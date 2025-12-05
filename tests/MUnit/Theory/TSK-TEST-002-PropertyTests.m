@@ -36,6 +36,17 @@ kofnStrictOK[n_, k_] := Module[{idxLoose, idxStrict},
   SubsetQ[idxLoose, idxStrict] && Length[idxLoose] >= Length[idxStrict]
 ];
 
+permuteBitsIndex[j_, n_, perm_List] := Module[{bits = IntegerDigits[j - 1, 2, n]}, 1 + FromDigits[bits[[perm]], 2]];
+permuteBitsSet[set_List, n_Integer, perm_List] := Sort[permuteBitsIndex[#, n, perm] & /@ set];
+relabellingInvarianceRandom[gate_, n_Integer, params_: <||>] := Module[{perm, Ic, S1, S2, IcPerm},
+  perm = RandomSample[Range[n]];
+  Ic = RandomSample[Range[n], Min[2, n]];
+  IcPerm = perm[[Ic]];
+  S1 = Integration`Gates`IndexSetNetwork[gate, n, Ic, params];
+  S2 = Integration`Gates`IndexSetNetwork[gate, n, IcPerm, params];
+  Sort[permuteBitsSet[S1, n, perm]] === Sort[S2]
+];
+
 cases = {
   <|"name" -> "phiInvolution", "ok" -> And @@ (phiInvolutionOK /@ {3, 4, 5})|>,
   <|"name" -> "universeSize", "ok" -> And @@ (universeSizeOK /@ {3, 4, 5})|>,
@@ -44,15 +55,17 @@ cases = {
   <|"name" -> "orderingInvariance_AND", "ok" -> orderingInvarianceOK["AND", 3, {2, 3}]|>,
   <|"name" -> "orderingInvariance_OR", "ok" -> orderingInvarianceOK["OR", 3, {2, 3}]|>,
   <|"name" -> "orderingInvariance_XOR", "ok" -> orderingInvarianceOK["XOR", 3, {2, 3}]|>,
-  <|"name" -> "kofnStrict", "ok" -> kofnStrictOK[3, 2]|>
+  <|"name" -> "kofnStrict", "ok" -> kofnStrictOK[3, 2]|>,
+  <|"name" -> "relabellingInvarianceRandom_OR_n5", "ok" -> relabellingInvarianceRandom["OR", 5]|>,
+  <|"name" -> "relabellingInvarianceRandom_XOR_n6", "ok" -> relabellingInvarianceRandom["XOR", 6]|>
 };
 
 timed = Table[Module[{t, r}, {t, r} = AbsoluteTiming[cases[[i]]]; Append[r, "timeSec" -> t]], {i, Length[cases]}];
 allOK = And @@ (timed[[All, "ok"]]);
 
-Export[FileNameJoin[{base, "PropertyTests.json"}], timed, "JSON"];
+env = <|"version" -> $Version, "machine" -> $MachineName, "processor" -> $ProcessorType, "os" -> $OperatingSystem|>;
+Export[FileNameJoin[{base, "PropertyTests.json"}], <|"env" -> env, "date" -> DateString[], "cases" -> timed|>, "JSON"];
 Export[FileNameJoin[{base, "Status.txt"}], If[allOK, "OK", "FAIL"], "Text"];
 Export[FileNameJoin[{base, "Report.txt"}], StringRiffle[Map[Function[r, r["name"] <> ": " <> If[r["ok"], "PASS", "FAIL"] <> " (" <> ToString[NumberForm[r["timeSec"], {4, 3}]] <> "s)"], timed], "\n"], "Text"];
 
 Association["Status" -> If[allOK, "OK", "FAIL"], "ResultsPath" -> base]
-
