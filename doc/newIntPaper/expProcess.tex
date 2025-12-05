@@ -251,4 +251,43 @@ KOFN(k=2) & 2 & OK \\
 \\
 \textbf{Limitations and Special Cases:} Exhaustive arrays scale as $2^n$, so arity augmentation is bounded for practical performance; NOT applies only at $n=1$ (single input); IMPLIES/NIMPLIES are tested at $n=2$; KOFN requires parameter $k$ (we report $k=1,2$). Timing metrics contextualise feasible ranges and help plan larger-scale sampling when $n$ grows.
 
+\section{TEST-002: Property Tests for Axioms and Invariances}
+\textbf{Objective:} Validate foundational axioms and invariances used across the programme: mapping involution ($\phi\circ\phi=\mathrm{id}$), set‑algebra closure (union/intersection/complement), De Morgan laws, band complements, ordering invariance for gate index sets, and KOFN strictness semantics.\\
+\textbf{Methods:} We construct ensembles over moderate sizes (e.g., $n\in\{3,4,5\}$), verify properties with exhaustive index computations and gate index sets \texttt{IndexSetNetwork}, recording pass/fail and timings.\\
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Property & Case & Status \\
+\midrule
+$\phi$ involution & $n\in\{3,4,5\}$ & OK \\
+Universe size & $|\{1..2^n\}|=2^n$ & OK \\
+Band complements & $\mathrm{OneBand}\cup\mathrm{ZeroBand}=\mathrm{Universe}$ & OK \\
+De Morgan & $\overline{A\cup B}=\overline{A}\cap\overline{B}$ & OK \\
+Ordering invariance & AND/OR/XOR, $n=3$, $I_c=\{2,3\}$ & OK \\
+KOFN strictness & $n=3$, $k=2$ (strict $\subseteq$ loose) & OK \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Interpretation:} These properties guarantee that index‑based constructions are robust under ordering changes and set‑algebra operations, enabling canonical and compositional reasoning in ALGO/ STOCH analyses. In particular, $\phi$ invariance bridges MSB/LSB enumerations, and De Morgan with band complements provides algebraic consistency for band/union/complement manipulations used in sampling and reconstruction. KOFN strictness formalises threshold semantics, ensuring predictable behaviour across parameter regimes.\\
+\textbf{Artefacts:} \texttt{results/tests/test002/PropertyTests.json}, \texttt{Report.txt}, \texttt{Status.txt}.
+
+\subsection*{Arity Timing (Controlled Measurements)}
+\textbf{Environment:} Apple M2, 8 cores, 8\,GB RAM; macOS; minimal background processes. Measurements use repeated runs per arity with identical workload (enumeration and parity evaluation) to isolate input-space scaling effects.\\
+\textbf{Runs and Averages (milliseconds)}
+\begin{center}
+\begin{tabular}{lrrrrr r}
+\toprule
+Arity & Run 1 & Run 2 & Run 3 & Run 4 & Run 5 & Avg \\
+\midrule
+1-ary & 0.003 & 0.001 & 0.002 & 0.001 & 0.001 & 0.002 \\
+2-ary & 0.002 & 0.002 & 0.002 & 0.002 & 0.002 & 0.002 \\
+3-ary & 0.003 & 0.003 & 0.003 & 0.003 & 0.003 & 0.003 \\
+4-ary & 0.007 & 0.007 & 0.007 & 0.009 & 0.010 & 0.008 \\
+5-ary & 0.018 & 0.016 & 0.016 & 0.016 & 0.016 & 0.016 \\
+6-ary & 0.034 & 0.034 & 0.034 & 0.034 & 0.034 & 0.034 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Notes:} Times are short under small arities on Apple M2; averages use five runs with consistent decimal precision. For gate semantics beyond parity, timing differences are negligible at these sizes; as $n$ grows, $2^n$ scaling dominates and sampling strategies are recommended for performance analysis.
+
 \end{document}
