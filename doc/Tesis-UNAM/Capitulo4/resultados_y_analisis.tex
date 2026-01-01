@@ -1,0 +1,1378 @@
+\chapter{Results}
+\subsection{Compression sensitivity as informative of integration}
+
+To understand the relationship between IIT and algorithmic complexity, 
+we shall briefly move away from the case of networks and focus on binary 
+files and the binary programs that may generate them, the programs that 
+are natural computable candidate models explaining the data. To illustrate 
+the connection, let us take some extreme cases. Let's say we have a random file:
+
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In: = randomfile=RandomChoice[CharacterRange["a", "z"],100]
+Out = {l,q,l,d,d,x,f,e,u,l,u,b,m,y,a,l,b,l,v,a,v,v,t,l,h,o,x,d,i,a,z,t,z,b,r,y,v,h,c,n,s,u,l,u,w,w,e,a,i,h,h,w,f,d,d,k,o,c,a,k,u,x,v,n,v,e,c,r,t,c,g,s,g,x,y,t,c,h,k,w,c,t,y,u,e,k,y,v,a,h,t,k,f,y,c,r,b,y,y,x}
+
+In: = Compress[randomfile]
+Out = 1:eJx1kEEOgyAQRWnSi/Q+XbUnEAUhtJoKInp6zbB5CenmZTL8mf+Hh55fdlBKxfuFp4/pfbuKj/CHegCL0AqNcIWy1lr4Fe7CDhqNOuM1g0zihDPcaxKP2QNTB1wWZMjY1gsnYfxzxQYaeHnscdDY5q8CkvfYEOBSkG1CbTC14LraGZF8xJ69UTo4bugn6Fc4hubHOuxJ0FgomVOjX1lOUdJPvg==}
+
+In: = Length[Characters@Compress[randomfile]]
+Out = 222
+\end{lstlisting}
+\caption{Code in Mathematica for generation of a file with random alphabetic content and 
+measurement of its compressed version. \textbf{Line 1} generates a file with random selection
+of alphabetic characters. \textbf{Line 2} compresses the file generated.}
+\label{}
+\end{table}
+
+
+\textcolor{black}{So, using the \textbf{Compress} algorithm, the resulting 
+ compressed object is even longer, this is because the compression algorithms inserts the decompression instructions together with the checksum which ends up increasing the size of the resulting object if the object was not long and compressible enough to begin with.}
+
+This is what happens if we perform a couple of random perturbations to
+the uncompressed file like replace the 5th and 12th characters with the letters `k' and `x:
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In: = mutatedfile=ReplacePart[randomfile,{5->"k", 12->"x"}]
+Out = {l,q,l,d,k,x,f,e,u,l,u,x,m,y,a,l,b,l,v,a,v,v,t,l,h,o,x,d,i,a,z,t,z,b,r,y,v,h,c,n,s,u,l,u,w,w,e,a,i,h,h,w,f,d,d,k,o,c,a,k,u,x,v,n,v,e,c,r,t,c,g,s,g,x,y,t,c,h,k,w,c,t,y,u,e,k,y,v,a,h,t,k,f,y,c,r,b,y,y,x}
+\end{lstlisting}
+\caption{Code in Mathematica for replacing 5th and 12th characters by 'k' and 'x' respectively.}
+\label{}
+\end{table}
+
+The difference between the original and perturbed files is:
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := SequenceAlignment[randomfile,mutatedfile]//Column
+Out= {l,q,l,d} {{d},{k}} {x,f,e,u,l,u} {{b},{x}} {m,y,a,l,b,l,v,a,v,v,t,l,h,o,x,d,i,a,z,t,z,b,r,y,v,h,c,n,s,u,l,u,w,w,e,a,i,h,h,w,f,d,d,k,o,c,a,k,u,x,v,n,v,e,c,r,t,c,g,s,g,x,y,t,c,h,k,w,c,t,y,u,e,k,y,v,a,h,t,k,f,y,c,r,b,y,y,x}
+\end{lstlisting}
+\caption{\textbf{SequenceAlignment} function to compare two sequences, randomfile 
+and mutatedfile, identifying similarities and differences between them. 
+The //Column operator formats the output into a vertical column for 
+clarity. The output displays aligned segments: identical portions 
+(e.g., \{l,q,l,d\}, \{x,f,e,u,l,u\}) are shown alongside divergent 
+segments (e.g., \{\{d\},\{k\}\}, \{\{b\},\{x\}\}), indicating where mutations 
+or differences occur in the sequences}
+\label{}
+\end{table}
+
+The files only differ by 2 characters, which can be counted using the following code:
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := Total[Length /@ 
+First /@ Select[SequenceAlignment[randomfile, mutatedfile], Head[#[[1]]] == List &]]
+
+Out = 2
+\end{lstlisting}
+\caption{Calculation of the total length of aligned sequence segments from
+the comparison of \emph{randomfile} and \emph{mutatedfile} using \textbf{SequenceAlignment}. 
+The Select function filters segments where the head of the first element 
+is a List, ensuring only structured alignments are considered. 
+The \textbf{Length/@First} computes the length of the first element in each 
+selected segment, and \textbf{Total} sums these lengths. This metric quantifies 
+the extent of aligned regions, useful for analysing sequence similarities 
+in bioinformatics or data comparison studies.}
+    \label{}
+\end{table}
+
+That is, 2/100 or 0.02 percent.\\
+ 
+On the other hand, let's take a simple object consisting of the repetition of a single object, say the letter e:
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := simplefile = Table["e",100] 
+Out = {e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e}
+\end{lstlisting}
+\caption{Generation a sequence named \emph{simplefile} consisting of 100 
+identical characters, specifically the letter "e".}
+\label{}
+\end{table}
+
+A shortest program to generate such a file is just: 
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+Table["e", 100]
+\end{lstlisting}
+\caption{Short probram for generated sequence of 100 characters, "e".}
+\label{}
+\end{table}
+
+In other languages this could be produced by an equivalent \textbf{`For'} 
+or \textbf{`Do-While'} program. We can now perturb the program again, 
+without loss of generality. Let's allow the same 2 perturbations to 
+the data only, and not to the program instructions (we will cover this 
+case later). The only places that can be modified are thus `e' or 1 
+instead of 5, say: \textbf{Table[``a'',500] }
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := Length/@First/@Select[SequenceAlignment[Table["a",500],Table["e",100]],Head[#[[1]]]==List&] 
+Out = {500} 
+\end{lstlisting}
+\caption{Calculation of similarity or divergence between two uniform 
+sequences: one comprising 500 instances 
+of the letter "a" and another with 100 instances of the letter "e", 
+generated using the \textbf{Table} function. The \textbf{SequenceAlignment} 
+function aligns these sequences, and \textbf{Select} filters segments
+ where the head of the first element is a \textbf{List}, ensuring only 
+ structured alignments are considered. The \textbf{Length/@First} 
+ computes the length of the first element in each selected segment, 
+ yielding a list of lengths suitable for analysing sequence similarity 
+ or divergence.}
+\label{}
+\end{table}
+
+Now, the original and decompressed versions differ by 500 elements, and 
+not just a small fraction (compared to the total program length) 
+as in the random case. This will happen in the general case with 
+random and simple files; random perturbations will have a very
+ different effect on each case.
+
+ \textbf{An object that is highly integrated among its parts means that one 
+can explain or describe part of each part with some other part when 
+the object is algorithmically simple; then these parts can be 
+compressed by exploiting the information that the said other 
+parts carry over from yet others, and the resulting program will be 
+highly integrated only if the removal of any of these parts has a 
+non-linear effect on its generating program}. In a random system, 
+no part contains any information about any other, and the distribution 
+of the individual algorithmic-content contribution of each element 
+is a normal distribution around the mean of the algorithmic-content 
+contributions, hence poorly integrated and trivial. So integrated 
+information is a measure of sophistication, filtering out simple 
+and random systems, and only ascribing high algorithmic information 
+content to highly integrated information systems.
+
+The algorithmic information calculus thus consists of a 2-step 
+procedure to determine:
+
+\begin{enumerate}
+    \item The complexity of the object (e.g. string, file, image) 
+    \item  The elements in that object that are less, more, or not 
+    sensitive to perturbations that can `causally steer the system,' 
+    i.e. causally modify an object in a surgical algorithmic fashion 
+    rather than on the basis of guesswork based on statistics.
+\end{enumerate}
+
+Note that this causal calculus is semi-computable, and one can perform 
+guiding perturbations based upon approximations ~\cite{maininfo,mainbook}. 
+Also note that we did not cover the case in which the actual instructions 
+of the program were perturbed. This is actually just a subcase of the 
+previous case, that separates data from program. For any program and data, 
+however, we conceive an equivalent Turing machine with empty input, 
+thus effectively embedding the data as part of its instructions.
+Nevertheless, the chances of modifying the instruction \textbf{Print[]} 
+in the random file case are constant, and for the specific example 
+are: $7/107 = 0.0654$. While for the non-random case, the probability
+of modifying any piece of the \textbf{Table[]} function is: $8/12 = 0.666667$. 
+Thus, the break-up of a program of a highly causally generated system 
+is more likely under random perturbations. 
+
+Notice similarities to a checksum for, e.g., file exchange verification 
+(e.g. from corruption or virus infection for downloading from the Internet), 
+where the data to be transmitted is a program and the data block to 
+check is the program's output file (which acts as a hash function).
+
+Unlike regular checksums, the data block to check is longer than the 
+program, and the checking is not for cryptographic purposes. 
+Moreover, the dissimilarity distance between the original block 
+(shared information) and the output of the actual shared program provides 
+a measure of both how much the program was perturbed and the random 
+or nonrandom nature of the data compressed by the program. And just 
+like checksums, one cannot tamper with the program without perturbing 
+the block to be verified (its output), without significantly changing 
+the output (block) if what the program has encoded is nonrandom and 
+therefore causally/recursively/algorithmically generated. Of course all 
+the theory is defined in terms of binary objects, but for purposes of 
+illustration and with no loss of generality we have shown actual 
+programs operating on larger alphabets (ASCII). And we also decided 
+to perform perturbations on what seems to be the program data and not 
+the program itself (though we have seen that this distinction is not 
+essential) for illustration purposes, to avoid the worst case in which 
+the actual computer program becomes non-functional.
+
+Yet, this means that the algorithmic calculus is actually more relevant, 
+because it can tell us which elements in the program break it completely 
+and which ones do not. But what happens when changes are made to the 
+program output and not the program instructions? Say we exchange an 
+arbitrary e for an a in our simple sequence consisting of a single 
+letter, e.g. the third entry ('a' for `e'):
+
+If we were to look to the generating program of the perturbed sequence,
+this would need to account for the 'a', e.g. 
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := ReplacePart[Table["e",100],3->"a"]
+Out = {e,e,a,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e,e}
+\end{lstlisting}
+\caption{Creation of a sequence of 100 identical characters, all "e", 
+using the \textbf{Table} function, and then modifies it with \textbf{ReplacePart} 
+to substitute the character at position 3 with "a". 
+The result is a uniform sequence with a single variation.}
+\label{}
+\end{table}
+
+\noindent where the second program is longer than the original one, and 
+has to be, if the sequence is simple, but the program remains unchanged 
+if the file is random because the shortest program of a random sequence
+is the random sequence itself, and random perturbations keep the 
+sequence random. Furthermore, every element in the simple example 
+consisting of repetitions of `e' has exactly the same algorithmic 
+content contribution when changed or removed, as all programs after 
+perturbation are of the form: 
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+ReplacePart[Table["e",100],n->x]
+\end{lstlisting}
+\caption{Code for replacement of the character at position \emph{n} with `x'}
+\label{}
+\end{table}
+
+Notice also how this is related to $\phi$ and possibly any measure of 
+integrated information based on the same principles. 
+
+We can now apply all these ideas to the language of networks, with respect 
+to which IIT has, for the most part, been defined. We have shown before 
+that networks with different topologies have different algorithmic complexity 
+values~\cite{physicaa}, in accordance with the theoretical expectation. 
+In this way, random ER graphs, for example, display the highest values, 
+while highly regular and recursive graphs display the lowest~\cite{zenilreview}. 
+Some more probabilistic, but yet recursively generated graphs are located between
+these 2 extremes~\cite{zenilmethods}. Indeed, the algorithmic complexity 
+$K$ of a regular graph grows by $O(logN)$, where $N$ is the number of 
+nodes of the graph, as in a highly compressible complete graph. Conversely, 
+in a truly random ER graph, however, $K$ will grow by $O(\log E)$, where $E$ 
+is the number of edges, because the information about the location of every 
+edge has to be specified.
+
+In what follows we will perform some numerical tests strengthening our 
+analytic derivations.
+
+
+\subsection{Finding simple rules in complex behaviour}
+
+A perturbation test is applied to systems which IIT is interested
+in. The set of answers is analyzed in order to find the rules that
+1) make it possible to simulate the behaviour of the system, 
+2) define their computability power, that is, rules that give an account of 
+what the system can and cannot compute, and 
+3) rules able to describe and predict behaviour of the same system. 
+The following procedure was applied to estimate $\phi_{K}$. 
+
+\begin{enumerate}
+    \item The perturbation test was applied to systems used in IIT to 
+        obtain detailed behaviour of the systems. 
+    \item Results in step one were analyzed in order to reduce the 
+        dynamics of a system to a set of simple rules. That is, in 
+        keeping with the claims of  natural computation, we found 
+        simple rules to describe a system's behaviour. 
+    \item Rules found in step 2 were used to generate descriptions 
+        of what a system is or is not capable of computing and under 
+        what initial conditions, without having to calculate the whole 
+        output repertoire. 
+    \item A combination of rules found in steps 2 and 3 was used to develop
+        procedures for predicting the behaviour of a system, that is, whether 
+        it is possible to have reduced forms that express complex behaviour. 
+        Knowing what conditions are necessary for the system to compute something,
+        it is possible to pinpoint where in the whole map of all possible 
+        inputs (questions) of a system such conditions may be found. 
+    \item Once rules in steps 2 and 3 are formalized, $\phi_{K}$ was turned 
+        into a kind of interrogator whose purpose was to ask questions of a 
+        system about its own computational capabilities and behaviour.
+\end{enumerate}
+
+This kind of analysis allowed us to find that the information distribution 
+in the complex behaviour of systems analyzed in IIT followed a \textcolor{black}{distribution
+replicated at several scales that is usually and informally identified as 
+`nested' or `fractal', and means that it is susceptible of being summarized 
+in simple rules by iteration or recursion, just as is the case with fractals proper. 
+These properties are used to find compressed forms to
+express answers given by a system when asked for explanations of its
+own behaviour.}
+
+This means that, as noted before, $\phi_{K}$ does not compute the
+whole output repertoire for a system but uses simple rules to express
+the whole behaviour of the system. Interestingly, the way in which
+we proceed appears to be connected to whether or not the system itself
+can explain its behaviour, or rather whether it can see itself to be
+capable of producing its behaviour from an internal experience (configuration)
+which is then evaluated by an observer. So $\phi_{K}$ takes the form
+of an automatic interrogator that, in imitation of the perturbation
+test, asks questions of the form \emph{are you capable of this specific
+configuration? (pattern), and if so, say where, in the map of the
+behavioural repertoire, I can find it}.
+
+The benefit of representing systems using simple rules is that it allows 
+an alternative calculation closer to algorithmic complexity and the 
+potential to reduce the number of calculations to derive an educated 
+estimation as compared to the original version of IIT 3.0.
+
+At this point, it is not possible to explain how simple rules define
+a system in the context of $\phi_{K}$ without talking about the pattern
+of distribution of information in the behaviour of systems like those studied in IIT. 
+
+\subsection{Simple rules and the \textcolor{black}{pattern of }distribution of
+information}
+
+As shown in~\cite{zenil2015causality}, despite deriving from a very
+simple program, without knowing the source code of the program, a
+partial view and a limited number of observations can be misleading
+or uninformative, illustrating how difficult it can be to reverse-engineer
+a system from its evolution in order to discover its generating code~\cite{zenil2015causality}.
+
+In the context of IIT, when we talk about a complex network we find
+that there are different levels of understanding complex phenomena,
+such as knowing the rules implemented by each node in a system and finding
+the rules that describe its behaviour over time. To achieve the second,
+as perhaps could be done for the ``whole {[}of{]} scientific practice''
+\cite{zenil2015causality}, we found it useful to perform perturbation 
+tests in order to deduce the behaviour of the subject systems. Results
+were analyzed and a \textcolor{black}{pattern in the }distribution of
+information was found to characterize the behaviour of these kinds of 
+systems. Then, as was to be expected, replicating behaviours were
+amenable to being expressed with simple formulae.
+
+In order to explain how simple rules were found and implemented in
+$\phi_{K}$, consider as an example the 7-node system shown in Figure
+\ref{fig:7nodesNet} whose behaviour is computed by perturbing the system 
+on all possible inputs. The code for the computational definition of the
+network is shown in Appendix in Table \ref{Code:Def7NodeNet},
+while the results, or the complete output repertoire, is shown in Figure 
+\ref{fig:7NodeFullRepertoire} in the Appendix.
+
+\begin{figure}[ht]´
+    \begin{centering}
+    \includegraphics[scale=0.4]{Capitulo4/figs/Fig07-7nodesSystem.png} 
+    \includegraphics[scale=0.4]{Capitulo4/figs/Fig7B-Network7Nodes.png} 
+    \par\end{centering}
+    \caption{7-node system. \textbf{Left: } Adjacency matrix. \textbf{Right:} Network representation.}
+    \label{fig:7nodesNet}
+\end{figure}
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := cm07 = {{0, 0, 1, 0, 0, 0, 1}, {0, 0, 1, 0, 0, 1, 0}, {1, 0, 0, 0, 1, 0, 1}, {1, 0, 1, 0, 1, 0, 1}, {0, 0, 1, 1, 0, 1, 1}, {1, 1, 1, 0, 0, 0, 0}, {0, 1, 0, 1, 1, 1, 0}};
+In := dyn07 = {"AND", "OR", "OR", "AND", "OR", "OR", "AND"};
+In := analysis07 = runDynamic[cm07, dyn07]["RepertoireOutputs"]
+\end{lstlisting}
+\caption{Mathematica code for computing the complete repertoire of 
+inputs and outputs for a network, based on its dynamics. \textbf{Line 1:} 
+Defines the adjacency matrix, where each row represents a node within the 
+network. A value of one indicates a connection between a given node and a 
+specific other node. \textbf{Line 2:} Specifies the dynamics, representing 
+the function that each node executes upon receiving input from its connected 
+nodes. \textbf{Line 3:} The `runDynamic` function calculates the exhaustive 
+repertoire of inputs, determined by the network's order, feeds these 
+into the defined network, and returns the corresponding output repertoire.
+The output for this specific case is shown in Figure \ref{fig:7NodeFullRepertoire}}
+\label{Code:Def7NodeNet}
+\end{table}
+
+
+The strategy adopted to find rules that govern a system's behaviour is the 
+same used in almost any branch of science, which is to say we separately observe 
+the behaviour of some of the components of a phenomenon, in this case nodes, 
+while bearing in mind that this behaviour is not isolated but rather the by-product 
+of interacting elements, or in other words, we observe individual behaviours 
+without losing sight of the whole.
+
+\textcolor{black}{When we observe the behaviour shown in Figure \ref{fig:7NodeFullRepertoire}
+corresponding to the system shown in \ref{fig:7nodesNet}, we notice mostly chaotic behaviour but with subtle 
+repetitions of certain patterns}. 
+
+\begin{figure*}[htp]
+	\begin{centering}
+	\includegraphics[scale=0.5]{Apendice1/figs/FigTable2-Results7nodesSys.png} 
+	\par\end{centering}
+	\caption{Output repertoire for 7-Node network defined in Table \ref{Code:Def7NodeNet}.}
+	\label{fig:7NodeFullRepertoire}
+\end{figure*}
+
+\textcolor{black}{When the behaviour of elements is isolated, the picture 
+appears clearer. For example, Tables \ref{Table:isolatedNode4} and \ref{Table:isolatedNode5} 
+shows the isolated behaviour of nodes 
+\{4\} and \{5\} of the same subject system as consequence of running code in Table \ref{table:codeIsolationNodse4-5}}.
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+analysis07[[All, 4]]
+analysis07[[All, 5]]
+\end{lstlisting}
+\caption{Mathematica code for isolation of behaviour of node 4 and 5 of the 7-node system shown in \ref{fig:7nodesNet}.}
+\label{table:codeIsolationNodse4-5}
+\end{table}
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1}
+\end{lstlisting}
+\caption{Isolated outputs for node 4 of the 7-node system shown in \ref{fig:7nodesNet} after perturbation.}
+\label{Table:isolatedNode4}
+\end{table}
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+{0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+\end{lstlisting}
+\caption{Isolated outputs for node 5 of the 7-node system shown in \ref{fig:7nodesNet} after perturbation.}
+\label{Table:isolatedNode5}
+\end{table}
+
+% \textcolor{black}{In Table 2, the isolated behaviour of two nodes of the system in Figure 6 is shown,
+%  where it is possible to observe that isolated behaviours for \{4\} and \{5\} follow a sort of order. 
+%  Such patterns are summarized in what we call behaviour tables, shown in Figure 7.}
+
+Notice that now that behaviour of nodes is isolated, it is possible to expressions
+that describe the behaviour of the subsystems or isolated nodes.
+
+Mathematical descriptions are shown in Figure \ref{fig:behaviourTables} in what we call \textbf{Behaviour Tables}.
+It is important to note that these Behaviour Tables are used here just as a mathematical artifact to explain how 
+regularities in the behaviour of the system emerge and can be explained in terms of the organisational definition
+of the system itsef.
+
+\begin{figure}
+    \begin{centering}
+    \includegraphics[scale=0.35]{Capitulo4/figs/Fig8-BehaviourTableNode4Sys7Nodes.png}
+    \includegraphics[scale=0.4]{Capitulo4/figs/Fig9-BehavTableNode4Sys07Nodes.png} 
+    \par\end{centering}
+    \centering{}\caption{Behaviour Tables for 7-Node system shown in Figure \ref{fig:7nodesNet}, and
+    defined computationally in \ref{Code:Def7NodeNet}.
+    \textbf{Left:} Behaviour Table for node 4 that descrive output shown at \ref{Table:isolatedNode4}.
+    \textbf{Right:} Behaviour Table for node 5 that descrive output shown at \ref{Table:isolatedNode5}.
+    From left to right and up to down, \textbf{Node} column lists input-nodes that feed the target node. 
+    \textbf{node-1=pow}: Stays as mnemonic for ``Content of \textbf{Node} column minus one, which determines the 
+    power to use''. This column computes the power used to transform a pattern in the world of the 
+    target n-node systems from binary to decimal. \textbf{2\textasciicircum (pow-1)} column is the result 
+    of the binary to decimal transformation operation, and is equal to 2 powered by column \textbf{node-1=pow}. 
+    The fourth column contains divisions between indexed elements of the column \textbf{2\textasciicircum (pow-1)}
+    where $n$ is the index, whose value is equal to the element $n+1$ divided by the element indexed as $n$}
+    \label{fig:behaviourTables}
+\end{figure}
+
+
+In behaviour tables shown in \ref{fig:behaviourTables} the lowest rows (within braces) correspond 
+to a compressed representation of behaviours shown in Tables \ref{Table:isolatedNode4} and \ref{Table:isolatedNode5}.
+
+Let's consider first the compressed expressions of behaviour for node \{4\} in Behaviour Table for node \{4\} shown
+in the left side of the Figure \ref{fig:behaviourTables}. The compressed expression of the behaviour of the 
+node \{4\} is shown in the expression \ref{CompressedBehaviourNode4}:
+
+\begin{equation}
+\label{CompressedBehaviourNode4}
+\small{85 \rightarrow 0, \{\{\{1 \rightarrow 1, 1 \rightarrow 0\}\} \rightarrow 2\}, 4 \rightarrow 0\} \rightarrow 2, 16 \rightarrow 0, \{\{\{1 \rightarrow 1, 1 \rightarrow 0\}\} \rightarrow 2, 4 \rightarrow 0\} \rightarrow 2}
+\end{equation}
+
+The expression \ref{CompressedBehaviourNode4} must be readed as follow:
+
+\begin{itemize}
+    \item 85 occurrences of the digit 0, followed by
+    \item Twice the patter $1, $0, followed by 4 repetitions of digit 0, followed by
+    \item 16 repetitions of digit 0, followed by
+    \item Twice the patter $1, $0, followed by 4 repetitions of digit 0.
+\end{itemize}
+
+
+Now, take in account that the purpose of Behaviour Tables and its compressed expressions are not 
+to give a formal descritption of the isolated patters in wn in Tables \ref{Table:isolatedNode4} and 
+\ref{Table:isolatedNode5}, but to create intuition on the hightlights of our method.
+
+Notice also that in the explanation of the compressed expression \ref{CompressedBehaviourNode4} the 
+following list of regularities for the column \textbf{2\textasciicircum (pow-1)} respect to 
+occurrences of number zero:
+
+\begin{itemize}
+    \item 85 (the total sum of values in the column), followed by
+    \item 1 acurrence of number zero, followed by
+    \item 16 repetitions of digit 0, followed by
+    \item 4 repetitions of the digit 0.
+\end{itemize}
+The occurrences of the digit 0 and  how they appear in the patter of the expression 
+\ref{CompressedBehaviourNode4} correspond to the regularities found in the column 
+\textbf{2\textasciicircum (pow-1)} in Behaviour Table for node \{4\}.
+
+Same analysis can be done easily for node \{5\}.
+
+Notice also that the representation used in this isolation of behaviours is expressed in terms of the 
+nodes that ``feed'' into target nodes of this example (\textbf{Node} column in the Behaviour Tables shown
+in \ref{fig:behaviourTables}), namely nodes \{4, 5\} 
+whose inputs, according to Figure \ref{fig:behaviourTables} are: for node \{4\}: \{1,3,5,7\}, and for 
+node 5: \{3,4,6,7\}.
+
+\textcolor{black}{This first shallow analysis works to yield the intuition that the behaviour of 
+an isolated node can be expressed as a series of regularities
+in terms of its inputs. In this context, intuition tells us that
+the greater the number of regularities, the shorter the description;
+then if no patterns are detected the chances of a causal relationship
+are lower.}
+
+\textcolor{black}{Perspective changes when rule/algorithm or compressed expression 
+of behaviour is not constructed from regularities identified at first sight, but from 
+intrinsic algorithmic properties. In this latter case, behaviour of systems can be 
+expressed as patterns of information with a distribution
+replicable at different scales, what we here call  \emph{fractal representation}
+or \emph{fractal behaviour}. To explain what we mean by fractal, we introduce characteristics 
+of distribution of information for the 7-node system shown in Figure \ref{fig:7nodesNet} 
+analyzed using $\phi_{K}$. This implementation is shown in Table \ref{Table:UnfoldingFractalInfo}.}
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := cm07 = {{0, 0, 1, 0, 0, 0, 1}, 
+                {0, 0, 1, 0, 0, 1, 0}, 
+                {1, 0, 0, 0, 1, 0, 1}, 
+                {1, 0, 1, 0, 1, 0, 1}, 
+                {0, 0, 1, 1, 0, 1, 1}, 
+                {1, 1, 1, 0, 0, 0, 0}, 
+                {0, 1, 0, 1, 1, 1, 0}};
+In := dyn07 = {"AND", "OR", "OR", "AND", "OR", "OR", "AND"};
+
+(* Computing places in output repertoire where node 4 = 0 *)
+In := res070 = onPossibleBehaviour[{4}, {0}, dyn07, cm07]
+
+(* Summarized representation of fractal behaviour *)
+In := gp = givePlaces[res070["DecimalRepertoire"], res070["Sumandos"]]
+
+(* Compressed representation of fractal behaviour *)
+Out = <|"DecimalRepertoire"-> {0, 1, 4, 5, 16, 17, 20, 21, 64, 65, 68, 69,80, 81, 84}, "Sumandos"-> {0, 2, 8, 10, 32, 34, 40, 42}|>
+
+(* Unfolded representation of fractal behaviour *)
+Out = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 88, 89, 90, 91, 92, 94, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 118, 120, 121, 122, 123, 124, 126}
+\end{lstlisting}
+\caption{$\phi_{K}$ asking for accounts of information distribution in
+behaviour of 4th node of the system shown in Figure \ref{fig:7nodesNet}. \textbf{Lines
+1-8}: Definition of the 7-node system by means of adjacency matrix and
+its internal dynamics. \textbf{Line 11:} $\phi_{K}$'s code asking
+for zero digit location in the whole behaviour of node 4. \textbf{Line
+17:} Compressing answer given by the system in line 11. \textbf{Line 20: } unfolded
+answer of the system in Line 17.}
+\label{Table:UnfoldingFractalInfo}
+\end{table}
+
+
+\textcolor{black}{Table \ref{Table:UnfoldingFractalInfo} shows how behaviour of 
+the system shown in Figure \ref{fig:7nodesNet} can be expressed as simple rules 
+following an analysis based on a querying scheme that results in a reduced 
+form to express its information distribution as a pattern replicated at different 
+scales or as a fractal form.
+Answers given by systems join facts explored above on regularities and the fractal 
+distribution of information. It is important to note 
+that the querying scheme has to be computable and algorithmically
+random in order to avoid introducing an artificially random-looking
+behaviour from the observer (experimenter/interrogator) to the observed
+(the system in question).}
+
+\textcolor{black}{In \ref{Table:UnfoldingFractalInfo}, after defining the target 
+system by means of an adjacency matrix and a dynamics vector (lines 1 to 8), $\phi_{K}$ can be regarded
+as testing: \emph{how 0 is distributed in node \{4\} in the system of
+seven nodes }(line 11).}
+
+\textcolor{black}{The target system reacts to the $\phi_{K}$'s query and it ``answers''
+in a compressed form (Table \ref{Table:UnfoldingFractalInfo}, line 17). The result
+can be represented in compressed form, expressed as a tiny rule that
+represents what we have called a fractal pattern. Such an expression is defined,
+as can be seen in the  line 17 in Table \ref{Table:UnfoldingFractalInfo}, by two variables: 
+\emph{DecimalRepertoire} that holds points distanced in different proportions where 
+the patterns defined by the \emph{Sumandos} variable must be reproduced. 
+This means that in order to unfold the whole distribution (of digit zero), the
+pattern of numbers in \emph{Sumandos} must be added to each value
+in \emph{DecimalRepertoire}.}
+
+\textcolor{black}{Once this `fractal' simple rule is unfolded, we obtain the ordinal
+places where, in the whole behaviour of node \{4\}, digit 0 can be
+found (see line 20 in \ref{Table:UnfoldingFractalInfo}). The accuracy of this answer can
+be verified by counting ordinals where, for node \{4\}, its output = 0 in
+Table shown in the Figure \ref{fig:7NodeFullRepertoire}, taking into 
+account that counting starts at 0.}
+
+% Probably I can put here as example of integration, speed, complexity and perturbation
+% the example of 16 nodes which taks just some secons to be computed, something impossible
+% for phi implementation.
+% also to show that we can ask for set of nodes, for the combination of questions
+% thanks to the combination of questions.
+
+In summary, $\phi_{K}$ is turned into a kind of interrogator that asks a system about 
+its own behaviour. On the other hand, a system is an analyzer and self evaluator capable
+to implement the set of rules that answers in different ways, depending on the information 
+requested. This is unlikely with traditional approaches to $\phi$, whose representation 
+of the system consists of the whole output repertoire of the system, which might represent 
+an important disadvantage when large networks are analyzed. $\phi_{K}$'s answers use 
+compressed forms taking advantage of the fractal distribution of the information in the
+ behaviour of the system, for which the answering interface is a function of its input 
+ related to each node in question.
+
+Obviously the whole behaviour of a system is not about isolated elements, but about 
+elements interacting in a non-linear manner, as IIT 3.0 makes clear. This last, broader 
+view is also addressed in  terms of $\phi_{K}$, and explained in the following sections. 
+In the next one, the advantages of simple rules over classical/naive approaches based 
+on an exhaustive calculus and review of whole repertoires held in memory will be established.
+
+
+\subsubsection{Automatic meta-perturbation test}
+
+It can be seen that this querying system is similar to the programmability tests 
+suggested in~\cite{zenilturingtest,zenilturingtest2,maininfo} based on questions designed 
+to ascertain the programmability of a dynamical system.
+
+The last section shows that systems implemented as simple rules that give rise to 
+complex behaviour enable the system itself to ``respond'' to questions about where, 
+in the chain of digits that conform to its behaviour (of a specific node), a certain 
+pattern is to be found. And the fractal nature of information distribution in behaviour 
+allows us to answer complex distribution questions in short forms. In this section, 
+we show the advantages of using an (automatic) perturbation test based on simulation 
+of behaviour using simple rules over the original version of IIT 3.0 based on the 
+``bottleneck principle''
+\cite{oizumi2014fromthe} in computing integrated information.
+
+Taking up the original perturbation test, questions take the form: 
+\emph{what is the output (answer) given this query (input)?.} 
+But in $\phi_{K}$, since questions look for explanations of the behaviour of the 
+system itself, they take the form: 
+\emph{tell me if this pattern is reachable, and if so, tell me where, in the behavioural 
+map, it is possible to find it}.
+
+The following example aims to show that even is possible to implement an interrogator
+and its corresponding analyzer that can answer questions about the behaviour of the
+target system, $\phi_{K}$ surpaces the capabilities of traditional approaches as $\phi$
+first and importantly minimizing the time and computational sources.
+
+One naivie implementation of an analyzer for a system of 9 nodes is defined in Table \ref{Table:Naivie9NodeNet} 
+while the structure of the network is show in Figure \ref{fig:9NodeNet}.
+Table \ref{Table:Naivie9NodeNet} shows this approach using filters to find patters.
+Lines 3-12 defines the adjacency matrix and dynamics vector of the system. Line 14 
+runs the internal dynamics over the exhaustive repertoire of inputs obtaining the exhaustive
+repertoire of outputs. Then lines 16-18 filter over all outputs cases where nodes \{8, 9\} = \{1,1\}.
+
+
+\begin{figure}[ht!]
+    \begin{centering}
+    \includegraphics[scale=0.4]{Capitulo4/figs/Figure9NodesNetwork.png} 
+    \par\end{centering}
+    \caption{Network example with 9 nodes}
+    \label{fig:9NodeNet}
+\end{figure}
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+mmu=MemoryInUse[];
+AbsoluteTiming[
+In := cmTest = {{0,1,1,1,1,1,1,1,1},
+                {1,0,1,1,1,1,1,1,1},
+                {1,1,0,1,1,1,1,1,1},
+                {1,1,1,0,1,1,1,1,1},
+                {1,1,1,1,0,1,1,1,1},
+                {1,1,1,1,1,0,1,1,1},
+                {1,1,1,1,1,1,0,1,1},
+                {1,0,1,0,1,1,0,0,0},
+                {1,0,1,0,1,0,1,0,0}};
+In := dynTest = {"OR","XOR","AND","XOR","AND","AND","OR","OR", "AND"};
+
+In := tdTest=runDynamic[cmTest, dynTest];
+
+In := inTest = tdTest["RepertoireInputs"];
+In := outTest = tdTest["RepertoireOutputs"];
+
+(*looking for pattern where {8,9}={1,1}*)
+In :=  For[i=1, i<=Length[outTest],i++,
+    If[(outTest[[i]][[8]]===1 && outTest[[i]][[9]]===1), 
+        outTest[[i]]=Style[outTest[[i]],{Bold,Red}]
+    ];
+];
+(*Showing results*)
+In :=  assoc=AssociationThread[inTest, outTest]
+]
+MemoryInUse[]-mmu
+\end{lstlisting}
+\caption{Mathematica code for definition of the 9-Node system shown in Figure \ref{fig:9NodeNet}.
+\textbf{Lines 1-12:} Definition of the 9-Node system by means of adjacency matrix and its internal dynamics.
+\textbf{Line 14:} Instruction for runing the internal dynamics overl exhaustive input repertoire.
+\textbf{Lines 17, 18:}: Retrieving exhaustive repertoores of inputs and outputs.
+\textbf{Lines 20-24:} Filtering over all cases where \{8,9\}={1,1}.
+\textbf{Lines 1, 28:} Measuring time and memory used by the program.
+}
+\label{Table:Naivie9NodeNet}
+\end{table}
+    
+Results of running the code in \ref{Table:Naivie9NodeNet} are shown in \ref{Table:OutNaivie9NodeNet}, where
+time in seconds is given, followed by the cases in repertoire of inputs and outputs where where the
+pattern \{8,9\}={1,1} is found. Finally the memory used by the program is given in bytes.
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+Out = 0.024581
+Out = <|runDynamic[{{0, 1, 1, 1, 1, 1, 1, 1, 1}, {1, 0, 1, 1, 1, 1, 1, 1, 
+    1}, {1, 1, 0, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 0, 1, 1, 1, 1, 
+    1}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {1, 1, 1, 1, 1, 0, 1, 1, 
+    1}, {1, 1, 1, 1, 1, 1, 0, 1, 1}, {1, 0, 1, 0, 1, 1, 0, 0, 
+    0}, {1, 0, 1, 0, 1, 0, 1, 0, 0}}, {"OR", "XOR", "AND", "XOR", 
+    "AND", "AND", "OR", "OR", "AND"}]["RepertoireInputs"] -> 
+Out = runDynamic[{{0, 1, 1, 1, 1, 1, 1, 1, 1}, {1, 0, 1, 1, 1, 1, 1, 1, 
+    1}, {1, 1, 0, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 0, 1, 1, 1, 1, 
+    1}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {1, 1, 1, 1, 1, 0, 1, 1, 
+    1}, {1, 1, 1, 1, 1, 1, 0, 1, 1}, {1, 0, 1, 0, 1, 1, 0, 0, 
+    0}, {1, 0, 1, 0, 1, 0, 1, 0, 0}}, {"OR", "XOR", "AND", "XOR", 
+    "AND", "AND", "OR", "OR", "AND"}]["RepertoireOutputs"]|>}
+Out = 17776
+\end{lstlisting}
+\caption{Results of running code shown in Table \ref{Table:Naivie9NodeNet}. This outputs are 1) execution 
+time in seconds, 2) filtered input cases where \{8,9\}={1,1} is found, 3) filtered output cases 
+where \{8,9\}={1,1} is found, and 4) memory used by the programin bytes}.
+\label{Table:OutNaivie9NodeNet}
+\end{table}
+
+For comparing purposes, ono more things have to be pointed respect the results shown in 
+Table \ref{Table:Naivie9NodeNet}, and this is the format of the outputs and inputs, where
+the rough cases are shown. This is, with no showing null analysis or highlights that give
+and idea how these inputs and outputs are related with the targeted nodes.
+
+
+The implementation of $\phi_{K}$ for specifically turnint it into an automatic interrogator 
+is shown in Table \ref{Table:phiK_implementation}. Notice that this approach is also based on 
+analyze the system networks shown in Figure \ref{fig:9NodeNet}. 
+In line 1, in the list code shown in \ref{Table:phiK_implementation}, it is possible to see how 
+at low level of implementation $\phi_{K}$ asks questions of a system. This line should be
+interpreted as, \emph{Can you compute the pattern \{8,9\} = \{1,1\} when \{8,9\}-> \{"OR'', "AND''\}? 
+If yes, tell me under what conditions you can do so}.
+Notice that here we are showing the low level implementation of this function. What really happens
+is that our high level implementation easily identiy input nodes of the targeted nodes, and its internal
+dynamics from the especification of the system.
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := combiningRepersWithSharedInputs[{1, 3, 5, 6}, "OR", 1, {1, 5, 7, 3}, "AND", 1]
+
+Out = 0.000736
+Out = <|"Combination" -> {{1, 0, 0, 0, 0}, {1, 0, 0, 0, 1}, {0, 1, 0, 0, 
+    0}, {0, 1, 0, 0, 1}, {1, 1, 0, 0, 0}, {1, 1, 0, 0, 1}, {0, 0, 1, 
+    0, 0}, {0, 0, 1, 0, 1}, {1, 0, 1, 0, 0}, {1, 0, 1, 0, 1}, {0, 1, 
+    1, 0, 0}, {0, 1, 1, 0, 1}, {1, 1, 1, 0, 0}, {1, 1, 1, 0, 1}, {0, 
+    0, 0, 1, 0}, {0, 0, 0, 1, 1}, {1, 0, 0, 1, 0}, {1, 0, 0, 1, 
+    1}, {0, 1, 0, 1, 0}, {0, 1, 0, 1, 1}, {1, 1, 0, 1, 0}, {1, 1, 0, 
+    1, 1}, {0, 0, 1, 1, 0}, {0, 0, 1, 1, 1}, {1, 0, 1, 1, 0}, {1, 0, 
+    1, 1, 1}, {0, 1, 1, 1, 0}, {0, 1, 1, 1, 1}, {1, 1, 1, 1, 0}, {1, 
+    1, 1, 1, 1}}, 
+"Filtered" -> {{1, 1, 1, 0, 1}, {1, 1, 1, 1, 1}}, 
+"jn" -> {1, 3, 5, 6, 7}, 
+"nn" -> {1, 2, 3, 4, 5}, 
+"DecRep" -> {85, 117}|>
+
+Out = 2440
+\end{lstlisting}
+\caption{$\phi_{K}$ algorithmic querying of the system about its own behaviour as shown in Figure \ref{fig:9NodeNet}. 
+\textbf{Line 1}: Query: Is it possible for this system to compute \emph{\{8,9\} = \{1,1\} when \{8,9\}-> \{"OR'', "AND''\} and whose input nodes are \{1,3,5,6\} and \{1,5,7,3\}
+respectively?. } The results show that the system does compute 1) time of computation in seconds, 2) possible candidates for combination of conditions,
+3) The especific input patters for specific notes ("Filtered" and "jn" keys), this is when \{1,3,5,6,7\} = \{\{1,1,1,0,1\},\{1,1,1,1,1\}\}
+4) Decimal representations of summandos to use for unfolding the complete dynamics of the system and 5) the memory used in bytes.}
+
+\label{Table:phiK_implementation}
+\end{table}
+
+
+In this example, in the first place $\phi_{K}$ tries to find conditions needed to 
+compute a specific output. As Table \ref{Table:phiK_implementation} shows, the answer 
+is: \emph{Yes! I can. This may happen when \{1,3,5,6,7\} = \{\{1,1,1,0,1\},\{1,1,1,1,1\}\}}. 
+In this answer \{1,3,5,6,7\} is the set of inputs to the subsystem \{8,9\}.
+
+The reader would note here that the answers offered by the system actually are conditions 
+or inputs needed by the system to compute specific input in a format equivalent to Holland's schemas. 
+The schemas' equivalent form for this case would be: \{\{1,{*},1,{*},1,0,1,{*},{*}\},
+\{1,{*},1,{*},1,1,1,{*},{*}\}\}, where `{*}' is a wildcard that means 0/1 (any symbol). 
+Such schemas correspond exactly to the generalized answer offered by the system, 
+that is: \{1,3,5,6,7\} = \{\{1,1,1,0,1\},\{1,1,1,1,1\}\}.
+
+This answer, like the Holland's schema theorem \cite{holland1975adaptation}, works by 
+imitating genetics, where a set of genes are responsible for specific features in phenotypes. 
+What $\phi_{K}$ retrieves is the general information that yields specific inputs 
+for the current system.
+
+Probably the greatest advantage of the approach using $\phi_{K}$ in querying samples
+has to do with the computation time needed to retrieve such information, as compared 
+with a traditional/naivie (Table \ref{Table:OutNaivie9NodeNet}) approach: 1/10 in the
+case shown just right above. But this effects are magnified when the number of nodes
+increases, this due the fractal distriution of the information. This is causede by
+the continous addition of nodes into a particular analysis, since is possible to 
+know that, if a system is strongly integrated, most of the parts of the system definition
+and its behaviour is involved in generating patters and answers about itself.
+This is shown in Table \ref{Table:16NodeNet}, that shows the definition and results of
+runing $\phi_{K}$ quering on a network of 16 nodes, a size untractable but the implementation 
+of IIT 3.0.
+In the results shown in Table \ref{Table:16NodeNet} the calculation amount of time and memory
+required for computation of answers are shown in lines 26 and 27, respectively.
+
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+mmu=MemoryInUse[];
+AbsoluteTiming[
+cm16 = {{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0}, 
+        {0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0},
+        {1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0}, 
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1},
+        {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0}, 
+        {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0}, 
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+        {0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0}};
+
+dyn16 = {"AND", "OR", "OR", "AND", "OR", "OR", "AND", "OR", "OR", "AND", "OR", "OR", "AND", "AND", "OR", "AND"};
+res = onPossibleBehaviour[{5, 7, 9, 10}, {0, 0, 1, 0}, dyn16, cm16];
+givePlaces[res["DecimalRepertoire"], res["Sumandos"]];]
+]
+MemoryInUse[]-mmu
+
+Out = {0.000011, {7.*10^-6, Null}}
+Out = 5888
+
+\end{lstlisting}
+\caption{Definition of a network of 16 nodes and its results of running $\phi_{K}$ quering. Results shown the 
+effect of the fractal distribution and the level of integration in a network}
+\label{Table:16NodeNet}
+\end{table}
+    
+
+This last suffices as proof that compression and generalization of systems in the form 
+of simple rules based on naturally fractal information distribution has advantages over 
+common sense or classical approaches to the analysis of complex systems, particularly
+in terms of the computational resources needed to compute integrated information.
+
+All the above were applied to analyzing isolated or very simple cases.
+In the next section the generalization of $n$ nodes of the system is addressed, and how 
+this works to compute integrated information according to IIT.
+
+\subsubsection{Shrinking after dividing to rule}
+
+In previous sections it was shown how $\phi_{K}$, applying a perturbation test, 
+can deduce, firstly, what a system is capable of computing and the conditions under 
+which a computation could be performed, and secondly, that by means of simple rules 
+specifying a system it is possible to obtain descriptions of its behaviour in the form 
+of rules that say how information is distributed, or in other words, where, in ordinal terms, 
+such conditions can be found.
+
+The ultimate objective of obtaining this kind of description of the behaviour of a system is 
+to know how many times specific patterns appear in whole repertoires, and thus to construct 
+probability distributions without need of exorbitant computational resources, since 
+these probability distributions are a key piece used by IIT to compute integrated information.
+
+$\phi_{K}$ addressed such challenges using a two-pronged strategy consisting firstly of 
+parallelizing the analytical process-- which is no more than a technical strategy available 
+to be implemented in almost any computer language and that falls beyond the scope of 
+this paper--and secondly of the partition of the target sets. This latter part of $\phi_{K}$'s 
+strategy consists of two parts: 1) given a target set to be analyzed, to divide this into 
+parts to be interrogated by $\phi_{K}$ via the implementation of an automatic test, 
+and 2) to find the MIP or the Maximal Information Partition using the algorithm 
+proposed and proved by Oizumi in \cite{kitazono2018efficient}.
+
+In the context of $\phi_{K}$, when a partition of a subject system is being analyzed, 
+the search space for the remaining parts is significantly reduced, facilitating and 
+acelerating the analysis of the remaining parts.
+
+In order to illustrate this idea, take for example the code shown in Table \ref{Table:cosecitiveQuering} and its
+restuls in Table \ref{Table:resultsConsecitiveQuering}.
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+cm07 = {
+{0, 0, 1, 0, 0, 0, 1},
+{0, 0, 1, 0, 0, 1, 0},
+{1, 0, 0, 0, 1, 0, 1},
+{1, 0, 1, 0, 1, 0, 1},
+{0, 0, 1, 1, 0, 1, 1},
+{1, 1, 1, 0, 0, 0, 0},
+{0, 1, 0, 1, 1, 1, 0}};
+dyn07 = {"AND", "OR", "OR", "AND", "OR", "OR", "AND"}; 
+onPossibleBehaviour[{1,2,3},{0,0,0},dyn07,cm07]//AbsoluteTiming
+onPossibleBehaviour[{2,3,4},{0,0,0},dyn07,cm07]//AbsoluteTiming
+onPossibleBehaviour[{1,2,3,4},{0,0,0,0},dyn07,cm07]//AbsoluteTiming
+onPossibleBehaviour[{5,6,7},{0,0,0},dyn07,cm07]//AbsoluteTiming
+onPossibleBehaviour[{1,2,3,4,5,6,7},{0,0,0,0,0,0,0},dyn07,cm07]//AbsoluteTiming
+\end{lstlisting}
+\caption{Definition of a network of 7 nodes and consecutive application of $\phi_{K}$ quering at different
+levels of complexity.}
+\label{Table:cosecitiveQuering}
+\end{table}
+
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+{0.00076,<|"DecimalRepertoire"->{0},"Sumandos"->{0,2,8,10}|>}
+{0.000647,<|"DecimalRepertoire"->{0},"Sumandos"->{0,2,8,10}|>}
+{0.0009,<|"DecimalRepertoire"->{0},"Sumandos"->{0,2,8,10}|>}
+{0.000656,<|"DecimalRepertoire"->{0,16},"Sumandos"->{0}|>}
+{0.001248,<|"DecimalRepertoire"->{0},"Sumandos"->{0}|>}
+\end{lstlisting}
+\caption{Comparing processing time when a system is divided to compute outputs. \textbf{Line 10-14:} 
+$\phi_{K}$ asking the system defined in lines 1-9 for patterns filled with zeros with 
+different lengths (3, 4 and 7) and combinations. \textbf{Lines 1-5} show, time in 
+seconds taken for computations and answers in terms of indexes using 
+compressed notation. In first data of this results square it
+can be observed that the larger the node wanted, the greater the amount of time 
+required to perform the computation, while the time ratio decreases.}
+\label{Table:resultsConsecitiveQuering}
+\end{table}
+
+Table \ref{Table:cosecitiveQuering} shows the definition of a system of 7 nodes (lines 1-9), 
+where a set of a progressively growing length is searched (lines 10-14). 
+In this example $\phi_{K}$  repeatedly asks the system if it is capable of finding a 
+growing pattern of zeros. If it is, the system is requested to show where it is possible 
+to find the desired pattern. Obviously, larger patterns need more computations, but as can be seen in 
+Table \ref{Table:resultsConsecitiveQuering}, in the results square, the time used by $\phi_{K}$ 
+increases as the pattern's length increases, but it grows linearly in contrast to IIT 3.0, 
+where it grows exponentially. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% NEW SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Integration in Complex Networks Using Algorithmic Complexity}
+
+\section{Metacompression}
+In the study of complex systems, measuring integration—the extent to which components 
+of a system work collectively to form a unified whole—is a fundamental challenge. 
+Integrated Information Theory (IIT), proposed by Tononi, quantifies integration 
+through $\phi$, which measures the information generated by a system beyond the 
+sum of its parts by identifying the Minimum Information Partition (MIP). However, 
+IIT's computational complexity grows exponentially with system size ($2^N$ for $N$ 
+nodes), rendering it infeasible for large-scale networks. Inspired by Zenil's work 
+\cite{zenil2015causality}, which explores algorithmic complexity as a tool for analysing 
+network dynamics, we introduce a novel measure of integration, $\phi_K$, that leverages 
+the intrinsic spreading of information within a fractal dynamic, reflected in attractors. 
+These attractors represent the natural convergence points of information flow, as defined 
+by the inherent structure of a system or network. By employing concise programs derived 
+from querying activities, the fractal distribution of information and algorithmic complexity 
+can be utilised to efficiently capture the essence of integration..
+
+Our approach is a pattern-based perturbation approach, that inpired on natural distribution
+of infomation expressed as fractal distribution that evolved to an attractor-based method,
+and culminated in a compressed, rule-based formulation that avoids IIT's exhaustive 
+partitioning. This section details the conceptual evolution, mathematical 
+formulations, and implementation in Mathematica, culminating in a scalable method to 
+measure integration in networks of varying sizes and topologies.
+
+\subsection{Step 1: Initial Pattern-Based Approach}
+We start with a network of \(N\) nodes and \(E\) edges, aiming to measure 
+integration by perturbing the network and observing its response. 
+For a 9-node network with 20 edges, we initially proposed querying the network's ability 
+to produce all \(2^N = 2^9 = 512\) possible binary output patterns 
+(e.g., \(\{1,2\} = \{0,0\}\), \(\{3,4,5\} = \{1,0,1\}\)) (see Table \ref{table:9NodeSchemataConditions}). 
+For each pattern, we would:
+
+\begin{enumerate}
+    \item Compute the rule (program) needed to generate the pattern, 
+    measuring its complexity \(K(s_0)\) in bytes 
+    (see bellow).
+    \item Remove one edge, recompute the rule, and measure the new complexity \(K(s_1)\).
+    \item Calculate the sensitivity as \(\Delta K = |K(s_0) - K(s_1)|\).
+\end{enumerate}
+
+For each edge (\(E = 20\)) and pattern (\(2^9 = 512\)), this required 
+\(20 \times 512 = 10,240\) simulations per network, totaling 1,024,000 for 100 networks. 
+While more efficient than IIT's \(2^{N-1}\) bipartitions 
+(e.g., \(2^8 = 256\) for 9 nodes), this was still computationally expensive.
+ We also considered partitioning the network (like IIT's MIP), but this would replicate 
+ IIT's exponential cost (\(B_N\), the Bell number), defeating our goal of efficiency.
+
+To reduce costs, we proposed a hybrid approach:
+\begin{itemize}
+    \item Select a subset of patterns (e.g., 10 subset patterns + 1 whole-system pattern, 
+    such as \(\{1,2\} = \{0,0\}\), \(\{1,2,3,4,5,6,7,8,9\} = \{0,1,0,1,0,1,0,1,0\}\)).
+    \item Compute \(\Delta K\) for each edge and pattern, averaging to get \(\phi_K\):
+    \[
+    \Delta K_i = \frac{1}{P} \sum_{j=1}^P \Delta K_{i,j}, \quad \phi_K = \frac{1}{E} \sum_{i=1}^E \Delta K_i
+    \]
+    where \(P = 11\) patterns, \(E = 20\) edges. This reduced simulations to \(20 \times 11 = 220\) per network, or 22,000 for 100 networks—a significant improvement.
+\end{itemize}
+
+However, the pattern selection was arbitrary, and the approach still required multiple queries, 
+potentially missing the network's intrinsic dynamics.
+
+\subsection{Step 2: Shifting to Attractors}
+Recognizing the inefficiency of querying all \(2^N\) patterns, we shifted to a more natural 
+approach: using the network's attractors—the set of stable states (fixed points or cycles) 
+under its dynamics (e.g., Boolean rules like AND, OR). Attractors represent the system's 
+possible outputs without exhaustively testing all input-output pairs, using minimal descriptions.
+
+For a 5-node network defined by:
+\begin{itemize}
+    \item Adjacency matrix: \(\text{cm05} = 
+    \begin{pmatrix} 
+        0 & 1 & 1 & 1 & 1 \\ 1 & 1 & 1 & 0 & 0 \\ 1 & 0 & 0 & 1 & 0 \\ 1 & 1 & 0 & 0 & 0 \\ 0 & 1 & 1 & 1 & 0 
+    \end{pmatrix}\)
+    \item Dynamics: 
+    \(\text{dyn05} = \{\text{``AND''}, \text{``AND''}, \text{``OR''}, \text{``AND''}, \text{``OR''}\}\)
+\end{itemize}
+
+Tononi's approach yields \(2^5 = 32\) output patterns, many redundant 
+(e.g., \(\{0,0,0,0,0\}\) at positions 0, 16). Our attractor method, using algorithmic 
+complexity principles, compressed this to 8 unique attractors:
+\[
+\text{AttractorsByPosition} = \langle| 0 \to \{0, 16\}, 4 \to \{1, 17\}, 16 \to \{2, 4, 6, 18, 20, 22\}, \ldots, 31 \to \{31\} |\rangle
+\]
+where keys are decimal representations of binary states (e.g., \(0 = \{0,0,0,0,0\}\)), 
+and values are positions in the full repertoire.
+
+This reduced the problem space from 32 to 8 queries per perturbation. We proposed:
+\begin{enumerate}
+    \item Compute the baseline attractor map, measure its complexity \(K(s_0)\) (e.g., using \(\text{ByteCount}\) in Mathematica).
+    \item Perturb each edge, recompute attractors, and measure \(K(s_1)\).
+    \item Compute \(\Delta K_i = |K(s_0) - K(s_1)|\) and \(\Delta A_i = |A_0 - A_1|\) (change in attractor count).
+    \item Define sensitivity per edge as:
+    \[
+    \text{Sensitivity}_i = \Delta K_i \cdot \log_2(\Delta A_i + 1)
+    \]
+    where \(\log_2\) scales the attractor count change informationally, and \(+1\) ensures the term is defined when \(\Delta A_i = 0\).
+    \item Compute \(\phi_K\) as the average sensitivity:
+    \[
+    \phi_K = \frac{1}{E} \sum_{i=1}^E \text{Sensitivity}_i
+    \]
+\end{enumerate}
+
+For 5 nodes and 11 edges, this required 1 baseline + 11 perturbations = 12 simulations 
+per network, or 1,920 for 160 networks—a massive improvement over 10,240.
+
+
+\subsection{Why Attractors?}
+\begin{itemize}
+    \item They capture the network's intrinsic dynamics, avoiding arbitrary pattern queries.
+    \item Perturbing edges tests integration causally: high integration means large 
+    \(\Delta K\) and \(\Delta A\) (attractors collapse), while low integration means 
+    small changes (attractors persist).
+    \item No need for IIT's partitions—edge perturbations act as localized cuts, 
+    approximating the MIP's effect dynamically.
+\end{itemize}
+
+\subsection{Step 3: Rule-Based Refinement}
+The attractor map provided a global view, but we noticed that each attractor could be 
+further compressed into a rule describing its positions in the repertoire—a meta-compression 
+explained as a fractal distribution of the information summarized as \(\text{DecimalRepertoire}\) and 
+\(\text{Sumandos}\) (Table \ref{Table:UnfoldingFractalInfo}). For the attractor \(\{0,0,0,0,0\}\):
+
+\[
+\text{Rule} = \langle| \text{``DecimalRepertoire''} \to \{0, 16\}, \text{``Sumandos''} \to \{0\} |\rangle
+\]
+This rule encodes how to generate the attractor's positions, offering a finer measure of dynamic sensitivity.
+
+We refined \(\phi_K\) by:
+\begin{enumerate}
+    \item Computing rules for each attractor before and after perturbation.
+    \item Measuring rule complexity \(K_{\text{rule}}\) (via \(\text{ByteCount}\)), averaging across attractors:
+    \[
+    K_{\text{rule,avg}} = \frac{1}{A} \sum_{a=1}^A K_{\text{rule}}(a)
+    \]
+    \item Calculating the rule sensitivity:
+    \[
+    \Delta K_{\text{rule,avg}} = |K_{\text{rule,avg}}(s_0) - K_{\text{rule,avg}}(s_1)|
+    \]
+    \item Combining with the map sensitivity using a weight \(w = 1\):
+    \[
+    \phi_K = \left( \frac{1}{E} \sum_{i=1}^E \text{Sensitivity}_i \right) + w \cdot \Delta K_{\text{rule,avg}}
+    \]
+\end{enumerate}
+
+This dual approach—global (map) and local (rules)—captures integration at multiple scales, 
+enhancing \(\phi_K\)'s sensitivity to subtle dynamic changes.
+
+\subsection{Implementation in Mathematica}
+We implemented this approach for some networks of variable architecture and 
+dynamics, generating \(n\) networks per size and type (Barabási-Albert, Watts-Strogatz, Ring, Complete).
+The detailed algorithm can be seen at algorithm \ref{algo-fullMetacompression}.
+
+A high level run can be see as follows:
+
+\begin{enumerate}
+    \item \textbf{Network Generation}:
+    \begin{itemize}
+        \item For each node size \(N\) (\emph{min} to \emph{max}), generate \(E\) edges randomly.
+        \item Create graphs using:
+        \begin{itemize}
+            \item Barabási-Albert (scale-free)%: \(\text{RandomGraph[BarabasiAlbertGraphDistribution[nodeSize, noEdges]]}\)
+            \item Watts-Strogatz (small-world)%: \(\text{RandomGraph[WattsStrogatzGraphDistribution[nodeSize, 0.3]]}\)
+            \item Ring%: \(\text{CycleGraph[nodeSize]}\)
+            \item Complete%: \(\text{CompleteGraph[nodeSize]}\)
+        \end{itemize}
+        \item Extract adjacency matrix%: \(\text{adjMat = AdjacencyMatrix[ranGraph] // Normal}\).
+    \end{itemize}
+
+    \item \textbf{Dynamics}:
+    \begin{itemize}
+        \item Assign random Boolean rules%: \(\text{dyn = createSimpleRandomDynamic[nodeSize][``Dynamic'']}\).
+    \end{itemize}
+
+    \item \textbf{Full Repertoire (for PyPhi)}:
+    \begin{itemize}
+        \item Compute all \(2^N\) output patterns%: \(\text{outRep = runDynamic[adjMat, dyn][``RepertoireOutputs'']}\).
+    \end{itemize}
+
+    \item \textbf{Random State}:
+    \begin{itemize}
+        \item Generate a random input and output%: \(\text{oneInput = createBinRandomInput[nodeSize]}\), \(\text{oneOut = calculateOneOutputOfNetwork[oneInput, adjMat, dyn][``Output'']}\).
+    \end{itemize}
+
+    \item \textbf{Attractors}:
+    \begin{itemize}
+        \item Compute attractors%: \(\text{ff = calculatingPattsInDivisionsOfCM[adjMat, dyn, 2]}\), \(\text{binAttractors = calculatingAttractors[ff[``Locations''], ff[``Sumandos'']][``BinAttractorsByPosition'']}\).
+        \item Measure complexity%: \(K(s_0) = \text{ByteCount}[binAttractors]\), \(A_0 = \text{Length}[binAttractors]\).
+    \end{itemize}
+
+    \item \textbf{Perturbations}:
+    \begin{itemize}
+        \item For each edge, set \(\text{adjMat[i,j] = 0}\), recompute attractors, and calculate:
+        \[
+        \Delta K_i = |K(s_0) - K(s_1)|, \quad \Delta A_i = |A_0 - A_1|, \quad \text{Sensitivity}_i = \Delta K_i \cdot \log_2(\Delta A_i + 1)
+        \]
+    \end{itemize}
+
+    \item \textbf{Rule Refinement}:
+    \begin{itemize}
+        \item Compute rules%: \(\text{rules0 = Map[onPossibleBehaviour[Range[nodeSize], \#, dyn, adjMat] \&, Keys[binAttractors]]}\).
+        \item Measure \(\Delta K_{\text{rule,avg}}\) and add to \(\phi_K\) with \(w = 1\).
+    \end{itemize}
+
+    \item \textbf{Save Data}:
+    \begin{itemize}
+        \item Export to \texttt{network\_data.csv} with NumPy-compatible formatting for PyPhi comparison.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Scalability}: For 5 nodes (11 edges), 12 simulations per network; for 1000 networks, 
+\(\sim 12,000\) simulations—orders of magnitude fewer than IIT's \(2^{N-1}\) bipartitions.
+
+\subsection{insights on Mathematica code}
+\begin{itemize}
+    \item \textbf{Attractors Over Patterns}: Attractors reflect intrinsic dynamics, 
+    reducing queries from \(2^N\) to the number of unique stable states.
+    \item \textbf{Algorithmic Complexity}: Using \(\text{ByteCount}\) as a proxy for \(K\) 
+    aligns with Zenil's Algorithmic Complexity but considering compression sensitivity, capturing 
+    rule complexity changes.
+    \item \textbf{No Partitions}: Edge perturbations approximate MIP dynamically, avoiding exponential costs.
+    \item \textbf{Rule Refinement}: Adds local sensitivity, making \(\phi_K\) more robust.
+    \item \textbf{Scalability}: Linear in edges, not exponential in nodes, unlike IIT.
+\end{itemize}
+
+\textbf{Formulas Recap}:
+\begin{itemize}
+    \item Sensitivity per edge: \(\text{Sensitivity}_i = \Delta K_i \cdot \log_2(\Delta A_i + 1)\)
+    \item Initial \(\phi_K\): \(\phi_K = \frac{1}{E} \sum_{i=1}^E \text{Sensitivity}_i\)
+    \item Refined \(\phi_K\): \(\phi_K = \left( \frac{1}{E} \sum_{i=1}^E \text{Sensitivity}_i \right) + w \cdot \Delta K_{\text{rule,avg}}\), \(w = 1\)
+\end{itemize}
+
+\textbf{Overview of implementation}
+
+Our \(\phi_K\) offers a computationally efficient alternative to IIT's \(\phi\), capturing integration 
+through attractor dynamics and algorithmic complexity. 
+
+When we visualize the behaviour of a system (or subsystem like an isolated node), and 
+take into account its implementation, from the point of view of optimization of computational 
+resources, running rules to generate the behaviour of the whole is still a challenge 
+because it is an expensive process in terms of time and memory. Hence for large systems, 
+analysis based on exhaustive reviews of such behaviour could eventually become intractable.
+
+In order to overcome this limitation, $\phi_{K}$ attempted to find rules that not 
+only give an account of the computability capabilities of a system, but also 
+describe its own behaviour. In other words, we wanted to know about possibilities 
+for finding "shortcuts to express the behaviour'' of a whole system.
+
+One other obvious limitation inherited from computability and algorithmic complexity 
+is that of the semi-computability of the process of trying to find simple 
+representations of behaviour. However, we are not required to find the shortest 
+(simplest) one but simply a set of possible short (simple) ones, which would be 
+an indication of the kind of system we are dealing with. While one can find shorter 
+descriptions using popular lossless compression algorithms, the more powerful 
+the algorithms to find shortcuts and fractal descriptions, the faster the 
+computation and the more telling the results,
+something that is to be expected for a relationship between the way in which
+integrated information is estimated, on the one hand, and algorithmic complexity.
+
+\section{Demonstration of Integration Measurement via \(\phi_K\)}
+
+To justify the effectiveness of the \(\phi_K\) approach, we demonstrate its application 
+on a specific 5-node network, defined by its adjacency matrix and dynamics. 
+This step-by-step example illustrates how integration is measured through perturbation, a
+ttractor dynamics, and algorithmic complexity, showcasing the computational efficiency 
+and interpretability of our method compared to traditional approaches like IIT.
+
+\subsection{Step 0: Network Setup}
+We consider a 5-node network with the following parameters:
+\begin{itemize}
+    \item \textbf{Adjacency Matrix}: A complete graph (with self-loops removed), represented as:
+    \[
+    \text{adjMat} = \begin{pmatrix}
+        0 & 1 & 1 & 1 & 1 \\
+        1 & 0 & 1 & 1 & 1 \\
+        1 & 1 & 0 & 1 & 1 \\
+        1 & 1 & 1 & 0 & 1 \\
+        1 & 1 & 1 & 1 & 0
+    \end{pmatrix}
+    \]
+    This matrix indicates 10 edges (since it is symmetric and the diagonal is 0), reflecting a highly connected network expected to exhibit significant integration.
+    \item \textbf{Dynamics}: Each node is assigned a Boolean rule:
+    \[
+    \text{dyn} = \{\text{``OR''}, \text{``AND''}, \text{``OR''}, \text{``AND''}, \text{``OR''}\}
+    \]
+    These rules govern how nodes update their states based on inputs from connected nodes, introducing variability in the network's behavior.
+\end{itemize}
+
+\subsection{Step 1: Compute Baseline Attractors}
+First, we compute the network's baseline attractors—the stable states or cycles under the given dynamics. The attractor map is:
+{\small
+\begin{align*}
+\text{Baseline Attractors} = \langle| 
+&\{0,0,0,0,0\} \to \{0\}, \{0,0,1,0,1\} \to \{1\}, \{1,0,0,0,1\} \to \{4\}, \\
+&\{1,0,1,0,0\} \to \{16\}, \{1,0,1,0,1\} \to \{2,3,5,6,7,8,9,10,11,12,13,14, \\
+&15,17,18,19,20,21,22,24,25,26,27,28,30\}, \{1,0,1,1,1\} \to \{23\}, \\
+&\{1,1,1,0,1\} \to \{29\}, \{1,1,1,1,1\} \to \{31\} |\rangle
+\end{align*}
+}
+Here, each key (e.g., \(\{0,0,0,0,0\}\)) represents a binary state (converted from decimal positions in the repertoire), and the values (e.g., \(\{0\}\)) indicate positions in the full \(2^5 = 32\) state space where this state appears as a stable attractor. Notably, the state \(\{1,0,1,0,1\}\) dominates, appearing at 21 positions, suggesting a strong attractor basin.
+
+We measure:
+\begin{itemize}
+    \item \textbf{Baseline Complexity (\(K_0\))}: \(K_0 = 3160\) bytes, computed using \(\text{ByteCount}\) in Mathematica, serving as a proxy for Kolmogorov complexity \cite{zenil2015causality}.
+    \item \textbf{Baseline Attractor Count (\(A_0\))}: \(A_0 = 8\), the number of unique attractors, reflecting the network's dynamic diversity.
+\end{itemize}
+
+\subsubsection{Step 2: Count Edges}
+The network has 10 edges (counted as 1s in the upper triangular part of the adjacency matrix, excluding the diagonal):
+\[
+\text{Number of Edges} = 10
+\]
+This determines the number of perturbations we will perform.
+
+\subsubsection{Step 3: Perturb Edges and Compute Sensitivities}
+We perturb each edge by setting its connectivity to 0 and recompute the attractors, measuring the sensitivity to each perturbation. The process is illustrated for select edges:
+
+\begin{itemize}
+    \item \textbf{Perturbation of Edge (1,2)}:
+    \[
+    \text{Perturbed Adjacency Matrix} = \begin{pmatrix}
+        0 & 0 & 1 & 1 & 1 \\
+        1 & 0 & 1 & 1 & 1 \\
+        1 & 1 & 0 & 1 & 1 \\
+        1 & 1 & 1 & 0 & 1 \\
+        1 & 1 & 1 & 1 & 0
+    \end{pmatrix}
+    \]
+    {\small
+        \begin{align*}
+        \text{Perturbed Attractors} = \langle| 
+        &\{0,0,0,0,0\} \to \{0\}, \{0,0,1,0,1\} \to \{1,2,3\}, \{1,0,0,0,1\} \to \{4\}, \\
+        &\{1,0,1,0,0\} \to \{16\}, \{1,0,1,0,1\} \to \{5,6,7,8,9,10,11,12,13,14,15, \\
+        &17,18,19,20,21,22,24,25,26,27,28,30\}, \{1,0,1,1,1\} \to \{23\}, \\
+        &\{1,1,1,0,1\} \to \{29\}, \{1,1,1,1,1\} \to \{31\} |\rangle
+        \end{align*}
+        }
+    \[
+    K_1 = 3176 \text{ bytes}, \quad A_1 = 8
+    \]
+    \[
+    \Delta K = |3160 - 3176| = 16, \quad \Delta A = |8 - 8| = 0
+    \]
+    \[
+    \text{Sensitivity}_{(1,2)} = \Delta K \cdot \log_2(\Delta A + 1) = 16 \cdot \log_2(0 + 1) = 16 \cdot 0 = 0
+    \]
+    The zero sensitivity indicates that removing this edge does not significantly alter the network's dynamics, as both the number and complexity of attractors remain stable.
+
+    \item \textbf{Perturbation of Edge (2,4)} (a more impactful example):
+    \[
+    \text{Perturbed Adjacency Matrix} = \begin{pmatrix}
+        0 & 1 & 1 & 1 & 1 \\
+        1 & 0 & 1 & 0 & 1 \\
+        1 & 1 & 0 & 1 & 1 \\
+        1 & 1 & 1 & 0 & 1 \\
+        1 & 1 & 1 & 1 & 0
+    \end{pmatrix}
+    \]
+    {\small
+        \begin{align*}
+        \text{Perturbed Attractors} = \langle| 
+        &\{0,0,0,0,0\} \to \{0\}, \{0,0,1,0,1\} \to \{1\}, \{1,0,0,0,1\} \to \{4\}, \\
+        &\{1,0,1,0,0\} \to \{16\}, \{1,0,1,0,1\} \to \{2,3,5,6,7,8,9,10,11,12,13,14, \\
+        &15,17,18,19,20,22,24,25,26,27,28,30\}, \{1,1,1,0,1\} \to \{21,29\}, \\
+        &\{1,1,1,1,1\} \to \{23,31\} |\rangle
+        \end{align*}
+        }
+    \[
+    K_1 = 2808 \text{ bytes}, \quad A_1 = 7
+    \]
+    \[
+    \Delta K = |3160 - 2808| = 352, \quad \Delta A = |8 - 7| = 1
+    \]
+    \[
+    \text{Sensitivity}_{(2,4)} = \Delta K \cdot \log_2(\Delta A + 1) = 352 \cdot \log_2(1 + 1) = 352 \cdot 1 = 352
+    \]
+    Here, the sensitivity is significant, reflecting a notable change in the attractor map: the number of attractors decreases from 8 to 7, and the complexity drops by 352 bytes, indicating that edge (2,4) plays a critical role in the network's integration.
+
+    \item \textbf{Remaining Edges}: Similar perturbations are performed for all 10 edges. Most edges (e.g., (1,3), (1,4), (1,5), etc.) yield \(\text{Sensitivity}_i = 0\), as \(\Delta A = 0\), meaning the attractor count remains stable. However, edge (4,2) also yields \(\text{Sensitivity}_{(4,2)} = 352\), mirroring the impact of edge (2,4) due to the symmetry of the undirected graph.
+\end{itemize}
+
+The sensitivities across all edges are:
+\[
+\text{Sensitivities} = \{0, 0, 0, 0, 0, 0, 352, 0, 0, 0, 0, 0, 352, 0, 0, 0, 0, 0, 0, 0\}
+\]
+Filtering out zeros (as per our methodology), we retain:
+\[
+\text{Sensitivities} = \{352, 352\}
+\]
+
+\subsubsection{Step 4: Compute Initial \(\phi_K\)}
+The initial \(\phi_K\) is the mean of the non-zero sensitivities:
+\[
+\phi_K = \frac{1}{|\text{Sensitivities}|} \sum \text{Sensitivity}_i = \frac{352 + 352}{2} = 352
+\]
+This value indicates that, on average, the network’s dynamics are moderately sensitive to perturbations, with only two edges significantly affecting the attractor map.
+
+\subsubsection{Step 5: Compute Rules and Refine \(\phi_K\)}
+To refine \(\phi_K\), we compute the rule-based sensitivity:
+\begin{itemize}
+    \item \textbf{Baseline Rules}: For each attractor, we generate a rule encoding its positions (e.g., for \(\{0,0,0,0,0\} \to \{0\}\), the rule is \(\langle| \text{``DecimalRepertoire''} \to \{0\}, \text{``Sumandos''} \to \{0\} |\rangle\)).
+    \[
+    K_{\text{rule,0}} = 585 \text{ bytes (average across 8 rules)}
+    \]
+    \item \textbf{Perturbed Rules}: Perturbing edge (1,2), we recompute rules for the original attractors:
+    \[
+    K_{\text{rule,1}} = 587 \text{ bytes}
+    \]
+    \[
+    \Delta K_{\text{rule}} = |585 - 587| = 2
+    \]
+\end{itemize}
+This small \(\Delta K_{\text{rule}}\) suggests that the rules are relatively stable, but it adds a local sensitivity component to our measure.
+
+The refined \(\phi_K\) with \(w = 1\) is:
+\[
+\phi_K = 352 + 1 \cdot 2 = 354
+\]
+
+\subsubsection{Interpretation}
+The final \(\phi_K = 354\) reflects the network’s integration, combining global (attractor map) and local (rule) sensitivities. Notably:
+\begin{itemize}
+    \item Most perturbations (e.g., edge (1,2)) result in \(\text{Sensitivity}_i = 0\), indicating that the network’s dynamics are robust to many single-edge removals, a sign of high integration where the system remains cohesive.
+    \item Edges (2,4) and (4,2) yield high sensitivity (352), showing that these connections are critical to maintaining the attractor structure. Removing them reduces the number of attractors, collapsing some states into others, which aligns with our expectation for a highly integrated network: perturbations to key edges have a significant impact.
+    \item The small \(\Delta K_{\text{rule}} = 2\) adds nuance, capturing subtle changes in the rules generating attractors, enhancing the robustness of our measure.
+\end{itemize}
+
+This demonstration validates our \(\phi_K\) approach, showing how it captures integration through dynamic sensitivity in a computationally efficient manner (\(O(E) = 10\) perturbations vs. IIT’s \(2^{5-1} = 16\) bipartitions). The result (\(\phi_K = 354\)) contrasts with IIT’s \(\phi = 0\) for this network, highlighting our method’s focus on dynamic sensitivity over irreducible information, making it more suitable for large-scale systems.
+
+
+\subsection{Conclusion}
+Our \(\phi_K\) approach provides a novel, scalable method to measure integration in complex networks, leveraging attractor dynamics and algorithmic complexity. The step-by-step demonstration on a 5-node network illustrates its practical application, capturing integration through sensitivity to perturbations in a way that aligns with the network’s intrinsic dynamics. By avoiding IIT’s exponential computational cost, \(\phi_K\) paves the way for studying integration in larger, more complex systems, with potential applications in social, economic, and governance contexts.
+
+% % Add bibliography references if needed
+% \begin{thebibliography}{9}
+% \bibitem{mayner2018pyphi}
+% Mayner O, et al. PyPhi: A toolbox for integrated information theory. \emph{PLoS Computational Biology}. 2018;14(7):e1006343.
+% \end{thebibliography}
+
+% \end{document}

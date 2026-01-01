@@ -1,0 +1,94 @@
+Project Continuation Prompt — Causal Boolean Integration (Comprehensive)
+
+1) Objective
+- Maintain seamless continuity for a mechanism‑first programme on causal Boolean networks: deliver exact closed‑form index‑set formulae, canonical structural programmes, rigorous proofs, deterministic tests, reproducible artefacts, and professionally compiled documentation (British English).
+- Retake the research from TSK‑COMPARE‑002 (PID‑based synergy comparator) with explicit requirements for documentation, testing, and analysis.
+
+2) Philosophy and Policy
+- Mechanism‑only claims; dataset compressions are secondary context not used as comparators.
+- Explicit ordering and assumptions everywhere; invariance under bit‑reversal `φ` must be stated and verified.
+- Acceptance per ticket: mathematics, index sets, proofs, deterministic tests, artefacts, documentation compiled, `plan.md` updated.
+- Determinism: fixed seeds, recorded parameters, identical runs produce identical artefacts.
+- Documentation integration: all experiment/comparator documentation MUST be written directly in `doc/newIntPaper/expProcess.tex` (no separate files/folders for text narratives). LaTeX tables may be `\input` from `results/tests/.../*.tex`.
+- Testing requirements: corroborate correctness and accuracy against analytic baselines or ground‑truth constructions; include deterministic unit tests and exported artefacts.
+- Analysis requirements: documentation MUST include scientific analysis of results; when needed, write an analysis script to compute summary statistics, comparisons, and figures; integrate outputs into `expProcess.tex`.
+
+3) Ordering Policy (Foundational)
+- Inputs enumerated by integers `j-1` in binary of length `n`.
+- LSB‑first (code default): `v(j)=Reverse[IntegerDigits(j-1,2,n)]`, weights `w(i)=2^(i-1)`.
+- MSB‑first (manuscript style): `v(j)` in MSB order, weights `w(i)=2^(n-i)`.
+- Mapping `φ(j)`: decode `b=IntegerDigits(j-1,2,n)`, `b'=Reverse[b]`, `φ(j)=1+FromDigits[b',2]`. `φ` is an involution. Index sets must be invariant modulo `φ`.
+
+4) Methods (Baseline vs Predictive vs Comparator)
+- Baseline (exhaustive): synchronous one‑step map `F` via gate dispatch over ordered inputs.
+- Predictive (analytic): per‑node closed‑form index sets evaluated over ordered inputs; compose columns to reconstruct full outputs; exact equality required.
+- Canonical programme: per‑node triplets `<gate, I_c, θ>` reconstruct outputs; invariant under node permutation modulo column order.
+- Comparator (PID‑based synergy): compute partial information decomposition terms (synergy, unique, redundancy) for selected gates/subsystems under unbiased inputs; compare predictive vs baseline distributions where applicable; ensure ordering consistency.
+
+5) Codebase Map
+- Packages: `src/Packages/Integration/Gates.m`, `Experiments.m`; legacy exhaustive pipelines in `src/integration/Alpha.m`.
+- Gate catalogue: AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES, NIMPLIES, MAJORITY, KOFN (strict/non‑strict), CANALISING.
+- Tests: `tests/MUnit/Analysis/*`, `tests/MUnit/Mixed/*`, `tests/MUnit/Theory/*`, `tests/MUnit/Algo/*`, `tests/MUnit/Stoch/*`, `tests/MUnit/Compare/*`.
+- Results: `results/tests/<area>/<ticket>/*`.
+- Documentation: `doc/newIntPaper/expProcess.tex` (algorithms/experiments and comparator analyses only), `doc/newIntPaper/docProcess.tex` (theory), plan: `doc/newIntPaper/plan.md`.
+
+6) Current State Summary (Scientific Work Completed)
+- THEORY: 001 (compression functional), 002 (sensitivity/normalisation), 003 (decomposition across cuts and canalisation), 004 (canonical and invariance under permutation), 005 (ordering transform invariance `φ`), 006 (index‑set closure/compositionality). All with tests and artefacts; docProcess updated.
+- ANALYSIS: ordering‑aware validations for AND/OR/XOR/XNOR/NAND/NOR/NOT; equality to empirical repertoires; artefacts under `results/tests/analysis_*`.
+- MIXED: dispatch equivalence validated (repertoires vs one‑step); artefacts under `results/tests/mixed*`; docProcess updated.
+- ALGO‑001: exact reconstruction at `n={10,13}`; performance summary and sampling tables; artefacts `results/tests/algo001/*`; expProcess compiled.
+- ALGO‑002: importance sampling for `n={20,50}`; predictive equals truth‑table per sampled rows; predictive faster; artefacts `results/tests/algo002/*`; expProcess compiled.
+- ALGO‑003: subsystem heuristics (connected components of `A=(cm+cm^T)>0`), compression factorisation validated (φ=0, ΔC=0 when connected); artefacts `results/tests/algo003/*`; expProcess compiled.
+- STOCH‑001: bit‑flip robustness, network‑level and per‑gate sensitivity summaries; artefacts `results/tests/stoch001/*`; expProcess compiled.
+- STOCH‑002: noise curves across `q∈{0..0.10}`, XOR analytic vs empirical `(1-(1-2q)^k)/2`; artefacts `results/tests/stoch002/*`; expProcess compiled.
+
+7) Artefacts and Documentation Build
+- Theory artefacts: `results/tests/theory00*/{Metrics.json, Status.txt}`.
+- Analysis/Mixed/Algo/Stoch/Compare artefacts: JSON/tex under `results/tests/...`; `tex` artefacts may be included via `\input` in `expProcess.tex`.
+- Documentation location: all experiment/comparator documentation MUST be authored directly in `doc/newIntPaper/expProcess.tex`.
+- Build commands:
+  - `pdflatex -interaction=nonstopmode -halt-on-error doc/newIntPaper/expProcess.tex`
+
+8) Testing and Verification Policy
+- Deterministic seeds and modes (`smoke`/`medium`/`real`).
+- Predictive vs baseline equality under both LSB/MSB via `φ`.
+- Export `Summary.json` and `Status.txt` per ticket; sanitise numeric/boolean JSON.
+- Keep ordering notes explicit in tests and docs.
+- Comparator accuracy: corroborate PID quantities against analytic expectations on canonical gates (e.g., XOR synergy); include unit tests and convergence checks.
+
+9) Execution Order (Refactored)
+- Foundations first: TSK‑THEORY‑005 → TSK‑THEORY‑004 → TSK‑THEORY‑006.
+- Then PATTERN (taxonomy) precedes ANALYSIS (ordering‑aware derivations).
+- Then MIXED, THEORY consolidation, ALGO, STOCH, TESTS, EXPER, COMPARE, manuscript.
+
+10) Commands Quick Reference
+- Run ALGO samples: `"/Applications/Wolfram.app/Contents/MacOS/WolframKernel" -script tests/MUnit/Algo/TSK-ALGO-001-Tests.m`
+- Run ALGO importance sampling: `"/Applications/Wolfram.app/Contents/MacOS/WolframKernel" -script tests/MUnit/Algo/TSK-ALGO-002-ImportanceSampling.m`
+- Run STOCH noise curves: `"/Applications/Wolfram.app/Contents/MacOS/WolframKernel" -script tests/MUnit/Stoch/TSK-STOCH-002-NoiseCurve.m`
+- Run COMPARE PID synergy: `"/Applications/Wolfram.app/Contents/MacOS/WolframKernel" -script tests/MUnit/Compare/TSK-COMPARE-002-PIDSynergy.m`
+- Compile exp docs: `pdflatex -interaction=nonstopmode -halt-on-error doc/newIntPaper/expProcess.tex`
+
+11) Immediate Next Ticket — TSK‑COMPARE‑002 (PID‑based Synergy Comparator)
+- Objective: implement and validate a PID‑based comparator reporting synergy, unique, and redundancy for selected gates and small subsystems; integrate scientific analysis directly into `expProcess.tex`.
+- Scope:
+  - Canonical gates: AND, OR, XOR, XNOR, NAND, NOR, NOT, MAJORITY; compare 2‑input cases primarily, extend to small subsystems where applicable.
+  - Analytical expectations: XOR shows positive synergy under unbiased inputs; monotone gates exhibit low synergy and higher redundancy/unique.
+  - Ordering harness and `φ` invariance where indices are used.
+- Technical Steps:
+  1. Create `tests/MUnit/Compare/TSK-COMPARE-002-PIDSynergy.m` with deterministic seeds; load `Gates.m`; compute PID terms for selected gates/subsystems.
+  2. Export artefacts: `results/tests/compare002/{Summary.json, Summary.tex, Status.txt}` with sanitised numeric outputs; include compact LaTeX tables.
+  3. Write (if needed) an analysis script to aggregate, normalise, and compare PID terms against analytic baselines; produce `Summary.tex` for inclusion.
+  4. Update `doc/newIntPaper/expProcess.tex` with a subsection “TSK‑COMPARE‑002: PID‑based Synergy Comparator” including methodology, tables, and a detailed scientific analysis of results and implications.
+  5. Compile documentation with `pdflatex` (twice); confirm no errors.
+- Acceptance:
+  - PID quantities computed and validated against analytic expectations (e.g., XOR synergy) with deterministic reproducibility.
+  - Artefacts exported; `Status.txt` shows `OK`; documentation updated in `expProcess.tex` with detailed analysis; compiled without errors.
+- Commands:
+  - `"/Applications/Wolfram.app/Contents/MacOS/WolframKernel" -script tests/MUnit/Compare/TSK-COMPARE-002-PIDSynergy.m`
+  - `pdflatex -interaction=nonstopmode -halt-on-error doc/newIntPaper/expProcess.tex`
+
+12) Context Retention
+- After each ticket: update `plan.md` status, append artefact paths, and revise this prompt with Current State and Next Tickets.
+- Persist seeds, parameters, and mode in `Summary.json`; keep `RunLog.txt` with timestamps and step progress under `results/tests/<ticket>/`.
+- Maintain ordering convention notes in both tests and docs; include a note if changed.
+- Ensure documentation is always integrated directly in `expProcess.tex`; avoid separate narrative files.

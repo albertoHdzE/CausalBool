@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\title{Discovering the Output Pattern of OR Gates in Boolean Networks}
+\author{}
+\date{June 20, 2025}
+\begin{document}
+\maketitle
+\begin{abstract}
+We derive a closed-form, network-aware index-set formula for the OR gate over ordered exhaustive inputs, with explicit ordering policy (LSB-first/MSB-first) and a mapping between orderings. The result is validated against empirical repertoires and presented with examples.
+\end{abstract}
+\section{Problem Definition}
+Consider a Boolean network with \(n\) nodes and adjacency matrix \(C\). Node \(k\) applies OR over its connected inputs \(I_c=\{i\mid C_{k,i}=1\}\). Inputs are the \(2^n\) binary vectors ordered by the binary of \(j-1\) (1-based \(j\)).
+\section{Ordering Policy}
+Two orderings are used:
+\begin{itemize}
+ \item LSB-first (code): \(v(j)=\mathrm{Reverse}\,\mathrm{IntegerDigits}(j-1,2,n)\), bit weights \(2^{i-1}\).
+ \item MSB-first (manuscript): \(v(j)=\mathrm{IntegerDigits}(j-1,2,n)\), bit weights \(2^{n-i}\).
+\end{itemize}
+Define \(\varphi(j)=1+\mathrm{FromDigits}(\mathrm{Reverse}(\mathrm{IntegerDigits}(j-1,2,n)),2)\); \(\varphi\) maps indices between orderings and is an involution.
+\section{Index-Set Formula (Network-Aware)}
+For node \(k\) and connected set \(I_c\), the one-set indices where OR outputs 1 are
+\[
+J_k=\bigcup_{i\in I_c}\,\Big\{\,1+w(i)+\sum_{t\in S} w(t)\ \Big|\ S\subseteq \{1,\dots,n\}\setminus\{i\}\Big\},
+\]
+where \(w(i)=2^{i-1}\) for LSB-first and \(w(i)=2^{n-i}\) for MSB-first. Equivalently,
+\[
+J_k=\Big\{\, j\ \Big|\ \exists i\in I_c:\ v_i(j)=1\,\Big\}.
+\]
+Under MSB-first, the index set equals \(\varphi\)-mapped LSB-first indices.
+\section{Examples}
+For \(n=3\) and \(I_c=\{2,3\}\), LSB-first weights \((1,2,4)\) yield bands \(\{3,4,7,8\}\) and \{5,6,7,8\}, so \(J_k=\{3,4,5,6,7,8\}\). Under MSB-first the numeric set differs but matches via \(\varphi\).
+\section{Validation}
+Empirical repertoires from \texttt{CreateRepertoiresDispatch} match the analytic \(J_k\) exactly under the stated ordering. Cross-ordering equality is verified by applying \(\varphi\).
+\section{Conclusion}
+The OR gate admits a band-union index construction that is exact and ordering-aware, with a simple mapping \(\varphi\) between orderings.
+\end{document}

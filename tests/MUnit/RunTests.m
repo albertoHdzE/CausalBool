@@ -1,0 +1,21 @@
+args = Rest@$CommandLine;
+pairs = Cases[args, s_String :> StringSplit[s, "=", 2]];
+opts = Association@Cases[pairs, {k_, v_} :> Rule[k, v]];
+sec = Lookup[opts, "section", None];
+gate = Lookup[opts, "gate", None];
+base = DirectoryName[$InputFileName];
+dirs = If[sec === None, Select[FileNameJoin[{base, #}] & /@ {"Analysis", "Gates", "Pattern", "Theory", "Algo", "Mixed"}, DirectoryQ], {FileNameJoin[{base, sec}]}];
+files = Flatten@FileNames["*.m", Prepend[dirs, base], Infinity];
+files = Select[files, StringContainsQ[FileNameTake[#], "Tests"] &];
+files = Select[files, ! StringEndsQ[#, "RunTests.m"] &];
+files = If[gate === None, files, Select[files, StringContainsQ[ToLowerCase@FileNameTake[#], ToLowerCase@gate] &]];
+If[Length[files] == 0, Print["NO_TESTS"]; Exit[1]];
+resPath = FileNameJoin[{DirectoryName[base], "results", "tests", "runall"}];
+If[! DirectoryQ[resPath], CreateDirectory[resPath, CreateIntermediateDirectories -> True]];
+results = Quiet@Get /@ files;
+statusPer = MapThread[Function[{f, r}, If[Head[r] === Association && KeyExistsQ[r, "Status"], {FileNameTake[f], r["Status"]}, {FileNameTake[f], "OK"}]], {files, results}];
+status = If[AllTrue[statusPer[[All, 2]], # === "OK" &], "OK", "FAIL"];
+summaryText = StringRiffle[Prepend[Map[Row[{#[[1]], ": ", #[[2]]}] &, statusPer], Row[{"SUMMARY: ", status, " ", ToString[Length[files]], " tests"}]], "\n"];
+Export[FileNameJoin[{resPath, "Status.txt"}], summaryText, "Text"];
+Print[status <> " " <> ToString[Length[files]] <> " tests"];
+If[status === "OK", Exit[0], Exit[1]]

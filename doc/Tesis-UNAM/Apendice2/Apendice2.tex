@@ -1,0 +1,1079 @@
+\chapter{How meta-perturbation test works}
+% -------------------------------
+% THIS IS MY ALGORITHM 0: Computes information integration information
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	\SetKwData{Pud}{pud}
+	\SetKwData{Fud}{fud}
+	\SetKwData{Fbupd}{fbupd}
+	\SetKwData{Distros}{distros}
+	\SetKwData{ConceptualSpace}{conceptualSpace}
+	\SetKwData{Nodes}{nodes}
+	\SetKwData{MechaSet}{mechaSet}
+	\SetKwData{OneConcept}{OneConcept}
+	\SetKwData{BipartitionsSet}{bipartitionsSet}
+	\SetKwData{IntegratedInformationValue}{integratedInformationValue}
+	\SetKwData{Aux}{aux}
+	\SetKwData{UPPD}{UPPD}
+	\SetKwData{UFPD}{UFPD}
+	
+	
+	\SetKwFunction{computeDistros}{computeDistros}
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{ComputeInputBitProbabilityDistro}{ComputeInputBitProbabilityDistro}
+	\SetKwFunction{ComputeOutputBitProbabilityDistro}{ComputeOutputBitProbabilityDistro}
+	\SetKwFunction{GetNodes}{GetNodes}
+	\SetKwFunction{ComputesPastProbabilityDistribution}{ComputesPastProbabilityDistribution}
+	\SetKwFunction{ComputesFutureProbabilityDistribution}{ComputesFutureProbabilityDistribution}
+	\SetKwFunction{ComputeConceptOfAMechanism}{ComputeConceptOfAMechanism}
+	\SetKwFunction{Append}{Append}
+	\SetKwFunction{ComputesConceptualSpace}{ComputesConceptualSpace}
+	\SetKwFunction{Bipartitions}{Bipartitions}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{GetNodes}{GetNodes}
+	
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	\Input{AdjacencyMatrix,Dynamic,CurrentState}
+	\Output{Information Integration Value}
+	\BlankLine
+	\Nodes $\leftarrow$ \GetNodes{AdjacencyMatrix}\;
+	\tcp*[h]{UPPD: Unrestricted Past Probability Distribution}\;
+	\tcp*[h]{UFPD: Unrestricted Future Probability Distribution}\;
+	\UPPD $\leftarrow$  \ComputesPastProbabilityDistribution{\Nodes,CurrentState,$\emptyset$,Dynamic,am}\;
+	\UFPD $\leftarrow$  \ComputesFutureProbabilityDistribution{\Nodes,CurrentState,$\emptyset$,Dynamic,am}\;
+	\tcp*[h]{am=AdjacencyMatrix; cs=CurrentState}\;
+	\ConceptualSpace$\leftarrow$ \ComputesConceptualSpace{am,Dynamic,cs,\UPPD,\UFPD}\;
+	
+	\IntegratedInformationValue$\leftarrow$ 0\;
+	\BipartitionsSet$\leftarrow$ \Bipartitions{\ConceptualSpace}\;
+	
+
+	\ForEach{bipartition $b_i \in \BipartitionsSet$}{%
+		\Aux$\leftarrow$\EMD{$b_i,\ConceptualSpace$}\;
+		\uIf{ \Aux > \IntegratedInformationValue}{%
+			\IntegratedInformationValue$\leftarrow$ \Aux\;
+		}
+	}
+	
+	
+	
+	\caption{computeIntegratedInformation}\label{algo_computeIntegratedInformation}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 2: GENERAL COMPUTATION OF CONCEPTUAL STRUCTURE
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	\SetKwData{Pud}{pud}
+	\SetKwData{Fud}{fud}
+	\SetKwData{Fbupd}{fbupd}
+	\SetKwData{Distros}{distros}
+	\SetKwData{ConceptualSpace}{conceptualSpace}
+	\SetKwData{Nodes}{nodes}
+	\SetKwData{MechaSet}{mechaSet}
+	\SetKwData{OneConcept}{OneConcept}
+	
+	
+	\SetKwFunction{computeDistros}{computeDistros}
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{ComputeInputBitProbabilityDistro}{ComputeInputBitProbabilityDistro}
+	\SetKwFunction{ComputeOutputBitProbabilityDistro}{ComputeOutputBitProbabilityDistro}
+	\SetKwFunction{GetNodes}{GetNodes}
+	\SetKwFunction{ComputesPastProbabilityDistribution}{ComputesPastProbabilityDistribution}
+	\SetKwFunction{ComputesFutureProbabilityDistribution}{ComputesFutureProbabilityDistribution}
+	\SetKwFunction{ComputeConceptOfAMechanism}{ComputeConceptOfAMechanism}
+	\SetKwFunction{Append}{Append}
+
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	\Input{AdjacencyMatrix,Dynamic,CurrentState,UPPD,UFPD}
+	\Output{conceptualStructure}
+	\BlankLine
+	\tcp*[h]{UPPD: Unrestricted Past Probability Distribution}\;
+	\tcp*[h]{UFPD: Unrestricted Future Probability Distribution}\;
+	\Nodes$\leftarrow$ \GetNodes{AdjacencyMatrix}\;
+	\MechaSet$\leftarrow$\Subsets{\Nodes}\;
+	
+	\ForEach{mechanism $mecha_i \in \MechaSet$}{%
+		\OneConcept$\leftarrow$\ComputeConceptOfAMechanism{$mecha_i,\Nodes,CurrentState,UPPD,UFPD$}\;
+		\Append{\ConceptualSpace,\OneConcept}
+	}
+	
+
+	
+	\caption{computeConceptualSpace}\label{algo_computeConceptualStructure}
+\end{algorithm}
+\DecMargin{1em}
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 3: COMPUTE CONCEPT OF A MECHANISM
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{PastDistribution}{pastDistribution}
+	\SetKwData{FutureDistribution}{futureDistribution}
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesPastProbabilityDistribution}{ComputesPastProbabilityDistribution}
+	\SetKwFunction{ComputesFutureProbabilityDistribution}{ComputesFutureProbabilityDistribution}
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+	\Input{mechanism,nodesForPurviews,currentState,pastDistro,futDistro,Dynamic, AdjacencyMatrix}
+	\Output{concept for current mechanism}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+	\tcp*[h]{nodes where all purviews will be taken from}
+	
+	\PurviewsSet$\leftarrow$\Subsets{$nodesForPurviews$}\;
+	\BlankLine
+	
+	\For{$j\leftarrow 1$ \KwTo \Length{$PurviewsSet$}}
+	{\label{forins}
+		
+		\APurview$\leftarrow$ \Part{$j,PurviewsSet$}\;
+		\Connected$\leftarrow$ \FullyConnectedQ{$mechanism,APurview$}\;
+		\lIf{\Connected}{
+			
+			\tcp*[h]{MIP: Maximal Information Partition}
+			
+			\SmallAlpha$\leftarrow$ \ComputesMIP{$mechanism,APurview$}
+		}
+	}
+	
+	\tcp*[h]{APurviewMIP: Purview responsable to cause MIP for current mechanism}\;
+	
+	\APurviewMIP$\leftarrow$ \SmallAlpha{$"PurviewMIP"$}\;
+	\tcp*[h]{Following sum is formalized in Figure 4, In Text S2 from Oizumi(2014)}\;
+	\tcp*[h]{cs=CurrentState; am = AdjacencyMatrix}\;
+	\PastDistribution$\leftarrow$ \ComputesPastProbabilityDistribution{$mechanism,cs,\APurviewMIP,\newline
+	Dynamic,am$}\;
+	\FutureDistribution$\leftarrow$ \ComputesFutureProbabilityDistribution{$mechanism,cs,\APurviewMIP,\newline
+	Dynamic,am$}\;
+	\ConceptualInfo$\leftarrow$ \EMD{$pastDistro,\PastDistribution$}+\EMD{$futDistro,\FutureDistribution$}\;
+	
+
+	
+	\caption{computeConceptOfAMechanism}\label{algo_computeConceptOfMecha}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 3: COMPUTE MIP FOR A MECHA AND A PURVIEW
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}	
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{MechaChildren}{mechaChildren}
+	\SetKwData{PurviewChildren}{PurviewChildren}
+	\SetKwData{Ci}{ci}
+	\SetKwData{Ei}{ei}
+	\SetKwData{Cei}{cei}
+	\SetKwData{PastMIP}{pastMIP}
+	\SetKwData{FutMIP}{futMIP}
+	\SetKwData{PastDistribution}{pastDistribution}
+	\SetKwData{FutureDistribution}{futureDistribution}
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesCEI}{ComputesCEI}
+	\SetKwFunction{ComputesPastProbabilityDistribution}{ComputesPastProbabilityDistribution}
+	\SetKwFunction{ComputesFutureProbabilityDistribution}{ComputesFutureProbabilityDistribution}
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+	\Input{mechanism,purview}
+	\Output{MIP structure}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+%	\tcp*[h]{To find a MIP for a concept involves search between all possible }
+%	\tcp*[h]{combinations of of all possible partitions of a mechanism and a }
+%	\tcp*[h]{purview, where MIP is such combination with the maximal }
+%	\tcp*[h]{information possible value}
+	
+	
+	\MechaChildren$\leftarrow$ \Subsets{mechanism}\;
+	\PurviewChildren$\leftarrow$ \Subsets{purview}\;
+%	\tcp*[h]{As we want to find the minimum value of causal information (ci) }
+%	\tcp*[h]{and effect information (ei), any big value works here, since every }
+%	\tcp*[h]{time a lower value of ci and ei be found, these are updated with }
+%	\tcp*[h]{the new lower value found}
+	
+	\Ci $\leftarrow$ 10000\;
+	\Ei $\leftarrow$ 10000\;
+
+	\ForEach{mecha  $m_i \in \MechaChildren$}{%
+		\ForEach{purview $p_i \in \PurviewChildren$}{%
+			\tcp*[h]{cs=CurrentState, am=AdjacencyMatrix}\;
+			\PastDistribution $\leftarrow$ \ComputesPastProbabilityDistribution{$m_i$,cs,$p_i$,Dynamic,am}\;
+			\FutureDistribution $\leftarrow$ \ComputesFutureProbabilityDistribution{$m_i$,cs,$p_i$,Dynamic,am}\;
+			\Cei $\leftarrow$ \ComputesCEI{mecha,purview,\PastDistribution,\FutureDistribution}\;
+			
+			\If{\Cei("ci") < \Ci}{%
+				\Ci $\leftarrow$ \Cei("ci")\;
+				\PastMIP $\leftarrow$ (mecha,purview)\;
+			}
+		
+			\If{\Cei("ei") < \Ei}{%
+				\Ei $\leftarrow$ \Cei("ei")\;
+				\FutMIP $\leftarrow$ (mecha,purview)\;
+			}
+
+		}
+	}
+	
+\caption{ComputesMIP}\label{algo_computesMIP}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 4: computeCEI4Partition
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}	
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{MechaChildren}{mechaChildren}
+	\SetKwData{PurviewChildren}{PurviewChildren}
+	\SetKwData{Ci}{ci}
+	\SetKwData{Ei}{ei}
+	\SetKwData{Cei}{cei}
+	\SetKwData{PastMIP}{pastMIP}
+	\SetKwData{FutMIP}{futMIP}
+	\SetKwData{MechaComplement}{mechaComplement}
+	\SetKwData{PurviewComplement}{purviewComplement}
+	\SetKwData{PastDistribution}{pastDistribution}
+	\SetKwData{FutureDistribution}{futureDistribution}
+	\SetKwData{PastDistributionComp}{pastDistributionComp}
+	\SetKwData{FutureDistributionComp}{futureDistributionComp}
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesCEI}{ComputesCEI}
+	\SetKwFunction{Complement}{ComplementI}
+	\SetKwFunction{CPPD}{CPPD}
+	\SetKwFunction{CFPD}{CFPD}
+	\SetKwFunction{Normalize}{Normalize}
+	\SetKwFunction{Min}{Min}
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+
+	\Input{ChildMecha, ChildPurview, ParentMecha, ParentPurview, ParentPastDistro, ParentFutDistro, UnconstrainedPastDistro, UnconstrainedFutDistro}
+	\Output{Causal and Effect information values}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+	\DontPrintSemicolon
+	
+	\MechaComplement$\leftarrow$ \Complement{$ChildMecha, ParentMecha$}\;
+	\PurviewComplement$\leftarrow$ \Complement{$ChildPurview, ParentPurview$}\;
+	
+	\MechaChildren$\leftarrow$ \Subsets{$mechanism$}\;
+	\PurviewChildren$\leftarrow$ \Subsets{$purview$}\;
+
+	
+	\ForEach{mecha  $m_i \in \MechaChildren$}{%
+		\ForEach{purview $p_i \in \PurviewChildren$}{%
+			ChildMecha $\leftarrow$  $m_i$\;
+			ChildPurview $\leftarrow$  $p_i$\;
+			
+			\uIf{ChildMecha=$\emptyset$}{%
+				\PastDistribution $\leftarrow$ UnconstrainedPastDistro\;
+				\FutureDistribution $\leftarrow$ UnconstrainedFutDistro\;
+				
+				\uElseIf{ChildPurview=$\emptyset$}{%
+					\PastDistribution $\leftarrow$ 1\;
+					\FutureDistribution $\leftarrow$ 1\;
+					
+					\uElseIf{}{%
+						\PastDistribution $\leftarrow$ \ComputesPastProbabilityDistribution{ChildMecha,ChildPurview,cm,am}\;
+						\FutureDistribution $\leftarrow$ \ComputesFutureProbabilityDistribution{ChildMecha,ChildPurview,cm,am}\;\;
+					}
+					
+				}
+				
+			}
+		
+		
+		
+			\uIf{\MechaComplement=$\emptyset$}{%
+				\PastDistributionComp $\leftarrow$ UnconstrainedPastDistro\;
+				\FutureDistributionComp $\leftarrow$ UnconstrainedFutDistro\;
+				
+				\uElseIf{\PurviewComplement=$\emptyset$}{%
+					\PastDistributionComp $\leftarrow$ 1\;
+					\FutureDistributionComp $\leftarrow$ 1\;
+					
+					\uElseIf{}{%
+						\tcp*[h]{CPPD=ComputesPastProbabilityDistribution }\;
+						\tcp*[h]{CFPD=ComputesFutureProbabilityDistribution}\;
+						\PastDistributionComp $\leftarrow$ \CPPD{MechaComplement,PurviewComplement,cm,am}\;
+						\FutureDistributionComp $\leftarrow$ \CFPD{MechaComplement,PurviewComplement,cm,am}\;
+					}
+					
+				}
+				
+			}
+		
+		
+			\PastDistribution $\leftarrow$ \Normalize{\PastDistribution*\PastDistributionComp}\;
+			\FutureDistribution $\leftarrow$ \Normalize{\FutureDistribution*\FutureDistributionComp}\;
+			
+			\Ci $\leftarrow$ \EMD{ParentPastDistro,\PastDistribution}\;
+			\Ei $\leftarrow$ \EMD{ParentFutDistro,\FutureDistribution}\;
+			\Cei $\leftarrow$ \Min{\Ci,\Ei}\;
+		}%\ForEach{purview $p_i
+	}%\ForEach{mecha  $m_i
+			
+	\caption{computesCEI}\label{algo_computesCEI}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 5: Position of patterns into the output repertoire
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+    \small % Reduce font size
+    \setstretch{0.8} % Reduce line spacing
+    \resizebox{\textwidth}{!}{% Scale the algorithm to fit the page width
+    \begin{minipage}{\textwidth} % Ensure content stays within bounds
+    \SetKwData{PurviewsSet}{purviewsSet}	
+    \SetKwData{APurview}{aPurview}
+    \SetKwData{APurviewMIP}{aPurviewMIP}
+    \SetKwData{Distros}{distros}
+    \SetKwData{Cs}{cs}
+    \SetKwData{Connected}{connected}
+    \SetKwData{MIP}{MIP}
+    \SetKwData{SmallAlpha}{smallAlpha}
+    \SetKwData{ConceptualInfo}{ConceptualInfo}
+    \SetKwData{Mechanism}{mechanism}
+    \SetKwData{Purview}{purview}
+    \SetKwData{MechaChildren}{mechaChildren}
+    \SetKwData{PurviewChildren}{PurviewChildren}
+    \SetKwData{Intersec}{intersec}
+    \SetKwData{JoinedNames}{joinedNames}
+    \SetKwData{Ci}{ci}
+    \SetKwData{Ei}{ei}
+    \SetKwData{Cei}{cei}
+    \SetKwData{PastMIP}{pastMIP}
+    \SetKwData{FutMIP}{futMIP}
+    \SetKwData{MechaComplement}{mechaComplement}
+    \SetKwData{PurviewComplement}{purviewComplement}
+    \SetKwData{Sumandos}{sumandos}
+    \SetKwData{Powers}{powers}
+    \SetKwData{Ins}{ins}
+    \SetKwData{Repertoire}{repertoire}
+    \SetKwData{Aux}{Aux}
+    \SetKwData{Indexes}{indexes}
+
+    \SetKwFunction{Subsets}{Subsets}
+    \SetKwFunction{Length}{Length}
+    \SetKwFunction{Extract}{Extract}
+    \SetKwFunction{Part}{Part}
+    \SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+    \SetKwFunction{ComputesMIP}{ComputesMIP}
+    \SetKwFunction{ComputesDistros}{ComputesDistros}
+    \SetKwFunction{EMD}{EMD}
+    \SetKwFunction{ComputesCEI}{ComputesCEI}
+    \SetKwFunction{Complement}{Complement}	
+    \SetKwFunction{Range}{Range}
+    \SetKwFunction{Append}{Append}	
+    \SetKwFunction{Join}{Join}
+    \SetKwFunction{Inputs}{Inputs}
+    \SetKwFunction{FirstNode}{FirstNode}
+    \SetKwFunction{RepertoireByOutput}{RepertoireByOutput}
+    \SetKwFunction{Intersection}{Intersection}
+    \SetKwFunction{CreateRepertoire}{CreateRepertoire}
+    \SetKwFunction{Combine}{Combine}
+    \SetKwFunction{FilterRepertoireByOutput}{FilterRepertoireByOutput}
+    \SetKwFunction{Sum}{Sum}
+
+    \SetKwInOut{Input}{input}
+    \SetKwInOut{Output}{output}
+
+    \Input{Mechanism, Purview, AdjacencyMatrix, CurrentState, Dynamic}
+    \Output{Positions (indexes) where current state of mechanism is found in the output repertoire}
+
+    \DontPrintSemicolon
+
+    \tcp*[h]{Nodes sending inputs to the mechanism. Remaining nodes define powers for pattern distribution.}\;
+    \JoinedNames $\leftarrow$ \Join{\Inputs{\Mechanism}}\;
+    \Powers $\leftarrow$ \Complement{\Range{\Length{AdjacencyMatrix}}, \JoinedNames} - 1\;
+    \ForEach{$n_i \in \Powers$}{%
+        $\Append(\Sumandos, 2^{n_i})$\;
+    }
+    \Sumandos $\leftarrow$ \Subsets{\Sumandos}\;
+    \ForEach{$s_i \in \Sumandos$}{%
+        $\Append(\Aux, \Sum(s_i))$\;
+    }
+    \Sumandos $\leftarrow$ \Aux\;
+
+    \Ins $\leftarrow$ \Inputs{\FirstNode{\Mechanism}}\;
+    \tcp*[h]{Compute all possible inputs of defined size resulting in a defined output (cs).}\;
+    \Repertoire $\leftarrow$ \RepertoireByOutput{\Length{\Ins}, Dynamic, \Cs}\;
+
+    \ForEach{$m_i \in (\Mechanism - \FirstNode{\Mechanism})$}{%
+        \Intersec $\leftarrow$ \Intersection{\Ins, \Inputs{$m_i$}}\;
+        \Ins $\leftarrow$ \Ins + (\Inputs{$m_i$} - \Intersec)\;
+        \Repertoire $\leftarrow$ \Combine{\Repertoire, \CreateRepertoire(\Inputs{$m_i$} - \Intersec)}\;
+        \Repertoire $\leftarrow$ \FilterRepertoireByOutput{\Repertoire, \Cs}\;
+    }
+
+    \ForEach{$s_i \in \Sumandos$}{%
+        \ForEach{$r_i \in \Repertoire$}{%
+            $\Append(\Indexes, \Sum(s_i, r_i))$\;
+        }	
+    }
+
+    \caption{Computes Positions of a Pattern in Outputs}\label{algo_computesPositionsOfAPatternInOutputs}
+    \end{minipage}
+    }
+\end{algorithm}
+\DecMargin{1em}
+
+% -------------------------------
+% THIS IS MY ALGORITHM 6: Compute past probabity distribution
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}	
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{Mechanism}{mechanism}
+	\SetKwData{Purview}{purview}
+	\SetKwData{MechaChildren}{mechaChildren}
+	\SetKwData{PurviewChildren}{PurviewChildren}
+	\SetKwData{Intersec}{intersec}
+	\SetKwData{JoinedNames}{joinedNames}
+	\SetKwData{Ci}{ci}
+	\SetKwData{Ei}{ei}
+	\SetKwData{Cei}{cei}
+	\SetKwData{PastMIP}{pastMIP}
+	\SetKwData{FutMIP}{futMIP}
+	\SetKwData{MechaComplement}{mechaComplement}
+	\SetKwData{PurviewComplement}{purviewComplement}
+	\SetKwData{Sumandos}{sumandos}
+	\SetKwData{Powers}{powers}
+	\SetKwData{Ins}{ins}
+	\SetKwData{Repertoire}{repertoire}
+	\SetKwData{Aux}{Aux}
+	\SetKwData{Indexes}{indexes}
+	\SetKwData{Locations}{locations}
+	\SetKwData{CorrectedLocations}{correctedLocations}
+	\SetKwData{Probability}{probability}
+	\SetKwData{AllInputs}{allInputs}
+	\SetKwData{ProbabilityDistribution}{probabilityDistribution}
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesCEI}{ComputesCEI}
+	\SetKwFunction{Complement}{Complement}	
+	\SetKwFunction{Range}{Range}
+	\SetKwFunction{Append}{Append}	
+	\SetKwFunction{Join}{Join}
+	\SetKwFunction{Inputs}{Inputs}
+	\SetKwFunction{FirstNode}{FirstNode}
+	\SetKwFunction{RepertoireByOutput}{RepertoireByOutput}
+	\SetKwFunction{Intersection}{Intersection}
+	\SetKwFunction{CreateRepertoire}{CreateRepertoire}
+	\SetKwFunction{Combine}{Combine}
+	\SetKwFunction{FilterRepertoireByOutput}{FilterRepertoireByOutput}
+	\SetKwFunction{Sum}{Sum}
+	\SetKwFunction{ComputesPositionsOfAPattern}{computesPositionsOfAPattern}
+	\SetKwFunction{FindPatternInInputs}{FindPatternInInputs}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{ComputesProbabilityForElements}{ComputesProbabilityForElements}
+	
+	
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+
+	\Input{Mechanism,Purview,AdjacencyMatrix,CurrentState,Dynamic}
+	\Output{Probability distribution for a mechanism}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+	\DontPrintSemicolon
+	
+	\BlankLine
+	\Locations$\leftarrow$\ComputesPositionsOfAPattern{$Mechanism,CurrentState,Purview,AdjacencyMatrix$}\;
+	\AllInputs $\leftarrow$ \Extract{\Locations,Purview}\;
+	\Probability$\leftarrow$ 1/(\Length{Locations})\;
+	
+	\ForEach{input $in_i \in \AllInputs$}{%
+		\CorrectedLocations$\leftarrow$\FindPatternInInputs{$Purview,in_i,\Length{AdjacencyMatrix}$}
+	}
+	
+	\ProbabilityDistribution $\leftarrow$ \ComputesProbabilityForElements{\CorrectedLocations}
+	
+	
+	
+	\caption{computesPastProbabilityDistribution}\label{algo_computesPastProbDistribution}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 7: Compute future (effect) probabity distribution
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}	
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{Mechanism}{mechanism}
+	\SetKwData{Purview}{purview}
+	\SetKwData{MechaChildren}{mechaChildren}
+	\SetKwData{PurviewChildren}{PurviewChildren}
+	\SetKwData{Intersec}{intersec}
+	\SetKwData{JoinedNames}{joinedNames}
+	\SetKwData{Ci}{ci}
+	\SetKwData{Ei}{ei}
+	\SetKwData{Cei}{cei}
+	\SetKwData{PastMIP}{pastMIP}
+	\SetKwData{FutMIP}{futMIP}
+	\SetKwData{MechaComplement}{mechaComplement}
+	\SetKwData{PurviewComplement}{purviewComplement}
+	\SetKwData{Sumandos}{sumandos}
+	\SetKwData{Powers}{powers}
+	\SetKwData{Ins}{ins}
+	\SetKwData{Repertoire}{repertoire}
+	\SetKwData{Aux}{Aux}
+	\SetKwData{Indexes}{indexes}
+	\SetKwData{Locations}{locations}
+	\SetKwData{CorrectedLocations}{correctedLocations}
+	\SetKwData{Probability}{probability}
+	\SetKwData{AllOutputs}{allOutputs}
+	\SetKwData{AllInputs}{allInputs}
+	\SetKwData{ProbabilityDistribution}{probabilityDistribution}
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesCEI}{ComputesCEI}
+	\SetKwFunction{Complement}{Complement}	
+	\SetKwFunction{Range}{Range}
+	\SetKwFunction{Append}{Append}	
+	\SetKwFunction{Join}{Join}
+	\SetKwFunction{Inputs}{Inputs}
+	\SetKwFunction{FirstNode}{FirstNode}
+	\SetKwFunction{RepertoireByOutput}{RepertoireByOutput}
+	\SetKwFunction{Intersection}{Intersection}
+	\SetKwFunction{CreateRepertoire}{CreateRepertoire}
+	\SetKwFunction{Combine}{Combine}
+	\SetKwFunction{FilterRepertoireByOutput}{FilterRepertoireByOutput}
+	\SetKwFunction{Sum}{Sum}
+	\SetKwFunction{ComputesPositionsOfAPattern}{computesPositionsOfAPattern}
+	\SetKwFunction{FindPatternInInputs}{FindPatternInInputs}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{ComputesProbabilityForElements}{ComputesProbabilityForElements}
+	\SetKwFunction{ComputesOutputs}{ComputesOutputs}
+	
+	
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+	
+	\Input{Mechanism,Purview,AdjacencyMatrix,CurrentState,Dynamic}
+	\Output{Probability distribution for a mechanism}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+	\DontPrintSemicolon
+	
+	\BlankLine
+	\Locations$\leftarrow$(\FindPatternInInputs{$Purview,CurrentState,\Length{AdjacencyMatrix}$})-1\;
+	\AllOutputs $\leftarrow$ \ComputesOutputs{\Locations}\;
+	\AllInputs $\leftarrow$ \Extract{\Locations,Purview}\;
+
+	\ProbabilityDistribution $\leftarrow$ \ComputesProbabilityForElements{\AllInputs}
+	
+	
+	
+	\caption{computesFutureProbabilityDistribution}\label{algo_computesFutureProbDistribution}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+
+
+
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 8: Find patterns in inputs
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}	
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{Mechanism}{mechanism}
+	\SetKwData{Purview}{purview}
+	\SetKwData{MechaChildren}{mechaChildren}
+	\SetKwData{PurviewChildren}{PurviewChildren}
+	\SetKwData{Intersec}{intersec}
+	\SetKwData{JoinedNames}{joinedNames}
+	\SetKwData{Ci}{ci}
+	\SetKwData{Ei}{ei}
+	\SetKwData{Cei}{cei}
+	\SetKwData{PastMIP}{pastMIP}
+	\SetKwData{FutMIP}{futMIP}
+	\SetKwData{MechaComplement}{mechaComplement}
+	\SetKwData{PurviewComplement}{purviewComplement}
+	\SetKwData{Sumandos}{sumandos}
+	\SetKwData{Powers}{powers}
+	\SetKwData{Ins}{ins}
+	\SetKwData{Repertoire}{repertoire}
+	\SetKwData{Aux}{Aux}
+	\SetKwData{Indexes}{indexes}
+	\SetKwData{Locations}{locations}
+	\SetKwData{Probability}{probability}
+	\SetKwData{Limit}{limit}
+	\SetKwData{Repetitions}{repetitions}
+	\SetKwData{Longi}{longi}
+	\SetKwData{Serie}{serie}
+	\SetKwData{Found}{Found}
+	
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesCEI}{ComputesCEI}
+	\SetKwFunction{Complement}{Complement}	
+	\SetKwFunction{Range}{Range}
+	\SetKwFunction{Append}{Append}	
+	\SetKwFunction{Join}{Join}
+	\SetKwFunction{Inputs}{Inputs}
+	\SetKwFunction{FirstNode}{FirstNode}
+	\SetKwFunction{RepertoireByOutput}{RepertoireByOutput}
+	\SetKwFunction{Intersection}{Intersection}
+	\SetKwFunction{CreateRepertoire}{CreateRepertoire}
+	\SetKwFunction{Combine}{Combine}
+	\SetKwFunction{FilterRepertoireByOutput}{FilterRepertoireByOutput}
+	\SetKwFunction{Sum}{Sum}
+	\SetKwFunction{ComputesPositionsOfAPattern}{computesPositionsOfAPattern}
+	\SetKwFunction{CreateSerieOddNumbers}{CreateSerieOddNumbers}
+	\SetKwFunction{CreateSerieEvenNumbers}{CreateSerieEvenNumbers}
+	
+		
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+	
+	\Input{Nodes,WantedPattern,sizeAdjacencyMatrix}
+	\Output{Finds indexes in input repertoire where nodes fullfill wantedPattern}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+	\DontPrintSemicolon
+	
+	$\Limit \leftarrow 2^{sizeAdjacencyMatrix}$\;
+	
+	\ForEach{node $n_i \in Nodes$}{%
+			$\Powers \leftarrow 2^{n_i-1}$\;
+			$\Repetitions \leftarrow \Limit/\Powers$\;
+			$\Longi \leftarrow \Limit/\Repetitions$\;
+			
+			\uIf{if expectedPatt = 1}{
+				$\Serie \leftarrow \CreateSerieEvenNumbers(\Repetitions)$\;
+			}
+			\Else{
+				$\Serie \leftarrow \CreateSerieOddNumbers(\Repetitions)$\;
+			}
+			
+			\For{$i = 1;\ i < \Length{\Serie};\ i = i + 1$}{
+				$\Found \leftarrow \Range{((\Powers*\Serie[i])-\Longi)+1, \Powers*\Serie[i]}$\;
+			}
+	
+	        
+			
+	}
+	
+	
+	
+	\caption{findPatternInInputs}\label{algo_findPatternsInInputs}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 9: Computes Bit probability for inputs
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}	
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{Mechanism}{mechanism}
+	\SetKwData{Purview}{purview}
+	\SetKwData{MechaChildren}{mechaChildren}
+	\SetKwData{PurviewChildren}{PurviewChildren}
+	\SetKwData{Intersec}{intersec}
+	\SetKwData{JoinedNames}{joinedNames}
+	\SetKwData{Ci}{ci}
+	\SetKwData{Ei}{ei}
+	\SetKwData{Cei}{cei}
+	\SetKwData{PastMIP}{pastMIP}
+	\SetKwData{FutMIP}{futMIP}
+	\SetKwData{MechaComplement}{mechaComplement}
+	\SetKwData{PurviewComplement}{purviewComplement}
+	\SetKwData{Sumandos}{sumandos}
+	\SetKwData{Powers}{powers}
+	\SetKwData{Ins}{ins}
+	\SetKwData{Repertoire}{repertoire}
+	\SetKwData{Aux}{Aux}
+	\SetKwData{Indexes}{indexes}
+	\SetKwData{Locations}{locations}
+	\SetKwData{Probability}{probability}
+	\SetKwData{Limit}{limit}
+	\SetKwData{Repetitions}{repetitions}
+	\SetKwData{Longi}{longi}
+	\SetKwData{Serie}{serie}
+	\SetKwData{Found}{Found}
+	\SetKwData{ZeroProbability}{zeroProbability}
+	\SetKwData{OneProbability}{oneProbability}
+	
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesCEI}{ComputesCEI}
+	\SetKwFunction{Complement}{Complement}	
+	\SetKwFunction{Range}{Range}
+	\SetKwFunction{Append}{Append}	
+	\SetKwFunction{Join}{Join}
+	\SetKwFunction{Inputs}{Inputs}
+	\SetKwFunction{FirstNode}{FirstNode}
+	\SetKwFunction{RepertoireByOutput}{RepertoireByOutput}
+	\SetKwFunction{Intersection}{Intersection}
+	\SetKwFunction{CreateRepertoire}{CreateRepertoire}
+	\SetKwFunction{Combine}{Combine}
+	\SetKwFunction{FilterRepertoireByOutput}{FilterRepertoireByOutput}
+	\SetKwFunction{Sum}{Sum}
+	\SetKwFunction{ComputesPositionsOfAPattern}{computesPositionsOfAPattern}
+	\SetKwFunction{CreateSerieOddNumbers}{CreateSerieOddNumbers}
+	\SetKwFunction{CreateSerieEvenNumbers}{CreateSerieEvenNumbers}
+	\SetKwFunction{FindPatternInInputs}{FindPatternInInputs}
+	
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+	
+	\Input{Nodes,AdjacencyMatrix,Dynamics}
+	\Output{Bit probability for given nodes}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+	\DontPrintSemicolon
+	
+	$\Locations \leftarrow \FindPatternInInputs{Nodes,1,\Length{AdjacencyMatrix}}$\;
+	$\OneProbability \leftarrow \Length{\Locations}/2^{\Length{AdjacencyMatrix}}$\;
+	$\ZeroProbability \leftarrow 1-\OneProbability$\;
+		
+	
+	\caption{computeInputBitProbabilityDistro}\label{algo_computeInputBitProbabilityDistro}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+
+
+
+% -------------------------------
+% THIS IS MY ALGORITHM 10: Computes Bit probability for outputs
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[!htb]
+	
+	% VARIABLES SECTION
+	% -------------------------
+	\SetKwData{PurviewsSet}{purviewsSet}	
+	\SetKwData{APurview}{aPurview}
+	\SetKwData{APurviewMIP}{aPurviewMIP}
+	\SetKwData{Distros}{distros}
+	\SetKwData{Cs}{cs}
+	\SetKwData{Connected}{connected}
+	\SetKwData{MIP}{MIP}
+	\SetKwData{SmallAlpha}{smallAlpha}
+	\SetKwData{ConceptualInfo}{ConceptualInfo}
+	\SetKwData{Mechanism}{mechanism}
+	\SetKwData{Purview}{purview}
+	\SetKwData{MechaChildren}{mechaChildren}
+	\SetKwData{PurviewChildren}{PurviewChildren}
+	\SetKwData{Intersec}{intersec}
+	\SetKwData{JoinedNames}{joinedNames}
+	\SetKwData{Ci}{ci}
+	\SetKwData{Ei}{ei}
+	\SetKwData{Cei}{cei}
+	\SetKwData{PastMIP}{pastMIP}
+	\SetKwData{FutMIP}{futMIP}
+	\SetKwData{MechaComplement}{mechaComplement}
+	\SetKwData{PurviewComplement}{purviewComplement}
+	\SetKwData{Sumandos}{sumandos}
+	\SetKwData{Powers}{powers}
+	\SetKwData{Ins}{ins}
+	\SetKwData{Repertoire}{repertoire}
+	\SetKwData{Aux}{Aux}
+	\SetKwData{Indexes}{indexes}
+	\SetKwData{Locations}{locations}
+	\SetKwData{Probability}{probability}
+	\SetKwData{Limit}{limit}
+	\SetKwData{Repetitions}{repetitions}
+	\SetKwData{Longi}{longi}
+	\SetKwData{Serie}{serie}
+	\SetKwData{Found}{Found}
+	\SetKwData{ZeroProbability}{zeroProbability}
+	\SetKwData{OneProbability}{oneProbability}
+	
+	
+	% FUNCTIONS SECTION
+	% -----------------------
+	\SetKwFunction{Subsets}{Subsets}
+	\SetKwFunction{Length}{Length}
+	\SetKwFunction{Extract}{Extract}
+	\SetKwFunction{Part}{Part}
+	\SetKwFunction{FullyConnectedQ}{FullyConnectedQ}
+	\SetKwFunction{ComputesMIP}{ComputesMIP}
+	\SetKwFunction{ComputesDistros}{ComputesDistros}
+	\SetKwFunction{EMD}{EMD}
+	\SetKwFunction{ComputesCEI}{ComputesCEI}
+	\SetKwFunction{Complement}{Complement}	
+	\SetKwFunction{Range}{Range}
+	\SetKwFunction{Append}{Append}	
+	\SetKwFunction{Join}{Join}
+	\SetKwFunction{Inputs}{Inputs}
+	\SetKwFunction{FirstNode}{FirstNode}
+	\SetKwFunction{RepertoireByOutput}{RepertoireByOutput}
+	\SetKwFunction{Intersection}{Intersection}
+	\SetKwFunction{CreateRepertoire}{CreateRepertoire}
+	\SetKwFunction{Combine}{Combine}
+	\SetKwFunction{FilterRepertoireByOutput}{FilterRepertoireByOutput}
+	\SetKwFunction{Sum}{Sum}
+	\SetKwFunction{ComputesPositionsOfAPattern}{computesPositionsOfAPattern}
+	\SetKwFunction{CreateSerieOddNumbers}{CreateSerieOddNumbers}
+	\SetKwFunction{CreateSerieEvenNumbers}{CreateSerieEvenNumbers}
+	\SetKwFunction{ComputesPositionsOfAPatternInOutputs}{ComputesPositionsOfAPatternInOutputs}
+	
+	
+	
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	
+	% INPUTS-OUTPUTS SECTION
+	% ------------------------------
+	
+	\Input{Nodes,AdjacencyMatrix,Dynamics}
+	\Output{Bit probability for given nodes}
+	\BlankLine
+	
+	% CODE SECTION
+	% -----------------------------
+	\DontPrintSemicolon
+	
+	$\Locations \leftarrow \ComputesPositionsOfAPatternInOutputs{Nodes,1,Dynamics,AdjacencyMatrix}$\;
+	$\OneProbability \leftarrow \Length{\Locations}/2^{\Length{AdjacencyMatrix}}$\;
+	$\ZeroProbability \leftarrow 1-\OneProbability$\;
+	
+	
+	\caption{computeOutputBitProbabilityDistro}\label{algo_computeOutputBitProbabilityDistro}
+\end{algorithm}
+\DecMargin{1em}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PSEUDO CODE SECTION    --END--
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
