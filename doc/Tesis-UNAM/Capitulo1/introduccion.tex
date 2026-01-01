@@ -1,0 +1,189 @@
+\chapter{Introduction}
+
+\textcolor{black}{Integration—the capacity of a system’s components to produce unified, 
+emergent behavior through their interactions—is proposed as a key property in cognitive 
+science, particularly in the study of consciousness, according to Integrated 
+Information Theory (IIT) developed by Tononi \cite{tononi2004information,tononi2016}. 
+IIT quantifies integration with the metric $\phi$, claiming to offer a framework 
+to investigate conscious experience in neural systems. This thesis introduces $\phi_K$, 
+a computationally efficient metric rooted in algorithmic probability, which enhances 
+IIT’s ability to calculate $\phi$ while addressing its computational 
+limitations \cite{mainbook}. Beyond cognitive science, integration underlies emergent 
+phenomena in complexity science, spanning biological networks, artificial intelligence, 
+and social systems \cite{barabasi}. By leveraging algorithmic probability to quantify 
+integration’s compressibility, $\phi_K$ provides a versatile tool to explore integration 
+in general, and therefore consciousness within the context of IIT, as well as the 
+holistic nature of complex systems \cite{zenilreview}.}
+
+\textcolor{black}{The development of techniques to decipher the structure and dynamics of complex 
+systems is a rich inter-disciplinary research area which is not only of fundamental interest 
+but also important in numerous applications. Broadly speaking, dynamical aspects such as 
+stability and state-transitions within such systems have been of major interest in statistical 
+physics, dynamical systems, and computational neuroscience \cite{strogatz,dayan,chandler}. 
+Here, complex systems are defined by a set of non-linear evolution equations. 
+Cellular automata, spin-glass systems, Hopfield networks, and Boolean networks, 
+have for example been used as numerical experimental model systems to investigate 
+the dynamical aspects of complex systems. Due to the complexity of the analysis, 
+notions such as symmetries in the systems, averaging (e.g. mean-field techniques), 
+and separation of time-scales, have all been instrumental in deciphering the core 
+principles at work in such complex systems. In parallel, network science has emerged 
+as a rich interdisciplinary field, essentially analyzing the structure of real networks 
+in different areas of science and in diverse application domains \cite{barabasi}. 
+Examples include social, biological and electrical networks, the web, business 
+networks and the interconnected internet. 
+By a structural analysis, which has dominated these investigations,
+ we refer to statistical descriptions of network connectivity. 
+ Networks can be described globally, in terms ranging from the 
+ degree to which they differ from a random Poisson distribution of links, 
+ to their modular organization, including their local properties such as 
+ local clustering around nodes, special nodes/links with high degrees of 
+ betweenness or serving specific roles in the network, and local motif structures. 
+ Such network features can be used to classify and describe similarities 
+ and differences between what appear to be different classes of networks 
+ across and within different application domains. Finally, due to the 
+ rich representational capacity of networks and their usefulness across 
+ science, technology, and applications, work in machine learning, in 
+ particular graph convolutional networks and embedding techniques, is 
+ currently making headway in devising ways to map these non-regular 
+ network objects onto a format such that machine learning techniques can 
+ be used to analyze their properties \cite{Bronstein}.}
+
+\textcolor{black}{Now, we may ask if integrated information theory (IIT) is 
+proposed to be of relevance for the analysis of complex networks, we ask how is 
+IIT related to fundamental questions underpinning research and thinking of 
+complex systems? On the one hand, we find a rich body of work dealing with 
+what could be referred to as technical, computational challenges, and application-driven 
+investigations. For example, which global and local properties should be computed and 
+how to do so in an efficient manner. However, at a more fundamental level we find 
+essentially two challenges, which in our view have a bearing on
+the core intellectual driving force of complex systems. First: What is the 
+origin of and mechanisms propelling order in complex systems? Secondly, and of
+ major concern for the present paper: Is the whole - in some sense - larger than 
+ the sum of its parts? Both questions are vague when formulated in words, as above, 
+ but they can readily be technically specified within a model class. The motivation 
+ for the second question is that it appears that there are indeed phenomena in nature 
+ which cannot easily be explained only with reference to their parts, but seem to require 
+ that we adopt a holistic view. Since Anderson's classic 1972 essay, there has been an 
+ animated and at times heated discussion of whether there is anything which could be 
+ referred to as emergence.\cite{Anderson}}
+
+\textcolor{black}{This interplay between emergent behavior, system-level causality, 
+and holistic dynamics naturally intersects with deeper philosophical questions. 
+Integrated Information Theory (IIT), while formal and quantitative, is also a 
+metaphysical proposal—it claims that consciousness is identical to integrated 
+information. This identity thesis bridges empirical neuroscience and foundational 
+inquiries about the nature of subjective experience and self-coherence. By 
+introducing a new metric, $\phi_K$, grounded in algorithmic probability, this 
+thesis contributes not only to the improvement of computational methods, but 
+also to the discourse on causality, representation, and emergence in cognitive 
+systems. The ability to trace causal-generative explanations in network dynamics 
+touches upon fundamental issues in the philosophy of mind: can consciousness be 
+explained by the relationships between a system’s parts? And what does it mean 
+for a system to simulate or reflect its own structure?}
+
+
+
+\textcolor{black}{Tononi and his group have developed a formalism--targeting exactly 
+such a holistic analysis--specifically to quantify the amount of information 
+generated by a system -- defined as a set of interconnected elements--beyond the 
+information generated by the parts (subsets) of the system. Their motivation was 
+that in order to develop a theory of consciousness~\cite{oizumi2014phenomenology}. 
+In that quest, they perceived a necessity to define a measure which could quantify 
+the amount and degree of consciousness, a measure they refer to as $\phi$, which in 
+turn constitutes the core of Integrated Information Theory or IIT. Importantly, in 
+the present work we distinguish between the issue of the relevance of $\phi$ for 
+consciousness versus the technical numerical question of how to calculate $\phi$. 
+Here we address the computation of $\phi$, as it is potentially a means toward a 
+precise formulation for the possible causal relation between a whole and the parts 
+of a system, regardless of its purported relevance to consciousness. To calculate $\phi$, 
+Tononi and collaborators have developed a computational toolbox~\cite{mayner2017pyphia}. 
+Yet, calculating $\phi$ comes with a severe computational cost, as the calculation 
+scales exponentially with the number of elements in the network. Furthermore, the 
+computation requires knowledge of the transition probabilities of the system, which 
+makes computation of anything larger than small systems of order of one magnitude 
+intractable in practice. The calculation of $\phi$ requires a division of the system 
+into smaller subsets, ranging from large pieces down to singletons, 
+every division into $k$ pieces can be instantiated in $\dbinom{N}{k}$ different ways.
+Using this procedure from Tononi, elements that have small causal influences on 
+the activity of other elements can be identified. A system with low $\phi$ is 
+therefore characterized by the fact that changes in subsets of the system do 
+not affect the rest of the system. Such a system is therefore considered to be 
+a non-integrated system. This observation entails a key insight, namely, that 
+if a system is highly integrated among its parts, then the different parts 
+can be related to each other, or more precisely, they can be used to describe 
+other parts of the system. Then the parts are in some sense simple and should 
+be compressible.}
+
+\textcolor{black}{This is the observation and intuition behind our method, 
+which employs a formalized notion of complexity to exploit this insight and 
+thereby allow a more efficient, guided search in the space of algorithmic distances, 
+in contrast to exhaustive computations of the distance between statistical 
+distributions, as currently implemented in IIT. Technically we are therefore 
+not required to perform a full computation of what is referred to as the input-output 
+repertoire (see Methods for technical details). This, in brief, is our motivation 
+for introducing our method, which is based on algorithmic information 
+dynamics~\cite{maininfo,zenilaid,mainbook}. At its core is a causal perturbation 
+analysis and a measure of sophistication connected to algorithmic complexity. 
+Our approach exploits the idea that causal deterministic systems have a simple 
+algorithmic description and thus a simple generating mechanism sufficient to 
+simulate and reproduce complex systemic behaviour. Using this technique we can 
+assess the effect of perturbations, and thereby exploit the fact that, depending 
+on the algorithmic complexity of a system, the perturbation will induce different 
+degrees of change in algorithmic space. In short, a system will be highly integrated 
+only if the removal or perturbation of its parts has a non-linear effect on the 
+generative program producing the system in the first place.}
+
+\textcolor{black}{Interestingly, even Tononi suggested early on that algorithmic 
+complexity could be connected to the computation of integrated information 
+~\cite{sciencetranslationmedicine}. However, a lossless compression 
+algorithm was used to approximate $\phi$. Here we contribute to the formalization 
+of such a suggestion by using stronger tools, which we have recently developed, 
+to approximate complexity. 
+At the core of algorithmic information is the concept of minimal program-size 
+and Kolmogorov-Chaitin complexity~\cite{kolmogorov,chaitin}. Briefly, the 
+Kolmogorov-Chaitin complexity $K(x)$ of an object $x$ is the length of the 
+shortest computer program that produces $x$ and halts. $K(x)$ is uncomputable 
+but can be approximated from above, meaning one can find upper bounds by using 
+compression algorithms, or rather more powerful techniques such as those 
+based on algorithmic probability~\cite{d4,d5,bdm}, given that popular lossless 
+compression algorithms are limited and more closely related to classical 
+Shannon entropy than to $K$ itself~\cite{zkpaper,smalldata,liliana}. One 
+reason for this state of affairs is that, as demonstrated in \cite{shalizi2001computational}, 
+there is a fundamental difference between algorithmic and statistical 
+complexity with respect to how randomness is characterised in opposition 
+to causation. Specifically, algorithmic complexity implies a deterministic 
+description of an object (it defines the algorithmic information content of an 
+individual sequence/object), whereas statistical complexity implies a 
+statistical description (it refers to an ensemble of sequences generated 
+by a certain source). Approaches such as transfer entropy~\cite{transfer}, 
+Granger causality~\cite{granger}, and Partial Information 
+Decomposition~\cite{williams,williams2} that are based on regression, 
+correlation and/or a combination of regression, correlation and 
+intervention but ultimately relying on probability distributions, 
+fall into this category. Hence for better-founded methods and algorithms 
+for estimating algorithmic complexity, we recommend the use of our tools, 
+which are already being used by independent groups working on, for example, 
+biological modelling~\cite{victor}, cognition~\cite{ventresca} and 
+consciousness~\cite{ruffini}. These tools are based on the theory of 
+algorithmic probability, and are not free from challenges and limitations,
+ but they are better connected to the algorithmic side of algorithmic 
+ complexity, rather than only to the statistical pattern-matching 
+ side that current approaches using popular lossless compression 
+ algorithms exploit, making these approaches potentially misleading~\cite{zkpaper}.}
+
+\textcolor{black}{Our procedure, in brief, is as follows. First, we deduce 
+the rules in systems of interest: we apply the perturbation test introduced 
+in \cite{zenilturingtest,maininfo,mainbook} to ascertain the computational 
+capabilities of networks. Next, simple rules are formalized and implemented 
+to simulate the behaviour of these systems. Following this analysis, 
+we perform an automatic procedure, referred to as a meta-perturbation 
+test, which is applied over the behaviour obtained by the aforementioned 
+simple rules, in order to arrive at explanations of such behaviour.}
+ We incorporate the ideas of an interventionist calculus 
+ \textcolor{black}{(c.f. Judea Pearl~\cite{pearl})} and perturbation 
+ analysis within what we call Algorithmic Information Dynamics, and 
+ \textcolor{black}{we go beyond pattern identification using probability 
+ theory, classical statistics, and correlation analysis by developing a 
+ model-driven approach that is fed by data. This contrasts with a purely 
+ data-driven approach, and is a consequence of the fact that our analysis 
+ considers the algorithmic distance between models.}

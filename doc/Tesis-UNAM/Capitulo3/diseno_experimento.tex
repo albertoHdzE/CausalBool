@@ -1,0 +1,407 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%           Capítulo 3: NOMBRE                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Methods}
+In this section we  introduction of the meta-perturbation analysis, 
+additional technical details of which are presented in the Appendix. 
+Next, we recap the causal perturbation and causal analysis leading up 
+to the notion of program-size divergence, which is our core metric for 
+how different programs, i.e. systems--more or less integrated--respond 
+to perturbations
+\subsection{\textcolor{black}{Programmability test and meta-test}}
+
+\textcolor{black}{In \cite{zenilturingtest} a programmability test is 
+introduced which was inspired by the Turing test, while being based on 
+the view that the universe and all physical systems living in it and able 
+to process information can be considered (natural) computers \cite{zenilturingtest} 
+equipped with particular computational capabilities \cite{zenil2013behavioural}.}
+
+\textcolor{black}{The programmability test is explained as: ``...replacing 
+the question of whether a system is capable of digital computation with 
+the question of whether a system can behave like a digital computer and 
+whether a digital computer can exhibit the behaviour of a natural system.''}
+
+\textcolor{black}{Then, in the same way that the Turing test proceeds
+to ask questions of a computer in order to determine whether it is
+capable of computing an intelligent behaviour, the programmability 
+test aims to know what a specific system is capable of computing 
+by means of algorithmic querying \cite{zenil2015causality}.}
+
+\textcolor{black}{In practice, the programmability test is
+a system perturbation test~\cite{zenilturingtest,zenilturingtest2} 
+that "asks" questions of a computational system in the form: }
+\textcolor{black}{\emph{what
+is your output (answer) given this question (input)?}}\textcolor{black}{.
+This idea is applied to $\phi_{K}$'s implementation so that once the 
+set of all possible answers of a system is obtained, this set is analyzed 
+and generalized to deduce the rules that should not just offer a picture 
+of its computability capabilities, but also simulate and give an account 
+of the behaviour of the system itself.}
+
+\textcolor{black}{A second step after this perturbation test is to analyze
+its results in order to construct a computer program--as simple as 
+possible--capable not only of reproducing the output repertoire 
+but also of giving an account of the programmability capabilities 
+of the system itself, that is, rules capable of producing a certain 
+output given an input, and at the same time explaining where, in ordinal terms, 
+such an output could be placed relative to the order of the full output repertoire. 
+This latter aspect we refer to as the meta-perturbation test.}
+
+\textcolor{black}{Then, $\phi_{K}$ not only applies a perturbation
+test over a system, but also a meta-perturbation test over results
+obtained on the first test. The rules found in this meta-test are
+used not only as compressed specifications or representations of
+the behaviour itself, but also as rules that give a sort of account
+of the behaviour of the system. }
+
+\textcolor{black}{This can be done because the systems analyzed in IIT
+are well known, or in other words, since all node-by-node operations
+are well defined, it is easy to compute all possible outputs (answers)
+for all possible inputs (questions or queries), corresponding to what in 
+IIT are referred to as repertoires. In the context of $\phi_{K}$, 
+a meta-test is applied in order to find the rules that describe the 
+behaviour embedded in repertoires of a system, instead of trying to 
+ascertain the rules that define how the system works.}
+
+\textcolor{black}{A system specified in this manner turns on a ``computer\textquotedbl{}, recording it's own behaviour (e.g the repertoires) as well as probing itself, e.g. the action of $\phi_{K}$, in such a manner as to potentially give an account of its own behaviour. To make
+this possible a system specification must be enabled with an explanatory
+interface based on these simple embedding behaviour rules. $\phi_{K}$
+goes beyond the original $\phi$ in that the programmability test
+searches for the rules underlying the behaviour of a system rather than
+generating a description of its possible causal connections. While in
+IIT these rules are defined a priori and induced by perturbation,
+$\phi_{K}$’s objective is not only to find rules that simulate, but
+also describe such behaviour in a brief manner (thus simple rules)
+and make predictions about the behaviour of the system. The field
+of Algorithmic Information Dynamics~\cite{maininfo,mainbook} implements
+this approach by asking what changes to hypothesized outputs mean
+for the hypothesized underlying program generating an observation,
+after an induced or natural perturbation.}
+
+\textcolor{black}{The simple rules discovered and used for the calculation
+of $\phi_{K}$ are used here exclusively to compose }\textcolor{black}{\emph{constrained/unconstrained
+distributions}}\textcolor{black}{{} used in IIT for obtaining }\textcolor{black}{\emph{cause-and-effect
+information}}\textcolor{black}{, a key concept from which the integration
+of information derives. The rest of the calculus--earth mover's distance
+measurements, the calculus of conceptual spaces, major complex and
+finding the MIP-- remains as specified in IIT 3.0.}
+
+\subsection{Causal perturbation analysis}
+
+From a statistical standpoint, it would be typical to suggest that the 
+behaviour of two time series, let's call them $X$ and $Z$, would potentially 
+be causally connected if they were statistically correlated. Yet, there are 
+several other cases that would not be distinguishable after a correlation test. 
+A first possibility is that the time series simply shows similar behaviour 
+without being causally connected, i.e. there is a shared upstream causal driver $Y$, 
+concealed from the observer. Another possibility is that they are causally 
+connected, but that correlation does not tell us whether it is a case 
+of $X$ affecting $Z$, or vice versa. 
+
+Perturbation analysis allows some disambiguation. The idea is to apply a 
+perturbation on one time series and see how the perturbation spreads to 
+the other time series. Perturbing the data-point in position 5 the time 
+series $Z$ as shown in Figure~\ref{timeseriesbeforeafter} multiplying it by -2, $X$ 
+does not respond to the perturbation. This means that for this data point, $X$ 
+remains the same. This suggests that there is no causal influence of $Z$ on $X$.
+
+\begin{figure*}[ht!]
+  \centering
+  \includegraphics[scale=0.3]{Capitulo3/figs/timeseriesbeforeafter.png}\\
+  \includegraphics[scale=0.3]{Capitulo3/figs/timeseriesbeforeafter2.png}
+  \caption{\label{timeseriesbeforeafter}\textcolor{black}
+  {Causal intervention analysis on time series $X$ and $Z$ before and after 
+  perturbation in $Z$ (top) and $X$ (bottom). The values of $Z$ come from 
+  the moving average of $X$, so there is a one-way causal relationship: 
+  perturbing $X$ has an effect on $Z$ but perturbing $Z$ has no effect on 
+  $X$ thereby suggesting the causal relationship.}}
+\end{figure*}
+
+In contrast, if the perturbation is applied to a value of $X$, $Z$ 
+changes and follows the direction of the new value, suggesting that 
+the perturbation of $X$ has a causal influence on $Z$. From behind 
+the scenes, we can reveal that $Z$ is the moving average of $X$, 
+which means that each value of $Z$ takes two values of $X$ to 
+calculate, and so is a function of $X$. The results of these 
+perturbations produce evidence in favour of a causal relationship 
+between these processes, if we did not know that they were related 
+by the function we just described.
+
+This suggests that it is $X$ which causally precedes $Z$. So we 
+can say that this single perturbation suggests a causal 
+relationship illustrated in Figure~\ref{causal1}.
+
+\begin{figure*}[htp]
+  \centering \includegraphics[scale=0.3]{Capitulo3/figs/causalrelationship} 
+  \caption{\label{causal1}Possible self-loopless causal relationship 
+  between two \textcolor{black}{unlabelled} variables
+  $X$ and $Z$.}
+\end{figure*}
+  
+\begin{figure*}[htp]
+\centering \includegraphics[scale=0.25]{Capitulo3/figs/causalrelationshipdag} 
+\caption{\label{timeseriesafterbefore2}Acyclic path graphs 
+representing all possible \textcolor{black}{self-loopless}
+connected causal relationships among 3 \textcolor{black}{unlabelled} 
+variables.}
+\end{figure*}
+
+There are a number of possible types of causal relationship between three events 
+(see Figure~\ref{timeseriesafterbefore2}) that can be represented in what is 
+known as a directed acyclic graph (DAG), that is, a graph that has arrows 
+implying a cause and effect relationship but has no loops, because a loop 
+would make a cause into the cause of itself, or an effect that is also 
+its own cause, something that would be incommensurate with causality. 
+In these graphs, nodes are events and events are linked to each other if 
+there is a direct cause-and-effect relation.
+
+In the first case, labelled $A$ in orange, the event $X$ is the cause of event
+ $Y$, and $Y$ is the cause of event $Z$, but $X$ is said to be an indirect 
+ cause of $Z$. In general, we are, of course, always more interested in direct 
+ causes, because almost anything can be an indirect cause of anything else. 
+ In the second case $B$, an event $Y$ is a direct cause of both $Z$ and $X$. 
+ Finally, in case $C$, the event $Y$ has 2 causes, $X$ and $Z$. With an 
+ interventionist calculus such as the one performed on the time series above, 
+ one may rule out some but not all cases, but more importantly, the perturbation 
+ analysis offers the means to start constructing a model explaining the system and 
+ data rather than merely describing it in terms of simpler correlations.
+
+In our approach to integrated information, \textcolor{black}{the idea is to 
+identify the set of most likely generating candidates able to produce certain 
+observed behaviour even if such behaviour may not carry any statistical regularity 
+and for all purposes appear statistically random~\cite{devine2006ait}. Strictly 
+speaking, computational mechanics~\cite{Shalizi2003Optimal,shalizi2001computational}, 
+is a framework that bridges statistical inference and stochastic modelling that 
+suggests a model based on an automaton called an $\epsilon$-machine. However, 
+such machines are stochastic in nature and, if the methods used to reconstruct 
+such machines rely on statistical methods, the result is only an apparent causal 
+representation with no correspondence between internal states and alleged states 
+of the phenomenon observed. In contrast, approaches based on algorithmic probability 
+as approached by algorithmic information dynamics can complement computational 
+mechanics as they provide means to construct non-stochastic automata models that 
+are independent of probability distributions and are in a strict sense optimal 
+and universal~\cite{solomonoff1964formal}.}
+
+In the case of our two time series experiments, the time series $X$
+is produced by the mathematical function $f(x)=Sin(x)$, and thus $Sin(x)$ is the generating mechanism of time series $X$. On the other hand, the generating mechanism of $Z$ is $MovAvg(f(x))$, and clearly $MovAvg(f(x))$ depends on $f(x)$, which is $Sin(x)$, but $Sin(X)$ does not depend on $MovAvg(f(x))$. In the context of networks, the algorithmic-information
+dynamics of a network is the trajectory of a network moving in algorithmic-information
+space together with the identification of those elements that shoot
+the network towards or away from randomness.
+
+\subsection{Causal influence and sublog program-size divergence}
+
+According to Algorithmic Information Dynamics~\cite{maininfo,mainbook} there 
+is an algorithmic causal relationship between two states $s_{t}$ and $s_{t'}$ 
+of a system $M$ and $M'$ if
+
+\[
+|K(M_{s_{t}}) - K(M'_{s_{t'}})|\leq \log_{2}(t)+c
+\]
+
+That is, if the descriptions of such systems can be bounded by $\log_{2}$ 
+and a small constant $c$, then $M$ is most likely equal to $M'$ but in some 
+other time state.
+In other words, if there is a causal influence of $s_{t}$ on $s_{t+1}$ or $s_{t+1}$ 
+on $s_{t}$ as a system in isolation, their $M$ and $M'$ short descriptions should 
+not differ by more than the description of the difference.
+\textcolor{black}{However, if the descriptions of the states of a system 
+(which may be two systems) in different alleged state times are not causally 
+connected, their difference will diverge beyond above bound. In integrated 
+information, causal influence among its parts is what is claimed to be measured 
+and how different elements of a system can be explained by a single model or the 
+other parts of the system informs us as to how integrated a system may be. 
+A system characterized by large divergence is less integrated compared to a 
+system which evolves with small differences in its respective subpart descriptions.}
+
+We will suggest that perturbations have to be algorithmic in nature because they 
+need to be made or quantified at the level of the generating mechanisms from the 
+whole or different parts of the integrated system and not at the level of the 
+observations. For example, some $n-$ary expansions of the mathematical constant 
+$\pi$ according to BPP (named after Bailey-Borwein-Plouffe) formulas~\cite{bpp} 
+allow perturbations to the digits that do not have any further effect because 
+no previous digits are needed to calculate any other segment of $\pi$ in the same base. 
+The constant $\pi$ then can be said to be information disintegrated to the extent 
+of the BPP representations. Algorithmically low complexity objects have low 
+integrated information. Similarly, highly random systems have low integrated 
+information, because perturbations have little to no impact. Integrated information is, 
+therefore, a measure of sophistication that separates high integration from both 
+random and trivially non-random states.
+
+
+\subsection{A simplicity versus complexity test}
+
+With the previous section in mind we can proceed to introduce the idea of $\phi_{K}$,
+where $K$ stands for the letter often used for algorithmic (from Kolmogorov or
+Kolmogorov-Chaitin) complexity, and $\phi$ for the traditional of integrated 
+information theory~\cite{oizumi2014phenomenology}. The measure $\phi_{K}$ mostly follows methods that Oizumi and Tononi set forth in \cite{oizumi2014phenomenology}, where integrated information is
+measured, roughly speaking, as distances between probability distributions 
+that characterize a MIP (Minimum Information Partition), that is, 
+``the partition of [a system] that makes the least difference''
+~\cite{oizumi2014phenomenology}.
+
+
+\textcolor{black}{However, the difference between IIT's $\phi$ and
+$\phi_{K}$ lies in how $\phi_{K}$ circumvents what is called the
+``intrinsic information bottleneck principle’’~\cite{oizumi2014fromthe}
+that traditionally requires an exhaustive search for the MIP among
+all possible partitions of a system, a procedure responsible for the
+fact that integrated information computation requires super-exponential
+computational resources. In contrast to $\phi$, which follows a statistical
+approach to estimating and exhaustively reviewing repertoires, the approach
+to $\phi_{K}$ is based on principles of algorithmic information.}
+
+\textcolor{black}{Discovering the simple rules that govern a ``discrete
+dynamical system'' \cite{mayner2017pyphia} like those studied in
+IIT presupposes the analysis
+of its general behaviour in pursuit of a dual agenda: first, to determine 
+its computational capabilities, and secondly to obtain explanations and 
+descriptions of the behaviour of the system.}
+
+\textcolor{black}{As a consequence, one of the major adaptations of IIT is 
+that $\phi_{K}$ uses the concept of Unconstrained Bit Probability Distribution 
+(UBPD), that is, the individual probabilities associated with a node of a system 
+taking values of 1 (ON) or 0 (OFF) after it has been ``fed'' all its possible 
+inputs or after all possible perturbations.}
+
+\textcolor{black}{In the context of $\phi_{K}$, UBDP is estimated by approximating 
+the algorithmic complexity of the TPM (Transition Probability Matrix) to compute 
+IIT's unconstrained/constrained probability distributions.} 
+
+\textcolor{black}{In Figure \ref{fig:3nodeExample} and Table \ref{table:UBPD} the concept UBPD and its 
+calculus is explained, using the example used by Oizumi et. al. 
+in~\cite{oizumi2014phenomenology}.}
+
+
+
+\textcolor{black}{In order to explain the notion of UBPD we use FigureS \ref{fig:3nodeExample}, 
+\ref{fig:UBPD} and Table \ref{table:UBPD}. in Figure \ref{fig:3nodeExample} 
+we use Oizumi's example used in~\cite{oizumi2014phenomenology} to 
+calculate information integration. Figure \ref{fig:3nodeExample}-A shows the network representation: 
+three nodes fully connected with different types of operation executed
+ on its inputs, that is, for example, inputs to node A (coming from B and C nodes) 
+ will be processed in a logical OR operation. In Figure \ref{fig:3nodeExample}-B the adjacency 
+ matrix that represents the same same network is shown. This adjacency matrix 
+ uses the number 1 to indicate if a node receives signals (inputs) for another 
+ node. For example, the first row in the adjacency matrix indicates that node 
+ 1 or A receives inputs from nodes B and C, denoted as nodes 2 and 3.
+  Finally, Figure \ref{fig:3nodeExample}-C shows the full input and output repertoires, that is, 
+  for the full set of all possible inputs to this system, all corresponding 
+  outputs are calculated according to the logical operations
+defined.}
+
+\begin{figure}{}
+  \begin{centering}
+  \includegraphics[scale=0.44]{Capitulo3/figs/Fig1-NewReferenceSystem.png}
+  \par\end{centering}
+  \caption{Three node example of a full connected network. 
+  From \cite{oizumi2014phenomenology}.}
+  \label{fig:3nodeExample}
+\end{figure}
+
+\begin{figure}{}
+  \begin{centering}
+  \includegraphics[scale=0.44]{Capitulo3/figs/Fig2-UBPCforEffectProbDistro.png}
+  \par\end{centering}
+  \caption{An example of using UBPC to calculate an unconstrained output distribution.}
+  \label{fig:UBPD}
+\end{figure}
+
+\textcolor{black}{Table \ref{table:UBPD} shows code for computing UBPD for 
+the system in Figure \ref{fig:3nodeExample}.
+This computation starts with the specification of the adjacency matrix (line 1) 
+and internal dynamic (line 2) of the
+target system. Then, lines 1 and 2 in Table \ref{table:UBPD} represent code to network 
+specified in Figures \ref{fig:3nodeExample}-A and \ref{fig:3nodeExample}-B.}
+
+\begin{table}[H]
+  \begin{lstlisting}[style=MathematicaStyle]
+  In := am = {{0, 1, 1}, {1, 0, 1}, {1, 1, 0}};
+  In := dyn = {"OR", "AND", "XOR"};
+  In := calcUBPOutputs[1, am, dyn] // AbsoluteTiming
+  In := calcUBPOutputs[2, am, dyn] // AbsoluteTiming
+  In := calcUBPOutputs[3, am, dyn] // AbsoluteTiming
+  
+  Out = {0.000575, <|"ZeroProb" -> 0.25, "OneProb" -> 0.75|>}
+  Out = {0.000287, <|"ZeroProb" -> 0.75, "OneProb" -> 0.25|>}
+  Out = {0.000341, <|"ZeroProb" -> 0.5, "OneProb" -> 0.5|>}
+  \end{lstlisting}
+  \caption{Computing UBPD for system shown in Figure \ref{fig:3nodeExample}.
+  \textbf{Lines 1, 2:} Definition of 
+  the system in Figure \ref{fig:3nodeExample}-A by adjacency matrix (line 1) 
+  and dynamics (line 2). 
+  \textbf{Lines 3-5: } Calculation of individual probabilities that each node of the 
+  system will take values 0/1 across the whole output repertoire. 
+  \textbf{Lines 7-9: } time of computation in seconds and UBPD distribution. }
+  \label{table:UBPD}
+  \end{table}
+
+\textcolor{black}{In the IIT approach, the system is perturbed with all possible 
+inputs to obtain the full output repertoire (Figure \ref{fig:3nodeExample}-C).
+Then, in the context of $\phi_{K}$, UBPD corresponds to the distribution 
+of probabilities that each node will take values 0/1 in the output/input
+repertoires after the perturbation. For instance, in Figure \ref{fig:UBPD}-A,
+full input and output repertoires are shown for network in Figure \ref{fig:3nodeExample}-A.
+Now, let's say we want to compute the future probability distribution,
+that is, the probability necessary to compute effect information according
+to \cite{oizumi2014phenomenology}. In this case we take output repertoire as 
+a reference and we compute the probability of nodes in the future (outputs) 
+taking the values 0 or 1. For node A, for example, the probability that node 
+A takes the value of 1 is 0.25, that is 2/8, and that it takes the value
+of 0 is 0.75 or 6/8. These values are called the UBPD for node A. A resume 
+of UBPD for all nodes is given in Figure \ref{fig:UBPD}-B.}
+
+\textcolor{black}{Once UBPD is computed for a subject partition, in this case 
+the full system's probability distribution is computed by multiplying UBDPs. 
+Let's take as an example the future probability of input \{0,
+0, 0\}, computed as $P(A) = 0$ {*} $P(B) = 0$ {*} $P(C) = 0$, that is, 
+0.25 {*} 0.75 {*} 0.5 (see first row in Figure \ref{fig:UBPD}-C). 
+When all future probabilities are computed in this manner, the result is the 
+distribution shown in Figure \ref{fig:UBPD}-D, which is exactly the same one computed in 
+\cite{oizumi2014phenomenology},
+as shown in Figure \ref{fig:UBPD}-E.}
+
+\textcolor{black}{In general, UBDP is used to compute probability distributions
+of a system in the context of $\phi_{K}$, which mirrors the 
+``constrained/unconstrained
+probability distributions'' in \cite{oizumi2014phenomenology}, that is, 
+probability distributions of input/output patterns for specific configurations 
+(partitions) of the system, in contrast to what IIT 3.0 does. In this 
+last case, Mayner shows how probability distributions are computed in the context 
+of IIT in his S1 text mentioned in \cite{mayner2017pyphia},
+using terms such as ``marginalization'' and ``virtual
+elements'' that seem to be highly complex methods.}
+
+\textcolor{black}{Then, in the context of $\phi_{K}$, UBDP aims to 
+obtain the 
+same results in terms of probability distributions, in a manner equivalent 
+to IIT but by following a different conceptual
+approach. Our measure $\phi_{K}$ uses adapted methods, having
+algorithmic complexity as a background, to compute information integration.}
+
+\textcolor{black}{In Table \ref{table:UBPD}, lines 3-5 shows Mathematica code that
+computes UBDP for the system specified in lines 1 and 2, that is, by means of 
+an adjacency matrix and an array of computations that nodes perform, 
+or the system dynamics. Table \ref{table:UBPD} also shows results of this computation 
+in this order: 1) time needed to compute, followed by probability that 
+a node take the value zero (zeroProb) or the value one(oneProb).} 
+One can see how the results in Table \ref{table:UBPD} correspond to UBDP values 
+shown in Figure \ref{fig:UBPD}-B.
+
+\textcolor{black}{We should note that for $\phi_{K}$, computation
+of probability distributions seems to be a task of counting, which for huge 
+systems would be extremely difficult or even impossible, if attempted in 
+a classical/brute force way. But, two important facts should be pointed out here: 
+1) In the context of $\phi_{K}$, UBPD is not calculated in this traditional 
+way, but is calculated using the simulation of the behaviour of a system 
+represented by a set of simple rules. Then for $\phi_{K}$, an 
+exhaustive review of repertoires is not needed to compute the 
+individual probabilities shown in Table 1, and 2) despite strong 
+theoretical and methodological differences between them, $\phi_{K}$ and $\phi$ lead 
+to the same
+results.}
+
+In the next sections we derive simple rules of a system, using the 
+perturbation test and its application to implement $\phi_{K}$.
+

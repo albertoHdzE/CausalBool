@@ -1,0 +1,1 @@
+Data and intermediate artefacts for experiments (topologies, input sets, cached repertoires). Versioned and described in metadata.

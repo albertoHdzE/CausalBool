@@ -38,20 +38,21 @@ kofnStrictOK[n_, k_] := Module[{idxLoose, idxStrict},
 
 permuteBitsIndex[j_, n_, perm_List] := Module[{bits = IntegerDigits[j - 1, 2, n]}, 1 + FromDigits[bits[[perm]], 2]];
 permuteBitsSet[set_List, n_Integer, perm_List] := Sort[permuteBitsIndex[#, n, perm] & /@ set];
-relabellingInvarianceRandom[gate_, n_Integer, params_: <||>] := Module[{perm, Ic, S1, S2, IcPerm},
-  perm = RandomSample[Range[n]];
+relabellingInvarianceRandom[gate_, n_Integer, params_: <||>] := Module[{pi, inv, Ic, S1, S2, IcPerm},
+  pi = RandomSample[Range[n]];
+  inv = Table[0, {n}]; Do[inv[[pi[[t]]]] = t, {t, n}];
   Ic = RandomSample[Range[n], Min[2, n]];
-  IcPerm = perm[[Ic]];
+  IcPerm = inv[[Ic]];
   S1 = Integration`Gates`IndexSetNetwork[gate, n, Ic, params];
   S2 = Integration`Gates`IndexSetNetwork[gate, n, IcPerm, params];
-  Sort[permuteBitsSet[S1, n, perm]] === Sort[S2]
+  Sort[permuteBitsSet[S1, n, pi]] === Sort[S2]
 ];
 
 cases = {
   <|"name" -> "phiInvolution", "ok" -> And @@ (phiInvolutionOK /@ {3, 4, 5})|>,
   <|"name" -> "universeSize", "ok" -> And @@ (universeSizeOK /@ {3, 4, 5})|>,
   <|"name" -> "bandsComplement", "ok" -> And @@ Table[bandsComplementOK[4, k], {k, 1, 4}]|>,
-  <|"name" -> "deMorgan", "ok" -> And @@ Table[deMorganOK[4, a, b], {a, 1, 4}, {b, 1, 4}]|>,
+  <|"name" -> "deMorgan", "ok" -> And @@ Flatten@Table[deMorganOK[4, a, b], {a, 1, 4}, {b, 1, 4}]|>,
   <|"name" -> "orderingInvariance_AND", "ok" -> orderingInvarianceOK["AND", 3, {2, 3}]|>,
   <|"name" -> "orderingInvariance_OR", "ok" -> orderingInvarianceOK["OR", 3, {2, 3}]|>,
   <|"name" -> "orderingInvariance_XOR", "ok" -> orderingInvarianceOK["XOR", 3, {2, 3}]|>,

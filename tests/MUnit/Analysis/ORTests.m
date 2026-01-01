@@ -1,0 +1,16 @@
+Get["src/Packages/Integration/Experiments.m"];
+Get["src/Packages/Integration/Gates.m"];
+n = 3;
+cm = {{0,1,1},{0,0,0},{0,0,0}};
+dyn = {"OR","AND","XOR"};
+phi[j_, n_] := 1 + FromDigits[Reverse[IntegerDigits[j - 1, 2, n]], 2];
+res = Integration`Experiments`CreateRepertoiresDispatch[cm, dyn];
+base = res["RepertoireOutputs"];
+lsbIndicesOR = Flatten@Position[base[[All, 1]], 1];
+mapped = Sort[phi[#, n] & /@ lsbIndicesOR];
+set = Integration`Gates`IndexSetNetwork["OR", n, {2,3}, <||>];
+analytic = Sort[set];
+ok = (mapped === analytic);
+CreateDirectory["results/tests/analysis_or", CreateIntermediateDirectories -> True];
+Export["results/tests/analysis_or/Patterns.json", <|"n"->n,"Ic"->{2,3},"LSBOnes"->lsbIndicesOR,"MSBMap"->mapped,"Analytic"->analytic,"ok"->ok|>];
+Export["results/tests/analysis_or/Status.txt", If[ok, "PASS", "FAIL"]];

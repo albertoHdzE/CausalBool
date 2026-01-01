@@ -1,0 +1,181 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Add some citations in the text using \cite{key}
+% Make sure bibliography entries exist in Bibliografia/referencias.bib
+% Run LaTeX multiple times to resolve cross-references
+% Consider using the bookmark package for PDF bookmarks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         FORMATO DE TESIS UMSNH                               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% based on Harish Bhanderi's PhD/MPhil template, then Uni Cambridge
+% http://www-h.eng.cam.ac.uk/help/tpl/textprocessing/ThesisStyle/
+% corrected and extended in 2007 by Jakob Suckale, then MPI-iCBG PhD programme
+% and made available through OpenWetWare.org - the free biology wiki
+
+%                     Under GNU License v3
+% Adaptado para UNAM: @Tepexic
+% ADAPTADO PARA UMSNH:  @arturolp
+
+\documentclass[twoside,11pt]{Latex/Classes/PhDthesisPSnPDF} % "thesisUMSNH" para formato de la UMSNH
+%         PUEDEN INCLUIR EN ESTE ESPACIO LOS PAQUETES EXTRA, O BIEN, EN EL ARCHIVO "PhDthesisPSnPDF.cls" EN "./Latex/Classes/"
+
+% Estos paquetes son opcionales y a necesidad de cada quien:
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{blindtext}                             % Para insertar texto dummy, de ejemplo, pues.
+\usepackage{amssymb, amsmath, amsbsy, amsfonts}    % ECUACIONES Y SÍMBOLOS MATEMÁTICOS
+\usepackage{listings}                    % PERMITE AGREGAR CÓDIGO DE LENGUAJES  DE PROGRAMACIÓN (DOCUMENTACIÓN EN GOOGLE)
+\usepackage{mathdots}                    % para el comando \iddots
+\usepackage{mathrsfs}                    % para formato de letra en ecuaciones
+\usepackage[round, sort, numbers]{natbib}  % Personalizar la bibliografía a gusto de cada quien
+\usepackage{pdflscape}
+\usepackage{setspace} % Add this to your preamble if not already included
+% \usepackage{algorithm}
+% \usepackage{algorithmic}
+% Add this to your preamble or at the beginning of the file
+% Definir el color gray
+\usepackage{xcolor}
+\definecolor{gray}{rgb}{0.5, 0.5, 0.5}
+\definecolor{grayer}{rgb}{0.95, 0.95, 0.95}
+% Define a custom style for Mathematica code
+\lstdefinestyle{MathematicaStyle}{
+    language=Mathematica,
+    breaklines=true,
+    breakatwhitespace=false,
+    breakindent=1em,
+    basicstyle=\ttfamily\scriptsize,
+    columns=flexible,
+    linewidth=0.9\linewidth,
+    frame=single,
+    showstringspaces=false,
+    numbers=left, % Added to show line numbers
+    numberstyle=\tiny\color{gray}, % Style for line numbers
+    backgroundcolor=\color{grayer}, % Changed to a lighter background color
+    literate={+}{+}{1} {a}{a}{1} {b}{b}{1} {c}{c}{1} {d}{d}{1} {e}{e}{1} {f}{f}{1} {g}{g}{1} {h}{h}{1} {i}{i}{1} {j}{j}{1} {k}{k}{1} {l}{l}{1} {m}{m}{1} {n}{n}{1} {o}{o}{1} {p}{p}{1} {q}{q}{1} {r}{r}{1} {s}{s}{1} {t}{t}{1} {u}{u}{1} {v}{v}{1} {w}{w}{1} {x}{x}{1} {y}{y}{1} {z}{z}{1} {A}{A}{1} {B}{B}{1} {C}{C}{1} {D}{D}{1} {E}{E}{1} {F}{F}{1} {G}{G}{1} {H}{H}{1} {I}{I}{1} {J}{J}{1} {K}{K}{1} {L}{L}{1} {M}{M}{1} {N}{N}{1} {O}{O}{1} {P}{P}{1} {Q}{Q}{1} {R}{R}{1} {S}{S}{1} {T}{T}{1} {U}{U}{1} {V}{V}{1} {W}{W}{1} {X}{X}{1} {Y}{Y}{1} {Z}{Z}{1} {0}{0}{1} {1}{1}{1} {2}{2}{1} {3}{3}{1} {4}{4}{1} {5}{5}{1} {6}{6}{1} {7}{7}{1} {8}{8}{1} {9}{9}{1} {\}}{\}}{1},
+    xleftmargin=1em,
+    xrightmargin=1em
+}
+\usepackage[ruled,vlined]{algorithm2e}
+
+
+
+% Note:
+% The \blindtext or \Blindtext commands throughout this template generate dummy text
+% to fill the template out. These commands should all be removed when 
+% writing thesis content.
+
+
+\include{Latex/Macros/MacroFile1}           % Archivo con funciones útiles
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                   DATOS                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Estimations of Integrated Information Based on Algorithmic Complexity and Dynamic Querying}
+\author{Alberto Hernández Espinosa} 
+\facultad{Facultad de Filosofia}                 % Nombre de la facultad/escuela
+\escudofacultad{Latex/Classes/Escudos/fi_azul} % Aquí ponen la ruta y nombre del escudo de su facultad, actualmente, la carpeta Latex/Classes/Escudos cuenta con los siguientes escudos:
+% "fi_azul" Facultad de ingenieria en color azul
+% "fi_negro" Facultad de ingenieria en color negro
+% "fc_azul" Facultad de ciencias en color azul
+% "fc_negro" Facultad de ciencias en color negro
+% "fmed_grande" Facultad de medicina UMSNH
+% Se agradecen sus aportaciones de escudos a jebus.velazquez@gmail.com
+
+\degree{Doctor en Filosofía de la Ciencia}       % Carrera
+\director{Hector Zenil}                 % Director de tesis
+%\tutor{Francisco Hernandez Quiroz}                    % Tutor de tesis, si aplica
+\degreedate{2025}                          % Año de la fecha del examen
+\lugar{Ciudad Universitaria, CDMX}         % Lugar
+
+%\portadafalse                              % Portada en NEGRO, descomentar y comentar la línea siguiente si se quiere utilizar
+\portadatrue                                % Portada en COLOR
+
+
+
+%% Opciones del posgrado (descomentar si las necesitan)
+	%\posgradotrue                                                    
+	%\programa{programa de maestría y doctorado en ingeniería}
+	%\campo{Ingeniería Eléctrica - Control}
+	%% En caso de que haya comité tutor
+	%\comitetrue
+	%\ctutoruno{Dr. Emmet L. Brown}
+	%\ctutordos{Dr. El Doctor}
+%% Datos del jurado                             
+	%\presidente{Dr. 1}
+	%\secretario{Dr. 2}
+	%\vocal{Dr. 3}
+	%\supuno{Dr. 4}
+	%\supdos{Dr. 5}
+	%\institucion{el Instituto de Ingeniería, UNAM}
+
+\keywords{tesis,autor,tutor,etc}            % Palablas clave para los metadatos del PDF
+\subject{tema_1,tema_2}                     % Tema para metadatos del PDF  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   PORTADA                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\maketitle									% Se redefinió este comando en el archivo de la clase para generar automáticamente la portada a partir de los datos
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                  PRÓLOGO                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frontmatter
+\include{Agradecimientos/Dedicatoria}       % Comentar línea si no se usa
+\include{Agradecimientos/Agradecimientos}   % Comentar línea si no se usa 
+\include{Declaracion/Declaracion}           % Comentar línea si no se usa
+\include{Resumen/Resumen}                   % Comentar línea si no se usa
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   ÍNDICES                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Esta sección genera el índice
+\setcounter{secnumdepth}{3} % organisational level that receives a numbers
+\setcounter{tocdepth}{3}    % print table of contents for level 3
+\tableofcontents            % Genera el índice 
+%: ----------------------- list of figures/tables ------------------------
+\listoffigures              % Genera el ínidce de figuras, comentar línea si no se usa
+\listoftables               % Genera índice de tablas, comentar línea si no se usa
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   CONTENIDO                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% the main text starts here with the introduction, 1st chapter,...
+\mainmatter
+\def\baselinestretch{1.5}                   % Interlineado de 1.5
+\include{Capitulo1/introduccion}            % ~10 páginas - Explicar el propósito de la tesis
+\include{Capitulo2/marco_teorico}           % ~20 páginas - Poner un contexto a la tesis, hacer referencia a trabajos actuales en el tema
+\include{Capitulo3/diseno_experimento}      % ~20 páginas - Explicar el problema en específico que se va a resolver, la metodología y experimentos/métodos utilizados
+\include{Capitulo4/resultados_y_analisis}   % ~20 páginas - Presentar los resultados tal cual son, y analizarlos.
+\include{Capitulo5/conclusiones}            % ~5 páginas - Resumir lo que se hizo y lo que no y comentar trabajos futuros sobre el tema
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   APÉNDICES                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\include{Apendice1/Apendice1}               % Colocar los circuitos, manuales, código fuente, pruebas de teoremas, etc.
+\include{Apendice2/Apendice2}               % Colocar los circuitos, manuales, código fuente, pruebas de teoremas, etc.
+\include{Apendice3/Apendice3}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   REFERENCIAS                     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% existen varios estilos de bilbiografía, pueden cambiarlos a placer
+%El formato trae otros estilos, o pueden agregar uno que les guste:
+%\bibliographystyle{Latex/Classes/PhDbiblio-case} % title forced lower case
+%\bibliographystyle{Latex/Classes/PhDbiblio-bold} % title as in bibtex but bold
+%\bibliographystyle{Latex/Classes/PhDbiblio-url} % bold + www link if provided
+%\bibliographystyle{Latex/Classes/jmb} % calls style file jmb.bst
+
+\bibliographystyle{apalike} % otros estilos pueden ser abbrv, acm, alpha, apalike, ieeetr, plain, siam, unsrt
+%\bibliographystyle{plainnat} % or another style like 'unsrt', 'alpha', etc.
+\bibliography{Bibliografia/referencias}             % Archivo .bib
+
+
+\end{document}

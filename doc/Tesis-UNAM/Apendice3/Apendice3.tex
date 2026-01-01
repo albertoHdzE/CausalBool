@@ -1,0 +1,64 @@
+\chapter{Meta-compression}
+
+% -------------------------------
+% THIS IS MY ALGORITHM: Generate Network Data and Export to CSV
+% --------------------------------
+\IncMargin{1em}
+\begin{algorithm}[H]
+    \small % Reduce font size
+    \setstretch{0.8} % Reduce line spacing
+    \resizebox{\textwidth}{!}{% Scale the algorithm to fit the page width
+    \begin{minipage}{\textwidth} % Ensure content stays within bounds
+    \SetKwInOut{Input}{Input}
+    \SetKwInOut{Output}{Output}
+
+    \Input{maxNodes}
+    \Output{CSV file with network data}
+
+    \BlankLine
+
+    \textbf{Initialize} networks as an empty list\;
+    \If{maxNodes is not provided or is not numeric}{
+        Set maxNodes to 12\;
+        Print "maxNodes set to default: 12"\;
+    }
+
+    \ForEach{nodeSize $\in$ \{5, \ldots, maxNodes\}}{
+        Set nodeSize to current value of n\;
+        Print "Processing nodeSize: " + nodeSize\;
+        Calculate noEdges as a random integer between $\lfloor\frac{\text{nodeSize}}{2}\rfloor$ and $\lfloor\frac{\text{nodeSize} \times (\text{nodeSize}-1)}{2}\rfloor$\;
+
+        \textbf{Generate a random network} with nodeSize nodes and noEdges edges\;
+
+        Calculate initial complexity (k0) and length (a0) of binary attractors\;
+        Initialize sensitivities as an empty list\;
+
+        \ForEach{edge (i, j) in the adjacency matrix}{
+            \If{adjMat[i, j] == 1}{
+                Set adjMatPert[i, j] to 0\;
+                Recalculate patterns and binary attractors with the perturbed adjacency matrix\;
+                \If{the perturbed binary attractors are valid}{
+                    Calculate new complexity (k1) and length (a1)\;
+                    Calculate deltaK as $|k0 - k1|$, deltaA as $|a0 - a1|$\;
+                    Add deltaK $\times \log_2(\text{deltaA} + 1)$ to sensitivities\;
+                }
+            }
+        }
+
+        Calculate phiK as the mean of sensitivities if sensitivities is not empty, otherwise 0\;
+
+        Calculate rules0 as behaviors for each attractor in binAttractors\;
+        Calculate kRule0 as the mean byte count of rules0\;
+        Calculate rules1 as behaviors for each attractor in binAttPert with the perturbed adjacency matrix\;
+        Calculate kRule1 as the mean byte count of rules1\;
+        Calculate deltaKRule as $|\text{kRule0} - \text{kRule1}|$\;
+        Calculate phiKRefined as phiK + deltaKRule\;
+    }
+
+    Export networks to a CSV file with columns: "NumberOfNodes", "OutputRepertoire", "AdjacencyMatrix", "OneOutput", "PhiK"\;
+
+    \caption{Generate Network Data and Export to CSV}\label{algo-fullMetacompression}
+    \end{minipage}
+    }
+\end{algorithm}
+\DecMargin{1em}
