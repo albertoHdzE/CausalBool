@@ -1,0 +1,1017 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="RA_APL_model_19Nov2024" nodeorder="RA PML_RARAg PLZF_RARAg RARA PML PML_RARA PLZF PLZF_RARA USP37 CoAct_COMP EZH2 PRC2 CoRep_COMP CDKN1A CDKN1B CDKN2D RB1 TP53 SKP2 MDM2 CAK CCNA2 CCND1 CCNE2 CDK4_6 CDK2 E2F1 MYC DUSP6 POU2F1 GATA2 RUNX1 SPI1 CEBPAB CEBPE RARB">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="120" height="45"/>
+    <nodestyle name="Input" background="#99ffff" text="#000000" width="125"/>
+    <nodestyle name="Arrest" background="#ff9999"/>
+    <nodestyle name="Differentiation" background="#ffff33"/>
+    <nodestyle name="Proliferation" background="#99ff99"/>
+    <nodestyle name="Epigenetic" background="#ffcc33" height="45"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="3" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle name="Edge style" pattern="DASH"/>
+    <node id="RA" name="Retinoic Acid" maxvalue="2" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:15367"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/32359642/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23841729/"/>
+        </linklist>
+        <comment>RA node represents the Retinoic Acid molecule [1].
+It has hormonal effects inducing differentiation on hematopoietic cells, which is mediated mostly by the transcriptional activation of receptors complexes (RAR/RXR) bound to the Retinoic Acid Receptor Elements (RARE) in specific genes [2]. The All Trans Retinoic Acid is used as a therapeutic agent, usually in combination with chemotherapy or arsenic trioxide (ATO) to treat Acute Promyelocytic Leukaemia [3].
+It is the only multilevel node in the network. 
+Considered as an input, its initial level is maintained during each simulation, corresponding to:
+Level 2 -&gt; Pharmacological RA concentration (μM range)
+Level 1 -&gt; Physiological RA concentration (nM range)
+Level 0 -&gt; No or negligible RA</comment>
+      </annotation>
+      <nodevisualsetting x="918" y="63" style="Input"/>
+    </node>
+    <node id="PML_RARAg" name="PML::RARA fusion gene" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/2170850/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20159610/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23841729/"/>
+        </linklist>
+        <comment>PML_RARAg node represents the fusion gene that results from the aberrant translocation t(15;17) involving the promyelocytic leukemia (PML) gene and the retinoic acid receptor alpha (RARA) gene [1]. It interferes with the normal RARA signalling and blocks myeloid differentiation leading to the accumulation of promyelocytes [2]. This fusion is associated with a form of Acute Promyelocytic Leukaemia which is primarily sensitive and responsive to the Retinoic Acid treatment in combination with chemotherapy or arsenic trioxide [3].
+It is an input node denoting the presence of the fusion gene.</comment>
+      </annotation>
+      <nodevisualsetting x="537" y="41" style="Input"/>
+    </node>
+    <node id="PLZF_RARAg" name="PLZF::RARA fusion gene" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8302850/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9462740/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9531570/"/>
+        </linklist>
+        <comment>PLZF_RARAg node represents the fusion gene that results from the aberrant translocation t(11;17) involving the promyelocytic leukemia zinc finger (PLZF) gene and the retinoic acid receptor alpha (RARA) gene [1]. It interferes with the normal RARA signalling and blocks myeloid differentiation leading to the accumulation of promyelocytes. This fusion is associated with a form of Acute Promyelocytic Leukaemia which is primarily resistant to the Retinoic Acid treatment [2, 3].
+It is an input node denoting the presence of the fusion gene.</comment>
+      </annotation>
+      <nodevisualsetting x="1231" y="37" style="Input"/>
+    </node>
+    <node id="RARA" name="Retinoic Acid Receptor" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9864"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20970498/"/>
+        </linklist>
+        <comment>RARA node represents the Retinoic Acid Receptor protein subunit [1].
+It forms heterodimers with RXR subunits and bind to the RARE of specific genes. In the absence of RA the complex recruits co-repressors such as SMRT, NCOR1 and PRC2 to silence targets genes. Upon RA binding, co-activators such as NCOA1 and RAC3 are recruited, and the transcription of the target genes is enabled [2].
+Its basal value is set to 1 per default.</comment>
+      </annotation>
+      <nodevisualsetting x="1069" y="126" style="Differentiation"/>
+    </node>
+    <node id="PML" name="PML nuclear body scaffold" maxvalue="1">
+      <value val="1">
+        <exp str="!CDK2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9113"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21840486/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23526763/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/17562868/"/>
+        </linklist>
+        <comment>PML node represents the PML nuclear body scaffold [1].
+It is located in nuclear bodies and functions as a transcription factor and tumor suppressor. It is involved in cell cycle regulation [2, 3].
+It is the translocation partner involved in the PML::RARA APL variant, which is sensitive to RA therapy [4].
+Its basal value is set to 1 per default.</comment>
+      </annotation>
+      <nodevisualsetting x="245" y="145" style=""/>
+    </node>
+    <node id="PML_RARA" name="PML::RARA fusion protein" maxvalue="1">
+      <value val="1">
+        <exp str="PML_RARAg &amp; CAK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/2170850/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20159610/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23841729/"/>
+        </linklist>
+        <comment>PML_RARA node represents the fusion protein that results from the aberrant translocation t(15;17) involving the promyelocytic leukemia (PML) gene and the retinoic acid receptor alpha (RARA) gene [1]. It interferes with the normal RARA signalling and blocks myeloid differentiation leading to the accumulation of promyelocytes [2]. This fusion is associated with a form of Acute Promyelocytic Leukaemia which is primarily sensitive and responsive to the Retinoic Acid treatment in combination with chemotherapy or arsenic trioxide [3].</comment>
+      </annotation>
+      <nodevisualsetting x="538" y="193" style=""/>
+    </node>
+    <node id="PLZF" name="Zinc finger and BTB domain containing 16" maxvalue="1">
+      <value val="1">
+        <exp str="GATA2 &amp; !CDK2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12930"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8622986/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/14645547/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/18246121/"/>
+        </linklist>
+        <comment>PLZF node represents the protein Zinc finger and BTB domain containing 16, also named PLZF, involved in cell cycle regulation  [1].
+It is the translocation partner involved in the PLZF::RARA APL variant, which is resistant to pharmacological doses of RA [2].
+It represses MYC expression [3], and is inhibited by Cyclin Dependent Kinase 2 (CDK2) [4].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1441" y="261" style=""/>
+    </node>
+    <node id="PLZF_RARA" name="PLZF::RARA fusion protein" maxvalue="1">
+      <value val="1">
+        <exp str="PLZF_RARAg &amp; USP37 &amp; CAK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8302850/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9462740/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9531570/"/>
+        </linklist>
+        <comment>PLZF_RARA node represents the fusion protein that results from the aberrant translocation t(11;17) involving the promyelocytic leukemia zinc finger (PLZF) gene and the retinoic acid receptor alpha (RARA) gene [1]. It interferes with the normal RARA signalling and blocks myeloid differentiation leading to the accumulation of promyelocytes. This fusion is associated with a form of Acute Promyelocytic Leukaemia which is primarily resistant to the Retinoic Acid treatment [2, 3].</comment>
+      </annotation>
+      <nodevisualsetting x="1228" y="289" style=""/>
+    </node>
+    <node id="USP37" name="Ubiquitin specific peptidase 37" maxvalue="1">
+      <value val="1">
+        <exp str="E2F1 &amp; !RB1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:20063"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/34758854/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/34454635/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23208507/"/>
+        </linklist>
+        <comment>USP37 node represents the ubiquitin specific peptidase 37 protein [1].
+It is a mediator of G1/S transition by protein deubiquitination, and has been associated with oncogenic mechanisms [2, 3].
+Its enzymatic activity regulates PLZF::RARA fusion stability [4].</comment>
+      </annotation>
+      <nodevisualsetting x="443" y="309" style=""/>
+    </node>
+    <node id="CoAct_COMP" name="Co Activation Complex" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23518351/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/17671166/"/>
+        </linklist>
+        <comment>CoAct_COMP node represents the dynamical assembly of epigenetic enzymes and scaffolding proteins which act on promoter and/or enhancer region thereby activating the transcription of target genes.
+Its components include PHF8 [1] and NCOA1 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1054" y="386" style="Epigenetic"/>
+    </node>
+    <node id="EZH2" name="Enhancer of zeste 2 polycomb repressive complex 2 subunit" maxvalue="1">
+      <value val="1">
+        <exp str="MYC | GATA2 | (E2F1 &amp; !RB1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3527"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21248841/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/15362224/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/35013218/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/35984905/"/>
+        </linklist>
+        <comment>EZH2 node represents the enhancer of zeste 2 polycomb repressive complex 2 subunit [1], which is the catalitic subunit of the PRC2 complex, and induces the repressive histone mark H3K27me3 on target genes [2].
+It is induced by E2F transcription factors [3].
+Evidences point towards a non canonical role of EZH2 in the interaction and stabilization of MYC in cancer [4].
+In a PLZF::RARA APL mouse model, the non canonical activity of EZH2 sustains the RA-resistant phenotype [5].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1545" y="632" style="Epigenetic"/>
+    </node>
+    <node id="PRC2" name="Polycomb repressive complex 2" maxvalue="1">
+      <value val="1">
+        <exp str="EZH2 &amp; CDK2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21248841/"/>
+        </linklist>
+        <comment>PRC2 node represents the Polycomb repressive complex 2 [1].
+It is an assembly of different protein subunits, including EED and SUZ1.</comment>
+      </annotation>
+      <nodevisualsetting x="1602" y="423" style="Epigenetic"/>
+    </node>
+    <node id="CoRep_COMP" name="Co-repressive complex" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22406747/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/36216898/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9486655/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9765306/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/15362224/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/35984905/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16449642/"/>
+        </linklist>
+        <comment>CoRep_COMP node represents the dynamical assembly of epigenetic enzymes and scaffolding proteins, which act on promoter and/or enhancer regions, thereby repressing the transcription of target genes.
+Its components include KDM1A [1], NCOR1 [2, 3, 4], PRC1 [5, 6], and SUV39H1 [7].</comment>
+      </annotation>
+      <nodevisualsetting x="1044" y="443" style="Epigenetic"/>
+    </node>
+    <node id="CDKN1A" name="Cyclin-dependent kinase inhibitor 1A" maxvalue="1">
+      <value val="1">
+        <exp str="((RARA &amp; CoAct_COMP &amp; !PRC2 &amp; !CoRep_COMP) | CEBPAB | TP53) &amp; !MYC &amp; !(PML_RARA | PLZF_RARA)"/>
+        <exp str="RA &amp; RARA &amp; CoAct_COMP &amp; !(PML_RARA | PLZF_RARA)"/>
+        <exp str="RA:2 &amp; RARA &amp; CoAct_COMP &amp; !PLZF_RARA"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1784"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12559756/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/18024792/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24821728/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24646031/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8940196/"/>
+        </linklist>
+        <comment>CDKN1A node represents the cyclin-dependent kinase inhibitor 1A, also named p21 [1].
+It inhibits the activity of Cyclin/CDK2 and Cyclin/CDK4 complexes [2].
+It is repressed by the fusion proteins PML::RARA [3] and PLZF::RARA [4] in APL, and its expression is transactivated in response to RA treatment [5, 6].
+</comment>
+      </annotation>
+      <nodevisualsetting x="606" y="478" style="Arrest"/>
+    </node>
+    <node id="CDKN1B" name="Cyclin dependent kinase inhibitor 1B" maxvalue="1">
+      <value val="1">
+        <exp str="!MYC &amp; !SKP2 &amp; !((CCNE2 | CCNA2) &amp; CDK2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1785"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12559756/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/15199159/"/>
+        </linklist>
+        <comment>CDKN1B node represents the cyclin dependent kinase inhibitor 1B, also named p27 [1].
+It inhibits CDK2/Cyclin E2 and CDK2/Cyclin A2 complexes, preventing them from phosphorylating their targets [2].
+CDKN1B is phosphorylated by CDK2, and SKP2 promotes the degradation of phosphorylated CDKN1B [3].
+</comment>
+      </annotation>
+      <nodevisualsetting x="125" y="342" style="Arrest"/>
+    </node>
+    <node id="CDKN2D" name="Cyclin-dependent kinase inhibitor 2D" maxvalue="1">
+      <value val="1">
+        <exp str="RA &amp; RARA &amp; CoAct_COMP &amp; !(PML_RARA | PLZF_RARA)"/>
+        <exp str="RARA &amp; CoAct_COMP &amp; !(CoRep_COMP | PRC2) &amp; !(PML_RARA | PLZF_RARA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1790"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24412926/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/25275592/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19855079/"/>
+        </linklist>
+        <comment>CDKN2D node represents the cyclin-dependent kinase inhibitor 2D, also named p19 [1].
+It prevents the activation of the CDK4 and CDK6 kinases.
+It is repressed by both PLML::RARA and PLZF::RARA in leukaemia cells [2, 3, 4].</comment>
+      </annotation>
+      <nodevisualsetting x="752" y="223" style="Arrest"/>
+    </node>
+    <node id="RB1" name="Retinoblastoma-associated transcriptional corepressor 1" maxvalue="1">
+      <value val="1">
+        <exp str="PML &amp; !PML_RARA &amp; CDKN1B &amp; (!CAK | !(CCND1 &amp; CDK4_6) | !((CCNA2 | CCNE2) &amp; CDK2))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9884"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22123859/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11113200/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21205865/"/>
+        </linklist>
+        <comment>RB1 node represents the Retinoblastoma-associated transcriptional corepressor 1 [1].
+It is a negative regulator of the cell cycle progression [3].
+Its activity is regulated by phosphorylation from many Cyclin/CDK complexes [3]. The active, hypophosphorylated form of the protein binds transcription factor E2F1 and represses its targets [4].</comment>
+      </annotation>
+      <nodevisualsetting x="526" y="422" style="Arrest"/>
+    </node>
+    <node id="TP53" name="Tumor protein p53" maxvalue="1">
+      <value val="1">
+        <exp str="((PML &amp; !PML_RARA) | MYC) &amp; !(MDM2 | PLZF_RARA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:11998"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24412926/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24821728/"/>
+        </linklist>
+        <comment>TP53  node represents the tumor protein p53 (TP53) [1].
+It is repressed by the fusion proteins PML::RARA [3] and PLZF::RARA [2] in APL, and its expression is transactivated in response to RA treatment.</comment>
+      </annotation>
+      <nodevisualsetting x="76" y="752" style="Arrest"/>
+    </node>
+    <node id="SKP2" name="S-phase kinase associated protein" maxvalue="1">
+      <value val="1">
+        <exp str="MYC &amp; (PML_RARA | PLZF_RARA | !GATA2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:10901"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11595732/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/34068643/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12393444/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21245140/"/>
+        </linklist>
+        <comment>SKP2 node represents the S-phase kinase associated protein 2 [1].
+It is an important mediator of S-phase entry.
+It is commonly associated with therapy-resistance phenotypes in leukaemic cells [2, 3, 4, 5].</comment>
+      </annotation>
+      <nodevisualsetting x="121" y="209" style="Proliferation"/>
+    </node>
+    <node id="MDM2" name="MDM2 proto-oncogene" maxvalue="1">
+      <value val="1">
+        <exp str="!PML | PML_RARA"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6973"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/15195100/"/>
+        </linklist>
+        <comment>MDM2 node represents the MDM2 proto-oncogene [1].
+It promotes tumor formation by targeting TP53 for proteasomal degradation.
+It is sequestered and inhibited by PML, which favors TP53 stabilization [2].</comment>
+      </annotation>
+      <nodevisualsetting x="151" y="396" style="Proliferation"/>
+    </node>
+    <node id="CAK" name="Cyclin-dependent kinase Activating Kinase" maxvalue="1">
+      <value val="1">
+        <exp str="MYC"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11113200/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16935935/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19917671/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12213824/"/>
+        </linklist>
+        <comment>CAK node represents the complex named cyclin-dependent kinase (CDK)-activating kinase (CAK), which is a trimeric enzyme complex composed of CDK7, cyclin H and MAT1 [1]. It is involved in the exit of G1 phase and cell cycle progression, by phosphorylating key components of the network, such as CDK4, CDK6, CDK2 and RB1. The RA-induced G1 arrest is associated with a decreased activity of the complex [2, 3, 4].</comment>
+      </annotation>
+      <nodevisualsetting x="377" y="103" style="Proliferation"/>
+    </node>
+    <node id="CCNA2" name="Cyclin A2" maxvalue="1">
+      <value val="1">
+        <exp str="(MYC | (E2F1 &amp; !RB1)) &amp; (PLZF_RARA | !PLZF)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1578"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22123859/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10023668/"/>
+        </linklist>
+        <comment>CCNA2 node represents the Cyclin A2 protein, encoded by the CCNA2 gene [1].
+It is an important mediator of S-phase entry [2].
+It is repressed by PLZF and activated by PLZF::RARA in leukaemia cells [3].</comment>
+      </annotation>
+      <nodevisualsetting x="490" y="248" style="Proliferation"/>
+    </node>
+    <node id="CCND1" name="Cyclin D1" maxvalue="1">
+      <value val="1">
+        <exp str="MYC | (E2F1 &amp; !RB1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1582"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22123859/"/>
+        </linklist>
+        <comment>CCND1 node represents the Cyclin D1 protein encoded by the CCND1 gene [1].
+It is an important mediator of G1/S transition in complex with CDK4 or CDK6 [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="567" y="576" style="Proliferation"/>
+    </node>
+    <node id="CCNE2" name="Cyclin E2" maxvalue="1">
+      <value val="1">
+        <exp str="MYC | (E2F1 &amp; !RB1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1590"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22123859/"/>
+        </linklist>
+        <comment>CCNE2 node represents the Cyclin E2 protein, encoded by the CCNE2 gene [1].
+It is an important mediator of G1/S transition in complex with CDK2 [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="435" y="369" style="Proliferation"/>
+    </node>
+    <node id="CDK4_6" name="Cyclin-dependent kinase 4 and 6" maxvalue="1">
+      <value val="1">
+        <exp str="MYC &amp; (CCND1 | CAK) &amp; !(CDKN2D | CDKN1A)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1773"/>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1777"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22123859/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11113200/"/>
+        </linklist>
+        <comment>CDK4_6 node represents both the cyclin-dependent kinase 4 and 6 [1, 2].
+These proteins participate in the cell cycle regulation, by mean of their serine/threonine kinase activity [3, 4].</comment>
+      </annotation>
+      <nodevisualsetting x="766" y="532" style="Proliferation"/>
+    </node>
+    <node id="CDK2" name="Cyclin-dependent kinase 2" maxvalue="1">
+      <value val="1">
+        <exp str="(CCNE2 | CCNA2) &amp; CAK &amp; !(CDKN1A | CDKN1B)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1771"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24646031/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11113200/"/>
+        </linklist>
+        <comment>CDK2 node represents the cyclin-dependent kinase 2 [3].
+It participates in the cell cycle regulation, by mean of its serine/threonine kinase activity [1, 2].</comment>
+      </annotation>
+      <nodevisualsetting x="798" y="344" style="Proliferation"/>
+    </node>
+    <node id="E2F1" name="E2F1" maxvalue="1">
+      <value val="1">
+        <exp str="MYC &amp; (PML_RARA | !(PML &amp; RB1)) &amp; !CDKN1A"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3113"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/15362224/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21205865/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24351540/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/35984905/"/>
+        </linklist>
+        <comment>E2F1 node represents the E2F transcription factor 1 [1].
+It is an important mediator of the cell cycle progression [2].
+Its activity is inhibited by PML and RB1 [3, 4].
+An E2F transcriptional network was found to be underlying RA resistance in APL mouse model [5].</comment>
+      </annotation>
+      <nodevisualsetting x="217" y="560" style="Proliferation"/>
+    </node>
+    <node id="MYC" name="MYC proto-oncogene" maxvalue="1">
+      <value val="1">
+        <exp str="E2F1 &amp; !RB1 &amp; EZH2 &amp; (PML_RARA | PLZF_RARA | !PML) &amp; (PLZF_RARA | !PLZF) &amp; !CEBPAB"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:7553"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24704206/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/14645547/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19855079/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12869508/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11340171/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/35013218/"/>
+        </linklist>
+        <comment>MYC node represents the TF encoded by the MYC proto-oncogene [1].
+It is an important mediator of cell cycle progression and cellular transformation [2].
+It is repressed by PLZF [3], and transactivated by the PLZF::RARA fusion [4].
+It is repressed by C/EBPalpha during granulopoiesis [5, 6].
+Evidences point towards a non canonical role of EZH2 in the interaction and stabilization of MYC in cancer [7].</comment>
+      </annotation>
+      <nodevisualsetting x="364" y="665" style="Proliferation"/>
+    </node>
+    <node id="DUSP6" name="Dual specificity phosphatase 6" maxvalue="1">
+      <value val="1">
+        <exp str="!PLZF_RARA &amp; PLZF"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3072"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19855079/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19723763/"/>
+        </linklist>
+        <comment>DUSP6 node represents the dual specificity phosphatase 6 [1].
+It negatively regulates MAP-kinases, which are associated with cellular proliferation and differentiation.
+It is activated by PLZF and repressed by PLZF::RARA in leukaemia cells [2, 3].</comment>
+      </annotation>
+      <nodevisualsetting x="1555" y="234" style=""/>
+    </node>
+    <node id="POU2F1" name="Oct1 transcription factor" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9212"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16352814/"/>
+        </linklist>
+        <comment>POU2F1 node represents the POU class 2 homeobox 1 transcription factor, also named OCT1 [1].
+It is required for the SPI1 transactivation [2].
+It has a basal value equal to 1.</comment>
+      </annotation>
+      <nodevisualsetting x="1576" y="124" style=""/>
+    </node>
+    <node id="GATA2" name="GATA binding protein 2" maxvalue="1">
+      <value val="1">
+        <exp str="PML &amp; !SPI1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4171"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10938104/"/>
+        </linklist>
+        <comment>GATA2 node represents the GATA binding protein 2 [1], which is an important mediator involved in the development and proliferation of hematopoietic cells.
+The formation of a complex with PML protein potentiates its transactivation capacity [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1384" y="439" style=""/>
+    </node>
+    <node id="RUNX1" name="RUNX Family Transcription Factor 1" maxvalue="1">
+      <value val="1">
+        <exp str="!PLZF_RARA"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:10471"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19855079/"/>
+        </linklist>
+        <comment>RUNX1 node represents the RUNX Family Transcription Factor 1 [1].
+It is involved in the development of normal hematopoiesis.
+It is repressed by the PLZF::RARA translocation protein [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1550" y="305" style=""/>
+    </node>
+    <node id="SPI1" name="SPI1" maxvalue="1">
+      <value val="1">
+        <exp str="(SPI1 | CEBPAB) &amp; POU2F1 &amp; PLZF &amp; !GATA2 &amp; !(PML_RARA | PLZF_RARA)"/>
+        <exp str="RA &amp; RARA &amp; !(PML_RARA | PLZF_RARA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:11241"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20159610/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16352814/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22105598/"/>
+        </linklist>
+        <comment>SPI1 node represents the protein encoded by the Spi-1 proto-oncogene, also named PU1 [1], which is an important mediator of myeloid differentiation.
+SPI1 activity is repressed by PML::RARA and PLZF::RARA fusion proteins in APL [2, 3, 4].</comment>
+      </annotation>
+      <nodevisualsetting x="1327" y="704" style="Differentiation"/>
+    </node>
+    <node id="CEBPAB" name="C/EBPalpha and C/EBPbeta" maxvalue="1">
+      <value val="1">
+        <exp str="RA &amp; RARA &amp; CoAct_COMP &amp; !(PML_RARA | PLZF_RARA)"/>
+        <exp str="(SPI1 | (RARA &amp; CoAct_COMP &amp; !CoRep_COMP &amp; !PRC2)) &amp; !PLZF &amp; !(PLZF_RARA | PML_RARA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1833"/>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1834"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/14592978/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/32393309/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23898169/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20159610/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19723763/"/>
+        </linklist>
+        <comment>CEBPAB node represents both the C/EBPalpha and C/EBPbeta proteins [1, 2], which are important mediators of myeloid differentiation.
+C/EBPalpha activity is repressed by PML::RARA and PLZF::RARA fusion proteins in APL [3, 4, 5, 6].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1150" y="797" style="Differentiation"/>
+    </node>
+    <node id="CEBPE" name="C/EBPepsilon" maxvalue="1">
+      <value val="1">
+        <exp str="SPI1 &amp; PML &amp; !(PML_RARA | PLZF_RARA | CoRep_COMP)"/>
+        <exp str="RA &amp; SPI1 &amp; PML &amp; RARA &amp; CoAct_COMP &amp; !(PML_RARA | PLZF_RARA)"/>
+        <exp str="RA:2 &amp; SPI1 &amp; PML &amp; RARA &amp; CoAct_COMP &amp; !PLZF_RARA"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1836"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/17562868/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19855079/"/>
+        </linklist>
+        <comment>CEBPE node represents the C/EBPepsilon protein [1], which is an important mediator of myeloid differentiation.
+C/EBPepsilon is target of repression by PML::RARA and PLZF::RARA fusion proteins in APL [2, 3].</comment>
+      </annotation>
+      <nodevisualsetting x="977" y="563" style="Differentiation"/>
+    </node>
+    <node id="RARB" name="Retinoic acid receptor beta" maxvalue="1">
+      <value val="1">
+        <exp str="RA &amp; RARA &amp; CoAct_COMP &amp; !(PML_RARA | PLZF_RARA)"/>
+        <exp str="RARA &amp; CoAct_COMP &amp; !(CoRep_COMP | PRC2) &amp; !(PML_RARA | PLZF_RARA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9865"/>
+        </linklist>
+        <comment>RARB node represents the retinoic acid receptor beta [1].
+It binds retinoic acid which mediates terminal myeloid differentiation. </comment>
+      </annotation>
+      <nodevisualsetting x="902" y="831" style="Differentiation"/>
+    </node>
+    <edge id="CEBPAB:SPI1" from="CEBPAB" to="SPI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1357,800" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPAB:MYC" from="CEBPAB" to="MYC" minvalue="1" sign="negative">
+      <edgevisualsetting points="428,812" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPAB:CDKN1A" from="CEBPAB" to="CDKN1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1154,512" anchor="NE" style=""/>
+    </edge>
+    <edge id="USP37:PLZF_RARA" from="USP37" to="PLZF_RARA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1038,310" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:RARB" from="PLZF_RARA" to="RARB" minvalue="1" sign="negative">
+      <edgevisualsetting points="962,319" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:CEBPAB" from="PLZF_RARA" to="CEBPAB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1207,330" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:CDKN2D" from="PLZF_RARA" to="CDKN2D" minvalue="1" sign="negative">
+      <edgevisualsetting points="1257,258" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:CEBPE" from="PLZF_RARA" to="CEBPE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1018,330" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:RUNX1" from="PLZF_RARA" to="RUNX1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1443,326" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:DUSP6" from="PLZF_RARA" to="DUSP6" minvalue="1" sign="negative">
+      <edgevisualsetting points="1304,237" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:CDKN1A" from="PLZF_RARA" to="CDKN1A" minvalue="1" sign="negative">
+      <edgevisualsetting points="689,294" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:SPI1" from="PLZF_RARA" to="SPI1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1348,703" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:TP53" from="PLZF_RARA" to="TP53" minvalue="1" sign="negative">
+      <edgevisualsetting points="1226,778" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:MYC" from="PLZF_RARA" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="1253,658" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:CCNA2" from="PLZF_RARA" to="CCNA2" minvalue="1" sign="positive">
+      <edgevisualsetting points="865,284" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARA:SKP2" from="PLZF_RARA" to="SKP2" minvalue="1" sign="positive">
+      <edgevisualsetting points="212,303" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoRep_COMP:CEBPAB" from="CoRep_COMP" to="CEBPAB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1166,598" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoRep_COMP:RARB" from="CoRep_COMP" to="RARB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1139,843" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoRep_COMP:CDKN2D" from="CoRep_COMP" to="CDKN2D" minvalue="1" sign="negative">
+      <edgevisualsetting points="782,458" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoRep_COMP:CDKN1A" from="CoRep_COMP" to="CDKN1A" minvalue="1" sign="negative">
+      <edgevisualsetting points="898,479" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoRep_COMP:CEBPE" from="CoRep_COMP" to="CEBPE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1063,521" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:EZH2" from="E2F1" to="EZH2" minvalue="1" sign="positive">
+      <edgevisualsetting points="314,648" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:USP37" from="E2F1" to="USP37" minvalue="1" sign="positive">
+      <edgevisualsetting points="304,322" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CCND1" from="E2F1" to="CCND1" minvalue="1" sign="positive">
+      <edgevisualsetting points="433,577" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CCNE2" from="E2F1" to="CCNE2" minvalue="1" sign="positive">
+      <edgevisualsetting points="311,394" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CCNA2" from="E2F1" to="CCNA2" minvalue="1" sign="positive">
+      <edgevisualsetting points="298,282" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:MYC" from="E2F1" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="410,590" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDKN2D:CDK4_6" from="CDKN2D" to="CDK4_6" minvalue="1" sign="negative">
+      <edgevisualsetting points="776,411" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2:PLZF" from="CDK2" to="PLZF" minvalue="1" sign="negative">
+      <edgevisualsetting points="1473,358" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2:RB1" from="CDK2" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="639,382" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2:PRC2" from="CDK2" to="PRC2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1651,370" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2:CDKN1B" from="CDK2" to="CDKN1B" minvalue="1" sign="negative">
+      <edgevisualsetting points="539,358" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2:PML" from="CDK2" to="PML" minvalue="1" sign="negative">
+      <edgevisualsetting points="885,163" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF:MYC" from="PLZF" to="MYC" minvalue="1" sign="negative">
+      <edgevisualsetting points="1511,665" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF:CCNA2" from="PLZF" to="CCNA2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1145,276" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF:DUSP6" from="PLZF" to="DUSP6" minvalue="1" sign="positive">
+      <edgevisualsetting points="1615,295" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF:CEBPAB" from="PLZF" to="CEBPAB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1528,819" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF:SPI1" from="PLZF" to="SPI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1520,736" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:CDKN1A" from="MYC" to="CDKN1A" minvalue="1" sign="negative">
+      <edgevisualsetting points="469,509" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:E2F1" from="MYC" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="290,668" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:TP53" from="MYC" to="TP53" minvalue="1" sign="positive">
+      <edgevisualsetting points="176,689" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:CCND1" from="MYC" to="CCND1" minvalue="1" sign="positive">
+      <edgevisualsetting points="477,595" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:SKP2" from="MYC" to="SKP2" minvalue="1" sign="positive">
+      <edgevisualsetting points="117,678" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:CDK4_6" from="MYC" to="CDK4_6" minvalue="1" sign="positive">
+      <edgevisualsetting points="437,560" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:CCNE2" from="MYC" to="CCNE2" minvalue="1" sign="positive">
+      <edgevisualsetting points="451,465" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:CCNA2" from="MYC" to="CCNA2" minvalue="1" sign="positive">
+      <edgevisualsetting points="427,289" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:CAK" from="MYC" to="CAK" minvalue="1" sign="positive">
+      <edgevisualsetting points="389,442" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:EZH2" from="MYC" to="EZH2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1250,679" anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:CDKN1B" from="MYC" to="CDKN1B" minvalue="1" sign="negative">
+      <edgevisualsetting points="381,380" anchor="NE" style=""/>
+    </edge>
+    <edge id="GATA2:EZH2" from="GATA2" to="EZH2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1466,632" anchor="NE" style=""/>
+    </edge>
+    <edge id="GATA2:SPI1" from="GATA2" to="SPI1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1426,632" anchor="NE" style=""/>
+    </edge>
+    <edge id="GATA2:PLZF" from="GATA2" to="PLZF" minvalue="1" sign="positive">
+      <edgevisualsetting points="1489,407" anchor="NE" style=""/>
+    </edge>
+    <edge id="GATA2:SKP2" from="GATA2" to="SKP2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1406,246 434,243" anchor="NE" style=""/>
+    </edge>
+    <edge id="SPI1:CEBPAB" from="SPI1" to="CEBPAB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1370,810" anchor="NE" style=""/>
+    </edge>
+    <edge id="SPI1:CEBPE" from="SPI1" to="CEBPE" minvalue="1" sign="positive">
+      <edgevisualsetting points="1042,726" anchor="NE" style=""/>
+    </edge>
+    <edge id="SPI1:SPI1" from="SPI1" to="SPI1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NW" style=""/>
+    </edge>
+    <edge id="SPI1:GATA2" from="SPI1" to="GATA2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1413,601" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK4_6:RB1" from="CDK4_6" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="590,546" anchor="NE" style=""/>
+    </edge>
+    <edge id="RARA:RARB" from="RARA" to="RARB" minvalue="1" sign="positive">
+      <edgevisualsetting points="954,162" anchor="NE" style=""/>
+    </edge>
+    <edge id="RARA:CEBPAB" from="RARA" to="CEBPAB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1190,638" anchor="NE" style=""/>
+    </edge>
+    <edge id="RARA:CDKN2D" from="RARA" to="CDKN2D" minvalue="1" sign="positive">
+      <edgevisualsetting points="814,157" anchor="NE" style=""/>
+    </edge>
+    <edge id="RARA:CDKN1A" from="RARA" to="CDKN1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="682,148" anchor="NE" style=""/>
+    </edge>
+    <edge id="RARA:SPI1" from="RARA" to="SPI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1363,151" anchor="NE" style=""/>
+    </edge>
+    <edge id="RARA:CEBPE" from="RARA" to="CEBPE" minvalue="1" sign="positive">
+      <edgevisualsetting points="1010,167" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAK:CDK4_6" from="CAK" to="CDK4_6" minvalue="1" sign="positive">
+      <edgevisualsetting points="406,553" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAK:CDK2" from="CAK" to="CDK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="895,134" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAK:RB1" from="CAK" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="414,435" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAK:PML_RARA" from="CAK" to="PML_RARA" minvalue="1" sign="positive">
+      <edgevisualsetting points="580,142" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAK:PLZF_RARA" from="CAK" to="PLZF_RARA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1272,123" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML:CEBPE" from="PML" to="CEBPE" minvalue="1" sign="positive">
+      <edgevisualsetting points="984,172" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML:E2F1" from="PML" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="284,422" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML:RB1" from="PML" to="RB1" minvalue="1" sign="positive">
+      <edgevisualsetting points="366,442" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML:TP53" from="PML" to="TP53" minvalue="1" sign="positive">
+      <edgevisualsetting points="350,755" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML:MDM2" from="PML" to="MDM2" minvalue="1" sign="negative">
+      <edgevisualsetting points="260,306" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML:GATA2" from="PML" to="GATA2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1418,179" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML:MYC" from="PML" to="MYC" minvalue="1" sign="negative">
+      <edgevisualsetting points="359,468" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:CEBPAB" from="PML_RARA" to="CEBPAB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1183,204" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:RARB" from="PML_RARA" to="RARB" minvalue="1" sign="negative">
+      <edgevisualsetting points="935,215" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:CDKN2D" from="PML_RARA" to="CDKN2D" minvalue="1" sign="negative">
+      <edgevisualsetting points="714,223" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:CDKN1A" from="PML_RARA" to="CDKN1A" minvalue="1" sign="negative">
+      <edgevisualsetting points="651,332" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:SPI1" from="PML_RARA" to="SPI1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1357,196" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:CEBPE" from="PML_RARA" to="CEBPE" minvalue="1" sign="negative">
+      <edgevisualsetting points="993,210" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:TP53" from="PML_RARA" to="TP53" minvalue="1" sign="negative">
+      <edgevisualsetting points="105,203" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:MDM2" from="PML_RARA" to="MDM2" minvalue="1" sign="positive">
+      <edgevisualsetting points="270,224" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:E2F1" from="PML_RARA" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="291,230" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:MYC" from="PML_RARA" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="397,237" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:RB1" from="PML_RARA" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="622,404" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARA:SKP2" from="PML_RARA" to="SKP2" minvalue="1" sign="positive">
+      <edgevisualsetting points="408,214" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:CCND1" from="RB1" to="CCND1" minvalue="1" sign="negative">
+      <edgevisualsetting points="571,522" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:CCNE2" from="RB1" to="CCNE2" minvalue="1" sign="negative">
+      <edgevisualsetting points="482,426" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:CCNA2" from="RB1" to="CCNA2" minvalue="1" sign="negative">
+      <edgevisualsetting points="588,336" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:USP37" from="RB1" to="USP37" minvalue="1" sign="negative">
+      <edgevisualsetting points="580,330" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:MYC" from="RB1" to="MYC" minvalue="1" sign="negative">
+      <edgevisualsetting points="461,469" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:EZH2" from="RB1" to="EZH2" minvalue="1" sign="negative">
+      <edgevisualsetting points="543,639" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:E2F1" from="RB1" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="317,461" anchor="NE" style=""/>
+    </edge>
+    <edge id="SKP2:CDKN1B" from="SKP2" to="CDKN1B" minvalue="1" sign="negative">
+      <edgevisualsetting points="172,303" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLZF_RARAg:PLZF_RARA" from="PLZF_RARAg" to="PLZF_RARA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1289,208" anchor="NE" style=""/>
+    </edge>
+    <edge id="EZH2:PRC2" from="EZH2" to="PRC2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1652,569" anchor="NE" style=""/>
+    </edge>
+    <edge id="EZH2:MYC" from="EZH2" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="1241,672" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDKN1A:E2F1" from="CDKN1A" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="325,494" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDKN1A:CDK4_6" from="CDKN1A" to="CDK4_6" minvalue="1" sign="negative">
+      <edgevisualsetting points="664,538" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDKN1A:CDK2" from="CDKN1A" to="CDK2" minvalue="1" sign="negative">
+      <edgevisualsetting points="698,390" anchor="NE" style=""/>
+    </edge>
+    <edge id="PML_RARAg:PML_RARA" from="PML_RARAg" to="PML_RARA" minvalue="1" sign="positive">
+      <edgevisualsetting points="597,137" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRC2:CEBPAB" from="PRC2" to="CEBPAB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1675,830" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRC2:RARB" from="PRC2" to="RARB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1688,856" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRC2:CDKN2D" from="PRC2" to="CDKN2D" minvalue="1" sign="negative">
+      <edgevisualsetting points="1682,226" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRC2:CDKN1A" from="PRC2" to="CDKN1A" minvalue="1" sign="negative">
+      <edgevisualsetting points="1632,500" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDKN1B:CDK2" from="CDKN1B" to="CDK2" minvalue="1" sign="negative">
+      <edgevisualsetting points="544,364" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDKN1B:RB1" from="CDKN1B" to="RB1" minvalue="1" sign="positive">
+      <edgevisualsetting points="139,454" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCNE2:CDK2" from="CCNE2" to="CDK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="664,374" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCNE2:RB1" from="CCNE2" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="561,392" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCNE2:CDKN1B" from="CCNE2" to="CDKN1B" minvalue="1" sign="negative">
+      <edgevisualsetting points="323,373" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoAct_COMP:CEBPAB" from="CoAct_COMP" to="CEBPAB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1173,571" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoAct_COMP:RARB" from="CoAct_COMP" to="RARB" minvalue="1" sign="positive">
+      <edgevisualsetting points="971,407" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoAct_COMP:CDKN2D" from="CoAct_COMP" to="CDKN2D" minvalue="1" sign="positive">
+      <edgevisualsetting points="1111,266" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoAct_COMP:CDKN1A" from="CoAct_COMP" to="CDKN1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="705,400" anchor="NE" style=""/>
+    </edge>
+    <edge id="CoAct_COMP:CEBPE" from="CoAct_COMP" to="CEBPE" minvalue="1" sign="positive">
+      <edgevisualsetting points="1031,416" anchor="NE" style=""/>
+    </edge>
+    <edge id="RA:CEBPAB" from="RA" to="CEBPAB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1201,106" anchor="NE" style=""/>
+    </edge>
+    <edge id="RA:RARB" from="RA" to="RARB" minvalue="1" sign="positive">
+      <edgevisualsetting points="946,384" anchor="NE" style=""/>
+    </edge>
+    <edge id="RA:SPI1" from="RA" to="SPI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1372,96" anchor="NE" style=""/>
+    </edge>
+    <edge id="RA:CEBPE" from="RA" to="CEBPE" effects="1:positive 2:positive">
+      <edgevisualsetting points="1001,399" anchor="NE" style=""/>
+    </edge>
+    <edge id="RA:CDKN2D" from="RA" to="CDKN2D" minvalue="1" sign="positive">
+      <edgevisualsetting points="802,103" anchor="NE" style=""/>
+    </edge>
+    <edge id="RA:CDKN1A" from="RA" to="CDKN1A" effects="1:positive 2:positive">
+      <edgevisualsetting points="671,86" anchor="NE" style=""/>
+    </edge>
+    <edge id="TP53:CDKN1A" from="TP53" to="CDKN1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="165,483" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCND1:CDK4_6" from="CCND1" to="CDK4_6" minvalue="1" sign="positive">
+      <edgevisualsetting points="812,599" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCND1:RB1" from="CCND1" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="580,526" anchor="NE" style=""/>
+    </edge>
+    <edge id="MDM2:TP53" from="MDM2" to="TP53" minvalue="1" sign="negative">
+      <edgevisualsetting points="156,615" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCNA2:CDK2" from="CCNA2" to="CDK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="604,347" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCNA2:RB1" from="CCNA2" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="596,360" anchor="NE" style=""/>
+    </edge>
+    <edge id="CCNA2:CDKN1B" from="CCNA2" to="CDKN1B" minvalue="1" sign="negative">
+      <edgevisualsetting points="194,276" anchor="NE" style=""/>
+    </edge>
+    <edge id="POU2F1:SPI1" from="POU2F1" to="SPI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1379,139" anchor="NE" style=""/>
+    </edge>
+    <annotation>
+      <linklist>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/19451220/"/>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9462740/"/>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10954752/"/>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28584084/"/>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/36514338/"/>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21853041/"/>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27098097/"/>
+        <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/35984905/"/>
+      </linklist>
+      <comment>Predictive modelling of Acute Promyelocytic Leukaemia resistance to Retinoic Acid therapy.
+
+Authors: José A. Sánchez-Villanueva (1), Lia N’Guyen (2), Mathilde Poplineau (2), Estelle Duprez (2), Élisabeth Remy (1) &amp; Denis Thieffry (3,4)
+
+1) Aix Marseille Univ, CNRS, I2M, Marseille, France.
+2) Integrative molecular biology in hematopoiesis and leukemia, Equipe Labellisée Ligue Contre le Cancer, CRCM, Inserm UMR1068, CNRS UMR7258, Institut Paoli-Calmettes, Aix Marseille Univ, Marseille, France.
+3) Department of Biology, École Normale Supérieure, Paris, France.
+4) Institut Curie - INSERM U900 - Mines Paris, PSL Research University, Paris, France.
+
+This model was designed to study the main features of resistance to Retinoic Acid (RA) treatment applied to Acute Promyelocytic Leukemia (APL) cells [1, 2, 3].
+Briefly, acute Promyelocytic Leukaemia (APL) results from an aberrant chromosomal translocation involving the Retinoic Acid Receptor Alpha (RARA) gene, most frequently with the Promyelocytic Leukaemia (PML) or Promyelocytic Leukaemia Zinc Finger (PLZF) gene. These oncoproteins block the normal haematopoietic differentiation program and promote aberrant proliferative promyelocytes.
+
+A differentiation therapy based on high doses of Retinoic Acid (RA) is successful in most of the PML::RARA patients, while PLZF::RARA patients frequently display treatment resistance and relapse.
+
+Previously published computational models [4, 5, 6, 7] focused on haematopoietic specification processes  were used for the model construction. The resulting model integrates signalling, transcriptional and epigenetic regulatory mechanisms, thereby capturing the key  activities of the two fusion proteins, as well as of their wild type counterpart, which underly cell responses to physiological and pharmacological RA treatments.
+
+More specifically, an analysis of single cell omics data (RNAseq and ATACseq data) for RA-treated versus control cells from an APL mouse model expressing the PLZF::RARA translocation revealed a potential role for EZH2 non canonical epigenetic activity sustaining RA-resistance [8], which could be assessed using this model.
+
+The stable states of the model recapitulate the main phenotypes of the APL subtypes and their different responses to RA.</comment>
+    </annotation>
+  </graph>
+</gxl>

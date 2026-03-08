@@ -1,0 +1,278 @@
+{
+  "name": "ginsim_default_MCP_budding_yeast_CC",
+  "nodes": [
+    "MASS",
+    "BUD",
+    "Hsl1",
+    "SBF",
+    "Clb2",
+    "Mih1",
+    "Mpk1",
+    "Swe1"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "MASS": "MASS:1",
+    "BUD": "MASS",
+    "Hsl1": "BUD",
+    "SBF": "MASS & !Clb2",
+    "Clb2": "(MASS:1 & Swe1 & !Mih1:2) | (MASS & Swe1:2 & !Mih1)",
+    "Mih1": "(Mpk1 & Clb2) | (!Mpk1 & !Clb2)",
+    "Mpk1": "!BUD",
+    "Swe1": "SBF & ((Clb2 & !Hsl1) | (Hsl1 & !Clb2))"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "MASS": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "BUD": {
+      "inputs": [
+        "MASS"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Hsl1": {
+      "inputs": [
+        "BUD"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "SBF": {
+      "inputs": [
+        "MASS",
+        "Clb2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Clb2": {
+      "inputs": [
+        "MASS",
+        "Mih1",
+        "Swe1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Mih1": {
+      "inputs": [
+        "Clb2",
+        "Mpk1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Mpk1": {
+      "inputs": [
+        "BUD"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Swe1": {
+      "inputs": [
+        "Hsl1",
+        "SBF",
+        "Clb2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 6,
+    "IDENTITY": 2
+  },
+  "n": 8,
+  "n_edges": 13,
+  "edges": [
+    {
+      "source": "MASS",
+      "target": "Clb2",
+      "type": "activation"
+    },
+    {
+      "source": "MASS",
+      "target": "Clb2",
+      "type": "activation"
+    },
+    {
+      "source": "MASS",
+      "target": "SBF",
+      "type": "activation"
+    },
+    {
+      "source": "MASS",
+      "target": "MASS",
+      "type": "activation"
+    },
+    {
+      "source": "MASS",
+      "target": "MASS",
+      "type": "activation"
+    },
+    {
+      "source": "MASS",
+      "target": "BUD",
+      "type": "activation"
+    },
+    {
+      "source": "BUD",
+      "target": "Hsl1",
+      "type": "activation"
+    },
+    {
+      "source": "BUD",
+      "target": "Mpk1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Hsl1",
+      "target": "Swe1",
+      "type": "inhibition"
+    },
+    {
+      "source": "SBF",
+      "target": "Swe1",
+      "type": "activation"
+    },
+    {
+      "source": "Clb2",
+      "target": "Swe1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Clb2",
+      "target": "SBF",
+      "type": "inhibition"
+    },
+    {
+      "source": "Clb2",
+      "target": "Mih1",
+      "type": "activation"
+    },
+    {
+      "source": "Mih1",
+      "target": "Clb2",
+      "type": "activation"
+    },
+    {
+      "source": "Mih1",
+      "target": "Clb2",
+      "type": "activation"
+    },
+    {
+      "source": "Mpk1",
+      "target": "Mih1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Swe1",
+      "target": "Clb2",
+      "type": "inhibition"
+    },
+    {
+      "source": "Swe1",
+      "target": "Clb2",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    3,
+    2,
+    1,
+    1,
+    3,
+    1,
+    1,
+    1
+  ]
+}

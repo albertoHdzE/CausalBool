@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="model_1cell" nodeorder="Y Wt1 AS Gata4 AF IW Sry Sf1 Sox9 Fgf9 Wnt4 b_cat Dmrt1 Foxl2">
+    <node id="Y" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <ellipse x="180" y="492" width="55" height="26" backgroundColor="#000000" foregroundColor="#ffffff"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Wt1" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <ellipse x="235" y="275" width="55" height="26" backgroundColor="#000000" foregroundColor="#ffffff"/>
+      </nodevisualsetting>
+    </node>
+    <node id="AS" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <ellipse x="341" y="496" width="55" height="26" backgroundColor="#000000" foregroundColor="#ffffff"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Gata4" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <ellipse x="179" y="120" width="55" height="26" backgroundColor="#000000" foregroundColor="#ffffff"/>
+      </nodevisualsetting>
+    </node>
+    <node id="AF" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <ellipse x="485" y="68" width="55" height="26" backgroundColor="#000000" foregroundColor="#ffffff"/>
+      </nodevisualsetting>
+    </node>
+    <node id="IW" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <ellipse x="649" y="491" width="55" height="26" backgroundColor="#000000" foregroundColor="#ffffff"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Sry" maxvalue="1">
+      <value val="1">
+        <exp str="Y &amp; Wt1 &amp; AS &amp; Sf1 &amp; !Sox9:2 &amp; Gata4"/>
+      </value>
+      <nodevisualsetting>
+        <ellipse x="341" y="405" width="55" height="30" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Sf1" maxvalue="2">
+      <value val="2">
+        <exp str="Wt1 &amp; Sox9"/>
+      </value>
+      <value val="1">
+        <exp str="Wt1 &amp; !Sox9"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="342" y="175" width="55" height="32" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Sox9" maxvalue="2">
+      <value val="2">
+        <exp str="(Sry &amp; Sf1 &amp; !b_cat:2 &amp; !Foxl2) | (!Sry &amp; Sf1 &amp; Sox9 &amp; !b_cat &amp; !Foxl2)"/>
+      </value>
+      <value val="1">
+        <exp str="(!Sry &amp; !b_cat:2 &amp; !Foxl2 &amp; !Sox9:1 &amp; Sf1) | (!Sry &amp; Sf1 &amp; b_cat:1 &amp; !Foxl2 &amp; Sox9)"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="486" y="254" width="55" height="32" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Fgf9" maxvalue="2">
+      <value val="2">
+        <exp str="Fgf9 &amp; Sox9:2"/>
+      </value>
+      <value val="1">
+        <exp str="(Fgf9:1 &amp; !Sox9:2) | (Sox9:2 &amp; !Fgf9)"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="486" y="406" width="55" height="32" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Wnt4" maxvalue="2">
+      <value val="2">
+        <exp str="!IW &amp; Wnt4:1 &amp; !Fgf9"/>
+      </value>
+      <value val="1">
+        <exp str="!IW &amp; Wnt4:1 &amp; Fgf9:1"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="649" y="408" width="55" height="32" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="b_cat" maxvalue="2">
+      <value val="2">
+        <exp str="Wnt4:2 &amp; !Sox9:2"/>
+      </value>
+      <value val="1">
+        <exp str="Wnt4:1 &amp; !Sox9:2"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="649" y="271" width="55" height="32" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Dmrt1" maxvalue="1">
+      <value val="1">
+        <exp str="(Gata4 | (Sox9:2 &amp; Sf1)) &amp; !Foxl2"/>
+      </value>
+      <nodevisualsetting>
+        <ellipse x="342" y="117" width="55" height="30" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Foxl2" maxvalue="1">
+      <value val="1">
+        <exp str="AF &amp; !Dmrt1:1"/>
+      </value>
+      <nodevisualsetting>
+        <ellipse x="485" y="118" width="55" height="30" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <edge id="Sf1:Sry" from="Sf1" to="Sry" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="369,209 368,402" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sf1:Sox9" from="Sf1" to="Sox9" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="382,209 382,262 483,262" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sf1:Dmrt1" from="Sf1" to="Dmrt1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="369,173 369,150" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="b_cat:Sox9" from="b_cat" to="Sox9" effects="1:negative 2:negative">
+      <edgevisualsetting>
+        <polyline points="647,274 640,274 544,274" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AF:Foxl2" from="AF" to="Foxl2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="512,96 512,115" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="IW:Wnt4" from="IW" to="Wnt4" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="676,489 676,443" line_color="#c80000" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Wnt4:b_cat" from="Wnt4" to="b_cat" effects="1:positive 2:positive">
+      <edgevisualsetting>
+        <polyline points="676,406 676,306" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Wnt4:Wnt4" from="Wnt4" to="Wnt4" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="689,406 689,393 719,393 719,423 707,423" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sox9:Sf1" from="Sox9" to="Sf1" minvalue="2" sign="positive">
+      <edgevisualsetting>
+        <polyline points="484,252 389,252 389,210" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sox9:Sry" from="Sox9" to="Sry" minvalue="2" sign="negative">
+      <edgevisualsetting>
+        <polyline points="484,273 381,273 381,402" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sox9:Fgf9" from="Sox9" to="Fgf9" minvalue="2" sign="positive">
+      <edgevisualsetting>
+        <polyline points="513,288 513,403" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sox9:Sox9" from="Sox9" to="Sox9" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="526,252 526,239 556,239 556,269 544,269" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sox9:b_cat" from="Sox9" to="b_cat" minvalue="2" sign="negative">
+      <edgevisualsetting>
+        <polyline points="543,283 606,283 646,283" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sox9:Dmrt1" from="Sox9" to="Dmrt1" minvalue="2" sign="positive">
+      <edgevisualsetting>
+        <polyline points="496,252 385,150" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Wt1:Sf1" from="Wt1" to="Sf1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="264,273 264,193 339,193" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Wt1:Sry" from="Wt1" to="Sry" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="265,303 265,402 338,402" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AS:Sry" from="AS" to="Sry" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="368,494 368,438" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Y:Sry" from="Y" to="Sry" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="207,490 207,425 338,425" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Gata4:Dmrt1" from="Gata4" to="Dmrt1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="236,132 339,132" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Gata4:Sry" from="Gata4" to="Sry" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="206,148 206,406 338,406" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Foxl2:Sox9" from="Foxl2" to="Sox9" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="512,150 513,251" line_color="#c80000" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Foxl2:Dmrt1" from="Foxl2" to="Dmrt1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="483,138 405,138 400,138" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Dmrt1:Foxl2" from="Dmrt1" to="Foxl2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="399,128 398,128 482,128" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Fgf9:Fgf9" from="Fgf9" to="Fgf9" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="526,404 526,391 556,391 556,421 544,421" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Fgf9:Wnt4" from="Fgf9" to="Wnt4" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="543,430 588,430 646,430" line_color="#c80000" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Sry:Sox9" from="Sry" to="Sox9" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="398,416 427,416 427,280 483,280" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+  </graph>
+</gxl>

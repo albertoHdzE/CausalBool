@@ -1,0 +1,222 @@
+{
+  "name": "arabidopsis_cc",
+  "nodes": [
+    "CycD3",
+    "E2Fa",
+    "RBR",
+    "CycA",
+    "CycB",
+    "CDKB",
+    "KRP"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ]
+  ],
+  "logic": {
+    "CycD3": "INPUT",
+    "E2Fa": "AND(CycD3, NOT(RBR))",
+    "RBR": "AND(NOT(CycD3), NOT(CycA), NOT(CycB))",
+    "CycA": "E2Fa",
+    "CycB": "AND(CycA, NOT(KRP))",
+    "CDKB": "CycB",
+    "KRP": "NOT(CDKB)"
+  },
+  "reference": "Menges et al., 2005",
+  "description": "Arabidopsis Cell Cycle Core",
+  "source": "Literature",
+  "gates": {
+    "CycD3": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "E2Fa": {
+      "inputs": [
+        "CycD3",
+        "RBR"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "RBR": {
+      "inputs": [
+        "CycD3",
+        "CycA",
+        "CycB"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "CycA": {
+      "inputs": [
+        "E2Fa"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "CycB": {
+      "inputs": [
+        "CycA",
+        "KRP"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "CDKB": {
+      "inputs": [
+        "CycB"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "KRP": {
+      "inputs": [
+        "CDKB"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 1,
+    "CANALISING": 2,
+    "NOR": 1,
+    "IDENTITY": 2,
+    "NOT": 1
+  },
+  "n": 7,
+  "n_edges": 10,
+  "edges": [
+    {
+      "source": "CycD3",
+      "target": "E2Fa",
+      "type": "regulation"
+    },
+    {
+      "source": "RBR",
+      "target": "E2Fa",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD3",
+      "target": "RBR",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "RBR",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "RBR",
+      "type": "regulation"
+    },
+    {
+      "source": "E2Fa",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "KRP",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "CDKB",
+      "type": "regulation"
+    },
+    {
+      "source": "CDKB",
+      "target": "KRP",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    2,
+    1,
+    1,
+    2,
+    2,
+    1,
+    1
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/arabidopsis_cc.json",
+  "category": "Maintainer"
+}

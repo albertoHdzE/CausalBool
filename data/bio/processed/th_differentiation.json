@@ -1,0 +1,241 @@
+{
+  "name": "th_differentiation",
+  "nodes": [
+    "GATA3",
+    "Tbet",
+    "IL4",
+    "IFNg",
+    "STAT6",
+    "STAT1",
+    "SOCS1"
+  ],
+  "cm": [
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0
+    ]
+  ],
+  "logic": {
+    "GATA3": "AND(STAT6, NOT(Tbet))",
+    "Tbet": "AND(STAT1, NOT(GATA3))",
+    "IL4": "AND(GATA3, NOT(STAT1))",
+    "IFNg": "AND(Tbet, NOT(STAT6))",
+    "STAT6": "IL4",
+    "STAT1": "IFNg",
+    "SOCS1": "OR(Tbet, STAT1)"
+  },
+  "reference": "Mendoza & Xenarios, 2006",
+  "description": "Th1/Th2 Differentiation Switch",
+  "source": "Literature",
+  "gates": {
+    "GATA3": {
+      "inputs": [
+        "Tbet",
+        "STAT6"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "Tbet": {
+      "inputs": [
+        "GATA3",
+        "STAT1"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "IL4": {
+      "inputs": [
+        "GATA3",
+        "STAT1"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "IFNg": {
+      "inputs": [
+        "Tbet",
+        "STAT6"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "STAT6": {
+      "inputs": [
+        "IL4"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "STAT1": {
+      "inputs": [
+        "IFNg"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "SOCS1": {
+      "inputs": [
+        "Tbet",
+        "STAT1"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CANALISING": 4,
+    "IDENTITY": 2,
+    "OR": 1
+  },
+  "n": 7,
+  "n_edges": 12,
+  "edges": [
+    {
+      "source": "STAT6",
+      "target": "GATA3",
+      "type": "regulation"
+    },
+    {
+      "source": "Tbet",
+      "target": "GATA3",
+      "type": "regulation"
+    },
+    {
+      "source": "STAT1",
+      "target": "Tbet",
+      "type": "regulation"
+    },
+    {
+      "source": "GATA3",
+      "target": "Tbet",
+      "type": "regulation"
+    },
+    {
+      "source": "GATA3",
+      "target": "IL4",
+      "type": "regulation"
+    },
+    {
+      "source": "STAT1",
+      "target": "IL4",
+      "type": "regulation"
+    },
+    {
+      "source": "Tbet",
+      "target": "IFNg",
+      "type": "regulation"
+    },
+    {
+      "source": "STAT6",
+      "target": "IFNg",
+      "type": "regulation"
+    },
+    {
+      "source": "IL4",
+      "target": "STAT6",
+      "type": "regulation"
+    },
+    {
+      "source": "IFNg",
+      "target": "STAT1",
+      "type": "regulation"
+    },
+    {
+      "source": "Tbet",
+      "target": "SOCS1",
+      "type": "regulation"
+    },
+    {
+      "source": "STAT1",
+      "target": "SOCS1",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    2,
+    3,
+    1,
+    1,
+    2,
+    3,
+    0
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/th_differentiation.json",
+  "category": "Decider"
+}

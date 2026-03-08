@@ -1,0 +1,679 @@
+{
+  "name": "ginsim_default_Traynard_Boolean_MamCC_Apr2016",
+  "nodes": [
+    "CycD",
+    "Rb2",
+    "E2F",
+    "CycE",
+    "CycA",
+    "CycB",
+    "p27_1",
+    "Cdc20",
+    "Cdh1",
+    "UbcH10",
+    "Skp2",
+    "Rb1",
+    "p27_2"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Rb2": "!CycD & !CycE & ((!CycA & !CycB) | p27_1) & Rb1",
+    "E2F": "(!CycA | (!p27_2 & !Skp2) | p27_2) & !(Rb1 & Rb2) & !(Cdc20 & CycB)",
+    "CycE": "E2F & !(Rb1 & Rb2)",
+    "CycA": "((E2F & !Rb1) | CycA) & (!UbcH10 | (!Cdh1 & !Cdc20))",
+    "CycB": "(!UbcH10 | !Cdc20) & !Cdh1",
+    "p27_1": "CycD & ((!CycB & (!CycA | p27_1) & (!CycE | (p27_1 & p27_2 & !CycA))) | !Skp2)",
+    "Cdc20": "CycB",
+    "Cdh1": "(!CycA | (p27_1 & !p27_2 & !Skp2) | (p27_1 & p27_2)) & (!CycB | p27_1)",
+    "UbcH10": "!Cdh1",
+    "Skp2": "!Cdh1 | !(Rb1 & Rb2)",
+    "Rb1": "!CycE & !CycA & !CycB",
+    "p27_2": "!CycD & ((!CycB & (!CycA | p27_1) & (!CycE | (p27_1 & p27_2 & !CycA))) | !Skp2) & p27_1"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "Rb2": {
+      "inputs": [
+        "CycD",
+        "CycE",
+        "CycA",
+        "CycB",
+        "p27_1",
+        "Rb1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "E2F": {
+      "inputs": [
+        "Rb2",
+        "CycA",
+        "CycB",
+        "p27_1",
+        "Cdc20",
+        "Skp2",
+        "Rb1",
+        "p27_2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycE": {
+      "inputs": [
+        "Rb2",
+        "E2F",
+        "Rb1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycA": {
+      "inputs": [
+        "E2F",
+        "Cdc20",
+        "Cdh1",
+        "UbcH10",
+        "Rb1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycB": {
+      "inputs": [
+        "Cdc20",
+        "Cdh1",
+        "UbcH10"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "p27_1": {
+      "inputs": [
+        "CycD",
+        "CycE",
+        "CycA",
+        "CycB",
+        "Skp2",
+        "p27_2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Cdc20": {
+      "inputs": [
+        "CycB"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Cdh1": {
+      "inputs": [
+        "CycA",
+        "CycB",
+        "p27_1",
+        "Skp2",
+        "p27_2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "UbcH10": {
+      "inputs": [
+        "CycA",
+        "CycB",
+        "Cdc20",
+        "Cdh1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Skp2": {
+      "inputs": [
+        "Rb2",
+        "Cdh1",
+        "Rb1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Rb1": {
+      "inputs": [
+        "Rb2",
+        "CycE",
+        "CycA",
+        "CycB",
+        "p27_1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "p27_2": {
+      "inputs": [
+        "CycD",
+        "CycE",
+        "CycA",
+        "CycB",
+        "p27_1",
+        "Skp2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 11,
+    "IDENTITY": 1
+  },
+  "n": 13,
+  "n_edges": 55,
+  "edges": [
+    {
+      "source": "Rb2",
+      "target": "Skp2",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb2",
+      "target": "CycE",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb2",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb2",
+      "target": "Rb1",
+      "type": "activation"
+    },
+    {
+      "source": "CycA",
+      "target": "Cdh1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "CycA",
+      "type": "activation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27_1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "activation"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb2",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "p27_2",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb2",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycE",
+      "target": "p27_1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycE",
+      "target": "p27_2",
+      "type": "inhibition"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27_1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Skp2",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "Skp2",
+      "target": "Cdh1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27_2",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycB",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdh1",
+      "target": "Skp2",
+      "type": "inhibition"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "activation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycE",
+      "type": "activation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27_1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "Cdh1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "Cdc20",
+      "type": "activation"
+    },
+    {
+      "source": "CycB",
+      "target": "UbcH10",
+      "type": "activation"
+    },
+    {
+      "source": "CycB",
+      "target": "Rb2",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "Rb1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "p27_2",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycD",
+      "target": "Rb2",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycD",
+      "target": "p27_1",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycD",
+      "target": "p27_2",
+      "type": "inhibition"
+    },
+    {
+      "source": "p27_1",
+      "target": "p27_1",
+      "type": "unknown"
+    },
+    {
+      "source": "p27_1",
+      "target": "E2F",
+      "type": "activation"
+    },
+    {
+      "source": "p27_1",
+      "target": "Rb2",
+      "type": "activation"
+    },
+    {
+      "source": "p27_1",
+      "target": "Cdh1",
+      "type": "activation"
+    },
+    {
+      "source": "p27_1",
+      "target": "Rb1",
+      "type": "activation"
+    },
+    {
+      "source": "p27_1",
+      "target": "p27_2",
+      "type": "activation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycA",
+      "type": "inhibition"
+    },
+    {
+      "source": "UbcH10",
+      "target": "UbcH10",
+      "type": "activation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycB",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycB",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdc20",
+      "target": "UbcH10",
+      "type": "activation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb1",
+      "target": "Rb2",
+      "type": "activation"
+    },
+    {
+      "source": "Rb1",
+      "target": "CycE",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb1",
+      "target": "CycA",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb1",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb1",
+      "target": "Skp2",
+      "type": "inhibition"
+    },
+    {
+      "source": "p27_2",
+      "target": "p27_2",
+      "type": "activation"
+    },
+    {
+      "source": "p27_2",
+      "target": "p27_1",
+      "type": "activation"
+    },
+    {
+      "source": "p27_2",
+      "target": "E2F",
+      "type": "activation"
+    },
+    {
+      "source": "p27_2",
+      "target": "Cdh1",
+      "type": "activation"
+    }
+  ],
+  "out_degrees": [
+    3,
+    4,
+    2,
+    4,
+    7,
+    8,
+    5,
+    4,
+    4,
+    2,
+    4,
+    5,
+    3
+  ]
+}

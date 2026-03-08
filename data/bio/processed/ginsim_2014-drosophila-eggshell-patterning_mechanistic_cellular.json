@@ -1,0 +1,640 @@
+{
+  "name": "ginsim_2014-drosophila-eggshell-patterning_mechanistic_cellular",
+  "nodes": [
+    "earlyGrk",
+    "X",
+    "Rho_ext",
+    "dpERK",
+    "Mid",
+    "Mirr",
+    "Rho",
+    "Br_adj",
+    "S",
+    "Aos_ext",
+    "earlyDpp",
+    "Pnt",
+    "Br",
+    "Grk",
+    "Aos",
+    "A",
+    "Dpp"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "X": "!Br & Br_adj",
+    "dpERK": "Grk:2 & ((S:2 & A & !X) | (!S:2 & !X))",
+    "Mid": "(earlyGrk & !earlyDpp) | Mid",
+    "Mirr": "dpERK & !Mid",
+    "Rho": "!Br & Mirr & dpERK:1",
+    "S": "(Rho:1 | Rho_ext:1) & !(Rho:2 | Rho_ext:2)",
+    "Pnt": "dpERK",
+    "Br": "(Mirr | Br) & !Dpp & !Pnt",
+    "Aos": "Pnt & !Mid & dpERK",
+    "A": "Aos_ext:2 | (Aos & Aos_ext:1)"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "X": {
+      "inputs": [
+        "Br_adj",
+        "Br"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "dpERK": {
+      "inputs": [
+        "X",
+        "S",
+        "Grk",
+        "A"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Mid": {
+      "inputs": [
+        "earlyGrk",
+        "earlyDpp"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Mirr": {
+      "inputs": [
+        "dpERK",
+        "Mid"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Rho": {
+      "inputs": [
+        "dpERK",
+        "Mirr",
+        "Br"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "S": {
+      "inputs": [
+        "Rho_ext",
+        "Rho"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Pnt": {
+      "inputs": [
+        "dpERK"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Br": {
+      "inputs": [
+        "Mirr",
+        "Pnt",
+        "Dpp"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Aos": {
+      "inputs": [
+        "dpERK",
+        "Mid",
+        "Pnt"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "A": {
+      "inputs": [
+        "Aos_ext",
+        "Aos"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 9,
+    "IDENTITY": 1
+  },
+  "n": 17,
+  "n_edges": 24,
+  "edges": [
+    {
+      "source": "earlyGrk",
+      "target": "Mid",
+      "type": "activation"
+    },
+    {
+      "source": "X",
+      "target": "dpERK",
+      "type": "activation"
+    },
+    {
+      "source": "Rho_ext",
+      "target": "S",
+      "type": "activation"
+    },
+    {
+      "source": "Rho_ext",
+      "target": "S",
+      "type": "activation"
+    },
+    {
+      "source": "dpERK",
+      "target": "Rho",
+      "type": "activation"
+    },
+    {
+      "source": "dpERK",
+      "target": "Rho",
+      "type": "activation"
+    },
+    {
+      "source": "dpERK",
+      "target": "Pnt",
+      "type": "activation"
+    },
+    {
+      "source": "dpERK",
+      "target": "Mirr",
+      "type": "activation"
+    },
+    {
+      "source": "dpERK",
+      "target": "Aos",
+      "type": "activation"
+    },
+    {
+      "source": "Mid",
+      "target": "Mirr",
+      "type": "inhibition"
+    },
+    {
+      "source": "Mid",
+      "target": "Aos",
+      "type": "inhibition"
+    },
+    {
+      "source": "Mid",
+      "target": "Mid",
+      "type": "activation"
+    },
+    {
+      "source": "Mirr",
+      "target": "Rho",
+      "type": "activation"
+    },
+    {
+      "source": "Mirr",
+      "target": "Br",
+      "type": "activation"
+    },
+    {
+      "source": "Rho",
+      "target": "S",
+      "type": "activation"
+    },
+    {
+      "source": "Rho",
+      "target": "S",
+      "type": "activation"
+    },
+    {
+      "source": "Br_adj",
+      "target": "X",
+      "type": "activation"
+    },
+    {
+      "source": "S",
+      "target": "dpERK",
+      "type": "activation"
+    },
+    {
+      "source": "S",
+      "target": "dpERK",
+      "type": "activation"
+    },
+    {
+      "source": "Aos_ext",
+      "target": "A",
+      "type": "activation"
+    },
+    {
+      "source": "Aos_ext",
+      "target": "A",
+      "type": "activation"
+    },
+    {
+      "source": "earlyDpp",
+      "target": "Mid",
+      "type": "inhibition"
+    },
+    {
+      "source": "Pnt",
+      "target": "Br",
+      "type": "inhibition"
+    },
+    {
+      "source": "Pnt",
+      "target": "Aos",
+      "type": "activation"
+    },
+    {
+      "source": "Br",
+      "target": "Rho",
+      "type": "inhibition"
+    },
+    {
+      "source": "Br",
+      "target": "Br",
+      "type": "activation"
+    },
+    {
+      "source": "Br",
+      "target": "X",
+      "type": "inhibition"
+    },
+    {
+      "source": "Grk",
+      "target": "dpERK",
+      "type": "activation"
+    },
+    {
+      "source": "Grk",
+      "target": "dpERK",
+      "type": "activation"
+    },
+    {
+      "source": "Grk",
+      "target": "dpERK",
+      "type": "activation"
+    },
+    {
+      "source": "Aos",
+      "target": "A",
+      "type": "activation"
+    },
+    {
+      "source": "A",
+      "target": "dpERK",
+      "type": "inhibition"
+    },
+    {
+      "source": "Dpp",
+      "target": "Br",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    1,
+    1,
+    1,
+    4,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1
+  ]
+}

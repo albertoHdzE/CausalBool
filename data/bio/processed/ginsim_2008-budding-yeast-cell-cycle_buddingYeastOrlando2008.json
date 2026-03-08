@@ -1,0 +1,320 @@
+{
+  "name": "ginsim_2008-budding-yeast-cell-cycle_buddingYeastOrlando2008",
+  "nodes": [
+    "ACE2",
+    "CLN3",
+    "MBF",
+    "SBF",
+    "HCM1",
+    "YHP1",
+    "SWI5",
+    "SFF",
+    "YOX1"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "ACE2": "SFF",
+    "CLN3": "SWI5 & ACE2 & !(YOX1 & YHP1)",
+    "MBF": "CLN3",
+    "SBF": "(CLN3 | MBF) & !(YOX1 & YHP1)",
+    "HCM1": "MBF & SBF",
+    "YHP1": "MBF | SBF",
+    "SWI5": "SFF",
+    "SFF": "SBF & HCM1",
+    "YOX1": "MBF & SBF"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "ACE2": {
+      "inputs": [
+        "SFF"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "CLN3": {
+      "inputs": [
+        "ACE2",
+        "YHP1",
+        "SWI5",
+        "YOX1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "MBF": {
+      "inputs": [
+        "CLN3"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "SBF": {
+      "inputs": [
+        "CLN3",
+        "MBF",
+        "YHP1",
+        "YOX1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "HCM1": {
+      "inputs": [
+        "MBF",
+        "SBF"
+      ],
+      "gate": "AND",
+      "parameters": {}
+    },
+    "YHP1": {
+      "inputs": [
+        "MBF",
+        "SBF"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "SWI5": {
+      "inputs": [
+        "SFF"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "SFF": {
+      "inputs": [
+        "SBF",
+        "HCM1"
+      ],
+      "gate": "AND",
+      "parameters": {}
+    },
+    "YOX1": {
+      "inputs": [
+        "MBF",
+        "SBF"
+      ],
+      "gate": "AND",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "IDENTITY": 3,
+    "CUSTOM": 2,
+    "AND": 3,
+    "OR": 1
+  },
+  "n": 9,
+  "n_edges": 19,
+  "edges": [
+    {
+      "source": "ACE2",
+      "target": "CLN3",
+      "type": "activation"
+    },
+    {
+      "source": "CLN3",
+      "target": "MBF",
+      "type": "activation"
+    },
+    {
+      "source": "CLN3",
+      "target": "SBF",
+      "type": "activation"
+    },
+    {
+      "source": "MBF",
+      "target": "SBF",
+      "type": "activation"
+    },
+    {
+      "source": "MBF",
+      "target": "YOX1",
+      "type": "activation"
+    },
+    {
+      "source": "MBF",
+      "target": "HCM1",
+      "type": "activation"
+    },
+    {
+      "source": "MBF",
+      "target": "YHP1",
+      "type": "activation"
+    },
+    {
+      "source": "SBF",
+      "target": "YOX1",
+      "type": "activation"
+    },
+    {
+      "source": "SBF",
+      "target": "HCM1",
+      "type": "activation"
+    },
+    {
+      "source": "SBF",
+      "target": "YHP1",
+      "type": "activation"
+    },
+    {
+      "source": "SBF",
+      "target": "SFF",
+      "type": "activation"
+    },
+    {
+      "source": "HCM1",
+      "target": "SFF",
+      "type": "activation"
+    },
+    {
+      "source": "YHP1",
+      "target": "SBF",
+      "type": "inhibition"
+    },
+    {
+      "source": "YHP1",
+      "target": "CLN3",
+      "type": "inhibition"
+    },
+    {
+      "source": "SWI5",
+      "target": "CLN3",
+      "type": "activation"
+    },
+    {
+      "source": "SFF",
+      "target": "ACE2",
+      "type": "activation"
+    },
+    {
+      "source": "SFF",
+      "target": "SWI5",
+      "type": "activation"
+    },
+    {
+      "source": "YOX1",
+      "target": "SBF",
+      "type": "inhibition"
+    },
+    {
+      "source": "YOX1",
+      "target": "CLN3",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    1,
+    2,
+    4,
+    4,
+    1,
+    2,
+    1,
+    2,
+    2
+  ]
+}

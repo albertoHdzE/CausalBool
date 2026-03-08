@@ -1,0 +1,399 @@
+{
+  "name": "ginsim_2013-drosophila-notch_Notch__Pathway_12Jun2013",
+  "nodes": [
+    "Notch",
+    "Da",
+    "Twi",
+    "Delta",
+    "Bx42",
+    "Nicd",
+    "E_Spl",
+    "Emc",
+    "Mam",
+    "H",
+    "Su_H",
+    "Gro",
+    "p300",
+    "CtBP"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Notch": "Delta:1",
+    "Twi": "Da & Emc & E_Spl:1 & !E_Spl:2",
+    "Nicd": "Notch:1",
+    "E_Spl": "!(Nicd & Mam)",
+    "Emc": "Nicd:1"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "Notch": {
+      "inputs": [
+        "Delta"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Twi": {
+      "inputs": [
+        "Da",
+        "E_Spl",
+        "Emc"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Nicd": {
+      "inputs": [
+        "Notch"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "E_Spl": {
+      "inputs": [
+        "Bx42",
+        "Nicd",
+        "Mam",
+        "H",
+        "Su_H",
+        "Gro",
+        "p300",
+        "CtBP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Emc": {
+      "inputs": [
+        "Nicd"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 5
+  },
+  "n": 14,
+  "n_edges": 14,
+  "edges": [
+    {
+      "source": "Notch",
+      "target": "Nicd",
+      "type": "activation"
+    },
+    {
+      "source": "Da",
+      "target": "Twi",
+      "type": "activation"
+    },
+    {
+      "source": "Delta",
+      "target": "Notch",
+      "type": "activation"
+    },
+    {
+      "source": "Bx42",
+      "target": "E_Spl",
+      "type": "activation"
+    },
+    {
+      "source": "Nicd",
+      "target": "Emc",
+      "type": "activation"
+    },
+    {
+      "source": "Nicd",
+      "target": "E_Spl",
+      "type": "activation"
+    },
+    {
+      "source": "E_Spl",
+      "target": "Twi",
+      "type": "inhibition"
+    },
+    {
+      "source": "E_Spl",
+      "target": "Twi",
+      "type": "activation"
+    },
+    {
+      "source": "Emc",
+      "target": "Twi",
+      "type": "inhibition"
+    },
+    {
+      "source": "Mam",
+      "target": "E_Spl",
+      "type": "activation"
+    },
+    {
+      "source": "H",
+      "target": "E_Spl",
+      "type": "inhibition"
+    },
+    {
+      "source": "Su_H",
+      "target": "E_Spl",
+      "type": "unknown"
+    },
+    {
+      "source": "Gro",
+      "target": "E_Spl",
+      "type": "inhibition"
+    },
+    {
+      "source": "p300",
+      "target": "E_Spl",
+      "type": "activation"
+    },
+    {
+      "source": "CtBP",
+      "target": "E_Spl",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    1,
+    1,
+    0,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ]
+}

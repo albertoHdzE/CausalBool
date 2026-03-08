@@ -1,0 +1,160 @@
+{
+  "name": "p53_mdm2",
+  "nodes": [
+    "DNA_Damage",
+    "ATM",
+    "p53",
+    "Mdm2",
+    "Wip1"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "DNA_Damage": "INPUT",
+    "ATM": "AND(DNA_Damage, NOT(Wip1))",
+    "p53": "AND(ATM, NOT(Mdm2))",
+    "Mdm2": "AND(p53, NOT(ATM))",
+    "Wip1": "p53"
+  },
+  "reference": "Choi et al., 2012",
+  "description": "p53-Mdm2 Oscillator",
+  "source": "Literature",
+  "gates": {
+    "DNA_Damage": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "ATM": {
+      "inputs": [
+        "DNA_Damage",
+        "Wip1"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "p53": {
+      "inputs": [
+        "ATM",
+        "Mdm2"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "Mdm2": {
+      "inputs": [
+        "ATM",
+        "p53"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "Wip1": {
+      "inputs": [
+        "p53"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 1,
+    "CANALISING": 3,
+    "IDENTITY": 1
+  },
+  "n": 5,
+  "n_edges": 7,
+  "edges": [
+    {
+      "source": "DNA_Damage",
+      "target": "ATM",
+      "type": "regulation"
+    },
+    {
+      "source": "Wip1",
+      "target": "ATM",
+      "type": "regulation"
+    },
+    {
+      "source": "ATM",
+      "target": "p53",
+      "type": "regulation"
+    },
+    {
+      "source": "Mdm2",
+      "target": "p53",
+      "type": "regulation"
+    },
+    {
+      "source": "p53",
+      "target": "Mdm2",
+      "type": "regulation"
+    },
+    {
+      "source": "ATM",
+      "target": "Mdm2",
+      "type": "regulation"
+    },
+    {
+      "source": "p53",
+      "target": "Wip1",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    2,
+    2,
+    1,
+    1
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/p53_mdm2.json",
+  "category": "Maintainer"
+}

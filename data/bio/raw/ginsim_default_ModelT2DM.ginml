@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="Reduced-apopt" nodeorder="Insulin GF Senescence G1_S MAPK p16 MDM2 p53 p21 AKT mTORC1_S6K1 ATP IRS_PIK3CA AMPK PTEN TSC MYC CDK2 pRB E2F1 PRC Metabolism PP2A FOXO PP1C Therapy">
+    <nodestyle background="#cccccc" foreground="#000000" text="#000000" shape="RECTANGLE" width="90" height="25"/>
+    <nodestyle background="#cccccc" foreground="#000000" text="#000000" shape="RECTANGLE" width="90" height="25"/>
+    <nodestyle name="Inputs" background="#ffffcc" shape="ELLIPSE"/>
+    <nodestyle name="Prolif" background="#ff9999" shape="RECTANGLE"/>
+    <nodestyle name="Regulators" background="#99ff99"/>
+    <nodestyle name="Phenotypes" background="#ccccff" shape="ELLIPSE"/>
+    <nodestyle name="ToBcontinued" foreground="#ff3333"/>
+    <nodestyle name="Node style" background="#ff9999" width="95"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle name="In progress" pattern="SIMPLE" line_width="4"/>
+    <node id="Insulin" maxvalue="1" input="true">
+      <nodevisualsetting x="49" y="280" style="Inputs"/>
+    </node>
+    <node id="GF" maxvalue="1" input="true">
+      <nodevisualsetting x="51" y="203" style="Inputs"/>
+    </node>
+    <node id="Senescence" maxvalue="1">
+      <value val="1">
+        <exp str="p16 | (p21 &amp; mTORC1_S6K1)"/>
+      </value>
+      <annotation>
+        <comment>- AKT &amp; p53 induced senescence requires cell cycle arrest: 
+Deciphering the intricate regulatory mechanisms for the cellular choice between cell repair, apoptosis or senescence in response to damaging signals. Erol A. Cell Signal. 2011. 
+
+- Moreover, senescence escape is seen in cell cycle arrest failures (or hyperreplication):
+Di Micco, R. et al. Oncogene-induced senescence is a DNA damage response triggered by DNA hyper-replication. Nature 444, 638–642 (2006). 
+
+- p16 &amp; p21 initiating senescence:
+CDK4/6-inhibiting drug substitutes for p21 and p16 in senescence
+Duration of cell cycle arrest and MTOR activity determine geroconversion. Olga V Leontieva and Mikhail V Blagosklonny. Cell Cycle. 2013 
+
+- p21 &amp; pRB:
+Childs BG, Baker DJ, Kirkland JL, Campisi J, van Deursen JM. Senescence and
+apoptosis: dueling or complementary cell fates? EMBO Rep. 2014 Nov
+
+- p16 inducing senescence alone:
+Mirzayans R, Andrais B, Hansen G, Murray D. Role of p16(INK4A) in Replicative Senescence and DNA Damage-Induced Premature Senescence in p53-Deficient Human Cells. Biochem Res Int. 2012</comment>
+      </annotation>
+      <nodevisualsetting x="684" y="372" style="Phenotypes"/>
+    </node>
+    <node id="G1_S" maxvalue="1">
+      <value val="1">
+        <exp str="CDK2 &amp; E2F1 &amp; Metabolism &amp; !p21"/>
+      </value>
+      <nodevisualsetting x="716" y="269" style="Phenotypes"/>
+    </node>
+    <node id="MAPK" maxvalue="1">
+      <value val="1">
+        <exp str="GF &amp; !PP2A"/>
+      </value>
+      <annotation>
+        <comment>RAS induces senescence through the Ets mediated transcription of p16:
+Opposing effects of Ets and Id proteins on p16INK4a expression during cellular senescence.
+Ohtani N, Zebedee Z, Huot TJ, Stinson JA, Sugimoto M, Ohashi Y, Sharrocks AD, Peters G, Hara E
+Nature. 2001
+
+RAS induction of a p53 and p16 response:
+
+Serrano M, Lin AW, McCurrach ME, Beach D, Lowe SW. Oncogenic ras provokes premature cell senescence associated with accumulation of p53 and p16INK4a. Cell. 1997
+
+Real-time in vivo imaging of p16Ink4a reveals cross talk with p53.
+Yamakoshi K, Takahashi A, Hirota F, Nakayama R, Ishimaru N, Kubo Y, Mann DJ, Ohmura M, Hirao A, Saya H, Arase S, Hayashi Y, Nakao K, Matsumoto M, Ohtani N, Hara E
+J Cell Biol. 2009</comment>
+      </annotation>
+      <nodevisualsetting x="251" y="189" style="Prolif"/>
+    </node>
+    <node id="p16" maxvalue="1">
+      <value val="1">
+        <exp str="MAPK &amp; !PRC &amp; !E2F1 &amp; !p53"/>
+      </value>
+      <annotation>
+        <comment>p53 inhibits p16:
+Leong WF, Chau JF, Li B. p53 Deficiency leads to compensatory up-regulation of p16INK4a. Mol Cancer Res. 2009
+
+p53 and p16 reciprocal inhibition:
+Mirzayans R, Andrais B, Hansen G, Murray D. Role of p16(INK4A) in Replicative Senescence and DNA Damage-Induced Premature Senescence in p53-Deficient Human Cells.  Biochem Res Int. 2012
+
+p16 at the center of a loop implicating MYC, RB and p53:
+Rayess H, Wang MB, Srivatsan ES. Cellular senescence and tumor suppressor gene p16.  Int J Cancer. 2012
+</comment>
+      </annotation>
+      <nodevisualsetting x="544" y="318" style="Regulators"/>
+    </node>
+    <node id="MDM2" maxvalue="1">
+      <value val="1">
+        <exp str="(p16 | AKT | p53) &amp; !mTORC1_S6K1 &amp; !MYC &amp; !E2F1"/>
+      </value>
+      <annotation>
+        <comment>- S6K1 phosphorylates MDM2 on S166/186 and binds MDM2 to inhibit nuclear localization and p53 ubiquitination, thereby stabilizing p53:
+
+S6K1 is a multifaceted regulator of Mdm2 that connects nutrient status and DNA damage response.
+Lai KP, Leong WF, Chau JF, Jia D, Zeng L, Liu H, He L, Hao A, Zhang H, Meek D, Velagapudi C, Habib SL, Li B. EMBO J. 2010
+
+Constitutive mTOR activation in TSC mutants sensitizes cells to energy starvation and genomic damage via p53. Lee CH, Inoki K, Karbowniczek M, Petroulakis E, Sonenberg N, Henske EP, Guan KL. EMBO J. 2007
+
+Regulation of PI 3-K, PTEN, p53, and mTOR in Malignant and Benign Tumors Deficient in Tuberin. Habib SL, Yadav A, Mahimainathan L, Valente AJ. Genes Cancer. 2011</comment>
+      </annotation>
+      <nodevisualsetting x="343" y="460" style="Prolif"/>
+    </node>
+    <node id="p53" maxvalue="1">
+      <value val="1">
+        <exp str="!MDM2"/>
+      </value>
+      <annotation>
+        <comment>- BCL2 inhibits p53 : KEGG
+
+- p53 can inhibit G1-S transition through PTPRV:
+Doumont G, Martoriati A, Beekman C, Bogaerts S, Mee PJ, Bureau F, Colombo E, Alcalay M, Bellefroid E, Marchesi F, Scanziani E, Pelicci PG, Marine JC. G1 checkpoint failure and increased tumor susceptibility in mice lacking the novel p53 target Ptprv. EMBO J. 2005
+
+-K117 acetylation in p53 with high amout of DNA damage preferably induces Apoptosis than senescence:
+Webley K, Bond JA, Jones CJ, Blaydes JP, Craig A, Hupp T, Wynford-Thomas D. Posttranslational modifications of p53 in replicative senescence overlapping but distinct from those induced by DNA damage. Mol Cell Biol. 2000
+
+No feedback loop RAS-p53
+
+Timofeev O, Schlereth K, Wanzel M, Braun A, Nieswandt B, Pagenstecher A,
+Rosenwald A, Elsässer HP, Stiewe T. p53 DNA binding cooperativity is essential
+for apoptosis and tumor suppression in vivo. Cell Rep. 2013
+
+p53 declining function in aging:
+
+Feng Z, Hu W, Teresky AK, Hernando E, Cordon-Cardo C, Levine AJ. Declining p53 function in the aging process: a possible mechanism for the increased tumor incidence in older populations. Proc Natl Acad Sci U S A. 2007 Oct</comment>
+      </annotation>
+      <nodevisualsetting x="550" y="411" style="Regulators"/>
+    </node>
+    <node id="p21" maxvalue="1">
+      <value val="1">
+        <exp str="(p53 | FOXO) &amp; !MYC &amp; !AKT"/>
+      </value>
+      <annotation>
+        <comment>- p21 is a direct substrate of AKT and that this may regulate the subcellular localisation of p21. Phosphorylation of p21 by AKT correlated with its exit from the nucleus and with increased cell cycle progression:
+
+Zhou BP, Liao Y, Xia W, Spohn B, Lee MH, Hung MC. Cytoplasmic localization of p21Cip1/WAF1 by Akt-induced phosphorylation in HER-2/neu-overexpressing cells. Nat Cell Biol. 2001
+
+Nicholson KM, Anderson NG. The protein kinase B/Akt signalling pathway in human malignancy. Cell Signal. 2002
+
+Cytoplasmic localization of p21Cip1/WAF1 by Akt-induced phosphorylation in HER-2/neu-overexpressing cells. Zhou BP, Liao Y, Xia W, Spohn B, Lee MH, Hung MC. Nat Cell Biol. 2001 
+
+Jung YS, Qian Y, Chen X. Examination of the expanding pathways for the regulation of p21 expression and activity. Cell Signal. 2010 
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="531" y="507" style="Regulators"/>
+    </node>
+    <node id="AKT" maxvalue="1">
+      <value val="1">
+        <exp str="(IRS_PIK3CA | CDK2) &amp; !PTEN &amp; !PP2A"/>
+      </value>
+      <annotation>
+        <comment>- AKT-mTor in cell fate orientation to Senescence:
+Deciphering the intricate regulatory mechanisms for the cellular choice between cell repair, apoptosis or senescence in response to damaging signals. Erol A. Cell Signal. 2011. 
+
+Blagosklonny MV. Geroconversion: irreversible step to cellular senescence. Cell Cycle. 2014
+
+
+-AKT inhibits apoptosis (BAD and Casp9)
+Franke TF, Hornik CP, Segev L, Shostak GA, Sugimoto C. PI3K/Akt and apoptosis: size matters. Oncogene. 2003 Dec</comment>
+      </annotation>
+      <nodevisualsetting x="289" y="332" style="Prolif"/>
+    </node>
+    <node id="mTORC1_S6K1" maxvalue="1">
+      <value val="1">
+        <exp str="!TSC &amp; !AMPK"/>
+      </value>
+      <nodevisualsetting x="457" y="367" style="Node style"/>
+    </node>
+    <node id="ATP" maxvalue="1">
+      <value val="1">
+        <exp str="Metabolism"/>
+      </value>
+      <nodevisualsetting x="339" y="547" style="Prolif"/>
+    </node>
+    <node id="IRS_PIK3CA" maxvalue="1">
+      <value val="1">
+        <exp str="Insulin &amp; !mTORC1_S6K1"/>
+      </value>
+      <nodevisualsetting x="231" y="282" style="Prolif"/>
+    </node>
+    <node id="AMPK" maxvalue="1">
+      <value val="1">
+        <exp str="p53 &amp; !ATP"/>
+      </value>
+      <nodevisualsetting x="473" y="546" style="Regulators"/>
+    </node>
+    <node id="PTEN" maxvalue="1">
+      <value val="1">
+        <exp str="p53 &amp; !AKT"/>
+      </value>
+      <nodevisualsetting x="220" y="406" style="Regulators"/>
+    </node>
+    <node id="TSC" maxvalue="1">
+      <value val="1">
+        <exp str="AMPK &amp; !AKT &amp; !MAPK"/>
+      </value>
+      <annotation>
+        <comment>- AKT inhibits TSC1 &amp; 2 by phosphorylation which in turn inhibits mTORC1 activation:
+
+TSC2 is phosphorylated and inhibited by Akt and suppresses mTOR signalling. Inoki K, Li Y, Zhu T, Wu J, Guan KL. Nat Cell Biol. 2002
+
+Identification of the tuberous sclerosis complex-2 tumor suppressor gene product tuberin as a target of the phosphoinositide 3-kinase/akt pathway.
+Manning BD, Tee AR, Logsdon MN, Blenis J, Cantley LC. Mol Cell. 2002
+
+Akt regulates growth by directly phosphorylating Tsc2.
+Potter CJ, Pedraza LG, Xu T. Nat Cell Biol. 2002</comment>
+      </annotation>
+      <nodevisualsetting x="459" y="265" style="Regulators"/>
+    </node>
+    <node id="MYC" maxvalue="1">
+      <value val="1">
+        <exp str="MAPK &amp; mTORC1_S6K1 &amp; E2F1 &amp; !p53"/>
+      </value>
+      <annotation>
+        <comment>Cellular senescence and tumor suppressor gene p16.
+Rayess H, Wang MB, Srivatsan ES
+Int J Cancer. 2012
+
+phospho MYC inhibits senescence: 
+Hydbring P, Bahram F, Su Y, Tronnersjö S, Högstrand K, von der Lehr N, Sharifi HR, Lilischkis R, Hein N, Wu S, Vervoorts J, Henriksson M, Grandien A, Lüscher B, Larsson LG. Phosphorylation by Cdk2 is required for Myc to repress Ras-induced senescence in cotransformation. Proc Natl Acad Sci U S A. 2010 Jan
+
+-MYC in cell cycle:
+Bretones G, Delgado MD, León J. Myc and cell cycle control. Biochim Biophys Acta. 2014 Apr
+
+-Activators of MYC:
+Hynes NE, Stoelzle T. Key signalling nodes in mammary gland development and cancer: Myc. Breast Cancer Res. 2009
+
+Wolfer A, Ramaswamy S. MYC and metastasis. Cancer Res. 2011
+
+Gera JF, Mellinghoff IK, Shi Y, Rettig MB, Tran C, Hsu JH, Sawyers CL,
+Lichtenstein AK. AKT activity determines sensitivity to mammalian target of
+rapamycin (mTOR) inhibitors by regulating cyclin D1 and c-myc expression. J Biol Chem. 2004
+</comment>
+      </annotation>
+      <nodevisualsetting x="417" y="136" style="Prolif"/>
+    </node>
+    <node id="CDK2" maxvalue="1">
+      <value val="1">
+        <exp str="!p21 &amp; (MYC | E2F1) &amp; mTORC1_S6K1"/>
+      </value>
+      <annotation>
+        <comment>Sahin O, Fröhlich H, Löbke C, Korf U, Burmester S, Majety M, Mattern J, SchuppI, Chaouiya C, Thieffry D, Poustka A, Wiemann S, Beissbarth T, Arlt D. Modeling ERBB receptor-regulated G1/S transition to find novel targets for de novo trastuzumab resistance. BMC Syst Biol. 2009
+
+Cdk2: a key regulator of the senescence control function of Myc. Hydbring P1, Larsson LG. Aging (Albany NY). 2010 Apr
+
+- CDK2 activates AKT by phosphorylation: 
+Liu P, Begley M, Michowski W, Inuzuka H, Ginzberg M, Gao D, Tsou P, Gan W,
+Papa A, Kim BM, Wan L, Singh A, Zhai B, Yuan M, Wang Z, Gygi SP, Lee TH, Lu KP,
+Toker A, Pandolfi PP, Asara JM, Kirschner MW, Sicinski P, Cantley L, Wei W.
+Cell-cycle-regulated activation of Akt kinase by phosphorylation at its carboxyl 
+
+- But AKT also inhibits the function of CDK2 but only in late S and G2
+Maddika S, Ande SR, Wiechec E, Hansen LL, Wesselborg S, Los M. Akt-mediated
+phosphorylation of CDK2 regulates its dual role in cell cycle progression and
+apoptosis. J Cell Sci. 2008
+terminus. Nature. 2014</comment>
+      </annotation>
+      <nodevisualsetting x="598" y="270" style="Prolif"/>
+    </node>
+    <node id="pRB" maxvalue="1">
+      <value val="1">
+        <exp str="!CDK2"/>
+      </value>
+      <annotation>
+        <comment>Loop engaging p16 and RB pathways:
+Mitogenic signalling and the p16INK4a-Rb pathway cooperate to enforce irreversible cellular senescence.
+Takahashi A, Ohtani N, Yamakoshi K, Iida S, Tahara H, Nakayama K, Nakayama KI, Ide T, Saya H, Hara E
+Nat Cell Biol. 2006
+
+Growth suppression by p16ink4 requires functional retinoblastoma protein.
+Medema RH, Herrera RE, Lam F, Weinberg RA; Proc Natl Acad Sci U S A. 1995</comment>
+      </annotation>
+      <nodevisualsetting x="608" y="184" style="Regulators"/>
+    </node>
+    <node id="E2F1" maxvalue="1">
+      <value val="1">
+        <exp str="!pRB &amp; E2F1 &amp; (GF | MYC)"/>
+      </value>
+      <annotation>
+        <comment>- E2F induces PRC expression (here trhough MYC):
+
+Bracken AP, Pasini D, Capra M, Prosperini E, Colli E, Helin K. EZH2 is
+downstream of the pRB-E2F pathway, essential for proliferation and amplified in cancer. EMBO J. 2003</comment>
+      </annotation>
+      <nodevisualsetting x="659" y="136" style="Prolif"/>
+    </node>
+    <node id="PRC" maxvalue="1">
+      <value val="1">
+        <exp str="MYC &amp; !AKT"/>
+      </value>
+      <annotation>
+        <comment>The oncogene and Polycomb-group gene bmi-1 regulates cell proliferation and senescence through the ink4a locus.
+Jacobs JJ, Kieboom K, Marino S, DePinho RA, van Lohuizen M
+Nature. 1999 Jan 14; 397(6715):164-8.
+
+
+MYC mediation of the p16 inhibition by polycomb repressor complex:
+Cellular senescence and tumor suppressor gene p16. Rayess H, Wang MB, Srivatsan ES. Int J Cancer. 2012
+
+-Akt mediated phosphorylation of EZH2 and BMI1 at serine 316 results in a decrease of lysine 27 trimethylation and de repression of INK4A, and other genes expression:
+
+Akt-mediated phosphorylation of EZH2 suppresses methylation of lysine 27 in histone H3. Cha TL, Zhou BP, Xia W, Wu Y, Yang CC, Chen CT, Ping B, Otte AP, Hung MC
+Science. 2005
+
+Akt phosphorylates the transcriptional repressor bmi1 to block its effects on the tumor-suppressing ink4a-arf locus. Liu Y, Liu F, Yu H, Zhao X, Sashida G, Deblasio A, Harr M, She QB, Chen Z, Lin HK, Di Giandomenico S, Elf SE, Yang Y, Miyata Y, Huang G, Menendez S, Mellinghoff IK, Rosen N, Pandolfi PP, Hedvat CV, Nimer SD
+Sci Signal. 2012
+</comment>
+      </annotation>
+      <nodevisualsetting x="456" y="174" style="Prolif"/>
+    </node>
+    <node id="Metabolism" maxvalue="1">
+      <value val="1">
+        <exp str="(mTORC1_S6K1 | MAPK) &amp; (AKT | PP1C)"/>
+      </value>
+      <annotation>
+        <comment>Activation of glycogenesis, lipogenesis, glycolysis genes.
+</comment>
+      </annotation>
+      <nodevisualsetting x="251" y="571" style="Phenotypes"/>
+    </node>
+    <node id="PP2A" maxvalue="1">
+      <value val="1">
+        <exp str="!mTORC1_S6K1"/>
+      </value>
+      <annotation>
+        <comment>-MEK is continuously dephosphorylated by PP2A (PPP2CA) whose activity is stimulated by P38: P38 activity increases the physical association between PP2A and MEK/ERK complex:
+Junttila MR, Li SP, Westermarck J. Phosphatase-mediated crosstalk between MAPK signaling pathways in the regulation of cell survival. FASEB J. 2008</comment>
+      </annotation>
+      <nodevisualsetting x="310" y="134" style="Regulators"/>
+    </node>
+    <node id="FOXO" maxvalue="1">
+      <value val="1">
+        <exp str="(AMPK | Metabolism | p16) &amp; !AKT &amp; !MAPK"/>
+      </value>
+      <nodevisualsetting x="209" y="519" style="Regulators"/>
+    </node>
+    <node id="PP1C" maxvalue="1">
+      <value val="1">
+        <exp str="MAPK | AKT"/>
+      </value>
+      <annotation>
+        <comment>Insuline signaling: http://www.kegg.jp/kegg-bin/show_pathway?ko04910+K06269
+
+MAPK signaling: http://lsresearch.thomsonreuters.com/static/maps/723_map.png
+
+MAPK-Lipid metabolims: http://lsresearch.thomsonreuters.com/static/maps/724_map.png</comment>
+      </annotation>
+      <nodevisualsetting x="202" y="133" style="Prolif"/>
+    </node>
+    <node id="Therapy" maxvalue="1" input="true">
+      <nodevisualsetting x="49" y="368" style=""/>
+    </node>
+    <edge id="MYC:PRC" from="MYC" to="PRC" minvalue="1" sign="positive">
+      <edgevisualsetting points="483,165" style=""/>
+    </edge>
+    <edge id="MYC:p21" from="MYC" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="441,520" style=""/>
+    </edge>
+    <edge id="MYC:CDK2" from="MYC" to="CDK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="602,152" style=""/>
+    </edge>
+    <edge id="MYC:E2F1" from="MYC" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="542,139" style=""/>
+    </edge>
+    <edge id="MYC:MDM2" from="MYC" to="MDM2" minvalue="1" sign="negative">
+      <edgevisualsetting points="424,281" style=""/>
+    </edge>
+    <edge id="pRB:E2F1" from="pRB" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="681,181" style=""/>
+    </edge>
+    <edge id="PP2A:AKT" from="PP2A" to="AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="348,244" style=""/>
+    </edge>
+    <edge id="PP2A:MAPK" from="PP2A" to="MAPK" minvalue="1" sign="negative">
+      <edgevisualsetting points="335,162" style=""/>
+    </edge>
+    <edge id="TSC:mTORC1_S6K1" from="TSC" to="mTORC1_S6K1" minvalue="1" sign="negative">
+      <edgevisualsetting points="482,306" style=""/>
+    </edge>
+    <edge id="IRS_PIK3CA:AKT" from="IRS_PIK3CA" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="306,324" style=""/>
+    </edge>
+    <edge id="p21:Senescence" from="p21" to="Senescence" minvalue="1" sign="positive">
+      <edgevisualsetting points="738,524" style=""/>
+    </edge>
+    <edge id="p21:CDK2" from="p21" to="CDK2" minvalue="1" sign="negative">
+      <edgevisualsetting points="669,515" style=""/>
+    </edge>
+    <edge id="p21:G1_S" from="p21" to="G1_S" minvalue="1" sign="negative">
+      <edgevisualsetting points="776,530" style=""/>
+    </edge>
+    <edge id="AMPK:TSC" from="AMPK" to="TSC" minvalue="1" sign="positive">
+      <edgevisualsetting points="500,413" style=""/>
+    </edge>
+    <edge id="AMPK:mTORC1_S6K1" from="AMPK" to="mTORC1_S6K1" minvalue="1" sign="negative">
+      <edgevisualsetting points="487,428" style=""/>
+    </edge>
+    <edge id="AMPK:FOXO" from="AMPK" to="FOXO" minvalue="1" sign="positive">
+      <edgevisualsetting points="478,536" style=""/>
+    </edge>
+    <edge id="PP1C:Metabolism" from="PP1C" to="Metabolism" minvalue="1" sign="positive">
+      <edgevisualsetting points="184,144 185,587" style=""/>
+    </edge>
+    <edge id="MDM2:p53" from="MDM2" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting points="567,465" style=""/>
+    </edge>
+    <edge id="CDK2:G1_S" from="CDK2" to="G1_S" minvalue="1" sign="positive">
+      <edgevisualsetting points="700,282" style=""/>
+    </edge>
+    <edge id="CDK2:pRB" from="CDK2" to="pRB" minvalue="1" sign="negative">
+      <edgevisualsetting points="651,235" style=""/>
+    </edge>
+    <edge id="CDK2:AKT" from="CDK2" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="641,345" style=""/>
+    </edge>
+    <edge id="p53:p16" from="p53" to="p16" minvalue="1" sign="negative">
+      <edgevisualsetting points="578,325" style=""/>
+    </edge>
+    <edge id="p53:p21" from="p53" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting points="592,470" style=""/>
+    </edge>
+    <edge id="p53:AMPK" from="p53" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting points="515,431" style=""/>
+    </edge>
+    <edge id="p53:MDM2" from="p53" to="MDM2" minvalue="1" sign="positive">
+      <edgevisualsetting points="580,483" style=""/>
+    </edge>
+    <edge id="p53:PTEN" from="p53" to="PTEN" minvalue="1" sign="positive">
+      <edgevisualsetting points="537,423" style=""/>
+    </edge>
+    <edge id="p53:MYC" from="p53" to="MYC" minvalue="1" sign="negative">
+      <edgevisualsetting points="569,159" style=""/>
+    </edge>
+    <edge id="ATP:AMPK" from="ATP" to="AMPK" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Therapy:mTORC1_S6K1" from="Therapy" to="mTORC1_S6K1" minvalue="1" sign="negative">
+      <edgevisualsetting points="345,384" style=""/>
+    </edge>
+    <edge id="Metabolism:G1_S" from="Metabolism" to="G1_S" minvalue="1" sign="positive">
+      <edgevisualsetting points="787,592" style=""/>
+    </edge>
+    <edge id="Metabolism:ATP" from="Metabolism" to="ATP" minvalue="1" sign="positive">
+      <edgevisualsetting points="384,581" style=""/>
+    </edge>
+    <edge id="Metabolism:FOXO" from="Metabolism" to="FOXO" minvalue="1" sign="positive">
+      <edgevisualsetting points="261,560" style=""/>
+    </edge>
+    <edge id="FOXO:p21" from="FOXO" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting points="253,512" style=""/>
+    </edge>
+    <edge id="MAPK:p16" from="MAPK" to="p16" minvalue="1" sign="positive">
+      <edgevisualsetting points="558,204" style=""/>
+    </edge>
+    <edge id="MAPK:MYC" from="MAPK" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="418,197" style=""/>
+    </edge>
+    <edge id="MAPK:TSC" from="MAPK" to="TSC" minvalue="1" sign="negative">
+      <annotation>
+        <comment>http://www.kegg.jp/kegg-bin/show_pathway?map04150
+
+</comment>
+      </annotation>
+      <edgevisualsetting points="493,212" style=""/>
+    </edge>
+    <edge id="MAPK:Metabolism" from="MAPK" to="Metabolism" minvalue="1" sign="positive">
+      <edgevisualsetting points="190,192 191,579" style=""/>
+    </edge>
+    <edge id="MAPK:FOXO" from="MAPK" to="FOXO" minvalue="1" sign="negative">
+      <edgevisualsetting points="199,197 199,533" style=""/>
+    </edge>
+    <edge id="MAPK:PP1C" from="MAPK" to="PP1C" minvalue="1" sign="positive">
+      <edgevisualsetting points="265,171" style=""/>
+    </edge>
+    <edge id="GF:E2F1" from="GF" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="716,223" style=""/>
+    </edge>
+    <edge id="GF:MAPK" from="GF" to="MAPK" minvalue="1" sign="positive">
+      <edgevisualsetting points="230,209" style=""/>
+    </edge>
+    <edge id="PRC:p16" from="PRC" to="p16" minvalue="1" sign="negative">
+      <edgevisualsetting points="578,191" style=""/>
+    </edge>
+    <edge id="PTEN:AKT" from="PTEN" to="AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="256,341" style=""/>
+    </edge>
+    <edge id="mTORC1_S6K1:MDM2" from="mTORC1_S6K1" to="MDM2" minvalue="1" sign="negative">
+      <edgevisualsetting points="433,390" style=""/>
+    </edge>
+    <edge id="mTORC1_S6K1:Senescence" from="mTORC1_S6K1" to="Senescence" minvalue="1" sign="positive">
+      <edgevisualsetting points="623,384" style=""/>
+    </edge>
+    <edge id="mTORC1_S6K1:MYC" from="mTORC1_S6K1" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="448,372" style=""/>
+    </edge>
+    <edge id="mTORC1_S6K1:CDK2" from="mTORC1_S6K1" to="CDK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="652,374" style=""/>
+    </edge>
+    <edge id="mTORC1_S6K1:Metabolism" from="mTORC1_S6K1" to="Metabolism" minvalue="1" sign="positive">
+      <edgevisualsetting points="463,587" style=""/>
+    </edge>
+    <edge id="mTORC1_S6K1:PP2A" from="mTORC1_S6K1" to="PP2A" minvalue="1" sign="negative">
+      <edgevisualsetting points="392,378" style=""/>
+    </edge>
+    <edge id="mTORC1_S6K1:IRS_PIK3CA" from="mTORC1_S6K1" to="IRS_PIK3CA" minvalue="1" sign="negative">
+      <edgevisualsetting points="472,299" style="In progress"/>
+    </edge>
+    <edge id="AKT:PRC" from="AKT" to="PRC" minvalue="1" sign="negative">
+      <edgevisualsetting points="361,187" style=""/>
+    </edge>
+    <edge id="AKT:MDM2" from="AKT" to="MDM2" minvalue="1" sign="positive">
+      <edgevisualsetting points="364,367" style=""/>
+    </edge>
+    <edge id="AKT:p21" from="AKT" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="333,528" style=""/>
+    </edge>
+    <edge id="AKT:TSC" from="AKT" to="TSC" minvalue="1" sign="negative">
+      <edgevisualsetting points="371,275" style=""/>
+    </edge>
+    <edge id="AKT:Metabolism" from="AKT" to="Metabolism" minvalue="1" sign="positive">
+      <edgevisualsetting points="327,460" style=""/>
+    </edge>
+    <edge id="AKT:FOXO" from="AKT" to="FOXO" minvalue="1" sign="negative">
+      <edgevisualsetting points="319,527" style=""/>
+    </edge>
+    <edge id="AKT:PP1C" from="AKT" to="PP1C" minvalue="1" sign="positive">
+      <edgevisualsetting points="335,251 235,251" style=""/>
+    </edge>
+    <edge id="AKT:PTEN" from="AKT" to="PTEN" minvalue="1" sign="negative">
+      <edgevisualsetting points="268,353" style=""/>
+    </edge>
+    <edge id="Insulin:IRS_PIK3CA" from="Insulin" to="IRS_PIK3CA" minvalue="1" sign="positive">
+      <edgevisualsetting points="152,295" style=""/>
+    </edge>
+    <edge id="p16:Senescence" from="p16" to="Senescence" minvalue="1" sign="positive">
+      <edgevisualsetting points="738,335" style=""/>
+    </edge>
+    <edge id="p16:MDM2" from="p16" to="MDM2" minvalue="1" sign="positive">
+      <edgevisualsetting points="413,335" style=""/>
+    </edge>
+    <edge id="p16:FOXO" from="p16" to="FOXO" minvalue="1" sign="positive">
+      <edgevisualsetting points="216,323" style=""/>
+    </edge>
+    <edge id="E2F1:p16" from="E2F1" to="p16" minvalue="1" sign="negative">
+      <edgevisualsetting points="588,158" style=""/>
+    </edge>
+    <edge id="E2F1:CDK2" from="E2F1" to="CDK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="729,233" style=""/>
+    </edge>
+    <edge id="E2F1:MYC" from="E2F1" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="621,146" style=""/>
+    </edge>
+    <edge id="E2F1:MDM2" from="E2F1" to="MDM2" minvalue="1" sign="negative">
+      <edgevisualsetting points="705,474" style=""/>
+    </edge>
+    <edge id="E2F1:G1_S" from="E2F1" to="G1_S" minvalue="1" sign="positive">
+      <edgevisualsetting points="740,227" style=""/>
+    </edge>
+    <edge id="E2F1:E2F1" from="E2F1" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+  </graph>
+</gxl>

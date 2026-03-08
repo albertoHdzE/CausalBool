@@ -1,0 +1,103 @@
+\documentclass[10pt,a4paper]{article}
+
+% Oxford/arXiv Standard Preamble
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % Type-1 fonts
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{microtype} % Better typography
+\usepackage[hidelinks]{hyperref} % Clickable links, no red boxes
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Algorithms
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% Bibliography
+\usepackage[style=numeric-comp,sorting=none,backend=biber]{biblatex}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{float}
+\lstset{
+  breaklines=true,
+  basicstyle=\ttfamily\small,
+  frame=single,
+  columns=fullflexible,
+  keepspaces=true
+}
+\addbibresource{references.bib}
+
+% Theorems
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% Graphics Path
+\graphicspath{{../../newIntPaper/figures/}{../newIntPaper/figures/}{figures/}}
+
+% Metadata
+\title{\textbf{Universal Algorithmic Properties of Biological Gene Regulatory Networks: \\ A Causal Boolean Integration Framework}}
+\author{Alberto Hern\'andez-Espinosa \\ \small{Complexity Science Group, University of Oxford}}
+\date{}
+\pagestyle{empty}
+
+\begin{document}
+
+\maketitle
+
+% Abstract
+\input{sections/abstract}
+
+% Keywords (Optional for arXiv, good for style)
+\vspace{1em}
+\noindent\textbf{Keywords:} Gene Regulatory Networks, Algorithmic Information Theory, Causal Integration, Edge of Chaos, Basin Entropy.
+
+% Sections
+\section{Introduction}
+\input{sections/introduction}
+
+\section{Theoretical Framework}
+\input{sections/theory}
+
+\section{Methodology and Algorithms}
+\input{sections/methods}
+
+\section{Results}
+\subsection{Universal Structural Compression}
+\input{sections/results_structural}
+
+\subsection{Hybrid Encoding and Integration}
+\input{sections/results_hybrid}
+
+\subsection{Asynchronous Dynamics and Basin Entropy}
+\input{sections/results_dynamics}
+
+\subsection{Semantic Basin Fidelity}
+\input{sections/results_semantic}
+
+\section{Discussion and Conclusions}
+\input{sections/discussion}
+
+% Appendices
+\appendix
+\section{Data Availability}
+All datasets generated and analyzed during this study are available in the project repository. The "Tri-Phylum" dataset ($N=10$) and the large-scale validation cohort ($N=231$) are provided in JSON format, standardized for boolean logic analysis.
+
+\section{Code Availability}
+The source code for the \texttt{Null\_Generator\_HPC.py}, \texttt{NatureBDM.wl}, and the Causal Integration framework is available at \url{https://github.com/alberto-oxford/CausalBoolIntegration}.
+
+\printbibliography
+
+\end{document}

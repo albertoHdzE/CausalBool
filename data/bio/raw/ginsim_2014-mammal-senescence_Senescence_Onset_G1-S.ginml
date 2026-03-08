@@ -1,0 +1,791 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://gin.univ-mrs.fr/GINsim/GINML_2_1.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+	<graph id="model_submitted" class="regulatory" nodeorder="apoptosis cycle_arrest senescence proliferation CHEK1 CHEK2 Mdm2 p14ARF p53 p21 RB1 p16INK4a p38MAPK CDK46CycD Cdc25A CDK2CycE E2F ATM ATR DSB SSB">
+<node id="p16INK4a" maxvalue="2">
+  <value val="2">
+    <exp str="p38MAPK:3"/>
+  </value>
+  <value val="1">
+    <exp str="p38MAPK:1"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1029"/>
+    </linklist>
+    <comment>Cyclin-dependent kinase inhibitor 2A (Transcript variant of CDKN2A locus)
+</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="271" y="340" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="p38MAPK" maxvalue="3">
+  <value val="3">
+    <exp str="ATM:2 &amp; ATR:2"/>
+  </value>
+  <value val="2">
+    <exp str="!ATR:2 &amp; ATM:2"/>
+  </value>
+  <value val="1">
+    <exp str="(ATM:1 | ATR:1 | ATR:2) &amp; !ATM:2"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1432"/>
+    </linklist>
+    <comment>Mitogen activated protein kinase 14
+
+</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="327" y="227" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="proliferation" maxvalue="1">
+  <value val="1">
+    <exp str="CDK2CycE"/>
+  </value>
+  <annotation>
+    <comment>MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="805" y="431" width="95" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="SSB" maxvalue="2" input="true">
+  <annotation>
+    <comment>DNA single-strand break.
+States:
+0: no SSB 
+1: repairable SSB
+2: irrepairable SSB
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="621" y="17" width="95" height="25" backgroundColor="#666666" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="CDK2CycE" maxvalue="1">
+  <value val="1">
+    <exp str="!p21 &amp; E2F &amp; Cdc25A"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1017"/>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/898"/>
+    </linklist>
+    <comment>protein complex: cyclin-dependent kinase 2 and Cyclin E</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="675" y="431" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="CHEK2" maxvalue="1">
+  <value val="1">
+    <exp str="ATM:2"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/11200"/>
+    </linklist>
+    <comment>checkpoint kinase 2</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="350" y="132" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="ATM" maxvalue="2">
+  <value val="2">
+    <exp str="DSB:2"/>
+  </value>
+  <value val="1">
+    <exp str="DSB:1"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/472"/>
+    </linklist>
+    <comment>ATM ataxia telangiectasia mutated</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="347" y="81" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="ATR" maxvalue="2">
+  <value val="2">
+    <exp str="SSB:2"/>
+  </value>
+  <value val="1">
+    <exp str="SSB:1"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/545"/>
+    </linklist>
+    <comment>Ataxia telangiectasia and Rad3 related</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="622" y="81" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="E2F" maxvalue="1">
+  <value val="1">
+    <exp str="!RB1"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1869"/>
+    </linklist>
+    <comment>E2F transcription factor 1</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="621" y="522" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="apoptosis" maxvalue="1">
+  <value val="1">
+    <exp str="p53:2"/>
+  </value>
+  <annotation>
+    <comment>Kracikova M, Akiri G, George A, Sachidanandam R, Aaronson SA: A threshold mechanism mediates p53 cell fate decision between growth arrest and apoptosis. Cell Death Differ. 2013, 20:576–588.
+
+doi: 10.1038/cdd.2012</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="797" y="229" width="95" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="CDK46CycD" maxvalue="1">
+  <value val="1">
+    <exp str="!p16INK4a &amp; !p21 &amp; Cdc25A"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/595"/>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1019"/>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1021"/>
+    </linklist>
+    <comment>protein complex: cyclin-dependent kinase 4, 6 and Cyclin D</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="271" y="431" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="cycle_arrest" maxvalue="1">
+  <value val="1">
+    <exp str="!CDK2CycE"/>
+  </value>
+  <annotation>
+    <comment>MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="816" y="559" width="95" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Cdc25A" maxvalue="2">
+  <value val="2">
+    <exp str="!p38MAPK &amp; !CHEK2 &amp; !CHEK1"/>
+  </value>
+  <value val="1">
+    <exp str="(p38MAPK | CHEK1 | CHEK2) &amp; !(p38MAPK &amp; CHEK1 &amp; CHEK2)"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/993"/>
+    </linklist>
+    <comment>cell division cycle 25A</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="479" y="430" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="DSB" maxvalue="2" input="true">
+  <annotation>
+    <comment>DNA double-strand break. 
+States:
+0: no DSB
+1: repairable DSB
+2: irrepairable DSB
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="346" y="16" width="95" height="25" backgroundColor="#666666" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="senescence" maxvalue="1">
+  <value val="1">
+    <exp str="(p16INK4a:1 &amp; p21 &amp; !p53:2 &amp; !Cdc25A) | (p16INK4a:2 &amp; p21 &amp; !p53:2 &amp; !Cdc25A:2)"/>
+  </value>
+  <annotation>
+    <comment>Kuilman T, Michaloglou C, Mooi WJ, Peeper DS: The essence of senescence. Genes Dev. 2010, 24:2463–2479. doi:10.1101/gad.1971610
+
+Campisi J: Aging, cellular senescence, and cancer. Annu. Rev. Physiol. 2013, 75:685–705. doi:10.1146/annurev-physiol-030212-183653
+
+Lanigan F, Geraghty JG, Bracken AP: Transcriptional regulation of cellular senescence. Oncogene 2011, 30:2901–2911. doi:10.1038/onc.2011.34</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="815" y="522" width="95" height="30" backgroundColor="#ffffff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="p53" maxvalue="2">
+  <value val="2">
+    <exp str="!Mdm2 &amp; (p38MAPK | ATR | ATM | CHEK1 | CHEK2)"/>
+  </value>
+  <value val="1">
+    <exp str="Mdm2 &amp; (p38MAPK | ATR | ATM | CHEK1 | CHEK2)"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/7157"/>
+    </linklist>
+    <comment>Tumor supressor protein p53</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="486" y="229" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="CHEK1" maxvalue="1">
+  <value val="1">
+    <exp str="ATR:2 | ATM:2"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1111"/>
+    </linklist>
+    <comment>Checkpoint kinase 1</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="619" y="129" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="p14ARF" maxvalue="1">
+  <value val="1">
+    <exp str="p38MAPK | E2F"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1029"/>
+    </linklist>
+    <comment>Alternate reading frame (Transcrip variant of CDKN2A locus)</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="491" y="334" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="p21" maxvalue="1">
+  <value val="1">
+    <exp str="p53:1"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/1026"/>
+    </linklist>
+    <comment>cyclin-dependent kinase inhibitor 1A</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="676" y="336" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Mdm2" maxvalue="1">
+  <value val="1">
+    <exp str="p53:1 &amp; !p14ARF"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/4193"/>
+    </linklist>
+    <comment>E3 ubiquitin protein ligase homolog</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="490" y="293" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="RB1" maxvalue="1">
+  <value val="1">
+    <exp str="!CDK46CycD &amp; !CDK2CycE"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/gene/5925"/>
+    </linklist>
+    <comment>retinoblastoma 1</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="483" y="524" width="95" height="25" backgroundColor="#cccccc" foregroundColor="#ffffff" textColor="#000000"/>
+			</nodevisualsetting>
+</node>
+		<edge id="p16INK4a:CDK46CycD" from="p16INK4a" to="CDK46CycD" minvalue="1" sign="negative">
+<annotation>
+  <comment>Phosphorylation
+
+Lanigan F, Geraghty JG, Bracken AP: Transcriptional regulation of cellular senescence. Oncogene 2011, 30:2901–2911.
+
+doi: 10.1038/onc.2011.34</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="318,367 318,428" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p16INK4a:senescence:1" from="p16INK4a" to="senescence" minvalue="1" maxvalue="1" sign="positive">
+<annotation>
+  <comment>Coppé J-P, Rodier F, Patil CK, Freund A, Desprez P-Y, Campisi J: Tumor suppressor and aging biomarker p16(INK4a) induces cellular senescence without the associated inflammatory secretory phenotype. J. Biol. Chem. 2011, 286:36396–36403.
+
+doi: 10.1074/jbc.M111.257071</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="268,351 260,351 258,494 836,495 836,519" line_style="straight" line_color="#339900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p16INK4a:senescence:2" from="p16INK4a" to="senescence" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="268,351 260,351 258,494 836,495 836,519" line_style="straight" line_color="#339900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p38MAPK:p53" from="p38MAPK" to="p53" minvalue="3" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+Kuilman T, Michaloglou C, Mooi WJ, Peeper DS: The essence of senescence. Genes Dev. 2010, 24:2463–2479.
+
+doi: 10.1101/gad.1971610</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="424,239 483,240" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p38MAPK:p14ARF" from="p38MAPK" to="p14ARF" minvalue="3" sign="positive">
+<annotation>
+  <comment>Transcriptional regulation
+
+Bulavin DV, Phillips C, Nannenga B, Timofeev O, Donehower LA, Anderson CW, Appella E, Fornace AJ: Inactivation of the Wip1 phosphatase inhibits mammary tumorigenesis through p38 MAPK–mediated activation of the p16Ink4a-p19Arf pathway. Nature Genetics 2004, 36:343–350.
+
+doi: 10.1038/ng1317</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="376,252 376,252 377,352 488,352" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p38MAPK:p16INK4a:1" from="p38MAPK" to="p16INK4a" minvalue="1" maxvalue="2" sign="positive">
+<annotation>
+  <comment>Transcriptional regulation
+
+Bulavin DV, Phillips C, Nannenga B, Timofeev O, Donehower LA, Anderson CW, Appella E, Fornace AJ: Inactivation of the Wip1 phosphatase inhibits mammary tumorigenesis through p38 MAPK–mediated activation of the p16Ink4a-p19Arf pathway. Nature Genetics 2004, 36:343–350.
+
+doi: 10.1038/ng1317</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="354,247 354,247 354,321 354,337" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p38MAPK:p16INK4a:2" from="p38MAPK" to="p16INK4a" minvalue="3" sign="positive">
+			<edgevisualsetting>
+				<polyline points="354,247 354,247 354,321 354,337" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p38MAPK:Cdc25A" from="p38MAPK" to="Cdc25A" minvalue="1" sign="negative">
+<annotation>
+  <comment>Phosphorylation
+
+Bulavin DV, Phillips C, Nannenga B, Timofeev O, Donehower LA, Anderson CW, Appella E, Fornace AJ: Inactivation of the Wip1 phosphatase inhibits mammary tumorigenesis through p38 MAPK–mediated activation of the p16Ink4a-p19Arf pathway. Nature Genetics 2004, 36:343–350.
+
+doi: 10.1038/ng1317</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="393,254 393,430 476,430" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SSB:ATR:1" from="SSB" to="ATR" minvalue="1" maxvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="668,44 669,78" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SSB:ATR:2" from="SSB" to="ATR" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="668,44 669,78" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CDK2CycE:RB1" from="CDK2CycE" to="RB1" minvalue="1" sign="negative">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="688,458 688,511 535,511 535,521" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CDK2CycE:proliferation" from="CDK2CycE" to="proliferation" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="772,443 802,443" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CDK2CycE:cycle_arrest" from="CDK2CycE" to="cycle_arrest" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="745,458 745,459 746,573 813,573" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CHEK2:Cdc25A" from="CHEK2" to="Cdc25A" minvalue="1" sign="negative">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="438,159 438,370 513,369 513,427" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CHEK2:p53" from="CHEK2" to="p53" minvalue="1" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="447,146 493,146 493,226" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATM:CHEK1" from="ATM" to="CHEK1" minvalue="2" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+ATM and ATR Substrate Analysis Reveals Extensive Protein Networks Responsive to DNA Damage
+Shuhei Matsuoka et al., Science 25 May 2007: Vol. 316 no. 5828 pp. 1160-1166 
+DOI: 10.1126/science.1140321</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="442,95 442,95 516,95 536,142 573,141 616,141" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATM:CHEK2" from="ATM" to="CHEK2" minvalue="2" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="400,108 400,109 400,129" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATM:p38MAPK:1" from="ATM" to="p38MAPK" minvalue="1" maxvalue="1" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+Medema RH, Macůrek L: Checkpoint control and cancer. Oncogene 2012, 31:2601–2613.
+
+doi: 10.1038/onc.2011.451</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="347,94 347,94 313,94 313,241 324,241" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATM:p38MAPK:2" from="ATM" to="p38MAPK" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="347,94 347,94 313,94 313,241 324,241" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATM:p53" from="ATM" to="p53" minvalue="1" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="444,95 516,95 516,226" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATR:CHEK1" from="ATR" to="CHEK1" minvalue="2" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="669,108 669,125 669,126" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATR:p53" from="ATR" to="p53" minvalue="1" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="624,93 624,93 549,93 548,221 548,226" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATR:p38MAPK:1" from="ATR" to="p38MAPK" minvalue="1" maxvalue="1" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+Medema RH, Macůrek L: Checkpoint control and cancer. Oncogene 2012, 31:2601–2613.
+
+doi: 10.1038/onc.2011.451</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="719,92 731,92 732,192 374,194 374,224" line_style="straight" line_color="#339900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="ATR:p38MAPK:2" from="ATR" to="p38MAPK" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="719,92 731,92 732,192 374,194 374,224" line_style="straight" line_color="#339900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="E2F:p14ARF" from="E2F" to="p14ARF" minvalue="1" sign="positive">
+<annotation>
+  <comment>Transcription regulation
+
+Balancing the decision of cell proliferation and cell fate. Timothy C. Hallstrom1and Joseph R. Nevins, Cell Cycle 8:4, 532-535; 2009
+
+doi: 10.4161/cc.8.4.7609</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="642,519 642,349 588,349" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="E2F:CDK2CycE" from="E2F" to="CDK2CycE" minvalue="1" sign="positive">
+<annotation>
+  <comment>Transcription regulation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="718,534 717,534 732,534 732,458" line_style="straight" line_color="#339900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CDK46CycD:RB1" from="CDK46CycD" to="RB1" minvalue="1" sign="negative">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="328,458 328,535 480,535" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc25A:CDK2CycE" from="Cdc25A" to="CDK2CycE" minvalue="2" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="576,440 577,440 672,440" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc25A:CDK46CycD" from="Cdc25A" to="CDK46CycD" minvalue="2" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+Medema RH, Macůrek L: Checkpoint control and cancer. Oncogene 2012, 31:2601–2613.
+
+doi: 10.1038/onc.2011.451</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="476,441 476,441 368,441" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc25A:senescence:1" from="Cdc25A" to="senescence" minvalue="1" maxvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="531,457 531,470 860,470 860,519" line_style="straight" line_color="#cc0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc25A:senescence:2" from="Cdc25A" to="senescence" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="531,457 531,470 860,470 860,519" line_style="straight" line_color="#cc0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="DSB:ATM:1" from="DSB" to="ATM" minvalue="1" maxvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="386,28 386,28 393,42 392,70 392,78" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="DSB:ATM:2" from="DSB" to="ATM" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="386,28 386,28 393,42 392,70 392,78" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p53:apoptosis" from="p53" to="apoptosis" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="579,240 579,240 794,240" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p53:Mdm2" from="p53" to="Mdm2" minvalue="1" sign="positive">
+<annotation>
+  <comment>Transcription regulation
+
+Stott FJ: The alternative product from the human CDKN2A locus, p14ARF, participates in a regulatory feedback loop with p53 and MDM2. The EMBO Journal 1998, 17:5001–5014.
+
+doi: 10.1093/emboj/17.17.5001</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="523,247 523,247 525,255 525,290" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p53:p21" from="p53" to="p21" minvalue="1" sign="positive">
+<annotation>
+  <comment>Transcription regulation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="550,256 550,255 551,281 716,281 716,333" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p53:senescence" from="p53" to="senescence" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="557,256 557,271 934,271 934,536 912,536" line_style="straight" line_color="#cc0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CHEK1:Cdc25A" from="CHEK1" to="Cdc25A" minvalue="1" sign="negative">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="653,156 653,367 547,368 547,427" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CHEK1:p53" from="CHEK1" to="p53" minvalue="1" sign="positive">
+<annotation>
+  <comment>Phosphorylation
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="637,156 637,212 565,212 565,226" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p14ARF:Mdm2" from="p14ARF" to="Mdm2" minvalue="1" sign="negative">
+<annotation>
+  <comment>Physical interaction
+
+Stott FJ: The alternative product from the human CDKN2A locus, p14ARF, participates in a regulatory feedback loop with p53 and MDM2. The EMBO Journal 1998, 17:5001–5014.
+
+doi: 10.1093/emboj/17.17.5001</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="538,335 538,335 538,320" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p21:CDK2CycE" from="p21" to="CDK2CycE" minvalue="1" sign="negative">
+<annotation>
+  <comment>Physical interaction
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="731,363 731,364 731,428" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p21:senescence" from="p21" to="senescence" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="773,352 775,352 926,351 925,526 912,526" line_style="straight" line_color="#009900" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="p21:CDK46CycD" from="p21" to="CDK46CycD" minvalue="1" sign="negative">
+<annotation>
+  <comment>Physical interaction
+
+MOLECULAR MECHANISMS OF MAMMALIAN DNA REPAIR AND THE DNA DAMAGE CHECKPOINTS. Aziz Sancar, Laura A. Lindsey-Boltz,
+Keziban Unsal-Kaçmaz, and Stuart Linn, Annu. Rev. Biochem. 2004. 73:39–85 
+
+doi:10.1146/annurev.biochem.73.011303.073723</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="697,363 697,391 335,392 335,428" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Mdm2:p53" from="Mdm2" to="p53" minvalue="1" sign="negative">
+<annotation>
+  <comment>Transcription regulation
+
+Stott FJ: The alternative product from the human CDKN2A locus, p14ARF, participates in a regulatory feedback loop with p53 and MDM2. The EMBO Journal 1998, 17:5001–5014.
+
+doi: 10.1093/emboj/17.17.5001</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="534,290 534,268 534,256" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="RB1:E2F" from="RB1" to="E2F" minvalue="1" sign="negative">
+<annotation>
+  <comment>Physical interaction
+
+The regulation of E2F by pRB-family proteins. Nicholas Dyson, Genes Dev. 1998 12: 2245-2262.
+
+
+doi: 10.1101/gad.12.15.2245</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="580,535 579,535 618,535" line_style="straight" line_color="#ff0000" line_width="1" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+<annotation>
+  <comment>
+</comment>
+</annotation>
+	</graph>
+</gxl>

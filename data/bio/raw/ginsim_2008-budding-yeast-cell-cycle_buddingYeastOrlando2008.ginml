@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://gin.univ-mrs.fr/GINsim/GINML_2_1.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+	<graph id="default_name" class="regulatory" nodeorder="MBF SBF YOX1 HCM1 YHP1 SFF ACE2 SWI5 CLN3">
+<node id="ACE2" maxvalue="1">
+  <parameter idActiveInteractions=" SFF:ACE2" val="1"/>
+  <value val="1">
+    <exp str="SFF"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="74" y="276" width="55" height="25" backgroundColor="#cc99ff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="CLN3" maxvalue="1">
+  <parameter idActiveInteractions=" SWI5:CLN3 ACE2:CLN3" val="1"/>
+  <parameter idActiveInteractions=" SWI5:CLN3 ACE2:CLN3 YHP1:CLN3" val="1"/>
+  <parameter idActiveInteractions=" SWI5:CLN3 ACE2:CLN3 YOX1:CLN3" val="1"/>
+  <value val="1">
+    <exp str="SWI5 &amp; ACE2 &amp; !(YOX1 &amp; YHP1)"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="128" y="68" width="55" height="25" backgroundColor="#ff0000" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="MBF" maxvalue="1">
+  <parameter idActiveInteractions=" CLN3:MBF" val="1"/>
+  <value val="1">
+    <exp str="CLN3"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="219" y="96" width="55" height="25" backgroundColor="#ff9900" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="SBF" maxvalue="1">
+  <parameter idActiveInteractions=" CLN3:SBF" val="1"/>
+  <parameter idActiveInteractions=" CLN3:SBF YHP1:SBF" val="1"/>
+  <parameter idActiveInteractions=" CLN3:SBF YOX1:SBF" val="1"/>
+  <parameter idActiveInteractions=" CLN3:SBF MBF:SBF" val="1"/>
+  <parameter idActiveInteractions=" CLN3:SBF MBF:SBF YHP1:SBF" val="1"/>
+  <parameter idActiveInteractions=" CLN3:SBF MBF:SBF YOX1:SBF" val="1"/>
+  <parameter idActiveInteractions=" MBF:SBF" val="1"/>
+  <parameter idActiveInteractions=" MBF:SBF YHP1:SBF" val="1"/>
+  <parameter idActiveInteractions=" MBF:SBF YOX1:SBF" val="1"/>
+  <value val="1">
+    <exp str="(CLN3 | MBF) &amp; !(YOX1 &amp; YHP1)"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="281" y="138" width="55" height="25" backgroundColor="#99ff33" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="HCM1" maxvalue="1">
+  <parameter idActiveInteractions=" SBF:HCM1 MBF:HCM1" val="1"/>
+  <value val="1">
+    <exp str="MBF &amp; SBF"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="305" y="217" width="55" height="25" backgroundColor="#33cc00" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="YHP1" maxvalue="1">
+  <parameter idActiveInteractions=" MBF:YHP1" val="1"/>
+  <parameter idActiveInteractions=" SBF:YHP1 MBF:YHP1" val="1"/>
+  <parameter idActiveInteractions=" SBF:YHP1" val="1"/>
+  <value val="1">
+    <exp str="MBF | SBF"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="286" y="254" width="55" height="25" backgroundColor="#66ff99" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="SWI5" maxvalue="1">
+  <parameter idActiveInteractions=" SFF:SWI5" val="1"/>
+  <value val="1">
+    <exp str="SFF"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="47" y="207" width="55" height="25" backgroundColor="#cc99ff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="SFF" maxvalue="1">
+  <parameter idActiveInteractions=" SBF:SFF HCM1:SFF" val="1"/>
+  <value val="1">
+    <exp str="SBF &amp; HCM1"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="186" y="302" width="55" height="25" backgroundColor="#33ccff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="YOX1" maxvalue="1">
+  <parameter idActiveInteractions=" MBF:YOX1 SBF:YOX1" val="1"/>
+  <value val="1">
+    <exp str="MBF &amp; SBF"/>
+  </value>
+
+			<nodevisualsetting>
+				<ellipse x="297" y="175" width="55" height="25" backgroundColor="#33cc00" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+		<edge id="ACE2:CLN3" from="ACE2" to="CLN3" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="101,288 40,290 20,260 20,140 60,70 110,40 140,50 155,80" line_style="straight" line_color="#cc00cc" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CLN3:MBF" from="CLN3" to="MBF" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="155,80 150,52 250,60 246,108" line_style="straight" line_color="#ff0033" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="CLN3:SBF" from="CLN3" to="SBF" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="155,80 150,52 250,60 310,80 350,110 308,150" line_style="straight" line_color="#ff0033" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="MBF:SBF" from="MBF" to="SBF" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="246,108 300,90 370,142 308,150" line_style="straight" line_color="#ff9900" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="MBF:YOX1" from="MBF" to="YOX1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="246,108 300,90 370,142 380,172 324,187" line_style="straight" line_color="#ff9900" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="MBF:HCM1" from="MBF" to="HCM1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="246,108 300,90 370,142 380,172 380,222 332,229" line_style="straight" line_color="#ff9900" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="MBF:YHP1" from="MBF" to="YHP1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="246,108 300,90 370,142 380,172 380,222 380,262 313,266" line_style="straight" line_color="#ff9900" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SBF:YOX1" from="SBF" to="YOX1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="308,150 390,152 400,192 324,187" line_style="straight" line_color="#33cc00" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SBF:HCM1" from="SBF" to="HCM1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="308,150 390,152 400,192 400,232 332,229" line_style="straight" line_color="#33cc00" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SBF:YHP1" from="SBF" to="YHP1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="308,150 390,152 400,192 400,232 370,302 313,266" line_style="straight" line_color="#33cc00" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SBF:SFF" from="SBF" to="SFF" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="308,150 390,152 400,192 400,232 370,302 310,342 250,342 213,314" line_style="straight" line_color="#33cc00" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="HCM1:SFF" from="HCM1" to="SFF" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="332,229 410,242 380,312 310,352 220,352 213,314" line_style="straight" line_color="#33cc00" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="YHP1:SBF" from="YHP1" to="SBF" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="313,266 260,262 250,202 230,162 250,142 308,150" line_style="straight" line_color="#3399ff" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="YHP1:CLN3" from="YHP1" to="CLN3" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="313,266 260,262 250,202 230,162 180,122 130,122 155,80" line_style="straight" line_color="#3399ff" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SWI5:CLN3" from="SWI5" to="CLN3" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="74,219 40,202 40,132 70,82 110,52 155,80" line_style="straight" line_color="#cc00cc" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SFF:ACE2" from="SFF" to="ACE2" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="213,314 210,352 150,352 90,332 60,312 101,288" line_style="straight" line_color="#3399ff" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SFF:SWI5" from="SFF" to="SWI5" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="213,314 210,352 150,352 90,332 60,312 30,262 30,222 74,219" line_style="straight" line_color="#3399ff" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="YOX1:SBF" from="YOX1" to="SBF" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="324,187 270,192 260,172 308,150" line_style="straight" line_color="#33cc00" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="YOX1:CLN3" from="YOX1" to="CLN3" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="324,187 270,192 260,172 220,132 190,112 160,112 155,80" line_style="straight" line_color="#33cc00" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+	</graph>
+</gxl>

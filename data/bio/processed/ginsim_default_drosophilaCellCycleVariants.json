@@ -1,0 +1,594 @@
+{
+  "name": "ginsim_default_drosophilaCellCycleVariants",
+  "nodes": [
+    "CycD",
+    "Rb",
+    "Rux",
+    "Wee1",
+    "Fzy",
+    "CycA",
+    "CycE",
+    "E2F",
+    "Fzr",
+    "Dap",
+    "Notch",
+    "Stg",
+    "CycB",
+    "Ago"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Rb": "!CycD & !CycE & ((!CycA & !CycB) | Rux)",
+    "Rux": "!(CycD & CycE) & (!(CycA | CycB) | Rux) & !(CycA & CycB)",
+    "Wee1": "!CycB | Rux",
+    "CycA": "E2F & !Rb & !Fzr & !Fzy",
+    "CycE": "E2F & !Rb & !(Ago & Dap)",
+    "E2F": "(!(CycA | CycB) | Rux) & !Rb",
+    "Fzr": "(!CycE | Notch) & ((!CycA & !CycB) | Rux)",
+    "Dap": "CycE | !Notch",
+    "Stg": "((E2F & !Rb) | (CycB & !Rux)) & !Notch",
+    "CycB": "(!Wee1 | Stg) & !Fzy & !Fzr"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "Rb": {
+      "inputs": [
+        "CycD",
+        "Rux",
+        "CycA",
+        "CycE",
+        "CycB"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Rux": {
+      "inputs": [
+        "CycD",
+        "CycA",
+        "CycE",
+        "CycB"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Wee1": {
+      "inputs": [
+        "Rux",
+        "CycB"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycA": {
+      "inputs": [
+        "Rb",
+        "Fzy",
+        "E2F",
+        "Fzr"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycE": {
+      "inputs": [
+        "Rb",
+        "E2F",
+        "Dap",
+        "Ago"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "E2F": {
+      "inputs": [
+        "Rb",
+        "Rux",
+        "CycA",
+        "CycB"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Fzr": {
+      "inputs": [
+        "Rux",
+        "CycA",
+        "CycE",
+        "Notch",
+        "CycB"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Dap": {
+      "inputs": [
+        "CycE",
+        "Notch"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Stg": {
+      "inputs": [
+        "Rb",
+        "Rux",
+        "E2F",
+        "Notch",
+        "CycB"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycB": {
+      "inputs": [
+        "Wee1",
+        "Fzy",
+        "Fzr",
+        "Stg"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 10
+  },
+  "n": 14,
+  "n_edges": 41,
+  "edges": [
+    {
+      "source": "CycD",
+      "target": "Rb",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycD",
+      "target": "Rux",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb",
+      "target": "CycE",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb",
+      "target": "Stg",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rux",
+      "target": "Rux",
+      "type": "activation"
+    },
+    {
+      "source": "Rux",
+      "target": "E2F",
+      "type": "activation"
+    },
+    {
+      "source": "Rux",
+      "target": "Fzr",
+      "type": "activation"
+    },
+    {
+      "source": "Rux",
+      "target": "Rb",
+      "type": "activation"
+    },
+    {
+      "source": "Rux",
+      "target": "Wee1",
+      "type": "activation"
+    },
+    {
+      "source": "Rux",
+      "target": "Fzy",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rux",
+      "target": "Stg",
+      "type": "inhibition"
+    },
+    {
+      "source": "Wee1",
+      "target": "CycB",
+      "type": "inhibition"
+    },
+    {
+      "source": "Fzy",
+      "target": "CycB",
+      "type": "inhibition"
+    },
+    {
+      "source": "Fzy",
+      "target": "CycA",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "Fzr",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycA",
+      "target": "Rux",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycE",
+      "target": "Rux",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycE",
+      "target": "Dap",
+      "type": "activation"
+    },
+    {
+      "source": "CycE",
+      "target": "Fzr",
+      "type": "inhibition"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "activation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycE",
+      "type": "activation"
+    },
+    {
+      "source": "E2F",
+      "target": "Stg",
+      "type": "activation"
+    },
+    {
+      "source": "Fzr",
+      "target": "CycB",
+      "type": "inhibition"
+    },
+    {
+      "source": "Fzr",
+      "target": "CycA",
+      "type": "inhibition"
+    },
+    {
+      "source": "Dap",
+      "target": "CycE",
+      "type": "inhibition"
+    },
+    {
+      "source": "Notch",
+      "target": "Fzr",
+      "type": "activation"
+    },
+    {
+      "source": "Notch",
+      "target": "Stg",
+      "type": "inhibition"
+    },
+    {
+      "source": "Notch",
+      "target": "Dap",
+      "type": "inhibition"
+    },
+    {
+      "source": "Stg",
+      "target": "CycB",
+      "type": "activation"
+    },
+    {
+      "source": "CycB",
+      "target": "Rb",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "Rux",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "Fzr",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "Fzy",
+      "type": "activation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "CycB",
+      "target": "Stg",
+      "type": "activation"
+    },
+    {
+      "source": "CycB",
+      "target": "Wee1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Ago",
+      "target": "CycE",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    2,
+    4,
+    6,
+    1,
+    2,
+    4,
+    4,
+    3,
+    2,
+    1,
+    3,
+    1,
+    7,
+    1
+  ]
+}

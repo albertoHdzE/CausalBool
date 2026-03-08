@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "https://ginsim.github.io/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="NEW-SYNERGY-MODEL_FORMAT-JUNE-2019" nodeorder="DNA_Damage ATM Mdm2 p53 Wip1 p53_A p53_K miR_34a miR_16 p21 p53INP1 c_Myc Cdc25A CDK46_CycD CDK2_CycE RB E2F1 Sirt_1 HDAC1 BMI1 PUMA BCL2 BAX Caspase3 Poliferation Senescence Apoptosis">
+    <attr name="display.node" value="name"/>
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="45" height="25"/>
+    <nodestyle name="Node style" background="#ff0000" foreground="#333333" width="90" height="40"/>
+    <nodestyle name="Node style 2" background="#ffffff" foreground="#000000" shape="RECTANGLE" width="60" height="30"/>
+    <nodestyle name="Node style 3" background="#ffff00" foreground="#000000" text="#000000" width="70" height="30"/>
+    <nodestyle name="Node style 4" background="#ffff00" foreground="#000000" text="#000000" width="70" height="30"/>
+    <nodestyle name="Node style 5" background="#ffffff" shape="RECTANGLE" width="80" height="30"/>
+    <nodestyle name="Node style 6" shape="RECTANGLE" width="80" height="30"/>
+    <nodestyle name="Node style 7" background="#33ff33" shape="RECTANGLE" width="80" height="30"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="2" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle name="Edge style" pattern="DASH"/>
+    <edgestyle name="Edge style 2" pattern="DASH"/>
+    <node id="DNA_Damage" maxvalue="1" input="true">
+      <nodevisualsetting x="33" y="112" style="Node style"/>
+    </node>
+    <node id="ATM" maxvalue="1">
+      <value val="1">
+        <exp str="DNA_Damage &amp; (!HDAC1 | !Wip1 | E2F1)"/>
+      </value>
+      <nodevisualsetting x="204" y="55" style="Node style 2"/>
+    </node>
+    <node id="Mdm2" maxvalue="1">
+      <value val="1">
+        <exp str="(!Wip1 | p53) &amp; !ATM"/>
+      </value>
+      <nodevisualsetting x="424" y="276" style="Node style 2"/>
+    </node>
+    <node id="p53" maxvalue="1">
+      <value val="1">
+        <exp str="(ATM | !Sirt_1) &amp; !Mdm2"/>
+      </value>
+      <nodevisualsetting x="211" y="277" style="Node style 2"/>
+    </node>
+    <node id="Wip1" maxvalue="1">
+      <value val="1">
+        <exp str="p53_A &amp; !miR_16"/>
+      </value>
+      <nodevisualsetting x="773" y="45" style="Node style 2"/>
+    </node>
+    <node id="p53_A" maxvalue="1">
+      <value val="1">
+        <exp str="!Sirt_1 &amp; !p53_K &amp; (p53:1 | !p53INP1)"/>
+      </value>
+      <nodevisualsetting x="213" y="369" style="Node style 2"/>
+    </node>
+    <node id="p53_K" maxvalue="1">
+      <value val="1">
+        <exp str="!p53_A &amp; (!Sirt_1 | !Wip1) &amp; p53"/>
+      </value>
+      <nodevisualsetting x="422" y="369" style="Node style 2"/>
+    </node>
+    <node id="miR_34a" maxvalue="1">
+      <value val="1">
+        <exp str="ATM | p53"/>
+      </value>
+      <nodevisualsetting x="222" y="131" style="Node style 3"/>
+    </node>
+    <node id="miR_16" maxvalue="1">
+      <value val="1">
+        <exp str="(ATM | p53) &amp; !HDAC1 &amp; !c_Myc"/>
+      </value>
+      <nodevisualsetting x="593" y="123" style="Node style 4"/>
+    </node>
+    <node id="p21" maxvalue="1">
+      <value val="1">
+        <exp str="p53_A | ((!HDAC1 | !c_Myc | !BMI1) &amp; !Caspase3)"/>
+      </value>
+      <nodevisualsetting x="604" y="268" style="Node style 2"/>
+    </node>
+    <node id="p53INP1" maxvalue="1">
+      <value val="1">
+        <exp str="p53_K | p53_A"/>
+      </value>
+      <nodevisualsetting x="262" y="427" style="Node style 2"/>
+    </node>
+    <node id="c_Myc" maxvalue="1">
+      <value val="1">
+        <exp str="(E2F1 | !miR_34a) &amp; !RB &amp; !p21"/>
+      </value>
+      <nodevisualsetting x="423" y="173" style="Node style 2"/>
+    </node>
+    <node id="Cdc25A" maxvalue="1">
+      <value val="1">
+        <exp str="!ATM &amp; !miR_34a"/>
+      </value>
+      <nodevisualsetting x="423" y="469" style="Node style 2"/>
+    </node>
+    <node id="CDK46_CycD" maxvalue="1">
+      <value val="1">
+        <exp str="Cdc25A &amp; !miR_34a &amp; !p21 &amp; !miR_16"/>
+      </value>
+      <nodevisualsetting x="291" y="544" style="Node style 5"/>
+    </node>
+    <node id="CDK2_CycE" maxvalue="1">
+      <value val="1">
+        <exp str="Cdc25A &amp; E2F1 &amp; !miR_34a &amp; !p21 &amp; !miR_16"/>
+      </value>
+      <nodevisualsetting x="501" y="544" style="Node style 5"/>
+    </node>
+    <node id="RB" maxvalue="1">
+      <value val="1">
+        <exp str="!CDK46_CycD &amp; !CDK2_CycE"/>
+      </value>
+      <nodevisualsetting x="217" y="469" style="Node style 2"/>
+    </node>
+    <node id="E2F1" maxvalue="1">
+      <value val="1">
+        <exp str="(!RB &amp; ((Cdc25A &amp; ATM) | !Sirt_1 | !miR_34a)) | c_Myc"/>
+      </value>
+      <nodevisualsetting x="615" y="466" style="Node style 2"/>
+    </node>
+    <node id="Sirt_1" maxvalue="1">
+      <value val="1">
+        <exp str="E2F1 &amp; !(miR_34a &amp; HDAC1)"/>
+      </value>
+      <nodevisualsetting x="777" y="463" style="Node style 2"/>
+    </node>
+    <node id="HDAC1" maxvalue="1">
+      <value val="1">
+        <exp str="(!miR_34a &amp; !Sirt_1) | !DNA_Damage"/>
+      </value>
+      <nodevisualsetting x="423" y="49" style="Node style 2"/>
+    </node>
+    <node id="BMI1" maxvalue="1">
+      <value val="1">
+        <exp str="!miR_16 &amp; (E2F1 | c_Myc)"/>
+      </value>
+      <nodevisualsetting x="774" y="166" style="Node style 2"/>
+    </node>
+    <node id="PUMA" maxvalue="1">
+      <value val="1">
+        <exp str="p53_K"/>
+      </value>
+      <nodevisualsetting x="604" y="367" style="Node style 2"/>
+    </node>
+    <node id="BCL2" maxvalue="1">
+      <value val="1">
+        <exp str="!PUMA &amp; !miR_34a &amp; !miR_16"/>
+      </value>
+      <nodevisualsetting x="773" y="266" style="Node style 2"/>
+    </node>
+    <node id="BAX" maxvalue="1">
+      <value val="1">
+        <exp str="!BCL2 &amp; (p53_K | c_Myc)"/>
+      </value>
+      <nodevisualsetting x="774" y="352" style="Node style 2"/>
+    </node>
+    <node id="Caspase3" maxvalue="1">
+      <value val="1">
+        <exp str="!(BCL2 &amp; p21) &amp; BAX"/>
+      </value>
+      <nodevisualsetting x="763" y="540" style="Node style 5"/>
+    </node>
+    <node id="Poliferation" maxvalue="1">
+      <value val="1">
+        <exp str="CDK2_CycE"/>
+      </value>
+      <nodevisualsetting x="892" y="338" style="Node style 7"/>
+    </node>
+    <node id="Senescence" maxvalue="1">
+      <value val="1">
+        <exp str="p21 &amp; !CDK2_CycE"/>
+      </value>
+      <nodevisualsetting x="896" y="430" style="Node style 7"/>
+    </node>
+    <node id="Apoptosis" maxvalue="1">
+      <value val="1">
+        <exp str="Caspase3"/>
+      </value>
+      <nodevisualsetting x="898" y="538" style="Node style 7"/>
+    </node>
+    <edge id="p53:miR_34a" from="p53" to="miR_34a" minvalue="1" sign="positive">
+      <edgevisualsetting points="238,233" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:miR_16" from="p53" to="miR_16" minvalue="1" sign="positive">
+      <edgevisualsetting points="250,247 625,247" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:Mdm2" from="p53" to="Mdm2" minvalue="1" sign="positive">
+      <edgevisualsetting points="312,298" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:p53_A" from="p53" to="p53_A" minvalue="1" sign="positive">
+      <edgevisualsetting points="221,342" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:p53_K" from="p53" to="p53_K" minvalue="1" sign="positive">
+      <edgevisualsetting points="245,334 456,334" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_A:Wip1" from="p53_A" to="Wip1" minvalue="1" sign="positive">
+      <edgevisualsetting points="236,352 737,352 737,52" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_A:p53_K" from="p53_A" to="p53_K" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_A:p21" from="p53_A" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting points="228,343 623,343" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_A:p53INP1" from="p53_A" to="p53INP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="301,385" anchor="NE" style=""/>
+    </edge>
+    <edge id="DNA_Damage:ATM" from="DNA_Damage" to="ATM" minvalue="1" sign="positive">
+      <edgevisualsetting points="96,64" anchor="NE" style=""/>
+    </edge>
+    <edge id="DNA_Damage:HDAC1" from="DNA_Damage" to="HDAC1" minvalue="1" sign="negative">
+      <edgevisualsetting points="78,15 449,15" anchor="NE" style=""/>
+    </edge>
+    <edge id="PUMA:BCL2" from="PUMA" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="723,380 723,281" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:miR_34a" from="ATM" to="miR_34a" minvalue="1" sign="positive">
+      <edgevisualsetting points="249,108" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:miR_16" from="ATM" to="miR_16" minvalue="1" sign="positive">
+      <edgevisualsetting points="243,24 625,24" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:p53" from="ATM" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting points="214,120" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:Mdm2" from="ATM" to="Mdm2" minvalue="1" sign="negative">
+      <edgevisualsetting points="381,78 381,278" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:Cdc25A" from="ATM" to="Cdc25A" minvalue="1" sign="negative">
+      <edgevisualsetting points="360,84 360,470" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:E2F1" from="ATM" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="142,75 142,526 656,526" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BAX" from="BCL2" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting points="800,329" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:Caspase3" from="BCL2" to="Caspase3" minvalue="1" sign="negative">
+      <edgevisualsetting points="728,293 728,528 775,528" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_K:p53_A" from="p53_K" to="p53_A" minvalue="1" sign="negative">
+      <edgevisualsetting points="314,394" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_K:PUMA" from="p53_K" to="PUMA" minvalue="1" sign="positive">
+      <edgevisualsetting points="522,383" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_K:BAX" from="p53_K" to="BAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="469,359" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53_K:p53INP1" from="p53_K" to="p53INP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="436,427 381,427 381,476 298,476" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2_CycE:RB" from="CDK2_CycE" to="RB" minvalue="1" sign="negative">
+      <edgevisualsetting points="521,583 229,583" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2_CycE:Poliferation" from="CDK2_CycE" to="Poliferation" minvalue="1" sign="positive">
+      <edgevisualsetting points="649,562 648,590 861,589 860,357" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK2_CycE:Senescence" from="CDK2_CycE" to="Senescence" minvalue="1" sign="negative">
+      <edgevisualsetting points="687,558 687,518 871,519 871,456" anchor="NE" style=""/>
+    </edge>
+    <edge id="Mdm2:p53" from="Mdm2" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting points="378,286" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:ATM" from="E2F1" to="ATM" minvalue="1" sign="positive">
+      <edgevisualsetting points="631,590 201,590" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:c_Myc" from="E2F1" to="c_Myc" minvalue="1" sign="positive">
+      <edgevisualsetting points="548,481 548,188" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:Sirt_1" from="E2F1" to="Sirt_1" minvalue="1" sign="positive">
+      <edgevisualsetting points="725,477" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CDK2_CycE" from="E2F1" to="CDK2_CycE" minvalue="1" sign="positive">
+      <edgevisualsetting points="624,551" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:BMI1" from="E2F1" to="BMI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="717,494 717,226 818,226" anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase3:p21" from="Caspase3" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="705,549 705,321 657,321" anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase3:Apoptosis" from="Caspase3" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting points="868,557" anchor="NE" style=""/>
+    </edge>
+    <edge id="Sirt_1:HDAC1" from="Sirt_1" to="HDAC1" minvalue="1" sign="negative">
+      <edgevisualsetting points="793,458 745,458 743,64" anchor="NE" style=""/>
+    </edge>
+    <edge id="Sirt_1:p53" from="Sirt_1" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting points="801,453 535,453 535,348 401,348 401,310" anchor="NE" style=""/>
+    </edge>
+    <edge id="Sirt_1:E2F1" from="Sirt_1" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="726,486" anchor="NE" style=""/>
+    </edge>
+    <edge id="Sirt_1:p53_A" from="Sirt_1" to="p53_A" minvalue="1" sign="negative">
+      <edgevisualsetting points="806,418 232,418" anchor="NE" style=""/>
+    </edge>
+    <edge id="Sirt_1:p53_K" from="Sirt_1" to="p53_K" minvalue="1" sign="negative">
+      <edgevisualsetting points="802,426 499,426 499,390" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB:c_Myc" from="RB" to="c_Myc" minvalue="1" sign="negative">
+      <edgevisualsetting points="330,484 330,190" anchor="NE" style=""/>
+    </edge>
+    <edge id="RB:E2F1" from="RB" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="257,515 650,515" anchor="NE" style=""/>
+    </edge>
+    <edge id="HDAC1:miR_16" from="HDAC1" to="miR_16" minvalue="1" sign="negative">
+      <edgevisualsetting points="451,144" anchor="NE" style=""/>
+    </edge>
+    <edge id="HDAC1:ATM" from="HDAC1" to="ATM" minvalue="1" sign="negative">
+      <edgevisualsetting points="319,66" anchor="NE" style=""/>
+    </edge>
+    <edge id="HDAC1:Sirt_1" from="HDAC1" to="Sirt_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="393,77 393,412 816,412" anchor="NE" style=""/>
+    </edge>
+    <edge id="HDAC1:p21" from="HDAC1" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="684,72 684,279" anchor="NE" style=""/>
+    </edge>
+    <edge id="BMI1:p21" from="BMI1" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="658,177" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:c_Myc" from="p21" to="c_Myc" minvalue="1" sign="negative">
+      <edgevisualsetting points="633,197" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:CDK46_CycD" from="p21" to="CDK46_CycD" minvalue="1" sign="negative">
+      <edgevisualsetting points="564,283 564,466 517,466 517,520 464,520 464,558" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:CDK2_CycE" from="p21" to="CDK2_CycE" minvalue="1" sign="negative">
+      <edgevisualsetting points="570,289" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:Caspase3" from="p21" to="Caspase3" minvalue="1" sign="negative">
+      <edgevisualsetting points="701,288 701,557" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:Senescence" from="p21" to="Senescence" minvalue="1" sign="positive">
+      <edgevisualsetting points="641,327 867,328 868,445" anchor="NE" style=""/>
+    </edge>
+    <edge id="CDK46_CycD:RB" from="CDK46_CycD" to="RB" minvalue="1" sign="negative">
+      <edgevisualsetting points="241,544" anchor="NE" style=""/>
+    </edge>
+    <edge id="c_Myc:miR_16" from="c_Myc" to="miR_16" minvalue="1" sign="negative">
+      <edgevisualsetting points="452,151" anchor="NE" style=""/>
+    </edge>
+    <edge id="c_Myc:p21" from="c_Myc" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="462,268" anchor="NE" style=""/>
+    </edge>
+    <edge id="c_Myc:BAX" from="c_Myc" to="BAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="752,183 752,349" anchor="NE" style=""/>
+    </edge>
+    <edge id="c_Myc:E2F1" from="c_Myc" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="368,177 368,447 639,447" anchor="NE" style=""/>
+    </edge>
+    <edge id="c_Myc:BMI1" from="c_Myc" to="BMI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="468,167" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_16:Wip1" from="miR_16" to="Wip1" minvalue="1" sign="negative">
+      <edgevisualsetting points="803,133" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_16:BMI1" from="miR_16" to="BMI1" minvalue="1" sign="negative">
+      <edgevisualsetting points="805,140" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_16:BCL2" from="miR_16" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="639,214 809,214" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_16:CDK46_CycD" from="miR_16" to="CDK46_CycD" minvalue="1" sign="negative">
+      <edgevisualsetting points="604,214 338,214" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_16:CDK2_CycE" from="miR_16" to="CDK2_CycE" minvalue="1" sign="negative">
+      <edgevisualsetting points="613,218 576,218" anchor="NE" style=""/>
+    </edge>
+    <edge id="BAX:Caspase3" from="BAX" to="Caspase3" minvalue="1" sign="positive">
+      <edgevisualsetting points="737,374 737,542" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:HDAC1" from="miR_34a" to="HDAC1" minvalue="1" sign="negative">
+      <edgevisualsetting points="443,145" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:c_Myc" from="miR_34a" to="c_Myc" minvalue="1" sign="negative">
+      <edgevisualsetting points="444,152" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:E2F1" from="miR_34a" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="267,241 712,241 711,470" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:BCL2" from="miR_34a" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="256,232 795,232" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:Cdc25A" from="miR_34a" to="Cdc25A" minvalue="1" sign="negative">
+      <edgevisualsetting points="163,162 162,520 431,520" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:CDK46_CycD" from="miR_34a" to="CDK46_CycD" minvalue="1" sign="negative">
+      <edgevisualsetting points="182,155 181,554" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:CDK2_CycE" from="miR_34a" to="CDK2_CycE" minvalue="1" sign="negative">
+      <edgevisualsetting points="277,256 557,256" anchor="NE" style=""/>
+    </edge>
+    <edge id="miR_34a:Sirt_1" from="miR_34a" to="Sirt_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="292,223 731,223 731,470" anchor="NE" style=""/>
+    </edge>
+    <edge id="Wip1:ATM" from="Wip1" to="ATM" minvalue="1" sign="negative">
+      <edgevisualsetting points="804,35 255,35" anchor="NE" style=""/>
+    </edge>
+    <edge id="Wip1:Mdm2" from="Wip1" to="Mdm2" minvalue="1" sign="negative">
+      <edgevisualsetting points="782,113 713,113 713,207 504,207 504,294" anchor="NE" style=""/>
+    </edge>
+    <edge id="Wip1:p53_K" from="Wip1" to="p53_K" minvalue="1" sign="negative">
+      <edgevisualsetting points="693,71 693,332 497,332 497,377" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:CDK46_CycD" from="Cdc25A" to="CDK46_CycD" minvalue="1" sign="positive">
+      <edgevisualsetting points="361,481" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:CDK2_CycE" from="Cdc25A" to="CDK2_CycE" minvalue="1" sign="positive">
+      <edgevisualsetting points="532,481" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:E2F1" from="Cdc25A" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="570,488" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53INP1:p53_A" from="p53INP1" to="p53_A" minvalue="1" sign="negative">
+      <edgevisualsetting points="247,439" anchor="NE" style=""/>
+    </edge>
+    <annotation>
+      <linklist>
+        <link xlink:href="https://doi.org/10.1002/1873-3468.13615"/>
+      </linklist>
+      <comment>Published by Gupta et al in FEBS Letters in 2020 [1], this Boolean model focuses on the regulation of a p21-dependent senescence-apoptosis switch in non-small cell lung cancer, emphasising the roles of two micro-RNAs, as well as of the histone deacetylase HDAC1. </comment>
+    </annotation>
+  </graph>
+</gxl>

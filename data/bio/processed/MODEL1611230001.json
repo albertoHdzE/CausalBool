@@ -1,0 +1,1148 @@
+{
+  "name": "MODEL1611230001",
+  "nodes": [
+    "CycD",
+    "Rb",
+    "E2F",
+    "CycE",
+    "CycA",
+    "CycB",
+    "p27",
+    "Cdc20",
+    "Cdh1",
+    "UbcH10",
+    "Skp2"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Rb": "OR(AND(NOT(CycD), CycE, CycA, CycB, p27), AND(CycD, NOT(CycE), NOT(CycA), NOT(CycB)), AND(CycD, NOT(CycE), NOT(CycA), CycB, p27), AND(CycD, NOT(CycE), CycA, p27), AND(CycD, CycE, p27))",
+    "E2F": "OR(AND(LEQ(Rb, 1), NOT(CycA), NOT(CycB)), AND(LEQ(Rb, 1), NOT(CycA), CycB, NOT(Cdc20)), AND(LEQ(Rb, 1), CycA, NOT(CycB), p27, NOT(Skp2)), AND(LEQ(Rb, 1), CycA, NOT(CycB), EQ(p27, 2)), AND(LEQ(Rb, 1), CycA, CycB, p27, NOT(Cdc20), NOT(Skp2)), AND(LEQ(Rb, 1), CycA, CycB, EQ(p27, 2), NOT(Cdc20)))",
+    "CycE": "AND(LEQ(Rb, 1), E2F)",
+    "CycA": "OR(AND(NOT(Rb), NOT(E2F), CycA, NOT(Cdc20), NOT(Cdh1)), AND(NOT(Rb), NOT(E2F), CycA, NOT(Cdc20), Cdh1, NOT(UbcH10)), AND(NOT(Rb), NOT(E2F), CycA, Cdc20, NOT(UbcH10)), AND(NOT(Rb), E2F, NOT(Cdc20), NOT(Cdh1)), AND(NOT(Rb), E2F, NOT(Cdc20), Cdh1, NOT(UbcH10)), AND(NOT(Rb), E2F, Cdc20, NOT(UbcH10)), AND(Rb, CycA, NOT(Cdc20), NOT(Cdh1)), AND(Rb, CycA, NOT(Cdc20), Cdh1, NOT(UbcH10)), AND(Rb, CycA, Cdc20, NOT(UbcH10)))",
+    "CycB": "OR(AND(NOT(Cdc20), NOT(Cdh1)), AND(Cdc20, NOT(Cdh1), NOT(UbcH10)))",
+    "p27": "OR(AND(CycD, NOT(CycE), NOT(CycA), NOT(CycB)), AND(CycD, NOT(CycE), NOT(CycA), CycB, NOT(Skp2)), AND(CycD, NOT(CycE), CycA, NOT(CycB), NOT(p27), NOT(Skp2)), AND(CycD, NOT(CycE), CycA, NOT(CycB), p27), AND(CycD, NOT(CycE), CycA, CycB, NOT(Skp2)), AND(CycD, CycE, NOT(CycA), NOT(CycB), LEQ(p27, 1), NOT(Skp2)), AND(CycD, CycE, NOT(CycA), NOT(CycB), EQ(p27, 2)), AND(CycD, CycE, NOT(CycA), CycB, NOT(Skp2)), AND(CycD, CycE, CycA, NOT(Skp2)))",
+    "Cdc20": "CycB",
+    "Cdh1": "OR(AND(NOT(CycA), NOT(CycB)), AND(NOT(CycA), CycB, p27), AND(CycA, p27, NOT(Skp2)), AND(CycA, EQ(p27, 2)))",
+    "UbcH10": "OR(AND(NOT(CycA), NOT(CycB), NOT(Cdc20), NOT(Cdh1)), AND(NOT(CycA), NOT(CycB), Cdc20, NOT(Cdh1)), AND(NOT(CycA), NOT(CycB), Cdc20, Cdh1, UbcH10), AND(NOT(CycA), CycB, NOT(Cdh1)), AND(NOT(CycA), CycB, Cdh1, UbcH10), AND(CycA, NOT(Cdh1)), AND(CycA, Cdh1, UbcH10))",
+    "Skp2": "OR(LEQ(Rb, 1), AND(EQ(Rb, 2), NOT(Cdh1)))",
+    "CycD": "INPUT"
+  },
+  "reference": null,
+  "description": "Imported from biomodels_MODEL1611230001.xml",
+  "source": "BioModels",
+  "gates": {
+    "CycD": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "Rb": {
+      "inputs": [
+        "CycD",
+        "CycE",
+        "CycA",
+        "CycB",
+        "p27"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "E2F": {
+      "inputs": [
+        "Rb",
+        "CycA",
+        "CycB",
+        "p27",
+        "Cdc20",
+        "Skp2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycE": {
+      "inputs": [
+        "Rb",
+        "E2F"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycA": {
+      "inputs": [
+        "Rb",
+        "E2F",
+        "Cdc20",
+        "Cdh1",
+        "UbcH10"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CycB": {
+      "inputs": [
+        "Cdc20",
+        "Cdh1",
+        "UbcH10"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 2,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "p27": {
+      "inputs": [
+        "CycD",
+        "CycE",
+        "CycA",
+        "CycB",
+        "Skp2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Cdc20": {
+      "inputs": [
+        "CycB"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Cdh1": {
+      "inputs": [
+        "CycA",
+        "CycB",
+        "p27",
+        "Skp2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "UbcH10": {
+      "inputs": [
+        "CycA",
+        "CycB",
+        "Cdc20",
+        "Cdh1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Skp2": {
+      "inputs": [
+        "Rb",
+        "Cdh1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 1,
+    "CUSTOM": 8,
+    "CANALISING": 1,
+    "IDENTITY": 1
+  },
+  "n": 11,
+  "n_edges": 37,
+  "edges": [
+    {
+      "source": "CycD",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycE",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycE",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "UbcH10",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Cdc20",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "Skp2",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "p27",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "Skp2",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "Skp2",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "Skp2",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    2,
+    4,
+    2,
+    2,
+    5,
+    6,
+    3,
+    4,
+    4,
+    2,
+    3
+  ]
+}

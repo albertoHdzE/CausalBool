@@ -1,0 +1,576 @@
+{
+  "name": "ginsim_2018-bird-sex-determination",
+  "nodes": [
+    "Z1",
+    "Z2",
+    "W",
+    "DMRT1",
+    "HEMGN",
+    "SOX9",
+    "FOXL2",
+    "AROMA",
+    "ESTRO",
+    "AMH",
+    "SF1",
+    "B_CATENIN",
+    "WNT4",
+    "FGF9"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "DMRT1": "AND(Z1, Z2, NOT(W), NOT(HEMGN), NOT(SOX9), NOT(FOXL2))",
+    "HEMGN": "AND(DMRT1, NOT(SOX9))",
+    "SOX9": "OR(AND(LEQ(DMRT1, 1), SOX9, NOT(FOXL2), NOT(B_CATENIN)), AND(EQ(DMRT1, 2), NOT(FOXL2)))",
+    "FOXL2": "OR(AND(LEQ(DMRT1, 1), NOT(ESTRO), NOT(AMH)), AND(LEQ(DMRT1, 1), ESTRO))",
+    "AROMA": "OR(AND(NOT(FOXL2), SF1), FOXL2)",
+    "ESTRO": "AROMA",
+    "AMH": "OR(AND(NOT(SOX9), NOT(ESTRO), SF1), AND(SOX9, NOT(ESTRO)))",
+    "SF1": "ESTRO",
+    "B_CATENIN": "AND(NOT(SOX9), WNT4)",
+    "WNT4": "NOT(FGF9)",
+    "FGF9": "SOX9",
+    "Z1": "INPUT",
+    "Z2": "INPUT",
+    "W": "INPUT"
+  },
+  "reference": null,
+  "description": "Imported from ginsim_2018-bird-sex-determination.sbml",
+  "source": "BioModels",
+  "gates": {
+    "Z1": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "Z2": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "W": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "DMRT1": {
+      "inputs": [
+        "Z1",
+        "Z2",
+        "W",
+        "HEMGN",
+        "SOX9",
+        "FOXL2"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "HEMGN": {
+      "inputs": [
+        "DMRT1",
+        "SOX9"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "SOX9": {
+      "inputs": [
+        "DMRT1",
+        "FOXL2",
+        "B_CATENIN"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "FOXL2": {
+      "inputs": [
+        "DMRT1",
+        "ESTRO",
+        "AMH"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "AROMA": {
+      "inputs": [
+        "FOXL2",
+        "SF1"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "ESTRO": {
+      "inputs": [
+        "AROMA"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "AMH": {
+      "inputs": [
+        "SOX9",
+        "ESTRO",
+        "SF1"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 2,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "SF1": {
+      "inputs": [
+        "ESTRO"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "B_CATENIN": {
+      "inputs": [
+        "SOX9",
+        "WNT4"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "WNT4": {
+      "inputs": [
+        "FGF9"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "FGF9": {
+      "inputs": [
+        "SOX9"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 3,
+    "CANALISING": 4,
+    "CUSTOM": 2,
+    "OR": 1,
+    "IDENTITY": 3,
+    "NOT": 1
+  },
+  "n": 14,
+  "n_edges": 25,
+  "edges": [
+    {
+      "source": "Z1",
+      "target": "DMRT1",
+      "type": "regulation"
+    },
+    {
+      "source": "Z2",
+      "target": "DMRT1",
+      "type": "regulation"
+    },
+    {
+      "source": "W",
+      "target": "DMRT1",
+      "type": "regulation"
+    },
+    {
+      "source": "HEMGN",
+      "target": "DMRT1",
+      "type": "regulation"
+    },
+    {
+      "source": "SOX9",
+      "target": "DMRT1",
+      "type": "regulation"
+    },
+    {
+      "source": "FOXL2",
+      "target": "DMRT1",
+      "type": "regulation"
+    },
+    {
+      "source": "DMRT1",
+      "target": "HEMGN",
+      "type": "regulation"
+    },
+    {
+      "source": "SOX9",
+      "target": "HEMGN",
+      "type": "regulation"
+    },
+    {
+      "source": "DMRT1",
+      "target": "SOX9",
+      "type": "regulation"
+    },
+    {
+      "source": "FOXL2",
+      "target": "SOX9",
+      "type": "regulation"
+    },
+    {
+      "source": "B_CATENIN",
+      "target": "SOX9",
+      "type": "regulation"
+    },
+    {
+      "source": "DMRT1",
+      "target": "SOX9",
+      "type": "regulation"
+    },
+    {
+      "source": "FOXL2",
+      "target": "SOX9",
+      "type": "regulation"
+    },
+    {
+      "source": "DMRT1",
+      "target": "FOXL2",
+      "type": "regulation"
+    },
+    {
+      "source": "ESTRO",
+      "target": "FOXL2",
+      "type": "regulation"
+    },
+    {
+      "source": "AMH",
+      "target": "FOXL2",
+      "type": "regulation"
+    },
+    {
+      "source": "DMRT1",
+      "target": "FOXL2",
+      "type": "regulation"
+    },
+    {
+      "source": "ESTRO",
+      "target": "FOXL2",
+      "type": "regulation"
+    },
+    {
+      "source": "FOXL2",
+      "target": "AROMA",
+      "type": "regulation"
+    },
+    {
+      "source": "SF1",
+      "target": "AROMA",
+      "type": "regulation"
+    },
+    {
+      "source": "FOXL2",
+      "target": "AROMA",
+      "type": "regulation"
+    },
+    {
+      "source": "AROMA",
+      "target": "ESTRO",
+      "type": "regulation"
+    },
+    {
+      "source": "SOX9",
+      "target": "AMH",
+      "type": "regulation"
+    },
+    {
+      "source": "ESTRO",
+      "target": "AMH",
+      "type": "regulation"
+    },
+    {
+      "source": "SF1",
+      "target": "AMH",
+      "type": "regulation"
+    },
+    {
+      "source": "SOX9",
+      "target": "AMH",
+      "type": "regulation"
+    },
+    {
+      "source": "ESTRO",
+      "target": "AMH",
+      "type": "regulation"
+    },
+    {
+      "source": "ESTRO",
+      "target": "SF1",
+      "type": "regulation"
+    },
+    {
+      "source": "SOX9",
+      "target": "B_CATENIN",
+      "type": "regulation"
+    },
+    {
+      "source": "WNT4",
+      "target": "B_CATENIN",
+      "type": "regulation"
+    },
+    {
+      "source": "FGF9",
+      "target": "WNT4",
+      "type": "regulation"
+    },
+    {
+      "source": "SOX9",
+      "target": "FGF9",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    1,
+    1,
+    3,
+    1,
+    5,
+    3,
+    1,
+    3,
+    1,
+    2,
+    1,
+    1,
+    1
+  ]
+}

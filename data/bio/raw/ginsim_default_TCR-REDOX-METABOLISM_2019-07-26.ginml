@@ -1,0 +1,2530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="JASV_24Jul2019" nodeorder="TCR CD28 LCK FYN ZAP70 LAT SLP76 ITK VAV1 RASGRP SOS GRB2 PLCg PI3K PIP3 PDK DAG PKCTH RAC1 AKT NOX2 DUOX1 SHP2 PTEN CBLB RAS TRPM2 PMCA ORAI1 IP3 IP3R STIM CALM CALN RAF MEK MAP3K11 MAP2K4 MKK3 ASK1 HPK1 HV1 mCa mROS mQH2_Q mNADH_NAD mGSH_GSSG mdH mNADPH_NADP mNNT mIDH2 mGPX mGR mPDHP mTR mTRX mPRX mShuttle mPDH mPDHK mATP_ADP cCa cROS cNADPH_NADP cGSH_GSSG cATP_ADP AMP_ATP cTRX cGR cGPX cTR cPRX TORC1 TORC2 SGK LKB AMPK CAMK2 PHD IKK IkB PKCA CPT1 PYR AcetylCoA GLUT1 GLYCOLYSIS FAO FAS GLUTAMINOLYSIS PPP KrebsCycle ETC ATPSyn P38 ERK FOS cJUN JNK HIF1A cMYC FOXO AP1 NFkB NFAT IL2 CD69 QUIESCENCE ACTIVATION ANERGY METABOLIC_ANERGY">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="100" height="40" properties="intermediate:#ffff00 active:#ffc800"/>
+    <nodestyle name="METABOLIC PATHWAY" background="#cccccc" width="100" height="40"/>
+    <nodestyle name="ROS or ROS source" background="#ffcccc" width="100"/>
+    <nodestyle name="redox sensitive" background="#ffffcc" width="100" height="40"/>
+    <nodestyle name="input" background="#ccffcc" width="100" height="40"/>
+    <nodestyle name="PHENOTYPE" background="#ccccff" width="140" height="40"/>
+    <nodestyle name="output" background="#ffccff" width="100" height="40"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="2" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="TCR" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/tools/search/#!/all?query=1674"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19132916"/>
+        </linklist>
+        <comment>This node represents the TCR heterodimer, including the CD3 complex as well. It is an input node. The functional level 1 is analog to the antigen encounter. The early TCR signaling is reviewed in [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1213" y="7" style="input"/>
+    </node>
+    <node id="CD28" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1653"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/27192564"/>
+        </linklist>
+        <comment>This node represents the costimulatory CD28 protein. It is an input node. The functional level 1 is analog to the ligation with CD80/CD86 molecule. The relevance of CD28 on the early TCR signaling is reviewed in [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1482" y="18" style="input"/>
+    </node>
+    <node id="LCK" maxvalue="1">
+      <value val="1">
+        <exp str="(TCR &amp; CD28 &amp; (SHP2 | !SHP2)) | (TCR &amp; !CD28 &amp; !SHP2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6524"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22723799"/>
+        </linklist>
+        <comment>This node represents the Src-family kinase LCK protein. Its action on the early TCR signaling is reviewed in [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1648" y="88" style=""/>
+    </node>
+    <node id="FYN" maxvalue="1">
+      <value val="1">
+        <exp str="TCR"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4037"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15489916"/>
+        </linklist>
+        <comment>This node represents the Src-family kinase FYN protein. Its action on the early TCR signaling is reviewed in [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1067" y="96" style=""/>
+    </node>
+    <node id="ZAP70" maxvalue="1">
+      <value val="1">
+        <exp str="(LCK &amp; FYN &amp; CD28 &amp; (!SHP2 | SHP2) &amp; !cROS) | (!LCK &amp; FYN &amp; CD28 &amp; !SHP2 &amp; !cROS) | (LCK &amp; !FYN &amp; CD28 &amp; !SHP2 &amp; !cROS)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=12858"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=1423621"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16273097"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25287889"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11744042"/>
+        </linklist>
+        <comment>This node represents the tyrosine kinase ZAP-70, one of the most relevant of the kinases involved on the early TCR signaling [2], [3]. It is a redox sensitive node [4], [5].</comment>
+      </annotation>
+      <nodevisualsetting x="1409" y="144" style="redox sensitive"/>
+    </node>
+    <node id="LAT" maxvalue="1">
+      <value val="1">
+        <exp str="ZAP70 &amp; !cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:18874"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=9489702"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10657671"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11756537"/>
+        </linklist>
+        <comment>This node represent the scaffold protein LAT, important for the downstream signaling derived from the TCR activation [2]. It is a redox sensitive node [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1068" y="236" style="redox sensitive"/>
+    </node>
+    <node id="SLP76" maxvalue="1">
+      <value val="1">
+        <exp str="LAT &amp; ZAP70"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6529"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=8702662"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10021361"/>
+        </linklist>
+        <comment>This node represents the Src homology 2 (SH2) domain-containing leukocyte protein of 76 kDa, a substrate of ZAP70 connecting TCR signals with downstream activation of RAS and calcium pathways [2], [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="1379" y="265" style=""/>
+    </node>
+    <node id="ITK" maxvalue="1">
+      <value val="1">
+        <exp str="SLP76 &amp; (VAV1 | LCK | ZAP70 | LAT | PI3K)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6171"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11994416"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=9584150"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15771581"/>
+        </linklist>
+        <comment>This node represents the Tec family kinase ITK. It is an important mediator of the early TCR signals [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1227" y="207" style=""/>
+    </node>
+    <node id="VAV1" maxvalue="1">
+      <value val="1">
+        <exp str="ITK &amp; SLP76"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12657"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11994416"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17050525"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10849438"/>
+        </linklist>
+        <comment>This node represents the signaling protein VAV1, important in the early TCR signaling events [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1229" y="402" style=""/>
+    </node>
+    <node id="RASGRP" maxvalue="1">
+      <value val="1">
+        <exp str="DAG &amp; PKCTH"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9878"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15899849"/>
+        </linklist>
+        <comment>This node represents the RAS exchange factor RASGRP1, an important activator of RAS during TCR activation [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1221" y="511" style=""/>
+    </node>
+    <node id="SOS" maxvalue="1">
+      <value val="1">
+        <exp str="GRB2 &amp; RAS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:11187"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=9846483"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17283063"/>
+        </linklist>
+        <comment>This node represents the RAS activator protein SOS. It is an important mediator of the TCR signals [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="969" y="520" style=""/>
+    </node>
+    <node id="GRB2" maxvalue="1">
+      <value val="1">
+        <exp str="LAT"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4566"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=9846483"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=8479536"/>
+        </linklist>
+        <comment>This node represent the early TCR signaling protein GRB2 involved in the LAT signalosome.</comment>
+      </annotation>
+      <nodevisualsetting x="998" y="326" style=""/>
+    </node>
+    <node id="PLCg" maxvalue="1">
+      <value val="1">
+        <exp str="SLP76 &amp; ITK &amp; LAT"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9065"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17148460"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11994416"/>
+        </linklist>
+        <comment>This node represents the phospholipase C gamma, an important signaling protein connecting the TCR signals with the downstream calcium currents [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1402" y="333" style=""/>
+    </node>
+    <node id="PI3K" maxvalue="1">
+      <value val="1">
+        <exp str="(SLP76 &amp; CD28 &amp; (!CBLB | CBLB)) | (!SLP76 &amp; CD28 &amp; !CBLB) | (SLP76 &amp; !CD28 &amp; !CBLB)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:8975"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11994416"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=8183372"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12121659"/>
+        </linklist>
+        <comment>This node represents the phosphatidylinositol 3'-kinase (PI3K), an important mediator of the CD28 signaling pathway [2], [3]. This node is important for the metabolic shift neccesary upon T cell activation [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1501" y="223" style=""/>
+    </node>
+    <node id="PIP3" maxvalue="1">
+      <value val="1">
+        <exp str="PI3K &amp; !PTEN"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16618"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12670391"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30692200"/>
+        </linklist>
+        <comment>This node represents the second messenger phosphatidylinositol 3,4,5-trisphosphate (PIP3), important in the PI3K signaling pathway [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1648" y="320" style=""/>
+    </node>
+    <node id="PDK" maxvalue="1">
+      <value val="1">
+        <exp str="PIP3 | PKCTH"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:8816"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19122654"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28152304"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23183047"/>
+        </linklist>
+        <comment>This node represents the enzyme phosphoinositide-dependent kinase 1. It is important for integrating the TCR and CD28 signals [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1282" y="1266" style=""/>
+    </node>
+    <node id="DAG" maxvalue="1">
+      <value val="1">
+        <exp str="PLCg"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:18035"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17548359"/>
+        </linklist>
+        <comment>This node represents the molecule diacylglycerol, an important second messenger downstream teh TCR signaling pathway [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1362" y="526" style=""/>
+    </node>
+    <node id="PKCTH" maxvalue="1">
+      <value val="1">
+        <exp str="DAG &amp; LCK &amp; PDK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9410"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17548359"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17544292"/>
+        </linklist>
+        <comment>This node represents the kinase PKC theta, a Ca independent and DAG dependent PKC [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1232" y="615" style=""/>
+    </node>
+    <node id="RAC1" maxvalue="1">
+      <value val="1">
+        <exp str="TRPM2 | VAV1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9801"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15258578"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30007118"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24598074"/>
+        </linklist>
+        <comment>This node represents the Rho small GTPase RAC. It is an important subunit for the activation of the NADPH-oxidase complex [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1482" y="420" style=""/>
+    </node>
+    <node id="AKT" maxvalue="1">
+      <value val="1">
+        <exp str="PIP3 &amp; PDK &amp; TORC2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:391"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12121659"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=18354169"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15718470"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28137869"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29523440"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29109121"/>
+        </linklist>
+        <comment>This node represents the serine/threonine kinase Akt, an important mediator of the metabolic shift required for T cell activation.</comment>
+      </annotation>
+      <nodevisualsetting x="1770" y="1079" style=""/>
+    </node>
+    <node id="NOX2" maxvalue="1">
+      <value val="1">
+        <exp str="RAC1 &amp; PKCTH &amp; ERK &amp; P38 &amp; cNADPH_NADP"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:2578"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15258578"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25081034"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19028840"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29757466"/>
+        </linklist>
+        <comment>This node represents the NADPH-oxidase enzyme complex assembled at the cytoplasmic membrane, which is activated upon TCR activation [2] It is composed of several subunits [4]. It is a source of cROS.</comment>
+      </annotation>
+      <nodevisualsetting x="1213" y="757" style="ROS or ROS source"/>
+    </node>
+    <node id="DUOX1" maxvalue="1">
+      <value val="1">
+        <exp str="cCa &amp; PKCTH"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3062"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20682913"/>
+        </linklist>
+        <comment>HGNC:3062
+20682913
+
+This node represents the nonphagocytic NADPH oxidase enzime DUOX1. It is a ROS source important for the early TCR signaling [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1354" y="594" style="ROS or ROS source"/>
+    </node>
+    <node id="SHP2" maxvalue="1">
+      <value val="1">
+        <exp str="!(cROS | LCK)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9644"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17982034"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20682913"/>
+        </linklist>
+        <comment>This node represent the tyrosine phosphatase SHP-2, an important negative modulator of the early TCR signaling. It is a redox sensitive node [2], [3].  </comment>
+      </annotation>
+      <nodevisualsetting x="1584" y="159" style="redox sensitive"/>
+    </node>
+    <node id="PTEN" maxvalue="1">
+      <value val="1">
+        <exp str="!(cROS | LCK | AKT)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9588"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15534200"/>
+        </linklist>
+        <comment>This node represents the phosphatase with sequence homology to tensin (PTEN), a negative modulator of PI3K signaling pathway. It is a redox sensitive node [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="1789" y="291" style="redox sensitive"/>
+    </node>
+    <node id="CBLB" maxvalue="1">
+      <value val="1">
+        <exp str="!LCK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1542"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11087752"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/12193687"/>
+        </linklist>
+        <comment>This node represents the E3 ubiquitin ligase Cbl-b, an important negative modulator of the T cell signaling [2], [3].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1621" y="228" style=""/>
+    </node>
+    <node id="RAS" maxvalue="1">
+      <value val="1">
+        <exp str="RASGRP | SOS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6407"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10807788"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=9582122"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15899849"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=9846483"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17283063"/>
+        </linklist>
+        <comment>This node represents the small GTPase RAS, important for T cell activation [6].</comment>
+      </annotation>
+      <nodevisualsetting x="988" y="614" style=""/>
+    </node>
+    <node id="TRPM2" maxvalue="1">
+      <value val="1">
+        <exp str="cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12339"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26839633"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24009611"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23302782"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23077651"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22547068"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15952035"/>
+        </linklist>
+        <comment>This node represent the TRPM2 cation channel located at the cytoplasmic membrane. It is a selective calcium channel [3], sensitive to the redox status of the cell [4], [5], [6].</comment>
+      </annotation>
+      <nodevisualsetting x="1495" y="355" style="redox sensitive"/>
+    </node>
+    <node id="PMCA" maxvalue="1">
+      <value val="1">
+        <exp str="!STIM"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:814"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22246182"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=14966303"/>
+        </linklist>
+        <comment>This node represents the Plasma Membrane Calcium ATPase. It is a pump that extrudes calcium and modulates its cytoplasmic concentration [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1752" y="665" style=""/>
+    </node>
+    <node id="ORAI1" maxvalue="1">
+      <value val="1">
+        <exp str="STIM &amp; !cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:25896"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20354224"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19754898"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16582901"/>
+        </linklist>
+        <comment>This node represents the ORAI1 calcium channel. It is located at the cytoplasmic membrane, and is the main channel responsible for the Store Operated Calcium Entry (SOCE) in T cells [3], [4]. It is a redox sensitive protein [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1585" y="567" style="redox sensitive"/>
+    </node>
+    <node id="IP3" maxvalue="1">
+      <value val="1">
+        <exp str="PLCg"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16595"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26052328"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23805141"/>
+        </linklist>
+        <comment>This node represents the second messenger inositol-1,4,5-trisphosphate (IP3), produced by the action of the PLC gamma enzyme. It is an important connection between the TCR signals and the calcium currents [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1376" y="823" style=""/>
+    </node>
+    <node id="IP3R" maxvalue="1">
+      <value val="1">
+        <exp str="IP3 | cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6180"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26052328"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30228182"/>
+        </linklist>
+        <comment>This node represents the inositol trisphosphate receptor (IP3) located at the endoplasmic reticulum membrane. It is a calcium channel opened by the ligation with inositol-1,4,5-trisphosphate (IP3). It induces the depletion of the internal calcium stores [2]. It is a redox sensitive node [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1500" y="621" style="redox sensitive"/>
+    </node>
+    <node id="STIM" maxvalue="1">
+      <value val="1">
+        <exp str="IP3R | cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:11386"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15866891"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16005298"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24053140"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28900911"/>
+        </linklist>
+        <comment>This node represents the calcium sensor and activator of SOCE STIM1, located at the endoplasmic reticulum. It senses the depletion of the internal calcium reserves and activates ORAI1 [2], [3]. It is also a redox sensitive node [4], [5]. </comment>
+      </annotation>
+      <nodevisualsetting x="1568" y="676" style="redox sensitive"/>
+    </node>
+    <node id="CALM" maxvalue="1">
+      <value val="1">
+        <exp str="cCa"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1442"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19290928"/>
+        </linklist>
+        <comment>This node represents calmodulin, a sensor for intracellular calcium [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1637" y="1117" style=""/>
+    </node>
+    <node id="CALN" maxvalue="1">
+      <value val="1">
+        <exp str="CALM"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9315"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=1715244"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=27941787"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11015619"/>
+        </linklist>
+        <comment>This node represents the phosphatase calcineurin. This enzyme activates NFAT transcription factor upon elevated cytosolic calcium levels [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1254" y="1357" style=""/>
+    </node>
+    <node id="RAF" maxvalue="1">
+      <value val="1">
+        <exp str="RAS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9829"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=9826444"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=14737111"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19542438"/>
+        </linklist>
+        <comment>This node represents the serine/threonine kinase Raf-1, a MAPKKK upstream of ERK [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="996" y="845" style=""/>
+    </node>
+    <node id="MEK" maxvalue="1">
+      <value val="1">
+        <exp str="RAF"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6847"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19542438"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12899942"/>
+        </linklist>
+        <comment>This node represents the mitogen-activated protein kinase kinase 7. It is an activator of ERK [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1018" y="926" style=""/>
+    </node>
+    <node id="MAP3K11" maxvalue="1">
+      <value val="1">
+        <exp str="HPK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6850"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10713178"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10849438"/>
+        </linklist>
+        <comment>HGNC:6850
+10713178
+10849438
+
+This node represents the Mitogen Activated Kinase Kinase Kinase 11, or MLK3. It is an upstream activator of the NFkB and JNK pathways [2], [3].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1357" y="1130" style=""/>
+    </node>
+    <node id="MAP2K4" maxvalue="1">
+      <value val="1">
+        <exp str="MAP3K11 | ASK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6844"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29248490"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10785355"/>
+        </linklist>
+        <comment>This node represents the MKK4, a MAPKK important in the activation of JNK in T cells [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1399" y="1305" style=""/>
+    </node>
+    <node id="MKK3" maxvalue="1">
+      <value val="1">
+        <exp str="ASK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6843"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=8974401"/>
+        </linklist>
+        <comment>This node represents the enzyme MAPKK3, a MAPKK involved in the activation of p38 during intracellular stress [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1217" y="1000" style=""/>
+    </node>
+    <node id="ASK1" name="MAP3K5" maxvalue="1">
+      <value val="1">
+        <exp str="!cTRX"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6857"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=18206122"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11274345"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17883330"/>
+        </linklist>
+        <comment>This node represents the Apoptosis signal-regulating kinase 1 (ASK1), a MAPKKK upstream of JNK and P38 which activates in response to cellular stress. It is a redox sensitive node [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1227" y="1123" style="redox sensitive"/>
+    </node>
+    <node id="HPK1" maxvalue="1">
+      <value val="1">
+        <exp str="LAT"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6863"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10849438"/>
+        </linklist>
+        <comment>This node represents the hematopoietic progenitor kinase 1 (HPK1), a serine/threonine kinase important for the signaling downstream the TCR [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1371" y="905" style=""/>
+    </node>
+    <node id="HV1" maxvalue="1">
+      <value val="1">
+        <exp str="cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:28240"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28013412"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23798303"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24890927"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20139987"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25425665"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29643227"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/31060879"/>
+        </linklist>
+        <comment>This node represents the Hv1 proton channel located at the cytoplasmic membrane [3]. This channel extrudes the excess of protons generated by the NADPH-oxidase enzyme, thus preventing cellular acidification [2]. Recent evidences support a role in the modulation of the mROS generation located at the internal mitochondrial membrane [8].</comment>
+      </annotation>
+      <nodevisualsetting x="890" y="847" style="redox sensitive"/>
+    </node>
+    <node id="mCa" maxvalue="2">
+      <value val="2">
+        <exp str="cCa:2"/>
+      </value>
+      <value val="1">
+        <exp str="cCa:1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:29108"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20668216"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30622345"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29032101"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30982525"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26100311"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29030115"/>
+        </linklist>
+        <comment>This node represent the mitochondrial level of the Ca ion, an important second messenger for T cells signaling [3]. It is important for the mitochondrial metabolic activity [4], [5], [7]. Recent evidences suggest that the Ca levels are differentially regulated between T cells from neonates and adults [6]. It is a multilevel node.
+
+Level 2 -&gt; very high mCa levels
+Level 1 -&gt; intermediate mCa levels
+Level 0 -&gt; very low mCa levels</comment>
+      </annotation>
+      <nodevisualsetting x="781" y="399" style=""/>
+    </node>
+    <node id="mROS" maxvalue="2">
+      <value val="2">
+        <exp str="(!(mPRX | mGPX) &amp; (cROS | ETC | mGR | mTR)) | (cROS &amp; (mPRX | mGPX | ETC | mGR | mTR))"/>
+      </value>
+      <value val="1">
+        <exp str="((!mPRX &amp; mGPX) | (mPRX &amp; !mGPX)) &amp; (ETC | mGR | mTR) &amp; !cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:26523"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23415911"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23880762"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30466061"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30057684"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19061483"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=27965578"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26100311"/>
+        </linklist>
+        <comment>This node represents the levels of Reactive Oxigen Species generated in the mitochondria (mROS). This is representing mainly by hydrogen peroxide (H2O2), but it also includes the superoxide anion (O2.-) and other derivatives. It is an important second messenger for signaling but it is detrimental at higher levels. Thus, its concentration is maintained under a strick balance between production and scavenging. It is a multilevel node.
+
+Level 2 --&gt; very high damaging levels of mROS
+Level 1 --&gt; normal signaling levels of mROS
+Level 0 --&gt; very low levels of mROS
+</comment>
+      </annotation>
+      <nodevisualsetting x="601" y="669" style="ROS or ROS source"/>
+    </node>
+    <node id="mQH2_Q" maxvalue="2">
+      <value val="2">
+        <exp str="ETC &amp; mdH"/>
+      </value>
+      <value val="1">
+        <exp str="ETC &amp; !mdH"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:17976"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19061483"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=27085844"/>
+        </linklist>
+        <comment>CHEBI:17976
+19061483
+27085844
+
+This node represent the ratio between the reduced (QH2) and the oxidized (Q) ubiquinone, the electron carrier in the mitochondrial internal membrane. At some conditions of very reduced values, it is a source of mROS [2], [3]. It is a multilevel node.
+
+Level 2 --&gt; very reduced
+Level 1 --&gt; normal physiological levels
+Level 0 --&gt; very oxidized
+</comment>
+      </annotation>
+      <nodevisualsetting x="504" y="514" style="ROS or ROS source"/>
+    </node>
+    <node id="mNADH_NAD" maxvalue="2">
+      <value val="2">
+        <exp str="(KrebsCycle | mPDH | FAO) &amp; !ETC"/>
+      </value>
+      <value val="1">
+        <exp str="(KrebsCycle | mPDH | FAO) &amp; ETC"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16908"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28648096"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20175987"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23442855"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19061483"/>
+        </linklist>
+        <comment>This node represents the ratio between the redox couple of the reduced (NADH) vs oxidized (NAD+) coenzime at the mitochondria. It is an important indicator of the energetic status of the cell [2], [3], [4], [5]. It is a multilevel node.
+Level 2 --&gt; corresponds to a very high NADH/NAD+ ratio, the couple is at an extreme of reduction
+Level 1 --&gt; corresponds to a hig or medium NADH/NAD+ ratio, the couple is at normal physiological levels of reduction.
+Level 0 --&gt; corresponds to a very low NADH/NAD+ ratio, the couple is at an extreme of oxidation.</comment>
+      </annotation>
+      <nodevisualsetting x="352" y="319" style=""/>
+    </node>
+    <node id="mGSH_GSSG" maxvalue="2">
+      <value val="2">
+        <exp str="mGR &amp; !mGPX"/>
+      </value>
+      <value val="1">
+        <exp str="mGR &amp; mGPX"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16856"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25701705"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/28558477"/>
+        </linklist>
+        <comment>This node represents the ratio between the reduced (GSH) and the oxidized (GSSG) mitochondrial pool of glutathione, an importan antioxidant of the cell [3]. In some cases of reductive stress the extremely reduced GSH/GSSG ratio is an inductor of ROS production by the enzyme Glutathione Reductase [2]. It is a multilevel node.
+
+Level 2 --&gt; highly reduced
+Level 1 --&gt; normal physiological reduction status
+Level 0 --&gt; highly oxidized
+</comment>
+      </annotation>
+      <nodevisualsetting x="96" y="743" style=""/>
+    </node>
+    <node id="mdH" maxvalue="2">
+      <parameter val="1"/>
+      <value val="2">
+        <exp str="ETC &amp; !ATPSyn"/>
+      </value>
+      <value val="1">
+        <exp str="ETC &amp; ATPSyn"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:24636"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29626541"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19061483"/>
+        </linklist>
+        <comment>This node represents the proton concentration at the mitochondrial intermediate membrane space. It is the proton motive force which drive ATP production by the ATP synthase. Several evidences connect the proton motive force to the gereation on mROS [2], [3]. It is a multilevel node.
+
+Level 2 --&gt; very high proton motive force
+Level 1 --&gt; intermediate levels of proton motive force
+Level 0 --&gt; very low proton motive force</comment>
+      </annotation>
+      <nodevisualsetting x="57" y="519" style=""/>
+    </node>
+    <node id="mNADPH_NADP" maxvalue="2">
+      <value val="2">
+        <exp str="(mNNT:2 &amp; !mIDH2) | (mNNT:2 &amp; mIDH2) | (mNNT:1 &amp; mIDH2)"/>
+      </value>
+      <value val="1">
+        <exp str="(!mNNT &amp; mIDH2) | (mNNT:1 &amp; !mIDH2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16474"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28648096"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20175987"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23442855"/>
+        </linklist>
+        <comment>This node represents the ratio between the redox couple of the reduced (NADHP) vs oxidized (NADP+) coenzime in the mitochondria. It is an important indicator of the reducing power of the cell [2], [3], [4]. It is a multilevel node.
+Level 2 --&gt; corresponds to a very high NADPH/NADP+ ratio, the couple is at an extreme of reduction
+Level 1 --&gt; corresponds to a hig or medium NADPH/NADP+ ratio, the couple is at normal physiological levels of reduction.
+Level 0 --&gt; corresponds to a very low NADPH/NADP+ ratio, the couple is at an extreme of oxidation.</comment>
+      </annotation>
+      <nodevisualsetting x="452" y="929" style=""/>
+    </node>
+    <node id="mNNT" maxvalue="2">
+      <value val="2">
+        <exp str="(mNADH_NAD:2 &amp; mdH:2) | (mNADH_NAD:1 &amp; mdH:2) | (mNADH_NAD:2 &amp; mdH:1)"/>
+      </value>
+      <value val="1">
+        <exp str="mNADH_NAD:1 &amp; mdH:1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:7863"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28648096"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16730324"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20007326"/>
+        </linklist>
+        <comment>This node represents the NAM nucleotide transhydrogenase, an important mediator of the conversion between NADH and NADPH pools in the mitochondria . It is regulated by the proton motive force. It is a multilevel node.</comment>
+      </annotation>
+      <nodevisualsetting x="12" y="801" style=""/>
+    </node>
+    <node id="mIDH2" maxvalue="1">
+      <value val="1">
+        <exp str="KrebsCycle"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:5383"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28648096"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20007326"/>
+        </linklist>
+        <comment>This node represents the mitochondrial enzyme Isocitrate dehydrogenase II. It is a source of mitochondrial NADPH [2], [3].  </comment>
+      </annotation>
+      <nodevisualsetting x="227" y="638" style=""/>
+    </node>
+    <node id="mGPX" maxvalue="2">
+      <value val="2">
+        <exp str="mGSH_GSSG:2 &amp; !mROS"/>
+      </value>
+      <value val="1">
+        <exp str="mGSH_GSSG:1 &amp; !mROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4553"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23397885"/>
+        </linklist>
+        <comment>This node represents the mitochondrial levels of the glutathione peroxidase. It is an important element of the antioxidant machinery [2]. It is a multilevel node.</comment>
+      </annotation>
+      <nodevisualsetting x="448" y="1256" style="redox sensitive"/>
+    </node>
+    <node id="mGR" maxvalue="2">
+      <value val="2">
+        <exp str="mGSH_GSSG:2 &amp; (mNADPH_NADP:1 | mNADPH_NADP:2)"/>
+      </value>
+      <value val="1">
+        <exp str="(mNADPH_NADP:1 &amp; !mGSH_GSSG) | (mNADPH_NADP:1 &amp; mGSH_GSSG:1) | (mNADPH_NADP:2 &amp; !mGSH_GSSG) | (mNADPH_NADP:2 &amp; mGSH_GSSG:1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4623"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25701705"/>
+        </linklist>
+        <comment>This node repesents the mitochondrial enzyme Glutathione Reductase (mGR). This enzyme is important in the generation of reduced Glutathione from NADPH. It is a source of ROS at extreme reduction conditions. It is a multilevel node [2].
+
+Level 2 --&gt; highly reduced enzyme
+Level 1 --&gt; normal physiological redox status of the enzyme
+Level 0 --&gt; highly oxidized enzyme
+</comment>
+      </annotation>
+      <nodevisualsetting x="444" y="1040" style="ROS or ROS source"/>
+    </node>
+    <node id="mPDHP" maxvalue="1">
+      <value val="1">
+        <exp str="mCa &amp; !mNADH_NAD"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9279"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30982525"/>
+        </linklist>
+        <comment>This node represents the enzyme Pyruvate Dehydrogenase Phosphatase located at the mitochondria. This enzyme is a positive regulator of the Pyruvate Dehydrogenase. It is an important mediator of the oxidative metabolism in the mitochondria [2].</comment>
+      </annotation>
+      <nodevisualsetting x="799" y="565" style=""/>
+    </node>
+    <node id="mTR" maxvalue="2">
+      <value val="2">
+        <exp str="mTRX:2 &amp; mNADPH_NADP:2"/>
+      </value>
+      <value val="1">
+        <exp str="(mNADPH_NADP:1 &amp; !mTRX) | (mNADPH_NADP:1 &amp; mTRX:1) | (mNADPH_NADP:2 &amp; !mTRX) | (mNADPH_NADP:2 &amp; mTRX:1) | (mNADPH_NADP:1 &amp; mTRX:2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:18155"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29278740"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25701705"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20175987"/>
+        </linklist>
+        <comment>This node repesents the mitochondrial enzyme Thioredoxin Reductase (mTR) [2]. This enzyme is important in the generation of reduced Thioredoxin from NADPH. It is a source of ROS at extreme reduction conditions [3], [4]. It is a multilevel node.
+
+Level 2 --&gt; highly reduced enzyme
+Level 1 --&gt; normal physiological redox status of the enzyme
+Level 0 --&gt; highly oxidized enzyme
+</comment>
+      </annotation>
+      <nodevisualsetting x="652" y="1254" style="ROS or ROS source"/>
+    </node>
+    <node id="mTRX" maxvalue="2">
+      <value val="2">
+        <exp str="mTR &amp; !mROS"/>
+      </value>
+      <value val="1">
+        <exp str="mTR &amp; mROS:1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:17772"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23397885"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25701705"/>
+        </linklist>
+        <comment>HGNC:17772
+This node represents the thioredoxin mitochondrial pool. This is an important element on the antioxidant machinery of the cell. It receives electrons from NADPH and transfers the electrons to other signaling proteins [2]. In some cases of reductive stress the extremely reduced TRX pool is an inductor of ROS production by the enzyme Thioredoxin Reductase [3]. It is a multilevel node.
+
+Level 2 --&gt; highly reduced
+Level 1 --&gt; normal physiological reduction status
+Level 0 --&gt; highly oxidized</comment>
+      </annotation>
+      <nodevisualsetting x="202" y="1320" style="redox sensitive"/>
+    </node>
+    <node id="mPRX" maxvalue="1">
+      <value val="1">
+        <exp str="(mTRX &amp; !mROS) | (mTRX:2 &amp; mROS)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9354"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23397885"/>
+        </linklist>
+        <comment>HGNC:9354
+23397885
+
+This node represents the mitochondrial pool of peroxiredoxin. It is an important antioxidant protein also involved in redox signaling [2].</comment>
+      </annotation>
+      <nodevisualsetting x="577" y="601" style="redox sensitive"/>
+    </node>
+    <node id="mShuttle" maxvalue="1">
+      <value val="1">
+        <exp str="mIDH2 &amp; mNADPH_NADP"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:10979"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28648096"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20007326"/>
+        </linklist>
+        <comment>This node represents the 2-oxoglutarate/isocitrate NADP(H)-redox shuttle located in the mitochondria. It connects the mitochondrial and cytosolic NADPH pools [2], [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="441" y="867" style=""/>
+    </node>
+    <node id="mPDH" maxvalue="1">
+      <value val="1">
+        <exp str="(mPDHP | PYR) &amp; !mPDHK &amp; !mNADH_NAD"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:8806"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30982525"/>
+        </linklist>
+        <comment>This node represents the Pyruvate Dehydrogenase enzyme, located in the mitochondria. This enzyme is important for the complete oxidation of glucose derivatives [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="416" y="752" style=""/>
+    </node>
+    <node id="mPDHK" maxvalue="1">
+      <value val="1">
+        <exp str="!mNADH_NAD &amp; HIF1A"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:8809"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16517405"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25437876"/>
+        </linklist>
+        <comment>This node represents the enzyme Pyruvate Dehydrogenase Kinase located at the mitochondria. This enzyme is a negative regulator of the Pyruvate Dehydrogenase. It is an important mediator of the metabolic shift towards aerobic glycolysis [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="277" y="753" style=""/>
+    </node>
+    <node id="mATP_ADP" maxvalue="1">
+      <value val="1">
+        <exp str="ATPSyn"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:15422"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/25229666"/>
+        </linklist>
+        <comment>CHEBI:15422
+25229666
+
+This node represent the mitochondrial ATP/ADP ratio. It is an indicator of the oxidative metabolism of quiescent cells supported mainly by the mitochondria, different from the Warburg metabolism of proliferative cells supported mainly by the cytosol [2]. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="521" y="423" style="output"/>
+    </node>
+    <node id="cCa" maxvalue="2">
+      <parameter val="1"/>
+      <value val="2">
+        <exp str="(IP3R &amp; ORAI1 &amp; TRPM2 &amp; !PMCA) | (IP3R &amp; ORAI1 &amp; !TRPM2 &amp; !PMCA) | (IP3R &amp; !ORAI1 &amp; TRPM2 &amp; !PMCA)"/>
+      </value>
+      <value val="1">
+        <exp str="(IP3R &amp; !ORAI1 &amp; !TRPM2 &amp; !PMCA) | (!IP3R &amp; !ORAI1 &amp; TRPM2 &amp; !PMCA) | (!IP3R &amp; ORAI1 &amp; TRPM2 &amp; !PMCA) | (!IP3R &amp; ORAI1 &amp; !TRPM2 &amp; !PMCA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:29108"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29030115"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30622345"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26100311"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23408835"/>
+        </linklist>
+        <comment>This node represent the cytosolic levels of the Ca ion, an important second messenger for T cells signaling [2], [3]. Recent evidences suggest that the Ca levels are differentially regulated between T cells from neonates and adults [4], [5]. It is a multilevel node.
+
+Level 2 -&gt; very high mCa levels
+Level 1 -&gt; intermediate mCa levels
+Level 0 -&gt; very low mCa levels</comment>
+      </annotation>
+      <nodevisualsetting x="1554" y="470" style=""/>
+    </node>
+    <node id="cROS" maxvalue="2">
+      <value val="2">
+        <exp str="(!(cPRX | cGPX) &amp; (NOX2 | mROS | DUOX1 | cTR | cGR)) | (mROS &amp; (cPRX | cGPX | NOX2 | DUOX1 | cTR | cGR))"/>
+      </value>
+      <value val="1">
+        <exp str="((cPRX &amp; !cGPX) | (!cPRX &amp; cGPX)) &amp; (NOX2 | DUOX1 | cTR | cGR) &amp; !mROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:26523"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=17982034"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=27965578"/>
+        </linklist>
+        <comment>This node represents the levels of Reactive Oxigen Species generated in the cytosol (cROS). This is representing mainly by hydrogen peroxide (H2O2), but it also includes the superoxide anion (O2.-) and other derivatives. It is an important second messenger for signaling but it is detrimental at higher levels. Thus, its concentration is maintained under a strick balance between production and scavenging. It is a multilevel node.
+
+Level 2 --&gt; very high damaging levels of cROS
+Level 1 --&gt; normal signaling levels of cROS
+Level 0 --&gt; very low levels of cROS</comment>
+      </annotation>
+      <nodevisualsetting x="876" y="694" style="ROS or ROS source"/>
+    </node>
+    <node id="cNADPH_NADP" maxvalue="2">
+      <value val="2">
+        <exp str="(mShuttle &amp; PPP &amp; GLUTAMINOLYSIS) | (!mShuttle &amp; PPP &amp; GLUTAMINOLYSIS) | (mShuttle &amp; !PPP &amp; GLUTAMINOLYSIS) | (mShuttle &amp; PPP &amp; !GLUTAMINOLYSIS)"/>
+      </value>
+      <value val="1">
+        <exp str="(mShuttle &amp; !PPP &amp; !GLUTAMINOLYSIS) | (!mShuttle &amp; PPP &amp; !GLUTAMINOLYSIS) | (!mShuttle &amp; !PPP &amp; GLUTAMINOLYSIS)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16474"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28648096"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20175987"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23442855"/>
+        </linklist>
+        <comment>This node represents the ratio between the redox couple of the reduced (NADHP) vs oxidized (NADP+) coenzime at the cytosol. It is an important indicator of the reducing power of the cell [2], [3], [4]. It is a multilevel node.
+Level 2 --&gt; corresponds to a very high NADPH/NADP+ ratio, the couple is at an extreme of reduction
+Level 1 --&gt; corresponds to a hig or medium NADPH/NADP+ ratio, the couple is at normal physiological levels of reduction.
+Level 0 --&gt; corresponds to a very low NADPH/NADP+ ratio, the couple is at an extreme of oxidation.</comment>
+      </annotation>
+      <nodevisualsetting x="1513" y="862" style=""/>
+    </node>
+    <node id="cGSH_GSSG" maxvalue="2">
+      <value val="2">
+        <exp str="cGR &amp; !cGPX"/>
+      </value>
+      <value val="1">
+        <exp str="cGR &amp; cGPX"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16856"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30232291"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25701705"/>
+        </linklist>
+        <comment>This node represents the ratio between the reduced (GSH) and the oxidized (GSSG) cytosolic pool of glutathione, an importan antioxidant of the cell [2]. In some cases of reductive stress the extremely reduced GSH/GSSG ratio is an inductor of ROS production by the enzyme Glutathione Reductase [3]. It is a multilevel node.
+
+Level 2 --&gt; highly reduced
+Level 1 --&gt; normal physiological reduction status
+Level 0 --&gt; highly oxidized
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1532" y="730" style=""/>
+    </node>
+    <node id="cATP_ADP" maxvalue="1">
+      <value val="1">
+        <exp str="GLYCOLYSIS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:15422"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20814441"/>
+        </linklist>
+        <comment>This node represent the cytosol ATP/ADP ratio. It is an indicator of the Warburg metabolism of proliferative cells supported mainly by the cytosol, different from the oxidative metabolism of quiescent cells supported mainly by the mitochondria [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1963" y="1333" style=""/>
+    </node>
+    <node id="AMP_ATP" maxvalue="1">
+      <value val="1">
+        <exp str="!cATP_ADP &amp; !GLYCOLYSIS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:16027"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20814441"/>
+        </linklist>
+        <comment>This node represents the cellular AMP to ATP ratio, an important indicator of the energy status of the cell [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1941" y="1515" style=""/>
+    </node>
+    <node id="cTRX" maxvalue="2">
+      <parameter val="1"/>
+      <value val="2">
+        <exp str="cTR &amp; !cROS"/>
+      </value>
+      <value val="1">
+        <exp str="cTR &amp; cROS:1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12435"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29749372"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23397885"/>
+        </linklist>
+        <comment>This node represents the thioredoxin cytosolic pool, an important element on the antioxidant machinery of the cell. It receives electrons from NADPH and transfers the electrons to other signaling proteins [2]. In some cases of reductive stress the extremely reduced TRX pool is an inductor of ROS production by the enzyme Thioredoxin Reductase [3]. It is a multilevel node.
+
+Level 2 --&gt; highly reduced
+Level 1 --&gt; normal physiological reduction status
+Level 0 --&gt; highly oxidized</comment>
+      </annotation>
+      <nodevisualsetting x="1414" y="1021" style="redox sensitive"/>
+    </node>
+    <node id="cGR" maxvalue="2">
+      <value val="2">
+        <exp str="cGSH_GSSG:2 &amp; (cNADPH_NADP:1 | cNADPH_NADP:2)"/>
+      </value>
+      <value val="1">
+        <exp str="(cNADPH_NADP:1 &amp; !cGSH_GSSG) | (cNADPH_NADP:1 &amp; cGSH_GSSG:1) | (cNADPH_NADP:2 &amp; !cGSH_GSSG) | (cNADPH_NADP:2 &amp; cGSH_GSSG:1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4623"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25701705"/>
+        </linklist>
+        <comment>This node repesents the cytoplasmic enzyme Glutathione Reductase (cGR). This enzyme is important in the generation of reduced Glutathione from NADPH. It is a source of ROS at extreme reduction conditions. It is a multilevel node [2].
+
+Level 2 --&gt; highly reduced enzyme
+Level 1 --&gt; normal physiological redox status of the enzyme
+Level 0 --&gt; highly oxidized enzyme
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1576" y="803" style="ROS or ROS source"/>
+    </node>
+    <node id="cGPX" maxvalue="2">
+      <value val="2">
+        <exp str="cGSH_GSSG:2 &amp; !cROS"/>
+      </value>
+      <value val="1">
+        <exp str="cGSH_GSSG:1 &amp; !cROS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4554"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23397885"/>
+        </linklist>
+        <comment>This node represents the cytoplasmic levels of the glutathione peroxidase. It is an important element of the antioxidant machinery [2]. It is a multilevel node.</comment>
+      </annotation>
+      <nodevisualsetting x="1360" y="681" style="redox sensitive"/>
+    </node>
+    <node id="cTR" maxvalue="2">
+      <value val="2">
+        <exp str="cTRX:2 &amp; cNADPH_NADP:2"/>
+      </value>
+      <value val="1">
+        <exp str="(cNADPH_NADP:1 &amp; !cTRX) | (cNADPH_NADP:1 &amp; cTRX:1) | (cNADPH_NADP:2 &amp; !cTRX) | (cNADPH_NADP:2 &amp; cTRX:1) | (cNADPH_NADP:1 &amp; cTRX:2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12437"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=29278740"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25701705"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20175987"/>
+        </linklist>
+        <comment>This node repesents the cytosolic enzyme Thioredoxin Reductase (cTR) [3]. This enzyme is important in the generation of reduced Thioredoxin from NADPH. It is a source of ROS at extreme reduction conditions [4], [2]. It is a multilevel node.
+
+Level 2 --&gt; highly reduced enzyme
+Level 1 --&gt; normal physiological redox status of the enzyme
+Level 0 --&gt; highly oxidized enzyme
+</comment>
+      </annotation>
+      <nodevisualsetting x="1253" y="825" style="ROS or ROS source"/>
+    </node>
+    <node id="cPRX" maxvalue="1">
+      <value val="1">
+        <exp str="cTRX &amp; !(cROS &amp; LCK)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9354"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23397885"/>
+        </linklist>
+        <comment>This node represents the cytosolic pool of peroxiredoxin. It is an important antioxidant protein also involved in redox signaling [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1283" y="722" style="redox sensitive"/>
+    </node>
+    <node id="TORC1" maxvalue="1">
+      <value val="1">
+        <exp str="(PDK | AKT) &amp; !AMPK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3942"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23183047"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24076634"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21233853"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=14668532"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30320109"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25893604"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30619240"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22517423"/>
+        </linklist>
+        <comment>This node represents the mTORC1 complex. It is an important regulator of the metabolic adaptation of T cells upon activation.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1079" y="1566" style=""/>
+    </node>
+    <node id="TORC2" maxvalue="1">
+      <value val="1">
+        <exp str="PIP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3942"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21310961"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30320109"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25893604"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22517423"/>
+        </linklist>
+        <comment>This node represents the mTORC2 complex, an important regulator of the metabolic adaptation of T cells upon activation.</comment>
+      </annotation>
+      <nodevisualsetting x="1658" y="1475" style=""/>
+    </node>
+    <node id="SGK" maxvalue="1">
+      <value val="1">
+        <exp str="PDK &amp; TORC2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:10810"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11154281"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22517423"/>
+        </linklist>
+        <comment>This node represents the Serum and glucocorticoid inducible kinase. It is activated by mTORC2 complex and is important in the inhibition of the FOXO1 transcription factor during T cell activation [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1407" y="1348" style=""/>
+    </node>
+    <node id="LKB" maxvalue="1">
+      <value val="1">
+        <exp str="LCK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:11389"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21930968"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21487392"/>
+        </linklist>
+        <comment>This node represents the serine/threonine kinase liver kinase B 1 (LKB1). It is an important regulator of T cell activation and metabolism [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1977" y="75" style=""/>
+    </node>
+    <node id="AMPK" maxvalue="1">
+      <value val="1">
+        <exp str="(LKB | CAMK2 | AMP_ATP) &amp; !cATP_ADP"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9376"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21670147"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=18719600"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16818670"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23310952"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21892142"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25360847"/>
+        </linklist>
+        <comment>This node represents the AMP-activated protein kinase (AMPK). This is an important regulator of cellular energetic metabolism. It controls the transition between the basal metabolism of quiescent cells and the highly anabolic metabolism of proliferating cells.</comment>
+      </annotation>
+      <nodevisualsetting x="1456" y="1667" style=""/>
+    </node>
+    <node id="CAMK2" maxvalue="1">
+      <value val="1">
+        <exp str="CALM"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1461"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15843557"/>
+        </linklist>
+        <comment>HGNC:1461
+15843557
+
+This node represents the calcium/calmodulin-dependent protein kinase II. This enzyme connects the calcium waves with other signaling events important for T cells activation and proliferation [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1456" y="1235" style=""/>
+    </node>
+    <node id="PHD" maxvalue="1">
+      <value val="1">
+        <exp str="!cROS &amp; !KrebsCycle"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:8548"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20199358"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24491179"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23535595"/>
+        </linklist>
+        <comment>This node represents the enzyme prolyl 4-hydroxylase. It inhibits HIF1 activation in response to high ROS levels or high succinate levels [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="399" y="1452" style=""/>
+    </node>
+    <node id="IKK" maxvalue="1">
+      <value val="1">
+        <exp str="PKCTH | CAMK2 | MAP3K11"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:5960"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10713178"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10733597"/>
+        </linklist>
+        <comment>This node represents the I kappa B kinase (IKK), which is activated by several other kinases (PKC theta, CAMK2 or MAP3K11) and inhibits by phosphorylation the IkB inhibitor of the NFkB transcription factor [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1422" y="961" style=""/>
+    </node>
+    <node id="IkB" maxvalue="1">
+      <value val="1">
+        <exp str="!IKK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:7797"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=7594468"/>
+        </linklist>
+        <comment>This node represents I kappa B alpha, a negative modulator of NFkB transcription factor [2].</comment>
+      </annotation>
+      <nodevisualsetting x="888" y="972" style=""/>
+    </node>
+    <node id="PKCA" maxvalue="1">
+      <value val="1">
+        <exp str="cCa"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9393"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26826124"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=1388136"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30048879"/>
+        </linklist>
+        <comment>This node represents the Ca(2+)-dependent protein kinase C A (PKCA). It activates NFkB transcription factor [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1056" y="1139" style=""/>
+    </node>
+    <node id="CPT1" maxvalue="1">
+      <value val="1">
+        <exp str="!FAS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:2328"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30619240"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22206904"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25001241"/>
+        </linklist>
+        <comment>This node represents the enzyme carnitine palmitoyl transferase, an important regulatory enzyme controlling the rate of Fatty Acid Oxidation (FAO) in the mitochondria [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1820" y="1280" style=""/>
+    </node>
+    <node id="PYR" maxvalue="1">
+      <value val="1">
+        <exp str="GLYCOLYSIS &amp; !mPDH"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:15361"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30619240"/>
+        </linklist>
+        <comment>This node represents pyruvate, a metabolite derived from the catabolism of glucose through glycolysis [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="611" y="1365" style=""/>
+    </node>
+    <node id="AcetylCoA" maxvalue="1">
+      <value val="1">
+        <exp str="(mPDH | FAO) &amp; !FAS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:15351"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30619240"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4380630/?report=classic"/>
+        </linklist>
+        <comment>This node represent the mitochondrial pool of the Acetyl CoA metabolite. It is an intermediate metabolite between lipids and carbohydrates. It is a common indicator of the energy fitness of the cell [2], [3].
+
+ </comment>
+      </annotation>
+      <nodevisualsetting x="432" y="55" style=""/>
+    </node>
+    <node id="GLUT1" maxvalue="1">
+      <value val="1">
+        <exp str="HIF1A | cMYC"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:11005"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30619240"/>
+        </linklist>
+        <comment>This node represents the glucose transporter Glut1, relevant for the glucose uptake required after TCR activation [2].</comment>
+      </annotation>
+      <nodevisualsetting x="163" y="1705" style="output"/>
+    </node>
+    <node id="GLYCOLYSIS" maxvalue="1">
+      <value val="1">
+        <exp str="HIF1A | cMYC"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12121659"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30619240"/>
+        </linklist>
+        <comment>This node represents the pathway Glycolysis, with enzymes located at the cytosol, responsible for the glucose catabolism. This pathway is upregulated uopn TCR activation, and is a metabolic signature of highly proliferative cells [1], [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1086" y="1396" style="METABOLIC PATHWAY"/>
+    </node>
+    <node id="FAO" maxvalue="1">
+      <value val="1">
+        <exp str="CPT1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19494812"/>
+        </linklist>
+        <comment>This node represents the Fatty Acid Oxidation (FAO) metabolic pathway rate. This pathway is maintained high during T cell quiescence, and is downregulated upon TCR activation [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1804" y="1169" style="METABOLIC PATHWAY"/>
+    </node>
+    <node id="FAS" maxvalue="1">
+      <value val="1">
+        <exp str="TORC1 &amp; !AMPK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24567531"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25592731"/>
+        </linklist>
+        <comment>This node represents the Fatty Acid Synthesis pathway, regulated mainly by the ACC enzyme [1]. The upregulation of this pathway is important to the cell growth and proliferation after the TCR activation.</comment>
+      </annotation>
+      <nodevisualsetting x="1847" y="1703" style="METABOLIC PATHWAY"/>
+    </node>
+    <node id="GLUTAMINOLYSIS" maxvalue="1">
+      <value val="1">
+        <exp str="cMYC"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22195744"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20554958"/>
+        </linklist>
+        <comment>This node represents the rate of the Glutaminolysis metabolic pathway, which is upregulated during T cell activation and proliferation [1], [2]. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="1543" y="1054" style="METABOLIC PATHWAY"/>
+    </node>
+    <node id="PPP" maxvalue="1">
+      <value val="1">
+        <exp str="cMYC"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22195744"/>
+        </linklist>
+        <comment>This node represents the Pentose Phosphate Pathway, important in the generation of reduction power and carbon skeletons for anabolism and T cell growth and proliferation [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1225" y="1205" style="METABOLIC PATHWAY"/>
+    </node>
+    <node id="KrebsCycle" maxvalue="2">
+      <value val="2">
+        <exp str="mCa &amp; (AcetylCoA | GLUTAMINOLYSIS) &amp; !mNADH_NAD"/>
+      </value>
+      <value val="1">
+        <exp str="(AcetylCoA | GLUTAMINOLYSIS) &amp; !mCa &amp; !mNADH_NAD"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30982525"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22195744"/>
+        </linklist>
+        <comment>This node represents the enzymes of the TCA cycle  located at the mitochondrial matrix. It is an important indicator of the energetic status of the cell. It is a multilevel node.</comment>
+      </annotation>
+      <nodevisualsetting x="739" y="814" style="METABOLIC PATHWAY"/>
+    </node>
+    <node id="ETC" maxvalue="2">
+      <parameter val="1"/>
+      <value val="2">
+        <exp str="mNADH_NAD &amp; mQH2_Q"/>
+      </value>
+      <value val="1">
+        <exp str="(!mNADH_NAD &amp; mQH2_Q) | (mNADH_NAD:1 &amp; !mQH2_Q) | (mNADH_NAD:2 &amp; !mQH2_Q)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16818739"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22206904"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12471050"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19061483"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=27085844"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30982525"/>
+        </linklist>
+        <comment>This node represents the enzymes of the Electron Transport Chain located in the internal mitochondrial membrane, which transfer electrons from reducen coenzimes to O2. Several evidences point to the importance of this pathway on T cell activation [2], [3]. At some metabolic situations it generates ROS [4], [5].
+
+It is a multilevel node. The ROS production occurs at level 2.</comment>
+      </annotation>
+      <nodevisualsetting x="245" y="135" style="ROS or ROS source"/>
+    </node>
+    <node id="ATPSyn" maxvalue="1">
+      <value val="1">
+        <exp str="mdH &amp; !mROS &amp; !mCa"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:823"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22889218"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28522037"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23312134"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19061483"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=27085844"/>
+        </linklist>
+        <comment>This node represent the ATP synthase enzyme complex, located at the internal mitochondrial membrane. It is a redox sensitive node [4], [5], [6].
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="508" y="172" style="redox sensitive"/>
+    </node>
+    <node id="P38" maxvalue="1">
+      <value val="1">
+        <exp str="MKK3 | ZAP70"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6876"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12670401"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16542479"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25151490"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=18451303"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10924852"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=16799472"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/15735648"/>
+        </linklist>
+        <comment>This node represents P38, a MAPK important in the activation of T cells.</comment>
+      </annotation>
+      <nodevisualsetting x="1235" y="926" style=""/>
+    </node>
+    <node id="ERK" maxvalue="1">
+      <value val="1">
+        <exp str="MEK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6871"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19017950"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26990855"/>
+        </linklist>
+        <comment>This node represents the Extracellular regulated Kinase, a MAPK. It is an important regulator of T cells activation and proliferation [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1001" y="1101" style=""/>
+    </node>
+    <node id="FOS" maxvalue="1">
+      <value val="1">
+        <exp str="ERK | P38"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3796"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12972619"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=15708845"/>
+        </linklist>
+        <comment>This node represents the subunit FOS, a component of the AP1 transcription factor.</comment>
+      </annotation>
+      <nodevisualsetting x="1021" y="1231" style=""/>
+    </node>
+    <node id="cJUN" maxvalue="1">
+      <value val="1">
+        <exp str="JNK &amp; cTRX"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6204"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25680272"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10970869"/>
+        </linklist>
+        <comment>This node represents the subunit JUN, a component of the AP1 transcription factor.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1380" y="1510" style=""/>
+    </node>
+    <node id="JNK" maxvalue="1">
+      <value val="1">
+        <exp str="MAP2K4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6881"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24673683"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12670401"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10924852"/>
+        </linklist>
+        <comment>This node represents the c-Jun N-terminal kinase, a MAPK important in the activation of the AP1 transcription factor. </comment>
+      </annotation>
+      <nodevisualsetting x="1531" y="1516" style=""/>
+    </node>
+    <node id="HIF1A" maxvalue="1">
+      <value val="1">
+        <exp str="TORC1 | !PHD"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:4910"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23183047"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24076634"/>
+        </linklist>
+        <comment>This node represents the hypoxia-inducible factor 1 alpha protein. It is an important mediator of the metabolic shift towards aerobic glycolysis in T cells during activation [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="117" y="1541" style=""/>
+    </node>
+    <node id="cMYC" maxvalue="1">
+      <value val="1">
+        <exp str="TORC1 &amp; ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:7553"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21704229"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=22195744"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=30619240"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=8035827"/>
+        </linklist>
+        <comment>This node represents the transcription factor MYC. It is an important regulator of the metabolic shift required for T cells activation and proliferation.</comment>
+      </annotation>
+      <nodevisualsetting x="318" y="1614" style=""/>
+    </node>
+    <node id="FOXO" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT &amp; !SGK &amp; AMPK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3821"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=18391970"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19658095"/>
+        </linklist>
+        <comment>This node represents the Forkhead transcription factor 1, which is important in the homeostatic survival of naive T cells [2], [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1557" y="1219" style=""/>
+    </node>
+    <node id="AP1" maxvalue="1">
+      <value val="1">
+        <exp str="FOS &amp; cJUN"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6204"/>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:3796"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25680272"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=10970869"/>
+        </linklist>
+        <comment>This node represents the transcription factor AP1. It is composed of the subunits FOS and JUN. It is an important transcriptional regulator of T cell fate upon stimulation. In combination with AP1 it promotes activation, but alone it promotes anergy [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1039" y="1758" style=""/>
+    </node>
+    <node id="NFkB" maxvalue="1">
+      <value val="1">
+        <exp str="!(cROS | IkB) &amp; PKCA"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:9955"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26826124"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=21199863"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=11714266"/>
+        </linklist>
+        <comment>This node represents the transcription factor NFkB. It is a combination of multiple heterodimers of p50, p65 and c-Rel. It is an important factor for the T cell activation upon stimulation or antigen encounter [2], [3], [4].</comment>
+      </annotation>
+      <nodevisualsetting x="851" y="1493" style="redox sensitive"/>
+    </node>
+    <node id="NFAT" maxvalue="1">
+      <value val="1">
+        <exp str="CALN"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:7775"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=20725108"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=12975316"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=25680272"/>
+        </linklist>
+        <comment>This node represents the Nuclear Factor of Activated T cells. It is an important transcriptional regulator of T cell fate upon stimulation [2], [3]. In combination with AP1 it promotes activation, but alone it promotes anergy [4].</comment>
+      </annotation>
+      <nodevisualsetting x="1252" y="1646" style=""/>
+    </node>
+    <node id="IL2" maxvalue="1">
+      <value val="1">
+        <exp str="AP1 &amp; NFAT &amp; NFkB"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:6001"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23352221"/>
+        </linklist>
+        <comment>This node represents the cytokine Interleukin-2. It is a marker of T cell activator, and also a mediator of T cells growth and proliferation. </comment>
+      </annotation>
+      <nodevisualsetting x="604" y="1753" style="output"/>
+    </node>
+    <node id="CD69" maxvalue="1">
+      <value val="1">
+        <exp str="NFkB &amp; HIF1A"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:1694"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=28507790"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=7665567"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19841192"/>
+        </linklist>
+        <comment>This node represents the early activation marker of T cells CD69. It is a type II C-type lectin involved in lymphocyte migration and cytokine secretion.</comment>
+      </annotation>
+      <nodevisualsetting x="128" y="1804" style="output"/>
+    </node>
+    <node id="QUIESCENCE" maxvalue="1">
+      <value val="1">
+        <exp str="FOXO &amp; !(AP1 | NFkB | NFAT | cMYC)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23601682"/>
+        </linklist>
+        <comment>This node represents the phenotype of resting naive T cells. It is defined as an unique configuration of metabolic and signaling pathways; which results in a basal oxidative metabolism supported mainly by the mitochondria</comment>
+      </annotation>
+      <nodevisualsetting x="1133" y="1862" style="PHENOTYPE"/>
+    </node>
+    <node id="ACTIVATION" maxvalue="1">
+      <value val="1">
+        <exp str="AP1 &amp; NFAT &amp; NFkB &amp; GLYCOLYSIS &amp; GLUTAMINOLYSIS &amp; !FAO &amp; FAS &amp; PPP &amp; !ATPSyn"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19132916"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=23601682"/>
+        </linklist>
+        <comment>This node represents the phenotype of activated T cells. It is defined as an unique configuration of metabolic and signaling pathways; which results in Warburg metabolism of proliferative cells supported mainly by the cytosol.</comment>
+      </annotation>
+      <nodevisualsetting x="891" y="1855" style="PHENOTYPE"/>
+    </node>
+    <node id="ANERGY" maxvalue="1">
+      <value val="1">
+        <exp str="NFAT &amp; !FOXO &amp; !AP1 &amp; !NFkB"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26256793"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24115444"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19841171"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/19494254"/>
+        </linklist>
+        <comment>This node represents the phenotype of anergic T cells. It is defined as an unique configuration of metabolic and signaling pathway activities; which results in an incomplete activation and no response.</comment>
+      </annotation>
+      <nodevisualsetting x="1558" y="1871" style="PHENOTYPE"/>
+    </node>
+    <node id="METABOLIC_ANERGY" maxvalue="1">
+      <value val="1">
+        <exp str="GLYCOLYSIS &amp; KrebsCycle &amp; !(FAS &amp; GLUTAMINOLYSIS)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=26256793"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=24115444"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/?term=19841171"/>
+        </linklist>
+        <comment>This node represents the phenotype of metabolically anergic T cells. It is defined as an unique configuration of metabolic and signaling pathways; which results in a cell not ready for proliferation upon stimulation.</comment>
+      </annotation>
+      <nodevisualsetting x="1713" y="1873" style="PHENOTYPE"/>
+    </node>
+    <edge id="MAP2K4:JNK" from="MAP2K4" to="JNK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1587,1334" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNNT:mNADPH_NADP" from="mNNT" to="mNADPH_NADP" effects="1:positive 2:positive">
+      <edgevisualsetting points="58,957" anchor="NE" style=""/>
+    </edge>
+    <edge id="cTRX:ASK1" from="cTRX" to="ASK1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1304,1062" anchor="NE" style=""/>
+    </edge>
+    <edge id="cTRX:cPRX" from="cTRX" to="cPRX" effects="1:positive 2:positive">
+      <edgevisualsetting points="1364,1029" anchor="NE" style=""/>
+    </edge>
+    <edge id="cTRX:cTR" from="cTRX" to="cTR" effects="1:positive 2:positive">
+      <edgevisualsetting points="1350,1039" anchor="NE" style=""/>
+    </edge>
+    <edge id="cTRX:cJUN" from="cTRX" to="cJUN" effects="1:positive 2:positive">
+      <edgevisualsetting points="1393,1051" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT:SLP76" from="LAT" to="SLP76" minvalue="1" sign="positive">
+      <edgevisualsetting points="1133,291" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT:HPK1" from="LAT" to="HPK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1100,911" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT:ITK" from="LAT" to="ITK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1108,224" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT:PLCg" from="LAT" to="PLCg" minvalue="1" sign="positive">
+      <edgevisualsetting points="1118,366" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT:GRB2" from="LAT" to="GRB2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1080,259" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTR:mROS" from="mTR" to="mROS" minvalue="2" sign="positive">
+      <edgevisualsetting points="703,1011" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTR:mTRX" from="mTR" to="mTRX" effects="1:positive 2:positive">
+      <edgevisualsetting points="703,1356" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:PIP3" from="PI3K" to="PIP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1566,337" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:ITK" from="PI3K" to="ITK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1437,247" anchor="NE" style=""/>
+    </edge>
+    <edge id="TRPM2:RAC1" from="TRPM2" to="RAC1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TRPM2:cCa" from="TRPM2" to="cCa" minvalue="1" sign="positive">
+      <edgevisualsetting points="1606,372" anchor="NE" style=""/>
+    </edge>
+    <edge id="JNK:cJUN" from="JNK" to="cJUN" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3R:STIM" from="IP3R" to="STIM" minvalue="1" sign="positive">
+      <edgevisualsetting points="1606,639" anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3R:cCa" from="IP3R" to="cCa" minvalue="1" sign="positive">
+      <edgevisualsetting points="1567,552" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO:QUIESCENCE" from="FOXO" to="QUIESCENCE" minvalue="1" sign="positive">
+      <edgevisualsetting points="1641,1775 1255,1773" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO:ANERGY" from="FOXO" to="ANERGY" minvalue="1" sign="negative">
+      <edgevisualsetting points="1645,1379" anchor="NE" style=""/>
+    </edge>
+    <edge id="MKK3:P38" from="MKK3" to="P38" minvalue="1" sign="positive">
+      <edgevisualsetting points="1276,985" anchor="NE" style=""/>
+    </edge>
+    <edge id="SOS:RAS" from="SOS" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1038,592" anchor="NE" style=""/>
+    </edge>
+    <edge id="cMYC:GLYCOLYSIS" from="cMYC" to="GLYCOLYSIS" minvalue="1" sign="positive">
+      <edgevisualsetting points="372,1426" anchor="NE" style=""/>
+    </edge>
+    <edge id="cMYC:GLUT1" from="cMYC" to="GLUT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="218,1636" anchor="NE" style=""/>
+    </edge>
+    <edge id="cMYC:GLUTAMINOLYSIS" from="cMYC" to="GLUTAMINOLYSIS" minvalue="1" sign="positive">
+      <edgevisualsetting points="350,1089" anchor="NE" style=""/>
+    </edge>
+    <edge id="cMYC:PPP" from="cMYC" to="PPP" minvalue="1" sign="positive">
+      <edgevisualsetting points="360,1206" anchor="NE" style=""/>
+    </edge>
+    <edge id="cMYC:QUIESCENCE" from="cMYC" to="QUIESCENCE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1193,1651" anchor="NE" style=""/>
+    </edge>
+    <edge id="SHP2:LCK" from="SHP2" to="LCK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1673,142" anchor="NE" style=""/>
+    </edge>
+    <edge id="SHP2:ZAP70" from="SHP2" to="ZAP70" minvalue="1" sign="negative">
+      <edgevisualsetting points="1541,166" anchor="NE" style=""/>
+    </edge>
+    <edge id="mQH2_Q:ETC" from="mQH2_Q" to="ETC" minvalue="2" sign="positive">
+      <edgevisualsetting points="317,521" anchor="NE" style=""/>
+    </edge>
+    <edge id="DUOX1:cROS" from="DUOX1" to="cROS" minvalue="1" sign="positive">
+      <edgevisualsetting points="961,597" anchor="NE" style=""/>
+    </edge>
+    <edge id="CALN:NFAT" from="CALN" to="NFAT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1297,1606" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADPH_NADP:mGR" from="mNADPH_NADP" to="mGR" effects="1:positive 2:positive">
+      <edgevisualsetting points="477,977" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADPH_NADP:mTR" from="mNADPH_NADP" to="mTR" effects="1:positive 2:positive">
+      <edgevisualsetting points="687,959" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADPH_NADP:mShuttle" from="mNADPH_NADP" to="mShuttle" minvalue="2" sign="positive">
+      <edgevisualsetting points="482,910" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLCg:DAG" from="PLCg" to="DAG" minvalue="1" sign="positive">
+      <edgevisualsetting points="1455,446" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLCg:IP3" from="PLCg" to="IP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1465,681" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAF:MEK" from="RAF" to="MEK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CPT1:FAO" from="CPT1" to="FAO" minvalue="1" sign="positive">
+      <edgevisualsetting points="1851,1263" anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK:AKT" from="PDK" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1782,1297" anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK:SGK" from="PDK" to="SGK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1366,1367" anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK:TORC1" from="PDK" to="TORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1138,1299" anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK:PKCTH" from="PDK" to="PKCTH" minvalue="1" sign="positive">
+      <edgevisualsetting points="1172,1286 1171,633" anchor="NE" style=""/>
+    </edge>
+    <edge id="STIM:ORAI1" from="STIM" to="ORAI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1645,636" anchor="NE" style=""/>
+    </edge>
+    <edge id="STIM:PMCA" from="STIM" to="PMCA" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ORAI1:cCa" from="ORAI1" to="cCa" minvalue="1" sign="positive">
+      <edgevisualsetting points="1648,547" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAMK2:AMPK" from="CAMK2" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1514,1453" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAMK2:IKK" from="CAMK2" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="cNADPH_NADP:NOX2" from="cNADPH_NADP" to="NOX2" effects="1:positive 2:positive">
+      <edgevisualsetting points="1237,882" anchor="NE" style=""/>
+    </edge>
+    <edge id="cNADPH_NADP:cGR" from="cNADPH_NADP" to="cGR" effects="1:positive 2:positive">
+      <edgevisualsetting points="1595,854" anchor="NE" style=""/>
+    </edge>
+    <edge id="cNADPH_NADP:cTR" from="cNADPH_NADP" to="cTR" effects="1:positive 2:positive">
+      <edgevisualsetting points="1428,868" anchor="NE" style=""/>
+    </edge>
+    <edge id="ZAP70:LAT" from="ZAP70" to="LAT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1457,260" anchor="NE" style=""/>
+    </edge>
+    <edge id="ZAP70:SLP76" from="ZAP70" to="SLP76" minvalue="1" sign="positive">
+      <edgevisualsetting points="1468,293" anchor="NE" style=""/>
+    </edge>
+    <edge id="ZAP70:ITK" from="ZAP70" to="ITK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1446,231" anchor="NE" style=""/>
+    </edge>
+    <edge id="ZAP70:P38" from="ZAP70" to="P38" minvalue="1" sign="positive">
+      <edgevisualsetting points="1905,153 1900,948" anchor="NE" style=""/>
+    </edge>
+    <edge id="cJUN:AP1" from="cJUN" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1415,1764" anchor="NE" style=""/>
+    </edge>
+    <edge id="mCa:KrebsCycle" from="mCa" to="KrebsCycle" minvalue="2" sign="positive">
+      <edgevisualsetting points="788,535" anchor="NE" style=""/>
+    </edge>
+    <edge id="mCa:mPDHP" from="mCa" to="mPDHP" minvalue="2" sign="positive">
+      <edgevisualsetting points="831,452" anchor="NE" style=""/>
+    </edge>
+    <edge id="mCa:ATPSyn" from="mCa" to="ATPSyn" minvalue="2" sign="negative">
+      <edgevisualsetting points="786,187" anchor="NE" style=""/>
+    </edge>
+    <edge id="TORC1:HIF1A" from="TORC1" to="HIF1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="567,1576" anchor="NE" style=""/>
+    </edge>
+    <edge id="TORC1:cMYC" from="TORC1" to="cMYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="1110,1636" anchor="NE" style=""/>
+    </edge>
+    <edge id="TORC1:FAS" from="TORC1" to="FAS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1871,1577" anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1A:GLYCOLYSIS" from="HIF1A" to="GLYCOLYSIS" minvalue="1" sign="positive">
+      <edgevisualsetting points="160,1413" anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1A:mPDHK" from="HIF1A" to="mPDHK" minvalue="1" sign="positive">
+      <edgevisualsetting points="343,1563" anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1A:GLUT1" from="HIF1A" to="GLUT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="185,1640" anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1A:CD69" from="HIF1A" to="CD69" minvalue="1" sign="positive">
+      <edgevisualsetting points="142,1691" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:IL2" from="NFkB" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="653,1518" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:ACTIVATION" from="NFkB" to="ACTIVATION" minvalue="1" sign="positive">
+      <edgevisualsetting points="897,1643" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:CD69" from="NFkB" to="CD69" minvalue="1" sign="positive">
+      <edgevisualsetting points="864,1837" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:ANERGY" from="NFkB" to="ANERGY" minvalue="1" sign="negative">
+      <edgevisualsetting points="913,1731 1585,1733 1583,1835 1583,1845" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:QUIESCENCE" from="NFkB" to="QUIESCENCE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1087,1511 1229,1511" anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCA:NFkB" from="PKCA" to="NFkB" minvalue="1" sign="positive">
+      <edgevisualsetting points="946,1154" anchor="NE" style=""/>
+    </edge>
+    <edge id="KrebsCycle:mNADH_NAD" from="KrebsCycle" to="mNADH_NAD" effects="1:positive 2:positive">
+      <edgevisualsetting points="744,364" anchor="NE" style=""/>
+    </edge>
+    <edge id="KrebsCycle:mIDH2" from="KrebsCycle" to="mIDH2" minvalue="2" sign="positive">
+      <edgevisualsetting points="244,833" anchor="NE" style=""/>
+    </edge>
+    <edge id="KrebsCycle:PHD" from="KrebsCycle" to="PHD" minvalue="2" sign="negative">
+      <edgevisualsetting points="785,1456" anchor="NE" style=""/>
+    </edge>
+    <edge id="KrebsCycle:METABOLIC_ANERGY" from="KrebsCycle" to="METABOLIC_ANERGY" minvalue="1" sign="positive">
+      <edgevisualsetting points="819,1812 1747,1812" anchor="NE" style=""/>
+    </edge>
+    <edge id="RASGRP:RAS" from="RASGRP" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1081,530" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTRX:mPRX" from="mTRX" to="mPRX" effects="1:positive 2:positive">
+      <edgevisualsetting points="207,615" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTRX:mTR" from="mTRX" to="mTR" effects="1:positive 2:positive">
+      <edgevisualsetting points="691,1347" anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCTH:IKK" from="PKCTH" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1485,642" anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCTH:RASGRP" from="PKCTH" to="RASGRP" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCTH:PDK" from="PKCTH" to="PDK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1160,627 1165,1292" anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCTH:DUOX1" from="PKCTH" to="DUOX1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1356,627" anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCTH:NOX2" from="PKCTH" to="NOX2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1272,699" anchor="NE" style=""/>
+    </edge>
+    <edge id="PYR:mPDH" from="PYR" to="mPDH" minvalue="1" sign="positive">
+      <edgevisualsetting points="417,1394" anchor="NE" style=""/>
+    </edge>
+    <edge id="DAG:PKCTH" from="DAG" to="PKCTH" minvalue="1" sign="positive">
+      <edgevisualsetting points="1300,556" anchor="NE" style=""/>
+    </edge>
+    <edge id="DAG:RASGRP" from="DAG" to="RASGRP" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AMP_ATP:AMPK" from="AMP_ATP" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting points="2022,1683" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATPSyn:mATP_ADP" from="ATPSyn" to="mATP_ADP" minvalue="1" sign="positive">
+      <edgevisualsetting points="545,255" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATPSyn:mdH" from="ATPSyn" to="mdH" minvalue="1" sign="negative">
+      <edgevisualsetting points="88,193" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATPSyn:ACTIVATION" from="ATPSyn" to="ACTIVATION" minvalue="1" sign="negative">
+      <edgevisualsetting points="569,1877" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:FOXO" from="AKT" to="FOXO" minvalue="1" sign="negative">
+      <edgevisualsetting points="1773,1236" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:TORC1" from="AKT" to="TORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1801,1567" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:PTEN" from="AKT" to="PTEN" minvalue="1" sign="negative">
+      <edgevisualsetting points="1864,463" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:IL2" from="AP1" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:ACTIVATION" from="AP1" to="ACTIVATION" minvalue="1" sign="positive">
+      <edgevisualsetting points="1073,1878" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:ANERGY" from="AP1" to="ANERGY" minvalue="1" sign="negative">
+      <edgevisualsetting points="1598,1783" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:QUIESCENCE" from="AP1" to="QUIESCENCE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1097,1879" anchor="NE" style=""/>
+    </edge>
+    <edge id="cTR:cTRX" from="cTR" to="cTRX" effects="1:positive 2:positive">
+      <edgevisualsetting points="1345,1046" anchor="NE" style=""/>
+    </edge>
+    <edge id="cTR:cROS" from="cTR" to="cROS" minvalue="2" sign="positive">
+      <edgevisualsetting points="933,835" anchor="NE" style=""/>
+    </edge>
+    <edge id="cGSH_GSSG:cGR" from="cGSH_GSSG" to="cGR" effects="1:positive 2:positive">
+      <edgevisualsetting points="1588,788" anchor="NE" style=""/>
+    </edge>
+    <edge id="cGSH_GSSG:cGPX" from="cGSH_GSSG" to="cGPX" effects="1:positive 2:positive">
+      <edgevisualsetting points="1401,756" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLYCOLYSIS:PYR" from="GLYCOLYSIS" to="PYR" minvalue="1" sign="positive">
+      <edgevisualsetting points="912,1396" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLYCOLYSIS:cATP_ADP" from="GLYCOLYSIS" to="cATP_ADP" minvalue="1" sign="positive">
+      <edgevisualsetting points="2012,1405" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLYCOLYSIS:AMP_ATP" from="GLYCOLYSIS" to="AMP_ATP" minvalue="1" sign="negative">
+      <edgevisualsetting points="2011,1417" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLYCOLYSIS:ACTIVATION" from="GLYCOLYSIS" to="ACTIVATION" minvalue="1" sign="positive">
+      <edgevisualsetting points="1033,1436" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLYCOLYSIS:METABOLIC_ANERGY" from="GLYCOLYSIS" to="METABOLIC_ANERGY" minvalue="1" sign="positive">
+      <edgevisualsetting points="1835,1426" anchor="NE" style=""/>
+    </edge>
+    <edge id="mPDHK:mPDH" from="mPDHK" to="mPDH" minvalue="1" sign="negative">
+      <edgevisualsetting points="393,771" anchor="NE" style=""/>
+    </edge>
+    <edge id="NOX2:cROS" from="NOX2" to="cROS" minvalue="1" sign="positive">
+      <edgevisualsetting points="956,762" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:ORAI1" from="cROS" to="ORAI1" minvalue="2" sign="negative">
+      <edgevisualsetting points="952,584" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:IP3R" from="cROS" to="IP3R" minvalue="2" sign="positive">
+      <edgevisualsetting points="968,660" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:TRPM2" from="cROS" to="TRPM2" minvalue="2" sign="positive">
+      <edgevisualsetting points="945,387" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:NFkB" from="cROS" to="NFkB" minvalue="2" sign="negative">
+      <edgevisualsetting points="872,1101" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:cTRX" from="cROS" to="cTRX" effects="1:negative 2:negative">
+      <edgevisualsetting points="882,1055" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:SHP2" from="cROS" to="SHP2" effects="1:negative 2:negative">
+      <edgevisualsetting points="916,188" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:ZAP70" from="cROS" to="ZAP70" minvalue="2" sign="negative">
+      <edgevisualsetting points="906,161" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:LAT" from="cROS" to="LAT" minvalue="2" sign="negative">
+      <edgevisualsetting points="927,254" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:cGPX" from="cROS" to="cGPX" minvalue="2" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:PTEN" from="cROS" to="PTEN" effects="1:negative 2:negative">
+      <edgevisualsetting points="937,313" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:PHD" from="cROS" to="PHD" minvalue="2" sign="negative">
+      <edgevisualsetting points="400,726" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:STIM" from="cROS" to="STIM" minvalue="2" sign="positive">
+      <edgevisualsetting points="974,675" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:HV1" from="cROS" to="HV1" minvalue="2" sign="positive">
+      <edgevisualsetting points="923,807" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:cPRX" from="cROS" to="cPRX" minvalue="2" sign="negative">
+      <edgevisualsetting points="1131,726" anchor="NE" style=""/>
+    </edge>
+    <edge id="cROS:mROS" from="cROS" to="mROS" minvalue="2" sign="positive">
+      <edgevisualsetting points="781,711" anchor="NE" style=""/>
+    </edge>
+    <edge id="HPK1:MAP3K11" from="HPK1" to="MAP3K11" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PHD:HIF1A" from="PHD" to="HIF1A" minvalue="1" sign="negative">
+      <edgevisualsetting points="175,1473" anchor="NE" style=""/>
+    </edge>
+    <edge id="mGPX:mGSH_GSSG" from="mGPX" to="mGSH_GSSG" minvalue="1" sign="negative">
+      <edgevisualsetting points="153,1277" anchor="NE" style=""/>
+    </edge>
+    <edge id="mGPX:mROS" from="mGPX" to="mROS" minvalue="2" sign="negative">
+      <edgevisualsetting points="605,1275" anchor="NE" style=""/>
+    </edge>
+    <edge id="IKK:IkB" from="IKK" to="IkB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1172,990" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT:IL2" from="NFAT" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="670,1670" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT:ACTIVATION" from="NFAT" to="ACTIVATION" minvalue="1" sign="positive">
+      <edgevisualsetting points="921,1685" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT:ANERGY" from="NFAT" to="ANERGY" minvalue="1" sign="positive">
+      <edgevisualsetting points="1630,1657" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT:QUIESCENCE" from="NFAT" to="QUIESCENCE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1305,1883" anchor="NE" style=""/>
+    </edge>
+    <edge id="LKB:AMPK" from="LKB" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting points="2071,1691" anchor="NE" style=""/>
+    </edge>
+    <edge id="PPP:cNADPH_NADP" from="PPP" to="cNADPH_NADP" minvalue="1" sign="positive">
+      <edgevisualsetting points="1528,1220" anchor="NE" style=""/>
+    </edge>
+    <edge id="PPP:ACTIVATION" from="PPP" to="ACTIVATION" minvalue="1" sign="positive">
+      <edgevisualsetting points="1016,1213" anchor="NE" style=""/>
+    </edge>
+    <edge id="cCa:DUOX1" from="cCa" to="DUOX1" effects="1:positive 2:positive">
+      <edgevisualsetting points="1555,611" anchor="NE" style=""/>
+    </edge>
+    <edge id="cCa:CALM" from="cCa" to="CALM" minvalue="2" sign="positive">
+      <edgevisualsetting points="1691,498" anchor="NE" style=""/>
+    </edge>
+    <edge id="cCa:mCa" from="cCa" to="mCa" effects="1:positive 2:positive">
+      <edgevisualsetting points="865,484" anchor="NE" style=""/>
+    </edge>
+    <edge id="cCa:PKCA" from="cCa" to="PKCA" minvalue="2" sign="positive">
+      <edgevisualsetting points="1134,499" anchor="NE" style=""/>
+    </edge>
+    <edge id="AMPK:TORC1" from="AMPK" to="TORC1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1487,1598" anchor="NE" style=""/>
+    </edge>
+    <edge id="AMPK:FOXO" from="AMPK" to="FOXO" minvalue="1" sign="positive">
+      <edgevisualsetting points="1651,1672" anchor="NE" style=""/>
+    </edge>
+    <edge id="AMPK:FAS" from="AMPK" to="FAS" minvalue="1" sign="negative">
+      <edgevisualsetting points="1674,1704" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:ZAP70" from="LCK" to="ZAP70" minvalue="1" sign="positive">
+      <edgevisualsetting points="1484,119" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:ITK" from="LCK" to="ITK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1269,84" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:PKCTH" from="LCK" to="PKCTH" minvalue="1" sign="positive">
+      <edgevisualsetting points="1339,91" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:LKB" from="LCK" to="LKB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1896,91" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:cPRX" from="LCK" to="cPRX" minvalue="1" sign="negative">
+      <edgevisualsetting points="1347,97" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:SHP2" from="LCK" to="SHP2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1661,138" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:CBLB" from="LCK" to="CBLB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1689,160" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK:PTEN" from="LCK" to="PTEN" minvalue="1" sign="negative">
+      <edgevisualsetting points="1879,107" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOS:AP1" from="FOS" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1066,1509" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:PDK" from="PIP3" to="PDK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1743,1289" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:AKT" from="PIP3" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1855,342" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:TORC2" from="PIP3" to="TORC2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="P38:NOX2" from="P38" to="NOX2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1214,951" anchor="NE" style=""/>
+    </edge>
+    <edge id="P38:FOS" from="P38" to="FOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1334,1251" anchor="NE" style=""/>
+    </edge>
+    <edge id="MEK:ERK" from="MEK" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:ZAP70" from="CD28" to="ZAP70" minvalue="1" sign="positive">
+      <edgevisualsetting points="1472,30" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:LCK" from="CD28" to="LCK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1667,28" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:PI3K" from="CD28" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="1542,179" anchor="NE" style=""/>
+    </edge>
+    <edge id="AcetylCoA:KrebsCycle" from="AcetylCoA" to="KrebsCycle" minvalue="1" sign="positive">
+      <edgevisualsetting points="760,86" anchor="NE" style=""/>
+    </edge>
+    <edge id="CALM:CALN" from="CALM" to="CALN" minvalue="1" sign="positive">
+      <edgevisualsetting points="1690,1396" anchor="NE" style=""/>
+    </edge>
+    <edge id="CALM:CAMK2" from="CALM" to="CAMK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1542,1138" anchor="NE" style=""/>
+    </edge>
+    <edge id="mPRX:mROS" from="mPRX" to="mROS" minvalue="1" sign="negative">
+      <edgevisualsetting points="638,661" anchor="NE" style=""/>
+    </edge>
+    <edge id="cPRX:cROS" from="cPRX" to="cROS" minvalue="1" sign="negative">
+      <edgevisualsetting points="1121,737" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLUTAMINOLYSIS:cNADPH_NADP" from="GLUTAMINOLYSIS" to="cNADPH_NADP" minvalue="1" sign="positive">
+      <edgevisualsetting points="1594,930" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLUTAMINOLYSIS:KrebsCycle" from="GLUTAMINOLYSIS" to="KrebsCycle" minvalue="1" sign="positive">
+      <edgevisualsetting points="832,1070" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLUTAMINOLYSIS:ACTIVATION" from="GLUTAMINOLYSIS" to="ACTIVATION" minvalue="1" sign="positive">
+      <edgevisualsetting points="979,1079" anchor="NE" style=""/>
+    </edge>
+    <edge id="GLUTAMINOLYSIS:METABOLIC_ANERGY" from="GLUTAMINOLYSIS" to="METABOLIC_ANERGY" minvalue="1" sign="negative">
+      <edgevisualsetting points="1762,1076" anchor="NE" style=""/>
+    </edge>
+    <edge id="mROS:mGPX" from="mROS" to="mGPX" minvalue="2" sign="negative">
+      <edgevisualsetting points="616,1286" anchor="NE" style=""/>
+    </edge>
+    <edge id="mROS:mTRX" from="mROS" to="mTRX" effects="1:negative 2:negative">
+      <edgevisualsetting points="264,705" anchor="NE" style=""/>
+    </edge>
+    <edge id="mROS:cROS" from="mROS" to="cROS" minvalue="2" sign="positive">
+      <edgevisualsetting points="797,699" anchor="NE" style=""/>
+    </edge>
+    <edge id="mROS:ATPSyn" from="mROS" to="ATPSyn" minvalue="2" sign="negative">
+      <edgevisualsetting points="679,200" anchor="NE" style=""/>
+    </edge>
+    <edge id="mROS:mPRX" from="mROS" to="mPRX" minvalue="2" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="cATP_ADP:AMP_ATP" from="cATP_ADP" to="AMP_ATP" minvalue="1" sign="negative">
+      <edgevisualsetting points="2027,1415" anchor="NE" style=""/>
+    </edge>
+    <edge id="cATP_ADP:AMPK" from="cATP_ADP" to="AMPK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1522,1364" anchor="NE" style=""/>
+    </edge>
+    <edge id="VAV1:ITK" from="VAV1" to="ITK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1274,384" anchor="NE" style=""/>
+    </edge>
+    <edge id="VAV1:RAC1" from="VAV1" to="RAC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1411,424" anchor="NE" style=""/>
+    </edge>
+    <edge id="mShuttle:cNADPH_NADP" from="mShuttle" to="cNADPH_NADP" minvalue="1" sign="positive">
+      <edgevisualsetting points="1262,897" anchor="NE" style=""/>
+    </edge>
+    <edge id="FAO:mNADH_NAD" from="FAO" to="mNADH_NAD" minvalue="1" sign="positive">
+      <edgevisualsetting points="383,1184" anchor="NE" style=""/>
+    </edge>
+    <edge id="FAO:AcetylCoA" from="FAO" to="AcetylCoA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1916,73" anchor="NE" style=""/>
+    </edge>
+    <edge id="FAO:ACTIVATION" from="FAO" to="ACTIVATION" minvalue="1" sign="negative">
+      <edgevisualsetting points="962,1193" anchor="NE" style=""/>
+    </edge>
+    <edge id="IkB:NFkB" from="IkB" to="NFkB" minvalue="1" sign="negative">
+      <edgevisualsetting points="917,1115" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:FOS" from="ERK" to="FOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1033,1184" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:cMYC" from="ERK" to="cMYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="1010,1620" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:NOX2" from="ERK" to="NOX2" minvalue="1" sign="positive">
+      <edgevisualsetting points="997,777" anchor="NE" style=""/>
+    </edge>
+    <edge id="GRB2:SOS" from="GRB2" to="SOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1026,456" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAC1:NOX2" from="RAC1" to="NOX2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1216,452" anchor="NE" style=""/>
+    </edge>
+    <edge id="mGSH_GSSG:mGR" from="mGSH_GSSG" to="mGR" effects="1:positive 2:positive">
+      <edgevisualsetting points="162,1066" anchor="NE" style=""/>
+    </edge>
+    <edge id="mGSH_GSSG:mGPX" from="mGSH_GSSG" to="mGPX" effects="1:positive 2:positive">
+      <edgevisualsetting points="136,1291" anchor="NE" style=""/>
+    </edge>
+    <edge id="ETC:mROS" from="ETC" to="mROS" minvalue="2" sign="positive">
+      <edgevisualsetting points="703,142" anchor="NE" style=""/>
+    </edge>
+    <edge id="ETC:mdH" from="ETC" to="mdH" effects="1:positive 2:positive">
+      <edgevisualsetting points="68,154" anchor="NE" style=""/>
+    </edge>
+    <edge id="ETC:mQH2_Q" from="ETC" to="mQH2_Q" effects="1:positive 2:positive">
+      <edgevisualsetting points="257,534" anchor="NE" style=""/>
+    </edge>
+    <edge id="ETC:mNADH_NAD" from="ETC" to="mNADH_NAD" minvalue="1" sign="negative">
+      <edgevisualsetting points="272,331" anchor="NE" style=""/>
+    </edge>
+    <edge id="cGR:cGSH_GSSG" from="cGR" to="cGSH_GSSG" minvalue="1" sign="positive">
+      <edgevisualsetting points="1608,780" anchor="NE" style=""/>
+    </edge>
+    <edge id="cGR:cROS" from="cGR" to="cROS" minvalue="2" sign="positive">
+      <edgevisualsetting points="945,811" anchor="NE" style=""/>
+    </edge>
+    <edge id="mPDH:mNADH_NAD" from="mPDH" to="mNADH_NAD" minvalue="1" sign="positive">
+      <edgevisualsetting points="413,465" anchor="NE" style=""/>
+    </edge>
+    <edge id="mPDH:AcetylCoA" from="mPDH" to="AcetylCoA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mPDH:PYR" from="mPDH" to="PYR" minvalue="1" sign="negative">
+      <edgevisualsetting points="431,1378" anchor="NE" style=""/>
+    </edge>
+    <edge id="CBLB:PI3K" from="CBLB" to="PI3K" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MAP3K11:MAP2K4" from="MAP3K11" to="MAP2K4" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MAP3K11:IKK" from="MAP3K11" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1519,1149" anchor="NE" style=""/>
+    </edge>
+    <edge id="mGR:mROS" from="mGR" to="mROS" minvalue="2" sign="positive">
+      <edgevisualsetting points="649,1063" anchor="NE" style=""/>
+    </edge>
+    <edge id="mGR:mGSH_GSSG" from="mGR" to="mGSH_GSSG" minvalue="1" sign="positive">
+      <edgevisualsetting points="174,1055" anchor="NE" style=""/>
+    </edge>
+    <edge id="ASK1:MKK3" from="ASK1" to="MKK3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1282,1088" anchor="NE" style=""/>
+    </edge>
+    <edge id="ASK1:MAP2K4" from="ASK1" to="MAP2K4" minvalue="1" sign="positive">
+      <edgevisualsetting points="1269,1334" anchor="NE" style=""/>
+    </edge>
+    <edge id="SLP76:PI3K" from="SLP76" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="1540,293" anchor="NE" style=""/>
+    </edge>
+    <edge id="SLP76:PLCg" from="SLP76" to="PLCg" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SLP76:ITK" from="SLP76" to="ITK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1300,280" anchor="NE" style=""/>
+    </edge>
+    <edge id="SLP76:VAV1" from="SLP76" to="VAV1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1390,414" anchor="NE" style=""/>
+    </edge>
+    <edge id="TORC2:SGK" from="TORC2" to="SGK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1472,1497" anchor="NE" style=""/>
+    </edge>
+    <edge id="TORC2:AKT" from="TORC2" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1792,1498" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:SOS" from="RAS" to="SOS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:RAF" from="RAS" to="RAF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TCR:LCK" from="TCR" to="LCK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1688,12" anchor="NE" style=""/>
+    </edge>
+    <edge id="TCR:FYN" from="TCR" to="FYN" minvalue="1" sign="positive">
+      <edgevisualsetting points="1125,45" anchor="NE" style=""/>
+    </edge>
+    <edge id="PTEN:PIP3" from="PTEN" to="PIP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="1781,330" anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3:IP3R" from="IP3" to="IP3R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1506,841" anchor="NE" style=""/>
+    </edge>
+    <edge id="FAS:CPT1" from="FAS" to="CPT1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1892,1652" anchor="NE" style=""/>
+    </edge>
+    <edge id="FAS:AcetylCoA" from="FAS" to="AcetylCoA" minvalue="1" sign="negative">
+      <edgevisualsetting points="1931,61" anchor="NE" style=""/>
+    </edge>
+    <edge id="FAS:ACTIVATION" from="FAS" to="ACTIVATION" minvalue="1" sign="positive">
+      <edgevisualsetting points="945,1715" anchor="NE" style=""/>
+    </edge>
+    <edge id="FAS:METABOLIC_ANERGY" from="FAS" to="METABOLIC_ANERGY" minvalue="1" sign="negative">
+      <edgevisualsetting points="1907,1888" anchor="NE" style=""/>
+    </edge>
+    <edge id="mdH:mQH2_Q" from="mdH" to="mQH2_Q" minvalue="2" sign="positive">
+      <edgevisualsetting points="141,548" anchor="NE" style=""/>
+    </edge>
+    <edge id="mdH:mNNT" from="mdH" to="mNNT" effects="1:positive 2:positive">
+      <edgevisualsetting points="74,679" anchor="NE" style=""/>
+    </edge>
+    <edge id="mdH:ATPSyn" from="mdH" to="ATPSyn" effects="1:positive 2:positive">
+      <edgevisualsetting points="108,209" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADH_NAD:ETC" from="mNADH_NAD" to="ETC" effects="1:positive 2:positive">
+      <edgevisualsetting points="411,153" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADH_NAD:KrebsCycle" from="mNADH_NAD" to="KrebsCycle" minvalue="2" sign="negative">
+      <edgevisualsetting points="753,351" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADH_NAD:mPDHP" from="mNADH_NAD" to="mPDHP" minvalue="2" sign="negative">
+      <edgevisualsetting points="444,574" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADH_NAD:mPDH" from="mNADH_NAD" to="mPDH" minvalue="2" sign="negative">
+      <edgevisualsetting points="430,578" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADH_NAD:mPDHK" from="mNADH_NAD" to="mPDHK" minvalue="2" sign="negative">
+      <edgevisualsetting points="370,646" anchor="NE" style=""/>
+    </edge>
+    <edge id="mNADH_NAD:mNNT" from="mNADH_NAD" to="mNNT" effects="1:positive 2:positive">
+      <edgevisualsetting points="36,349" anchor="NE" style=""/>
+    </edge>
+    <edge id="PMCA:cCa" from="PMCA" to="cCa" minvalue="1" sign="negative">
+      <edgevisualsetting points="1774,483" anchor="NE" style=""/>
+    </edge>
+    <edge id="FYN:ZAP70" from="FYN" to="ZAP70" minvalue="1" sign="positive">
+      <edgevisualsetting points="1457,118" anchor="NE" style=""/>
+    </edge>
+    <edge id="mIDH2:mNADPH_NADP" from="mIDH2" to="mNADPH_NADP" minvalue="1" sign="positive">
+      <edgevisualsetting points="226,941" anchor="NE" style=""/>
+    </edge>
+    <edge id="mIDH2:mShuttle" from="mIDH2" to="mShuttle" minvalue="1" sign="positive">
+      <edgevisualsetting points="526,670" anchor="NE" style=""/>
+    </edge>
+    <edge id="SGK:FOXO" from="SGK" to="FOXO" minvalue="1" sign="negative">
+      <edgevisualsetting points="1608,1355" anchor="NE" style=""/>
+    </edge>
+    <edge id="ITK:PLCg" from="ITK" to="PLCg" minvalue="1" sign="positive">
+      <edgevisualsetting points="1290,356" anchor="NE" style=""/>
+    </edge>
+    <edge id="ITK:VAV1" from="ITK" to="VAV1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1258,354" anchor="NE" style=""/>
+    </edge>
+    <edge id="mPDHP:mPDH" from="mPDHP" to="mPDH" minvalue="1" sign="positive">
+      <edgevisualsetting points="485,585" anchor="NE" style=""/>
+    </edge>
+    <edge id="cGPX:cGSH_GSSG" from="cGPX" to="cGSH_GSSG" minvalue="1" sign="negative">
+      <edgevisualsetting points="1414,744" anchor="NE" style=""/>
+    </edge>
+    <edge id="cGPX:cROS" from="cGPX" to="cROS" minvalue="2" sign="negative">
+      <edgevisualsetting points="1147,700" anchor="NE" style=""/>
+    </edge>
+    <annotation>
+      <comment>
+
+</comment>
+    </annotation>
+  </graph>
+</gxl>

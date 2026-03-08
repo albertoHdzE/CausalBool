@@ -1,0 +1,2168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="Model_Th1_Th17_November_2020" nodeorder="IL1_In IL12_In IL23_In TGFB_In IL6_Aut STAT1 Tbet IFNg IL12RB1 IL12RB2 IL12R STAT4 IL1RAP IL1R1 STAT3 IL21 IL17A IL17F RORGt TCR IL1R CD28 Lck CD4 Zap70 Lat VAV PI3K SOS PLCG Rac PIP2 PTEN PIP3 IP3 DAG PKCO RAS ERK1_2 c_Fos AP1 MEKK1 TAK1 c_Jun NFAT1 NFKB IKK c_Maf Myd88 IRAK1_4 TRAF6 Blimp1 RunX3 Eomes IRF4 AHR MHCII CD80 NFAT2 NFAT4 NFAT2A FOXP3 IL2R IL2RA IL2RB STAT5B CGC IL2 Smad2 STAT5A GP130 IL23R FOXP3_2 SATB1 MINA RUNX1 RORA IL6R TGFBR IL6_In CXCR4 ITK">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="ELLIPSE" width="60" height="30"/>
+    <nodestyle name="Node style 2" background="#ffcccc"/>
+    <nodestyle name="Node style 5" background="#cccccc" foreground="#000000"/>
+    <nodestyle name="Node style 7" background="#ffffcc"/>
+    <nodestyle name="Node style" background="#ffccff"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle name="Edge style" line_width="1"/>
+    <node id="IL1_In" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5992"/>
+        </linklist>
+        <comment>Interleukin 1 beta [1]. 
+
+External source of IL-1.</comment>
+      </annotation>
+      <nodevisualsetting x="629" y="6" style="Node style 7"/>
+    </node>
+    <node id="IL12_In" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5970"/>
+        </linklist>
+        <comment>Interleukin 12B (p40) [1]. 
+
+External source of IL-12.
+</comment>
+      </annotation>
+      <nodevisualsetting x="312" y="7" style="Node style 7"/>
+    </node>
+    <node id="IL23_In" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:15488"/>
+        </linklist>
+        <comment>Interleukin 23 subunit alpha [1]. 
+
+External source of  IL-23. </comment>
+      </annotation>
+      <nodevisualsetting x="1446" y="3" style="Node style 7"/>
+    </node>
+    <node id="TGFB_In" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:P01137"/>
+        </linklist>
+        <comment>Transforming growth factor beta-1,  TGFB [1]. 
+
+External source of  TGFB. </comment>
+      </annotation>
+      <nodevisualsetting x="1150" y="2" style="Node style 7"/>
+    </node>
+    <node id="IL6_Aut" maxvalue="1">
+      <value val="1">
+        <exp str="PI3K"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6018"/>
+          <link xlink:href="pmid:18515365"/>
+        </linklist>
+        <comment>Interleukin 6  [1]. 
+
+Internal source of  IL-6 produced by the cell. 
+Experimental validation data. 
+
+A novel role for the phosphatidylinositol 3-kinase/AKT pathway in mediating induction of interleukin-6 (IL-6) in response to IL-1 is reported in [2]. Pharmacological inhibition of phosphatidylinositol 3-kinase (PI3K) inhibited IL-6 mRNA and protein production. </comment>
+      </annotation>
+      <nodevisualsetting x="1222" y="20" style=""/>
+    </node>
+    <node id="STAT1" maxvalue="1">
+      <value val="1">
+        <exp str="IL12R | IL6R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:11362"/>
+          <link xlink:href="uniprot:P42224"/>
+          <link xlink:href="pmid:9454765"/>
+          <link xlink:href="pmid:19626047"/>
+        </linklist>
+        <comment>STAT1, signal transducer and activator of transcription 1, Transcription factor [1] [2]. 
+
+STAT1 is activated by IL12, STAT1 is tyrosine phosphorylated in response to IL12 in PHA-activated human T cells, Figure 1, (Functional data in human cells)   [3]. 
+
+In STAT3-depleted cells, interleukin IL-6 acquired the capacity to induce apoptosis, correlating with prolonged STAT1 activation and the induction of major histocompatibility complex (MHC) class I expression [4].</comment>
+      </annotation>
+      <nodevisualsetting x="217" y="194" style=""/>
+    </node>
+    <node id="Tbet" maxvalue="1">
+      <value val="1">
+        <exp str="Tbet | (STAT1 &amp; NFAT1 &amp; AP1 &amp; NFKB &amp; !Blimp1 &amp; !RUNX1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:11599"/>
+          <link xlink:href="uniprot:Q9UL17"/>
+          <link xlink:href="pmid:23232398"/>
+          <link xlink:href="pmid:12006974"/>
+          <link xlink:href="pmid:20103781"/>
+          <link xlink:href="pmid:18684923"/>
+          <link xlink:href="pmid:21151104"/>
+        </linklist>
+        <comment>Tbet, T-box 21, TBX21 gene [1]. 
+
+Tbet is the master Transcription Factor of Th1 lineage [2]. 
+
+Auto-activated: Fig 5 (Binding and functional data in mice model) [3].
+
+Activated by STAT1: Fig 2 (Functional data in mice model) [4].
+
+NFAT, AP1 and NFKB in combination with STAT1 binds to the TBX21 promoter, Fig 2 [5]. 
+
+Tbet is inhibited by Blimp1. Blimp1 binds directly at multiple sites in TBX21, Figure 1 (binding data in mice model)  [6]. 
+
+Tbet is inhibited by RUNX1. Overexpression of Runx1 was sufficient to reverse the inhibitory effects of Tbet on IL17A production by Th17 cells, Figure 6  (Functional data in a mice model)  [7]. 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+In other words, if Tbet is expressed in excess in the cell, it can inhibit the activation of RORc, since it captures Runx1 and Runx1 is neccesary for RORc transcription.  Runx1 in adddition to inducing RORc also induces RORa. Tbet suppresses IL21, which is an important inducer of IL23. Subsequently, the over-expression of Runx1 retracts the effect of Tbet on the inhibition of the Th17 response. Experimentally this was corroborated with experimental data, where it was observed that in the IL12 + IL1b condition, Tbet is expressed in excess, while Runx1 and RORc decrease its expression. In the Th17 condition, Tbet decreases its expression and Runx1 and RORc can increase its expression. Regarding the expression of IL23R, no differences were observed between the two conditions, experimentally. This indicates the importance of maintaining a balance of expression between TFs, both negative and positive TFs can interact at the same time but at a certain level of expression.
+
+We consider that Tbet autoactivation is not affected by the presence of Blimp1 and RUNX1, since it occurs when Tbet is overexpressed in the cell and the level of Tbet is enough high. 
+
+
+ </comment>
+      </annotation>
+      <nodevisualsetting x="333" y="410" style="Node style 2"/>
+    </node>
+    <node id="IFNg" maxvalue="1">
+      <value val="1">
+        <exp str="Tbet &amp; RunX3 &amp; Eomes &amp; STAT4 &amp; STAT1 &amp; NFAT1 &amp; AP1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5438"/>
+          <link xlink:href="uniprot:P01579"/>
+          <link xlink:href="pmid:17195845"/>
+          <link xlink:href="pmid:12006974"/>
+          <link xlink:href="pmid:20969595"/>
+          <link xlink:href="pmid:11520798"/>
+          <link xlink:href="pmid:11801649"/>
+          <link xlink:href="pmid:20103781"/>
+          <link xlink:href="pmid:19050290"/>
+          <link xlink:href="pmid:18684923"/>
+        </linklist>
+        <comment>Interferon gamma [1].
+
+Interferon gamma secreted by the cell [2]. 
+
+Tbet and Runx3 cooperate to activate IFNg: Figure 2 and 3, (Binding and functional data in mice model) [3]. 
+
+Activated by STAT4: Figure 3A (functional data in mice model); Fig 4B and S4 (Binding data) [5].
+
+Activated by NFAT: Figure 1 (Functional data in mice model) [6].
+
+AP1 and STAT4 form a complex that exhibits a stronger force of INFgamma promoter that free alone, Figure 4 and 5 (binding data in mice cell line) [7]. 
+
+STAT1 binds to IFNg gene and induces its transcription, Figure 2 [8].
+
+Eomes directly up-regulates IFNg expression, Figure 2C (Functional data in mice model) [9].
+
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="231" y="570" style="Node style 5"/>
+    </node>
+    <node id="IL12RB1" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5971"/>
+          <link xlink:href="uniprot:P42701"/>
+        </linklist>
+        <comment>Interleukin 12 receptor subunit beta 1[1]. 
+
+IL2RB1 is a subchain of the IL-12 and IL-23 receptors [2]. 
+
+We consider the constituvely expression of IL12RB1. </comment>
+      </annotation>
+      <nodevisualsetting x="716" y="40" style=""/>
+    </node>
+    <node id="IL12RB2" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5972"/>
+          <link xlink:href="uniprot:Q99665"/>
+        </linklist>
+        <comment>Interleukin 12 receptor subunit beta 2 [1]. 
+
+
+IL12RB2 is a subchain of the IL-12 receptor [2].
+
+
+We consider the constituvely expression of IL12RB2. </comment>
+      </annotation>
+      <nodevisualsetting x="269" y="56" style=""/>
+    </node>
+    <node id="IL12R" maxvalue="1">
+      <value val="1">
+        <exp str="IL12_In &amp; IL12RB1 &amp; IL12RB2"/>
+      </value>
+      <annotation>
+        <comment>Activated by its subchain(s) IL12RB1, IL12RB2 and by its associated cytokine(s) (external IL12).</comment>
+      </annotation>
+      <nodevisualsetting x="304" y="165" style=""/>
+    </node>
+    <node id="STAT4" maxvalue="1">
+      <value val="1">
+        <exp str="IL12R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:11365"/>
+          <link xlink:href="uniprot:Q14765"/>
+          <link xlink:href="pmid:12370372"/>
+        </linklist>
+        <comment>STAT4, Transcription factor. 
+
+Tyrosine residues on the cytoplasmic segment of  the IL-12RB2 chain are involved in STAT4 tyrosine phosphorylation, Figure 3 (Functional data in mice model and human cells) [4]. 
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="258" y="265" style=""/>
+    </node>
+    <node id="IL1RAP" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5995"/>
+          <link xlink:href="uniprot:Q9NPH3"/>
+        </linklist>
+        <comment>Interleukin 1 receptor accessory protein [1].
+
+IL1RAP is a subchain of IL-1, IL-33 and IL-36 receptors [2].
+
+We consider the constituvely expression of IL1RAP. </comment>
+      </annotation>
+      <nodevisualsetting x="668" y="69" style=""/>
+    </node>
+    <node id="IL1R1" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5993"/>
+          <link xlink:href="uniprot:P14778"/>
+          <link xlink:href="pmid:23467089"/>
+        </linklist>
+        <comment>Interleukin 1 receptor type 1[1].
+
+IL1R1 is a subchain of IL-1 receptor [2].
+
+STAT5A  activates IL1R1, is a prediction of  Yosef' model, Supplementary material No. 5  (No experimental validation) [3]. 
+
+Yosef´model is based on diverse databases including mice, rat and human information like TRED, MSigDB 3.0. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="590" y="69" style=""/>
+    </node>
+    <node id="STAT3" maxvalue="1">
+      <value val="1">
+        <exp str="(IL1R | IL23R | IL6R) &amp; NFKB &amp; AP1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:11364"/>
+          <link xlink:href="uniprot:P40763"/>
+          <link xlink:href="pmid:12023369"/>
+          <link xlink:href="pmid:19380824"/>
+          <link xlink:href="pmid:15465816"/>
+          <link xlink:href="pmid:22586032"/>
+          <link xlink:href="pmid:17493959"/>
+        </linklist>
+        <comment>STAT3, signal transducer and activator of transcription 3, transcription factor [1] [2]. 
+
+Activated by IL23R: Figure 6A (functional data in Kit225 cells) [3].
+
+Activated by IL1R: Figure 4 (functional data in mice model) [4]. IRAK1, a downstream component of IL1R signaling path is mainly involved in STAT3 activation, Figure 3, [5]. 
+
+Activated by AP1 and NFKB. PKCO mediated activation of AP-1 and NF-kB for stimulation of the Stat3 promoter, Figure 5 (Functional data in mice model) [6]. 
+
+It is activated by IL6-gp130 signaling, Figure 1 [7]. </comment>
+      </annotation>
+      <nodevisualsetting x="1313" y="342" style=""/>
+    </node>
+    <node id="IL21" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3 &amp; c_Maf &amp; NFAT1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6005"/>
+          <link xlink:href="uniprot:Q9HBE4"/>
+          <link xlink:href="pmid:20103781"/>
+        </linklist>
+        <comment>IL21, Interleukin [1]. 
+
+IL21 secreted by the cell [2]. 
+
+NFAT together with STAT3 and c-MAF activates the transcription of IL21, Figure 4 [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="1278" y="497" style=""/>
+    </node>
+    <node id="IL17A" maxvalue="1">
+      <value val="1">
+        <exp str="RORA &amp; RORGt &amp; NFAT2A &amp; Smad2 &amp; IRF4 &amp; AHR &amp; !(STAT5A &amp; STAT5B) &amp; AP1 &amp; STAT3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:5981"/>
+          <link xlink:href="uniprot:Q16552"/>
+          <link xlink:href="pmid:17404271"/>
+          <link xlink:href="pmid:18607004"/>
+          <link xlink:href="pmid:20103781"/>
+          <link xlink:href="pmid:26750311"/>
+          <link xlink:href="pmid:18164222"/>
+          <link xlink:href="pmid:19818650"/>
+          <link xlink:href="pmid:21278738"/>
+          <link xlink:href="pmid:20656683"/>
+        </linklist>
+        <comment>Interleukin IL17A [1].
+
+IL17A secreted by the cell [2]. 
+
+Is activated by STAT3, Figure 1 (Functional data in mice models) [3].
+
+It is activated by AHR, Figure2 (Functional data in mice model)  [4] . 
+
+RORGt in combination with AP1 and  IRF4 binds to the IL17 promoter region to induce transcription; Figure 4 [5]. 
+
+Blimp1 colocalize with RORGt and STAT3 at IL17A/F loci to enhance their expression. With T cells from the dLNs of mice was demostrated that Blimp1-deficient IL17 producers were not able to co-express GM-CSF and IFN, Figure 2E (Functional data in mice model) [6]. 
+IL17A expression is not afected by Blimp1, Figure 5 (differential chip-seq peaks patterns in IL17A vs IL17F promoters) [6]. 
+
+It has corroborated in RORA knockout mice model that the expression of IL17A and IL23R decreased, however the expression levels of IL22, IL21 and IL17F mRNA were not affected by RORA deficiency, indicating differential dependency of Th17 cytokines on RORA (Functional data in mice model) [7]. 
+
+IL17A expression is linked to NFAT2 activation, Figure 6 (Functional data in mice model) [8]. We suggest that NFAT2A could be affecting the expression of IL17A.
+
+Chip-seq data analysis revealed that STAT1 could modulate IL17F directly, but not IL17A (see supplemental Figure and Table in this original article). 
+
+It is known that STAT5 is an inhibitor of IL17, Figure 4 (Functional data in mice model) [9] . However, there is little clarity in the literature about the isoform of STAT5 (STAT5 or STAT5B) that acts as an inhibitor of IL17 and if this transcription factor preferentially inhibits IL17F or IL17A. We hypothesized that STAT5A and STAT5B inhibit IL17A. Chip-seq data revealed STAT5 peaks in IL17F and IL17F genomic regions (see supplemental Figure and Table in this original article). 
+
+Smad2 is required for the generation of IL17A in vivo, FIgure 3 (Functional data in mice model) [10]. Experimentaly, we observe that IL17A expression reaches a high value only when TGFB is present (and subsequently Smad2 activation). 
+
+The components of the model that affect the activation of IL17F and IL17A are very similar, except for RORA and NFAT2A, two transcriptional factors possibly affecting only the expression of IL17A and not of IL17F.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+In addition there is an interesting connection between STAT1, STAT4, STAT5A, STAT5B, which could explain the expression of IL17F under suboptimal conditions to Th17 conditions and the non expression of IL17A under said conditions. Based on the results of qPCR and FACS, the following is suggested:
+
+STAT4, a transcriptional factor activated mainly by IL12-proTh1, has been involved in the production of IL17 in response to IL23 and IL18 [3]. While the relationship with IL17 is unknown from STAT1. In the experiments, an overexpression of STAT1 could be observed in the IL1B + IL23 condition (IL17F and a little IL17A are obtained), which gives us an indication of the possible link between STAT1 and the production of IL17, therefore one interaction was added to the model: STAT1 activating IL17  (Experiment CC14, chip-seq and literature).
+
+Likewise, the negative interactions of STAT5B and STAT5A towards IL17A and IL17F was maintained. 
+
+These results indicate that possibly STAT5A, STAT1, STAT4 give a stochastic factor to the system on the expression of IL17F compared to IL17A; changes in the interactions that modulate the components in play, lead to varied stable states, which can serve as a basis to predict the behavior in the expression of IL17A and IL17F, and validate the hypotheses that have been arisen.
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1258" y="556" style="Node style 5"/>
+    </node>
+    <node id="IL17F" maxvalue="1">
+      <value val="1">
+        <exp str="RORGt &amp; AHR &amp; AP1 &amp; IRF4 &amp; Blimp1 &amp; NFAT1 &amp; (STAT3 | STAT1) &amp; !(STAT5B &amp; STAT5A)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:16404"/>
+          <link xlink:href="uniprot:Q96PD4"/>
+          <link xlink:href="pmid:17404271"/>
+          <link xlink:href="pmid:18607004"/>
+          <link xlink:href="pmid:20103781"/>
+          <link xlink:href="pmid:26750311"/>
+          <link xlink:href="pmid:21278738"/>
+          <link xlink:href="pmid:25261206"/>
+        </linklist>
+        <comment>IL17F, Interleukin [1]. 
+
+IL17F secreted by the cell [2]. 
+
+Is activated by STAT3, Figure 1 (Functional data in mice models) [3].
+
+STAT4 is required for IL-17 production in response to IL-23 plus IL-18, Figure 5 (Functional data in mice model) [3] . 
+
+It is activated by AHR, Figure2 (Functional data in mice model) [4] and Figure [8]. 
+
+RORGt in combination with AP1, NFAT, IRF4 binds to the IL17 promoter region to induce transcription, Figure 4 [5]. 
+
+Blimp1 colocalize with RORGt and STAT3 at IL17A/F loci to enhance their expression. With T cells from the dLNs of mice was demostrated that Blimp1-deficient IL17 producers were not able to co-express GM-CSF and IFN, Figure 2E (Functional data in mice model) [6]. 
+Blimp1 peaks on genomic regions of IL17-F promoter, but not on IL-17A promoter were observed in Figure 5 [6]. We decided to put a positive interaction between Blimp1 and IL17F, but not for IL17A. 
+
+It is known that STAT5 is an inhibitor of IL17, Figure 4 (Functional data in mice model)  [7]. However, there is little clarity in the literature about the isoform of STAT5 (STAT5 or STAT5B) that acts as an inhibitor of IL17 and if this transcription factor preferentially inhibits IL17F or IL17A. Chip-seq data revealed STAT5 peaks in IL17F and IL17F genomic regions (see supplemental Figure and Table in this original article). 
+
+Chip-seq data analysis revealed that STAT1 could modulate IL17F directly, but not IL17A (see supplemental Figure and Table in this original article). 
+
+The components of the model that affect the activation of IL17F and IL17A are very similar, except for RORA and NFAT2A, two transcriptional factors possibly affecting only the expression of IL17A and not of IL17F.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+In addition there is an interesting connection between STAT1, STAT4, STAT5A, STAT5B, which could explain the expression of IL17F under suboptimal conditions to Th17 conditions and the non expression of IL17A under said conditions. Based on the results of qPCR and FACS, the following is suggested:
+
+STAT4, a transcriptional factor activated mainly by IL12-proTh1, has been involved in the production of IL17 in response to IL23 and IL18 [3]. While the relationship with IL17 is unknown from STAT1. In the experiments, an overexpression of STAT1 could be observed in the IL1B + IL23 condition (IL17F and a little IL17A are obtained), which gives us an indication of the possible link between STAT1 and the production of IL17, therefore one interaction was added to the model: STAT1 activating IL17  (Experiment CC14, chip-seq and literature).
+
+Likewise, the negative interactions of STAT5B and STAT5A towards IL17A and IL17F was maintained. 
+
+These results indicate that possibly STAT5A, STAT1, STAT4 give a stochastic factor to the system on the expression of IL17F compared to IL17A; changes in the interactions that modulate the components in play, lead to varied stable states, which can serve as a basis to predict the behavior in the expression of IL17A and IL17F, and validate the hypotheses that have been arisen.
+
+
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1128" y="521" style="Node style 5"/>
+    </node>
+    <node id="RORGt" maxvalue="1">
+      <value val="1">
+        <exp str="(STAT3 &amp; RUNX1) | (IRF4 &amp; AP1 &amp; NFAT1 &amp; RUNX1 &amp; !Tbet)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:10260"/>
+          <link xlink:href="uniprot:P51449"/>
+          <link xlink:href="pmid:21151104"/>
+          <link xlink:href="pmid:17363300"/>
+          <link xlink:href="pmid:17676043"/>
+          <link xlink:href="pmid:20103781"/>
+          <link xlink:href="pmid:23467089"/>
+        </linklist>
+        <comment>RORGt, RAR related orphan receptor C, Transcription factor [1] [2].  
+
+Runx1 induces Rorc expression, Figure 6 (Expression and functional data in mice model) [3]. 
+
+RORGt is inhibited by Tbet. Tbet interacts with the transcription factor Runx1 and this interaction blocked Runx-1mediated transactivation of Rorc (Functional data in mice model) [3]. To simplify it has been decided to draw a direct interaction between Tbet and RORgt. 
+
+Activated by STAT3: Figure 4C (functional data in mice model) [4]. 
+
+The development of inflammatory Th17 cells require IRF4. IRF4 mediates STAT3 and RORGt expression, Figure 5 (Functional data in mice model)  [5].
+
+NFAT and AP1 binds to the promoter of RORGt which is the master transcription factor of the Th17 lineage [6].
+
+RORGt is induced by STAT5A, interaction predicted in [7] (Binding data). 
+
+We hypothesized that there is a RORGt activation mechanism independent of STAT3, however it requires the presence of IRF4, NFAT1, AP1, RUNX1 and the no presence of Tbet. 
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1106" y="424" style="Node style 2"/>
+    </node>
+    <node id="TCR" maxvalue="2">
+      <value val="2">
+        <exp str="MHCII:2 &amp; Lck"/>
+      </value>
+      <value val="1">
+        <exp str="MHCII:1 &amp; Lck"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>T-cell Receptor. 
+
+TCR is a molecule found on the surface of T cells, it is responsible to recognizing fragments of antigen as peptides bound to MHC II molecules [1]. 
+
+The TCR chains all contain immunoreceptor tyrosine-based activation motifs (ITAMs) which are phosphorylated by the Src kinase leukocyte-specific tyrosine kinase (Lck), it is essential to start the intracellular signaling [1]. 
+
+A high signal strength of TCR is achieved with a high level of MHCII. 
+
+TCR signaling components have been validated in Human CD4+ T cells. </comment>
+      </annotation>
+      <nodevisualsetting x="967" y="20" style=""/>
+    </node>
+    <node id="IL1R" maxvalue="1">
+      <value val="1">
+        <exp str="IL1_In &amp; IL1RAP &amp; IL1R1"/>
+      </value>
+      <annotation>
+        <comment>Activated by its subchain(s) IL1R1, IL1RAP and by its associated cytokine(s) (external IL1).</comment>
+      </annotation>
+      <nodevisualsetting x="639" y="227" style=""/>
+    </node>
+    <node id="CD28" maxvalue="1">
+      <value val="1">
+        <exp str="CD80 &amp; Lck"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:1653"/>
+          <link xlink:href="uniprot:P10747"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>CD28, Cluster of Differentiation 28 [1]. 
+ 
+CD28 is one of the proteins expressed on T cells that provide co-stimulatory signals required for T cell activation and survival. CD80, expressed on antigen-presenting cells interacts with CD28 to initiate the immune signal [2].  
+
+Ligand binding of CD28 induces the phosphorylation of tyrosine-containing sequences in its cytoplasmic tail by Scr-family kinases like Lck and subsequently induces its activation [3]. 
+
+Validation in Human CD4+ T cell. </comment>
+      </annotation>
+      <nodevisualsetting x="781" y="77" style=""/>
+    </node>
+    <node id="Lck" maxvalue="1">
+      <value val="1">
+        <exp str="CD4 &amp; TCR"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6524"/>
+          <link xlink:href="uniprot:P06239"/>
+          <link xlink:href="pmid:21190897"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>Lck, lymphocyte-specific protein tyrosine kinase [1], [2]. 
+
+It has been proposed that ligand engagement by the TCR activates the Scr kinase Lck, which in turns phosphorylates the TCR [3]. 
+
+A significant proportion of Lck in the cell constitutively associates with the coreceptor CD4. Because CD4 also interacts with MHC molecules, CD4 recruits Lck to regions that contain TCR complex, allowing the Lck activation [4]. 
+
+Validation in Human CD4+ T cell. </comment>
+      </annotation>
+      <nodevisualsetting x="997" y="76" style=""/>
+    </node>
+    <node id="CD4" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:1678"/>
+          <link xlink:href="uniprot:P01730"/>
+        </linklist>
+        <comment>CD4 molecule, Cluster of Differentiation 4 [1]. 
+
+Glycoprotein found on the surface of immune cells such T helper cells. CD4 is a coreceptor of the TCR and assits the latter in communicating with antigen-presenting cells [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="1028" y="1" style="Node style 7"/>
+    </node>
+    <node id="Zap70" maxvalue="1">
+      <value val="1">
+        <exp str="Lck &amp; TCR"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:12858"/>
+          <link xlink:href="uniprot:P43403"/>
+          <link xlink:href="KEGG:hsa04660"/>
+          <link xlink:href="pmid:29196709"/>
+        </linklist>
+        <comment>ZAP70, Zeta-chain-associated protein kinase 70 [1]. 
+
+Phosphorylated ITAMS (of TCR) recruit the Syk family kinase Zap70 via Src-homology-2 SH2-domain interactions [2] [3]. 
+
+Lck activates and phosphorylates Zap70, after which it can transautophosphorylate and activate other vicinal Zap70 molecules [4]. 
+
+Validation in Human CD4+ T cell. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="958" y="148" style=""/>
+    </node>
+    <node id="Lat" maxvalue="1">
+      <value val="1">
+        <exp str="Zap70"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:18874"/>
+          <link xlink:href="KEGG:hsa04660"/>
+          <link xlink:href="uniprot:O43561"/>
+        </linklist>
+        <comment>Lat, Linker of Activated T cells [1] 
+
+Lat is activated by Zap70 [2] [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="854" y="146" style=""/>
+    </node>
+    <node id="VAV" maxvalue="1">
+      <value val="1">
+        <exp str="(Zap70 &amp; Lat) | CD28"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:P15498"/>
+          <link xlink:href="pmid:8673706"/>
+          <link xlink:href="pmid:11754814"/>
+          <link xlink:href="KEGG:hsa04660"/>
+        </linklist>
+        <comment>VAV, Guanine Nucleotide Exhange Factor [1], 
+
+VAV is activated by ZAP70, the VAV site (Y315) in ZAP70 is critical for antigen receptor-mediated signal transduction [2]. 
+
+CD28 signaling is dependent on VAV/Slp6 complex formation and induces membrane localization of these complexes. CD28 can cooperate with VAV/SLP-76 adaptors to upregulate interleukin 2/4 transcription independently of TCR ligation [3]. 
+
+LAT induces the recruitment of VAV to LAT complex [4]. </comment>
+      </annotation>
+      <nodevisualsetting x="924" y="266" style=""/>
+    </node>
+    <node id="PI3K" maxvalue="2">
+      <value val="2">
+        <exp str="TCR:2 &amp; CD28 &amp; RAS &amp; IL1R"/>
+      </value>
+      <value val="1">
+        <exp str="TCR:1 &amp; CD28 &amp; RAS &amp; IL1R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:12660731"/>
+          <link xlink:href="pmid:18006698"/>
+          <link xlink:href="pmid:18515365"/>
+        </linklist>
+        <comment>PI3K, Phosphoinositide 3 kinase class IA 
+
+Class IA PI3Ks are activated by T cell receptor and TCR signaling downstream components, such as by Ras [1].  
+
+CD28 provides T-cell costimulation and enhances PI3K activity at the immune synapse [2]. 
+
+We suppose that PI3K has a high level when TCR achieve high strength (level 2 also).
+
+Validation in Human CD4+ T cell. 
+
+A novel role for the phosphatidylinositol 3-kinase/AKT pathway in mediating induction of interleukin-6 (IL-6) in response to IL-1 is reported in [3]. Pharmacological inhibition of phosphatidylinositol 3-kinase (PI3K) inhibited IL-6 mRNA and protein production. </comment>
+      </annotation>
+      <nodevisualsetting x="1025" y="215" style=""/>
+    </node>
+    <node id="SOS" maxvalue="1">
+      <value val="1">
+        <exp str="Lat | CD28"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:Q07889"/>
+          <link xlink:href="KEGG:hsa04660"/>
+          <link xlink:href="pmid:7737275"/>
+        </linklist>
+        <comment>SOS, Son of Sevenless [1] 
+
+It is recruited by LAT through GRB2-related adapter protein, in other words, the activation of SOS requires of LAT [2]. 
+
+CD28 binds the SOS exchange factor and activates it [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="715" y="143" style=""/>
+    </node>
+    <node id="PLCG" maxvalue="1">
+      <value val="1">
+        <exp str="Lat"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:9065"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>PLCG, Phospholipase C, gamma 1[1], 
+
+The LAT-Slp76 complex acts as a platform for the recruitment of signaling effectors, one of the most important is PLCG, which interacts directly with both LAT and Slp6 [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="757" y="290" style=""/>
+    </node>
+    <node id="Rac" maxvalue="1">
+      <value val="1">
+        <exp str="VAV"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="KEGG:hsa04660"/>
+        </linklist>
+        <comment>RAC, Rho family of GTPases small signaling G proteins, 
+
+It is induced  by VAV  [1]. </comment>
+      </annotation>
+      <nodevisualsetting x="953" y="376" style=""/>
+    </node>
+    <node id="PIP2" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:12681284"/>
+        </linklist>
+        <comment>PIP2, phosphatydylinositol-4-5-bisphosphate. 
+
+PIP2 is a negatively charged lipid that, it has a well-established role in the generation of second messengers in T cells signaling pathways [1]</comment>
+      </annotation>
+      <nodevisualsetting x="829" y="285" style="Node style 7"/>
+    </node>
+    <node id="PTEN" maxvalue="1">
+      <value val="1">
+        <exp str="FOXP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:9588"/>
+          <link xlink:href="pmid:25855357"/>
+        </linklist>
+        <comment>PTEN, Phosphatase and tensin homolog [1], 
+
+Indirectly, we suggest that FOXP3 induces the expression and activation of PTEN. During Treg induction, PTEN function is maintained through the stabilization of PTEN mRNA transcription and sustained protein levels [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="974" y="304" style=""/>
+    </node>
+    <node id="PIP3" maxvalue="1">
+      <value val="1">
+        <exp str="((PI3K:1 &amp; !PTEN) | PI3K:2) &amp; PIP2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:22905034"/>
+        </linklist>
+        <comment>PIP3, phosphatidylinositol-3,4,5-triphosphate. 
+
+PI3K phosphorylates PIP2 to form PIP3 on the inner membrane of the cell, thus initiating the downstream signaling components, in other words, to activate PIP3, the presence of PI3K (PI3K in a high level or PI3K in a low level but without the presence of PTEN)  and PIP2 is necessary [1]. 
+
+PTEN inhibits PI3K pathway, PTEN dephosphorylates PIP3 [1]. </comment>
+      </annotation>
+      <nodevisualsetting x="1044" y="298" style=""/>
+    </node>
+    <node id="IP3" maxvalue="1">
+      <value val="1">
+        <exp str="PLCG &amp; PIP2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>IP3, Inositol triphosphate , Diffusible second messenger, 
+
+PLCG transduces TCR signals by hydrolyzing PIP2 to yield DAG and IP3. In other words, to obtain active IP3  is necessary the presence of PLCG and PIP2 [1]. </comment>
+      </annotation>
+      <nodevisualsetting x="861" y="369" style=""/>
+    </node>
+    <node id="DAG" maxvalue="1">
+      <value val="1">
+        <exp str="PLCG &amp; PIP2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>DAG, Diacylglycerol, membrane-associated lipid,
+
+PLCG transduces TCR signals by hydrolyzing PIP2 to yield DAG and IP3. In other words, the presence of PLCG and PIP2 is necessary to obtain active DAG  [1].  
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="773" y="356" style=""/>
+    </node>
+    <node id="PKCO" maxvalue="1">
+      <value val="1">
+        <exp str="DAG | PIP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:11956228"/>
+          <link xlink:href="pmid:22905034"/>
+          <link xlink:href="pmid:26528291"/>
+        </linklist>
+        <comment>PKC0, Protein Kinase C theta
+
+PKC0 is important for T cell activation, proliferation and cytokine production, this isotype is essential in inducing signaling pathways [1]. 
+
+It is activated by PIP3 through PDK1 [2]. 
+
+PKC0 is activated by DAG. Upon the initial receptor stimulation, PKC0 is recruited to plasma membrane via membrane-resident DAG binding to its C1 domain [3]. 
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1026" y="359" style=""/>
+    </node>
+    <node id="RAS" maxvalue="1">
+      <value val="1">
+        <exp str="SOS | DAG"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>RAS, Small GTPase RAS, 
+
+DAG activates RAS through RasGRP (RAS guanyl nucleotide-releasing protein) [1]. 
+
+RAS can also be activated by SOS, which is recruited to LAT via the adaptor molecule Grb2 [1]. </comment>
+      </annotation>
+      <nodevisualsetting x="739" y="450" style=""/>
+    </node>
+    <node id="ERK1_2" maxvalue="1">
+      <value val="1">
+        <exp str="RAS &amp; ITK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:P28482"/>
+          <link xlink:href="KEGG:hsa04660"/>
+          <link xlink:href="pmid:19386893"/>
+          <link xlink:href="pmid:20237289"/>
+        </linklist>
+        <comment>ERK1_2, Extracellular signal-regulated kinases, related with Mitogen-activated protein kinase 1 [1].
+
+RAS is a crucial activator of MAPK signaling pathway. RAS starts activating C-Raf, followed by MEK and subsequently ERK [2] [3]. 
+
+The ERK pathway is stimulated by the association of active Ras [3]. 
+
+Expression of the Itk variant in primary murine T cells induced higher ERK activation and increased calcium flux following TCR stimulation compared with that of wild-type Itk, Figure 5  [4].</comment>
+      </annotation>
+      <nodevisualsetting x="817" y="459" style=""/>
+    </node>
+    <node id="c_Fos" maxvalue="1">
+      <value val="1">
+        <exp str="ERK1_2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:3796"/>
+          <link xlink:href="uniprot:P01100"/>
+          <link xlink:href="KEGG:hsa04660"/>
+        </linklist>
+        <comment>c-Fos protein, Fos proto-oncogene, AP-1 transcription factor subunit [1] [2]. 
+
+It is activated by ERK cascade [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="708" y="548" style=""/>
+    </node>
+    <node id="AP1" maxvalue="1">
+      <value val="1">
+        <exp str="c_Fos &amp; c_Jun"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>AP1, Activator protein 1, Transcription Factor, 
+
+MAPK signaling cascades stimulate AP1 activity via the upregulation of Fos and Jun transcription and also by direct phosphorylation of the Fos and Jun proteins [1]. </comment>
+      </annotation>
+      <nodevisualsetting x="745" y="589" style=""/>
+    </node>
+    <node id="MEKK1" maxvalue="1">
+      <value val="1">
+        <exp str="RAS | Rac"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:Q13233"/>
+          <link xlink:href="pmid:10702308"/>
+          <link xlink:href="pmid:7744823"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>MEKK1, Mitogen-activated protein kinase kinase kinase 1, gene MAP3K1 [1]. 
+
+MEKK1 initiates the JNK and p38 signaling pathway [1]. A subgroup of MAPKKKs including the MEKK family proteins activate the MAPKKs proteins that phosphorylate JNK and p38 downstream. Downstream molecules that are activated by JNK include c-Jun [2]. 
+
+MEKK1 is activated in response to growth factor stimulation of cells and by expression of activated Ras [3]. 
+MEKK1 is activated by RAC. The JNK and p38 pathways respond to activated Rac in addition to Ras [4]. </comment>
+      </annotation>
+      <nodevisualsetting x="761" y="494" style=""/>
+    </node>
+    <node id="TAK1" maxvalue="1">
+      <value val="1">
+        <exp str="PKCO | TRAF6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6859"/>
+          <link xlink:href="uniprot:O43318"/>
+          <link xlink:href="pmid:22941947"/>
+          <link xlink:href="pmid:15125833"/>
+          <link xlink:href="pmid:10702308"/>
+        </linklist>
+        <comment>TAK1, Transforming growth factor beta-activated kinase 1 or mitogen-activated protein kinase kinase kinase 7 MAP3K7 [1] [2]. 
+
+TAK1 is activated by upstream molecules comprising PKC0  [3]. 
+
+TAK1 is activated by TRAF6, Figure 4 [4]. 
+
+TAK1 is involved in the IL1 signaling pathway by activating two kinase cascades; one is a MAPK cascade leading to JNK and c-Jun activation and the other is a kinase cascade composed of NFKB-inducing kinase and IkB kinases (IKK in the model), ultimately leading to NFKB activation [5]. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="938" y="442" style=""/>
+    </node>
+    <node id="c_Jun" maxvalue="1">
+      <value val="1">
+        <exp str="MEKK1 | TAK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6204"/>
+          <link xlink:href="uniprot:P05412"/>
+          <link xlink:href="KEGG:hsa04660"/>
+          <link xlink:href="pmid:23028407"/>
+        </linklist>
+        <comment>c-Jun protein, Jun proto-oncogene, AP-1 transcription factor subunit [1] [2]
+
+c-Jun is activated by JNK cascade through MEKK1 or TAK1 upstream signaling [3], Figure 2  [4]. </comment>
+      </annotation>
+      <nodevisualsetting x="796" y="549" style=""/>
+    </node>
+    <node id="NFAT1" maxvalue="1">
+      <value val="1">
+        <exp str="IP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:7776"/>
+          <link xlink:href="uniprot:Q13469"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>NFAT1, Nuclear factor of activated T cells 2
+Also named NFATp or NFATc2  [1] [2]. 
+
+The production of IP3 stimulates the opening of Ca2+-permeable ion channels in the endoplasmic reticulum. This drives in NFAT induction or activation [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="987" y="664" style=""/>
+    </node>
+    <node id="NFKB" maxvalue="1">
+      <value val="1">
+        <exp str="IKK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:Q00653"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>NFKB, Nuclear factor NF-kappa-B p100 subunit [1]
+
+Under resting conditions, NFKB is sequestred in the cytoplasm by inhibitor of KB (IkB), phosphorylation of IkB by IKK (IkB kinases complex) leads to the degradation of IkB, allowing to NFKB to translocate to the nucleus [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="900" y="623" style=""/>
+    </node>
+    <node id="IKK" maxvalue="1">
+      <value val="1">
+        <exp str="PKCO | TAK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:17544292"/>
+        </linklist>
+        <comment>IKK, IkB kinases enzyme complex. 
+
+PKCO induces the activation of several adaptor proteins including IKK [1]. 
+
+IKK may itself be regulated by additional enzymes like TAK1 Ser/Thr kinase [1].
+ </comment>
+      </annotation>
+      <nodevisualsetting x="953" y="491" style=""/>
+    </node>
+    <node id="c_Maf" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:O75444"/>
+          <link xlink:href="pmid:15728480"/>
+        </linklist>
+        <comment>c-Maf, Transcription factor Maf [1]. 
+
+STAT3 binds the c-Maf promoter in CD4T cell to activate c-Maf expression, Figure 8 (Binding data in mice model) [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="1282" y="454" style=""/>
+    </node>
+    <node id="Myd88" maxvalue="1">
+      <value val="1">
+        <exp str="IL1R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:7562"/>
+          <link xlink:href="uniprot:Q99836"/>
+          <link xlink:href="pmid:9430229"/>
+        </linklist>
+        <comment>Myd88, Myeloid differentiation primary response 88 [1] [2]. 
+
+Myd88 is recruited to the IL1 receptor complex following IL1 stimulation and acts like an adaptor to bind IRAK, therefore IL1R is a an activator of Myd88, Figure 3 [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="533" y="224" style=""/>
+    </node>
+    <node id="IRAK1_4" maxvalue="1">
+      <value val="1">
+        <exp str="Myd88"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6112"/>
+          <link xlink:href="uniprot:P51617"/>
+          <link xlink:href="hgnc:17967"/>
+          <link xlink:href="UniProtKB - Q9NWZ3"/>
+          <link xlink:href="pmid:9430229"/>
+        </linklist>
+        <comment>IRAK1-4, Interleukin1 receptor-associated kinase 1 [1] [2] and 4 [3] [4]. 
+
+Myd88 is recruited to the IL1 receptor complex following IL1 stimulation and acts like an adaptor to bind IRAK, therefore Myd88 is an activator of IRAK1-4, Figure 5 [5]. </comment>
+      </annotation>
+      <nodevisualsetting x="521" y="312" style=""/>
+    </node>
+    <node id="TRAF6" maxvalue="1">
+      <value val="1">
+        <exp str="IRAK1_4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:12036"/>
+          <link xlink:href="uniprot:Q9Y4K3"/>
+          <link xlink:href="pmid:18070982"/>
+        </linklist>
+        <comment>TRAF6, TNF receptor associated factor 6 [1] [2]. 
+
+Autophosphorylated IRAK1-4 interacts with TRAF6, leading to the activation of TRAF6, Figure 3 (Functional data in human cells) [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="526" y="376" style=""/>
+    </node>
+    <node id="Blimp1" maxvalue="2">
+      <value val="2">
+        <exp str="STAT3 &amp; STAT5B"/>
+      </value>
+      <value val="1">
+        <exp str="STAT4 &amp; STAT5B &amp; !STAT3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:9346"/>
+          <link xlink:href="uniprot:O75626"/>
+          <link xlink:href="pmid:26750311"/>
+          <link xlink:href="pmid:25073792"/>
+          <link xlink:href="pmid:22318729"/>
+          <link xlink:href="pmid:18370921"/>
+        </linklist>
+        <comment>Blimp1, PR domain zinc finger protein 1, Prdm1 gene, [1] [2]. 
+
+Blimp1 expression in Th17 cells is STAT3 Dependent, Figure 1 (mice model) [3]. 
+
+Blimp1 is induced by IL12 in a STAT4-dependent manner, Figure 4 (mice model) [4]. 
+
+Blimp1 Is upregulated by STAT5 (mice model) [5]. 
+
+Naive CD4+ T cells stimulated under anti-Th1 conditions express higher levels of Blimp1 steady-state mRNA [6]. For this reason, we consider that a high level of Blimp1 is achieved when STAT3 and STA5B are present and not STAT4 (a pro-Th1 TFs). </comment>
+      </annotation>
+      <nodevisualsetting x="664" y="345" style=""/>
+    </node>
+    <node id="RunX3" maxvalue="1">
+      <value val="1">
+        <exp str="Tbet"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:10473"/>
+          <link xlink:href="uniprot:Q13761"/>
+          <link xlink:href="pmid:17195845"/>
+        </linklist>
+        <comment>RunX3, Runt related transcription factor 3 [1] [2]. 
+
+
+Runx3 expression during Th1 differentiation requires Tbet, Figure 1 (Functional data in mice) [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="276" y="446" style=""/>
+    </node>
+    <node id="Eomes" maxvalue="1">
+      <value val="1">
+        <exp str="RunX3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:3372"/>
+          <link xlink:href="uniprot:O95936"/>
+          <link xlink:href="pmid:20399120"/>
+        </linklist>
+        <comment>Eomes, Eomesdermin [1] [2]. 
+
+It was suggested that RunX3 induces IFNg production partly through its upregulation of Eomes expression, Figure 4 (Functional data in mice) [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="304" y="487" style=""/>
+    </node>
+    <node id="IRF4" maxvalue="1">
+      <value val="1">
+        <exp str="AP1 &amp; NFKB"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6119"/>
+          <link xlink:href="uniprot:Q15306"/>
+          <link xlink:href="pmid:25833963"/>
+          <link xlink:href="pmid:24782159"/>
+        </linklist>
+        <comment>IRF4, Interferon Regulatory factor 4 [1] [2].
+
+NF-KB subunits p52 and RelB are transcriptional activators of IRFA, Figure 3. The oncogenic transcription factor IRF4 is regulated by a novel CD30/NFKB positive feedback loop in peripheral T-cell lymphoma (Functional data in clinical samples) [3] . 
+
+TCR pathway is the major pathway to induce IRF4 in T cells, we suggest that AP1 is an important activator of IRF4 [4]. 
+ 
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1151" y="667" style=""/>
+    </node>
+    <node id="AHR" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:348"/>
+          <link xlink:href="uniprot:P35869"/>
+          <link xlink:href="pmid:24127753"/>
+        </linklist>
+        <comment>AHR, Aryl hydrocarbon receptor, transcription factor [1] [2]. 
+
+STAT3 regulates basal and cytokine-inducible AHR expression in HepG2 cells, Figure 3 (Binding data) [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="1228" y="383" style=""/>
+    </node>
+    <node id="MHCII" maxvalue="2" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="Bookshelf ID:NBK27156"/>
+          <link xlink:href="pmid:21505216"/>
+        </linklist>
+        <comment>Major Histocompatibility Complex class II, 
+
+MHCII molecules bind peptide fragments derived from pathogens and display them on the cell surface for recognition by the appropriate T cells through TCR. Subsequently, immune response initiates [1].
+
+The two levels of MHCII refer to strength of interaction with peptide/MHC ligand and how it transmits the information. A high or low strength can be achieved by changing the amount or quality of peptide/MHC ligand [2]. We consider a high strength stimulation of MHCII (=2) to induce the activation of the virtual cell. </comment>
+      </annotation>
+      <nodevisualsetting x="863" y="10" style="Node style 7"/>
+    </node>
+    <node id="CD80" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:1700"/>
+          <link xlink:href="uniprot:P33681"/>
+        </linklist>
+        <comment>CD80, Cluster of Differentiation 80 [1]. 
+
+Protein found on dendritic cells, activated B cells and monocytes and provides a costimulatory signal necessary for T cell activation and survival [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="779" y="6" style="Node style 7"/>
+    </node>
+    <node id="NFAT2" maxvalue="1">
+      <value val="1">
+        <exp str="IP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:7775"/>
+          <link xlink:href="uniprot:O95644"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>NFAT2, Nuclear factor of activated T cells 1
+Also named NFATc or NFATc1  [1] [2].
+
+NFAT activity is regulated by the concentration of intracellular Ca2+. Increases in intracellular Ca2+ lead to the dephosphorylation and nuclear import of NFAT, it means, its activation [3]. 
+
+The production of IP3 stimulates the opening of Ca2+-permeable ion channels in the endoplasmic reticulum. This drives in NFAT induction or activation [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="861" y="719" style=""/>
+    </node>
+    <node id="NFAT4" maxvalue="1">
+      <value val="1">
+        <exp str="IP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:7777"/>
+          <link xlink:href="uniprot:Q12968"/>
+          <link xlink:href="pmid:19386893"/>
+        </linklist>
+        <comment>NFAT4, Nuclear factor of activated T cells 3
+Also named NFATx or NFATc3 [1] [2]
+
+The production of IP3 stimulates the opening of Ca2+-permeable ion channels in the endoplasmic reticulum. This drives in NFAT induction or activation [3]. </comment>
+      </annotation>
+      <nodevisualsetting x="954" y="549" style=""/>
+    </node>
+    <node id="NFAT2A" maxvalue="2">
+      <value val="2">
+        <exp str="(!(FOXP3 &amp; NFAT1) &amp; ((NFAT1 &amp; NFAT4 &amp; ITK) | (NFAT1 &amp; NFAT2)) &amp; NFAT2A:2 &amp; ITK) | (!(FOXP3 &amp; NFAT1) &amp; NFAT2A:2 &amp; ITK)"/>
+      </value>
+      <value val="1">
+        <exp str="!FOXP3 &amp; NFAT1 &amp; (NFAT4 | NFAT2) &amp; !NFAT2A:2 &amp; ITK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:15928679"/>
+          <link xlink:href="pmid:26324768"/>
+          <link xlink:href="pmid:19564342"/>
+          <link xlink:href="pmid:19818650"/>
+        </linklist>
+        <comment>NFAT2A, Nuclear factor of activated T cells 1 isoform alpha. 
+Also named NFATc1 alpha, 
+
+Although the main mode of NFAT regulation is through calcium and calcineurin, NFAT2 is apparently unique in that it is also regulated at the transcriptional level through an autoregulatory loop. The mechanism is isoform specific-only one of the two NFAT2 N-terminal splice variants, NFAT2A, is under the control of an NFAT-dependent inducible promoter. Only when sufficiently high levels of NFAT2 expression are attained would the self-sustaining positive autoregulatory loop function to maintain high levels of NFAT2 expression and NFAT activity (murine models) [1]. 
+
+NFAT1 which is the main isoform in naive cells, act together with constitutively expressed NFAT2 and/or NFAT4 to turn on expression of the inducible isoform of NFAT2A (murine models) [1]. 
+
+NFAT2A is inhibited by the complex NFAT1/FOXP3. FOXP3 competes with NFAT1 for binding to the endogenous of NFAT2 promoter. FOXP3 functions not only suppress the first wave of NFAT-mediated transcriptional responses, but may also affect sustained NFAT-mediated inflammatory gene expression through supression of inducible NFAT2 transcription, Figure 3 (Binding data in human cells) [3]. It has been corroborated that NFAT1/FOXP3 interaction might affect NFAT1-driven CD40L expression, Figure 3, also this interaction might affect IL2, IFNg, IL6 and IL17 production in response to TCR stimulation (Functional and expression data in Jurkat cells) [2]. 
+
+Hypothesis: FOXP3+NFAT1 complex inhibits IL17A expression, through NFAT2A inhibition since NFAT2A induces IL17A expression when it reaches a high level. This hypothesis is corroborated by experimental results, where NFAT1, NFAT2 and NFAT4 expression does not present changes between different conditions, but the expression of NFAT2A is unknown. 
+
+Itk−/− cells show a selective defect in the binding of NFATc1 to the IL-17A promoter despite having an open chromatin conformation (Figure 6). CHIP analyses of WT cells differentiated under Th17 conditions demonstrated a large enrichment of NFATc1 binding to the conserved NFAT binding site in the IL-17A promoter (Fig 6d). However, we saw no enrichment of amplification in samples from Itk−/− cells.  [4]. This data suggest that an edge between Itk and NFAT2A should be added to indicates that ITK possibly activates NFAT2 and the latter in turn binds to the IL17A promoter. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="1019" y="738" style=""/>
+    </node>
+    <node id="FOXP3" maxvalue="1">
+      <value val="1">
+        <exp str="FOXP3 | (STAT5B &amp; NFAT1 &amp; Smad2 &amp; !STAT1 &amp; !RORGt)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6106"/>
+          <link xlink:href="uniprot:Q9BZS1"/>
+          <link xlink:href="pmid:18270368"/>
+          <link xlink:href="pmid:20072126"/>
+          <link xlink:href="pmid:18157133"/>
+          <link xlink:href="pmid:20427770"/>
+          <link xlink:href="pmid:17298177"/>
+        </linklist>
+        <comment>FOXP3 forkhead box P3 with exon 7, Transcription Factor [1] [2]. 
+
+Effector T (Teff) cells can transiently express FOXP3 upon activation. STAT5-signaling cytokine induces FOXP3 upregulation in vitro in activated human T effec cells, Figure 1(expression data in human cells)  [3]. 
+
+Auto-activated: Figure 4, (binding and functional data in mice model) [4].
+
+Activated by NFAT and SMAD3: Figure 4, 6 and 7 (binding and functional data in mice cells) [5].
+
+Inhibited by RORGT: Figure 1, 2, 4 and 5 (binding and functional data in human cells) [6].
+
+We assume that Stat1 inhibits Foxp3, Figure S1, putative binding data in mice model [7].
+
+Similarly of Tbet, we consider that FOXP3 autoactivation is not affected by the presence of STAT1 and RORGt, since it occurs when FOXP3 is overexpressed in the cell and the level of Tbet is enough high.
+</comment>
+      </annotation>
+      <nodevisualsetting x="613" y="559" style="Node style 2"/>
+    </node>
+    <node id="IL2R" maxvalue="2">
+      <value val="2">
+        <exp str="CGC &amp; IL2RA &amp; IL2 &amp; IL2RB"/>
+      </value>
+      <value val="1">
+        <exp str="CGC &amp; IL2RB &amp; !IL2RA &amp; IL2"/>
+      </value>
+      <annotation>
+        <comment>Activated by its subchain(s) IL2RA, IL2RB, CGC and by its associated cytokine(s) (secreted IL2).
+
+When the IL2RA chain is present, a functional state of the receptor or a higher activation level is reached.
+</comment>
+      </annotation>
+      <nodevisualsetting x="460" y="127" style=""/>
+    </node>
+    <node id="IL2RA" maxvalue="1">
+      <value val="1">
+        <exp str="((Smad2 &amp; FOXP3) | STAT5B) &amp; NFKB &amp; NFAT2A &amp; !SATB1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6008"/>
+          <link xlink:href="uniprot:P01589"/>
+          <link xlink:href="pmid:2497520"/>
+          <link xlink:href="pmid:9763616"/>
+          <link xlink:href="pmid:16087671"/>
+          <link xlink:href="pmid:16911870"/>
+          <link xlink:href="pmid:23467089"/>
+          <link xlink:href="pmid:15713622"/>
+        </linklist>
+        <comment>Interleukin 2 receptor subunit alpha (CD25) [1]. 
+
+IL2RA is a subchain of the IL-2 receptor [2]. 
+
+Activated by NFKB: 
+Analysis of the human IL-2Rα promoter region revealed PRRI as a critical element that contains an NF-κB binding, Figure 3 (Binding and Functional data in human cells)  [3]. 
+
+Activated by NFAT: 
+Two NFAT sites in the intronic PRRIV enhancer and two NFAT sites located at approximately −585 and −650 in the mouse IL-2Rα gene were reported to control IL-2Rα promoter activity in T cells, Figure 1and 2 (Functional and binding data in mice and data also corroborated in human cells) [4]. 
+The interaction between the isoform of NFAT2: NFAT2alpha and IL2RA, has been added to the model in a hypothetical manner. In addition, a low level of NFAT2A=1 is enough to activate IL2RA. 
+
+Activated by Smad3:  
+A positive regulatory region, PRRV, regulates IL-2Rα expression in cells treated with anti-CD3+ anti-CD28 as well as TGF-β and this region contains binding sites for Smad3, Figure 4 and 5 (Functional data in mice model) [5]. 
+
+Activated by Foxp3:
+It remains to be determined whether Foxp3 directly or indirectly activates the transcription of the IL-2Rα gene, we consider a direct interaction [6].
+
+Activated by STAT5:
+In the model we distinguished two STAT5 isoforms: STAT5B and STAT5A. Yosef et al, 2013 developed a network of regulator (TFs)-target (gene) associations from published genomics profiles, in addition to functional and binding data, the model of Yosef predicted the direct interaction between STAT5B and IL2RA [7]. 
+
+In base on that, we consider that STAT5B  is sufficient to induce IL2RA expression (in conjunction with NKFB, NFAT2A  and is not necessary the presence of Smad3 and Foxp3); if STAT5B is absent then Foxp3 and SMAD3 conduce the activation of IL2RA). 
+
+SATB1 is a negative regulator of IL12 and IL2RA:
+SATB1 directly binds to the  upstream regulatory region of IL2Ralpha, Figure 1(Binding data in human cells) [8]. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="415" y="263" style=""/>
+    </node>
+    <node id="IL2RB" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6009"/>
+          <link xlink:href="uniprot:P14784"/>
+        </linklist>
+        <comment>Interleukin 2 receptor subunit beta [1].
+
+IL2RB is a subchain of the IL-2 and IL-15 receptors [2].
+
+We consider the constitutively expression of IL2RB.</comment>
+      </annotation>
+      <nodevisualsetting x="497" y="68" style=""/>
+    </node>
+    <node id="STAT5B" maxvalue="2">
+      <value val="2">
+        <exp str="(IL2R &amp; !ERK1_2) | !ERK1_2"/>
+      </value>
+      <value val="1">
+        <exp str="IL2R &amp; !((IL2R &amp; !ERK1_2) | !ERK1_2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:11367"/>
+          <link xlink:href="uniprot:P51692"/>
+          <link xlink:href="pmid:7479881"/>
+          <link xlink:href="pmid:23080204"/>
+        </linklist>
+        <comment>Stat5B, signal transducer and activator of transcription 5B, transcription factor [1] [2]. 
+
+Activated by IL2R: (functional  and binding data in human cells) [3].
+
+Inhibited by ERK, Figure 2 [4]. 
+
+The presence of  IL2 receptor at a high level (= 2) leads to obtain a STAT5B = 2 level, provided that ERK is not present, otherwise, STAT5B will be equal to 1, likewise a low level of IL2R = 1 and the non-presence of ERK, lead to STAT5B = 1. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="497" y="636" style=""/>
+    </node>
+    <node id="CGC" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6010"/>
+          <link xlink:href="uniprot:P31785"/>
+        </linklist>
+        <comment>Common Chain Gamma (Interleukin 2 receptor subunit gamma) [1].
+
+CGC is a subchain shared by the IL-2, IL-4, IL-15 and IL-21 receptors [2].
+
+We consider the constitutively expression of CGC. </comment>
+      </annotation>
+      <nodevisualsetting x="431" y="68" style=""/>
+    </node>
+    <node id="IL2" maxvalue="1">
+      <value val="1">
+        <exp str="NFKB &amp; AP1 &amp; NFAT1 &amp; !SATB1 &amp; !FOXP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6001"/>
+          <link xlink:href="uniprot:P60568"/>
+          <link xlink:href="pmid:16275766"/>
+          <link xlink:href="pmid:11163226"/>
+          <link xlink:href="pmid:20103781"/>
+          <link xlink:href="pmid:15713622"/>
+          <link xlink:href="pmid:15790681"/>
+        </linklist>
+        <comment>Interleukin 2 [1] [2].
+
+IL2 secreted by the cell. 
+
+Activated by NFKB: Figure 6 and 7 (binding and functional data in mice model) [3]. 
+
+Activated by NFAT: Figure 2C (functional data in mice model) [4].
+
+AP1 forms part of the TFs to induce IL2.  NFKB, NFAT, AP1, cooperates together on the IL2 transcription [5]. 
+
+SATB1 is a negative regulator of IL12 and IL2Ralpha. SATB1 directly binds to the upstream regulatory region of IL2Ralpha, Figure 1 (Binding data in human cells) [6]. 
+
+Inhibited by Foxp3: Figure 1A (functional data in mice model) [7]. </comment>
+      </annotation>
+      <nodevisualsetting x="462" y="683" style=""/>
+    </node>
+    <node id="Smad2" maxvalue="1">
+      <value val="1">
+        <exp str="TGFBR"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6768"/>
+          <link xlink:href="uniprot:Q15796"/>
+          <link xlink:href="hgnc:6769"/>
+          <link xlink:href="uniprot:P84022"/>
+          <link xlink:href="KEGG:hsa04350"/>
+          <link xlink:href="pmid:20656683"/>
+          <link xlink:href="pmid:19887374"/>
+        </linklist>
+        <comment>Smad 2, SMAD family member 2 [1] [2]- Smad 3, SMAD family member 3 [3] [4]. 
+
+Smad2 and Smad3 are activated by TGFB   [5].
+
+Functional and binding data in mice model show that Smad2 and Smad3 are necessary for the differentiation of Tregs, Figure 1 [6] through the activation of FOXP3 and IL2RA. In other hand, Smad2 is required for IL17 differentiation, Figure 3 [6] but Smad3 inhibits it, Figure 2 and 3 [7], this indicates unique targets genes of specific SMADs.  We consider these interactions in the model with one unique node for Smad2 and Smad3, but in the annotation of IL17A and FOXP3 we specify the only participation of Smad2 and Smad3 respectively.</comment>
+      </annotation>
+      <nodevisualsetting x="1159" y="146" style=""/>
+    </node>
+    <node id="STAT5A" maxvalue="2">
+      <value val="2">
+        <exp str="IL2R &amp; IL12R &amp; IL1R"/>
+      </value>
+      <value val="1">
+        <exp str="((IL2R &amp; IL1R) | (IL2R &amp; IL12R)) &amp; !(IL12R &amp; IL1R &amp; IL2R)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:11366"/>
+          <link xlink:href="uniprot:P42229"/>
+          <link xlink:href="pmid:7479881"/>
+        </linklist>
+        <comment>Stat5A, signal transducer and activator of transcription 5A, transcription factor [1] [2]. 
+
+Activated by IL2R: (functional and bindind data in human cells) [3].
+
+Activated by IL12 and IL1B, these interactions are hypothesis based on experimental results of qPCR, where we observe that the expression of STAT5A was higher with the addition of IL12 and IL1B together in the medium, in comparison with IL1B or IL12 alone. Experiment CC9. Although the presence of IL2R=2; IL12 and IL1 cytokines are necessary to obtain STAT5A in a high level. 
+</comment>
+      </annotation>
+      <nodevisualsetting x="1353" y="175" style=""/>
+    </node>
+    <node id="GP130" maxvalue="1">
+      <parameter val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6022"/>
+          <link xlink:href="uniprot:P40189"/>
+        </linklist>
+        <comment>Glycoprotein 130 (Interleukin 6 signal transducer pseudogene 1) [1]. 
+
+GP130 is a subunit of IL-6, IL-21, IL-23 and IL-27 receptors [2].
+
+We consider the constituvely expression of GP130. </comment>
+      </annotation>
+      <nodevisualsetting x="1361" y="21" style=""/>
+    </node>
+    <node id="IL23R" maxvalue="1">
+      <value val="1">
+        <exp str="(IL23_In &amp; GP130 &amp; IL12RB1 &amp; STAT3 &amp; RORGt) | (Myd88 &amp; STAT3 &amp; RORGt)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:19100"/>
+          <link xlink:href="uniprot:Q5VWK5"/>
+          <link xlink:href="pmid:17581537"/>
+          <link xlink:href="pmid:17277312"/>
+          <link xlink:href="pmid:23341605"/>
+        </linklist>
+        <comment>IL23R, interleukin 23 receptor [1]
+Activated by its subchain(s) IL12RB1, GP130 and by its associated cytokine(s) (external IL23) [2].  
+
+Activated by RORGt: 
+Results suggest that RORγt contributes to directing the expression of IL23R, Fig 1b (Functional data in mice model) [3].
+
+Activated by Stat3: 
+Residual expression of IL-23R, consistently found in the absence of RORγt, may be directed by STAT3. IL-23R expression is completely abrogated in STAT3-deficient cells, Figure 3C (Functional data in mice model) [4].
+
+Myd88-deficient Th17 cells show reduced IL23R expression and mTOR activation leading to impaired Th17 cell proliferation, suggesting that Myd88 is essential for inducing the IL23R expression necessary for IL17 production, Figure 3 (Functional data in mice model)  [5]. 
+
+IL23R can be activated by IL23 input or from internal cellular components, like Myd88. 
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1415" y="114" style=""/>
+    </node>
+    <node id="FOXP3_2" maxvalue="1">
+      <value val="1">
+        <exp str="IL1R &amp; !MINA"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:26441347"/>
+          <link xlink:href="pmid:23467089"/>
+        </linklist>
+        <comment>FOXP3 forkhead box P3 isoform, excision of exon 7. 
+
+IL1b promotes excision of FOXP3 exon7, Figure 2  (human cells and biopsies) [1]. Although the article directly mentions the participation of IL1B in the induction of FOXP3 isoform, we suggest that it does so through the receptor.
+
+MINA promotes the Th17 program and inhibits the FOXP3 expression, Figure 5, Experimental validation in mice models [2]. 
+FOXP3 is an inhibitor of SATB1 (see SATB1 annotation). 
+---------------------------------------------------------------------------------------------------------------------------------------------
+In the experimental results, we observe that FOXP3 is expressed in greater quantity in the Th17 condition, while its expression is reduced in the IL12 + IL1B condition. SATB1 and MINA are upregulated in the condition IL12 + IL1B and downregulated in the condition Th17. When MINA is present, FOXP3 lowers its expression and SATB1 is not inhibited by FOXP3, which increases its expression. In the model we hypothesize that the FOXP3delta7 isoform is the one that is involved in the mentioned circuit.</comment>
+      </annotation>
+      <nodevisualsetting x="580" y="291" style=""/>
+    </node>
+    <node id="SATB1" maxvalue="1">
+      <value val="1">
+        <exp str="RORGt &amp; !FOXP3_2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="uniprot:Q01826"/>
+          <link xlink:href="pmid:21841785"/>
+          <link xlink:href="pmid:23467089"/>
+        </linklist>
+        <comment>SATB1, DNA binding protein SATB1[1]. 
+
+FOXP3 acts as a transcriptional repressor, directly supressing the SATB1 locus and indirectly through induction of miRNAs that bound the SATB1 3´UTR, Figure 4 (Binding data in human cells) [2]. They do not indicate exactly which isoform of FOXP3 inhibits SATB1, in this model it is considered the inhibition of SATB1 by FOXP3delta7 (induced by IL1R) like a hypothetical interaction.
+
+SATB1 is induced by RORGt. This interaction was predicted in [3]. Yosef's model does not specify whether the interaction is positive or negative and we hypothesize that it is positive in base of TFs expression data (qPCR measurements developed in our lab).
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+In the experimental results, we observe that FOXP3 is expressed in greater quantity in the Th17 condition, while its expression is reduced in the IL12 + IL1B condition. SATB1 and MINA are upregulated in the condition IL12 + IL1B and downregulated in the condition Th17. When MINA is present, FOXP3 lowers its expression and SATB1 is not inhibited by FOXP3, which increases its expression. In the model we hypothesize that the FOXP3delta7 isoform is the one that is involved in the mentioned circuit.</comment>
+      </annotation>
+      <nodevisualsetting x="687" y="475" style=""/>
+    </node>
+    <node id="MINA" maxvalue="1">
+      <value val="1">
+        <exp str="RORGt &amp; !STAT5A"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="pmid:23467089"/>
+        </linklist>
+        <comment>MINA, 
+
+MINA is induced by RORGt, validation using a RORGt-knockout mice model [1]. 
+
+MINA is inhibited by STAT5A. This interaction was predicted in [1]. Yosef's model does not specify whether the interaction is positive or negative and we hypothesize that it is negative in base of TFs expression data (qPCR measurements developed in our lab).
+---------------------------------------------------------------------------------------------------------------------------------------------
+In the experimental results, we observe that FOXP3 is expressed in greater quantity in the Th17 condition, while its expression is reduced in the IL12 + IL1B condition. SATB1 and MINA are upregulated in the condition IL12 + IL1B and downregulated in the condition Th17. When MINA is present, FOXP3 lowers its expression and SATB1 is not inhibited by FOXP3, which increases its expression. In the model we hypothesize that the FOXP3delta7 isoform is the one that is involved in the mentioned circuit.</comment>
+      </annotation>
+      <nodevisualsetting x="560" y="448" style=""/>
+    </node>
+    <node id="RUNX1" maxvalue="2">
+      <value val="2">
+        <exp str="STAT3 &amp; RORGt"/>
+      </value>
+      <value val="1">
+        <exp str="STAT3 &amp; !RORGt"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:10471"/>
+          <link xlink:href="uniprot:Q01196"/>
+          <link xlink:href="pmid:23467089"/>
+        </linklist>
+        <comment>RUNX1, Runt-related transcription factor [1] [2]. 
+
+Is activated by RORGt, interaction predicted in [3] (Binding data). 
+
+Is activated by STAT3, interaction predicted in [3] (Binding data). 
+
+An overexpression of Runx1 is important to reverse the inhibitory effects of Tbet on IL17A production by Th17 cells, for this reason, we consider two levels of Runx1 in the model. </comment>
+      </annotation>
+      <nodevisualsetting x="1112" y="299" style=""/>
+    </node>
+    <node id="RORA" maxvalue="1">
+      <value val="1">
+        <exp str="IRF4 &amp; STAT3 &amp; RUNX1 &amp; RORGt &amp; IL23R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:10258"/>
+          <link xlink:href="uniprot:P35398"/>
+          <link xlink:href="pmid:18164222"/>
+          <link xlink:href="pmid:23467089"/>
+        </linklist>
+        <comment>RORA, RAR related Orphan Receptor alpha, transcription factor [1] [2]. 
+
+RORA is highly expressed in Th17 cells in a STAT3-dependent manner, Figure 1c (Functional data in mice model) [3]. 
+
+Is activated by IRF4, RUNX1, RORGt, these interactions were predicted in [4] (Bindind data). We assume that a positive interaction is established between the three components and RORA. 
+
+Hypothesis: IL23R induces directly the expression of RORA, we assume this hypothesis in based on experimental results (qPCR) Experiment CC9. </comment>
+      </annotation>
+      <nodevisualsetting x="1403" y="350" style=""/>
+    </node>
+    <node id="IL6R" maxvalue="1">
+      <value val="1">
+        <exp str="(IL6_Aut &amp; GP130) | (IL6_In &amp; GP130)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6019"/>
+          <link xlink:href="uniprot:P08887"/>
+        </linklist>
+        <comment>IL6R, interleukin 6 receptor [1].
+
+Activated by its subchain(s) IL6R and GP130 and by its associated cytokine(s) (external and autocrine IL6) [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1267" y="86" style=""/>
+    </node>
+    <node id="TGFBR" maxvalue="1">
+      <value val="1">
+        <exp str="TGFB_In"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:11772"/>
+          <link xlink:href="uniprot:P01137"/>
+        </linklist>
+        <comment>Transforming growth factor beta receptor 1 [1]. 
+
+Activated by its subchain(s) and by its associated cytokine(s) (external TGFB) [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1156" y="77" style=""/>
+    </node>
+    <node id="IL6_In" maxvalue="1" input="true">
+      <nodevisualsetting x="1277" y="3" style="Node style 7"/>
+    </node>
+    <node id="CXCR4" maxvalue="1">
+      <value val="1">
+        <exp str="!(IL12R &amp; IL1R)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:2561"/>
+          <link xlink:href="uniprot:P61073"/>
+        </linklist>
+        <comment>C-X-C motif chemokine receptor 4, CXCR4 [1], [2]. 
+
+
+
+We hypothesized that cxcr4 is inhibited by IL12 + IL1B based on our experimental data.</comment>
+      </annotation>
+      <nodevisualsetting x="1255" y="240" style=""/>
+    </node>
+    <node id="ITK" maxvalue="2">
+      <value val="2">
+        <exp str="TCR &amp; CXCR4"/>
+      </value>
+      <value val="1">
+        <exp str="TCR &amp; !CXCR4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="hgnc:6171"/>
+          <link xlink:href="uniprot:Q08881"/>
+          <link xlink:href="pmid:24534190"/>
+        </linklist>
+        <comment>Interleukin-2 inducible T cell kinase, ITK [1] [2].
+
+ITK participates in the crosstalk between TCR and cytokine signaling that differentially affects the activation of distinct signaling pathways involving mTOR and STAT5 activation downstream of IL2. 
+
+ITK is activated by TCR [3]. 
+
+We hypothesized that cxcr4 directly activates Itk based on our experimental results.</comment>
+      </annotation>
+      <nodevisualsetting x="1206" y="275" style=""/>
+    </node>
+    <edge id="IL2:IL2R" from="IL2" to="IL2R" minvalue="1" sign="positive">
+      <edgevisualsetting points="486,318" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL6_In:IL6R" from="IL6_In" to="IL6R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1294,62" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:Tbet" from="NFAT1" to="Tbet" minvalue="1" sign="positive">
+      <edgevisualsetting points="370,669" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:IFNg" from="NFAT1" to="IFNg" minvalue="1" sign="positive">
+      <edgevisualsetting points="261,673" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:RORGt" from="NFAT1" to="RORGt" minvalue="1" sign="positive">
+      <edgevisualsetting points="1112,674" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:IL17F" from="NFAT1" to="IL17F" minvalue="1" sign="positive">
+      <edgevisualsetting points="1139,687" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:IL21" from="NFAT1" to="IL21" minvalue="1" sign="positive">
+      <edgevisualsetting points="1021,508" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:NFAT2A" from="NFAT1" to="NFAT2A" minvalue="1" sign="dual">
+      <edgevisualsetting points="1025,708" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:IL2" from="NFAT1" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1013,707" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT1:FOXP3" from="NFAT1" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="650,665" anchor="NE" style=""/>
+    </edge>
+    <edge id="Rac:MEKK1" from="Rac" to="MEKK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="804,405" anchor="NE" style=""/>
+    </edge>
+    <edge id="TCR:Lck" from="TCR" to="Lck" minvalue="2" sign="positive">
+      <edgevisualsetting points="1027,59" anchor="NE" style=""/>
+    </edge>
+    <edge id="TCR:Zap70" from="TCR" to="Zap70" minvalue="2" sign="positive">
+      <edgevisualsetting points="978,69" anchor="NE" style=""/>
+    </edge>
+    <edge id="TCR:PI3K" from="TCR" to="PI3K" effects="1:positive 2:positive">
+      <edgevisualsetting points="1068,47" anchor="NE" style=""/>
+    </edge>
+    <edge id="TCR:ITK" from="TCR" to="ITK" minvalue="2" sign="positive">
+      <edgevisualsetting points="1243,39" anchor="NE" style=""/>
+    </edge>
+    <edge id="Eomes:IFNg" from="Eomes" to="IFNg" minvalue="1" sign="positive">
+      <edgevisualsetting points="335,582" anchor="NE" style=""/>
+    </edge>
+    <edge id="TAK1:IKK" from="TAK1" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting points="974,483" anchor="NE" style=""/>
+    </edge>
+    <edge id="TAK1:c_Jun" from="TAK1" to="c_Jun" minvalue="1" sign="positive">
+      <edgevisualsetting points="943,560" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12RB1:IL12R" from="IL12RB1" to="IL12R" minvalue="1" sign="positive">
+      <edgevisualsetting points="355,58" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12RB1:IL23R" from="IL12RB1" to="IL23R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1430,59" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:FOXP3" from="FOXP3" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:IL2RA" from="FOXP3" to="IL2RA" minvalue="1" sign="positive">
+      <edgevisualsetting points="642,282" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:PTEN" from="FOXP3" to="PTEN" minvalue="1" sign="positive">
+      <edgevisualsetting points="634,327" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:NFAT2A" from="FOXP3" to="NFAT2A" minvalue="1" sign="negative">
+      <edgevisualsetting points="641,755" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:IL2" from="FOXP3" to="IL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="627,684" anchor="NE" style=""/>
+    </edge>
+    <edge id="c_Fos:AP1" from="c_Fos" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="774,561" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:IL17A" from="RORGt" to="IL17A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1258,445" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:FOXP3" from="RORGt" to="FOXP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="651,429" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:SATB1" from="RORGt" to="SATB1" minvalue="1" sign="positive">
+      <edgevisualsetting points="715,433" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:MINA" from="RORGt" to="MINA" minvalue="1" sign="positive">
+      <edgevisualsetting points="615,425" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:RUNX1" from="RORGt" to="RUNX1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1123,377" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:RORA" from="RORGt" to="RORA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1429,432" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:IL23R" from="RORGt" to="IL23R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1469,439" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORGt:IL17F" from="RORGt" to="IL17F" minvalue="1" sign="positive">
+      <edgevisualsetting points="1147,468" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1R1:IL1R" from="IL1R1" to="IL1R" minvalue="1" sign="positive">
+      <edgevisualsetting points="635,121" anchor="NE" style=""/>
+    </edge>
+    <edge id="c_Maf:IL21" from="c_Maf" to="IL21" minvalue="1" sign="positive">
+      <edgevisualsetting points="1323,489" anchor="NE" style=""/>
+    </edge>
+    <edge id="MEKK1:c_Jun" from="MEKK1" to="c_Jun" minvalue="1" sign="positive">
+      <edgevisualsetting points="800,534" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT4:IFNg" from="STAT4" to="IFNg" minvalue="1" sign="positive">
+      <edgevisualsetting points="260,429" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT4:Blimp1" from="STAT4" to="Blimp1" minvalue="1" sign="positive">
+      <edgevisualsetting points="289,352" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1R:Myd88" from="IL1R" to="Myd88" minvalue="1" sign="positive">
+      <edgevisualsetting points="602,235" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1R:STAT3" from="IL1R" to="STAT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="671,336" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1R:FOXP3_2" from="IL1R" to="FOXP3_2" minvalue="1" sign="positive">
+      <edgevisualsetting points="611,245" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1R:STAT5A" from="IL1R" to="STAT5A" minvalue="1" sign="positive">
+      <edgevisualsetting points="688,202" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1R:PI3K" from="IL1R" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="908,231" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1R:CXCR4" from="IL1R" to="CXCR4" minvalue="1" sign="negative">
+      <edgevisualsetting points="994,252" anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCO:TAK1" from="PKCO" to="TAK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="942,361" anchor="NE" style=""/>
+    </edge>
+    <edge id="PKCO:IKK" from="PKCO" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1051,495" anchor="NE" style=""/>
+    </edge>
+    <edge id="RunX3:Eomes" from="RunX3" to="Eomes" minvalue="1" sign="positive">
+      <edgevisualsetting points="347,467" anchor="NE" style=""/>
+    </edge>
+    <edge id="RunX3:IFNg" from="RunX3" to="IFNg" minvalue="1" sign="positive">
+      <edgevisualsetting points="288,526" anchor="NE" style=""/>
+    </edge>
+    <edge id="Blimp1:IL17F" from="Blimp1" to="IL17F" minvalue="2" sign="positive">
+      <edgevisualsetting points="675,532" anchor="NE" style=""/>
+    </edge>
+    <edge id="Blimp1:Tbet" from="Blimp1" to="Tbet" minvalue="2" sign="negative">
+      <edgevisualsetting points="375,360" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL6R:STAT3" from="IL6R" to="STAT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1324,214" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL6R:STAT1" from="IL6R" to="STAT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="238,115" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5A:MINA" from="STAT5A" to="MINA" minvalue="1" sign="negative">
+      <edgevisualsetting points="598,206" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5A:IL17A" from="STAT5A" to="IL17A" minvalue="2" sign="negative">
+      <edgevisualsetting points="1391,574" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5A:IL17F" from="STAT5A" to="IL17F" minvalue="2" sign="negative">
+      <edgevisualsetting points="1381,542" anchor="NE" style="Edge style"/>
+    </edge>
+    <edge id="IL12RB2:IL12R" from="IL12RB2" to="IL12R" minvalue="1" sign="positive">
+      <edgevisualsetting points="314,135" anchor="NE" style=""/>
+    </edge>
+    <edge id="GP130:IL23R" from="GP130" to="IL23R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1444,34" anchor="NE" style=""/>
+    </edge>
+    <edge id="GP130:IL6R" from="GP130" to="IL6R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1316,39" anchor="NE" style=""/>
+    </edge>
+    <edge id="MINA:FOXP3_2" from="MINA" to="FOXP3_2" minvalue="1" sign="negative">
+      <edgevisualsetting points="610,381" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL2RA:IL2R" from="IL2RA" to="IL2R" minvalue="1" sign="positive">
+      <edgevisualsetting points="468,226" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3_2:SATB1" from="FOXP3_2" to="SATB1" minvalue="1" sign="negative">
+      <edgevisualsetting points="629,472" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12_In:IL12R" from="IL12_In" to="IL12R" minvalue="1" sign="positive">
+      <edgevisualsetting points="341,104" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL23_In:IL23R" from="IL23_In" to="IL23R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1466,42" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL23R:STAT3" from="IL23R" to="STAT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1341,121" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL23R:RORA" from="IL23R" to="RORA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PLCG:DAG" from="PLCG" to="DAG" minvalue="1" sign="positive">
+      <edgevisualsetting points="790,346" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLCG:IP3" from="PLCG" to="IP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="757,399" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1RAP:IL1R" from="IL1RAP" to="IL1R" minvalue="1" sign="positive">
+      <edgevisualsetting points="680,118" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD4:Lck" from="CD4" to="Lck" minvalue="1" sign="positive">
+      <edgevisualsetting points="1054,61" anchor="NE" style=""/>
+    </edge>
+    <edge id="Myd88:IRAK1_4" from="Myd88" to="IRAK1_4" minvalue="1" sign="positive">
+      <edgevisualsetting points="562,311" anchor="NE" style=""/>
+    </edge>
+    <edge id="Myd88:IL23R" from="Myd88" to="IL23R" minvalue="1" sign="positive">
+      <edgevisualsetting points="557,138" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT4:NFAT2A" from="NFAT4" to="NFAT2A" minvalue="1" sign="positive">
+      <edgevisualsetting points="972,740" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:SOS" from="CD28" to="SOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="802,149" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:VAV" from="CD28" to="VAV" minvalue="1" sign="positive">
+      <edgevisualsetting points="812,266" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:PI3K" from="CD28" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="822,223" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12R:STAT4" from="IL12R" to="STAT4" minvalue="1" sign="positive">
+      <edgevisualsetting points="310,229" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12R:STAT1" from="IL12R" to="STAT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="248,173" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12R:STAT5A" from="IL12R" to="STAT5A" minvalue="1" sign="positive">
+      <edgevisualsetting points="935,185" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12R:CXCR4" from="IL12R" to="CXCR4" minvalue="1" sign="negative">
+      <edgevisualsetting points="1290,191" anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3:NFAT1" from="IP3" to="NFAT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="895,662" anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3:NFAT2" from="IP3" to="NFAT2" minvalue="1" sign="positive">
+      <edgevisualsetting points="889,541" anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3:NFAT4" from="IP3" to="NFAT4" minvalue="1" sign="positive">
+      <edgevisualsetting points="904,569" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFKB:Tbet" from="NFKB" to="Tbet" minvalue="1" sign="positive">
+      <edgevisualsetting points="376,628" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFKB:IRF4" from="NFKB" to="IRF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="1170,637" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFKB:STAT3" from="NFKB" to="STAT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="923,351" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFKB:IL2" from="NFKB" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="926,701" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFKB:IL2RA" from="NFKB" to="IL2RA" minvalue="1" sign="positive">
+      <edgevisualsetting points="440,625" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:IL17F" from="IRF4" to="IL17F" minvalue="1" sign="positive">
+      <edgevisualsetting points="1151,588" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:IL17A" from="IRF4" to="IL17A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1301,679" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:RORGt" from="IRF4" to="RORGt" minvalue="1" sign="positive">
+      <edgevisualsetting points="1118,675" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:RORA" from="IRF4" to="RORA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1440,692" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1_In:IL1R" from="IL1_In" to="IL1R" minvalue="1" sign="positive">
+      <edgevisualsetting points="662,96" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT2:NFAT2A" from="NFAT2" to="NFAT2A" minvalue="1" sign="positive">
+      <edgevisualsetting points="975,746" anchor="NE" style=""/>
+    </edge>
+    <edge id="SOS:RAS" from="SOS" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting points="743,265" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbet:Tbet" from="Tbet" to="Tbet" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NW" style=""/>
+    </edge>
+    <edge id="Tbet:RunX3" from="Tbet" to="RunX3" minvalue="1" sign="positive">
+      <edgevisualsetting points="354,457" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbet:IFNg" from="Tbet" to="IFNg" minvalue="1" sign="positive">
+      <edgevisualsetting points="270,433" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbet:RORGt" from="Tbet" to="RORGt" minvalue="1" sign="negative">
+      <edgevisualsetting points="844,420" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL6_Aut:IL6R" from="IL6_Aut" to="IL6R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1275,70" anchor="NE" style=""/>
+    </edge>
+    <edge id="DAG:RAS" from="DAG" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting points="786,390" anchor="NE" style=""/>
+    </edge>
+    <edge id="DAG:PKCO" from="DAG" to="PKCO" minvalue="1" sign="positive">
+      <edgevisualsetting points="931,356" anchor="NE" style=""/>
+    </edge>
+    <edge id="RORA:IL17A" from="RORA" to="IL17A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1433,582" anchor="NE" style=""/>
+    </edge>
+    <edge id="CXCR4:ITK" from="CXCR4" to="ITK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1290,294" anchor="NE" style=""/>
+    </edge>
+    <edge id="IKK:NFKB" from="IKK" to="NFKB" minvalue="1" sign="positive">
+      <edgevisualsetting points="932,504" anchor="NE" style=""/>
+    </edge>
+    <edge id="RUNX1:RORA" from="RUNX1" to="RORA" minvalue="2" sign="positive">
+      <edgevisualsetting points="1425,314" anchor="NE" style=""/>
+    </edge>
+    <edge id="RUNX1:Tbet" from="RUNX1" to="Tbet" minvalue="2" sign="negative">
+      <edgevisualsetting points="1116,411" anchor="NE" style=""/>
+    </edge>
+    <edge id="RUNX1:RORGt" from="RUNX1" to="RORGt" minvalue="1" sign="positive">
+      <edgevisualsetting points="1131,379" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT1:Tbet" from="STAT1" to="Tbet" minvalue="1" sign="positive">
+      <edgevisualsetting points="362,222" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT1:IFNg" from="STAT1" to="IFNg" minvalue="1" sign="positive">
+      <edgevisualsetting points="238,351" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT1:FOXP3" from="STAT1" to="FOXP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="248,557" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT1:IL17F" from="STAT1" to="IL17F" minvalue="1" sign="positive">
+      <edgevisualsetting points="254,527" anchor="NE" style="Edge style"/>
+    </edge>
+    <edge id="PI3K:PIP3" from="PI3K" to="PIP3" effects="1:positive 2:positive">
+      <edgevisualsetting points="1067,269" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:IL6_Aut" from="PI3K" to="IL6_Aut" minvalue="2" sign="positive">
+      <edgevisualsetting points="1076,50" anchor="NE" style=""/>
+    </edge>
+    <edge id="Zap70:Lat" from="Zap70" to="Lat" minvalue="1" sign="positive">
+      <edgevisualsetting points="938,156" anchor="NE" style=""/>
+    </edge>
+    <edge id="Zap70:VAV" from="Zap70" to="VAV" minvalue="1" sign="positive">
+      <edgevisualsetting points="960,204" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:RORGt" from="STAT3" to="RORGt" minvalue="1" sign="positive">
+      <edgevisualsetting points="1328,427" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:IL21" from="STAT3" to="IL21" minvalue="1" sign="positive">
+      <edgevisualsetting points="1349,516" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:c_Maf" from="STAT3" to="c_Maf" minvalue="1" sign="positive">
+      <edgevisualsetting points="1336,412" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:AHR" from="STAT3" to="AHR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1320,402" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:Blimp1" from="STAT3" to="Blimp1" minvalue="1" sign="positive">
+      <edgevisualsetting points="927,347" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:RUNX1" from="STAT3" to="RUNX1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1318,322" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:RORA" from="STAT3" to="RORA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1387,361" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:IL23R" from="STAT3" to="IL23R" minvalue="1" sign="positive">
+      <edgevisualsetting points="1332,115" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:IL17F" from="STAT3" to="IL17F" minvalue="1" sign="positive">
+      <edgevisualsetting points="1352,535" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:IL17A" from="STAT3" to="IL17A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1357,565" anchor="NE" style=""/>
+    </edge>
+    <edge id="AHR:IL17F" from="AHR" to="IL17F" minvalue="1" sign="positive">
+      <edgevisualsetting points="1231,523" anchor="NE" style=""/>
+    </edge>
+    <edge id="AHR:IL17A" from="AHR" to="IL17A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1265,470" anchor="NE" style=""/>
+    </edge>
+    <edge id="Lat:SOS" from="Lat" to="SOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="820,160" anchor="NE" style=""/>
+    </edge>
+    <edge id="Lat:VAV" from="Lat" to="VAV" minvalue="1" sign="positive">
+      <edgevisualsetting points="944,167" anchor="NE" style=""/>
+    </edge>
+    <edge id="Lat:PLCG" from="Lat" to="PLCG" minvalue="1" sign="positive">
+      <edgevisualsetting points="788,171" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD80:CD28" from="CD80" to="CD28" minvalue="1" sign="positive">
+      <edgevisualsetting points="813,73" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT2A:NFAT2A" from="NFAT2A" to="NFAT2A" minvalue="2" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT2A:IL17A" from="NFAT2A" to="IL17A" minvalue="2" sign="positive">
+      <edgevisualsetting points="1313,771" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT2A:IL2RA" from="NFAT2A" to="IL2RA" minvalue="1" sign="positive">
+      <edgevisualsetting points="422,766" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL2R:STAT5B" from="IL2R" to="STAT5B" effects="1:positive 2:positive">
+      <edgevisualsetting points="506,230" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL2R:STAT5A" from="IL2R" to="STAT5A" effects="1:positive 2:positive">
+      <edgevisualsetting points="1385,127" anchor="NE" style=""/>
+    </edge>
+    <edge id="CGC:IL2R" from="CGC" to="IL2R" minvalue="1" sign="positive">
+      <edgevisualsetting points="472,110" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP2:DAG" from="PIP2" to="DAG" minvalue="1" sign="positive">
+      <edgevisualsetting points="829,326" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP2:IP3" from="PIP2" to="IP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="903,306" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP2:PIP3" from="PIP2" to="PIP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="971,299" anchor="NE" style=""/>
+    </edge>
+    <edge id="ITK:NFAT2A" from="ITK" to="NFAT2A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1220,765" anchor="NE" style=""/>
+    </edge>
+    <edge id="ITK:ERK1_2" from="ITK" to="ERK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1213,478" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:PI3K" from="RAS" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="750,236" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:ERK1_2" from="RAS" to="ERK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting points="811,468" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:MEKK1" from="RAS" to="MEKK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="776,486" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:Tbet" from="AP1" to="Tbet" minvalue="1" sign="positive">
+      <edgevisualsetting points="382,601" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:IFNg" from="AP1" to="IFNg" minvalue="1" sign="positive">
+      <edgevisualsetting points="366,592" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:RORGt" from="AP1" to="RORGt" minvalue="1" sign="positive">
+      <edgevisualsetting points="1107,597" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:IL17F" from="AP1" to="IL17F" minvalue="1" sign="positive">
+      <edgevisualsetting points="779,540" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:IL17A" from="AP1" to="IL17A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1280,604" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:IRF4" from="AP1" to="IRF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="1181,619" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:STAT3" from="AP1" to="STAT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1364,615" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:IL2" from="AP1" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="770,696" anchor="NE" style=""/>
+    </edge>
+    <edge id="Lck:Zap70" from="Lck" to="Zap70" minvalue="1" sign="positive">
+      <edgevisualsetting points="1014,127" anchor="NE" style=""/>
+    </edge>
+    <edge id="Lck:TCR" from="Lck" to="TCR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1016,62" anchor="NE" style=""/>
+    </edge>
+    <edge id="Lck:CD28" from="Lck" to="CD28" minvalue="1" sign="positive">
+      <edgevisualsetting points="858,88" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:PKCO" from="PIP3" to="PKCO" minvalue="1" sign="positive">
+      <edgevisualsetting points="1054,343" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5B:FOXP3" from="STAT5B" to="FOXP3" minvalue="2" sign="positive">
+      <edgevisualsetting points="557,562" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5B:Blimp1" from="STAT5B" to="Blimp1" minvalue="1" sign="positive">
+      <edgevisualsetting points="514,367" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5B:IL2RA" from="STAT5B" to="IL2RA" minvalue="1" sign="positive">
+      <edgevisualsetting points="432,646" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5B:IL17A" from="STAT5B" to="IL17A" minvalue="2" sign="negative">
+      <edgevisualsetting points="1293,658" anchor="NE" style="Edge style"/>
+    </edge>
+    <edge id="STAT5B:IL17F" from="STAT5B" to="IL17F" minvalue="2" sign="negative">
+      <edgevisualsetting points="542,537" anchor="NE" style="Edge style"/>
+    </edge>
+    <edge id="c_Jun:AP1" from="c_Jun" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="784,561" anchor="NE" style=""/>
+    </edge>
+    <edge id="SATB1:IL2RA" from="SATB1" to="IL2RA" minvalue="1" sign="negative">
+      <edgevisualsetting points="464,488" anchor="NE" style=""/>
+    </edge>
+    <edge id="SATB1:IL2" from="SATB1" to="IL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="704,689" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFB_In:TGFBR" from="TGFB_In" to="TGFBR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1185,55" anchor="NE" style=""/>
+    </edge>
+    <edge id="VAV:Rac" from="VAV" to="Rac" minvalue="1" sign="positive">
+      <edgevisualsetting points="960,338" anchor="NE" style=""/>
+    </edge>
+    <edge id="MHCII:TCR" from="MHCII" to="TCR" effects="1:positive 2:positive">
+      <edgevisualsetting points="939,27" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2:FOXP3" from="Smad2" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1198,581" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2:IL2RA" from="Smad2" to="IL2RA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1178,279 558,278" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2:IL17A" from="Smad2" to="IL17A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1202,570" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:Smad2" from="TGFBR" to="Smad2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1187,120" anchor="NE" style=""/>
+    </edge>
+    <edge id="PTEN:PIP3" from="PTEN" to="PIP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="1033,318" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK1_2:c_Fos" from="ERK1_2" to="c_Fos" minvalue="1" sign="positive">
+      <edgevisualsetting points="753,483" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK1_2:STAT5B" from="ERK1_2" to="STAT5B" minvalue="1" sign="negative">
+      <edgevisualsetting points="879,652" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRAK1_4:TRAF6" from="IRAK1_4" to="TRAF6" minvalue="1" sign="positive">
+      <edgevisualsetting points="565,357" anchor="NE" style=""/>
+    </edge>
+    <edge id="TRAF6:TAK1" from="TRAF6" to="TAK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="554,439" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL2RB:IL2R" from="IL2RB" to="IL2R" minvalue="1" sign="positive">
+      <edgevisualsetting points="518,108" anchor="NE" style=""/>
+    </edge>
+  </graph>
+</gxl>

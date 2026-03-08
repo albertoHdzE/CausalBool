@@ -1,0 +1,263 @@
+{
+  "name": "yeast_cell_cycle",
+  "nodes": [
+    "Cdc2_Cdc13",
+    "Ste9",
+    "Rum1",
+    "Slp1",
+    "Cdc2_Cdc13_active",
+    "Wee1_Mik1",
+    "Cdc25",
+    "PP"
+  ],
+  "cm": [
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Cdc2_Cdc13": "NOT(Ste9)",
+    "Ste9": "AND(NOT(Cdc2_Cdc13_active), Slp1)",
+    "Rum1": "NOT(Cdc2_Cdc13_active)",
+    "Slp1": "Cdc2_Cdc13_active",
+    "Cdc2_Cdc13_active": "AND(Cdc2_Cdc13, NOT(Wee1_Mik1), Cdc25)",
+    "Wee1_Mik1": "NOT(Cdc2_Cdc13_active)",
+    "Cdc25": "Cdc2_Cdc13_active",
+    "PP": "Slp1"
+  },
+  "reference": "Davidich & Bornholdt, PLoS ONE 2008",
+  "description": "Fission yeast cell cycle control network (core)",
+  "source": "Literature",
+  "essentiality": {
+    "Cdc2_Cdc13": 1,
+    "Ste9": 0,
+    "Rum1": 0,
+    "Slp1": 1,
+    "Cdc2_Cdc13_active": 1,
+    "Wee1_Mik1": 0,
+    "Cdc25": 1,
+    "PP": 1
+  },
+  "gates": {
+    "Cdc2_Cdc13": {
+      "inputs": [
+        "Ste9"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "Ste9": {
+      "inputs": [
+        "Slp1",
+        "Cdc2_Cdc13_active"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "Rum1": {
+      "inputs": [
+        "Cdc2_Cdc13_active"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "Slp1": {
+      "inputs": [
+        "Cdc2_Cdc13_active"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Cdc2_Cdc13_active": {
+      "inputs": [
+        "Cdc2_Cdc13",
+        "Wee1_Mik1",
+        "Cdc25"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "Wee1_Mik1": {
+      "inputs": [
+        "Cdc2_Cdc13_active"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "Cdc25": {
+      "inputs": [
+        "Cdc2_Cdc13_active"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "PP": {
+      "inputs": [
+        "Slp1"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "NOT": 3,
+    "CANALISING": 2,
+    "IDENTITY": 3
+  },
+  "n": 8,
+  "n_edges": 11,
+  "edges": [
+    {
+      "source": "Ste9",
+      "target": "Cdc2_Cdc13",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc2_Cdc13_active",
+      "target": "Ste9",
+      "type": "regulation"
+    },
+    {
+      "source": "Slp1",
+      "target": "Ste9",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc2_Cdc13_active",
+      "target": "Rum1",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc2_Cdc13_active",
+      "target": "Slp1",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc2_Cdc13",
+      "target": "Cdc2_Cdc13_active",
+      "type": "regulation"
+    },
+    {
+      "source": "Wee1_Mik1",
+      "target": "Cdc2_Cdc13_active",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc25",
+      "target": "Cdc2_Cdc13_active",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc2_Cdc13_active",
+      "target": "Wee1_Mik1",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc2_Cdc13_active",
+      "target": "Cdc25",
+      "type": "regulation"
+    },
+    {
+      "source": "Slp1",
+      "target": "PP",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    1,
+    0,
+    2,
+    5,
+    1,
+    1,
+    0
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/yeast_cell_cycle.json",
+  "category": "Maintainer"
+}

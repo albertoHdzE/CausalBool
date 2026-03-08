@@ -29,6 +29,14 @@ We investigate integration in Boolean causal networks using intervention semanti
 \item For node \(i\), \(N_i=\{j: cm_{ij}=1\}\) is the set of input indices; the local map is \(g_i: \{0,1\}^{\lvert N_i\rvert}\to\{0,1\}\).
 \item The synchronous network map \(F: \{0,1\}^n\to\{0,1\}^n\) is \(F(x)=(g_1(x_{N_1}),\dots,g_n(x_{N_n}))\).
 \end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/connectivity_heatmap.png}
+\caption{\textbf{Visualisation of Structural Connectivity ($cm$).} A heatmap representation of a reconstructed connectivity matrix. Dark squares indicate $cm_{ij}=1$ (regulatory interaction). The block-diagonal structure highlights the modular organisation typical of biological networks, which facilitates the block factorisation of the complexity functional $\mathcal{C}$ (see ALGO-003).}
+\label{fig:connectivity_heatmap}
+\end{figure}
+
 \section{Documentation Process}
 For each ticket, we add a subsection documenting: objective, methods, inputs, outputs, acceptance tests, and artefacts. Artefacts refer to paths under \texttt{results/} and figures under \texttt{figures/}.
 \subsection*{Development Sequence and Policy}
@@ -1220,6 +1228,7 @@ Under any node permutation \(\pi\), reconstructed outputs match baseline up to c
 \end{itemize}
 \textbf{Artefacts:} \url{../../results/tests/mixed001FormulaVsExhaustive/Complexity.json}.\\
 \textbf{Notes:} ZIP reflects statistical redundancy; BDM approximates algorithmic complexity (shortest program length) and can detect non-statistical structure. Formula-based compression provides exact structural description length via index algebra.
+\paragraph{Refactor Note (D and BDM).} Across all experimental phases that report description-length metrics, the programme bits \(D\) are computed from the canonical structural representation (gate labels, in-degree sets, and parameters) as in the bio-metrics encoder. This makes \(D\) largely insensitive to rewiring operations that preserve per-node degree sequences and the global gate-type histogram: networks that differ only by such rewiring can have very similar \(D\) even when their wiring is substantially rearranged. Behavioural complexity measures such as BDM operate instead on output repertoires and can vary under dynamics-induced differences even when \(D\) is nearly invariant. When interpreting earlier experiments and medium-scale validations, comparisons of \(D\) across networks or null models should therefore be read with this separation in mind, and joint \(D\)+BDM analyses (as defined in the biological programme) provide the primary route to assessing algorithmic simplicity against structured nulls.\\
 \begin{center}
 \textbf{Overall Metrics}\\
 \emph{Removed per project policy}

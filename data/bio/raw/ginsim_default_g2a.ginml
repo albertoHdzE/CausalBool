@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="g2a_complete" nodeorder="CtrA GcrA DnaA CcrM SciP">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="45" height="25"/>
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="45" height="25"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="CtrA" name="CtrA" maxvalue="1">
+      <value val="1">
+        <exp str="(CtrA | GcrA) &amp; !CcrM &amp; !SciP"/>
+      </value>
+      <value val="0">
+        <exp str="(!CtrA &amp; !GcrA) | CcrM | SciP"/>
+      </value>
+      <nodevisualsetting x="419" y="94" style=""/>
+    </node>
+    <node id="GcrA" name="GcrA" maxvalue="1">
+      <value val="1">
+        <exp str="DnaA &amp; !CtrA"/>
+      </value>
+      <value val="0">
+        <exp str="!DnaA | CtrA"/>
+      </value>
+      <nodevisualsetting x="325" y="135" style=""/>
+    </node>
+    <node id="DnaA" name="DnaA" maxvalue="1">
+      <value val="1">
+        <exp str="CtrA &amp; CcrM &amp; !GcrA &amp; !DnaA"/>
+      </value>
+      <value val="0">
+        <exp str="!CtrA | !CcrM | GcrA | DnaA"/>
+      </value>
+      <nodevisualsetting x="374" y="224" style=""/>
+    </node>
+    <node id="CcrM" name="CcrM" maxvalue="1">
+      <value val="1">
+        <exp str="CtrA &amp; !CcrM &amp; !SciP"/>
+      </value>
+      <value val="0">
+        <exp str="!CtrA | CcrM | SciP"/>
+      </value>
+      <nodevisualsetting x="462" y="222" style=""/>
+    </node>
+    <node id="SciP" name="SciP" maxvalue="1">
+      <value val="1">
+        <exp str="CtrA &amp; !DnaA"/>
+      </value>
+      <value val="0">
+        <exp str="!CtrA | DnaA"/>
+      </value>
+      <nodevisualsetting x="506" y="133" style=""/>
+    </node>
+    <edge id="GcrA:CtrA" from="GcrA" to="CtrA" minvalue="1" sign="positive">
+      <edgevisualsetting points="351,132 350,100 416,101" style=""/>
+    </edge>
+    <edge id="GcrA:DnaA" from="GcrA" to="DnaA" minvalue="1" sign="negative">
+      <edgevisualsetting points="354,161 388,187" style=""/>
+    </edge>
+    <edge id="CtrA:CtrA" from="CtrA" to="CtrA" minvalue="1" sign="positive">
+      <edgevisualsetting points="453,90 453,66 431,65" style=""/>
+    </edge>
+    <edge id="CtrA:SciP" from="CtrA" to="SciP" minvalue="1" sign="positive">
+      <edgevisualsetting points="463,100 535,102" style=""/>
+    </edge>
+    <edge id="CtrA:CcrM" from="CtrA" to="CcrM" minvalue="1" sign="positive">
+      <edgevisualsetting points="453,122 487,217" style=""/>
+    </edge>
+    <edge id="CtrA:GcrA" from="CtrA" to="GcrA" minvalue="1" sign="negative">
+      <edgevisualsetting points="363,112" style=""/>
+    </edge>
+    <edge id="CtrA:DnaA" from="CtrA" to="DnaA" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="DnaA:DnaA" from="DnaA" to="DnaA" minvalue="1" sign="negative">
+      <edgevisualsetting points="427,244 427,271 398,271" style=""/>
+    </edge>
+    <edge id="DnaA:GcrA" from="DnaA" to="GcrA" minvalue="1" sign="positive">
+      <edgevisualsetting points="385,231 373,227 345,202" style=""/>
+    </edge>
+    <edge id="DnaA:SciP" from="DnaA" to="SciP" minvalue="1" sign="negative">
+      <edgevisualsetting points="410,223 478,147" style=""/>
+    </edge>
+    <edge id="SciP:CtrA" from="SciP" to="CtrA" minvalue="1" sign="negative">
+      <edgevisualsetting points="517,141 516,110 469,108" style=""/>
+    </edge>
+    <edge id="SciP:CcrM" from="SciP" to="CcrM" minvalue="1" sign="negative">
+      <edgevisualsetting points="532,156 500,177 499,216" style=""/>
+    </edge>
+    <edge id="CcrM:CtrA" from="CcrM" to="CtrA" minvalue="1" sign="negative">
+      <edgevisualsetting points="473,222 445,154" style=""/>
+    </edge>
+    <edge id="CcrM:CcrM" from="CcrM" to="CcrM" minvalue="1" sign="negative">
+      <edgevisualsetting points="497,264 529,263 528,233" style=""/>
+    </edge>
+    <edge id="CcrM:DnaA" from="CcrM" to="DnaA" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+  </graph>
+</gxl>

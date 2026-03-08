@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="zanudo_2018_proliferation" nodeorder="RTK RAS PI3K MAPK PIP3 FOXO3 AKT cycE TSC PRAS40 Rb mTORC1 E2F EIF4F S6K Proliferation GFs">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="85" height="30"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="RTK" maxvalue="1">
+      <value val="1">
+        <exp str="GFs &amp; (FOXO3 | (!S6K &amp; !MAPK))"/>
+      </value>
+      <nodevisualsetting x="164" y="89" style=""/>
+    </node>
+    <node id="RAS" maxvalue="1">
+      <value val="1">
+        <exp str="RTK"/>
+      </value>
+      <nodevisualsetting x="59" y="166" style=""/>
+    </node>
+    <node id="PI3K" maxvalue="1">
+      <value val="1">
+        <exp str="RTK | RAS"/>
+      </value>
+      <nodevisualsetting x="239" y="168" style=""/>
+    </node>
+    <node id="MAPK" maxvalue="1">
+      <value val="1">
+        <exp str="RAS | PIP3"/>
+      </value>
+      <nodevisualsetting x="65" y="239" style=""/>
+    </node>
+    <node id="PIP3" maxvalue="1">
+      <value val="1">
+        <exp str="PI3K"/>
+      </value>
+      <nodevisualsetting x="244" y="238" style=""/>
+    </node>
+    <node id="FOXO3" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT | !MAPK"/>
+      </value>
+      <nodevisualsetting x="63" y="310" style=""/>
+    </node>
+    <node id="AKT" maxvalue="1">
+      <value val="1">
+        <exp str="PIP3"/>
+      </value>
+      <nodevisualsetting x="242" y="315" style=""/>
+    </node>
+    <node id="cycE" maxvalue="1">
+      <value val="1">
+        <exp str="(AKT &amp; !FOXO3) | E2F"/>
+      </value>
+      <nodevisualsetting x="61" y="392" style=""/>
+    </node>
+    <node id="TSC" maxvalue="1">
+      <value val="1">
+        <exp str="!MAPK &amp; !AKT"/>
+      </value>
+      <nodevisualsetting x="186" y="392" style=""/>
+    </node>
+    <node id="PRAS40" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT"/>
+      </value>
+      <nodevisualsetting x="305" y="391" style=""/>
+    </node>
+    <node id="Rb" maxvalue="1">
+      <value val="1">
+        <exp str="!cycE"/>
+      </value>
+      <nodevisualsetting x="63" y="457" style=""/>
+    </node>
+    <node id="mTORC1" maxvalue="1">
+      <value val="1">
+        <exp str="!TSC &amp; !PRAS40"/>
+      </value>
+      <nodevisualsetting x="254" y="460" style=""/>
+    </node>
+    <node id="E2F" maxvalue="1">
+      <value val="1">
+        <exp str="!Rb"/>
+      </value>
+      <nodevisualsetting x="60" y="531" style=""/>
+    </node>
+    <node id="EIF4F" maxvalue="1">
+      <value val="1">
+        <exp str="mTORC1"/>
+      </value>
+      <nodevisualsetting x="188" y="529" style=""/>
+    </node>
+    <node id="S6K" maxvalue="1">
+      <value val="1">
+        <exp str="mTORC1"/>
+      </value>
+      <nodevisualsetting x="349" y="528" style=""/>
+    </node>
+    <node id="Proliferation" maxvalue="2">
+      <value val="2">
+        <exp str="E2F &amp; EIF4F &amp; S6K"/>
+      </value>
+      <value val="1">
+        <exp str="(!E2F &amp; EIF4F &amp; S6K) | (E2F &amp; (!EIF4F | !S6K))"/>
+      </value>
+      <nodevisualsetting x="187" y="638" style=""/>
+    </node>
+    <node id="GFs" maxvalue="1" input="true">
+      <nodevisualsetting x="162" y="30" style=""/>
+    </node>
+    <edge id="MAPK:FOXO3" from="MAPK" to="FOXO3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MAPK:TSC" from="MAPK" to="TSC" minvalue="1" sign="negative">
+      <edgevisualsetting points="214,293" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAPK:RTK" from="MAPK" to="RTK" minvalue="1" sign="negative">
+      <edgevisualsetting points="36,250 35,109" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:PI3K" from="RAS" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:MAPK" from="RAS" to="MAPK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:PIP3" from="PI3K" to="PIP3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:cycE" from="AKT" to="cycE" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:FOXO3" from="AKT" to="FOXO3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:TSC" from="AKT" to="TSC" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:PRAS40" from="AKT" to="PRAS40" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EIF4F:Proliferation" from="EIF4F" to="Proliferation" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:EIF4F" from="mTORC1" to="EIF4F" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:S6K" from="mTORC1" to="S6K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="S6K:Proliferation" from="S6K" to="Proliferation" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="S6K:RTK" from="S6K" to="RTK" minvalue="1" sign="negative">
+      <edgevisualsetting points="406,105" anchor="NE" style=""/>
+    </edge>
+    <edge id="GFs:RTK" from="GFs" to="RTK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TSC:mTORC1" from="TSC" to="mTORC1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="cycE:Rb" from="cycE" to="Rb" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Rb:E2F" from="Rb" to="E2F" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO3:RTK" from="FOXO3" to="RTK" minvalue="1" sign="positive">
+      <edgevisualsetting points="22,322 24,101" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO3:cycE" from="FOXO3" to="cycE" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F:cycE" from="E2F" to="cycE" minvalue="1" sign="positive">
+      <edgevisualsetting points="22,548 24,404" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F:Proliferation" from="E2F" to="Proliferation" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:RAS" from="RTK" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:PI3K" from="RTK" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:MAPK" from="PIP3" to="MAPK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:AKT" from="PIP3" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PRAS40:mTORC1" from="PRAS40" to="mTORC1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+  </graph>
+</gxl>

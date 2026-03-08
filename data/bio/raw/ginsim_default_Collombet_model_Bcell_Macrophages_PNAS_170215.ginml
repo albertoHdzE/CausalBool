@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="Collombet_model_Bcell_Macrophages_PNAS_170215" nodeorder="Mac1_gene Mac1 Id2 Egr2 Cebpb Cebpa_gene Cebpa Csf1r Csf1r_act Spi1 Runx1 Gfi1 Ikzf1 Flt3 Mef2c Ets1 Il7ra Il7r_act E2a_gene E2a E2a_prot_Active Foxo1_gene Foxo1 Ebf1 Ebf1_gene Pax5_gene Pax5 Pax5_prot_active Cd19_gene Cd19 Csf1 Il7 Cebpa_ER">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="45" height="25"/>
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="45" height="25"/>
+    <nodestyle name="Mac" background="#ff7f00" foreground="#ffffff" text="#ffffff" shape="ELLIPSE" width="80" height="40"/>
+    <nodestyle name="Progenitor" background="#6a3d9a" foreground="#ffffff" text="#ffffff" shape="ELLIPSE" width="80" height="40"/>
+    <nodestyle name="Progenitor (small)" background="#6a3d9a" foreground="#ffffff" text="#ffffff" shape="ELLIPSE" width="60" height="30"/>
+    <nodestyle name="Bcell" background="#1f78b4" foreground="#ffffff" text="#ffffff" shape="ELLIPSE" width="80" height="40"/>
+    <nodestyle name="Mac (small)" background="#ff7f00" foreground="#ffffff" text="#ffffff" shape="ELLIPSE" width="65" height="30"/>
+    <nodestyle name="Bcell (small)" background="#1f78b4" foreground="#ffffff" text="#ffffff" shape="ELLIPSE" width="60" height="30"/>
+    <nodestyle name="Progenitors [2]" background="#6a3d9a" foreground="#ffffff" text="#ffffff" width="80" height="40"/>
+    <edgestyle color="#666666" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle color="#666666" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle name="+ Func, Phys" color="#33a02c" pattern="SIMPLE" line_width="3"/>
+    <edgestyle name="- Func, Phys" color="#e31a1c" pattern="SIMPLE" line_width="3"/>
+    <edgestyle name="+ Proven" color="#33a02c" pattern="SIMPLE" line_width="3"/>
+    <edgestyle name="- Proven" color="#e31a1c" pattern="SIMPLE" line_width="3"/>
+    <edgestyle name="+ ChIPseq Confirmed" color="#b2df8a" pattern="SIMPLE" line_width="3"/>
+    <edgestyle name="- ChIPseq Confirmed" color="#fb9a99" pattern="SIMPLE" line_width="3"/>
+    <edgestyle name="+ Func" color="#33a02c" pattern="DASH" line_width="2"/>
+    <edgestyle name="- Func" color="#e31a1c" pattern="DASH" line_width="2"/>
+    <edgestyle name="ChIPseq only" color="#999999" pattern="SIMPLE" line_width="2"/>
+    <edgestyle name="Dual" color="#0000ff"/>
+    <node id="Mac1_gene" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1:2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000030786;r=7:128062640-128118491"/>
+        </linklist>
+        <comment>See Mac1 node for annotations.</comment>
+      </annotation>
+      <nodevisualsetting x="232" y="783" style="Mac (small)"/>
+    </node>
+    <node id="Mac1" maxvalue="1">
+      <value val="1">
+        <exp str="Mac1_gene"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000030786;r=7:128062640-128118491"/>
+        </linklist>
+        <comment>Marker of macrophage phenotype. 
+
+Encoded by the Itgam gene.</comment>
+      </annotation>
+      <nodevisualsetting x="257" y="816" style="Mac"/>
+    </node>
+    <node id="Id2" maxvalue="1">
+      <value val="1">
+        <exp str="Cebpa &amp; Cebpb &amp; Spi1 &amp; !Ebf1 &amp; !Gfi1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000020644;r=12:25093801-25096092;t=ENSMUST00000020974"/>
+        </linklist>
+        <comment>Inhibitor of Pax5 and E2a DNA binding activity through protein-protein interraction.
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="704" y="482" style="Mac"/>
+    </node>
+    <node id="Egr2" name="EGR2" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1:1 &amp; !Gfi1"/>
+        <exp str="Pax5_prot_active"/>
+        <exp str="Spi1:2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000038418;r=18:34859823-34864984"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/19818654"/>
+        </linklist>
+        <comment>Favor myeloid over lymphoid differentiation by repressing Gfi1
+[Spooner et al (2009) Immunity 31:576-86]</comment>
+      </annotation>
+      <nodevisualsetting x="562" y="427" style="Mac"/>
+    </node>
+    <node id="Cebpb" name="CEBPb" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1:2 &amp; (Cebpa | Cebpb)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000056501;r=2:167688915-167690418;t=ENSMUST00000070642"/>
+          <link xlink:href="ttps://www.ncbi.nlm.nih.gov/pubmed/15163413"/>
+        </linklist>
+        <comment>Like Cebpa, ectopic expression in B cells induces their reprogramming into to macrophage.
+[Xie H et al. Cell. 2004 May 28;117(5):663-76]</comment>
+      </annotation>
+      <nodevisualsetting x="231" y="511" style="Mac"/>
+    </node>
+    <node id="Cebpa_gene" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1 &amp; Runx1 &amp; !Foxo1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000034957;r=7:35119293-35121928"/>
+        </linklist>
+        <comment>See Cebpa node for annotations.</comment>
+      </annotation>
+      <nodevisualsetting x="249" y="351" style="Mac (small)"/>
+    </node>
+    <node id="Cebpa" name="CEBPa" maxvalue="1">
+      <value val="1">
+        <exp str="Cebpa_gene | Cebpa_ER"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000034957;r=7:35119293-35121928"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/15589173"/>
+          <link xlink:href="ttps://www.ncbi.nlm.nih.gov/pubmed/15163413"/>
+        </linklist>
+        <comment>CEBPa is expressed in myeloid lineage and necessary for granulcytic development.
+
+CEBPa is necessary for CMP to GMP transition ; necessary for general myelopoiesis ; not for GMP to Neutrophile.
+[Zhang P et al. (2004) Immunity 21:853-63]
+
+Ectopic expression in B cells induces their reprogramming into macrophage.
+[Xie H et al. Cell. 2004 May 28;117(5):663-76]
+
+
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="251" y="370" style="Mac"/>
+    </node>
+    <node id="Csf1r" name="M-CSFR" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1 &amp; !Pax5_prot_active"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000024621;r=18:61105572-61132149"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/10498603"/>
+        </linklist>
+        <comment>Necessary for monocyte differentiation.
+
+Constitutive expression in PU1-- myeloid cell line allowed recovering of survival but not myeloid differentiation.
+[Anderson K. L. et al. (1999) Blood, 94(7)]</comment>
+      </annotation>
+      <nodevisualsetting x="110" y="312" style="Mac"/>
+    </node>
+    <node id="Csf1r_act" name="M-CSFR" maxvalue="1">
+      <value val="1">
+        <exp str="Csf1r &amp; Csf1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000024621;r=18:61105572-61132149"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>See Csf1r node for annotations.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="123" y="239" style="Mac (small)"/>
+    </node>
+    <node id="Spi1" name="Spi1" maxvalue="2">
+      <value val="2">
+        <exp str="(Runx1 &amp; Spi1 &amp; (Cebpa | Cebpb) &amp; Csf1r_act) | (Runx1 &amp; Spi1 &amp; !(Gfi1 | (Foxo1 &amp; Ikzf1)))"/>
+      </value>
+      <value val="1">
+        <exp str="(Spi1 &amp; Runx1 &amp; !(((Cebpa | Cebpb) &amp; Csf1r_act) | (Foxo1 &amp; !Ikzf1) | !Gfi1)) | (Foxo1 &amp; Ebf1 &amp; Ikzf1 &amp; !(Spi1 | Runx1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000002111;r=2:91082390-91115756"/>
+          <link xlink:href="https://www-ncbi-nlm-nih-gov.insb.bib.cnrs.fr/pubmed/16923394"/>
+          <link xlink:href="https://www-ncbi-nlm-nih-gov.insb.bib.cnrs.fr/pubmed/19818654"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>Necessary for myeloid and lymphoid differentiation.
+
+2 levels of activity: 
+- low level control B cell or granulocyte differentiation, 
+- high level control monocyte differentiation.
+[﻿Laslo P et al. (2006) Cell 126:755-66] 
+[Spooner C et al. (2009)  Immunity, 31(4), 576–86]
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="367" y="298" style="Progenitors [2]"/>
+    </node>
+    <node id="Runx1" name="Runx1" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000022952;r=16:92601466-92826149"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>Ruequired for early hematopoiesis.</comment>
+      </annotation>
+      <nodevisualsetting x="361" y="181" style="Progenitor"/>
+    </node>
+    <node id="Gfi1" name="Gfi1" maxvalue="1">
+      <value val="1">
+        <exp str="(Ikzf1 | Cebpa) &amp; !Egr2"/>
+        <exp str="Pax5_prot_active"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000029275;r=5:107716657-107726036"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/19818654"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/20453161"/>
+        </linklist>
+        <comment>Promote B cell fate versus myeloid in MPP 
+[﻿Spooner et al. (2009) Immunity 31:576-86]
+
+Necessary for B cell development through Id2 inhibition ﻿
+[Li et al. (2010) Blood 116:1060-9]
+</comment>
+      </annotation>
+      <nodevisualsetting x="581" y="358" style="Bcell"/>
+    </node>
+    <node id="Ikzf1" name="Ikzf1" maxvalue="1">
+      <value val="1">
+        <exp str="Mef2c"/>
+        <exp str="Pax5_prot_active"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000018654;r=11:11685003-11772926"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/7923373"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/16518393"/>
+        </linklist>
+        <comment>Necessary for lymphoid development.   
+[Georgopoulos K et al. (1994) Cell, 79(1), 143–56]
+
+Necessary for the specification of LMPP from MPP.
+[Yoshida T et al.(2006) Nature immunology, 7(4)]
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="512" y="295" style="Progenitor"/>
+    </node>
+    <node id="Flt3" name="Flt3" maxvalue="1">
+      <value val="1">
+        <exp str="Ikzf1 &amp; Spi1 &amp; !Pax5_prot_active"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000042817;r=5:147330741-147400489"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>LMPP phenotype marker.
+</comment>
+      </annotation>
+      <nodevisualsetting x="537" y="789" style="Progenitor"/>
+    </node>
+    <node id="Mef2c" name="Mef2c" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1 &amp; !(Cebpa | Cebpb)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000005583;r=13:83504034-83667080"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/19169261"/>
+        </linklist>
+        <comment>Required for CLP, B-cells and T-cells differentiation  .
+[Stehling-Sun S et al. (2009) Nature immunology, 10(3)]
+
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="497" y="130" style="Progenitor"/>
+    </node>
+    <node id="Ets1" name="Ets1" maxvalue="1">
+      <value val="1">
+        <exp str="E2a_prot_Active"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000032035;r=9:32636221-32757820"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>Required for lymphoid development.</comment>
+      </annotation>
+      <nodevisualsetting x="764" y="422" style="Bcell"/>
+    </node>
+    <node id="Il7ra" name="IL7R" maxvalue="1">
+      <value val="1">
+        <exp str="Spi1 &amp; Mef2c &amp; !(Cebpa | Cebpb)"/>
+        <exp str="Ebf1 &amp; Foxo1 &amp; !(Cebpa | Cebpb)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000003882;r=15:9506161-9529876;t=ENSMUST00000003981"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/15837809"/>
+        </linklist>
+        <comment>Necessary for lymphoid differentiation.
+
+KO block B cell development at the preproB stage, Partially rescued by overexpression of EBF or STAT5.
+[﻿K. Kikuchi et al., The Journal of experimental medicine 201, 1197-203 (2005)]
+</comment>
+      </annotation>
+      <nodevisualsetting x="932" y="341" style="Bcell"/>
+    </node>
+    <node id="Il7r_act" name="Il7R" maxvalue="1">
+      <value val="1">
+        <exp str="Il7ra &amp; Il7"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000003882;r=15:9506161-9529876;t=ENSMUST00000003981"/>
+        </linklist>
+        <comment>See Il7ra node for annotation.</comment>
+      </annotation>
+      <nodevisualsetting x="945" y="406" style="Bcell (small)"/>
+    </node>
+    <node id="E2a_gene" maxvalue="1">
+      <value val="1">
+        <exp str="Ikzf1 &amp; (Spi1 | (Ebf1 &amp; Pax5_prot_active))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000020167;r=10:80409514-80433647"/>
+        </linklist>
+        <comment>See E2a node for annotation.</comment>
+      </annotation>
+      <nodevisualsetting x="694" y="351" style="Bcell (small)"/>
+    </node>
+    <node id="E2a" maxvalue="1">
+      <value val="1">
+        <exp str="E2a_gene"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000020167;r=10:80409514-80433647"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/18674933"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/18538592"/>
+        </linklist>
+        <comment>Necessary for normal LMPP/CLP/Lymphoid development  
+[﻿Dias, S. et al. (2008)  Immunity, 29(2)]
+
+Necessary to maintain B cell phenotype in proB (rescued by Pax5 constitutive expression)  
+[Kwon, K.et al. (2008) Immunity, (June), 751–762]
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="706" y="382" style="Bcell (small)"/>
+    </node>
+    <node id="E2a_prot_Active" name="E2a" maxvalue="1">
+      <value val="1">
+        <exp str="E2a &amp; !Id2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000020167;r=10:80409514-80433647"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>See E2a node for annotation.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="737" y="349" style="Bcell"/>
+    </node>
+    <node id="Foxo1_gene" maxvalue="1">
+      <value val="1">
+        <exp str="E2a_prot_Active &amp; !(Cebpa | Cebpb)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000044167;r=3:52268336-52353221;t=ENSMUST00000053764"/>
+        </linklist>
+        <comment>See Foxo1 node for annotation.</comment>
+      </annotation>
+      <nodevisualsetting x="855" y="428" style="Bcell (small)"/>
+    </node>
+    <node id="Foxo1" name="FOXO1" maxvalue="1">
+      <value val="1">
+        <exp str="Foxo1_gene"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000044167;r=3:52268336-52353221;t=ENSMUST00000053764"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/17254970"/>
+        </linklist>
+        <comment>FoxO1 knock-out mice has less mature B and T cells and HSC with impaired self renewal
+[Tothova, Z. (2007) Cell, 128(2)]
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="856" y="449" style="Bcell"/>
+    </node>
+    <node id="Ebf1" name="EBF" maxvalue="1">
+      <value val="1">
+        <exp str="Ebf1_gene"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000057098;r=11:44617317-45008091"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/7542362"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/15767371"/>
+        </linklist>
+        <comment>Necessary for B cell differentiation.
+
+KO block B cell development at a proB B220+ Bp1-- HSA-- stage   
+[﻿Lin H, Grosschedl R (1995) Nature 376:263–267]
+
+In IL-7 knock-out, overexpression of Ebf1 rescue B cell potential of CLP 
+[﻿S. Dias et al.,The Journal of experimental medicine 201, 971-9 (2005)]</comment>
+      </annotation>
+      <nodevisualsetting x="815" y="537" style="Bcell"/>
+    </node>
+    <node id="Ebf1_gene" maxvalue="1">
+      <value val="1">
+        <exp str="E2a_prot_Active &amp; Foxo1 &amp; Ets1 &amp; Runx1 &amp; Spi1 &amp; Il7r_act &amp; !(Cebpa | Cebpb)"/>
+        <exp str="E2a_prot_Active &amp; Foxo1 &amp; Ets1 &amp; Pax5_prot_active &amp; Ebf1 &amp; !(Cebpa | Cebpb)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000057098;r=11:44617317-45008091"/>
+        </linklist>
+        <comment>See Ebf1 node for annotation.</comment>
+      </annotation>
+      <nodevisualsetting x="872" y="549" style="Bcell (small)"/>
+    </node>
+    <node id="Pax5_gene" maxvalue="1">
+      <value val="1">
+        <exp str="Ebf1 &amp; !(Cebpa | Cebpb)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000014030;r=4:44524757-44710487"/>
+        </linklist>
+        <comment>See Pax5 node for annotation.</comment>
+      </annotation>
+      <nodevisualsetting x="853" y="662" style="Bcell (small)"/>
+    </node>
+    <node id="Pax5" maxvalue="1">
+      <value val="1">
+        <exp str="Pax5_gene"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000014030;r=4:44524757-44710487"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/10524622"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/10572073"/>
+        </linklist>
+        <comment>Necessary for terminal B cell differentiation.
+
+Knock-out block B cell development at proB stage 
+[Nutt, S.L. et al., Nature 401, 556-62 (1999)]
+
+Overexpression in CMP block myeloid differentiation 
+[﻿Chiang MY, Monroe JG (1999) Blood 94:3621-32]
+</comment>
+      </annotation>
+      <nodevisualsetting x="861" y="624" style="Bcell (small)"/>
+    </node>
+    <node id="Pax5_prot_active" name="Pax5" maxvalue="1">
+      <value val="1">
+        <exp str="Pax5 &amp; !Id2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000014030;r=4:44524757-44710487"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>See Pax5 node for annotation.</comment>
+      </annotation>
+      <nodevisualsetting x="763" y="616" style="Bcell"/>
+    </node>
+    <node id="Cd19_gene" maxvalue="1">
+      <value val="1">
+        <exp str="Pax5_prot_active &amp; !Cebpa"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000030724;r=7:126408450-126414889"/>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>see Cd19 node for annotation.</comment>
+      </annotation>
+      <nodevisualsetting x="763" y="812" style="Bcell (small)"/>
+    </node>
+    <node id="Cd19" maxvalue="1">
+      <value val="1">
+        <exp str="Cd19_gene"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000030724;r=7:126408450-126414889"/>
+        </linklist>
+        <comment>B cell phenotype marker.</comment>
+      </annotation>
+      <nodevisualsetting x="849" y="808" style="Bcell"/>
+    </node>
+    <node id="Csf1" name="M-CSF" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.ensembl.org/Mus_musculus/Gene/Summary?db=core;g=ENSMUSG00000014599;r=3:107741048-107760469"/>
+        </linklist>
+        <comment>Necessary for monocyte differentiation.
+</comment>
+      </annotation>
+      <nodevisualsetting x="118" y="31" style="Mac"/>
+    </node>
+    <node id="Il7" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href=""/>
+        </linklist>
+        <comment>Required for B cells differentiation.
+
+- KO entails impairs in lymphoid compartiment 
+(U. von Freeden-Jeffry et al., Immunity 7, 147-54 (1997).)
+
+- KO impairs selectivly B potential of CLP, not T or NK (﻿1. S. Dias et al.,The Journal of experimental medicine 201, 971-9 (2005).
+- - Can be partially rescue by overexpression of EBF
+- - Nearly not rescue by overexpression of Pax5
+
+- KO block B development at the prepro stage (﻿1. K. Kikuchi et al., The Journal of experimental medicine 201, 1197-203 (2005).
+
+- KO downregulate EBF and Pax5 (4w+, adult++) (﻿1. S. Dias et al.,The Journal of experimental medicine 201, 971-9 (2005).
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="965" y="37" style="Bcell"/>
+    </node>
+    <node id="Cebpa_ER" maxvalue="1">
+      <annotation>
+        <comment>See Cebpa for annotations</comment>
+      </annotation>
+      <nodevisualsetting x="30" y="370" style="Mac (small)"/>
+    </node>
+    <edge id="Cebpb:Id2" from="Cebpb" to="Id2" minvalue="1" sign="positive">
+      <edgevisualsetting points="716,536" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Cebpb:Spi1" from="Cebpb" to="Spi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="244,301" style="ChIPseq only"/>
+    </edge>
+    <edge id="Cebpb:Mef2c" from="Cebpb" to="Mef2c" minvalue="1" sign="negative">
+      <edgevisualsetting points="236,137" style=""/>
+    </edge>
+    <edge id="Cebpb:Pax5_gene" from="Cebpb" to="Pax5_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="255,664" style=""/>
+    </edge>
+    <edge id="Cebpb:Ebf1_gene" from="Cebpb" to="Ebf1_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="275,568" style=""/>
+    </edge>
+    <edge id="Cebpb:Il7ra" from="Cebpb" to="Il7ra" minvalue="1" sign="negative">
+      <edgevisualsetting points="314,88 978,92" style=""/>
+    </edge>
+    <edge id="Cebpb:Foxo1_gene" from="Cebpb" to="Foxo1_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="856,548" style=""/>
+    </edge>
+    <edge id="Cebpb:Cebpb" from="Cebpb" to="Cebpb" minvalue="1" sign="positive">
+      <edgevisualsetting style="ChIPseq only"/>
+    </edge>
+    <edge id="E2a_prot_Active:Ets1" from="E2a_prot_Active" to="Ets1" minvalue="1" sign="positive">
+      <edgevisualsetting points="791,406" style="+ Func"/>
+    </edge>
+    <edge id="E2a_prot_Active:Ebf1_gene" from="E2a_prot_Active" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="911,359" style="+ Proven"/>
+    </edge>
+    <edge id="E2a_prot_Active:Foxo1_gene" from="E2a_prot_Active" to="Foxo1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="876,370" style="+ Proven"/>
+    </edge>
+    <edge id="Foxo1:Il7ra" from="Foxo1" to="Il7ra" minvalue="1" sign="positive">
+      <edgevisualsetting points="1029,464 1030,357" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Foxo1:Cebpa_gene" from="Foxo1" to="Cebpa_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="919,269 290,270" style="ChIPseq only"/>
+    </edge>
+    <edge id="Foxo1:Ebf1_gene" from="Foxo1" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="897,506" style="+ Func, Phys"/>
+    </edge>
+    <edge id="Foxo1:Spi1" from="Foxo1" to="Spi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="859,301" style="ChIPseq only"/>
+    </edge>
+    <edge id="Cebpa_gene:Cebpa" from="Cebpa_gene" to="Cebpa" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Cebpa:Id2" from="Cebpa" to="Id2" minvalue="1" sign="positive">
+      <edgevisualsetting points="295,509" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Cebpa:Cebpb" from="Cebpa" to="Cebpb" minvalue="1" sign="positive">
+      <edgevisualsetting points="284,477" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Cebpa:Spi1" from="Cebpa" to="Spi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="333,335" style="+ Proven"/>
+    </edge>
+    <edge id="Cebpa:Mef2c" from="Cebpa" to="Mef2c" minvalue="1" sign="negative">
+      <edgevisualsetting points="271,150" style="ChIPseq only"/>
+    </edge>
+    <edge id="Cebpa:Cd19_gene" from="Cebpa" to="Cd19_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="205,383 205,836" style="- Proven"/>
+    </edge>
+    <edge id="Cebpa:Ebf1_gene" from="Cebpa" to="Ebf1_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="323,557" style="- ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Cebpa:Foxo1_gene" from="Cebpa" to="Foxo1_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="893,378" style=""/>
+    </edge>
+    <edge id="Cebpa:Pax5_gene" from="Cebpa" to="Pax5_gene" minvalue="1" sign="negative">
+      <edgevisualsetting points="269,653" style="- ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Cebpa:Gfi1" from="Cebpa" to="Gfi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="529,383" style=""/>
+    </edge>
+    <edge id="Cebpa:Il7ra" from="Cebpa" to="Il7ra" minvalue="1" sign="negative">
+      <edgevisualsetting points="326,103 965,104" style="- ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Csf1r:Csf1r_act" from="Csf1r" to="Csf1r_act" minvalue="1" sign="positive">
+      <edgevisualsetting points="158,297" style="+ Proven"/>
+    </edge>
+    <edge id="Gfi1:Spi1" from="Gfi1" to="Spi1" minvalue="1" sign="negative">
+      <annotation>
+        <comment>[Laslo et al (2006) Cell 126:755-66]</comment>
+      </annotation>
+      <edgevisualsetting points="427,373" style="- Proven"/>
+    </edge>
+    <edge id="Gfi1:Id2" from="Gfi1" to="Id2" minvalue="1" sign="negative">
+      <edgevisualsetting points="645,492" style="- Func, Phys"/>
+    </edge>
+    <edge id="Gfi1:Egr2" from="Gfi1" to="Egr2" minvalue="1" sign="negative">
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.its.caltech.edu/~tcellgrn/TCellMap/NodePages/Egr2.html"/>
+        </linklist>
+        <comment>[Laslo et al (2006) Cell 126:755-66]</comment>
+      </annotation>
+      <edgevisualsetting points="623,416" style="- Proven"/>
+    </edge>
+    <edge id="Mac1_gene:Mac1" from="Mac1_gene" to="Mac1" minvalue="1" sign="positive">
+      <edgevisualsetting points="243,825" style=""/>
+    </edge>
+    <edge id="Ebf1_gene:Ebf1" from="Ebf1_gene" to="Ebf1" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Pax5:Pax5_prot_active" from="Pax5" to="Pax5_prot_active" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Cebpa_ER:Cebpa" from="Cebpa_ER" to="Cebpa" minvalue="1" sign="positive">
+      <edgevisualsetting points="176,399" style="+ Proven"/>
+    </edge>
+    <edge id="Egr2:Gfi1" from="Egr2" to="Gfi1" minvalue="1" sign="negative">
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.its.caltech.edu/~tcellgrn/TCellMap/NodePages/Egr2.html"/>
+        </linklist>
+        <comment>[Laslo et al (2006) Cell 126:755-66]</comment>
+      </annotation>
+      <edgevisualsetting points="613,415" style="- Proven"/>
+    </edge>
+    <edge id="Csf1:Csf1r_act" from="Csf1" to="Csf1r_act" minvalue="1" sign="positive">
+      <edgevisualsetting points="158,189" style="+ Proven"/>
+    </edge>
+    <edge id="Cd19_gene:Cd19" from="Cd19_gene" to="Cd19" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Ikzf1:Gfi1" from="Ikzf1" to="Gfi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="634,316" style="+ Func, Phys"/>
+    </edge>
+    <edge id="Ikzf1:Flt3" from="Ikzf1" to="Flt3" minvalue="1" sign="positive">
+      <edgevisualsetting points="547,699" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Ikzf1:Spi1" from="Ikzf1" to="Spi1" minvalue="1" sign="dual">
+      <edgevisualsetting points="477,314" style=""/>
+    </edge>
+    <edge id="Ikzf1:E2a_gene" from="Ikzf1" to="E2a_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="720,321" style="ChIPseq only"/>
+    </edge>
+    <edge id="Il7r_act:Ebf1_gene" from="Il7r_act" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="970,558" style="+ Func"/>
+    </edge>
+    <edge id="E2a:E2a_prot_Active" from="E2a" to="E2a_prot_Active" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Spi1:Flt3" from="Spi1" to="Flt3" minvalue="1" sign="positive">
+      <edgevisualsetting points="439,799" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Spi1:Il7ra" from="Spi1" to="Il7ra" minvalue="1" sign="positive">
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.its.caltech.edu/~tcellgrn/TCellMap/NodePages/Il7r.html"/>
+        </linklist>
+        <comment>- DeKoter, R.P. et al.. Immunity 16, 297-309 (2002)
+
+
+PU1 activates IL7Ra
+[ Singh et al (2005) PNAS 102:4949-53]
+[Ikawa et al (2006) JEM 203: 1329-42]
+Pre-TCR signal represses IL7Ra [Taghon et al (2006)]</comment>
+      </annotation>
+      <edgevisualsetting points="940,294" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Spi1:Spi1" from="Spi1" to="Spi1" effects="1:positive 2:positive">
+      <edgevisualsetting style="+ Proven"/>
+    </edge>
+    <edge id="Spi1:Egr2" from="Spi1" to="Egr2" effects="1:positive 2:positive">
+      <annotation>
+        <linklist>
+          <link xlink:href="http://www.its.caltech.edu/~tcellgrn/TCellMap/NodePages/Egr2.html"/>
+        </linklist>
+        <comment>[Laslo et al (2006) Cell 126:755-66]</comment>
+      </annotation>
+      <edgevisualsetting points="389,454" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Spi1:Runx1" from="Spi1" to="Runx1" minvalue="1" sign="positive">
+      <edgevisualsetting points="405,251" style="+ Proven"/>
+    </edge>
+    <edge id="Spi1:Id2" from="Spi1" to="Id2" minvalue="1" sign="positive">
+      <edgevisualsetting points="377,504" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Spi1:Csf1r" from="Spi1" to="Csf1r" effects="1:positive 2:positive">
+      <edgevisualsetting points="227,324" style="+ Proven"/>
+    </edge>
+    <edge id="Spi1:Mef2c" from="Spi1" to="Mef2c" minvalue="1" sign="positive">
+      <edgevisualsetting points="436,167" style="+ Proven"/>
+    </edge>
+    <edge id="Spi1:Cebpb" from="Spi1" to="Cebpb" minvalue="2" sign="positive">
+      <annotation>
+        <comment>Data from Graf lab</comment>
+      </annotation>
+      <edgevisualsetting points="368,530" style="ChIPseq only"/>
+    </edge>
+    <edge id="Spi1:Cebpa_gene" from="Spi1" to="Cebpa_gene" effects="1:positive 2:positive">
+      <edgevisualsetting points="300,329" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Spi1:Mac1_gene" from="Spi1" to="Mac1_gene" minvalue="2" sign="positive">
+      <edgevisualsetting points="396,803" style="ChIPseq only"/>
+    </edge>
+    <edge id="Spi1:E2a_gene" from="Spi1" to="E2a_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="696,329" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Spi1:Ebf1_gene" from="Spi1" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="886,309" style="+ Proven"/>
+    </edge>
+    <edge id="Id2:E2a_prot_Active" from="Id2" to="E2a_prot_Active" minvalue="1" sign="negative">
+      <edgevisualsetting points="767,446" style="- Proven"/>
+    </edge>
+    <edge id="Id2:Pax5_prot_active" from="Id2" to="Pax5_prot_active" minvalue="1" sign="negative">
+      <edgevisualsetting points="732,626" style="- Proven"/>
+    </edge>
+    <edge id="Pax5_gene:Pax5" from="Pax5_gene" to="Pax5" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Csf1r_act:Spi1" from="Csf1r_act" to="Spi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="381,253" style="+ Func"/>
+    </edge>
+    <edge id="Ets1:Ebf1_gene" from="Ets1" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="792,544" style="+ Proven"/>
+    </edge>
+    <edge id="Mef2c:Ikzf1" from="Mef2c" to="Ikzf1" minvalue="1" sign="positive">
+      <edgevisualsetting points="545,253" style="+ Func"/>
+    </edge>
+    <edge id="Mef2c:Il7ra" from="Mef2c" to="Il7ra" minvalue="1" sign="positive">
+      <edgevisualsetting points="953,149" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Foxo1_gene:Foxo1" from="Foxo1_gene" to="Foxo1" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Il7:Il7r_act" from="Il7" to="Il7r_act" minvalue="1" sign="positive">
+      <edgevisualsetting points="997,207" style="+ Proven"/>
+    </edge>
+    <edge id="E2a_gene:E2a" from="E2a_gene" to="E2a" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Runx1:Spi1" from="Runx1" to="Spi1" minvalue="1" sign="positive">
+      <annotation>
+        <comment>Huang et al (2007) Nature Genetics
+</comment>
+      </annotation>
+      <edgevisualsetting points="393,255" style="+ Proven"/>
+    </edge>
+    <edge id="Runx1:Cebpa_gene" from="Runx1" to="Cebpa_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="283,199" style="+ Proven"/>
+    </edge>
+    <edge id="Runx1:Ebf1_gene" from="Runx1" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="904,186" style="+ Proven"/>
+    </edge>
+    <edge id="Ebf1:Id2" from="Ebf1" to="Id2" minvalue="1" sign="negative">
+      <edgevisualsetting points="760,573" style="- Func, Phys"/>
+    </edge>
+    <edge id="Ebf1:Il7ra" from="Ebf1" to="Il7ra" minvalue="1" sign="positive">
+      <annotation>
+        <comment>[Singh et al (2005) PNAS 102: 4949-53]
+This interaction involves STAT5</comment>
+      </annotation>
+      <edgevisualsetting points="845,348" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Ebf1:E2a_gene" from="Ebf1" to="E2a_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="866,360" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Ebf1:Ebf1_gene" from="Ebf1" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="Ebf1:Pax5_gene" from="Ebf1" to="Pax5_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="863,603" style="+ Proven"/>
+    </edge>
+    <edge id="Ebf1:Spi1" from="Ebf1" to="Spi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="839,323" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Pax5_prot_active:Ikzf1" from="Pax5_prot_active" to="Ikzf1" minvalue="1" sign="positive">
+      <annotation>
+        <comment>- [Horcher M, Souabni a, Busslinger M (2001) Immunity 14:779-90]</comment>
+      </annotation>
+      <edgevisualsetting points="828,675 565,675" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Pax5_prot_active:Flt3" from="Pax5_prot_active" to="Flt3" minvalue="1" sign="negative">
+      <edgevisualsetting points="792,800" style="- ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Pax5_prot_active:Csf1r" from="Pax5_prot_active" to="Csf1r" minvalue="1" sign="negative">
+      <edgevisualsetting points="839,742 152,742" style="- Proven"/>
+    </edge>
+    <edge id="Pax5_prot_active:Cd19_gene" from="Pax5_prot_active" to="Cd19_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="808,706" style="+ Proven"/>
+    </edge>
+    <edge id="Pax5_prot_active:E2a_gene" from="Pax5_prot_active" to="E2a_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="695,642" style="+ ChIPseq Confirmed"/>
+    </edge>
+    <edge id="Pax5_prot_active:Ebf1_gene" from="Pax5_prot_active" to="Ebf1_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="876,620" style="+ Proven"/>
+    </edge>
+    <edge id="Pax5_prot_active:Egr2" from="Pax5_prot_active" to="Egr2" minvalue="1" sign="positive">
+      <edgevisualsetting points="637,647" style=""/>
+    </edge>
+    <edge id="Pax5_prot_active:Gfi1" from="Pax5_prot_active" to="Gfi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="658,637" style=""/>
+    </edge>
+    <edge id="Il7ra:Il7r_act" from="Il7ra" to="Il7r_act" minvalue="1" sign="positive">
+      <edgevisualsetting points="963,392" style="+ Func, Phys"/>
+    </edge>
+    <annotation>
+      <linklist>
+        <link xlink:href="https://www-ncbi-nlm-nih-gov.insb.bib.cnrs.fr/pubmed/26235892"/>
+        <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/26235892"/>
+      </linklist>
+      <comment>Based on public and novel data from molecular genetic experiments (qPCR, western blot, EMSA), along with genome-wide assays (RNA-seq, ChIP-seq), this logical model recapitulates cytokine-induced differentiation of common progenitors myeloid-lymphoid progenitors, the effect of various reported gene knock-downs, as well as reprogramming of pre-B cells into macrophages induced by ectopic expression of CEBPa and CEBPb factors (van Oevelen et al (20015) Stem Cell Report). 
+
+This model explicitly distinguishes between genes, proteins, and activated proteins for several key network players, in order to enable the reproduction of specific temporal behaviour.
+
+A simple version of this network can be obtained by applying one of the model reductions associated with this model (e.g. reduce_proteins, to obtain the regulatory graph of Figure 3 in Collombet et al, PNAS, in press).
+
+For some factors, several nodes are considered to represent the gene (factor_gene), the protein (factor) and the active form of the protein (factor_active). This was introduced to account for post-translational regulation (cytokine receptors activation by their ligand, and protein-protein interaction, etc). Otherwise, nodes represent both the gene and the corresponding protein. 
+
+The reduction "Reduce_proteins" reduce the multi-level nodes (gene-protein-active protein) and results in only one node for each factor, reducing the complexity of stable states analysis or simulations.
+
+Using this reduction, the model exhibits four stables states (plus one stable state with all variables at 0, independently of the state of the inputs cytokines Il7 and Csf1). These four states correspond to CLP, GMP, B cells and Macrophages as defined in the “Run simulation” panel. CLP and GMP states are stable only in the absence of Il7 or Cs1 (respectively), as these cytokines enable differentiation into B cells and macrophages, respectively.
+
+Normal differentiation can be simulated from multipotent progenitors, as defined in the simulation panel (MP). In the absence of inputs, the MP can lead to GMP or CLP. In the presence of inputs, they can tends toward B cell or macrophage (see simulation presets "Dif: ....").
+
+Reprogramming of B cells into macrophages can be simulated with constant or transient ectopic expression of Cebpa in B cells (see "Bcell-Repro" simulation presets, which include Cebpa expression combined with various perturbations). 
+
+Reverse reprogramming from macrophages to B cells can be simulated by ectopic expression of combinations of B cell factors in macrophages (see "Mac-Repro" presets).</comment>
+    </annotation>
+  </graph>
+</gxl>

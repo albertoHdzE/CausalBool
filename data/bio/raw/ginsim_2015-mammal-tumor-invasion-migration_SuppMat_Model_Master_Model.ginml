@@ -1,0 +1,1552 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="This_is_the_one" nodeorder="ECMicroenv DNAdamage Metastasis Migration Invasion EMT Apoptosis CellCycleArrest GF TGFbeta p21 CDH1 CDH2 VIM TWIST1 SNAI1 SNAI2 ZEB1 ZEB2 AKT1 DKK1 CTNNB1 NICD p63 p53 p73 miR200 miR203 miR34 AKT2 ERK SMAD">
+    <node id="ECMicroenv" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <rect x="4" y="49" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="DNAdamage" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <rect x="1218" y="2" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Metastasis" maxvalue="1">
+      <value val="1">
+        <exp str="Migration"/>
+      </value>
+      <annotation>
+        <comment>EMT is required
+
+Anoikis should be avoided; also apoptosis
+
+cell cycle inhibits metastasis: over expression of cell cycle genes is poor outcome: occurrence of metastasis PMID:15899795</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="614" y="768" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Migration" maxvalue="1">
+      <value val="1">
+        <exp str="VIM &amp; AKT2 &amp; ERK &amp; !miR200 &amp; !AKT1 &amp; EMT &amp; Invasion &amp; !p63"/>
+      </value>
+      <annotation>
+        <comment>- AKT2 induces beta integrins -&gt; migration 
+PMID:12517798
+
+- Inhibition of AKT2 compromises migration 
+PMID:23165443
+
+-AKT1 inhibits migration through NFAT inhibition 
+PMID:17332325, 18281467
+
+-AKT1 inhibits migration through palladin 
+PMID:20471940
+
+-ERK stimulates migration through  cofilin 
+PMID:24217646
+
+-miR200 inhibits migration through targeting fibronectin1 
+PMID:21501518
+
+- Enhanced ERK activation is necessary for migration induced by Akt1 down- regulation 
+PMID:16365168</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="615" y="716" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Invasion" maxvalue="1">
+      <value val="1">
+        <exp str="(SMAD &amp; CDH2) | CTNNB1"/>
+      </value>
+      <annotation>
+        <comment>- TGF-b induces MMP-2 and MMP-9 expresion but requires p38 MapK for this PMID:15492828, 22614218
+
+- CTNNB1 induces transcription of MMPs see survival map
+
+- Shown that p38 MapK induces MMP transcription (AP-1 binding sites in promoter) and TGFbeta is required PMID:24464212
+
+- N-cadherin is required for TGFbeta induced invasion PMID:15331629
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="714" y="658" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="EMT" maxvalue="1">
+      <value val="1">
+        <exp str="CDH2 &amp; !CDH1"/>
+      </value>
+      <annotation>
+        <comment>EMT=absence of epithelial markers and presence of mesenchymal markers:known as full EMT; single cell movement 
+PMID:21412939, 21740232, 17344479</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="208" y="659" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Apoptosis" maxvalue="1">
+      <value val="1">
+        <exp str="(p53 | p63 | p73 | miR200 | miR34) &amp; !ZEB2 &amp; !AKT1 &amp; !ERK"/>
+      </value>
+      <annotation>
+        <comment>-p53 =&gt; anoikis PMID:23388179
+
+-Akt1 =| anoikis PMID:15299029
+
+-p63 =| anoikis via integrin beta4 PMID:16715076
+
+-miR34 =&gt; apoptosis 
+(by inhibiting anti-apoptotic gene BCL2)
+PMID:21706478
+
+-miR200 =| XIAP PMID:21993663
+
+-ERK inhibits apoptosis through Bcl2, Bcl-XL and Mcl-1 PMID:23085856
+
+-Zeb2 =| apoptosis PMID:19706487
+
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="1153" y="634" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CellCycleArrest" maxvalue="1">
+      <value val="1">
+        <exp str="(miR203 | miR200 | miR34 | ZEB2 | p21) &amp; !AKT1"/>
+      </value>
+      <annotation>
+        <comment>- miR34 inhibits cell cycle progression by inhibiting Cyclin D1 activity.
+PMID:22113133
+
+-miR203 inhibits cell cycle by targeting CDK6
+PMID:19843643
+
+-miR200 -| CCNE2
+PMID: 22183793
+
+Only Akt1 is required for proliferation 16982699
+
+Zeb2 =| CyclinD PMID:19706487
+
+ERK activates proliferation 
+PMID:24217646
+
+miR34 =&gt; cell cycle (E2F genes)
+PMID:21706478</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="930" y="673" width="95" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="GF" maxvalue="1">
+      <value val="1">
+        <exp str="!CDH1 &amp; (GF | CDH2)"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="5" y="231" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="TGFbeta" maxvalue="1">
+      <value val="1">
+        <exp str="(ECMicroenv | NICD) &amp; !CTNNB1"/>
+      </value>
+      <annotation>
+        <comment>- miR203 -| smad4: transcriptional component of the TGF-b pathway
+PMID: 19843643
+
+- miR200 -|Smad2 and 3
+PMID: 23492772,
+
+- CTNNB1 -&gt; Bambi -| TGF-b PMID:14660579)
+
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="103" y="7" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="p21" maxvalue="1">
+      <value val="1">
+        <exp str="((SMAD &amp; NICD) | p63 | p53 | p73 | AKT2) &amp; !(AKT1 | ERK)"/>
+      </value>
+      <annotation>
+        <comment>p63 =&gt; p21
+Murray‑Zmijewski F, Lane DP,
+Bourdon JC. p53/p63/p73 isoforms: an orchestra of isoforms to harmonise
+cell differentiation and response to stress. Cell Death Differ 2006; 13(6):962‑972.
+
+- TP53 =&gt; CellCycleArrest
+p53-&gt;Apoptosis by binding of several Bcl-2 family proteins leading to changed permeability of the mitochondrial membrane 
+p53-&gt;apotosis by binding to pro- anti-apoptotitc BCL-2 family thereby modulating their function towards initiation of apoptosis
+p53-&gt;Puma and NOXA-&gt;apoptosis transcriptionally
+
+p53 induces expression of pro-apoptotic genes  with higher levels than p63/73. It also modulates anti-and pro-apoptotic proteins in their function. So p53 is more efficient in inducing apoptosis	
+
+- TP63 =&gt; CellCycleArrest
+p63-&gt;Apoptosis transcriptionally by inducing expression of CD95, TNF-R, TRAIL-R and Bax
+PMID:
+
+Although p63 can activate transcription of certain p53-target genes, the expression is less high PMID:11423969, 12163168
+	
+- TP73 =&gt; CellCycleArrest
+p73-&gt;Apoptosis transcriptionally e.g. Bax, PUMA, NOXA, Bad, Bak, CD95, TRAIL-R, TNF-R
+PMID:18955976	
+
+p73 can induce transcription of certain p53-target genes involved in apoptosis but not all and if it can the expression of the target genes is less than for p53-induced gene expression PMID:9823311, 12163168
+
+- AKT =| CellCycleArrest
+AKT activates CyclinD1 (FOXO3a?)
+AKT =&gt; MDM2 =| TP53 =&gt; Apoptosis
+
+Notch is required for growth arrest by TGF-beta PMID:17325209
+
+- Snai1 and Twist cooperate in inhibition of p21 expression PMID:15555546
+
+-AKT2 induces cell cycle arrest by keeping p21 into the nucleus PMID:16982699, PMID:24194853
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="995" y="542" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CDH1" maxvalue="1">
+      <value val="1">
+        <exp str="!TWIST1 &amp; !SNAI2 &amp; !ZEB1 &amp; !ZEB2 &amp; !SNAI1 &amp; !AKT2"/>
+      </value>
+      <annotation>
+        <comment>- AKT1 down-regulation repressed cdh1 expression 
+PMID:16365168
+
+- Snai1 inhibits Cdh1 but requires Akt2 for it 
+PMID:22158034
+
+-AKT2 -&gt; Dab2 -| Cdh1 
+PMID:22796940
+
+-AKT2 require Snai1 to inhibit Cdh1 
+PMID:22158034
+
+- Synergistic effect of Zeb1 &amp; Snai2 on repression CDH1 
+PMID:21593765
+
+- Zeb1 and Zeb2 are required to collaborate with Snai2 to repress CDH1 
+PMID:21199805
+
+- Twist1 and Snai1 cooperation to repress cdh1 
+PMID:22332917</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="49" y="564" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CDH2" maxvalue="1">
+      <value val="1">
+        <exp str="TWIST1"/>
+      </value>
+      <annotation>
+        <comment>- Twist activates transcription of CDH2 PMID:22945800
+
+- shSnai2 has no effect on CDH2 gene expression PMID:22332917
+
+-AKT1 down-regulation enhanced cdh2 expression PMID:16365168
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="226" y="530" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="VIM" maxvalue="1">
+      <value val="1">
+        <exp str="CTNNB1 | ZEB2"/>
+      </value>
+      <annotation>
+        <comment>- AKT&amp;-&gt;VIM by phosphorylating it, thereby blocking degradation PMID:21686283	
+
+- CTNNB1-&gt;VIM PMID:12750294	
+
+- ZEB2-&gt; Vim transcriptionally PMID:17719575, 23143680
+
+- Snai2 not involved for VIM expression PMID:21199805	
+
+- Twist1 not involved for VIM expression PMID:22006115	
+
+- Notch =| Vimentin shown in double mutant Notch1 up APC down mutant compared to APC down mutant 22863622
+
+- AKT2 -&gt; vim increasing its mRNA stability / increasing efficiency of RNA translation PMID:20109457, 16365168
+
+- p38_MAPK inhibition increased expression of vimentin PMID:21098640
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="411" y="582" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="TWIST1" maxvalue="1">
+      <value val="1">
+        <exp str="CTNNB1 | NICD | SNAI1"/>
+      </value>
+      <annotation>
+        <comment>- NICD-&gt;Twist1 
+transcriptionally  
+PMID:22581828
+
+- CTNNB1-&gt;Twist1  
+transcriptionally 
+PMID:20182623
+
+- Snai1-&gt;Twist1 
+post-transcriptionally (increased protein stability) ?
+PMID:21317430
+
+- AKT =&gt; Twist1
+by phosphorylation and stabilization 
+PMID: 20400976</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="252" y="279" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="SNAI1" maxvalue="1">
+      <value val="1">
+        <exp str="(NICD | TWIST1) &amp; !miR203 &amp; !miR34 &amp; !p53 &amp; !CTNNB1"/>
+      </value>
+      <annotation>
+        <comment>- NICD-&gt;Snai1 
+PMID:18427106
+
+- Twist1-&gt;Snai1 
+PMID:21199805
+
+- AKT-&gt;Snai1 
+transcriptional 
+PMID:22332917
+
+- miR203-|Snai1 
+PMID:22514743
+
+- miR34-| Snai1
+PMID:22134354
+
+- p53-|Snai1 
+via complex formation with mdm2 
+PMID:20385133
+
+-CTNNB1 -&gt; miR-30e -| Snai1 PMID:20372961, PMID:21633953
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="315" y="440" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="SNAI2" maxvalue="1">
+      <value val="1">
+        <exp str="(TWIST1 | CTNNB1 | NICD) &amp; !miR200 &amp; !p53 &amp; !miR203"/>
+      </value>
+      <annotation>
+        <comment>Snai2 alone cannot induce EMT 
+PMID: 21199805
+
+- Twist1-&gt;Snai2 
+transcriptionally 
+PMID:21199805	
+
+- b-catenin-&gt;Wnt pathway-&gt;Snai2 
+PMID:16179074	
+
+- NICD-&gt;Snai2 
+transcriptionally 
+PMID:17984306, 18663143
+
+- miR200-|Snai2 
+PMID:22370643	
+
+- p53-|Snai2 
+via mdm2 
+PMID:19448627	
+
+- miR203 -| Snai2
+PMID:23354685
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="461" y="410" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="ZEB1" maxvalue="1">
+      <value val="1">
+        <exp str="((TWIST1 &amp; SNAI1) | CTNNB1 | SNAI2 | NICD) &amp; !miR200"/>
+      </value>
+      <annotation>
+        <comment>- Snai1 and Twist1 coorperate to activate transcription of Zeb1 
+PMID:21317430	
+
+- Snai2 -&gt; Zeb1 
+PMID:21593765, 21593765
+
+- b-catenin-&gt;WNT_Act-&gt;Zeb1 
+PMID:22080605	
+
+- miR200-|Zeb1	 
+PMID:22753312, 22514743
+
+- NICD =&gt; Zeb1
+PMID: 21463919</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="365" y="313" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="ZEB2" maxvalue="1">
+      <value val="1">
+        <exp str="(SNAI1 | (SNAI2 &amp; TWIST1) | NICD) &amp; !miR200 &amp; !miR203"/>
+      </value>
+      <annotation>
+        <comment>- Snai1 -&gt; Zeb2 
+expression via alternative processing of its mRNA	 
+PMID:18347095	
+
+- Twist1 &amp; Snai2 cooperate to activate transcription of Zeb2 
+PMID:21199805	
+
+- miR200 -| Zeb2 
+PMID:22514743,22753312
+
+- miR203-|Zeb2 
+PMID:22514743, 21159887
+
+- NICD =&gt; Zeb2
+PMID: 21463919</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="490" y="469" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="AKT1" maxvalue="1">
+      <value val="1">
+        <exp str="CTNNB1 &amp; (NICD | TGFbeta | GF | CDH2) &amp; !p53 &amp; !miR34 &amp; !CDH1"/>
+      </value>
+      <annotation>
+        <comment>AKT seems to be needed for EMT
+
+- NICD =&gt; AKT
+NICD activates AKT via inhibition of PTEN through HES1 expression 
+PMID:19609265
+
+- CTNNB1 =&gt; AKT
+WNT-signaling leads to expression of HES1; HES1 inhibits PTEN transcription which inhibits AKT activation 
+PMID:21205878
+
+b-catenin/TCF4 -complex-&gt;AKT1 gene expression 
+PMID:21720709
+
+- TP53 =| AKT
+TP53 inhibits AKT through transcription of PTEN which inhibits AKT activation 
+PMID:18172008
+
+miR34 =| Akt-P mir34 inhibits Akt activation PMID:22419847
+
+TGFbeta =&gt; Akt1 through p38 MapK PMID:14576166
+
+- Cdh2 can polymerise FGFR thereby activating the receptors leading to activation of AKT1 PMID:23975425
+
+- E-cadherin inhibits ligand binding to EGFR at high cell densities     PMID:18726070
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="634" y="198" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="DKK1" maxvalue="1">
+      <value val="1">
+        <exp str="CTNNB1 | NICD"/>
+      </value>
+      <annotation>
+        <comment>DKK1 is able to induce apoptosis through JNK (independently of WNT pathway)
+PMID: 17141200
+
+CTNNB1 =&gt; DKK1
+PMID:</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="307" y="110" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CTNNB1" maxvalue="1">
+      <value val="1">
+        <exp str="!DKK1 &amp; !p53 &amp; !AKT1 &amp; !miR34 &amp; !miR200 &amp; !CDH1 &amp; !CDH2 &amp; !p63"/>
+      </value>
+      <annotation>
+        <comment>CTNNB1 stands for CTNNB1 nuclear in the model (thus activating transcription form)
+
+- NICD-&gt;DKK-|WNT-signaling.
+PMID:17143565
+DKK1 is methylated in colon cancer =&gt; need to be mutated (DKK1=0) when simulating colon cancer
+PMID: 21953410
+
+- AKT =| CTNNB1 or AKT =&gt; CTNNB1
+PMID: ???
+Phosphorylation of β-Catenin in the cytosol by AKT Promotes β-Catenin Transcriptional Activity, Fang et al.
+PMID: 17287208
+Akt1 phosphorylates  β-Catenin in the nucleus and this leads to export of  β-Catenin to the cytosol PMID:19158508
+
+- CDH1-| WNT-signaling by forming complex with b-catenin 
+PMID:22007144, 20173740
+
+-CHD2 -| wnt-signaling by forming also complexes with b-catenin 
+PMID:15331629
+
+- miR34 targets  
+PMID:22024162
+
+-Twist1 -| cdh1 -| CTNNB1
+PMID:21284870
+
+- miR200 -|CTNNB1
+PMID: 19703993, 19931509
+
+- p63 =| CTNNB1 via increased transcription of APC PMID:12750249
+
+- p53 =| CTNBB1 via activation of nuclear GSK3 =| CTNNB1 PMID:12048243 and via inhibition of TCF4 transcriptioin PMID:14990988
+
+- CTNNB1 activation alone is not sufficient to induce EMT and did not induce expression of mesenchymal markers PMID:18483246</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="404" y="170" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="NICD" maxvalue="1">
+      <value val="1">
+        <exp str="!p53 &amp; !p63 &amp; !p73 &amp; !miR200 &amp; !miR34 &amp; ECMicroenv"/>
+      </value>
+      <annotation>
+        <comment>NICD = Notch1
+
+Not included: WNT_Act -&gt;Notch2 
+PMID:21437251	
+		
+- p53-|PSEN-&gt;NICD p53 down-regulates PSEN which is required for cleavage of the intracellular domain of the Notch receptor (NICD) 
+PMID:19609265		p
+
+- p63-&gt;Notch 
+Not included in the model.
+It has been described that p63 can induce Notch expression, however this has only been demonstrated in developing keratinocytes and in mature keratinocytes no observation of p63 inducing Notch has been seen 
+PMID:19609265	
+		
+- CTNNB1, p63 and p73-&gt;Jag-&gt;NICD only in neighbouring cells. 
+Not included in the model because this model represents a single cell and not a collection of cells. Therefore p63 and p73-|NICD as it has been shown that cis-interaction between Jag ligands inhibit Notch signaling within the same cell 
+PMID:18660822, 21215938, 9108365, 18758484
+
+- dNp63 isoform of p63 is predominantly expressed and inhibits NICD 
+PMID:20090763, 22041817, 22399352
+
+- p53 =| NICD
+PMID: 
+
+- p73 =| NICD
+PMID:
+
+- miR200 =| NICD
+PMID:  21224848
+
+- miR34 -| Notch1 = NICD
+PMID: 20351093
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="190" y="82" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="p63" maxvalue="1">
+      <value val="1">
+        <exp str="DNAdamage &amp; !NICD &amp; !AKT1 &amp; !AKT2 &amp; !p53 &amp; !miR203"/>
+      </value>
+      <annotation>
+        <comment>- Notch inhibits p63  
+PMID:19609265, 22041817, 22399351
+
+- Akt inhibits p63 via mdm2 
+PMID:19609265, 21088494
+
+- p53 inhibits p63 via mdm2 
+PMID:20399660 ,14707283
+
+- miR203 =| p63 
+PMID:18311128, 18483491</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="1108" y="27" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="p53" maxvalue="1">
+      <value val="1">
+        <exp str="(DNAdamage | CTNNB1 | NICD | miR34) &amp; !SNAI2 &amp; !p73 &amp; !AKT1 &amp; !AKT2"/>
+      </value>
+      <annotation>
+        <comment>- NICD =&gt; TP53 
+Not included in the model because cell type dependent (keratinocytes: PMID...)
+
+- p73 represses P53 transcription and/or by binding to p53 or by activation mdm2 expression PMID:21216303, 11245471
+
+- Snai2 inhibits p53 expression 
+PMID:17344479	
+
+- AKT1 inhibits p53 via MDM2 PMID:19609265	
+
+- AKT2 inhibits p53 via MDMD2 PMID:19079138
+
+-CTNNB1 =&gt; TP53 at protein level partially through inhibiting mdm2 PMID:10357817  and through p14ARF PMID:15111320
+
+-NICD =&gt; myc =&gt; p14ARF=&gt;p53 PMID: 22022427, 15838523
+
+-mir34a =| sirt1 =| p53 PMID:21278451
+
+- p38 =&gt; TP53
+Activated p38 phosphorylates p53 at several residues, including Ser33, and thereby increases the transcriptional activity of p53. Activated p53 then induces apoptosis in cells that have suffered extensive DNA damage. When the intensity of the damage is moderate, however, the cell can repair the damage and escape apoptotic cell death by down-regulating p38-p53 signaling. Under these conditions, p53-induced Wip1 phosphatase interacts with activated p38 and selectively dephosphorylates p38 at the phospho-Thr180 residue, thereby reducing its kinase activity towards p53.
+PMID:21614932
+
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="1152" y="249" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="p73" maxvalue="1">
+      <value val="1">
+        <exp str="DNAdamage &amp; !p53 &amp; !ZEB1 &amp; !AKT1 &amp; !AKT2"/>
+      </value>
+      <annotation>
+        <comment>- p53 inhibit p73 expression 
+PMID:15254416	
+
+- AKT1  inhibits p73 via mdm2 
+PMID:19609265,21093410
+
+- Zeb1 -| p73 expression 
+PMID:15254416	
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="1097" y="428" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="miR200" maxvalue="1">
+      <value val="1">
+        <exp str="(p63 | p53 | p73) &amp; !(AKT2 | SNAI1 | SNAI2 | ZEB1 | ZEB2)"/>
+      </value>
+      <annotation>
+        <comment>- p53 activates transcription of miR200c 
+PMID:22332917
+
+- p63 and p73 activate transcription of miR200 family 
+PMID:21917857
+
+- Zeb1 and Zeb2 inhibit expression of miR200 
+PMID:22514743, 22753312
+
+- Snai1 and Snai2 inhibit expression of miR200 
+PMID:22514743
+
+-AKT2 inhibits miR200 
+PMID:19825827, 11866432
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="885" y="369" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="miR203" maxvalue="1">
+      <value val="1">
+        <exp str="p53 &amp; !(SNAI1 | ZEB1 | ZEB2)"/>
+      </value>
+      <annotation>
+        <comment>- p53 activates transcription of miR203 in keratinocytes 
+PMID:20702634
+
+-Snai1 inhibits expression of miR203 
+PMID:21159887
+
+- Zeb1 and Zeb2 inhibit expression of miR203 
+PMID:22514743
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="769" y="284" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="miR34" maxvalue="1">
+      <value val="1">
+        <exp str="!(SNAI1 | ZEB1 | ZEB2) &amp; (p53 | p73) &amp; AKT2 &amp; !p63 &amp; !AKT1"/>
+      </value>
+      <annotation>
+        <comment>- miR34 is a p53 target gene 
+PMID:17554199, 22024162
+
+- Snai1 and Zeb1 regulate miR34 expression 
+PMID:22134354	
+
+- p63 represses miR34 
+PMID:20090763	
+
+-p63 inhibits migration by inhibiting formation of lamellipodia PMID:23913939, 21760596
+
+- p73 induces gene transcription miR34 
+PMID:22160706	
+
+-AKT1 inhibits miR34 PMID:19825827
+
+-AKT2 induces mir34 PMID:19825827</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="823" y="503" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="AKT2" maxvalue="1">
+      <value val="1">
+        <exp str="TWIST1 &amp; (TGFbeta | GF | CDH2 | NICD) &amp; !(miR203 | miR34 | p53)"/>
+      </value>
+      <annotation>
+        <comment>- Twist induces AKT2 transcription PMID:17332325, 18281467
+
+- knock down of Akt1 increases AKT2 PMID:19825827
+
+- miR203 inhibits AKT2 PMID:21354697
+ 
+- miR34 inhibits AKT2 PMID:23147995
+
+- TGFbeta activates PI3K through association of its receptors with p85 subunit (PI3K) PMID:15657037
+
+- Cdh2 can polymerise FGFR thereby activating the receptors leading to activation of AKT1 &amp; AKT2 PMID:23975425
+
+- P53 inhibits AKT2 through PTEN
+
+- E-cadherin inhibits ligand binding to EGFR at high cell densities     PMID:18726070
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="583" y="122" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="ERK" maxvalue="1">
+      <value val="1">
+        <exp str="(SMAD | CDH2 | GF | NICD) &amp; !AKT1"/>
+      </value>
+      <annotation>
+        <comment>- TGFbeta activates ERK PMID:22614218, 22880011
+
+- Chd2 can activates ERK via FGFR polymerisation PMID:23975425
+
+- AKT1 inhibits ERK signaling
+PMID:16365168, 16618711
+Rommel et al., 1999; Zimmermann and Moelling, 1999
+
+- NICD -&gt; HES1 -| DUSP1/6 -| pERK PMID: 24509876</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="113" y="363" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="SMAD" maxvalue="1">
+      <value val="1">
+        <exp str="TGFbeta &amp; !miR200 &amp; !miR203"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="315" y="43" width="75" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <edge id="DKK1:CTNNB1" from="DKK1" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="384,122 388,122 436,122 436,167" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:miR200" from="p53" to="miR200" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1174,276 1174,281 1174,386 967,386 962,386" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:miR203" from="p53" to="miR203" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1162,276 1162,281 1162,302 851,302 846,302" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:miR34" from="p53" to="miR34" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1209,276 1209,281 1209,524 905,524 900,524" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:p73" from="p53" to="p73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1199,276 1199,281 1198,440 1174,440" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:p21" from="p53" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1204,276 1204,281 1204,560 1077,560 1072,560" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:SNAI2" from="p53" to="SNAI2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1150,273 533,273 533,407 533,407" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:SNAI1" from="p53" to="SNAI1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1150,260 1147,260 349,256 349,437" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:NICD" from="p53" to="NICD" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1150,247 198,242 198,114 198,109" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:p63" from="p53" to="p63" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1216,247 1216,247 1216,45 1190,45 1185,45" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:AKT1" from="p53" to="AKT1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1150,254 683,254 683,230 683,225" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:Apoptosis" from="p53" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1220,276 1220,281 1220,544 1220,631" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:CTNNB1" from="p53" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1190,247 1190,170 486,170 481,170" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:AKT2" from="p53" to="AKT2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1159,247 1159,140 683,140 660,140" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Migration:Metastasis" from="Migration" to="Metastasis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="662,743 662,758 662,765" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:CDH1" from="AKT2" to="CDH1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="581,140 88,140 88,561" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:p21" from="AKT2" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="660,134 683,134 1026,134 1026,539" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:p53" from="AKT2" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="660,149 661,150 683,150 1184,150 1184,246" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:Migration" from="AKT2" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="631,149 631,156 631,241 631,713" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:miR200" from="AKT2" to="miR200" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="660,122 683,122 953,123 953,366 953,366" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:miR34" from="AKT2" to="miR34" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="654,149 654,153 841,153 841,500" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:p73" from="AKT2" to="p73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="647,149 647,158 1120,156 1120,425" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:p63" from="AKT2" to="p63" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="621,120 621,26 1105,24" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH2:EMT" from="CDH2" to="EMT" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="253,557 253,562 253,592 253,656" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH2:CTNNB1" from="CDH2" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="224,538 204,538 207,193 401,193" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH2:AKT2" from="CDH2" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="303,549 308,549 617,549 617,156 617,149" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH2:ERK" from="CDH2" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="224,552 147,552 147,396 147,390" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH2:Invasion" from="CDH2" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="273,557 273,562 273,626 756,624 756,655" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH2:GF" from="CDH2" to="GF" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="224,545 53,545 53,263 53,258" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH2:AKT1" from="CDH2" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="303,557 308,557 645,557 645,230 645,225" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p73:miR200" from="p73" to="miR200" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1095,440 927,440 927,401 927,396" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p73:miR34" from="p73" to="miR34" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1123,455 1123,460 1123,514 905,514 900,514" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p73:p21" from="p73" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1142,455 1142,460 1142,545 1077,545 1072,545" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p73:p53" from="p73" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1174,434 1179,434 1191,434 1191,281 1191,276" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p73:NICD" from="p73" to="NICD" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1139,426 1139,93 272,93 267,93" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p73:Apoptosis" from="p73" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1159,455 1159,460 1159,459 1159,631" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:ERK" from="GF" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="72,258 72,263 72,376 110,376" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:AKT2" from="GF" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="54,229 54,146 580,146" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:AKT1" from="GF" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="76,229 76,229 76,213 631,213" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:GF" from="GF" to="GF" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="78,229 78,216 105,216 105,243 82,243" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:p63" from="NICD" to="p63" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="231,80 231,19 1135,18 1135,24" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:SNAI1" from="NICD" to="SNAI1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="238,109 238,114 238,449 312,449" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:TWIST1" from="NICD" to="TWIST1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="259,109 259,114 259,206 259,276" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:SNAI2" from="NICD" to="SNAI2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="263,109 263,237 498,237 498,407" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:AKT1" from="NICD" to="AKT1" minvalue="1" sign="positive">
+      <annotation>
+        <comment>through HES1</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="267,83 272,83 698,83 698,195" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:DKK1" from="NICD" to="DKK1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="253,109 253,125 304,125" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:ZEB1" from="NICD" to="ZEB1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="267,109 266,265 403,266 403,310" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:ZEB2" from="NICD" to="ZEB2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="229,109 229,114 229,491 487,491" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:p21" from="NICD" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="267,97 272,97 1064,97 1064,539" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:p53" from="NICD" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="267,88 272,88 1174,88 1174,246" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:TGFbeta" from="NICD" to="TGFbeta" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="188,92 154,92 154,39 154,34" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:ERK" from="NICD" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="188,109 164,110 164,360" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="NICD:AKT2" from="NICD" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="267,105 613,105 613,119" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB2:VIM" from="ZEB2" to="VIM" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="511,496 511,543 462,543 462,579" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB2:miR200" from="ZEB2" to="miR200" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="567,491 572,491 914,491 914,401 914,396" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB2:miR203" from="ZEB2" to="miR203" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="553,467 553,467 553,308 766,308" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB2:miR34" from="ZEB2" to="miR34" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="526,496 526,501 526,507 820,507" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB2:CellCycleArrest" from="ZEB2" to="CellCycleArrest" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="517,496 517,498 515,601 934,604 934,670" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB2:Apoptosis" from="ZEB2" to="Apoptosis" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="541,496 541,501 541,644 1150,644" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB2:CDH1" from="ZEB2" to="CDH1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="488,487 124,487 124,561" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI1:TWIST1" from="SNAI1" to="TWIST1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="320,438 320,374 320,311 320,306" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI1:ZEB1" from="SNAI1" to="ZEB1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="378,438 378,438 378,401 378,345 378,340" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI1:ZEB2" from="SNAI1" to="ZEB2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="392,454 397,454 501,454 501,466" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI1:miR200" from="SNAI1" to="miR200" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="390,438 390,438 390,390 882,390" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI1:miR203" from="SNAI1" to="miR203" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="358,438 358,302 766,302" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI1:miR34" from="SNAI1" to="miR34" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="364,467 364,472 364,526 820,526" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI1:CDH1" from="SNAI1" to="CDH1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="313,444 118,444 118,561" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB1:miR200" from="ZEB1" to="miR200" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="413,340 413,345 413,358 909,358 909,366" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB1:miR203" from="ZEB1" to="miR203" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="427,311 427,311 427,293 766,293" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB1:miR34" from="ZEB1" to="miR34" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="442,338 447,338 849,338 849,500" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB1:p73" from="ZEB1" to="p73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="442,333 447,333 1114,333 1114,425" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ZEB1:CDH1" from="ZEB1" to="CDH1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="363,326 102,326 102,561" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFbeta:AKT1" from="TGFbeta" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="180,30 185,30 704,30 704,195" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFbeta:AKT2" from="TGFbeta" to="AKT2" minvalue="1" sign="positive">
+      <annotation>
+        <comment>- TGFbeta activates PI3K by association with p85 PMID15657037</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="171,34 171,39 642,38 642,119" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFbeta:SMAD" from="TGFbeta" to="SMAD" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="160,34 160,39 160,59 312,59" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ECMicroenv:TGFbeta" from="ECMicroenv" to="TGFbeta" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="59,47 59,47 59,24 100,24" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ECMicroenv:NICD" from="ECMicroenv" to="NICD" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="60,76 60,81 60,100 187,100" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:SNAI2" from="miR200" to="SNAI2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="895,396 895,401 895,429 543,429 538,429" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:ZEB1" from="miR200" to="ZEB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="918,367 918,352 420,353 420,345 420,340" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:ZEB2" from="miR200" to="ZEB2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="900,396 900,401 900,482 572,482 567,482" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:NICD" from="miR200" to="NICD" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="924,367 924,102 272,102 267,102" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:CellCycleArrest" from="miR200" to="CellCycleArrest" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="950,396 950,401 950,488 950,670" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:CTNNB1" from="miR200" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="883,378 458,378 458,202 458,197" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:Apoptosis" from="miR200" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="962,394 967,394 1037,394 1038,502 1178,502 1178,631" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:Migration" from="miR200" to="Migration" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="908,396 908,401 908,726 712,726" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR200:SMAD" from="miR200" to="SMAD" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="933,367 933,53 797,51 397,51 392,51" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ERK:Migration" from="ERK" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="157,390 157,396 157,732 612,732" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ERK:Apoptosis" from="ERK" to="Apoptosis" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="174,390 174,396 174,638 1150,638" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ERK:p21" from="ERK" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="138,390 138,563 992,563" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH1:EMT" from="CDH1" to="EMT" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="85,591 85,596 85,672 205,672" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH1:CTNNB1" from="CDH1" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="93,562 93,188 401,188" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH1:AKT1" from="CDH1" to="AKT1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="126,570 131,570 654,570 654,230 654,225" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CDH1:GF" from="CDH1" to="GF" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="47,576 37,576 37,263 37,258" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TWIST1:CDH2" from="TWIST1" to="CDH2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="267,306 267,311 267,498 267,527" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TWIST1:ZEB1" from="TWIST1" to="ZEB1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="306,283 306,283 306,283 388,283 388,310" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TWIST1:SNAI2" from="TWIST1" to="SNAI2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="309,306 309,311 309,418 458,418" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TWIST1:SNAI1" from="TWIST1" to="SNAI1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="284,306 284,311 284,440 312,440" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TWIST1:ZEB2" from="TWIST1" to="ZEB2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="276,306 276,311 276,480 487,480" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TWIST1:AKT2" from="TWIST1" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="309,277 309,277 309,151 580,149" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TWIST1:CDH1" from="TWIST1" to="CDH1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="250,303 64,303 64,561" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMT:Migration" from="EMT" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="255,686 255,723 612,723" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:p21" from="AKT1" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="711,215 716,215 1003,215 1003,539" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:p73" from="AKT1" to="p73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="711,203 716,203 1128,203 1128,425" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:p63" from="AKT1" to="p63" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="689,196 689,196 689,38 1105,38" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:p53" from="AKT1" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="711,199 716,199 1167,199 1167,246" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:CellCycleArrest" from="AKT1" to="CellCycleArrest" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="711,223 719,223 719,571 979,572 979,670" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:CTNNB1" from="AKT1" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="660,196 660,188 486,188 481,188" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:Apoptosis" from="AKT1" to="Apoptosis" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="711,210 716,210 724,210 1090,210 1091,650 1150,650" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:miR34" from="AKT1" to="miR34" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="675,225 675,519 820,519" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:Migration" from="AKT1" to="Migration" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="661,225 661,686 661,713" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:ERK" from="AKT1" to="ERK" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="632,225 176,225 176,361 176,360" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Invasion:Migration" from="Invasion" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="763,685 763,720 712,720" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI2:miR200" from="SNAI2" to="miR200" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="538,424 543,424 886,424 886,401 886,396" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI2:ZEB1" from="SNAI2" to="ZEB1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="485,408 485,367 402,367 402,345 402,340" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI2:ZEB2" from="SNAI2" to="ZEB2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="511,437 511,442 511,450 511,466" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI2:p53" from="SNAI2" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="519,408 519,408 519,267 1149,267" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SNAI2:CDH1" from="SNAI2" to="CDH1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="459,426 111,426 111,561" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63:miR200" from="p63" to="miR200" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1106,49 1079,49 943,50 943,366" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63:miR34" from="p63" to="miR34" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1106,44 867,44 867,500" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63:p21" from="p63" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1106,54 1048,54 1048,539" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63:NICD" from="p63" to="NICD" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1153,25 1153,12 215,13 215,79" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63:Apoptosis" from="p63" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1185,40 1190,40 1241,40 1241,631" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63:CTNNB1" from="p63" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1121,54 1121,59 1121,108 461,111 461,167" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63:Migration" from="p63" to="Migration" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="1185,51 1190,51 1293,51 1290,734 716,734 712,734" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SMAD:p21" from="SMAD" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="392,58 397,58 1032,58 1032,539" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SMAD:Invasion" from="SMAD" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="392,61 397,61 763,61 763,655" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="SMAD:ERK" from="SMAD" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="313,65 149,65 149,360" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="VIM:Migration" from="VIM" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="488,592 493,592 621,592 621,713" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:SNAI1" from="miR34" to="SNAI1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="821,530 356,533 356,472 356,467" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:CTNNB1" from="miR34" to="CTNNB1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="856,501 856,218 465,219 465,202 465,197" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:CellCycleArrest" from="miR34" to="CellCycleArrest" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="870,530 870,533 987,532 987,670" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:NICD" from="miR34" to="NICD" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="821,512 246,512 246,114 246,109" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:AKT1" from="miR34" to="AKT1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="821,501 698,501 698,230 698,225" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:p53" from="miR34" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="900,509 905,509 1182,509 1182,281 1182,276" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:Apoptosis" from="miR34" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="861,530 861,653 1150,653" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR34:AKT2" from="miR34" to="AKT2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="877,501 877,501 877,129 683,129 660,129" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="DNAdamage:p63" from="DNAdamage" to="p63" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1216,15 1168,15 1168,24" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="DNAdamage:p53" from="DNAdamage" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1273,29 1273,34 1273,264 1234,264 1229,264" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="DNAdamage:p73" from="DNAdamage" to="p73" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1284,29 1284,34 1284,447 1179,447 1174,447" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR203:SNAI1" from="miR203" to="SNAI1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="789,311 789,316 789,450 397,450 392,450" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR203:ZEB2" from="miR203" to="ZEB2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="804,311 804,316 804,470 572,470 567,470" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR203:p63" from="miR203" to="p63" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="799,282 799,31 1105,31" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR203:CellCycleArrest" from="miR203" to="CellCycleArrest" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="816,311 816,316 816,589 964,590 964,670" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR203:SNAI2" from="miR203" to="SNAI2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="774,311 774,316 774,417 543,417 538,417" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR203:AKT2" from="miR203" to="AKT2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="785,282 785,145 683,145 660,145" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miR203:SMAD" from="miR203" to="SMAD" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="824,282 824,282 824,65 397,65 392,65" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p21:CellCycleArrest" from="p21" to="CellCycleArrest" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1017,569 1017,599 1017,670" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:VIM" from="CTNNB1" to="VIM" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="445,197 445,202 445,279 445,579" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:AKT1" from="CTNNB1" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="481,179 486,179 676,179 676,195" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:TWIST1" from="CTNNB1" to="TWIST1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="402,197 402,202 297,202 297,276" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:SNAI2" from="CTNNB1" to="SNAI2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="452,197 452,202 452,229 509,228 509,272 509,407" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:ZEB1" from="CTNNB1" to="ZEB1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="419,197 419,229 419,310" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:DKK1" from="CTNNB1" to="DKK1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="402,178 339,178 339,138 339,137" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:p53" from="CTNNB1" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="481,175 486,175 1200,175 1200,246" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:SNAI1" from="CTNNB1" to="SNAI1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="402,173 333,173 333,437" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:Invasion" from="CTNNB1" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="481,184 746,184 746,655" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CTNNB1:TGFbeta" from="CTNNB1" to="TGFbeta" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="402,179 145,179 145,39 145,34" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+  </graph>
+</gxl>

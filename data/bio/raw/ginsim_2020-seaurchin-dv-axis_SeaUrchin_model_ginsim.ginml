@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="SeaUrchin_Echinodal_07122017_dose_extraLevel_testadmp1_bmpat2" nodeorder="Nodal_In Lefty_In Panda Bmp2_4_In Chordin_In Tolloid_In Admp1_In Admp2_Trans Wnt_In Alk4_5_7 Smad2_3_4 Nodal Bmp2_4 Lefty Chordin Admp1 Goosecoid FoxA Brachyury Onecut FGFA Repressor_R1 Alk1_2_3_6 Smad1_4_5_8 Tbx2_3 Smad6 IrxA Admp2 Frz Glypican5 Univin">
+    <nodestyle background="#eeeeee" foreground="#000000" text="#000000" shape="ELLIPSE" width="85" height="35"/>
+    <nodestyle name="Inputs" background="#ffffcc" foreground="#000000" text="#000000" width="100"/>
+    <nodestyle name="Dorsal" background="#ccffcc" foreground="#000000" width="95"/>
+    <nodestyle name="Ventral" background="#ccffff" foreground="#000000" width="90"/>
+    <nodestyle name="Ciliary" background="#ffcccc" foreground="#000000"/>
+    <nodestyle name="Multilevel ventral" background="#ccffff" foreground="#000000" shape="RECTANGLE" width="80" height="40"/>
+    <nodestyle name="Multilevel input" background="#ffffcc" foreground="#000000" shape="RECTANGLE"/>
+    <nodestyle name="Multilevel dorsal" background="#ccffcc" foreground="#000000" shape="RECTANGLE" width="90"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="3" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle name="Edge style" pattern="DASH"/>
+    <edgestyle name="To update" color="#000000"/>
+    <edgestyle name="Edge style 2" color="#999999"/>
+    <node id="Nodal_In" maxvalue="3" input="true">
+      <annotation>
+        <comment>Nodal now has 2 levels in order to better represent the decreasing in this morphogen between the Ventral zone (where it is produced) and the Ciliary/Dorsal zones (where it difuses).
+
+See Nodal (output)</comment>
+      </annotation>
+      <nodevisualsetting x="420" y="52" style="Multilevel input"/>
+    </node>
+    <node id="Lefty_In" maxvalue="1" input="true">
+      <annotation>
+        <comment>Lefty represses Nodal when it is present at low level of expression (in the ciliary region in WT). At high dose of Nodal (Nodal:2 in ventral region after specification), lefty cannot repress it.
+
+See Lefty (output)</comment>
+      </annotation>
+      <nodevisualsetting x="298" y="52" style="Inputs"/>
+    </node>
+    <node id="Panda" maxvalue="1" input="true">
+      <annotation>
+        <comment>In the early stage, Panda constrains Nodal expression.
+In a Panda KO, Nodal is expressed everywhere in the early stage.
+
+Haillot E, Molina MD, Lapraz F, Lepage T (2015) The Maternal Maverick/GDF15-like TGF-β Ligand Panda Directs Dorsal-Ventral Axis Formation by Restricting Nodal Expression in the Sea Urchin Embryo. PLOS Biology 13(9): e1002247. https://doi.org/10.1371/journal.pbio.1002247</comment>
+      </annotation>
+      <nodevisualsetting x="528" y="54" style="Inputs"/>
+    </node>
+    <node id="Bmp2_4_In" maxvalue="2" input="true">
+      <annotation>
+        <comment>See bmp2-4 (output)</comment>
+      </annotation>
+      <nodevisualsetting x="885" y="53" style="Multilevel input"/>
+    </node>
+    <node id="Chordin_In" name="Chordin_In" maxvalue="2" input="true">
+      <annotation>
+        <comment>See chordin (output)</comment>
+      </annotation>
+      <nodevisualsetting x="1007" y="52" style="Multilevel input"/>
+    </node>
+    <node id="Tolloid_In" maxvalue="1" input="true">
+      <annotation>
+        <comment>Tolloid (BMP1). Protease.
+
+Activity required at the dorsal area, but expressed ubiquitously at an early stage.
+Degrades Chordin which inhibits Alk1/2/3/6 signalling. Represented by a direct positive activation by tolloid onto ALK1/2/3/6, but remember that it acts on Chordin.
+
+Lapraz F, Besnardeau L, Lepage T (2009) Patterning of the Dorsal-Ventral Axis in Echinoderms: Insights into the Evolution of the BMP-Chordin Signaling Network. PLOS Biology 7(11): e1000248. https://doi.org/10.1371/journal.pbio.1000248</comment>
+      </annotation>
+      <nodevisualsetting x="1114" y="52" style="Inputs"/>
+    </node>
+    <node id="Admp1_In" maxvalue="1" input="true">
+      <annotation>
+        <comment>See admp1 (output)</comment>
+      </annotation>
+      <nodevisualsetting x="765" y="53" style="Inputs"/>
+    </node>
+    <node id="Admp2_Trans" maxvalue="1">
+      <annotation>
+        <comment>ADMP2 is produced by 
+
+admp2 is not an input, allowing for simulations where it starts with being present (value 1) and then slowly fades away (tends to 0).</comment>
+      </annotation>
+      <nodevisualsetting x="1220" y="52" style="Inputs"/>
+    </node>
+    <node id="Wnt_In" maxvalue="1" input="true">
+      <annotation>
+        <comment>Wnt is active in the vegetative pole.
+It induces Admp2 expression through the Frizzled receptor(s).</comment>
+      </annotation>
+      <nodevisualsetting x="1333" y="51" style="Inputs"/>
+    </node>
+    <node id="Alk4_5_7" name="Alk4_5_7" maxvalue="2">
+      <value val="2">
+        <exp str="Nodal_In:3 &amp; Univin"/>
+      </value>
+      <value val="1">
+        <exp str="(Nodal_In:1 &amp; !Lefty_In &amp; Univin &amp; !Panda) | (Nodal_In:2 &amp; Univin &amp; !Panda)"/>
+      </value>
+      <annotation>
+        <comment>ALK= Activin-like Kinases. Type I receptor of Nodal ligand. Have a serine-threonine kinase activity to activate Smad2-3.
+ALK function (active/inactive) depends on which from Lefty or Nodal gets the upper hand. WT suppose Lefty &gt; Nodal.
+
+Massagué, J., and Chen, Y.-G. (2000). Controlling TGF-β signaling. Genes &amp; Development 14, 627–644.
+
+#Alk takes a level 1 for expression in WT condition, but can reach a higher level of expression in case of an injection of Nodal #(simulated by overexpression). In this case, Alk is activated regardless of the presence of Lefty nor Panda.
+</comment>
+      </annotation>
+      <nodevisualsetting x="422" y="137" style="Multilevel ventral"/>
+    </node>
+    <node id="Smad2_3_4" name="Smad2_3_4" maxvalue="2">
+      <value val="2">
+        <exp str="Alk4_5_7:2"/>
+      </value>
+      <value val="1">
+        <exp str="Alk4_5_7:1 &amp; !Smad1_4_5_8 &amp; !Smad6"/>
+      </value>
+      <annotation>
+        <comment>SMAD=combination of two homologous proteins SMA+MAD. 
+Intracellular component that transduce Nodal signalling into the nucleus by being phosphorylated by active Alk receptors. May require several Smad, Co-Smad and Co-factors. Receptor substrate. Transcriptional regulator.
+
+Competes for Smad4 with Smad1/5/8.
+Massagué, J., and Chen, Y.-G. (2000). Controlling TGF-β signaling. Genes &amp; Development 14, 627–644.
+
+#Smad is activated at level 1 in WT, but can reach a level 2 if the upstream cascade is overexpressed.</comment>
+      </annotation>
+      <nodevisualsetting x="421" y="218" style="Multilevel ventral"/>
+    </node>
+    <node id="Nodal" maxvalue="2">
+      <value val="2">
+        <exp str="Smad2_3_4"/>
+      </value>
+      <annotation>
+        <comment>Member of the TGF-beta family. Governs the specification of the Ventral region and activate the expression of the signalling cascade for the Dorsal region (repressed locally but also exported in the Dorsal region).
+
+Molina, M.D., de Crozé, N., Haillot, E., and Lepage, T. (2013). Nodal: Master And Commander Of The Dorsal-Ventral And Left-Right Axes In The Sea Urchin Embryo. Curr. Opin. Genet. Dev. 23, 445–453.</comment>
+      </annotation>
+      <nodevisualsetting x="26" y="289" style="Multilevel ventral"/>
+    </node>
+    <node id="Bmp2_4" maxvalue="2">
+      <value val="2">
+        <exp str="Smad2_3_4:2"/>
+      </value>
+      <value val="1">
+        <exp str="Smad2_3_4:1"/>
+      </value>
+      <annotation>
+        <comment>Member of the TGF-Beta family. Paracrine factor. Highly diffusible. Ligand.
+
+Gilbert, S.F. (2014). Developmental biology (Sunderland, MA, USA: Sinauer Associates, Inc., Publishers).
+
+# Bmp2-4 can takes four different levels in the input :
+# 0 if inactive
+# 1 if active at low level (requires admp1 to trigger Alk1_2_3_6)
+# 2 if active at high level (can trigger Alk1_2_3_6 without the help of admp1)
+# 3 if extremely activated (by injection of mRNA for example)</comment>
+      </annotation>
+      <nodevisualsetting x="119" y="289" style="Multilevel ventral"/>
+    </node>
+    <node id="Lefty" maxvalue="1">
+      <value val="1">
+        <exp str="Smad2_3_4"/>
+      </value>
+      <annotation>
+        <comment>Member of the TGFbeta family. Diffusible (faster than Nodal). Long range Nodal antagonist. Competitive binding to the receptors ActRIIA and ActRIIB. Monomeric. Feedback inhibitor of Nodal signalling. Reaction-diffusion mechanism.
+
+Saijoh, Y., Adachi, H., Sakuma, R., Yeo, C.-Y., Yashiro, K., Watanabe, M., Hashiguchi, H., Mochida, K., Ohishi, S., Kawabata, M., et al. (2000). Left–Right Asymmetric Expression of lefty2 and nodal Is Induced by a Signaling Pathway that Includes the Transcription Factor FAST2. Molecular Cell 5, 35–47.
+
+Sakuma, R., Ohnishi Yi, Y., Meno, C., Fujii, H., Juan, H., Takeuchi, J., Ogura, T., Li, E., Miyazono, K., and Hamada, H. (2002). Inhibition of Nodal signalling by Lefty mediated through interaction with common receptors and efficient diffusion. Genes Cells 7, 401–412.
+</comment>
+      </annotation>
+      <nodevisualsetting x="213" y="293" style="Ventral"/>
+    </node>
+    <node id="Chordin" maxvalue="1">
+      <value val="1">
+        <exp str="Smad2_3_4"/>
+      </value>
+      <annotation>
+        <comment>Paracrine factor. Antagonist of BMP. In extracellular space, binds directly to BMP2-4 by cysteine rich modules to prevents its complexing with the receptors. Complexing can be cleaved by metalloprotease Tolloid (Bmp1), freeing Bmp2/4 from Chordin in the dorsal area.
+
+Larraín, J., Bachiller, D., Lu, B., Agius, E., Piccolo, S., and De Robertis, E.M. (2000). BMP-binding modules in chordin: a model for signalling regulation in the extracellular space. Development 127, 821–830.
+</comment>
+      </annotation>
+      <nodevisualsetting x="312" y="292" style="Ventral"/>
+    </node>
+    <node id="Admp1" maxvalue="1">
+      <value val="1">
+        <exp str="Smad2_3_4 &amp; !Smad1_4_5_8"/>
+      </value>
+      <annotation>
+        <comment>ADMP=Anti-Dorsalizing morphogenis protein. Ligand part of the BMP family.
+
+ADMP1 is expressed on the ventral side (activated by Smad2), but repressed on the dorsal side (by Smad1) when signal from Bmp2/4 is sufficient (level 2).
+Morphogen/expander relationship between E=ADMP1 and M=BMP2/4. See Averbukh et al. (2014) for an example between dpp/pentagon.
+
+In BMP2/4 KO, ADMP1 cannot compensate.
+ADMP1 overexpression by RNA injection is only temporary. A strong but non-lasting effect is observed on Alk1/2/3/6.
+
+Inna Averbukh, Danny Ben-Zvi, Siddhartha Mishra, Naama Barkai (2014). Scaling morphogen gradients during tissue growth by a cell division rule. Development 141: 2150-2156.
+
+#Upon overexpression of Nodal, the dorsal cascade is partially activated by bmp2-4 (downstream of the Nodal cascade), therefore #in this case a ventral specification takes place but with adpm1 being repressed and the receptors of the dorsal signalling partially #present. This is why admp1 repression from Smad1_4_5_8 is only happening when Smad is at level 1,
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="630" y="277" style="Ventral"/>
+    </node>
+    <node id="Goosecoid" maxvalue="1">
+      <value val="1">
+        <exp str="Smad2_3_4"/>
+      </value>
+      <annotation>
+        <comment>Organizer gene. Transcriptional repressor. Homeobox gene.
+
+Angerer, L.M., Oleksyn, D.W., Levine, A.M., Li, X., Klein, W.H., and Angerer, R.C. (2001). Sea urchin goosecoid function links fate specification along the animal-vegetal and oral-aboral embryonic axes. Development 128, 4393–4404.
+
+Molina, M.D., de Crozé, N., Haillot, E., and Lepage, T. (2013). Nodal: master and commander of the dorsal–ventral and left–right axes in the sea urchin embryo. Current Opinion in Genetics &amp; Development 23, 445–453.
+</comment>
+      </annotation>
+      <nodevisualsetting x="389" y="426" style="Ventral"/>
+    </node>
+    <node id="FoxA" maxvalue="1">
+      <value val="1">
+        <exp str="(FoxA | Brachyury) &amp; !Repressor_R1"/>
+      </value>
+      <annotation>
+        <comment>FOX=Forkhead Transcription Factor. Important in rendoderm and stomodeum specification.
+
+Oliveri, P., Walton, K.D., Davidson, E.H., and McClay, D.R. (2006). Repression of mesodermal fate by foxa, a key endoderm regulator of the sea urchin embryo. Development 133, 4173–4181.
+
+Tu, Q., Brown, C.T., Davidson, E.H., and Oliveri, P. (2006). Sea urchin Forkhead gene family: phylogeny and embryonic expression. Dev. Biol. 300, 49–62.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="157" y="489" style="Ventral"/>
+    </node>
+    <node id="Brachyury" maxvalue="1">
+      <value val="1">
+        <exp str="!Repressor_R1 | FoxA"/>
+      </value>
+      <annotation>
+        <comment>Transcription factor, T-box type. Acts during mesoderm specification.
+
+Gilbert, S.F. (2014). Developmental biology (Sunderland, MA, USA: Sinauer Associates, Inc., Publishers).
+</comment>
+      </annotation>
+      <nodevisualsetting x="317" y="489" style="Ventral"/>
+    </node>
+    <node id="Onecut" name="onecut" maxvalue="1">
+      <value val="1">
+        <exp str="!(IrxA | Goosecoid | Smad2_3_4)"/>
+      </value>
+      <annotation>
+        <comment>Protein containing a cut domain and an homeodomain. Trancriptional regulator. DNA binding by motif recognition.
+
+Nguyen, D.N., Rohrbaugh, M., and Lai, Z. (2000). The Drosophila homolog of Onecut homeodomain proteins is a neural-specific transcriptional activator with a potential role in regulating neural differentiation. Mech. Dev. 97, 57–72.
+</comment>
+      </annotation>
+      <nodevisualsetting x="725" y="418" style="Ciliary"/>
+    </node>
+    <node id="FGFA" name="FGFA" maxvalue="1">
+      <value val="1">
+        <exp str="!Smad2_3_4 &amp; !Smad1_4_5_8:2"/>
+      </value>
+      <annotation>
+        <comment>Member of the FGF family. FGF= Fibroblast Growth Factors. Paracrine factors regulating cell proliferation and differenciation. Involved in the regulation of the morphogenesis of the skeleton.
+
+Rottinger, E., Saudemont, A., Duboc, V., Besnardeau, L., McClay, D., and Lepage, T. (2007). FGF signals guide migration of mesenchymal cells, control skeletal morphogenesis and regulate gastrulation during sea urchin development. Development 135, 353–365.
+</comment>
+      </annotation>
+      <nodevisualsetting x="725" y="368" style="Ciliary"/>
+    </node>
+    <node id="Repressor_R1" maxvalue="1">
+      <value val="1">
+        <exp str="!Goosecoid"/>
+      </value>
+      <annotation>
+        <comment>Unknown Repressor. Allow the indirect induction of brachyury and FoxA by the transcriptional repressor goosecoid.
+
+Molina, M.D., de Crozé, N., Haillot, E., and Lepage, T. (2013). Nodal: master and commander of the dorsal–ventral and left–right axes in the sea urchin embryo. Current Opinion in Genetics &amp; Development 23, 445–453.
+</comment>
+      </annotation>
+      <nodevisualsetting x="240" y="433" style="Dorsal"/>
+    </node>
+    <node id="Alk1_2_3_6" name="Alk1_2_3_6" maxvalue="2">
+      <value val="2">
+        <exp str="Bmp2_4_In:2 &amp; !Chordin_In:2"/>
+      </value>
+      <value val="1">
+        <exp str="((Bmp2_4_In:1 &amp; Admp1_In &amp; !Chordin_In) | (Bmp2_4_In:1 &amp; Admp1_In &amp; Tolloid_In &amp; !Chordin_In:2)) &amp; !Bmp2_4_In:2"/>
+        <exp str="((Admp2_Trans &amp; !Chordin_In) | (Admp2_Trans &amp; Tolloid_In &amp; !Chordin_In:2)) &amp; !Bmp2_4_In:2"/>
+      </value>
+      <annotation>
+        <comment>ALK= Activin-like Kinases. Type I receptor of BMP ligand like bmp2-4 and amdp1. Have a serine-threonine kinase activity to activate Smad1-8.
+
+ALK function (active/inactive) depends on which from Chordin or bmp2-4 gets the upper hand. WT suppose Chordin &gt; bmp2-4.
+ADMP1 is not sufficient alone to stimulate it.
+
+Massagué, J., and Chen, Y.-G. (2000). Controlling TGF-β signaling. Genes &amp; Development 14, 627–644.
+
+# Alk is active at level 1 in WT situation, meaning bmp is present at high level or present with admp1. Also, if chordin is present, Alk is activated only of tolloid is degrading chordin.
+# Alk can reach a level 2 if BMP is extremely high (injection of mRNA, bmp:3)</comment>
+      </annotation>
+      <nodevisualsetting x="1004" y="146" style="Multilevel dorsal"/>
+    </node>
+    <node id="Smad1_4_5_8" name="Smad1_4_5_8" maxvalue="2">
+      <value val="2">
+        <exp str="(Alk1_2_3_6:2 &amp; !Smad2_3_4:2) | (Alk1_2_3_6:1 &amp; !Smad2_3_4)"/>
+      </value>
+      <value val="1">
+        <exp str="Alk1_2_3_6:2 &amp; Smad2_3_4:2"/>
+      </value>
+      <annotation>
+        <comment>SMAD=combination of two homologous proteins SMA+MAD. 
+Intracellular component that transduce BMP signalling into the nucleus by being phosphorylated by active Alk receptors. May require several Smad, Co-Smad and Co-factors. Receptor substrate. Transcriptional regulator.
+
+Competes for Smad4 with Smad2/3.
+Massagué, J., and Chen, Y.-G. (2000). Controlling TGF-β signaling. Genes &amp; Development 14, 627–644.
+
+#Smad is activated at level 1 in WT, but can reach a level 2 if the upstream cascade is overexpressed.
+# Smad1_4_5_8 is activated in WT condition at level 2. In this case, it can activate the total downstream cascade.
+# However, Smad reaches only the level 1 in case of weak expression, when a high activation of Alk1_2_3_6:2 is counter-balanced by the repression of Smad2_3_4:2 also present at high level. This is the case in the condition of Nodal overexpression.</comment>
+      </annotation>
+      <nodevisualsetting x="1003" y="218" style="Multilevel dorsal"/>
+    </node>
+    <node id="Tbx2_3" name="Tbx2_3" maxvalue="1">
+      <value val="1">
+        <exp str="Smad1_4_5_8:2"/>
+      </value>
+      <annotation>
+        <comment>Codes for T-box proteins that regulate activity of other genes by binding to specific region of DNA. Transcription factor. Tbx2-3 governs EMT=Epithelial-Mesenchymal Transition.
+
+Gilbert, S.F. (2014). Developmental biology (Sunderland, MA, USA: Sinauer Associates, Inc., Publishers).
+</comment>
+      </annotation>
+      <nodevisualsetting x="1096" y="316" style="Dorsal"/>
+    </node>
+    <node id="Smad6" name="Smad6" maxvalue="1">
+      <value val="1">
+        <exp str="Tbx2_3 | Smad1_4_5_8:2"/>
+      </value>
+      <annotation>
+        <comment>Co-Smad. required by Smads to regulate transcription inside the nucleus.
+
+Massagué, J., and Chen, Y.-G. (2000). Controlling TGF-β signaling. Genes &amp; Development 14, 627–644.
+</comment>
+      </annotation>
+      <nodevisualsetting x="833" y="320" style="Dorsal"/>
+    </node>
+    <node id="IrxA" name="IrxA" maxvalue="1">
+      <value val="1">
+        <exp str="Tbx2_3"/>
+      </value>
+      <annotation>
+        <comment>Cluster of 3 Irx genes. IRX= Iroquoit Gene Family. Encodes homeoproteins. PLays a role in specification of territories and development of patterns. Act via protein-protein interaction
+
+Gómez-Skarmeta, J.L., and Modolell, J. (2002). Iroquois genes: genomic organization and function in vertebrate neural development. Current Opinion in Genetics &amp; Development 12, 403–408.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1098" y="417" style="Dorsal"/>
+    </node>
+    <node id="Admp2" name="Admp2" maxvalue="1">
+      <value val="1">
+        <exp str="Frz | Smad1_4_5_8:2"/>
+      </value>
+      <annotation>
+        <comment>ADMP=Anti-Dorsalizing morphogenis protein. Ligand part of the BMP family.
+
+ADMP2 is expressed both in the border ectoderm (following Wnt signalling, propagating to the dorsal area, activating the dorsal pathway) and dorsally in a positive feedback loop down stream of BMP signalling. (Note: This is unusual, ADMP are in general repressed by BMP signalling).
+
+Gaviño, M.A., and Reddien, P.W. (2011). A Bmp/Admp Regulatory Circuit Controls Maintenance and Regeneration of Dorsal-Ventral Polarity in Planarians. Current Biology 21, 294–299.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1327" y="219" style="Dorsal"/>
+    </node>
+    <node id="Frz" maxvalue="1">
+      <value val="1">
+        <exp str="Wnt_In"/>
+      </value>
+      <annotation>
+        <comment>Frizzled
+Receptor for Wnt ligands. Activates admp2 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="1326" y="138" style="Dorsal"/>
+    </node>
+    <node id="Glypican5" name="Glypican5" maxvalue="1">
+      <value val="1">
+        <exp str="Smad1_4_5_8:2"/>
+      </value>
+      <nodevisualsetting x="1255" y="417" style="Dorsal"/>
+    </node>
+    <node id="Univin" name="Univin" maxvalue="1">
+      <value val="1">
+        <exp str="!Smad1_4_5_8:2"/>
+      </value>
+      <nodevisualsetting x="650" y="52" style="Ventral"/>
+    </node>
+    <edge id="Alk4_5_7:Smad2_3_4" from="Alk4_5_7" to="Smad2_3_4" effects="1:positive 2:positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Admp2_Trans:Alk1_2_3_6" from="Admp2_Trans" to="Alk1_2_3_6" minvalue="1" sign="positive">
+      <edgevisualsetting points="1272,173" anchor="NE" style=""/>
+    </edge>
+    <edge id="Nodal_In:Alk4_5_7" from="Nodal_In" to="Alk4_5_7" effects="1:positive 2:positive 3:positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:FGFA" from="Smad2_3_4" to="FGFA" minvalue="1" sign="negative">
+      <edgevisualsetting points="470,386" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Onecut" from="Smad2_3_4" to="Onecut" minvalue="1" sign="negative">
+      <edgevisualsetting points="453,420" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Goosecoid" from="Smad2_3_4" to="Goosecoid" minvalue="1" sign="positive">
+      <edgevisualsetting points="433,301" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Nodal" from="Smad2_3_4" to="Nodal" minvalue="1" sign="positive">
+      <edgevisualsetting points="70,220" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Bmp2_4" from="Smad2_3_4" to="Bmp2_4" effects="1:positive 2:positive">
+      <edgevisualsetting points="162,230" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Lefty" from="Smad2_3_4" to="Lefty" minvalue="1" sign="positive">
+      <edgevisualsetting points="262,240" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Chordin" from="Smad2_3_4" to="Chordin" minvalue="1" sign="positive">
+      <edgevisualsetting points="358,249" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Smad1_4_5_8" from="Smad2_3_4" to="Smad1_4_5_8" effects="1:negative 2:negative">
+      <edgevisualsetting points="815,236" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad2_3_4:Admp1" from="Smad2_3_4" to="Admp1" minvalue="1" sign="positive">
+      <edgevisualsetting points="501,294" anchor="NE" style=""/>
+    </edge>
+    <edge id="Bmp2_4_In:Alk1_2_3_6" from="Bmp2_4_In" to="Alk1_2_3_6" effects="1:positive 2:positive">
+      <edgevisualsetting points="925,153" anchor="NE" style=""/>
+    </edge>
+    <edge id="Wnt_In:Frz" from="Wnt_In" to="Frz" minvalue="1" sign="positive">
+      <edgevisualsetting points="1372,111" anchor="NE" style=""/>
+    </edge>
+    <edge id="Brachyury:FoxA" from="Brachyury" to="FoxA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Admp1_In:Alk1_2_3_6" from="Admp1_In" to="Alk1_2_3_6" minvalue="1" sign="positive">
+      <edgevisualsetting points="809,165" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbx2_3:Smad6" from="Tbx2_3" to="Smad6" minvalue="1" sign="positive">
+      <edgevisualsetting points="969,343" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbx2_3:IrxA" from="Tbx2_3" to="IrxA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Panda:Alk4_5_7" from="Panda" to="Alk4_5_7" minvalue="1" sign="negative">
+      <edgevisualsetting points="578,148" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:Smad6" from="Smad1_4_5_8" to="Smad6" minvalue="2" sign="positive">
+      <edgevisualsetting points="1033,328" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:Tbx2_3" from="Smad1_4_5_8" to="Tbx2_3" minvalue="2" sign="positive">
+      <edgevisualsetting points="1077,326" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:FGFA" from="Smad1_4_5_8" to="FGFA" minvalue="2" sign="negative">
+      <edgevisualsetting points="1055,386" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:Admp2" from="Smad1_4_5_8" to="Admp2" minvalue="2" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:Smad2_3_4" from="Smad1_4_5_8" to="Smad2_3_4" minvalue="1" sign="negative">
+      <edgevisualsetting points="656,245" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:Admp1" from="Smad1_4_5_8" to="Admp1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1007,294" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:Univin" from="Smad1_4_5_8" to="Univin" minvalue="2" sign="negative">
+      <edgevisualsetting points="706,225" anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad1_4_5_8:Glypican5" from="Smad1_4_5_8" to="Glypican5" minvalue="2" sign="positive">
+      <edgevisualsetting points="1304,247 1302,370" anchor="NE" style=""/>
+    </edge>
+    <edge id="Univin:Alk4_5_7" from="Univin" to="Alk4_5_7" minvalue="1" sign="positive">
+      <edgevisualsetting points="685,166" anchor="NE" style=""/>
+    </edge>
+    <edge id="Lefty_In:Alk4_5_7" from="Lefty_In" to="Alk4_5_7" minvalue="1" sign="negative">
+      <edgevisualsetting points="340,155" anchor="NE" style=""/>
+    </edge>
+    <edge id="IrxA:Onecut" from="IrxA" to="Onecut" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Repressor_R1:Brachyury" from="Repressor_R1" to="Brachyury" minvalue="1" sign="negative">
+      <edgevisualsetting points="365,458" anchor="NE" style=""/>
+    </edge>
+    <edge id="Repressor_R1:FoxA" from="Repressor_R1" to="FoxA" minvalue="1" sign="negative">
+      <edgevisualsetting points="203,451" anchor="NE" style=""/>
+    </edge>
+    <edge id="Goosecoid:Repressor_R1" from="Goosecoid" to="Repressor_R1" minvalue="1" sign="negative">
+      <edgevisualsetting points="366,443" anchor="NE" style=""/>
+    </edge>
+    <edge id="Goosecoid:Onecut" from="Goosecoid" to="Onecut" minvalue="1" sign="negative">
+      <edgevisualsetting points="524,445" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tolloid_In:Alk1_2_3_6" from="Tolloid_In" to="Alk1_2_3_6" minvalue="1" sign="positive">
+      <edgevisualsetting points="1160,154" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxA:Brachyury" from="FoxA" to="Brachyury" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxA:FoxA" from="FoxA" to="FoxA" minvalue="1" sign="positive">
+      <edgevisualsetting points="176,451 117,452 118,507" anchor="NE" style=""/>
+    </edge>
+    <edge id="Frz:Admp2" from="Frz" to="Admp2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1372,194" anchor="NE" style=""/>
+    </edge>
+    <edge id="Chordin_In:Alk1_2_3_6" from="Chordin_In" to="Alk1_2_3_6" effects="1:negative 2:negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Smad6:Smad2_3_4" from="Smad6" to="Smad2_3_4" minvalue="1" sign="negative">
+      <edgevisualsetting points="487,338" anchor="NE" style=""/>
+    </edge>
+    <edge id="Alk1_2_3_6:Smad1_4_5_8" from="Alk1_2_3_6" to="Smad1_4_5_8" effects="1:positive 2:positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+  </graph>
+</gxl>

@@ -1,0 +1,299 @@
+{
+  "name": "MODEL1504170001",
+  "nodes": [
+    "SCR",
+    "PLT",
+    "ARF",
+    "AUXIAA",
+    "AUXIN",
+    "SHR",
+    "JKD",
+    "MGP",
+    "WOX5"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ]
+  ],
+  "logic": {
+    "SCR": "AND(SHR, SCR, OR(JKD, NOT(MGP)))",
+    "PLT": "ARF",
+    "ARF": "NOT(AUXIAA)",
+    "AUXIAA": "NOT(AUXIN)",
+    "AUXIN": "AUXIN",
+    "SHR": "SHR",
+    "JKD": "AND(SHR, SCR)",
+    "MGP": "AND(SHR, SCR, NOT(WOX5))",
+    "WOX5": "AND(ARF, SHR, SCR, OR(NOT(MGP), WOX5))"
+  },
+  "reference": null,
+  "description": "Imported from biomodels_MODEL1504170001.xml",
+  "source": "BioModels",
+  "gates": {
+    "SCR": {
+      "inputs": [
+        "SHR",
+        "JKD",
+        "MGP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "PLT": {
+      "inputs": [
+        "ARF"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "ARF": {
+      "inputs": [
+        "AUXIAA"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "AUXIAA": {
+      "inputs": [
+        "AUXIN"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "AUXIN": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "SHR": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "JKD": {
+      "inputs": [
+        "SCR",
+        "SHR"
+      ],
+      "gate": "AND",
+      "parameters": {}
+    },
+    "MGP": {
+      "inputs": [
+        "SCR",
+        "SHR",
+        "WOX5"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "WOX5": {
+      "inputs": [
+        "SCR",
+        "ARF",
+        "SHR",
+        "MGP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 4,
+    "IDENTITY": 1,
+    "NOT": 2,
+    "AND": 1,
+    "CANALISING": 1
+  },
+  "n": 9,
+  "n_edges": 15,
+  "edges": [
+    {
+      "source": "SHR",
+      "target": "SCR",
+      "type": "regulation"
+    },
+    {
+      "source": "JKD",
+      "target": "SCR",
+      "type": "regulation"
+    },
+    {
+      "source": "MGP",
+      "target": "SCR",
+      "type": "regulation"
+    },
+    {
+      "source": "ARF",
+      "target": "PLT",
+      "type": "regulation"
+    },
+    {
+      "source": "AUXIAA",
+      "target": "ARF",
+      "type": "regulation"
+    },
+    {
+      "source": "AUXIN",
+      "target": "AUXIAA",
+      "type": "regulation"
+    },
+    {
+      "source": "SHR",
+      "target": "JKD",
+      "type": "regulation"
+    },
+    {
+      "source": "SCR",
+      "target": "JKD",
+      "type": "regulation"
+    },
+    {
+      "source": "SHR",
+      "target": "MGP",
+      "type": "regulation"
+    },
+    {
+      "source": "SCR",
+      "target": "MGP",
+      "type": "regulation"
+    },
+    {
+      "source": "WOX5",
+      "target": "MGP",
+      "type": "regulation"
+    },
+    {
+      "source": "ARF",
+      "target": "WOX5",
+      "type": "regulation"
+    },
+    {
+      "source": "SHR",
+      "target": "WOX5",
+      "type": "regulation"
+    },
+    {
+      "source": "SCR",
+      "target": "WOX5",
+      "type": "regulation"
+    },
+    {
+      "source": "MGP",
+      "target": "WOX5",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    3,
+    0,
+    2,
+    1,
+    1,
+    4,
+    1,
+    2,
+    1
+  ]
+}

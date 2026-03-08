@@ -1,0 +1,444 @@
+{
+  "name": "drosophila_sp",
+  "nodes": [
+    "SLP",
+    "wg",
+    "Wg",
+    "en",
+    "En",
+    "hh",
+    "Hh",
+    "ptc",
+    "Ptc",
+    "ci",
+    "Ci",
+    "CN",
+    "CIA"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "SLP": "INPUT",
+    "wg": "AND(CIA, SLP, NOT(CN))",
+    "Wg": "wg",
+    "en": "NOT(SLP)",
+    "En": "en",
+    "hh": "En",
+    "Hh": "hh",
+    "ptc": "AND(NOT(En), NOT(CN))",
+    "Ptc": "AND(ptc, NOT(Hh))",
+    "ci": "NOT(En)",
+    "Ci": "ci",
+    "CN": "Ptc",
+    "CIA": "NOT(Ptc)"
+  },
+  "reference": "Albert & Othmer, 2003",
+  "description": "Drosophila Segment Polarity (Single Cell Projection)",
+  "source": "Literature",
+  "gates": {
+    "SLP": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "wg": {
+      "inputs": [
+        "SLP",
+        "CN",
+        "CIA"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "Wg": {
+      "inputs": [
+        "wg"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "en": {
+      "inputs": [
+        "SLP"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "En": {
+      "inputs": [
+        "en"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "hh": {
+      "inputs": [
+        "En"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Hh": {
+      "inputs": [
+        "hh"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "ptc": {
+      "inputs": [
+        "En",
+        "CN"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "Ptc": {
+      "inputs": [
+        "Hh",
+        "ptc"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "ci": {
+      "inputs": [
+        "En"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "Ci": {
+      "inputs": [
+        "ci"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "CN": {
+      "inputs": [
+        "Ptc"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "CIA": {
+      "inputs": [
+        "Ptc"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 1,
+    "CANALISING": 2,
+    "IDENTITY": 6,
+    "NOT": 3,
+    "NOR": 1
+  },
+  "n": 13,
+  "n_edges": 16,
+  "edges": [
+    {
+      "source": "CIA",
+      "target": "wg",
+      "type": "regulation"
+    },
+    {
+      "source": "SLP",
+      "target": "wg",
+      "type": "regulation"
+    },
+    {
+      "source": "CN",
+      "target": "wg",
+      "type": "regulation"
+    },
+    {
+      "source": "wg",
+      "target": "Wg",
+      "type": "regulation"
+    },
+    {
+      "source": "SLP",
+      "target": "en",
+      "type": "regulation"
+    },
+    {
+      "source": "en",
+      "target": "En",
+      "type": "regulation"
+    },
+    {
+      "source": "En",
+      "target": "hh",
+      "type": "regulation"
+    },
+    {
+      "source": "hh",
+      "target": "Hh",
+      "type": "regulation"
+    },
+    {
+      "source": "En",
+      "target": "ptc",
+      "type": "regulation"
+    },
+    {
+      "source": "CN",
+      "target": "ptc",
+      "type": "regulation"
+    },
+    {
+      "source": "ptc",
+      "target": "Ptc",
+      "type": "regulation"
+    },
+    {
+      "source": "Hh",
+      "target": "Ptc",
+      "type": "regulation"
+    },
+    {
+      "source": "En",
+      "target": "ci",
+      "type": "regulation"
+    },
+    {
+      "source": "ci",
+      "target": "Ci",
+      "type": "regulation"
+    },
+    {
+      "source": "Ptc",
+      "target": "CN",
+      "type": "regulation"
+    },
+    {
+      "source": "Ptc",
+      "target": "CIA",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    2,
+    1,
+    0,
+    1,
+    3,
+    1,
+    1,
+    1,
+    2,
+    1,
+    0,
+    2,
+    1
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/drosophila_sp.json",
+  "category": "Decider"
+}

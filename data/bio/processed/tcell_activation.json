@@ -1,0 +1,393 @@
+{
+  "name": "tcell_activation",
+  "nodes": [
+    "TCR",
+    "CD4",
+    "CD28",
+    "LAT",
+    "ZAP70",
+    "LCK",
+    "FYN",
+    "PLCg",
+    "RasGRP",
+    "NFAT",
+    "AP1",
+    "IL2"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0
+    ]
+  ],
+  "logic": {
+    "TCR": "INPUT",
+    "CD4": "INPUT",
+    "CD28": "INPUT",
+    "LCK": "OR(CD4, FYN)",
+    "FYN": "TCR",
+    "ZAP70": "AND(TCR, LCK)",
+    "LAT": "ZAP70",
+    "PLCg": "LAT",
+    "RasGRP": "LAT",
+    "NFAT": "PLCg",
+    "AP1": "RasGRP",
+    "IL2": "AND(NFAT, AP1, CD28)"
+  },
+  "reference": "Klamt et al., BMC Bioinformatics 2006",
+  "description": "Simplified T-cell receptor signalling leading to IL-2 production",
+  "source": "CellCollective/Literature",
+  "essentiality": {
+    "TCR": 1,
+    "CD4": 0,
+    "CD28": 1,
+    "LAT": 1,
+    "ZAP70": 1,
+    "LCK": 1,
+    "FYN": 0,
+    "PLCg": 1,
+    "RasGRP": 1,
+    "NFAT": 1,
+    "AP1": 1,
+    "IL2": 1
+  },
+  "gates": {
+    "TCR": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "CD4": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "CD28": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "LAT": {
+      "inputs": [
+        "ZAP70"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "ZAP70": {
+      "inputs": [
+        "TCR",
+        "LCK"
+      ],
+      "gate": "AND",
+      "parameters": {}
+    },
+    "LCK": {
+      "inputs": [
+        "CD4",
+        "FYN"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "FYN": {
+      "inputs": [
+        "TCR"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "PLCg": {
+      "inputs": [
+        "LAT"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "RasGRP": {
+      "inputs": [
+        "LAT"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "NFAT": {
+      "inputs": [
+        "PLCg"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "AP1": {
+      "inputs": [
+        "RasGRP"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "IL2": {
+      "inputs": [
+        "CD28",
+        "NFAT",
+        "AP1"
+      ],
+      "gate": "AND",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 3,
+    "IDENTITY": 6,
+    "AND": 2,
+    "OR": 1
+  },
+  "n": 12,
+  "n_edges": 13,
+  "edges": [
+    {
+      "source": "ZAP70",
+      "target": "LAT",
+      "type": "regulation"
+    },
+    {
+      "source": "TCR",
+      "target": "ZAP70",
+      "type": "regulation"
+    },
+    {
+      "source": "LCK",
+      "target": "ZAP70",
+      "type": "regulation"
+    },
+    {
+      "source": "CD4",
+      "target": "LCK",
+      "type": "regulation"
+    },
+    {
+      "source": "FYN",
+      "target": "LCK",
+      "type": "regulation"
+    },
+    {
+      "source": "TCR",
+      "target": "FYN",
+      "type": "regulation"
+    },
+    {
+      "source": "LAT",
+      "target": "PLCg",
+      "type": "regulation"
+    },
+    {
+      "source": "LAT",
+      "target": "RasGRP",
+      "type": "regulation"
+    },
+    {
+      "source": "PLCg",
+      "target": "NFAT",
+      "type": "regulation"
+    },
+    {
+      "source": "RasGRP",
+      "target": "AP1",
+      "type": "regulation"
+    },
+    {
+      "source": "NFAT",
+      "target": "IL2",
+      "type": "regulation"
+    },
+    {
+      "source": "AP1",
+      "target": "IL2",
+      "type": "regulation"
+    },
+    {
+      "source": "CD28",
+      "target": "IL2",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    2,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/tcell_activation.json",
+  "category": "Processor"
+}

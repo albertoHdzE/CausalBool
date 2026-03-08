@@ -1,0 +1,319 @@
+{
+  "name": "ginsim_2013-drosophila-toll_Toll_Pathway_12Jun2013",
+  "nodes": [
+    "Pelle",
+    "Cactus",
+    "Nec",
+    "Dorsal",
+    "Slmb",
+    "Spz",
+    "MyD88",
+    "Targets",
+    "Tube",
+    "Toll",
+    "Dif"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Pelle": "Tube",
+    "Cactus": "!(Pelle & Slmb)",
+    "Dorsal": "!Cactus",
+    "Spz": "!Nec",
+    "MyD88": "Toll",
+    "Targets": "Dorsal | Dif",
+    "Tube": "MyD88",
+    "Toll": "Spz",
+    "Dif": "!Cactus"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "Pelle": {
+      "inputs": [
+        "Tube"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Cactus": {
+      "inputs": [
+        "Pelle",
+        "Slmb"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Dorsal": {
+      "inputs": [
+        "Cactus"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Spz": {
+      "inputs": [
+        "Nec"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "MyD88": {
+      "inputs": [
+        "Toll"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Targets": {
+      "inputs": [
+        "Dorsal",
+        "Dif"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "Tube": {
+      "inputs": [
+        "MyD88"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Toll": {
+      "inputs": [
+        "Spz"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Dif": {
+      "inputs": [
+        "Cactus"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "IDENTITY": 4,
+    "CUSTOM": 4,
+    "OR": 1
+  },
+  "n": 11,
+  "n_edges": 11,
+  "edges": [
+    {
+      "source": "Pelle",
+      "target": "Cactus",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cactus",
+      "target": "Dorsal",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cactus",
+      "target": "Dif",
+      "type": "inhibition"
+    },
+    {
+      "source": "Nec",
+      "target": "Spz",
+      "type": "inhibition"
+    },
+    {
+      "source": "Dorsal",
+      "target": "Targets",
+      "type": "activation"
+    },
+    {
+      "source": "Slmb",
+      "target": "Cactus",
+      "type": "inhibition"
+    },
+    {
+      "source": "Spz",
+      "target": "Toll",
+      "type": "activation"
+    },
+    {
+      "source": "MyD88",
+      "target": "Tube",
+      "type": "activation"
+    },
+    {
+      "source": "Tube",
+      "target": "Pelle",
+      "type": "activation"
+    },
+    {
+      "source": "Toll",
+      "target": "MyD88",
+      "type": "activation"
+    },
+    {
+      "source": "Dif",
+      "target": "Targets",
+      "type": "activation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1
+  ]
+}

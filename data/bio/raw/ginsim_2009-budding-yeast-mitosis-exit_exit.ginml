@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://gin.univ-mrs.fr/GINsim/GINML_2_1.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+	<graph id="default_name" class="regulatory" nodeorder="Clb2 Cdc20 SecurinPds1 SeparaseEsp1 PP2ACdc55 Cdc5Polo Bub2-Bfa1 Tem1 Cdc15 Net1 Cdc14 Cdh1">
+<node id="Cdc14" maxvalue="1">
+  <parameter val="1"/>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/Q00684"/>
+    </linklist>
+    <comment>Phosphatase required for exit of mitosis.
+Cdc14 reverses the CDK-mediated phosphorylation of Net1, Cdc15 and Cdh1.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="195" y="180" width="60" height="30" backgroundColor="#ffcc99" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Cdc5Polo" maxvalue="1">
+  <parameter idActiveInteractions=" Clb2:Cdc5Polo" val="1"/>
+  <value val="1">
+    <exp str="Clb2 &amp; !Cdh1"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P32562"/>
+    </linklist>
+    <comment>Kinase, phosphorylates Bfa1.
+Essential in budding yeast for Cdc14 activation. ((Jaspersen et al., 1998; Lee et al., 2001; Stegmeier and Amon, 2004), cited in Queralt et al.)</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="297" y="190" width="60" height="30" backgroundColor="#ff99ff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="PP2ACdc55" maxvalue="2">
+  <parameter val="2"/>
+  <parameter idActiveInteractions=" SecurinPds1:PP2ACdc55" val="2"/>
+  <parameter idActiveInteractions=" SeparaseEsp1:PP2ACdc55:1 SecurinPds1:PP2ACdc55" val="2"/>
+  <parameter idActiveInteractions=" SeparaseEsp1:PP2ACdc55:1" val="1"/>
+  <parameter idActiveInteractions=" SeparaseEsp1:PP2ACdc55:2" val="1"/>
+  <parameter idActiveInteractions=" SeparaseEsp1:PP2ACdc55:2 SecurinPds1:PP2ACdc55" val="1"/>
+  <value val="2">
+    <exp str="!SeparaseEsp1 | (SeparaseEsp1:1 &amp; SecurinPds1)"/>
+  </value>
+  <value val="1">
+    <exp str="!(!SeparaseEsp1 | (SeparaseEsp1:1 &amp; SecurinPds1))"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/Q00362"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P23594"/>
+    </linklist>
+    <comment>Type 2A phosphatase.
+Queralt et al. (2006) refer to PP2ACdc55 as a complex consisting of Tpd3 (scaffold protein), either Pph21 or Pph22 (catalytic subunit), and Cdc55 (regulatory subunit, provide substrate specificity).
+In metaphase, PP2ACdc55 prevents premature Net1 phosphorylation and Cdc14 activation. At anaphase onset, PP2ACdc55 activity is downregulated in a separase-dependent manner. (Queralt et al., 2006)
+</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="372" y="366" width="86" height="30" backgroundColor="#ff99ff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="SecurinPds1" maxvalue="1">
+  <parameter val="1"/>
+  <value val="1">
+    <exp str="!Cdc20"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P40316"/>
+    </linklist>
+    <comment>Stoichiometric inhibitor of Esp1 that prevents sister chromatid separation.
+Degradation of Pds1 is necessary for release of Cdc14 from the nucleolus.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="517" y="323" width="81" height="30" backgroundColor="#ff99ff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Bub2-Bfa1" maxvalue="1">
+  <parameter idActiveInteractions=" PP2ACdc55:Bub2-Bfa1" val="1"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Bub2-Bfa1 Cdc5Polo:Bub2-Bfa1" val="1"/>
+  <parameter val="1"/>
+  <value val="1">
+    <exp str="PP2ACdc55 | !Cdc5Polo"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P26448"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P47113"/>
+    </linklist>
+    <comment>Spindle assembly checkpoint proteins. 
+"Budding Uninhibited by Benomyl" 
+Checkpoint protein governed by spindle orientation.
+Cdc5 phosphorylates Bfa1, causing the dissociation of the complex.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="281" y="328" width="80" height="30" backgroundColor="#cccccc" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Clb2" maxvalue="2">
+  <parameter val="2"/>
+  <parameter idActiveInteractions=" Cdc20:Clb2" val="1"/>
+  <value val="2">
+    <exp str="!Cdc20 &amp; !Cdh1"/>
+  </value>
+  <value val="1">
+    <exp str="!Cdh1 &amp; Cdc20"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P24869"/>
+    </linklist>
+    <comment>B-type cyclin essential for mitosis, present in S/G2/M phase (represents both Clb1 and Clb2 in the model).
+Activates CDK-dependent inhibitory phosphorylation of Net1, Cdc15 and Cdh1.
+Two levels to account for partial inhibition by Cdc20 (full inhibition only by Cdh1).</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="443" y="31" width="60" height="30" backgroundColor="#66ff66" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="SeparaseEsp1" maxvalue="2">
+  <parameter val="1"/>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/Q03018"/>
+    </linklist>
+    <comment>Separase protein required for sister chromatid separation.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="516" y="363" width="91" height="30" backgroundColor="#ff99ff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Tem1" maxvalue="1">
+  <parameter val="1"/>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P38987"/>
+    </linklist>
+    <comment>GTP-binding protein and a component of the MEN pathway.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="58" y="304" width="60" height="30" backgroundColor="#00ccff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Net1" maxvalue="2">
+  <parameter idActiveInteractions=" Cdc14:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:2 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:2" val="2"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 Bub2-Bfa1:Net1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 Cdc15:Net1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 Cdc15:Net1 Bub2-Bfa1:Net1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 Bub2-Bfa1:Net1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 Cdc15:Net1 Bub2-Bfa1:Net1" val="1"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1 Cdc15:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Tem1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Net1 Tem1:Net1 Net1:Net1 PP2ACdc55:Net1:1 Cdc15:Net1 Bub2-Bfa1:Net1 Clb2:Net1:1" val="1"/>
+  <value val="2">
+    <exp str="((((Cdc14 &amp; !Net1) | PP2ACdc55) &amp; !Clb2) | PP2ACdc55:2) &amp; !(Cdc15 &amp; Tem1 &amp; !Bub2-Bfa1)"/>
+  </value>
+  <value val="1">
+    <exp str="((Cdc14 &amp; Net1 &amp; !Clb2 &amp; !PP2ACdc55) | (PP2ACdc55:1 &amp; ((!Cdc14 &amp; Clb2:1) | (Cdc14 &amp; Clb2:1)))) &amp; !(Cdc15 &amp; Tem1 &amp; !Bub2-Bfa1)"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P47035"/>
+    </linklist>
+    <comment>Nucleolar protein and a stoichiometric inhibitor of Cdc14.
+inhibited by phosphorylation by Cdk and Cdc5/Polo.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<rect x="24" y="175" width="78" height="30" backgroundColor="#ffcc99" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Cdh1" maxvalue="1">
+  <parameter idActiveInteractions=" Cdc14:Cdh1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Cdh1 Clb2:Cdh1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Cdh1 Cdh1:Cdh1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Cdh1 Cdh1:Cdh1 Clb2:Cdh1:1" val="1"/>
+  <parameter idActiveInteractions=" Cdh1:Cdh1" val="1"/>
+  <parameter idActiveInteractions=" Net1:Cdh1 Cdh1:Cdh1" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Cdh1 Net1:Cdh1 Cdh1:Cdh1" val="1"/>
+  <value val="1">
+    <exp str="(!Clb2:2 &amp; Cdc14 &amp; !Net1) | (Cdh1 &amp; !Clb2)"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P53197"/>
+    </linklist>
+    <comment>Activator of APC-dependent proteolysis; involved in Clb2 and Cdc5 proteolysis.
+Phosphorylation by the CDKs (Clb2) inhibits the binding to the APC.
+The APC core is considered constant throughout the cell cycle, and thus not represented.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="116" y="87" width="60" height="30" backgroundColor="#ff6666" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Cdc15" maxvalue="1">
+  <parameter val="1"/>
+  <parameter idActiveInteractions=" Net1:Cdc15" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Cdc15" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Cdc15 Net1:Cdc15" val="1"/>
+  <parameter idActiveInteractions=" Cdc14:Cdc15 Clb2:Cdc15" val="1"/>
+  <value val="1">
+    <exp str="!Clb2 | (Cdc14 &amp; !Net1)"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P27636"/>
+    </linklist>
+    <comment>Kinase essential for late nuclear division and a component of the MEN pathway.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="214" y="265" width="60" height="30" backgroundColor="#00ccff" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+<node id="Cdc20" maxvalue="1">
+  <parameter val="1"/>
+  <value val="1">
+    <exp str="!Cdh1"/>
+  </value>
+  <annotation>
+    <linklist>
+      <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+      <link xlink:href="http://www.uniprot.org/uniprot/P26309"/>
+    </linklist>
+    <comment>Activator of the APC, involved in Clb2 and Pds1 proteolysis, and required for exit from mitosis.
+The APC core is considered constant throughout the cell cycle, and thus not represented.</comment>
+  </annotation>
+
+			<nodevisualsetting>
+				<ellipse x="537" y="98" width="60" height="30" backgroundColor="#ff6666" foregroundColor="#000000"/>
+			</nodevisualsetting>
+</node>
+		<edge id="Cdc14:Cdc15" from="Cdc14" to="Cdc15" minvalue="1" sign="positive">
+<annotation>
+  <comment>dephosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="225,195 231,223 244,280" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc14:Cdh1" from="Cdc14" to="Cdh1" minvalue="1" sign="positive">
+<annotation>
+  <comment>dephosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="225,195 155,191 146,102" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc14:Net1" from="Cdc14" to="Net1" minvalue="1" sign="positive">
+<annotation>
+  <comment>dephosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="225,195 145,191 63,190" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc5Polo:Bub2-Bfa1" from="Cdc5Polo" to="Bub2-Bfa1" minvalue="1" sign="negative">
+<annotation>
+  <comment>phosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="327,205 326,242 321,343" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="PP2ACdc55:Bub2-Bfa1" from="PP2ACdc55" to="Bub2-Bfa1" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="415,381 319,379 321,343" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="PP2ACdc55:Net1:1" from="PP2ACdc55" to="Net1" minvalue="1" maxvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="415,381 29,379 63,190" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="PP2ACdc55:Net1:2" from="PP2ACdc55" to="Net1" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="415,381 29,379 63,190" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SecurinPds1:PP2ACdc55" from="SecurinPds1" to="PP2ACdc55" minvalue="1" sign="positive">
+<annotation>
+  <comment>Sequestration of Separase.
+</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="557,338 410,338 415,381" line_style="straight" line_color="#00cc00" line_width="1" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Bub2-Bfa1:Net1" from="Bub2-Bfa1" to="Net1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="321,343 45,343 63,190" line_style="straight" line_color="#00cc00" line_width="1" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Clb2:Cdh1:1" from="Clb2" to="Cdh1" minvalue="1" maxvalue="1" sign="negative">
+<annotation>
+  <comment>phosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="473,46 122,37 146,102" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Clb2:Cdh1:2" from="Clb2" to="Cdh1" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="473,46 122,37 146,102" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Clb2:Net1:1" from="Clb2" to="Net1" minvalue="1" maxvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="473,46 37,37 63,190" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Clb2:Net1:2" from="Clb2" to="Net1" minvalue="2" sign="negative">
+<annotation>
+  <comment>phosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="473,46 37,37 63,190" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Clb2:Cdc5Polo" from="Clb2" to="Cdc5Polo" minvalue="1" sign="positive">
+<annotation>
+  <comment>phosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="473,46 348,50 327,205" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Clb2:Cdc15" from="Clb2" to="Cdc15" minvalue="2" sign="negative">
+<annotation>
+  <comment>phosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="473,46 259,37 244,280" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SeparaseEsp1:PP2ACdc55:1" from="SeparaseEsp1" to="PP2ACdc55" minvalue="1" maxvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="561,378 503,378 415,381" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="SeparaseEsp1:PP2ACdc55:2" from="SeparaseEsp1" to="PP2ACdc55" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="561,378 503,378 415,381" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Tem1:Net1" from="Tem1" to="Net1" minvalue="1" sign="negative">
+<annotation>
+  <comment>Cdc15 activation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="88,319 65,253 63,190" line_style="straight" line_color="#ff0000" line_width="1" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Net1:Cdc15" from="Net1" to="Cdc15" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="63,190 98,268 244,280" line_style="straight" line_color="#ff0000" line_width="1" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Net1:Cdh1" from="Net1" to="Cdh1" minvalue="1" sign="negative">
+<annotation>
+  <comment>Sequestration of Cdc14 in the nucleolus</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="63,190 141,179 146,102" line_style="straight" line_color="#ff0000" line_width="1" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Net1:Net1" from="Net1" to="Net1" minvalue="1" sign="negative">
+<annotation>
+  <comment>Sequestration of Cdc14 in the nucleolus</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="63,190 53,158 63,154 73,158 63,190" line_style="straight" line_color="#ff0000" line_width="1" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdh1:Clb2" from="Cdh1" to="Clb2" minvalue="1" sign="negative">
+<annotation>
+  <comment>degradation by the proteasome, following ubiquitination by the APC.</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="146,102 474,108 473,46" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdh1:Cdc20" from="Cdh1" to="Cdc20" minvalue="1" sign="negative">
+<annotation>
+  <comment>degradation by the proteasome, following ubiquitination by the APC.</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="146,102 438,108 567,113" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdh1:Cdc5Polo" from="Cdh1" to="Cdc5Polo" minvalue="1" sign="negative">
+<annotation>
+  <comment>degradation by the proteasome, following ubiquitination by the APC.</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="146,102 316,108 327,205" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdh1:Cdh1" from="Cdh1" to="Cdh1" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="146,102 136,70 146,66 156,70 146,102" line_style="straight" line_color="#00cc00" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc15:Net1" from="Cdc15" to="Net1" minvalue="1" sign="negative">
+<annotation>
+  <comment>phosphorylation</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="244,280 84,284 63,190" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc20:Clb2" from="Cdc20" to="Clb2" minvalue="1" sign="negative">
+<annotation>
+  <comment>degradation by the proteasome, following ubiquitination by the APC.</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="567,113 563,43 473,46" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Cdc20:SecurinPds1" from="Cdc20" to="SecurinPds1" minvalue="1" sign="negative">
+<annotation>
+  <comment>degradation by the proteasome, following ubiquitination by the APC.</comment>
+</annotation>
+			<edgevisualsetting>
+				<polyline points="567,113 564,217 557,338" line_style="straight" line_color="#ff0000" line_width="4" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+<annotation>
+  <linklist>
+    <link xlink:href="http://www.ncbi.nlm.nih.gov/pubmed/16713564"/>
+  </linklist>
+  <comment>This refined model of the budding Yeast exit module is principally based on the article by Queralt et al (2006).
+According to their model, when securin is degraded by Cdc20 at anaphase onset, free separase cleaves the cohesin that maintains sister chromatids together and downregulates PP2ACdc55, a phosphatase that opposes Net1 phosphorylation by Clb2. 
+Down- regulation of PP2ACdc55 also participates in MEN activation by facilitating phosphorylation of Bfa1 by the Polo-like Cdc5 kinase. 
+This mechanism accounts for the two-steps release of the Cdc14 phosphatase from its competitive inhibitor Net1. 
+The present logical model qualitatively recapitulates the behaviours of the wild-type situation and of nine reported mutants. 
+In each case, we have checked whether a stable state with active Cdh1 can be reached from the state corresponding to anaphase. 
+
+In simulation we test the model for mitotic exit, starting from a state corresponding to metaphase, with high Clb2, low Cdh1 and sister chromatids attached. In the wild-type situation, this leads to a single stable state corresponding to G0/G1 phase, with low Clb2 and high Cdh1. Stable state analysis confirms that this is the only stable state in the wild-type case.</comment>
+</annotation>
+	</graph>
+</gxl>

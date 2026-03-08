@@ -1,0 +1,193 @@
+{
+  "name": "ginsim_default_zebra_miR9_22jul2011",
+  "nodes": [
+    "miR9",
+    "Her6",
+    "Zic5",
+    "HuC",
+    "P",
+    "N"
+  ],
+  "cm": [
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "miR9": "!Her6 & !N",
+    "Her6": "!miR9 & !N",
+    "Zic5": "!miR9 & !N",
+    "HuC": "!miR9 & !P",
+    "P": "Her6 | Zic5",
+    "N": "HuC"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "miR9": {
+      "inputs": [
+        "Her6",
+        "N"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Her6": {
+      "inputs": [
+        "miR9",
+        "N"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Zic5": {
+      "inputs": [
+        "miR9",
+        "N"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "HuC": {
+      "inputs": [
+        "miR9",
+        "P"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "P": {
+      "inputs": [
+        "Her6",
+        "Zic5"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "N": {
+      "inputs": [
+        "HuC"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 4,
+    "OR": 1,
+    "IDENTITY": 1
+  },
+  "n": 6,
+  "n_edges": 11,
+  "edges": [
+    {
+      "source": "P",
+      "target": "HuC",
+      "type": "inhibition"
+    },
+    {
+      "source": "HuC",
+      "target": "N",
+      "type": "activation"
+    },
+    {
+      "source": "miR9",
+      "target": "HuC",
+      "type": "inhibition"
+    },
+    {
+      "source": "miR9",
+      "target": "Zic5",
+      "type": "inhibition"
+    },
+    {
+      "source": "miR9",
+      "target": "Her6",
+      "type": "inhibition"
+    },
+    {
+      "source": "N",
+      "target": "Zic5",
+      "type": "inhibition"
+    },
+    {
+      "source": "N",
+      "target": "Her6",
+      "type": "inhibition"
+    },
+    {
+      "source": "N",
+      "target": "miR9",
+      "type": "inhibition"
+    },
+    {
+      "source": "Zic5",
+      "target": "P",
+      "type": "activation"
+    },
+    {
+      "source": "Her6",
+      "target": "P",
+      "type": "activation"
+    },
+    {
+      "source": "Her6",
+      "target": "miR9",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    3,
+    2,
+    1,
+    1,
+    1,
+    3
+  ]
+}

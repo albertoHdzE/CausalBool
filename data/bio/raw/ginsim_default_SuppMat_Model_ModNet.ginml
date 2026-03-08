@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="ModNet" nodeorder="ECMicroenv DNAdamage GF Metastasis Migration Invasion EMT Apoptosis CCA TGFb_pthw Notch_pthw WNT_pthw p53 EMTreg p63_73 AKT1 AKT2 ERK_pthw miRNA Ecadh">
+    <node id="ECMicroenv" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <rect x="55" y="53" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="DNAdamage" maxvalue="1" input="true">
+      <nodevisualsetting>
+        <rect x="983" y="41" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="GF" maxvalue="1">
+      <value val="1">
+        <exp str="(GF | EMTreg) &amp; !Ecadh"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="55" y="142" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Metastasis" maxvalue="1">
+      <value val="1">
+        <exp str="Migration"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="501" y="513" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Migration" maxvalue="1">
+      <value val="1">
+        <exp str="EMT &amp; ERK_pthw &amp; AKT2 &amp; Invasion &amp; !AKT1 &amp; !miRNA &amp; !p63_73"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="494" y="456" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Invasion" maxvalue="1">
+      <value val="1">
+        <exp str="(TGFb_pthw &amp; EMTreg) | WNT_pthw"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="716" y="442" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="EMT" maxvalue="1">
+      <value val="1">
+        <exp str="!Ecadh &amp; EMTreg"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="307" y="447" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Apoptosis" maxvalue="1">
+      <value val="1">
+        <exp str="!ERK_pthw &amp; !AKT1 &amp; !EMTreg &amp; (miRNA | p63_73 | p53)"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="886" y="511" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CCA" maxvalue="1">
+      <value val="1">
+        <exp str="(((p53 | p63_73 | (TGFb_pthw &amp; Notch_pthw) | AKT2) &amp; !ERK_pthw) | miRNA | EMTreg) &amp; !AKT1"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="1114" y="499" width="80" height="25" backgroundColor="#999999" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="TGFb_pthw" maxvalue="1">
+      <value val="1">
+        <exp str="(Notch_pthw | ECMicroenv) &amp; !WNT_pthw &amp; !miRNA"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="182" y="43" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Notch_pthw" maxvalue="1">
+      <value val="1">
+        <exp str="ECMicroenv &amp; !p53 &amp; !p63_73 &amp; !miRNA"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="292" y="166" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="WNT_pthw" maxvalue="1">
+      <value val="1">
+        <exp str="!Notch_pthw &amp; !EMTreg &amp; !miRNA &amp; !p53 &amp; !p63_73 &amp; !AKT1 &amp; !Ecadh &amp; !WNT_pthw"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="478" y="163" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="p53" maxvalue="1">
+      <value val="1">
+        <exp str="(Notch_pthw | DNAdamage | WNT_pthw) &amp; !AKT1 &amp; !AKT2 &amp; !p63_73 &amp; !EMTreg"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="891" y="124" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="EMTreg" maxvalue="1">
+      <value val="1">
+        <exp str="(Notch_pthw | WNT_pthw | EMTreg) &amp; !miRNA &amp; !p53"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="269" y="339" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="p63_73" maxvalue="1">
+      <value val="1">
+        <exp str="!Notch_pthw &amp; !p53 &amp; DNAdamage &amp; !AKT2 &amp; !AKT1 &amp; !EMTreg"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="930" y="203" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="AKT1" maxvalue="1">
+      <value val="1">
+        <exp str="WNT_pthw &amp; (Notch_pthw | TGFb_pthw | GF | EMTreg) &amp; !miRNA &amp; !p53 &amp; !Ecadh"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="648" y="179" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="AKT2" maxvalue="1">
+      <value val="1">
+        <exp str="(TGFb_pthw | GF | Notch_pthw | EMTreg) &amp; EMTreg &amp; !miRNA &amp; !p53"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="626" y="267" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="ERK_pthw" maxvalue="1">
+      <value val="1">
+        <exp str="(TGFb_pthw | Notch_pthw | GF | EMTreg) &amp; !AKT1"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="135" y="249" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="miRNA" maxvalue="1">
+      <value val="1">
+        <exp str="(p53 | p63_73) &amp; !AKT2 &amp; !EMTreg &amp; !AKT1"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="678" y="354" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Ecadh" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT2 &amp; !EMTreg"/>
+      </value>
+      <nodevisualsetting>
+        <rect x="150" y="409" width="80" height="25" backgroundColor="#ffffff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <edge id="miRNA:EMTreg" from="miRNA" to="EMTreg" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="676,365 437,365 365,365 356,365 351,366" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:AKT2" from="miRNA" to="AKT2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="696,352 696,312 696,300 696,294" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:AKT1" from="miRNA" to="AKT1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="745,352 745,351 745,347 745,194 736,194 736,194 730,194" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:Migration" from="miRNA" to="Migration" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="676,373 561,373 561,452 561,453" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:WNT_pthw" from="miRNA" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="676,357 541,357 544,199 544,190" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:TGFb_pthw" from="miRNA" to="TGFb_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="676,378 242,378 242,85 242,80 242,70" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:Apoptosis" from="miRNA" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="760,378 944,378 944,502 944,508" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:CCA" from="miRNA" to="CCA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="760,361 763,361 1133,361 1133,496" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:Notch_pthw" from="miRNA" to="Notch_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="682,352 682,307 356,305 356,198 356,193" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:p53" from="miRNA" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="760,374 763,374 914,374 914,159 914,151" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="miRNA:p63_73" from="miRNA" to="p63_73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="760,365 763,365 984,365 984,241 984,230" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ERK_pthw:Migration" from="ERK_pthw" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="217,266 221,266 224,266 524,266 524,453" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ERK_pthw:Apoptosis" from="ERK_pthw" to="Apoptosis" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="138,276 138,279 138,489 824,492 919,493 919,508" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ERK_pthw:CCA" from="ERK_pthw" to="CCA" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="217,256 221,256 863,256 1142,254 1142,496" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:TGFb_pthw" from="Notch_pthw" to="TGFb_pthw" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="290,181 202,181 202,85 202,80 202,70" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:WNT_pthw" from="Notch_pthw" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="374,182 373,182 373,182 475,182" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:EMTreg" from="Notch_pthw" to="EMTreg" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="327,193 327,306 327,336" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:p53" from="Notch_pthw" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="325,164 325,135 888,135" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:p63_73" from="Notch_pthw" to="p63_73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="332,193 332,198 332,202 332,229 927,230" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:ERK_pthw" from="Notch_pthw" to="ERK_pthw" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="290,193 203,192 203,243 203,244 203,246" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:CCA" from="Notch_pthw" to="CCA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="374,193 374,198 374,330 1146,332 1146,496" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:AKT1" from="Notch_pthw" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="335,164 335,128 690,127 690,176" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Notch_pthw:AKT2" from="Notch_pthw" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="365,193 365,198 365,282 623,282" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:ERK_pthw" from="GF" to="ERK_pthw" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="83,169 83,264 132,264" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:AKT1" from="GF" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="134,140 134,118 134,114 663,114 663,176" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:AKT2" from="GF" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="134,140 134,123 134,123 632,122 632,264" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="GF:GF" from="GF" to="GF" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="123,142 123,127 150,127 150,154 137,154" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63_73:p53" from="p63_73" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="962,201 962,186 962,164 962,159 962,151" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63_73:Notch_pthw" from="p63_73" to="Notch_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="928,219 344,219 344,202 344,198 344,193" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63_73:miRNA" from="p63_73" to="miRNA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="944,230 944,241 944,248 944,368 763,368 760,368" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63_73:WNT_pthw" from="p63_73" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="949,230 949,241 949,251 525,251 525,204 525,199 525,190" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63_73:Apoptosis" from="p63_73" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="966,230 966,241 966,248 966,389 966,502 966,502 966,508" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63_73:Migration" from="p63_73" to="Migration" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="957,230 957,241 957,248 953,479 593,479 584,479 576,479" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p63_73:CCA" from="p63_73" to="CCA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1012,218 1028,218 1169,218 1169,496" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:Migration" from="AKT2" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="639,294 639,456 576,456" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:p53" from="AKT2" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="708,292 716,292 721,292 904,292 904,164 904,159 904,151" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:p63_73" from="AKT2" to="p63_73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="708,275 716,275 721,275 940,276 940,241 940,230" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:Ecadh" from="AKT2" to="Ecadh" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="661,294 661,300 661,315 661,418 239,418 238,418 232,418" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:CCA" from="AKT2" to="CCA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="703,294 703,298 943,297 1152,300 1152,496" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT2:miRNA" from="AKT2" to="miRNA" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="689,294 689,315 689,351" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Ecadh:WNT_pthw" from="Ecadh" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="232,436 238,436 239,436 501,436 501,204 501,199 501,190" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Ecadh:AKT1" from="Ecadh" to="AKT1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="227,407 227,406 227,237 672,236 672,207 672,206" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Ecadh:GF" from="Ecadh" to="GF" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="148,434 107,434 108,219 108,169" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Ecadh:EMT" from="Ecadh" to="EMT" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="214,436 214,440 214,462 304,462" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Migration:Metastasis" from="Migration" to="Metastasis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="555,483 555,487 555,488 555,510" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:AKT2" from="EMTreg" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="351,352 356,352 365,352 545,352 652,353 652,300 652,294" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:WNT_pthw" from="EMTreg" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="351,349 356,349 365,349 516,349 516,204 516,199 516,190" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:Invasion" from="EMTreg" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="351,366 351,372 351,374 351,406 736,406 736,439" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:ERK_pthw" from="EMTreg" to="ERK_pthw" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="267,363 180,363 180,276" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:miRNA" from="EMTreg" to="miRNA" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="351,362 462,362 675,362" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:GF" from="EMTreg" to="GF" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="281,366 281,368 72,368 72,169" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:Ecadh" from="EMTreg" to="Ecadh" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="306,366 306,372 306,374 306,427 239,427 238,427 232,427" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:Apoptosis" from="EMTreg" to="Apoptosis" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="351,345 356,345 365,345 929,345 929,508" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:p53" from="EMTreg" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="345,337 345,338 345,335 345,323 923,324 924,246 923,164 923,159 923,151" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:CCA" from="EMTreg" to="CCA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="339,366 339,372 339,393 1124,391 1124,496" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:AKT1" from="EMTreg" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="311,337 311,204 645,204" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:p63_73" from="EMTreg" to="p63_73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="340,337 340,338 340,242 933,241 933,230" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:EMT" from="EMTreg" to="EMT" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="324,366 324,372 324,406 324,444" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMTreg:EMTreg" from="EMTreg" to="EMTreg" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="306,337 306,309 295,308 295,332 295,336" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Invasion:Migration" from="Invasion" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="714,466 664,466 593,466 584,466 576,466" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:p63_73" from="p53" to="p63_73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="946,151 946,159 946,164 946,187 946,200" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:Notch_pthw" from="p53" to="Notch_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="889,146 343,146 343,163 343,163" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:miRNA" from="p53" to="miRNA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="908,151 908,159 908,164 908,356 760,356" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:WNT_pthw" from="p53" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="889,151 503,151 503,160" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:AKT1" from="p53" to="AKT1" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="938,151 938,180 730,180" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:AKT2" from="p53" to="AKT2" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="917,151 917,159 917,164 917,284 721,284 716,284 708,284" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:Apoptosis" from="p53" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="973,151 978,151 978,151 1009,151 1007,515 979,515 978,515 968,515" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:CCA" from="p53" to="CCA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="973,140 988,140 1190,140 1190,496" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p53:EMTreg" from="p53" to="EMTreg" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="889,138 284,138 284,336" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ECMicroenv:TGFb_pthw" from="ECMicroenv" to="TGFb_pthw" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="137,65 137,65 137,65 179,65" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="ECMicroenv:Notch_pthw" from="ECMicroenv" to="Notch_pthw" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="121,80 121,80 121,80 122,104 304,103 304,163" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="WNT_pthw:Invasion" from="WNT_pthw" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="536,190 536,199 536,204 536,443 713,443" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="WNT_pthw:AKT1" from="WNT_pthw" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="554,190 554,195 645,195" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="WNT_pthw:TGFb_pthw" from="WNT_pthw" to="TGFb_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="485,161 485,98 257,97 257,80 257,70" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="WNT_pthw:EMTreg" from="WNT_pthw" to="EMTreg" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="485,190 485,199 485,204 485,340 365,340 356,340 351,340" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="WNT_pthw:p53" from="WNT_pthw" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="560,167 900,167 900,151" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="WNT_pthw:WNT_pthw" from="WNT_pthw" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="548,161 548,148 578,148 578,178 560,178" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFb_pthw:AKT1" from="TGFb_pthw" to="AKT1" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="258,63 258,63 258,63 674,63 674,176" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFb_pthw:AKT2" from="TGFb_pthw" to="AKT2" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="252,70 252,84 605,85 604,288 623,288" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFb_pthw:Invasion" from="TGFb_pthw" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="258,50 258,50 258,50 782,51 782,439" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFb_pthw:CCA" from="TGFb_pthw" to="CCA" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="264,70 1175,78 1175,496" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="TGFb_pthw:ERK_pthw" from="TGFb_pthw" to="ERK_pthw" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="188,70 188,80 188,164 188,244 188,246" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="DNAdamage:p53" from="DNAdamage" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="996,68 996,77 996,132 973,132" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="DNAdamage:p63_73" from="DNAdamage" to="p63_73" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="1050,68 1050,212 1012,212" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="EMT:Migration" from="EMT" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting>
+        <polyline points="377,463 377,463 491,463" line_color="#00c800" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:p53" from="AKT1" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="696,177 696,155 888,151" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:Migration" from="AKT1" to="Migration" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="679,206 679,207 679,212 679,240 531,242 531,453" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:ERK_pthw" from="AKT1" to="ERK_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="699,206 699,207 699,215 403,214 214,214 214,246" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:WNT_pthw" from="AKT1" to="WNT_pthw" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="646,181 584,181 560,181" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:miRNA" from="AKT1" to="miRNA" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="730,189 736,189 736,189 752,189 752,350 752,351" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:p63_73" from="AKT1" to="p63_73" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="711,206 711,211 927,211" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:Apoptosis" from="AKT1" to="Apoptosis" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="730,199 899,199 899,508" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="AKT1:CCA" from="AKT1" to="CCA" minvalue="1" sign="negative">
+      <edgevisualsetting>
+        <polyline points="730,185 746,185 1158,185 1158,496" line_color="#ff0000" line_style="straight" line_width="1" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+  </graph>
+</gxl>

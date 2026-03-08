@@ -1,0 +1,150 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb, booktabs, multirow, siunitx}
+\title{Supplementary Information: Algorithmic Causal Simplicity Predicts Gene Essentiality}
+\author{Alberto Hernández \& Oxford Collaboration Group}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Supplementary Methods}
+
+\subsection{Detailed Gate Classification Algorithm}
+The gate classifier proceeds as:
+\begin{enumerate}
+    \item Extract truth table for node \(i\) with inputs \(I_c(i)\)
+    \item Match against canonical gates using Hamming distance
+    \item If minimal distance > threshold, classify as CANALISING
+    \item For CANALISING gates, extract parameters \((i, v, c)\):
+    \begin{itemize}
+        \item Canalising index \(i\): input that determines output
+        \item Canalising value \(v \in \{0,1\}\): value forcing output
+        \item Canalised output \(c \in \{0,1\}\): output when \(x_i = v\)
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Mechanistic Description Length Derivation}
+The functional \(D\) derives from prefix-free coding:
+\begin{align*}
+D(\mathcal{N}) &= \sum_{i=1}^n \left[ L(g_i) + L(I_c(i)) + L(\theta_i) \right] \\
+L(g) &= -\log_2 P(g) \quad \text{(Shannon-Fano coding)} \\
+P(g) &= \frac{\text{freq}(g) + 1}{\sum_{g'}(\text{freq}(g') + 1)} \quad \text{(add-1 smoothing)} \\
+L(I_c) &= \log_2 \binom{n}{k} + \log_2 k! \quad \text{(ordered inputs)} \\
+L(\theta) &= \begin{cases}
+0 & \text{non-parameterised} \\
+\log_2 k & \text{KOFN threshold} \\
+\log_2 6 & \text{canalising triple}
+\end{cases}
+\end{align*}
+
+\section{Supplementary Tables}
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{Complete gate distribution across networks}}
+\label{tab:gate_dist_full}
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+\textbf{Network} & \textbf{AND} & \textbf{OR} & \textbf{XOR} & \textbf{NOT} & \textbf{Canalising} & \textbf{IDENTITY} & \textbf{INPUT} & \textbf{NAND} & \textbf{NOR} \\
+\midrule
+Lambda phage & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 0 & 0 \\
+Lac operon & 0 & 0 & 0 & 3 & 2 & 0 & 2 & 0 & 0 \\
+Yeast cell cycle & 0 & 0 & 0 & 2 & 3 & 2 & 1 & 0 & 0 \\
+T-cell activation & 2 & 1 & 0 & 1 & 0 & 10 & 0 & 0 & 0 \\
+\hline
+\textbf{Total} & 2 & 1 & 0 & 7 & 5 & 13 & 4 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{Individual gene \(\Delta D\) values and essentiality labels}}
+\label{tab:deltaD_full}
+\begin{tabular}{@{}lllcc@{}}
+\toprule
+\textbf{Network} & \textbf{Gene} & \textbf{Essential} & \(\boldsymbol{\Delta D}\) (bits) & \(\boldsymbol{\Delta\mathrm{BDM}}\) \\
+\midrule
+Lambda phage & CI & Yes & 8.26 & 12.4 \\
+Lambda phage & Cro & Yes & 3.33 & 8.2 \\
+Lambda phage & CII & No & 3.33 & 5.0 \\
+Lambda phage & N & No & 2.00 & 3.1 \\
+Lac operon & lacI & Yes & 3.33 & 8.15 \\
+Lac operon & lacZ & Yes & 8.26 & 15.3 \\
+Lac operon & lacY & Yes & 3.33 & 7.8 \\
+Lac operon & lacA & No & 0.00 & 2.1 \\
+Lac operon & CRP & No & 3.33 & 6.4 \\
+Lac operon & cAMP & No & 0.00 & 1.5 \\
+Lac operon & glucose & No & 0.00 & 0.8 \\
+Yeast cell cycle & Cdc2\_active & Yes & 20.43 & 25.1 \\
+Yeast cell cycle & Cdc13/Cdc2 & Yes & 15.67 & 18.3 \\
+Yeast cell cycle & Ste9 & Yes & 8.26 & 12.4 \\
+Yeast cell cycle & Rum1 & Yes & 3.33 & 8.2 \\
+Yeast cell cycle & Slp1 & Yes & 3.33 & 7.1 \\
+Yeast cell cycle & PP & No & 2.00 & 4.3 \\
+Yeast cell cycle & Wee1/Mik1 & No & 3.33 & 6.2 \\
+Yeast cell cycle & Cdc25 & No & 2.00 & 3.8 \\
+T-cell activation & ZAP70 & Yes & 8.26 & 14.2 \\
+T-cell activation & IL2 & Yes & 19.63 & 22.1 \\
+T-cell activation & LCK & Yes & 8.26 & 13.8 \\
+T-cell activation & TCR & No & 0.00 & 2.4 \\
+T-cell activation & CD28 & No & 0.00 & 1.8 \\
+T-cell activation & PKCtheta & No & 0.00 & 1.2 \\
+T-cell activation & NFAT & No & 0.00 & 0.9 \\
+T-cell activation & NFkB & No & 0.00 & 0.7 \\
+T-cell activation & AP1 & No & 0.00 & 0.5 \\
+T-cell activation & CRE & No & 0.00 & 0.3 \\
+T-cell activation & FOXP3 & No & 0.00 & 0.2 \\
+T-cell activation & GATA3 & No & 0.00 & 0.1 \\
+T-cell activation & TBET & No & 0.00 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Supplementary Figures}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\linewidth]{figures_supp/gate_distribution.pdf}
+\caption{\textbf{Gate type distribution.} (A) Biological networks favour simple gates. (B) Random networks show uniform distribution.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\linewidth]{figures_supp/null_comparison.pdf}
+\caption{\textbf{Detailed null model comparison.} \(D_{\mathrm{bio}}\) vs \(D_{\mathrm{rand}}\) distributions for each network.}
+\end{figure}
+
+\section{Reproducibility Instructions}
+
+\subsection{Software Requirements}
+\begin{itemize}
+    \item Wolfram Mathematica 12.0+ (for \(D\) calculation)
+    \item Python 3.8+ with packages: pybdm, numpy, pandas, scikit-learn
+    \item Jupyter Notebook for analysis
+    \item Docker (optional, for containerised reproduction)
+\end{itemize}
+
+\subsection{Step-by-Step Reproduction}
+\begin{enumerate}
+    \item Clone repository: \texttt{git clone https://github.com/oxford-dcbi/algorithmic-essentiality}
+    \item Install dependencies: \texttt{pip install -r requirements.txt}
+    \item Run main analysis: \texttt{python analyse\_networks.py}
+    \item Generate figures: \texttt{jupyter notebook figures.ipynb}
+    \item Compile manuscript: \texttt{pdflatex main.tex}
+\end{enumerate}
+
+\subsection{Data Availability}
+All processed networks available in \texttt{data/processed/} as JSON files with schema:
+\begin{verbatim}
+{
+    "name": "lambda_phage",
+    "nodes": ["CI", "Cro", "CII", "N"],
+    "edges": [["CI", "Cro"], ...],
+    "logic": {"CI": "NOT Cro", ...},
+    "essential": {"CI": true, ...}
+}
+\end{verbatim}
+
+\end{document}

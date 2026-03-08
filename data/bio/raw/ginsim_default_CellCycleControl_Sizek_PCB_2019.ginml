@@ -1,0 +1,3031 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="PI3K_cell_cycle_apoptosis" nodeorder="GF RTK Grb2 Ras RAF mTORC2 PI3K PIP3 PDK1 AKT_B p110_H PI3K_H AKT_H FoxO3 PLCgamma NeddL4 FoxO1 p21_mRNA TSC2 PRAS40 Rheb mTORC1 S6K eIF4E GSK3 p21 pRB p27Kip1 Myc CyclinD1 E2F1 CyclinE ORC Cdc6 Cdt1 Pre_RC geminin CyclinA_mRNA Emi1 FoxM1 Cdc25A CyclinA Wee1 UbcH10 CyclinB Cdc25B Plk1 Cdc25C Cdk1 pAPC Cdc20 Cdh1 Replication f4N_DNA U_Kinetochores Mad2 A_Kinetochores Plk1_H Ect2 Casp8 Casp2 MCL_1 BCLXL BCL2 BAD BIK BIM BID BAK BAX Cyto_C SMAC IAPs Casp9 Casp3 CAD ATR CHK1 Ca2 DAG DR4_5 ERK GF_High IP3 MEK SOS Trail">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="100" height="60"/>
+    <nodestyle name="Apoptosis" background="#ffcccc"/>
+    <nodestyle name="Growth_signaling" background="#ccffcc"/>
+    <nodestyle name="Cycle_process_bridge" background="#ffcc66"/>
+    <nodestyle name="Cell_cycle_phase_switch" background="#ffccff" width="100"/>
+    <nodestyle name="Restriction_switch" background="#ccffff"/>
+    <nodestyle name="Origin_lisensing_switch" background="#ffffcc"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="2" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="GF" maxvalue="1">
+      <value val="1">
+        <exp str="GF | GF_High"/>
+      </value>
+      <annotation>
+        <comment>Logical rule and regulatory inputs:
+The GF node represents an extracellular environment with low levels of growth factors capable of sustaining survival signaling. The node is ON in high growth factor as well.
+It is self-sustaining in the absence of in silico perturbation.</comment>
+      </annotation>
+      <nodevisualsetting x="393" y="98" style="Growth_signaling"/>
+    </node>
+    <node id="RTK" maxvalue="1">
+      <value val="1">
+        <exp str="!CAD &amp; (GF_High | GF)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2010.06.011"/>
+        </linklist>
+        <comment>Logical rule:
+The ON state of the RTK node in our model represents basal growth receptor activation (required to keep a normal cell alive). Thus it requires the absence of CAD and at least low growth levels of growth factors in the extracellular environment [1].
+
+Regulatory inputs:
+Caspase-activated DNAase (CAD) inhibition of receptor tyrosine kinases ensures that apoptotic cells no longer maintain even basal levels of growth signaling.
+The ON state of the RTK node in our model represents basal growth receptor activation by low / medium growth factor availability, encoded by the GF node (required to keep a normal cell alive).
+Similarly, high growth factor availability also keeps RTK on.</comment>
+      </annotation>
+      <nodevisualsetting x="455" y="190" style="Growth_signaling"/>
+    </node>
+    <node id="Grb2" maxvalue="1">
+      <value val="1">
+        <exp str="RTK &amp; GF_High"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/S1470-8175(01)00023-6"/>
+        </linklist>
+        <comment>Logical rule:
+Grb2 is ON when the RTK is activated by high levels of extracellular growth factors (capable of driving proliferation).
+
+Regulatory inputs:
+The SH2 domain of Grb2 binds to a phosphotyrosine residue in the activated RTK, where it functions as an adaptor protein [1].
+The ON state of Grb2 node in our model encode the change from basal (or absent) Grb2 activity at weakly stimulated RTKs to the level of recruitment seen in high growth factor environments, capable of mediating Ras activation.</comment>
+      </annotation>
+      <nodevisualsetting x="585" y="220" style="Growth_signaling"/>
+    </node>
+    <node id="Ras" maxvalue="1">
+      <value val="1">
+        <exp str="Grb2 &amp; SOS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/S1470-8175(01)00023-6"/>
+        </linklist>
+        <comment>Logical rule:
+Ras activation requires the GEF activity of SOS and the RTK-linked (active) adaptor protein Grb2 [1].
+
+Regulaory inputs:
+RTK-bound Grb2 is required to recruits SOS, the GEF responsible for converting inactive Ras to its GTP-bound active form [1].
+SOS is a GEF that is recruited to activate Ras near ligand- bound, active RTKs [1].
+
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="730" y="377" style="Growth_signaling"/>
+    </node>
+    <node id="RAF" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; Ras"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/sj.leu.2402945"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.273.12.7141"/>
+        </linklist>
+        <comment>Logical rule:
+Raf is active in response to Ras activity in the absence of Caspase 3. As active Raf-1 is continuously dephosphorylated and bound by 14-3-3 which translocates it to the cytoplasm from the plasma membrane (not modeled explicitly), ongoing Ras activity is necessary to keep it ON [1].
+
+Regulatory inputs:
+Raf-1 is cleaved and inhibited by Caspase 3 [2].
+Active Ras phosphorylates Raf, enhancing its kinase activity [1].</comment>
+      </annotation>
+      <nodevisualsetting x="727" y="456" style="Growth_signaling"/>
+    </node>
+    <node id="mTORC2" maxvalue="1">
+      <value val="1">
+        <exp str="PIP3 | !S6K"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1158/2159-8290.CD-15-0460"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.00735-09"/>
+        </linklist>
+        <comment>Logical rule:
+It is assumed that mTORC2 is active in quiescent cells with basal levels of PI3K activity leading to basal PIP3 generation. Alternatively, the absence of high growth factor- stimulated mTORC1 and S6K1 can also increase mTORC2 activity.
+
+Regulatory inputs:
+PtdIns(3,4,5)P3 (PIP3), interacts with the mTORC2 component Sin1 to release its inhibition on the mTOR kinase domain. Thus, PIP3 is necessary for mTORC2 activation [1].
+Rictor, a component of the mTORC2 complex, undergoes S6K1-mediated phosphorylation at T1135, dampening mTORC2-dependent phosphorylation of Akt [2].</comment>
+      </annotation>
+      <nodevisualsetting x="451" y="738" style="Growth_signaling"/>
+    </node>
+    <node id="PI3K" maxvalue="1">
+      <value val="1">
+        <exp str="Ras | RTK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/370527a0"/>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2007.03.051"/>
+          <link xlink:href="https://doi.org/doi:10.1016/j.cell.2010.06.011"/>
+        </linklist>
+        <comment>Logical rule:
+In our model, basal PI3K activity can be maintained by active RTKs or active Ras, while high PI3K activity requires both (see below).
+
+Regulatory inputs:
+Ras binds the catalytic subunit of PI3K and Ras knockdown / over expression decreases /increases the PI3K-dependent generation of PIP3 [1,2].
+Active RTKs recruit PI3K to the signaling complex they nucleate, where PI3K catalyzes the production of PtdIns(3,4,5)P3 (PIP3) [3].</comment>
+      </annotation>
+      <nodevisualsetting x="588" y="286" style="Growth_signaling"/>
+    </node>
+    <node id="PIP3" maxvalue="1">
+      <value val="1">
+        <exp str="PI3K_H | PI3K"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/doi:10.1016/j.cell.2010.06.011"/>
+        </linklist>
+        <comment>Logical rule:
+PIP3 is ON as a result of basal or high PI3K activity.
+
+Regulatory inputs:
+Active PI3K recruited to the membrane catalyzes the production of membrane-bound PtdIns(3,4,5)P3 (PIP3) from PtdIns(4,5)P2 (PIP2) [1].
+Active PI3K recruited to the membrane catalyzes the production of membrane-bound PtdIns(3,4,5)P3 (PIP3) from PtdIns(4,5)P2 (PIP2) [1].</comment>
+      </annotation>
+      <nodevisualsetting x="527" y="429" style="Growth_signaling"/>
+    </node>
+    <node id="PDK1" maxvalue="1">
+      <value val="1">
+        <exp str="PI3K &amp; PIP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.04.001"/>
+        </linklist>
+        <comment>Logical rule:
+PDK1 enzyme activation requires active (at least basal) PI3K and PIP3 [1].
+
+Regulatory inputs:
+The PDK1 kinase is recruited to the plasma membrane by PIP3 at the sites of active PI3K activity [1].
+The PDK1 kinase is recruited to the plasma membrane by PIP3 at the sites of active PI3K activity [1].</comment>
+      </annotation>
+      <nodevisualsetting x="576" y="499" style="Growth_signaling"/>
+    </node>
+    <node id="AKT_B" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; PIP3 &amp; (PDK1 | mTORC2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.04.001"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.273.12.7141"/>
+        </linklist>
+        <comment>Logical rule:
+Basal AKT1 activity in our model requires the absence of Caspase 3, the availability of at least basal levels of PIP3, and phosphorylation by PDK1 or mTORC2. In contrast, full mitogen-stimulated AKT1 activation requires phosphorylation by both (see AKT_H) [1].
+
+Regulatory inputs:
+AKT1 is cleaved and inhibited by Caspase 3 [2].
+PIP3 recruits AKT to the plasma membrane and PIP3 binding changes the conformation of AKT such that it becomes accessible for T308 phosphorylation by PDK1 [9].
+Membrane-recruited PDK1 phosphorylates AKT at T308, a critical step in its activation [1].
+Maximal activation of AKT requires phosphorylation of S473 by mTORC2 [1].</comment>
+      </annotation>
+      <nodevisualsetting x="604" y="638" style="Growth_signaling"/>
+    </node>
+    <node id="p110_H" maxvalue="1">
+      <value val="1">
+        <exp str="(FoxO3 &amp; !NeddL4) | (p110_H &amp; (FoxO3 | !NeddL4))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1128/MCB.01265-07"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M116.726083"/>
+        </linklist>
+        <comment>Logical rule:
+In order to capture the cyclic dynamics of p110 protein expression, it is assumed that high p110 protein levels can be induced by FoxO3 in the absence of the growth factor-activated NeddL4 ubiquitin ligase. Once present, high p110 can be maintained by FoxO3 transcription, or the absence of activated NeddL4.
+
+Regulatory inputs:
+FoxO3 is a direct inducer p110α (PIK3CA), the catalytic subunit of PI3K [1].
+p110α (PIK3CA) is polyubiquitinated by the E3 ligase NEDD4L, leading to its proteasomal degradation. Both free p110 and the regulatory subunit-bound protein is subject to ubiquitination by NEDD4L [2].
+It is assumed that maintaining high p110 levels is easier than driving the re-accumulation of the protein following its rapid destruction.</comment>
+      </annotation>
+      <nodevisualsetting x="322" y="468" style="Growth_signaling"/>
+    </node>
+    <node id="PI3K_H" maxvalue="1">
+      <value val="1">
+        <exp str="p110_H &amp; PI3K &amp; RTK &amp; Ras"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cub.2010.12.047"/>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.04.001"/>
+          <link xlink:href="https://doi.org/10.1038/370527a0"/>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2007.03.051"/>
+        </linklist>
+        <comment>Logical rule:
+Full, peak-level activation of PI3K requires high levels of p110 protein, basal PI3K activation, active RTKs, and active Ras. 
+As the ON-state of Ras represents strong Ras activation in the presence of proliferation-inducing (high) growth factors, PI3K_H activation can only occur in these conditions.
+
+Regulatory inputs:
+High levels of PI3K activity in response to strong growth factor stimulation only occur in cells that express high levels of p110 protein [1].
+It is assumed that high PI3K activation is contingent on the ON state of the basal PI3K node.
+High levels of PI3K activation only occur near at growth factor- bound RTKs, which recruit and activate PI3K at the plasma membrane [2].
+Ras binds the catalytic subunit of PI3K and Ras knockdown / over expression decreases /increases the PI3K-dependent generation of PIP3 [3,4].</comment>
+      </annotation>
+      <nodevisualsetting x="368" y="281" style="Growth_signaling"/>
+    </node>
+    <node id="AKT_H" maxvalue="1">
+      <value val="1">
+        <exp str="AKT_B &amp; p110_H &amp; PI3K_H &amp; PIP3 &amp; PDK1 &amp; mTORC2 &amp; Ras"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.04.001"/>
+          <link xlink:href="https://doi.org/10.1038/370527a0"/>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2007.03.051"/>
+        </linklist>
+        <comment>Logical rule:
+In contact to basal AKT, high AKT activity in our model requires basal AKT (AKT_B), the ongoing presence of high p110 protein levels along with active PI3K_H, and PIP3. In addition this maximal AKT activation requires phosphorylation by both PDK1 and mTORC2, as well as active Ras [1].
+
+Regulatory inputs:
+In our model, high AKT activation is contingent on the ON-state of basal AKT (AKT_B).
+Ongoing high p110 availability and PI3K_H activity are required to induce maximal activation of AKT_H [1].
+Ongoing high p110 availability and PI3K_H activity are required to induce maximal activation of AKT_H [1].
+PIP3 recruits AKT to the plasma membrane and PIP3 binding changes the conformation of AKT such that it becomes accessible for T308 phosphorylation by PDK1 [1].
+Membrane-recruited PDK1 phosphorylates AKT at T308, a critical step in its activation [1].
+Maximal activation of AKT requires phosphorylation of S473 by mTORC2 [1].
+Ras binding to the catalytic subunit of PI3K is required for its full potency in PIP3 generation [2,3]. Active Ras is thus required for inducing peak AKT_H activity.</comment>
+      </annotation>
+      <nodevisualsetting x="377" y="597" style="Growth_signaling"/>
+    </node>
+    <node id="FoxO3" maxvalue="1">
+      <value val="1">
+        <exp str="!(AKT_B | AKT_H | ERK) | (!(AKT_H &amp; (Plk1 | Plk1_H | AKT_B | ERK)) &amp; !(Plk1 &amp; Plk1_H &amp; ERK))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.04.001"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1676"/>
+          <link xlink:href="https://doi.org/10.15190/d.2014.8"/>
+        </linklist>
+        <comment>Logical rule:
+In order to account for all the influences on FoxO3 activity,  the following logic was used. In the absence of basal or high AKT as well as ERK, FoxO3 remains active. In addition, FoxO3 can overcame peak (AKT_H) activation only if no other inhibitor is present and AKT_B is OFF (indicating that AKT levels are falling). Finally, the joint activity of ERK and Plk1 can also block FoxO3.
+
+Regulatory inputs:
+AKT mediates the translation of FoxO3 our of the nucleus through direct phosphorylation of three conserved residues. These events create a recognition site for 14-3-3 family proteins, which export and sequester FoxO3 in the cytosol [1].
+AKT mediates the translation of the FoxO3 transcription factor our of the nucleus (see above).
+ERK downregulates FOXO3 transactional activity by phosphorylating it at three Serines, inducing its MDM2- mediated ubiquitination and degradation [2].
+Plk1 binds FoxO3, induces its translocation to the cytosol, phosphorylates it and suppresses its activity through most of the the cell cycle, but most significantly during G2 and M [3].
+Plk1 binds FoxO3, induces its translocation to the cytosol (see above).</comment>
+      </annotation>
+      <nodevisualsetting x="359" y="870" style="Growth_signaling"/>
+    </node>
+    <node id="PLCgamma" maxvalue="1">
+      <value val="1">
+        <exp str="RTK &amp; Grb2 &amp; p110_H &amp; PI3K_H &amp; PIP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1042/bj2880001"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(91)90461-7"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M000404200"/>
+          <link xlink:href="https://doi.org/10.1093/emboj/17.2.414"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.273.37.23750"/>
+        </linklist>
+        <comment>Logical rule:
+Peak activation of PLCγ requires active an RTK receptor node bound by active Grb2, as well as high PI3K activity (including high p110 availability and the presence of PIP3).
+
+Regulatory inputs:
+The SH2 domains of PLCγ binds to active RTKs at tyrosine autophosphorylation sites, leading to tyrosine phosphorylation of PLCγ and stimulation its enzymatic activity [1,2].
+RTK tyrosine autophosphorylation induces PLCγ binding to the Grb2 adaptor protein and likely aids the translocation of PLCγ to the plasma membrane [3].
+Membrane targeting of PLCγ to the sight of growth receptor stimulation requires PI3K activity and PIP3 generation near growth receptors [4]. Thus, peak PLCγ activity in our model requires high p110 protein expression [5].
+In addition to high p110 protein levels, high PI3K activation is also required to fully activate PLCγ [4,5].
+Membrane targeting of PLCγ to the sight of growth receptor stimulation is mediated by PIP3 binding of PLCγ [4,5].</comment>
+      </annotation>
+      <nodevisualsetting x="255" y="635" style="Growth_signaling"/>
+    </node>
+    <node id="NeddL4" maxvalue="1">
+      <value val="1">
+        <exp str="Ca2 &amp; IP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/doi:10.1016/j.str.2014.08.016"/>
+        </linklist>
+        <comment>Logical rule:
+Activation of NeddL4 requires both Ca2+ and IP3 binding [1].
+
+Regulatory inputs:
+In order to transition to its active form, the E3 ubiquitin ligase NeddL4 binds Ca2+ and inositol 1,4,5-trisphosphate (IP3) [1].
+In order to transition to its active form, the E3 ubiquitin ligase NeddL4 binds Ca2+ and inositol 1,4,5-trisphosphate (IP3) [1].</comment>
+      </annotation>
+      <nodevisualsetting x="157" y="336" style="Growth_signaling"/>
+    </node>
+    <node id="FoxO1" maxvalue="1">
+      <value val="1">
+        <exp str="!Plk1 &amp; !AKT_H"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.04.001"/>
+          <link xlink:href="https://doi.org/doi:10.4161/cc.27727"/>
+        </linklist>
+        <comment>Logical rule:
+FoxO1 is transcriptionally active in the absence of peak AKT activation and Plk1 activity.
+
+Regulatory inputs:
+AKT mediates the translation of FoxO1 our of the nucleus through direct phosphorylation of three conserved residues. These events create a recognition site for 14-3-3 family proteins, which export and sequester FoxO1 in the cytosol [1].
+PLK1 interacts with and phosphorylates FOXO1, mainly at the G 2/M phase of the cell cycle. PLK1-mediated phosphorylation leads to the impairment of FOXO1's transcriptional activity in an Akt-independent manner. By immunofluorescence staining and subcellular fractionation, it was demonstrated that PLK1-induced FOXO1 phosphorylation causes its nuclear exclusion. [2]</comment>
+      </annotation>
+      <nodevisualsetting x="207" y="775" style="Growth_signaling"/>
+    </node>
+    <node id="p21_mRNA" maxvalue="1">
+      <value val="1">
+        <exp str="(FoxO1 &amp; FoxO3) | (!Myc &amp; (FoxO1 | FoxO3))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(04)00298-3"/>
+          <link xlink:href="https://doi.org/10.1038/35070076"/>
+          <link xlink:href="https://doi.org/10.1038/nature01119"/>
+        </linklist>
+        <comment>Logical rule:
+It is assumed that both FoxOs are required to induce p21Cip1 if Myc is active, and one of the two if Myc is OFF. This is based on data showing that both FoxO3 and FoxO1 bind and induce the p21Cip1 promoter and that loss of Myc repression alone is not sufficient to induce p21Cip1 [1].
+
+Regulatory inputs:
+p21Cip1 is a direct transcriptional target of FoxO1 [1].
+p21Cip1 is a direct transcriptional target of FoxO3 [1].
+Myc is a direct transcriptional repressor of the p21Cip1 promoter (it is recruited by the DNA-binding Miz-1) [2,3].</comment>
+      </annotation>
+      <nodevisualsetting x="330" y="995" style="Growth_signaling"/>
+    </node>
+    <node id="TSC2" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT_H | !(AKT_B | ERK)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/doi:10.1016/j.cell.2017.03.035"/>
+          <link xlink:href="https://doi.org/doi:10.1038/ncb839"/>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2005.02.031"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.0405659101"/>
+        </linklist>
+        <comment>Logical rule:
+Blocking TSC2 requires ongoing mitogen stimulation through AKT and/or ERK. It is assumed that TSC2 inhibition requires high (peak) AKT activity, supported by either ERK or basal AKT (assuring that complete loss of AKT activity is not impending) [1].
+
+Regulatory inputs:
+TSC2 is phosphorylated by AKT1, inhibiting it by dissociating TSC2 from lysosomal membranes [2], where it stimulates GTP hydrolysis of the small GTPase Rheb, this inactivating it [1].
+TSC2 is phosphorylated by AKT1, inhibiting it by dissociating TSC2 from lysosomal membranes [27], where it stimulates GTP hydrolysis of the small GTPase Rheb, this inactivating it [1].
+ERK phosphorylates TSC2 directly, causing dissociation of the complex and inhibition of its activity [3]. In addition, the ERK target p90RSK can also inactivate TSC2 [4].</comment>
+      </annotation>
+      <nodevisualsetting x="699" y="817" style="Growth_signaling"/>
+    </node>
+    <node id="PRAS40" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT_H &amp; (!mTORC1 | !AKT_B)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1152/ajpendo.00660.2011"/>
+          <link xlink:href="https://doi.org/doi:10.1038/ncb1547"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M704406200"/>
+        </linklist>
+        <comment>Logical rule:
+PRAS40 is inhibited by peak AKT activity aided by either basal AKT (meaning AKT_H is on its way down), or ongoing mTORC1 activation. Both Akt and mTORC1 phosphorylate PRAS40, leading to its dissociation from mTORC1 [1].
+
+Regulatory inputs:
+PRAS40 is an inhibitory component of the mTORC1 complex. It is phosphorylated by AKT, triggering its dissociation from mTORC1 and loss of mTORC1 inhibition [2].
+PRAS40 is phosphorylated by AKT, triggering its dissociation from mTORC1 [2].
+PRAS40 is a substrate of the mTORC1 kinase; its phosphorylation aids its dissociation from mTORC1 and its sequestration by 14-3-3 proteins [32].</comment>
+      </annotation>
+      <nodevisualsetting x="514" y="818" style="Growth_signaling"/>
+    </node>
+    <node id="Rheb" maxvalue="1">
+      <value val="1">
+        <exp str="!TSC2 &amp; DAG"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/doi:10.1101/gad.1110003"/>
+          <link xlink:href="https://doi.org/10.1371/journal.pone.0184818"/>
+          <link xlink:href="https://doi.org/10.1038/ncomms10662"/>
+        </linklist>
+        <comment>Logical rule:
+PKC (and DAG)-dependent activation of mTORC1 recruits mTORC1 to the site of Rheb activity (to prenuclear lysosomes), while AKT and ERK-mediated TSC2 inhibition guarantees that Rheb remains potent [1-3].
+
+Regulatory inputs:
+TSC2, a key component of the heterotrimeric TSC complex, is a GTPase activating protein (GAP) that induces ATP hydrolysis and deactivation of the small GTPase Rheb [1].
+The second messenger DAG activates both classical and novel PKCs. One of its targets, PKCη, is responsible for the translocation and accumulation of mTORC1 to perinuclear lysosomes, where the majority of Rheb is anchored. Thus, DAG brings Rheb in proximity with its target, mTORC1 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="659" y="946" style="Growth_signaling"/>
+    </node>
+    <node id="mTORC1" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; ((Rheb &amp; !PRAS40) | E2F1 | (CyclinB &amp; Cdk1 &amp; GSK3))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/cddiscovery.2016.24"/>
+          <link xlink:href="https://doi.org/10.1016/j.cub.2005.02.053"/>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.03.035"/>
+          <link xlink:href="https://doi.org/10.1371/journal.pone.0016163"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.00322-09"/>
+        </linklist>
+        <comment>Logical rule:
+mTORC1 is activated by mitogenic signals via Rheb in the absence of PRAS40. Independently of this, E2F1 can promote mTORC1 activity. Finally, the mitotic Cyclin B and its Cdk1 kinase can also activate mTORC1, aided by GSK3.
+
+Regulatory inputs:
+Raptor, a key component of the mTORC1 complex, is cleaved and inhibited by Caspase 3 [1].
+The Rheb small GTPase binds mTORC1 directly and activates the complex [2].
+PRAS40 is an inhibitory component of the mTORC1 complex, removed by phosphorylation by AKT or mTORC1 itself [3].
+E2F1 induces mTORC1 activity by inducing mTORC1 translocation to late endosomes. This effect does not require AKT and is not blocked by high levels of TSC2 [4].
+During mitosis, mTORC1 is activated by the G2/M-specific phosphorylation of Raptor, a component of mTORC1, by CyclinB / Cdk1 complexes, aided by GSK3 [5].
+mTORC1 is activated by the G2/M-specific phosphorylation of Raptor, a component of mTORC1, by CyclinB / Cdk1 complexes, aided by GSK3 [5].</comment>
+      </annotation>
+      <nodevisualsetting x="448" y="984" style="Growth_signaling"/>
+    </node>
+    <node id="S6K" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; mTORC1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1021/bi801840s"/>
+          <link xlink:href="https://doi.org/doi:10.1038/nrm2672"/>
+        </linklist>
+        <comment>Logical rule:
+S6K is activated by mTORC1 in the absence of Caspase 3.
+
+Regulatory inputs:
+S6K is cleaved and inhibited by Caspase 3 [1].
+mTORC1 phosphorylates and activates 40S ribosomal S6 kinases (S6Ks) [2].
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="810" y="817" style="Growth_signaling"/>
+    </node>
+    <node id="eIF4E" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; mTORC1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/s0014-5793(99)00614-6"/>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.03.035"/>
+        </linklist>
+        <comment>Logical rule:
+eIF4E is activated by mTORC1-mediated repression in the absence of Caspase 3.
+
+Regulatory inputs:
+eIF4E is cleaved and inhibited by Caspase 3 [1].
+mTORC1 phosphorylates 4EBP, triggering its dissociation from eIF4F, and thus promoting translation initiation [2].
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="862" y="955" style="Growth_signaling"/>
+    </node>
+    <node id="GSK3" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT_H &amp; !(S6K &amp; ERK)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.cell.2017.04.001"/>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2005.06.009"/>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2006.09.019"/>
+        </linklist>
+        <comment>Logical rule:
+GSK3 activity can be completely blocked by peak AKT activation (AKT_H), or by the joint action of S6K and ERK.
+
+Regulatory inputs:
+AKT blocks GSK3 kinase activity via an inhibitory phosphorylation on the amino terminus, which blocks the substrate accessibility of GSK3 [1].
+ERK binds and phosphorylates GSK3β at Thr-43, which primes it for subsequent phosphorylation by the ERK target p90RSK at Ser-9, which inactivates GSK3β [2].
+GSK3 is a direct phosphorylation target of S6K1, resulting in its inhibition [3].</comment>
+      </annotation>
+      <nodevisualsetting x="896" y="764" style="Growth_signaling"/>
+    </node>
+    <node id="p21" maxvalue="1">
+      <value val="1">
+        <exp str="p21_mRNA &amp; !Casp3 &amp; !CyclinE"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1073/pnas.1409797111"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.273.30.19207"/>
+          <link xlink:href="https://doi.org/10.4161/cc.9.12.11988"/>
+        </linklist>
+        <comment>Logical rule:
+The p21 node corresponds to nuclear p21 in cells with relatively high basal p21 activity. p21 activity and or localization can be lowered by loss of FoxO mediated transcription (see p21_mRNA node) and via feedback from Cyclin E / Cdk2 [1].
+
+Regulatory inputs:
+p21 protein activity requires the presence of p21 transcription and mRNA.
+Caspase 3 cleaves and deactivates p21Cip1 [2].
+p21 and Cyclin E / Cdk2 form a positive (double-negative) feedback loop in which Cyclin E / Cdk2 activates the SCF/Skp2 complex responsible for the degradation of Cyclin E / Cdk2- bound, phosphorylated p21 [3]. 
+p21, in turn, not only blocks Cyclin E / Cdk2 activity, but it also inhibits Cyclin D1. Thus, p21 interferes with the mitogen signal that turns on Cyclin E in the first place. In quiescent cells with high basal p21 levels, this positive feedback renders cell cycle entry stochastic [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1062" y="1091" style="Restriction_switch"/>
+    </node>
+    <node id="pRB" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; !CyclinD1 &amp; !CyclinA &amp; (p27Kip1 | !CyclinE)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/s0962-8924(02)00043-0"/>
+          <link xlink:href="https://doi.org/doi:10.1038/sj.onc.1204414"/>
+          <link xlink:href="https://doi.org/10.1101/gad.7.3.331"/>
+          <link xlink:href="https://doi.org/10.1016/j.jtbi.2004.04.039"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.272.19.12738"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(92)90249-c"/>
+        </linklist>
+        <comment>Logical rule:
+pRB is active in the absence of Caspase 3, CyclinD1 and CyclinA. In addition, pRB maintains its activity when active p27Kip1 counteracts the effects of CyclinE [1].
+
+Regulatory inputs:
+Caspase 3 cleaves RB, generating fragments that do not associate with E2F, rendering RB inactive [2].
+Cyclin D1 / Cdk4,6 complexes bind and phosphorylate RB, inhibiting its activity [3,4].
+Cyclin A / Cdk2 complexes phosphorylate and deactivate RB [5].
+Active p27Kip1 can counteract the inhibitory effects of active CyclinE/Cdk2 complexes [1].
+Cyclin E / Cdk2 complexes bind and phosphorylate RB, inhibiting its activity [4,6].</comment>
+      </annotation>
+      <nodevisualsetting x="1347" y="1333" style="Restriction_switch"/>
+    </node>
+    <node id="p27Kip1" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; !CyclinD1 &amp; !(Cdk1 &amp; CyclinB) &amp; ((!CyclinE &amp; FoxO3 &amp; FoxO1) | (!CyclinA &amp; (FoxO3 | FoxO1)) | (!CyclinE &amp; !CyclinA))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/s0962-8924(02)00043-0"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.C100762200"/>
+          <link xlink:href="https://doi.org/10.1093/ bioinformatics/btl210"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1202860"/>
+          <link xlink:href="https://doi.org/10.1016/s1097-2765(00)80055-6"/>
+          <link xlink:href="https://doi.org/10.1101/gad.13.9.1181"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1201440"/>
+          <link xlink:href="https://doi.org/10.1101/gad.11.11.1464"/>
+          <link xlink:href="https://doi.org/10.1038/35008115"/>
+        </linklist>
+        <comment>Logical rule:
+Active p27Kip1 is cleaved by Caspase 3 and inhibited (sequestered) by Cyclin D1/Cdk4,6 [1] or Cyclin B / Cdk1 [2]. In addition, maintenance of p27Kip1 requires one or both FoxO factors when sequestered by Cyclin E / Cdk2 (one FoxO factor) or Cyclin A / Cdk2 (both FoxO factors), but it cannot keep pace with the simultaneous activity of Cyclin E / Cdk2 and Cyclin A / Cdk2 [3].
+
+Regulatory inputs:
+Caspase 3 cleaves p27Kip1 [4]; the cleaved fragments can no longer associate with Cdk2 / Cyclin complexes [5].
+Active Cyclin D1 / Cdk4,6 complexes competitively bind to p27Kip1 and progressively inhibit its ability to keep Cyclin E / Cdk2 inactive [1].
+Cyclin B / Cdk1 complexes phosphorylate p27Kip1 [6] and although they do not promote its degradation, phosphorylated p27Kip1 is exported from the nucleus and looses its ability to inhibit Cdk activity [2].
+Active Cyclin E / Cdk2 phosphorylate p27Kip1 [7], which marks it for degradation by the SCFSKP2 complex at the onset of S-phase [8]. (Cyclin- E/Cdk2 complexes can remain active in the presence of p27Kip1 when Cyclin A is also active).
+Cyclin A / Cdk2 complexes sequester and inactivate p27Kip1, phosphorylate it, and promote its degradation [6].
+FoxO factors are direct inducers of p27Kip1 expression [9].</comment>
+      </annotation>
+      <nodevisualsetting x="1114" y="1363" style="Restriction_switch"/>
+    </node>
+    <node id="Myc" maxvalue="1">
+      <value val="1">
+        <exp str="(ERK &amp; (eIF4E | !GSK3)) | (E2F1 &amp; !pRB &amp; (eIF4E | ERK | !GSK3))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1101/gad.836800"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8290253/"/>
+          <link xlink:href="https://doi.org/10.1128/mcb.14.8.5510-5522.1994"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.0402770101"/>
+          <link xlink:href="https://doi.org/10.1158/0008-5472.CAN-09-0813"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8208548/"/>
+          <link xlink:href="https://doi.org/10.1101/gad.3.4.527"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8036009/"/>
+        </linklist>
+        <comment>Logical rule:
+Myc activity is turned on by stabilization of the protein via ERK phosphorylation, aided by either an increase in translation initiated by eIF4E or loss of degradation-promoting phosphorylation by GSK3 [1].
+
+Regulatory rules:
+Alternatively, increased transcription by E2F1 can also promote Myc accumulation in the absence of active pRB [2], provided that the protein is stabilized by ERK, eIF4E, or the absence of GSK3.
+Ser-62 phosphorylation by ERK increases its half life, leading to Myc accumulation [1,3].
+Thr-58 phosphorylation by GSK-3 promotes Myc degradation [1,4]
+Increased translational initiation in the presence of activated eIF4E leads to an increase in Myc protein levels [5].
+E2F1 binds and activates the c-Myc promoter [6,7].
+E2F1’s ability to induce Myc is blocked by active (hypo- phosphorylated pRB) [8].</comment>
+      </annotation>
+      <nodevisualsetting x="1189" y="1032" style="Restriction_switch"/>
+    </node>
+    <node id="CyclinD1" maxvalue="1">
+      <value val="1">
+        <exp str="!CHK1 &amp; ((!p21 &amp; ((!GSK3 &amp; (Myc | E2F1)) | (Myc &amp; CyclinD1) | (Myc &amp; E2F1) | (E2F1 &amp; CyclinD1))) | (!pRB &amp; E2F1 &amp; ((Myc &amp; CyclinD1) | (Myc &amp; !GSK3) | (CyclinD1 &amp; !GSK3))))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/onc.2008.55"/>
+          <link xlink:href="https://doi.org/10.1177/1947601911403475"/>
+          <link xlink:href="https://doi.org/10.1101/gad.11.8.957"/>
+          <link xlink:href="https://doi.org/10.1091/mbc.6.4.387"/>
+          <link xlink:href="https://doi.org/10.1038/366701a0"/>
+          <link xlink:href="https://doi.org/10.1007/s13148-010-0018-y"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1200940"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(91)90557-F"/>
+          <link xlink:href="https://doi.org/10.1016/S0960-9822(99)80476-X"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.17.7.3850"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/7526316/"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.19.7.4672"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12851485/"/>
+          <link xlink:href="https://doi.org/10.1101/gad.12.22.3499"/>
+        </linklist>
+        <comment>Logical rule:
+Ongoing DNA synthesis keeps the CHK1 kinase active, which inhibits CyclinD1. The precise regulatory logic of Cyclin D1 as a function of transcriptional control by Myc and E2F, combined with the regulation of its protein stability / activity by GSK3/ basal p21 is not known. It is assumde that in the absence of p21 (once p21 levels drop due to growth factor signals and/or Cdk2 activation), Cyclin D1 can be activated by either Myc or E2F1 in the absence of GSK3. In the presence of GSK3, it is assumde that Cyclin D1 can be induced by the combined action of both Myc and E2F1 [1], but sustained in an ON state by either. In the presence of basal (normal quiescent) levels of p21, it is assumde that Cyclin D1 transcription requires E2F1 unencumbered by pRB, as well as any two of the following: Myc, already active Cyclin D1, and no GSK3.
+
+Regulatory inputs:
+During replication, checkpoint kinases such as CHK1 (active during normal DNA synthesis) suppress Cyclin D1 [2], which has a very short half- life (~ 24 min) [3].
+p21Cip1 is a Cyclin Dependent kinase inhibitor which binds to and blocks the activity of Cdk2, Cdk3, Cdk4 and Cdk6 kinases [4] and thus inhibits CyclinD1/Cdk4,6 [5].
+The Cyclin D1 promoter is bound by E2F factors including E2F1; E2F1 over-expression can increase Cyclin D1 (though its effects are context-dependent, as E2F1 over-expression can also lead to apoptosis) [6]. Dominant negative E2F1 over-expression results in a 2-3 fold decrease in Cyclin D1 expression and Cyclin D1/Cdk4,6 activity [7].
+E2F1’s ability to induce CyclinD1 is blocked by active (hypo- phosphorylated pRB) [8].
+Extracellular growth signals activate the MAPK pathway, leading to transcriptional activation of Cyclin D1 by Myc [9,10]. Myc overexpression leads to rapid Cyclin D1 induction and subsequent cell cycle entry [11], while its absence halves Cyclin D1 levels [81]. In addition, Myc induces Cdk4, aiding the assembly of active Cyclin D1 / Cdk4,6 complexes [12,13].
+GSK-3beta phosphorylates Cyclin D1 on Thr-286, promoting its ubiquitination and degradation [14].
+In order to take into account both production and stability of Cyclin D1, is is assumed that the presence of active CyclinD/ Cdk2,4 complexes renders transcriptional maintenance of their levels easier.</comment>
+      </annotation>
+      <nodevisualsetting x="1340" y="1198" style="Restriction_switch"/>
+    </node>
+    <node id="E2F1" maxvalue="1">
+      <value val="1">
+        <exp str="!(CAD | CyclinA | pRB) &amp; (E2F1 | Myc)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(94)90582-7"/>
+          <link xlink:href="https://doi.org/10.1128/mcb.14.12.8420-8431.1994"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(91)90557-F"/>
+          <link xlink:href="https://doi.org/10.1038/358259a0"/>
+          <link xlink:href="https://doi.org/10.1101/gad.8.13.1514"/>
+          <link xlink:href="https://doi.org/10.1016/s1097-2765(00)80055-6"/>
+          <link xlink:href="https://doi.org/10.4161/cc.9.12.11988"/>
+          <link xlink:href="https://doi.org/10.1038/387422a0"/>
+          <link xlink:href="https://doi.org/10.1016/s1097-2765(02)00522-1"/>
+          <link xlink:href="https://doi.org/10.1038/ncomms5750"/>
+        </linklist>
+        <comment>Logical rule:
+In the absence of both CyclinA and pRB, E2F1 transcription can be induced by Myc or maintained by active E2F1. CAD deactivates E2F1 as it destroys the cell’s DNA.
+
+Rgulatory inputs:
+The link from Caspase-activated DNAase (CAD) to E2F1 ensures that apoptotic cells settle into an E2F1-negative attractor regardless of their initial state. The rationale for this is that E2F1 cannot maintain its activity if DNA is fragmented.
+The phosphorylation of the E2F1-binding DP-1 protein by Cyclin A, which binds directly to E2F1 (as well as E2F-2,3) down-regulates E2F1 transcriptional activity in S phase [1,2].
+RB binds to E2F/DP1 complexes and switches their DNA binding activity from an activating to a repressive form [3,4].
+E2F1 binds to its own promoter and up regulates transcription (as long as Cyclin D1/E activity blocks RB-E2F1 binding) [5].
+Myc is required for growth-factor mediated induction of E2F1 [6, 7]. It binds to and remodels the E2F1 promoter, facilitating E2F1 transcription [8]. In addition, Myc augments protein expression of E2F1 [9]. Single-cell experiments show that Myc is a critical modulator of the amplitude of E2F activation [10].
+</comment>
+      </annotation>
+      <nodevisualsetting x="931" y="1205" style="Restriction_switch"/>
+    </node>
+    <node id="CyclinE" maxvalue="1">
+      <value val="1">
+        <exp str="E2F1 &amp; Cdc6 &amp; Pre_RC &amp; !(pRB | p27Kip1 | CHK1 | Casp3)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1073/pnas.92.26.12146"/>
+          <link xlink:href="https://doi.org/10.4161/cc.9.22.13789"/>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2006.11.029"/>
+          <link xlink:href="https://doi.org/10.1016/s0959-437x(98)80058-0"/>
+          <link xlink:href="https://doi.org/10.1016/s0962-8924(02)00043-0"/>
+          <link xlink:href="https://doi.org/10.1016/s1535-6108(03)00048-5"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.22.7.2398-2409.2002"/>
+        </linklist>
+        <comment>In our model, the ON state of Cyclin E represents active Cyclin E / Cdk2 complexes. Thus, its full activation requires transcription via E2F1 not blocked by active pRB, binding to Cdc6 and pre-RC complexes, and the absence of its inhibitors p27Kip1, CHK1 and Caspase 3.
+
+E2F1 is a potent transcriptional activator of Cyclin E [1].
+
+Chromatin association and full activation of Cyclin E / Cdk2 requires Cdc6 [2].
+
+At the G1/S transition, Cyclin E is loaded onto chromatin by pre-RC complexes (Cdc6 and Cdt1 binding), where it is required for MCM2 loading, origin firing and the start of DNA synthesis [3]. In addition, activation of its partner Cdk2 by Cdc6 is contingent on this localization [2].
+
+CyclinE transcription by E2F1 is inhibited by hypo- phosphorylated (active) pRB protein [4].
+
+p27Kip1 binds to Cyclin E / Cdk2 complexes and prevents their activation [5].
+
+Chk1 activation during normal S-phase progression keeps Cdk2 activity in a physiological range by binding to both Cdk2 and Cdc25A, aiding the loss of Cyclin E / Cdk1 activity [6].
+
+Caspase 3 cleaves and deactivates Cyclin E, which is then rapidly degraded [7].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1366" y="1483" style="Restriction_switch"/>
+    </node>
+    <node id="ORC" maxvalue="1">
+      <value val="1">
+        <exp str="E2F1 | (Pre_RC &amp; Cdt1 &amp; Cdc6)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.ceb.2006.04.001"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.16.12.6977"/>
+        </linklist>
+        <comment>Logical rule:
+Active (unphosphorylated and not geminin-bound) Cdt1 bound to the Pre-RC is necessary for the maintenance of licensed origins [1].
+
+Regulatory inputs:
+Expression of the ORC1 gene is regulated by E2F1 [2].
+Licensed but not yet fired replication complexes (Pre-RCs containing ORC, Cdc6, Cdt1 and inactive MCMs) remain stable at sites of replication origin until fired by the activation of the MCM helicase [1].
+Availability of stable (unphosphorylated) Cdc6 in the Pre-RC is necessary for the maintenance of licensed origins [1].
+Active (unphosphorylated and not geminin-bound) Cdt1 bound to the Pre-RC is necessary for the maintenance of licensed origins [1].</comment>
+      </annotation>
+      <nodevisualsetting x="391" y="1125" style="Origin_lisensing_switch"/>
+    </node>
+    <node id="Cdc6" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; !(f4N_DNA &amp; CyclinA) &amp; ((E2F1 &amp; ORC &amp; !Plk1) | (Pre_RC &amp; ORC &amp; Cdc6 &amp; Cdt1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1093/embo-reports/kvf161"/>
+          <link xlink:href="https://doi.org/10.1093/emboj/18.2.396"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.95.7.3603"/>
+          <link xlink:href="https://doi.org/10.1016/j.ceb.2006.04.001"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.1013557107"/>
+        </linklist>
+        <comment>Logical rule:
+The Cdc6 node represents nuclear, chromatin-bound Cdc6. Thus, the node is only active during the assembly of pre-replication complexes, or their ongoing presence during DNA replication. Cdc6 is ON in the absence of Caspase 3 or CyclinA / Cdk2 phosphorylation of Cdc6 in all origins required for the completion of DNA replication (thus, its inhibition by Cyclin A also requires 4N_DNA). In addition, active Cdc6 requires either transcription by E2F1 and recruitment by origin-bound ORC proteins in the absence of mitotic Plk1 or maintenance of Pre-RCs by the presence of all of its components.
+
+Regulatory inputs:
+Caspase 3 cleaves and deactivates Cdc6 [1].
+Phosphorylation of CDC6 by Cyclin A / Cdk2 during DNA replication leads to its re-localization to the cytoplasm [2].
+Full deactivation of Cdc6 represents the firing of all ORCs as DNA replication is completed. Thus Cyclin A’s inhibitory action takes full effect once the cell reaches 4N DNA content [2].
+Transcription of Cdc6 is directly induced by E2F1 [3].
+ORC recruits Cdc6 to origins of replication [4].
+Plk1 binds, phosphorylated and strongly recruits Cdc6 to the spindle pole during metaphase, then to the central spindle in anaphase, leading to its exclusion from chromosomes until telophase, when the majority of Plk1 is degraded by APC/CCdh1 [5].
+Licensed but not yet fired replication complexes (Pre-RCs containing ORC, Cdc6, Cdt1 and inactive MCMs) remain stable and Cdc6-bound until fired by the activation of the MCM helicase [4].
+Stable (unphosphorylated) Cdc6 in the Pre-RC is necessary for the maintenance of licensed origins [4].
+Active (unphosphorylated and not geminin-bound) Cdt1 bound to the Pre-RC is necessary for the maintenance of licensed origins [4].</comment>
+      </annotation>
+      <nodevisualsetting x="493" y="1224" style="Origin_lisensing_switch"/>
+    </node>
+    <node id="Cdt1" maxvalue="1">
+      <value val="1">
+        <exp str="!geminin &amp; ORC &amp; Cdc6 &amp; !(CyclinE &amp; CyclinA &amp; Cdc25A) &amp; ((Pre_RC &amp; (E2F1 | Myc)) | (E2F1 &amp; (Myc | !pRB)))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.ceb.2006.04.001"/>
+          <link xlink:href="https://doi.org/10.1038/srep03444"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1207488"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M206202200"/>
+        </linklist>
+        <comment>Logical rule:
+Replication-origin bound Cdt1 requires the absence of geminin, the presence of origin- bound ORC and Cdc6, and the absence of sustained Cdk2 activity responsible for the firing of all origins during DNA synthesis (modeled as simultaneous Cyclin E, Cyclin A and Cdc25A activity). Bound into a licensed pre-replication complex (Pre-RC), Cdt1 remains stable as long as it is transcribed by E2F1 or Myc (this guarantees that Pre-RC complexes cannot persist indefinitely in the absence of de novo transcription). Alternatively, it can be turned on by E2F1, aided by Myc or the absence of RB, and FoxO3 in cells with 4N_DNA.
+
+Regulatory inputs:
+ORC-bound origin of replication sites are the point of pre- replication complex assembly, where Cdt1 is recruited by ORC- bound Cdc6 [1].
+ORC-bound Cdc6 recruits Cdt1 to pre-RC complexes [1].
+Sustained Cdk2 activity during S-phase, responsible for the firing of all origins required to complete DNA synthesis (modeled as simultaneous Cyclin E, Cyclin A and Cdc25A activity), also leads to the phosphorylation and proteasomal degradation of Cdt1 [1].
+Sustained Cdk2 activity leads to phosphorylation and degradation of Cdt1 (see above) [1].
+Sustained Cdk2 activity leads to phosphorylation and degradation of Cdt1 (see above) [1].
+Licensed but not yet fired replication complexes (Pre-RC) remain stable until fired during DNA replication [1].
+Cdt1 is a direct transcriptional target of the Myc-Max complex, ensuring its availability for Pre-RC formation and maintenance [2].
+Cdt1 is a direct transcriptional target of E2F1, ensuring its availability for Pre-RC formation and maintenance [3].
+E2F1-mediated transcription of Cdt1 is blocked by hypo- phosphorylated (active) pRB [3].
+Geminin binds to Cdt1 at pre-replication complexes, where it blocks Cdt1 binding to DNA, sequestering it away from Pre- RCs [4].</comment>
+      </annotation>
+      <nodevisualsetting x="264" y="1241" style="Origin_lisensing_switch"/>
+    </node>
+    <node id="Pre_RC" maxvalue="1">
+      <value val="1">
+        <exp str="ORC &amp; Cdc6 &amp; Cdt1 &amp; !(Replication &amp; f4N_DNA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.ceb.2006.04.001"/>
+        </linklist>
+        <comment>Logical rule:
+Pre-RC complexes assemble when ORC, Cdc6, and Cdt1 are all bound to sites of replication origin along the DNA. The node denoting their licensing turns OFF at the moment of transition from ongoing Replication to 4N_DNA (it is blocked in the one time-point when both of these nodes are ON).
+
+Regulatory inputs:
+Pre-RC complexes assemble when ORC, Cdc6 and Cdt1 are all bound to sites of replication origin along the DNA [1].
+Pre-RC complexes assemble when ORC, Cdc6 and Cdt1 are all bound to sites of replication origin along the DNA [1].
+Pre-RC complexes assemble when ORC, Cdc6 and Cdt1 are all bound to sites of replication origin along the DNA, leading to the recruitment of the MCM helicase [1].
+Pre-RCs fire and fall apart during DNA replication [1].
+It is assumed that Pre-RC turns OFF when Replication is completed, marked by the time-point when both Replication and f4N_DNA are ON.</comment>
+      </annotation>
+      <nodevisualsetting x="374" y="1374" style="Origin_lisensing_switch"/>
+    </node>
+    <node id="geminin" maxvalue="1">
+      <value val="1">
+        <exp str="E2F1 &amp; !Cdh1 &amp; !(pAPC &amp; Cdc20)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/doi:10.1038/sj.onc.1207488"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1742"/>
+          <link xlink:href="https://doi.org/10.1083/jcb.201211019"/>
+        </linklist>
+        <comment>Logical rule:
+Geminin is present when transcribed by E2F1 and not targeted for degradation by APC/ CCh1 or APC/Cdc20.
+
+Regulatory inputs:
+Geminin is a direct transcriptional target of E2F1 [1].
+Geminin is a target of APC/CCdh1 ubiquitin ligase [2].
+Geminin is a target of APC/CCdc20 at the metaphase/anaphase transition [3].
+Geminin is a target of APC/CCdc20 at the metaphase/anaphase transition [3].</comment>
+      </annotation>
+      <nodevisualsetting x="209" y="1674" style="Origin_lisensing_switch"/>
+    </node>
+    <node id="CyclinA_mRNA" maxvalue="1">
+      <value val="1">
+        <exp str="!CAD &amp; ((E2F1 &amp; !pRB) | FoxM1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/s0959-437x(98)80058-0"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.274.39.27632"/>
+          <link xlink:href="https://doi.org/10.1158/0008-5472.CAN-05-3003"/>
+          <link xlink:href="https://doi.org/10.1158/0008-5472.CAN-05-3138"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1217"/>
+          <link xlink:href="https://doi.org/10.1038/embor.2010.46"/>
+        </linklist>
+        <comment>Logical rule:
+In non-apoptotic cells Cyclin A is transcribed by E2F1 in the absence of active RB or by FoxM1.
+
+Regulatory inputs:
+The link from Caspase-activated DNAase (CAD) to Cyclin A mRNA ensures that apoptotic cells settle into a G0-like attractor regardless of their initial state. The rationale for this is that no mRNA synthesis can be maintained if DNA is fragmented (we only use these links from CAD if needed).
+Cyclin A is transcriptionally activated by E2F factors [1].
+Active RB blocks E2F1’s ability to transcribe Cyclin A [2].
+Depletion of FoxM1 results in reduced Cyclin A2 expression (it is not clear whether FoxM1 is a direct transcriptional inducer of Cyclin A) [3-6].</comment>
+      </annotation>
+      <nodevisualsetting x="693" y="1455" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Emi1" maxvalue="1">
+      <value val="1">
+        <exp str="(E2F1 | !pRB | !p21) &amp; !(Plk1 &amp; CyclinB &amp; Cdk1 &amp; (U_Kinetochores | A_Kinetochores))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1091/mbc.e04-07-0598"/>
+          <link xlink:href="https://doi.org/10.1016/S1673-8527(08)60030-2"/>
+          <link xlink:href="https://doi.org/10.1038/ncb785"/>
+          <link xlink:href="https://doi.org/10.1091/mbc.e08-08-0818"/>
+        </linklist>
+        <comment>Logical rule:
+The model allows the sustained presence of Emi1 protein when it is either actively transcribed by E2F1 or lacks joint inhibition by pRB and p21. Degradation of Emi1 is mediated by Plk1 and CyclinB/Cdk1 complexes. In addition, it requires at least temporary co-localization of Emi1 with Plk1 at mitotic spindle poles [1].
+
+Regulatory inputs:
+Emi1 is a direct transactional target of E2F1 [2,3].
+Active retinoblastoma protein can block Emi1 transcription mediated by E2F1 [3].
+p21 activation during DNA damage lead to a substantial decrease of Emi1 levels, not observed in p21-null cells [4].
+Plk1 phosphorylates Emi1 at mitotic spindle poles, stimulating its βTrCP binding and ubiquitination [1].
+Cyclin B / Cdk1 enhances the ability of Plk1 to mediate Emi1 destruction [1].
+As Plk1-mediated phosphorylation of Emi1 occurs at mitotic spindle poles, our model requires ongoing mitosis for this interaction [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1065" y="1738" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="FoxM1" maxvalue="1">
+      <value val="1">
+        <exp str="(Myc &amp; CyclinE) | (CyclinA &amp; Cdc25A &amp; Cdc25B) | (Plk1 &amp; CyclinB &amp; Cdk1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1186/s12957-018-1352-3"/>
+          <link xlink:href="https://doi.org/10.1016/j.febslet.2006.02.021"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.01710-07"/>
+          <link xlink:href="https://doi.org/10.1371/journal.pone.0051277"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.24.7.2649-2661.2004"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1767"/>
+        </linklist>
+        <comment>Logical rule:
+It is assumed that FoxM1 activity requires increased expression by Myc and activating phosphorylation by Cyclin E. Alternatively, FoxM1 activity can be sustained by potent Cdk2 / Cdk1 activity in G2 (supported by Cdc25A or Cdc25B), or a serial phosphorylation by Cyclin B / Cdk1 and Plk1 during mitosis.
+
+Regulatory inputs:
+FoxM1 is a direct transcriptional target of c-Myc [1].
+Cyclin E / Cdk2 complexes bind and phosphorylate FoxM1, potently inducing its transcriptional activity, which starts during S-phase [2].
+In addition to Cyclin E / Cdk2, Cyclin A / Cdk2 complexes can also keep FoxM1 transcriptionally active by phosphorylating its autoinhibitory N-terminal region [3].
+Active Cdc25A enhances the transcriptional activity of FoxM1, likely via keeping a strong pool of active Cdk2 [4].
+Cdc25B overexpression can increase FoxM1-dependent transcription, likely via keeping aiding Cdk1 activity [5].
+FoxM1 binds Plk1, and phosphorylation of two key residues in this domain by Cyclin B / Cdk1 primes it for Plk1 binding [6].
+Plk1 binds and phosphorylates FoxM1, which activates the FoxM1-mediated transcription in early mitosis [6].</comment>
+      </annotation>
+      <nodevisualsetting x="922" y="1617" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Cdc25A" maxvalue="1">
+      <value val="1">
+        <exp str="((FoxM1 &amp; E2F1 &amp; !pRB) | (!Cdh1 &amp; (FoxM1 | (E2F1 &amp; !pRB)))) &amp; (!(GSK3 | CHK1) | CyclinE | CyclinA | (CyclinB &amp; Cdk1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1371/journal.pone.0051277"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.19.9.6379"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.20.19.7059-7067.2000"/>
+          <link xlink:href="https://doi.org/10.1093/emboj/cdf491"/>
+          <link xlink:href="https://doi.org/10.1016/j.ccr.2007.12.002"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.23.21.7488-7497.2003"/>
+          <link xlink:href="https://doi.org/10.1002/j.1460-2075.1994.tb06750.x"/>
+          <link xlink:href="https://doi.org/10.1080/15384101.2016.1220455"/>
+          <link xlink:href="https://doi.org/10.1093/emboj/cdf567"/>
+        </linklist>
+        <comment>Logical rule:
+As the precise combinatorial regulation of Cdc25A throughput the cell cycle is unknown, the model assumes that accumulation of the Cdc25A protein requires transcriptional activation by both E2F1 in the absence of pRB and FoxM1 to override destruction by APC/CCdh1. Alternatively, one of the two transcription factors can drive Cdc25A accumulation in the absence of APC/CCdh1. In addition, stabilisation of Cdc25A either requires the absence of GSK3 and CHK1 (both of which promote its degradation), or stabilisation by Cdk activity.
+
+Regulatory inputs:
+FoxM1 is a direct transcriptional inducer of Cdc25A [1].
+E2F1 is a direct transcriptional inducer of Cdc25A [2].
+RB blocks E2F1’s ability to drive Cdc25A transcription [2,3].
+APC/CCdh1 degrades Cdc25A at mitotic exit [4].
+GSK3β phosphorylates Cdc25A, promoting its proteolysis [5].
+CHK1 phosphorylates Cdc25A, promoting its proteolysis and inhibiting its interaction with Cyclin B / Cdk1 [6].
+Cdc25A protein levels are stabilized during S-phase by CyclinE/ Cdk2 dependent phosphorylation [7].
+Cdc25A protein levels are stabilized during S and G2 by Cdk2- dependent phosphorylation. Cdk2 first partners with Cyclin E [118], then continues to stabilize Cdc25A past the point of Cyclin E expression by partnering with Cyclin A [8].
+During mitosis, Cdc25A is stabilizes by Cyclin B / Cdk1 phosphorylation, which protects it from the proteasome [9].</comment>
+      </annotation>
+      <nodevisualsetting x="530" y="1662" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="CyclinA" maxvalue="1">
+      <value val="1">
+        <exp str="CyclinA_mRNA &amp; !pAPC &amp; ((Cdc25A &amp; (!Cdh1 | Emi1)) | (CyclinA &amp; ((!Cdh1 &amp; (Emi1 | !UbcH10)) | (Emi1 &amp; !UbcH10))))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1083/jcb.153.1.137"/>
+          <link xlink:href="https://doi.org/10.1083/jcb.153.1.121"/>
+          <link xlink:href="https://doi.org/10.1083/jcb.201001083"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.19.9.6183"/>
+          <link xlink:href="https://doi.org/10.1016/j.febslet.2009.01.044"/>
+          <link xlink:href="https://doi.org/10.1038/nature03023"/>
+          <link xlink:href="https://doi.org/10.1101/gad.1495007"/>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(01)00361-0"/>
+          <link xlink:href="https://doi.org/10.1101/gad.945701"/>
+        </linklist>
+        <comment>Logical rule:
+Cyclin A activity requires transcription (Cyclin_A mRNA) and the absence of degradation by phosphorylated (mitotic) pAPC. In addition, turning ON inactive Cyclin A requires activation of Cdk2 by Cdc25A [124] and the absence / Emi1-mediated inhibition of APC/ CCdh1. Once active, Cyclin A maintains its activity in the absence of overpowering influences driving its degradation. Namely, Cyclin A relies on either Emi1 or the absence of UbcH10 for its ability to keep inactive APC/CCdh1 in check. To overpower active APC/ CCdh1, Cyclin A requires both Emi1 and no UbcH10. The precise combinatorial regulation of Cyclin A is not known; the above logic is consistent with Cyclin A activity pattern during cell cycle progression.
+
+Regulatory inputs:
+Sustained availability of Cyclin A requires transcription.
+Cyclin A is degraded by the APC/CCdc20 in prometaphase (as soon as the APC/C components are phosphorylated by Cdk1) [1,2], before the full activation of the complex at SAC passage [3].This stage of mitotic APC/CCdc20 activation is represented by Cdk1-phosphorylated APC/C (pAPC).
+Cdc25A promotes active Cyclin A / Cdk2 complex formation by removing inhibitory phosphorylation from Cdk2 [4,5].
+Cyclin A is degraded by APC/CCdh1 in the presence of the UbcH10 protein [1,6].
+Emi1 binding to Cdh1 is required to stabilize Cyclin A levels at the G1/S transition, allowing Cyclin A / Cdk2 to block Cdh1 [7-9].
+Cyclin A degradation by APC/CCdh1 requires UbcH10 [6].
+Once activated, Cyclin A / Cdk2,1 complexes can sustain their activity under favorable conditions until Cyclin A is degraded.</comment>
+      </annotation>
+      <nodevisualsetting x="338" y="1548" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Wee1" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; (Replication | CHK1) &amp; !(Cdk1 &amp; CyclinB) &amp; (CHK1 | !(Cdk1 &amp; CyclinA &amp; Plk1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1073/pnas.95.12.6785"/>
+          <link xlink:href="https://doi.org/10.1091/mbc.12.3.551"/>
+          <link xlink:href="https://doi.org/10.1083/jcb.201101047"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.0500410102"/>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2010.02.023"/>
+        </linklist>
+        <comment>Logical rule:
+Wee1 is active in non-apoptotic cells undergoing DNA synthesis or subject to the single- strand damage checkpoint signaled by active CHK1. That said, Wee1 is blocked by Cyclin B / Cdk1 phosphorylation or Cyclin A / Cdk1 / Plk1 in the absence of CHK1.
+
+Regulatory inputs:
+Caspase 3 cleaves and deactivates Wee1 [1].
+During DNA replication Wee1 is activated by the checkpoint kinase Chk1 [2].
+To model the sensitivity of Wee1 activation to ongoing DNA synthesis even in the absence of damage, our model turns on Wee1 immediately upon the start of DNA replication and maintains it until both Replication and the checkpoint kinase Chk1 is OFF [2]. In addition, Wee1 activity has been implicated in maintaining normal replication fork procession, linking its activity directly to ongoing replication [3].
+The somatic Wee1 protein is an order of magnitude more sensitive to Cdk1 activity than Cdc25C. Thus, both Cyclin B / Cdk1 and Cyclin A / Cdk1 induce Wee1 phospho- rylation and deactivation [4,5].
+Plk1 phosphorylation at S53 promotes Wee1 degradation [4]. This event is primed by Cdk1 phosphorylation of Wee1 at S123 [4]. As the main partner of Cdk1 in mitosis is Cyclin B, we assume that assistance from Plk1 to block Wee1 is more relevant when paired with Cyclin A / Cdk1 complexes.</comment>
+      </annotation>
+      <nodevisualsetting x="690" y="1705" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="UbcH10" maxvalue="1">
+      <value val="1">
+        <exp str="!Cdh1 | (UbcH10 &amp; (Cdc20 | CyclinA | CyclinB))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/nature03023"/>
+        </linklist>
+        <comment>Logical rule:
+The ubiquitin-conjugating enzyme (E2) UbcH10 is active in the absence of Cdh1. Alternatively, active UbcH10 is maintained in the presence of Cdh1 when some of its targets are present: Cdc20 OR CyclinA OR CyclinB [1].
+
+Regulatory inputs:
+UbcH10 is degraded by APC/CCdh1.
+Active UbcH10 cannot be autoubiquitinated in the presence of APC/CCdh1 substrates and thus remains active.
+The presence of APC/CCdh1 substrates, including Cdc20, Cyclin A and Cyclin B inhibit the autoubiquitination of UbcH10 but not its function, thus preserving APC activity.</comment>
+      </annotation>
+      <nodevisualsetting x="756" y="1570" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="CyclinB" maxvalue="1">
+      <value val="1">
+        <exp str="(FoxM1 | (FoxO3 &amp; CyclinB)) &amp; !(Cdh1 | (pAPC &amp; Cdc20))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/embor.2010.46"/>
+          <link xlink:href="https://doi.org/10.1016/s0014-5793(01)02915-5"/>
+          <link xlink:href="https://doi.org/10.1038/35099574"/>
+          <link xlink:href="https://doi.org/10.1101/gad.1013102"/>
+        </linklist>
+        <comment>Logical rule:
+Cyclin B node is ON when the concentration of Cyclin B proteins is high (does not represent the activity of CyclinB/Cdk1 complexes). This occurs when Cyclin B is transcribed by FoxM1, maintained by FoxO3 transcription, and not undergoing APC-mediated degradation by APC/Cdc20 or APC/Cdh1.
+
+Regulatory inputs:
+FoxM1 is a direct transcriptional regulator of Cyclin B1 [1,2].
+FoxO3 is a direct transcriptional regulator of Cyclin B; its activation in G2 helps increase/maintain Cyclin B levels [3].
+It is assumed that FoxO3 alone can only maintain, but not independently induce Cyclin B1 expression.
+Cyclin B is degraded by APC/Cdh1 and by APC/Cdc20  [4].</comment>
+      </annotation>
+      <nodevisualsetting x="856" y="2009" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Cdc25B" maxvalue="1">
+      <value val="1">
+        <exp str="FoxM1 &amp; f4N_DNA"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1128/MCB.25.24.10875-10894.2005"/>
+          <link xlink:href="https://doi.org/10.1242/jcs.01108"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1205775"/>
+        </linklist>
+        <comment>Logical rule:
+Cdc25B activation requires transcription by FoxM1, centrosomal localization, and activation by Aurora A kinase on replicated centrosomes.
+
+Regulatory inputs:
+FoxM1 is an essential inducer or Cdc25B [1].
+Cdc25B is localized at centrosomes, where it is activated by Aurora A kinase [2]. As Aurora A itself is only recruited to duplicated, centrosomes before their separation [3], Cdc25B activation requires duplicated centrosome, which implies the completion of S-phase (f4N_DNA) in the model.</comment>
+      </annotation>
+      <nodevisualsetting x="1200" y="1608" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Plk1" maxvalue="1">
+      <value val="1">
+        <exp str="!Cdh1 &amp; (FoxM1 | Plk1_H) &amp; ((CyclinB &amp; Cdk1) | (CyclinA &amp; !Wee1 &amp; Cdc25A))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/35099574"/>
+          <link xlink:href="https://doi.org/10.1016/j.celrep.2017.05.031"/>
+          <link xlink:href="https://doi.org/10.1083/jcb.200309035"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1767"/>
+          <link xlink:href="https://doi.org/10.1016/s1097-2765(00)80037-4"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.18.7.4262"/>
+          <link xlink:href="https://doi.org/10.1016/j.celrep.2016.03.049"/>
+          <link xlink:href="https://doi.org/10.1016/j.febslet.2009.01.044"/>
+        </linklist>
+        <comment>Logical rule:
+Plk1 activity requires the absence of APC/CCdh1, transcription by FoxM1, or high Plk1 levels transcribed earlier by both FoxM1 and FoxO3 (see Plk1_H below) [1]. 
+In addition, Plk1 activation requires phosphorylation by either CyclinB/Cdk1 during mitosis or Cyclin A / Cdk2 (aided by lack of Wee1 and Cdc25A) at the G2/M boundary [2].
+
+Regulatory inputs:
+The majority of Plk1 is degraded in anaphase by the APC/CCdh1 complex [3]
+Plk1 is a direct transcriptional target of FoxM1 [4].
+The model tracks the accumulauton of high-enough levels of Plk1 to survive APC/CCdh1 mediated destruction into telophase via the Plk1_H node. Its ON state represents strong prior Plk1 activation. Thus, it sustains the Plk1 node in the absence of FoxM1-mediated transcription until Plk1_H itself is lost as Plk1 levels fall.
+Plk1 is activated by Cyclin B / Cdk1 phosphorylation [5-7].
+Plk1 activation at the G2/M boundary, before Cdk1/Cuclin B complexes are activated, requires active Cyclin A / Cdk [145].
+Cyclin A-mediated induction of Plk1 is blocked by Wee1 kinase, which specifically inhibits Cdk2 activity [8].
+As the model does not include a separate Cdk2 node, strong Cyclin A / Cdk2 activity requires ongoing dephosphorylation of Cdk2 by Cdc25A [9].</comment>
+      </annotation>
+      <nodevisualsetting x="654" y="1828" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Cdc25C" maxvalue="1">
+      <value val="1">
+        <exp str="f4N_DNA &amp; Plk1 &amp; ((Cdc25B &amp; !CHK1) | (CyclinB &amp; Cdk1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.celrep.2017.05.031"/>
+          <link xlink:href="https://doi.org/10.1016/j.bbamcr.2008.12.015"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1202983"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.18.7.4262"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11149596/"/>
+          <link xlink:href="https://doi.org/10.1006/excr.2000.4872"/>
+          <link xlink:href="https://doi.org/10.1038/ncb918"/>
+          <link xlink:href="https://doi.org/10.1083/jcb.200503066"/>
+          <link xlink:href="https://doi.org/10.1038/16488"/>
+          <link xlink:href="https://doi.org/10.1242/jcs.03200"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1165"/>
+          <link xlink:href="https://doi.org/10.1002/j.1460-2075.1993.tb05631.x"/>
+        </linklist>
+        <comment>Logical rule:
+The model assumes that Cdc25C is active in cells with replicated DNA (see f4N_DNA → Cdc25C link). Its activation is initiated by a small, initially cytoplasmic pool of Cyclin B / Cdk1 activated by Cdc25B (not directly represented in our model) and further increased by Cdc25B itself, which translocates to the nucleus with the aid of Plk1. During mitosis, Plk1 potentiates the ability of Cyclin B / Cdk1 to maintain Cdc25C activity.
+
+Regulatory inputs:
+Plk1-mediated phosphorylation of Cdc25C before mitotic entry is required as the initiating step of the Cdc25C / Cdk1 feedback loop [1]. In addition, Plk1 induces nuclear transport of CDC25B, where it contributes to the initiation of Cdk1 activity [2]. During mitosis, Plk1 helps maintain strong Cdc25C activation by phosphorylating it on the same site as Cyclin B / Cdk1 [3], as indicated by the profound decrease of Cdc25C activity in Plk1-inhibited mitotic cells [4,5].
+CDC25B starts the cascade leading to mitotic entry by activating a small centrosomal pool of Cyclin B / Cdk1, leading to their nuclear translocation where they trigger the activation of Cdc25C and eventually the larger nuclear Cyclin B / Cdk1 pool [6-8].
+Chk1 phosphorylates Cdc25C, leading to its nuclear exclusion, loss of access to its main target, Cdk1 [9]. In addition, CHK1 blocks the ability of Cdc25B to activate Cdc25C at the centrosomes by phosphorylating it and blocking it’s Cdk1 activity [10,11].
+Cyclin B / Cdk1 are potent Cdc25C activators, creating positive feedback that causes switch-like mitotic entry [12].
+The nature and localization of the signals responsible for the onset and maintenance of Cdc25C activity require replicated DNA (f4N_DNA) [2,8]. Namely, Cdc25C is initially activated by a small pool of Cyclin B / Cdk1 (below the ON-threshold of Cdk1 in our model) which starts our at the replicated centrosome (see above). Moreover, the pool of mitotic Cdc25C co-localized with active Chk1/Cyclin B is found on condensed chromosomes, again requiring the presence of f4N_DNA [9].</comment>
+      </annotation>
+      <nodevisualsetting x="1199" y="1868" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Cdk1" maxvalue="1">
+      <value val="1">
+        <exp str="CyclinB &amp; Cdc25C &amp; (!CHK1 | (!Wee1 &amp; Cdk1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9338096/"/>
+          <link xlink:href="https://doi.org/10.1002/j.1460-2075.1993.tb05631.x"/>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2010.02.023"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(93)80048-j"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1165"/>
+        </linklist>
+        <comment>Logical rule:
+Full Cdk1 kinase activation requires its binding partner Cyclin B and the Cdc25C phosphatase, which maintains Cdk1 in an active dephosphorylated state. Cdk1 is inhibited by the checkpoint kinase CHK1, unless it is already full active and Wee1 kinase is inhibited.
+
+Regulatory inputs:
+Full kinase activation of Cdk1 in our model requires it to complex with Cyclin B [1].
+Cdk1 is subject to inhibitory phosphorylation by Wee1 or Myt1, while its dephosphorylation is carried out by activated Cdc25C [1, 2].
+It is assumed that the presence of fully activated, nuclear Cdk1 is able to overcome the effect of active Wee1 (as long as CHK1 is off), given that Wee1 is very sensitive to Cdk1-mediated inhibitory phosphorylation [3].
+Wee1 is a nuclear protein that ensures the completion of DNA replication prior to mitosis by blocking Cdk1 activation [4].
+In the absence of CHK1 kinase, a small cytosolic (centrosomal) pool of Cyclin B / Cdk1 can be activated by Cdc25B, the nuclear translocation of which can trigger a positive feedback loop that activates the full Cdk1 pool (assuming nuclear Wee1 is also inactive). Thus, CHK1 can maintain the OFF state of inactive Cdk1 [5].</comment>
+      </annotation>
+      <nodevisualsetting x="970" y="1908" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="pAPC" maxvalue="1">
+      <value val="1">
+        <exp str="(CyclinB &amp; Cdk1 &amp; Plk1) | (CyclinB &amp; Cdk1 &amp; pAPC) | (pAPC &amp; Cdc20)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1006/bbrc.1999.0884"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M111476200"/>
+        </linklist>
+        <comment>Logical rule:
+In line with evidence that Plk1 can aid full activation of APC/C, but Cdk1 appears to be the more potent inducer, the model requires both Cyclin B / Cdk1 and Plk1 to activate APC/C from an OFF state, but only Cdk1 activity to maintain it. In addition, ongoing phosphorylation of the functional APC/CCdc20 complex is no longer required.
+
+Regulatory inputs:
+CyclinB/Cdk1 activation promotes APC/CCdc20 activity via APC/ C subunit phosphorylation [1].
+In addition to Cyclin B / Cdk1 phosphorylation, full activation of the APC/CCdc20 complex also requires the kinase activity of Plk1 [2].
+Activated APC/Cdc20 initiates the Metaphase / Anaphase transition by degrading Cyclin B and securing.
+Once catalytically active, APC/Cdc20 no longer requires ongoing CyclinB/Cdk1 or Plk1 phosphorylation.</comment>
+      </annotation>
+      <nodevisualsetting x="403" y="1884" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Cdc20" maxvalue="1">
+      <value val="1">
+        <exp str="pAPC &amp; !Emi1 &amp; !Cdh1 &amp; (!Mad2 | (!CyclinA &amp; !(CyclinB &amp; Cdk1)))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1101/gad.267603"/>
+          <link xlink:href="https://doi.org/10.1042/BST0380065"/>
+          <link xlink:href="https://doi.org/10.1038/nrm1988"/>
+          <link xlink:href="https://doi.org/10.1038/ncomms10975"/>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(01)00361-0"/>
+          <link xlink:href="https://doi.org/10.2174/1573409910666140410124315"/>
+          <link xlink:href="https://doi.org/10.1016/j.ceb.2009.09.007"/>
+          <link xlink:href="https://doi.org/10.1101/gad.1478306"/>
+        </linklist>
+        <comment>Logical rule:
+APC/Cdc20 complex formation is represented by the joint activity of Cdc20 and phosphorylated APC/C (pAPC). Cdc20 is thus ON in the presence of pAPC when both Emi1 and Cdh1 are absent (APC/Cdh1 is represented by the Cdh1 node, see below). In addition, Cdc20 activity requires either the absence of Mad2 at unattached kinetochores, or the absence of Cdc20 phosphorylation by Cyclin B / Cdk1 or by Cyclin A / Cdk2 complexes to potentiate the interaction between Mad2 and Cdc20. and pAPC is ON (present and phosphorylated) [1].
+
+Regulatory inputs:
+APC/Cdh1 complexes degrade Cdc20, leading to a complete switch from APC/Cdc20 to APC/Cdh1 during mitotic exit [2,3].
+Cdk1-phosphorylated Cdc20 interacts with Mad2 rather than APC/C, resulting in a block on APC/CCdc20 activation until completion of spindle assembly [1].
+Cyclin B partners with Cdk1 to keep Cdc20 phosphorylated, increasing its interaction with Mad2 rather than APC/C [1].
+Cyclin A / Cdk2 complexes phosphorylate Cdc20 and inactivate the APC/Cdc20 complex during S and G2 [4].
+Emi1 binds Cdc20 and inhibits the ubiquitin ligase activity of APC/CCdc20 [5].
+The physical alignment of chromosomes along the mitotic spindle is monitored by Mad checkpoint proteins [6]. In cells with a normal spindle assembly checkpoint (SAC), even a single unattached, Mad2-bound kinetochore can sequester Cdc20 and thus inhibit APC/CCdc20 [7].
+Cdc20 becomes active in early mitosis by binding to APC/C, an event that requires Cyclin B / Cdk1 phosphorylation of several APC/C subunits [2,8].</comment>
+      </annotation>
+      <nodevisualsetting x="573" y="1964" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Cdh1" maxvalue="1">
+      <value val="1">
+        <exp str="!(CyclinB &amp; Cdk1) &amp; !(CyclinA &amp; (Emi1 | Cdc25A))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1091/mbc.11.5.1555"/>
+          <link xlink:href="https://doi.org/10.1038/nrm1988"/>
+          <link xlink:href="https://doi.org/10.1016/j.febslet.2009.01.044"/>
+          <link xlink:href="https://doi.org/10.1101/gad.945701"/>
+          <link xlink:href="https://doi.org/10.1038/ncb2755"/>
+        </linklist>
+        <comment>Logical rule:
+APC/Cdh1 activity requires the absence of Cyclin Dependent kinase phosphorylation by Cyclin B / Cdk1, or Cyclin A / Cdk2 aided by further inhibition of Cdh1 by Emi1, or ongoing Cdk2 activation by Cdc25A in the absence of Emi1.
+
+Regulatory inputs:
+Cyclin B / Cdk1 complexes phosphorylate Cdh1, blooming its ability to bind APC/C and inhibiting APC/Cdh1 activity [1].
+Active Cyclin A / Cdk1,2 complexes phosphorylate Cdh1 during S, G2 and early mitosis, impairing its interaction with APC/C until late stages of mitosis when Cdk1/2 activity falls [2].
+As the model does not include a separate Cdk2 node, strong Cyclin A / Cdk2 activity capable of overriding Cdh1 activity even in the presence of Emi1 requires ongoing dephosphorylation of Cdk2 by Cdc25A [3].
+Emi1 blocks APC/Cdh1 binding to its substrates [4], as well as its ability to add ubiquitin chains to them [5].</comment>
+      </annotation>
+      <nodevisualsetting x="288" y="1756" style="Cell_cycle_phase_switch"/>
+    </node>
+    <node id="Replication" maxvalue="1">
+      <value val="1">
+        <exp str="!CAD &amp; Pre_RC &amp; ((E2F1 &amp; CyclinE &amp; Cdc25A) | (Replication &amp; CyclinA &amp; Cdc25A &amp; (E2F1 | !f4N_DNA)))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/nrm4002"/>
+          <link xlink:href="https://doi.org/10.1101/gad.949802"/>
+          <link xlink:href="https://doi.org/10.1016/s1535-6108(03)00080-1"/>
+          <link xlink:href="https://doi.org/10.1038/ncb813"/>
+          <link xlink:href="https://doi.org/10.1126/science.288.5470.1425"/>
+          <link xlink:href="https://doi.org/10.1038/sj.embor.embor887"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.0809350106"/>
+        </linklist>
+        <comment>Logical rule:
+The Replication node represents ongoing DNA synthesis. This requires a non-apoptotic cell, licensed pre-replication complexes (Pre_RC). The start of DNA synthesis requires E2F1-meditated transcription of the genes that help execute it, as well as the firing of the first round of replication origins by Cyclin E / Cdk2. Once ongoing, replication is sustained by Cyclin A / Cdk2 and Cdc25A, aided by E2F1 and terminated by completion of a full round of synthesis (f4N_DNA).
+
+Regulatory inputs:
+Caspase-activated DNAase (CAD) destroys DNA, preventing ongoing replication.
+Ongoing DNA replication requires licensed replication origins, which fire throughout DNA synthesis [1].
+In addition to E2F1 target genes directly included in our model, E2F1 transcribes an array of critical S-phase genes responsible for carrying out DNA synthesis (e.g, POLA1, POLA2, MCM3, MCM5, MCM6, PCNA, TOP2A, RFC2, TK1) [2,3].
+DNA replication is initiated by fully active CyclinE/Cdk2 [4].
+Active Cdc25A is required for onset as well as progression through S-phase [5,6].
+Cyclin A / Cdk1 complexes regulate the origin firing program in mammalian cells and are required for the completion of DNA replication [6,7].
+Once ongoing, DNA synthesis continues in the presence of active Cyclin A / Cdk2, only ending when DNA content is doubled.
+Complete duplication of a cell’s DNA, represented in our model by f4N_DNA = ON, marks the end of active Replication.</comment>
+      </annotation>
+      <nodevisualsetting x="1829" y="1303" style="Cycle_process_bridge"/>
+    </node>
+    <node id="f4N_DNA" maxvalue="1">
+      <value val="1">
+        <exp str="!CAD &amp; ((Replication &amp; ((Pre_RC &amp; CyclinA) | f4N_DNA)) | (f4N_DNA &amp; !Ect2))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1101/gad.949802"/>
+          <link xlink:href="https://doi.org/10.1038/ncb813"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.0809350106"/>
+          <link xlink:href="https://doi.org/10.1016/j.devcel.2007.03.013"/>
+          <link xlink:href="https://doi.org/10.1073/pnas.0701140104"/>
+        </linklist>
+        <comment>Logical rule:
+4N DNA content is reached via the completion of Replication (via the firing of the last round of replication origins by Cyclin A / Cdk complexes) and maintained in non-apoptotic cells the absence of a contractile ring (marked by Ect2), driving cytokinesis.
+
+Regulatory inputs:
+Caspase-activated DNAase (CAD) destroys DNA, preventing maintenance of a double DNA content.
+DNA content is doubled by the process of Replication.
+Replication can only complete DNA synthesis and produce double DNA content if the availability of licensed replication origins is not blocked [1].
+Cyclin A / Cdk1 complexes regulate the origin firing program in mammalian cells and are required for the completion of DNA replication [2,3].
+Once achieved, a cell’s 4N DNA content is sustained up to the point of cytokinesis.
+At the start of cytokinesis, the Ect2 RhoGEF is recruited to the central spindle [4]. Ect2 aids the accumulation of GTP-bound RhoA [5] and the formation of the contractile ring. In our model, Ect2 recruitment to the central spindle marks the start of cytokinesis and the subsequent resetting of daughter cell DNA content to 2N.</comment>
+      </annotation>
+      <nodevisualsetting x="1961" y="1396" style="Cycle_process_bridge"/>
+    </node>
+    <node id="U_Kinetochores" maxvalue="1">
+      <value val="1">
+        <exp str="f4N_DNA &amp; !Cdh1 &amp; !A_Kinetochores &amp; ((CyclinB &amp; Cdk1) | U_Kinetochores)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/21831"/>
+          <link xlink:href="https://doi.org/10.1083/jcb.201302060"/>
+          <link xlink:href="https://doi.org/10.1016/j.semcdb.2005.02.007"/>
+        </linklist>
+        <comment>Logical rule:
+The U_Kinetochores node  is ON from the moment the nuclear envelope is dissolved in prometaphase and the mitotic spindle starts to form, until all kinetochores are properly attached. In addition to the presence of unattached kinetochores, U_Kinetochores = ON requires attached sister chromatics, the absence of APC/CCdh1 activity. It is turned on my CyclinB/Cdk1 and remains on until the spindle is complete (or it is destroyed by APC/CCdh1).
+
+Regulatory inputs:
+Metaphase requires replicated sister chromatids (f4N_DNA), held together by their kinetochores, face in opposing directions and can be attached to opposite poles of the mitotic spindle.
+Premature activation of APC/CCdh1 destroys the incomplete spindle by triggering premature, aberrant anaphase. This occurs due to premature degradation of APC/C targets including Securin (responsible for keeping sister chromatids attached [1]), Cyclin B, CDC20, and Aurora kinase A (AURKA) [2].
+The transition from unattached (U_Kinetochores) to all attached kinetochores (A_Kinetochores) marks the completion of the mitotic spindle and Spindle Assembly Checkpoint (SAC) passage.
+The start of mitotic spindle assembly is initiated by active CyclinB/Cdk1 [3].
+The start of mitotic spindle assembly is initiated by active CyclinB/Cdk1 [3].
+Once metaphase starts, the mitotic spindle remains incomplete as long as some of the kinetochores remain unattached.</comment>
+      </annotation>
+      <nodevisualsetting x="1545" y="1567" style="Cycle_process_bridge"/>
+    </node>
+    <node id="Mad2" maxvalue="1">
+      <value val="1">
+        <exp str="U_Kinetochores &amp; !A_Kinetochores"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.ceb.2009.09.007"/>
+        </linklist>
+        <comment>Logical rule:
+The  spindle assembly checkpoint (SAC) is represented via the Mad2 kinetochore-binding protein. Mad2 is active as long as the cell has at least one unattached kinetochore and it is responsible for keeping Cdc20 sequestered from APC/C. By keeping APC at bay until the spindle is complete, Mad2 is required for the proper timing of anaphase [1].
+
+Regulatory inputs:
+The Mad2 SAC protein is active and potent in the presence of even a single unattached kinetochore [1].
+Mad2 is inhibited by SAC passage, marked by the completion of the spindle and proper attachment of all kinetochore [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1832" y="1868" style="Cycle_process_bridge"/>
+    </node>
+    <node id="A_Kinetochores" maxvalue="1">
+      <value val="1">
+        <exp str="f4N_DNA &amp; !Cdh1 &amp; !(pAPC &amp; Cdc20) &amp; (A_Kinetochores | (U_Kinetochores &amp; Plk1 &amp; CyclinB &amp; Cdk1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1083/jcb.201302060"/>
+          <link xlink:href="https://doi.org/10.1038/21831"/>
+          <link xlink:href="https://doi.org/10.1016/j.devcel.2008.04.014"/>
+          <link xlink:href="https://doi.org/10.1038/jid.2009.172"/>
+          <link xlink:href="https://doi.org/10.1016/j.ccr.2007.01.014"/>
+        </linklist>
+        <comment>Logical rule:
+The completed spindle, represented by the A_Kinetochores node, requires replicated and attached sister chromatids (f4N_DNA) and the absence of APC/C activity. It turns on when the process of spindle assembly (U_Kinetochores) is completed by active Plk1 localized to unattached kinetochores in the presence of ongoing Cyclin B / Cdk1 activity and it remains on until anaphase (APC/C activation).
+
+Regulatory inputs:
+Completion of the mitotic spindle requires replicated and attached sister chromatids (f4N_DNA).
+APC/CCdh1 destroys the spindle by triggering anaphase via the degradation of APC/C targets, including Securin [1].
+During normal mitosis, the completed spindle is pulled apart in response to APC/CCdc20-mediated degradation of Securin, which normally blocks separate from severing the cohesin rings keeping sister chromatids attached [2].
+During normal mitosis, the completed spindle is pulled apart in response to APC/CCdc20-mediated degradation of Securin, which normally blocks separate from severing the cohesin rings keeping sister chromatids attached [2].
+Once assembled, separation of the mitotic spindle requires APC/C activity to promote the destruction of sister chromatid cohesion [2].
+The mitotic spindle is assembled gradually, as the number of unattached kinetochores gradually decreased by the formation of microtubule attachments.
+Plk1 activity at unattached kinetochores is required for promoting their attachment [3]. In its absence, kinetochores remain unattached and cells eventually undergo mitotic catastrophe and apoptosis [4].
+Plk1 activity at unattached kinetochores is required for promoting their attachment [3]. In its absence, kinetochores remain unattached and cells eventually undergo mitotic catastrophe and apoptosis [4].
+Ongoing Cyclin B / Cdk1 at unattached kinetochores is necessary to keep Plk1 active and allow the completion of mitosis [5].
+Ongoing Cyclin B / Cdk1 at unattached kinetochores is necessary to keep Plk1 active and allow the completion of mitosis [5].</comment>
+      </annotation>
+      <nodevisualsetting x="1960" y="2084" style="Cycle_process_bridge"/>
+    </node>
+    <node id="Plk1_H" maxvalue="1">
+      <value val="1">
+        <exp str="Plk1 &amp; FoxM1 &amp; (Plk1_H | FoxO3 | FoxO1)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1083/jcb.200309035"/>
+          <link xlink:href="https://doi.org/10.1016/j.devcel.2007.03.013"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1217"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1767"/>
+          <link xlink:href="https://doi.org/10.1038/35099574"/>
+          <link xlink:href="https://doi.org/10.1126/science.1152337"/>
+          <link xlink:href="https://doi.org/10.15190/d.2014.8"/>
+        </linklist>
+        <comment>Logical rule:
+The ON state of Plk1_H encodes the short-lived memory of a sufficiently large active Plk1 pool to temporarily survive Plk1 destruction by APC/CCdh1 [1], recruit Ect2 to the central spindle, and thus aid the completion of cytokinesis [2]. Thus, Plk1_H requires ongoing Plk1 activation and transcription by FoxM1, and either induction by FoxO3 or FoxO1, or prior accumulation.
+
+Regulatory inputs:
+Active mitotic Plk1 is a prerequisite for the accumulation of the larger active Plk1 pool denoted by Plk1_H.
+Plk1 is a direct transcriptional target of FoxM1; loss of FoxM1 severely reduces Plk1 protein levels [3,4].
+Plk1 is a direct transcriptional target of FoxO3, but Plk1 appears to be sufficiently induced in the absence of FoxO preteens to aid its G2/M and mitotic functions. In contrast, accumulation if a large enough Plk1 pool to briefly outlast APC/ CCdh1 activation (modeled by the Plk1_H node), requires FoxO activity in G2 [5].
+In addition to FoxO3, FoxO1 also binds the Plk1 promoter, potentially aiding its accumulation during G2 [6].
+Once accumulated, we assume that the Plk1_H pool of active Plk1 remains stable in the absence of FoxO-mediated transcription. This is supported by negative feedback regulation of FoxO proteins by Plk1 [7], indicating that ongoing high FoxO activity is likely not required for the maintenance of Plk1_H.</comment>
+      </annotation>
+      <nodevisualsetting x="1657" y="1450" style="Cycle_process_bridge"/>
+    </node>
+    <node id="Ect2" maxvalue="1">
+      <value val="1">
+        <exp str="f4N_DNA &amp; Plk1_H &amp; Cdh1 &amp; !U_Kinetochores &amp; !A_Kinetochores"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1083/jcb.200309035"/>
+          <link xlink:href="https://doi.org/10.1016/j.cub.2008.09.058"/>
+        </linklist>
+        <comment>Logical rule:
+Ect2 activaiton at the spindle midzone represents the step of cytokinesis in our model. Thus, Ect2 requires f4N_DNA, high Plk1 activity, as well as Cdh1 for the assembly of a normal spindle midzone. Finally, Ect2 cannot be recruited to the mid zone before anaphase is completed.
+
+Regulatory inputs:
+Formation of a spindle midzone, where Ect2 accumulates in preparation of cytokinesis requires recently separated sister chromatids (4N DNA content).
+Plk1 activity in telophase (Plk1_H) is required for the recruitment of Ect2 to the central spindle [1].
+APC/Cdh1 -mediated destruction of Aurora kinase is required for the assembly of a robust spindle midzone at anaphase and for the normal timing of cytokinesis [2].
+Formation of a spindle midzone requires the separation of sister chromatids; thus it cannot occur before anaphase.</comment>
+      </annotation>
+      <nodevisualsetting x="2002" y="1537" style="Cycle_process_bridge"/>
+    </node>
+    <node id="Casp8" maxvalue="1">
+      <value val="1">
+        <exp str="DR4_5 | Casp3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.bbcan.2009.11.004"/>
+          <link xlink:href="https://doi.org/10.1038/sj.cdd.4401065"/>
+        </linklist>
+        <comment>Logical rule:
+Pro-Caspase 8 may be cleaved independently by DISC (DR4_5) or Caspase 3.
+
+Regulatory inputs:
+Trail-bound (active) DR4 and DR5 receptors trigger the assembly of the pro-apoptotic death-inducing signaling complex (DISC), which binds a cluster of pro-Caspase 8 proteins and initiates their cleavage into active Caspase 8 [1].
+Caspase 3 indirectly activates Caspase 8 by cleaving Caspase 6 [200], which, in turn, cleaves Caspase 8 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1464" y="221" style="Apoptosis"/>
+    </node>
+    <node id="Casp2" maxvalue="1">
+      <value val="1">
+        <exp str="Casp3 | (U_Kinetochores &amp; Mad2 &amp; !(CyclinB &amp; Cdk1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1074/jbc.272.34.21010"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M008363200"/>
+          <link xlink:href="https://doi.org/10.1080/23723556.2015.1059921"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.C400545200"/>
+          <link xlink:href="https://doi.org/10.1016/S0002-9440(10)63470-0"/>
+          <link xlink:href="https://doi.org/10.1038/emboj.2009.253"/>
+        </linklist>
+        <comment>Logical rule:
+Pro-caspase 2 is cleaved and activated by Caspase 3, or by failed cytokinesis marked by the presence of unattached kinetochores, an active SAC, and the absence of active Cyclin B / Cdk1 complexes to phosphorylate and inhibit Caspase 2.
+
+Regulatory inputs:
+Caspase 2 is a target of Caspase 3, as its inhibition severely limits Caspase 2 cleavage during apoptosis [1,2].
+Although the precise molecular mechanism by which Caspase 2 is activated during prolonged or stalled mitosis is unclear, its activation platform, the PIDDosome, has been localized to unattached kinetochores [204]. Even though a checkpoint protein keeps the PIDDosome unresponsive to DNA damage signals, the loss of protective Cyclin B / Cdk1 phosphorylation only leads to Caspase 2 activation in the presence of a partially assembled mitotic spindle, and requires active SAC.
+A functional spindle assembly checkpoint is required for mitotic cell death upon prolonged mitotic arrest [4] or spindle damage [5].
+Cyclin B1/Cdk1 phosphorylate caspase-2 at Ser 340, preventing its activation [6].</comment>
+      </annotation>
+      <nodevisualsetting x="1207" y="819" style="Apoptosis"/>
+    </node>
+    <node id="MCL_1" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; !Casp2 &amp; (!GSK3 | (AKT_B &amp; (ERK | !E2F1))) &amp; !(Cdk1 &amp; CyclinB &amp; U_Kinetochores)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2006.02.009"/>
+          <link xlink:href="https://doi.org/10.1038/nature09779"/>
+          <link xlink:href="https://doi.org/10.1016/j.yexcr.2012.04.003"/>
+          <link xlink:href="https://doi.org/10.1371/journal.pone.0145460"/>
+          <link xlink:href="https://doi.org/10.1038/emboj.2010.112"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1205157"/>
+          <link xlink:href="https://doi.org/10.1158/0008-5472.CAN-08-0579"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1202035"/>
+        </linklist>
+        <comment>Logical rule:
+Caspase 3 or 2-mediated destruction of MCL-1 must be absent for MCL-1 to be ON. Avoiding degradation via GSK3 requires the GSK3-weakenjng presence of basal AKT activity (AKT_B) [1] and either ERK-mediated stabilization, or the absence of its repressor E2F1. Finally, during mitotic arrest (U_Kinetochores), MCL-1 is deactivated by CyclinB / Cdk1 phosphorylation, which shields it from the PPA2-mediated dephosphorylation of its degradation-targeting sites [2].
+
+Regulatory inputs:
+Caspase 3 cleaves and deactivated MCL-1 [3].
+Caspase 2 activation destabilizes the MCL-1 protein [4].
+During prolonged mitotic arrest (U_kinetochores), MCL-1 levels drop steadily due to phosphorylation by JNK, p38 and/or CKII and its subsequent degradation by the E3 ubiquitin ligase SCF(FBW7) [2].
+Phosphorylation by CyclinB / Cdk1 in cells arrested in mitosis initiates MCL-1 degradation [211].
+In cells arrested in mitosis, phosphorylation by CyclinB / Cdk1 on T92 initiates MCL-1 degradation [5].
+E2F1 is a direct transcriptional repressor of MCL-1 [6].
+ERK phosphorylates Mcl-1, promoting its interaction with Pin1, which stabilizes it [7,8].
+MCL-1 is phosphorylated by GSK-3, leading to ubiquitinylation and degradation of MCL-1 [1].
+In order to account for the loss of MCL-1 in the complete absence of growth factors vs. its presence in low growth factor environments, we required basal AKT to modulate the strength of GSK3 inhibition [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1256" y="622" style="Apoptosis"/>
+    </node>
+    <node id="BCLXL" maxvalue="1">
+      <value val="1">
+        <exp str="!Casp3 &amp; (BCL2 | !BAD) &amp; (!U_Kinetochores | (Plk1 &amp; (!(CyclinB &amp; Cdk1) | (BCL2 &amp; MCL_1))) | (BCL2 &amp; MCL_1 &amp; !(CyclinB &amp; Cdk1)))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1073/pnas.95.2.554"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(95)90411-5"/>
+          <link xlink:href="https://doi.org/10.1101/gad.1326205"/>
+          <link xlink:href="https://doi.org/10.1038/cddis.2014.251"/>
+          <link xlink:href="https://doi.org/10.1002/ijc.29725"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.00882-09"/>
+          <link xlink:href="https://doi.org/10.1002/cbin.10259"/>
+        </linklist>
+        <comment>Logical rule:
+BCLXL activity requires the absence of Caspase 3. In addition, BAD can block BCLXL when BCL2 is also OFF. Finally, mitotic BCLXL can be inhibited by Cdk1 activity if either BCL2, MCL-1, or Plk1 are OFF. In the absence of Plk1, loss of either BCL2 or MCL-1 can result in BCLXL inhibition (even without Cdk1 phosphorylation), as it is assumed that its targets are no longer competitively bound by its family members.
+
+Regulatory inputs:
+BCL-xL is cleaved and deactivated by Caspase 3 [1].
+Bad can bind BCL-xL and displace it from BAX, thus deactivating it [2].
+BCL2 competes with BCL-xL for BAD binding. Although BCL- xL is a stronger binding partner, we assume that BAD alone cannot fully block BCL-xL in the presence of BCL2 [2].
+MCL-1 competes with BCL-xL for BAK binding; the presence of MCL-1 can keep part of the BCL-xL pool active [3].
+Prolonged mitosis is required for the accumulation of BCL-xL phosphorylation, weakening its interaction with Bax [4].
+In addition to other effects of prolonged mitotic arrest on BCL-2 proteins, Plk1 inhibition synergistically enhances the inhibitory phosphorylation of BCL-2 and BCL-xL, as well as downregulation of MCL-1 [5].
+During normal mitosis, Cyclin B / Cdk1 only transiently phosphorylates part of the BCLXL pool. Prolonged mitosis, however, results in high levels of BCL-xL (and Bcl-2) phosphorylation, priming the system for Caspase 2-mediated apoptosis [6,7].</comment>
+      </annotation>
+      <nodevisualsetting x="1155" y="420" style="Apoptosis"/>
+    </node>
+    <node id="BCL2" maxvalue="1">
+      <value val="1">
+        <exp str="!(Casp3 | BAD | BIM | BIK) &amp; (!U_Kinetochores | (MCL_1 &amp; BCLXL) | (Plk1 &amp; (BCLXL | MCL_1 | !(Cdk1 &amp; CyclinB))))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1074/jbc.274.30.21155"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(95)90411-5"/>
+          <link xlink:href="https://doi.org/10.1093/emboj/17.2.384"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.272.39.24494"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.00882-09"/>
+          <link xlink:href="https://doi.org/10.1002/cbin.10259"/>
+          <link xlink:href="https://doi.org/10.1002/ijc.29725"/>
+          <link xlink:href="https://doi.org/10.1038/cddis.2013.360"/>
+        </linklist>
+        <comment>Logical rule:
+It is assumed that BCL2 as ON in the absence of Caspase 3, BAD, BIM or BIK. This choice makes BCL2 the most sensitive of the three family members to activation of its three inhibitors. In addition, mitotic BCL2 is blocked by Cdk1 if both BCL-xL and MCL-1 are OFF. In the absence of Plk1, loss of either BCL2 or MCL-1 can result in BCL-2 inhibition (even without Cdk1 phosphorylation), as it is assumed that its targets are no longer competitively bound by its family members.
+
+Regulatory inputs:
+BCL2 is cleaved and deactivated by Caspase 3 [1].
+BCL2 competes with BCL-xL for BAD binding. BAD displaces BCL2 from its Although BCL-xL is a stronger binding partner, we assume that BAD alone cannot fully block BCL-xL in the presence of BCL2 [2].
+BIM binds BCL2 and they mutually inhibit each other’s ability to activate further targets [3].
+BIK also binds BCL2 and they mutually inhibit each other’s activity [4].
+BCL2 competes with BCL-xL for binding most of their apoptotic partners, including BIK, BIM, BID, BAX and BAK.
+MCL-1 competes with BCL2 for binding most of their apoptotic partners, including BIK, BIM, BID, BAX and BAK.
+Prolonged mitosis is required for the accumulation of BCL-2 phosphorylation [4,5,6].
+In addition to other effects of prolonged mitotic arrest on BCL-2 proteins, Plk1 inhibition synergistically enhances the inhibitory phosphorylation of BCL-2 and BCL-xL, as well as downregulation of MCL-1 [7].
+Prolonged mitosis results in high levels of BCL-xL and Bcl-2 phosphorylation, priming the system for Caspase 2-mediated apoptosis [5,6,8].
+Cyclin B / Cdk1 phosphorylates Bcl-2 (and BCL-xL) during mitosis [5,6].</comment>
+      </annotation>
+      <nodevisualsetting x="1372" y="502" style="Apoptosis"/>
+    </node>
+    <node id="BAD" maxvalue="1">
+      <value val="1">
+        <exp str="Casp3 | !(AKT_H | AKT_B | ERK | S6K) | (Casp8 &amp; !(AKT_B &amp; ERK &amp; S6K) &amp; !(AKT_H &amp; (AKT_B | ERK)))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1128/MCB.21.9.3025-3036.2001"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12754297"/>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(00)80405-5"/>
+          <link xlink:href="https://doi.org/10.1038/sj.onc.1203076"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M004199200"/>
+        </linklist>
+        <comment>Logical rule:
+BAD is ON when cleaved by Caspase 3, or in the complete absence of survival signals (AKT, ERK or S6K). Alternatively, BAD can be cleaved and activated by Caspase 8 in the absence of strong survival signaling. This inhibitory survival signal is modelled as either the combined activity of ERK, S6K and (at least) basal AKT, or high AKT in the joint presence of ERK and basal AKT (indicating that AKT_H will not drop by the next time-step).
+
+Regulatory inputs:
+Caspase 3 cleaves BAD, generating a more potently apoptotic fragment [1].
+Caspase 8 is also able to cleave BAD, generating a more potently apoptotic fragment [1]. In addition, TRAIL-mediated apoptosis results in BAD cleavage by a Caspase upstream of MOMP, creating a potent apoptotic inducer before full Caspase 3 activation [2].
+Akt phosphorylates BAD at Ser-136, inducing its sequestration away from the mitochondrial membrane where its BCL-2 family targets are located (e.g., BCL-2, BCL-xL) [3]
+Akt phosphorylates BAD at Ser-136, inducing its sequestration away from the mitochondrial membrane where its BCL-2 family targets are located (e.g., BCL-2, BCL-xL) [3]
+ERK phosphorylates BAD at Ser-112, inducing its sequestration away from the mitochondrial membrane where its BCL-2 family targets are located (e.g., BCL-2, BCL-xL)[4].
+S6K1 phosphorylates BAD at Ser-155, directly blocking its binding to BCL-xL [5].</comment>
+      </annotation>
+      <nodevisualsetting x="1066" y="325" style="Apoptosis"/>
+    </node>
+    <node id="BIK" maxvalue="1">
+      <value val="1">
+        <exp str="!(MCL_1 | BCLXL | BCL2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1083/jcb.200703040"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.272.39.24494"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/7478623"/>
+        </linklist>
+        <comment>Logical rule:
+BIK is free to activate its target, BAX, only when it is not sequestered by any of the three BCL-2 family proteins in our model [1].
+
+Regulatory inputs:
+BCL2 binds BIK; they mutually inhibit each other [2].
+BCLXL also binds BIK; they mutually inhibit each other [3].
+MCL-1 also binds BIK; they mutually inhibit each other [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1328" y="359" style="Apoptosis"/>
+    </node>
+    <node id="BIM" maxvalue="1">
+      <value val="1">
+        <exp str="FoxO3 &amp; GSK3 &amp; !(ERK | MCL_1 | BCLXL | BCL2)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/s0960-9822(00)00728-4"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.23.17.6027-6036.2003"/>
+          <link xlink:href="https://doi.org/10.1186/1471-2202-12-69"/>
+          <link xlink:href="https://doi.org/10.1093/emboj/17.2.384"/>
+          <link xlink:href="https://doi.org/10.1002/eji.200424981"/>
+        </linklist>
+        <comment>Logical rule:
+BIM’s pro-apoptotic activity requires expression driven by FoxO3 and aided by GSK3 and the absence of all three inhibitory BCL2 family proteins.
+
+Regulatory inputs:
+FoxO3 is a transcriptional activator of BIM [1].
+GSK3 kinase is likely required for the AP1-dependent expression of BIM [2].
+The MEK/ERK pathway represses BIM protein levels, likely via transcriptional repression [3].
+BLC2 binds BIM and inhibits its apoptotic activity [4].
+BLC-XL binds BIM and inhibits its apoptotic activity [4].
+MCL-1 binds BIM and inhibits its apoptotic activity [5].</comment>
+      </annotation>
+      <nodevisualsetting x="1351" y="685" style="Apoptosis"/>
+    </node>
+    <node id="BID" maxvalue="1">
+      <value val="1">
+        <exp str="Casp8 | (Casp2 &amp; !(BCL2 | BCLXL | MCL_1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1006/bbrc.1999.1641"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M115.711051"/>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(00)81590-1"/>
+          <link xlink:href="https://doi.org/10.1128/MCB.00013-08"/>
+          <link xlink:href="https://doi.org/10.1038/ncb1499"/>
+        </linklist>
+        <comment>Logical rule:
+BID is truncated in response to Caspase 8 activation. In addition, Caspase 2 can also promote BID activation once all three pro-apoptotic BCL2 family proteins are blocked.
+
+Regulatory inputs:
+In response to TRAIL (or FAS ligand), the initiator caspase 8 cleaves BID to its active truncated form [1-3].
+Caspase 2 cleaves BID to its active truncated form [4]
+All three anti-apoptotic BCL2 proteins (BCL2, BCL-xL and MCL-1) sequesters BID into stable complexes, preventing them from activating BAX or BAK [5].</comment>
+      </annotation>
+      <nodevisualsetting x="1578" y="286" style="Apoptosis"/>
+    </node>
+    <node id="BAK" maxvalue="1">
+      <value val="1">
+        <exp str="(BID &amp; (BIM | BIK | !(BCL2 &amp; BCLXL &amp; MCL_1))) | ((BIM | BIK) &amp; !(BCLXL | MCL_1))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2013.08.048"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M708426200"/>
+          <link xlink:href="https://doi.org/10.1101/gad.1304105"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10950869/"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M500800200"/>
+          <link xlink:href="https://doi.org/10.1101/gad.279414.116"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M109.004770"/>
+        </linklist>
+        <comment>Logical rule:
+BAK is preferentially activated by BID compared to BIM [1], and  it is less responsive to sequestration by BCL2 than the other two anti-apoptotic BCL2 family proteins [2,3].
+Hence it is assumed that BAK turns ON when stimulated by BID if one or more BCL2 family proteins are absent, or if BIM or BIK are also present. In contrast, BIM or BIK only activate BAK if BCLXL and MCL-1 are absent (BCL-2 alone cannot block them).
+
+Regulatory inputs:
+Activated (truncated) BID binds to mitochondrial BAK, resulting in its activation and oligomerization in the mitochondrial membrane, followed by cytochrome c release [4].
+BAK is preferentially activated by BID compared to BIM, but BIM can also promote BAK oligomerization [1]
+BIK can aid the activation of both BAK and BAX by triggering BAK oligomerization on the ER membrane and promoting a Ca2+ efflux required for the fragmentation of hyper fused mitochondrial tubules, aiding BAK and BAX activation [5].
+BCLXL binds BAK and prevent its oligomerization in the mitochondrial membrane [2,3,6].
+MCL-1 binds BAK and prevent its oligomerization in the mitochondrial membrane [2,3].
+BCL2 can also bind BAK to prevent its oligomerization, but it does so less potently than the other two BCL-2 family members [2,3,7].</comment>
+      </annotation>
+      <nodevisualsetting x="1529" y="376" style="Apoptosis"/>
+    </node>
+    <node id="BAX" maxvalue="1">
+      <value val="1">
+        <exp str="(BIM &amp; (BID | BIK | !(BCL2 &amp; BCLXL &amp; MCL_1))) | ((BID | BIK) &amp; !(BCL2 | BCLXL))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/j.molcel.2013.08.048"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M708426200"/>
+          <link xlink:href="https://doi.org/10.1101/gad.1304105"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M500800200"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.M707762200"/>
+        </linklist>
+        <comment>Logical rule:
+BAX is preferentially activated by BIM compared to BID [1] and it is less responsive to sequestration by MCL-1 than the other two anti-apoptotic BCL2 family proteins [2,3]. 
+It is thus assumed that BAX turns ON when stimulated by BIM if one or more BCL2 family proteins are absent, or if BID or BIK are also present. In contrast, BID or BIK only activate BAK if BCL2 and BCLXL are absent (MCL-1 alone cannot block them).
+
+Regulatory inputs:
+BAX is preferentially activated by BIM compared to BID, but BID can also promote BAK oligomerization [1].
+BIK can aid the activation of both BAK and BAX by triggering BAK oligomerization on the ER membrane and promoting a Ca2+ efflux required for the fragmentation of hyper fused mitochondrial tubules, aiding BAK and BAX activation [4].
+BCL2 binds BAX and prevent its oligomerization in the mitochondrial membrane [2,3].
+BCL-xL binds BAK and prevent its oligomerization in the mitochondrial membrane [2,3].
+MCL-1 can also bind BAK to prevent its oligomerization, but it does so less potently than the other two BCL-2 family members [2,3,5].</comment>
+      </annotation>
+      <nodevisualsetting x="1684" y="481" style="Apoptosis"/>
+    </node>
+    <node id="Cyto_C" maxvalue="1">
+      <value val="1">
+        <exp str="BAX | BAK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1126/science.1059108"/>
+          <link xlink:href="https://doi.org/10.1016/0092-8674(93)90509-o"/>
+          <link xlink:href="https://doi.org/10.1016/s0014-5793(97)01087-9"/>
+        </linklist>
+        <comment>Logical rule:
+Cytochrome C release from mitochondria requires the oligomerization of either BAK or BAX [1].
+
+Regulatory inputs:
+BAX oligomerization at the mitochondrial membrane triggers MOMP, which results in the release of cytochrome C from mitochondria [2,3].
+BAK oligomerization at the mitochondrial membrane triggers MOMP, which results in the release of cytochrome C from mitochondria [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1738" y="631" style="Apoptosis"/>
+    </node>
+    <node id="SMAC" maxvalue="1">
+      <value val="1">
+        <exp str="BAX | BAK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1126/science.1059108"/>
+          <link xlink:href="https://doi.org/10.1242/jcs.024703"/>
+        </linklist>
+        <comment>Logical rule:
+SMAC/Diablo release from mitochondria requires the oligomerization of either BAK or BAX [1,2].
+
+Regulatory inputs:
+BAX oligomerization at the mitochondrial membrane triggers MOMP, which results in the release of cytochrome C from mitochondria [1,2].
+BAK oligomerization at the mitochondrial membrane triggers MOMP, which results in the release of cytochrome C from mitochondria [1,2].</comment>
+      </annotation>
+      <nodevisualsetting x="1662" y="729" style="Apoptosis"/>
+    </node>
+    <node id="IAPs" maxvalue="1">
+      <value val="1">
+        <exp str="!SMAC | AKT_H"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1074/jbc.M407700200"/>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(00)00008-8"/>
+        </linklist>
+        <comment>Logical rule:
+Inhibitor of Apoptosis Proteins (IAPs) are active in the absence of SMAC/Diablo inhibition, or following AKT_H mediated up regulation (this protection from SMAC requires peak or oncogenic AKT activity).
+
+Regulatory inputs:
+cIAP-2 and XIAP are both transcriptionally up-regulated in response to strong PI3K/AKT1 activation [1]
+SMAC / Diablo binds tightly to IAP proteins and blocks their ability to inhibit Caspase 3 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1515" y="764" style="Apoptosis"/>
+    </node>
+    <node id="Casp9" maxvalue="1">
+      <value val="1">
+        <exp str="Casp3 | (!IAPs &amp; Cyto_C)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1074/jbc.M008363200"/>
+          <link xlink:href="https://doi.org/10.1093/emboj/17.8.2215"/>
+          <link xlink:href="https://doi.org/10.1016/s1097-2765(00)80095-7"/>
+        </linklist>
+        <comment>Logical rule:
+Procaspase 9 is cleaved into active Caspase 9 by Caspase 3, or by the apoptosome (which relies on Cytochrome C for its assembly) in the absence of IAP proteins.
+
+Regulatory inputs:
+Procaspase 9 is a direct cleavage target of Caspase 3 [1].
+XIAP, cIAP1 and cIAP2 inhibitor the the cytochrome c-induced activation of procaspase-9 [2].
+Cytochrome c binds to APAF-1 proteins, promoting their assembly into the apoptosome, a platform for procaspase 9 binding and cleavage into its active form [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1730" y="783" style="Apoptosis"/>
+    </node>
+    <node id="Casp3" maxvalue="1">
+      <value val="1">
+        <exp str="(Casp9 &amp; Casp8) | (Casp3 &amp; (Casp9 | Casp8)) | (!IAPs &amp; (Casp9 | Casp8 | Casp3))"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1093/emboj/17.8.2215"/>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(01)00274-4"/>
+          <link xlink:href="https://doi.org/10.1016/s0092-8674(00)80434-1"/>
+          <link xlink:href="https://doi.org/10.1074/jbc.273.42.27084"/>
+          <link xlink:href="https://doi.org/10.1038/nature08012"/>
+        </linklist>
+        <comment>Logical rule:
+Activation of Caspase 3 requires proteolytic cleavage of procaspase-3 by initiator caspases such as Caspase 9 or Caspase 8. It is assumed that cooperation of two of the three caspases (Casp9, Casp8, Casp3) is required in the presence of IAPS, which inhibit the proteolytic activity of Caspase 3 by bind tightly to its active site. In the absence of IAPS, either of the three caspases can cleave and activate Caspase 3.
+
+Regulatory inputs:
+IAPs bind tightly to the active site of Caspase 3, keeping its activity in check [1,2].
+Active Caspase 9 cleaves Caspase 3 [3].
+Caspase 8 can cleave Caspase 3 [4], but full Caspase 3 activation also requires MOMP (potentially due to a need for IAP inhibition) [5].
+Once activated, Caspase 3 helps sustain its own activation by cleaving procaspase 8 and 6. Caspase 6, in turn, generates additional active caspase 8 and 9. Together they all sustains a continuing active pool of Caspase 3.</comment>
+      </annotation>
+      <nodevisualsetting x="1447" y="920" style="Apoptosis"/>
+    </node>
+    <node id="CAD" maxvalue="1">
+      <value val="1">
+        <exp str="Casp3 &amp; Casp9"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1074/jbc.274.43.30651"/>
+        </linklist>
+        <comment>Logical rule:
+Caspase-activated DNase (CAD) is activated when its inhibition is released via the cleavage of ICAD (inhibitor of caspase-activated DNase). While Capsase 3 and 7 (a direct target of Caspase 9) can inhibit ICAD [1], it is assumed they are both required, as CAD = ON represents terminal, irreversible apoptotic commitment, which is fully locked in when both Caspase 3 and 9 are ON.
+
+Regulatory inputs:
+Caspase 3 relives CAD inhibition by cleaving its inhibitor ICAD [1].
+In addition of Caspase 3, CAD inhibition can also be relieved by ICAD cleavage by Caspase 7, which is a direct target of Caspase 9 [1].</comment>
+      </annotation>
+      <nodevisualsetting x="1777" y="1125" style="Apoptosis"/>
+    </node>
+    <node id="ATR" maxvalue="1">
+      <value val="1">
+        <exp str="Replication"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1128/MCB.26.8.3319-3326.2006"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+ATR accumulates at replication forks during unperturbed DNA synthesis [1].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1849" y="1496" style="Cycle_process_bridge"/>
+    </node>
+    <node id="CHK1" maxvalue="1">
+      <value val="1">
+        <exp str="ATR"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1128/MCB.26.8.3319-3326.2006"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+ATR kinase activates CHK1 at replication forks, which not only blocks premature mitosis but also regulates the rate of origin firing by keeping Cdc25 protein levels from increasing above their physiological range [1].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1776" y="1725" style="Cycle_process_bridge"/>
+    </node>
+    <node id="Ca2" maxvalue="1">
+      <value val="1">
+        <exp str="IP3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1098/rstb.1981.0177"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+IP3 travels from the cell membrane to the endoplasmic reticulum where it opens IP3-sensitive Ca2+ channels, releasing a sudden Ca2+ efflux from the ER into the cytosol [1].</comment>
+      </annotation>
+      <nodevisualsetting x="180" y="438" style="Growth_signaling"/>
+    </node>
+    <node id="DAG" maxvalue="1">
+      <value val="1">
+        <exp str="PLCgamma"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1007/978-94-007-3012-0_3"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+Membrane-bound, active PLCγ is responsible for converting phosphatidylinositol(4,5)P2 (PIP2) to the second messenger diacylglycerol (DAG), along with IP3 [1].</comment>
+      </annotation>
+      <nodevisualsetting x="639" y="713" style="Growth_signaling"/>
+    </node>
+    <node id="DR4_5" maxvalue="1">
+      <parameter idActiveInteractions=" Trail:DR4_5" val="1"/>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1096/fj.08-111005"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+The DR4 and DR5 death receptors, represented by the DR4_5 node, are activated by extracellular Trail [1].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1458" y="113" style="Apoptosis"/>
+    </node>
+    <node id="ERK" maxvalue="1">
+      <value val="1">
+        <exp str="MEK &amp; !BIK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/sj.leu.2402945"/>
+        </linklist>
+        <comment>Logical rule and regulatory inputs:
+MEK phosphorylates and activates the ERK kinase [1].
+</comment>
+      </annotation>
+      <nodevisualsetting x="765" y="682" style="Growth_signaling"/>
+    </node>
+    <node id="GF_High" maxvalue="1" input="true">
+      <annotation>
+        <comment>Logical rule:
+The GF_High (fixed input) node represents an extracellular environment with saturating levels of growth factors; this input node is self-sustaining in the absence of in silico perturbation.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="504" y="42" style="Growth_signaling"/>
+    </node>
+    <node id="IP3" maxvalue="1">
+      <value val="1">
+        <exp str="PLCgamma"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1007/978-94-007-3012-0_3"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+Membrane-bound, active PLCγ is responsible for converting phosphatidylinositol(4,5)P2 (PIP2) to the second messenger inositol(1,4,5)P3 (IP3) responsible for triggering a sudden Ca2+ influx from the endoplasmic reticulum, along with DAG (diacylglycerol, another second messenger) [1].
+</comment>
+      </annotation>
+      <nodevisualsetting x="147" y="581" style="Growth_signaling"/>
+    </node>
+    <node id="MEK" maxvalue="1">
+      <value val="1">
+        <exp str="RAF"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1038/sj.leu.2402945"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+Raf phosphorylates and activates the MEK kinase [1].
+</comment>
+      </annotation>
+      <nodevisualsetting x="728" y="537" style="Growth_signaling"/>
+    </node>
+    <node id="SOS" maxvalue="1">
+      <value val="1">
+        <exp str="Grb2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://doi.org/10.1016/S1470-8175(01)00023-6"/>
+        </linklist>
+        <comment>Logical rule and regulatory input:
+RTK-bound Grb2 recruits SOS, a guanine nucleotide –  exchange protein (GEF) that converts inactive Ras to its active GTP-bound form [1].
+</comment>
+      </annotation>
+      <nodevisualsetting x="690" y="276" style="Growth_signaling"/>
+    </node>
+    <node id="Trail" maxvalue="1" input="true">
+      <annotation>
+        <comment>Logical rule:
+The Trail node represents environmental availability of the Trail protein outside the cell; this input node remains on/off if set ON/OFF in the absence of in silico perturbation.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1452" y="21" style="Apoptosis"/>
+    </node>
+    <edge id="pAPC:geminin" from="pAPC" to="geminin" minvalue="1" sign="negative">
+      <edgevisualsetting points="283,1915" anchor="NE" style=""/>
+    </edge>
+    <edge id="pAPC:CyclinA" from="pAPC" to="CyclinA" minvalue="1" sign="negative">
+      <edgevisualsetting points="405,1790" anchor="NE" style=""/>
+    </edge>
+    <edge id="pAPC:CyclinB" from="pAPC" to="CyclinB" minvalue="1" sign="negative">
+      <edgevisualsetting points="864,1918" anchor="NE" style=""/>
+    </edge>
+    <edge id="pAPC:pAPC" from="pAPC" to="pAPC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="pAPC:Cdc20" from="pAPC" to="Cdc20" minvalue="1" sign="positive">
+      <edgevisualsetting points="446,1995" anchor="NE" style=""/>
+    </edge>
+    <edge id="pAPC:A_Kinetochores" from="pAPC" to="A_Kinetochores" minvalue="1" sign="negative">
+      <edgevisualsetting points="436,2131" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BCLXL" from="BCL2" to="BCLXL" minvalue="1" sign="positive">
+      <edgevisualsetting points="1254,521" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BIK" from="BCL2" to="BIK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1408,490" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BIM" from="BCL2" to="BIM" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BID" from="BCL2" to="BID" minvalue="1" sign="negative">
+      <edgevisualsetting points="1645,530" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BAK" from="BCL2" to="BAK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1579,519" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BAX" from="BCL2" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting points="1632,540" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:Cdc6" from="f4N_DNA" to="Cdc6" minvalue="1" sign="negative">
+      <edgevisualsetting points="1984,1277" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:Pre_RC" from="f4N_DNA" to="Pre_RC" minvalue="1" sign="negative">
+      <edgevisualsetting points="1948,1429 1272,1432" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:Cdc25B" from="f4N_DNA" to="Cdc25B" minvalue="1" sign="positive">
+      <edgevisualsetting points="1968,1649" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:Cdc25C" from="f4N_DNA" to="Cdc25C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1975,1931" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:Replication" from="f4N_DNA" to="Replication" minvalue="1" sign="negative">
+      <edgevisualsetting points="1961,1345" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:f4N_DNA" from="f4N_DNA" to="f4N_DNA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:U_Kinetochores" from="f4N_DNA" to="U_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="1963,1583" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:A_Kinetochores" from="f4N_DNA" to="A_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="1988,1982" anchor="NE" style=""/>
+    </edge>
+    <edge id="f4N_DNA:Ect2" from="f4N_DNA" to="Ect2" minvalue="1" sign="positive">
+      <edgevisualsetting points="2029,1495" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO1:p21_mRNA" from="FoxO1" to="p21_mRNA" minvalue="1" sign="positive">
+      <edgevisualsetting points="297,1043" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO1:p27Kip1" from="FoxO1" to="p27Kip1" minvalue="1" sign="positive">
+      <edgevisualsetting points="263,1367" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO1:Plk1_H" from="FoxO1" to="Plk1_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="222,1443" anchor="NE" style=""/>
+    </edge>
+    <edge id="Mad2:Cdc20" from="Mad2" to="Cdc20" minvalue="1" sign="negative">
+      <edgevisualsetting points="1888,2105 590,2107" anchor="NE" style=""/>
+    </edge>
+    <edge id="Mad2:Casp2" from="Mad2" to="Casp2" minvalue="1" sign="positive">
+      <edgevisualsetting points="2112,1892 2107,863" anchor="NE" style=""/>
+    </edge>
+    <edge id="Myc:p21_mRNA" from="Myc" to="p21_mRNA" minvalue="1" sign="negative">
+      <edgevisualsetting points="905,1056" anchor="NE" style=""/>
+    </edge>
+    <edge id="Myc:CyclinD1" from="Myc" to="CyclinD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1264,1203" anchor="NE" style=""/>
+    </edge>
+    <edge id="Myc:E2F1" from="Myc" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting points="976,1079" anchor="NE" style=""/>
+    </edge>
+    <edge id="Myc:Cdt1" from="Myc" to="Cdt1" minvalue="1" sign="positive">
+      <edgevisualsetting points="308,1071" anchor="NE" style=""/>
+    </edge>
+    <edge id="Myc:FoxM1" from="Myc" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="928,1076" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:mTORC1" from="E2F1" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="962,1026" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:Myc" from="E2F1" to="Myc" minvalue="1" sign="positive">
+      <edgevisualsetting points="1010,1087" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CyclinD1" from="E2F1" to="CyclinD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1190,1226" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:E2F1" from="E2F1" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CyclinE" from="E2F1" to="CyclinE" minvalue="1" sign="positive">
+      <edgevisualsetting points="1012,1508" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:ORC" from="E2F1" to="ORC" minvalue="1" sign="positive">
+      <edgevisualsetting points="952,1152" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:Cdc6" from="E2F1" to="Cdc6" minvalue="1" sign="positive">
+      <edgevisualsetting points="897,1260" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:Cdt1" from="E2F1" to="Cdt1" minvalue="1" sign="positive">
+      <edgevisualsetting points="972,1300" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:geminin" from="E2F1" to="geminin" minvalue="1" sign="positive">
+      <edgevisualsetting points="250,1203" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CyclinA_mRNA" from="E2F1" to="CyclinA_mRNA" minvalue="1" sign="positive">
+      <edgevisualsetting points="742,1244" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:Emi1" from="E2F1" to="Emi1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1080,1236" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:Cdc25A" from="E2F1" to="Cdc25A" minvalue="1" sign="positive">
+      <edgevisualsetting points="632,1229" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:Replication" from="E2F1" to="Replication" minvalue="1" sign="positive">
+      <edgevisualsetting points="1026,1299" anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:MCL_1" from="E2F1" to="MCL_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1004,675" anchor="NE" style=""/>
+    </edge>
+    <edge id="Wee1:Plk1" from="Wee1" to="Plk1" minvalue="1" sign="negative">
+      <edgevisualsetting points="692,1745" anchor="NE" style=""/>
+    </edge>
+    <edge id="Wee1:Cdk1" from="Wee1" to="Cdk1" minvalue="1" sign="negative">
+      <edgevisualsetting points="994,1738" anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:CHK1" from="ATR" to="CHK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1874,1626" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp8:BAD" from="Casp8" to="BAD" minvalue="1" sign="positive">
+      <edgevisualsetting points="1110,245" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp8:BID" from="Casp8" to="BID" minvalue="1" sign="positive">
+      <edgevisualsetting points="1621,240" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp8:Casp3" from="Casp8" to="Casp3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1513,583" anchor="NE" style=""/>
+    </edge>
+    <edge id="BAK:Cyto_C" from="BAK" to="Cyto_C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1793,405" anchor="NE" style=""/>
+    </edge>
+    <edge id="BAK:SMAC" from="BAK" to="SMAC" minvalue="1" sign="positive">
+      <edgevisualsetting points="1674,417" anchor="NE" style=""/>
+    </edge>
+    <edge id="DR4_5:Casp8" from="DR4_5" to="Casp8" minvalue="1" sign="positive">
+      <edgevisualsetting points="1504,188" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAF:MEK" from="RAF" to="MEK" minvalue="1" sign="positive">
+      <edgevisualsetting points="780,500" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:pRB" from="CyclinA" to="pRB" minvalue="1" sign="negative">
+      <edgevisualsetting points="348,1352" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:p27Kip1" from="CyclinA" to="p27Kip1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1160,1564" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:E2F1" from="CyclinA" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="978,1558" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:Cdc6" from="CyclinA" to="Cdc6" minvalue="1" sign="negative">
+      <edgevisualsetting points="544,1554" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:Cdt1" from="CyclinA" to="Cdt1" minvalue="1" sign="negative">
+      <edgevisualsetting points="304,1556" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:FoxM1" from="CyclinA" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="430,1652" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:Cdc25A" from="CyclinA" to="Cdc25A" minvalue="1" sign="positive">
+      <edgevisualsetting points="420,1670" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:CyclinA" from="CyclinA" to="CyclinA" minvalue="1" sign="positive">
+      <edgevisualsetting points="308,1567 309,1605 343,1605" anchor="SW" style=""/>
+    </edge>
+    <edge id="CyclinA:Wee1" from="CyclinA" to="Wee1" minvalue="1" sign="negative">
+      <edgevisualsetting points="418,1733" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:UbcH10" from="CyclinA" to="UbcH10" minvalue="1" sign="positive">
+      <edgevisualsetting points="488,1595" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:Plk1" from="CyclinA" to="Plk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="674,1606" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:Cdc20" from="CyclinA" to="Cdc20" minvalue="1" sign="negative">
+      <edgevisualsetting points="398,2005" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:Cdh1" from="CyclinA" to="Cdh1" minvalue="1" sign="negative">
+      <edgevisualsetting points="351,1664" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:Replication" from="CyclinA" to="Replication" minvalue="1" sign="positive">
+      <edgevisualsetting points="360,1313" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA:f4N_DNA" from="CyclinA" to="f4N_DNA" minvalue="1" sign="positive">
+      <edgevisualsetting points="388,1438" anchor="NE" style=""/>
+    </edge>
+    <edge id="BIK:BCL2" from="BIK" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BIK:BAK" from="BIK" to="BAK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1496,393" anchor="NE" style=""/>
+    </edge>
+    <edge id="BIK:BAX" from="BIK" to="BAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="1730,365" anchor="NE" style=""/>
+    </edge>
+    <edge id="BIK:ERK" from="BIK" to="ERK" minvalue="1" sign="negative">
+      <edgevisualsetting points="852,396" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca2:NeddL4" from="Ca2" to="NeddL4" minvalue="1" sign="positive">
+      <edgevisualsetting points="223,422" anchor="NE" style=""/>
+    </edge>
+    <edge id="SOS:Ras" from="SOS" to="Ras" minvalue="1" sign="positive">
+      <edgevisualsetting points="773,355" anchor="NE" style=""/>
+    </edge>
+    <edge id="MEK:ERK" from="MEK" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting points="791,648" anchor="NE" style=""/>
+    </edge>
+    <edge id="Replication:Pre_RC" from="Replication" to="Pre_RC" minvalue="1" sign="negative">
+      <edgevisualsetting points="1870,1428" anchor="NE" style=""/>
+    </edge>
+    <edge id="Replication:Wee1" from="Replication" to="Wee1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1845,1714" anchor="NE" style=""/>
+    </edge>
+    <edge id="Replication:Replication" from="Replication" to="Replication" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Replication:f4N_DNA" from="Replication" to="f4N_DNA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1972,1336" anchor="NE" style=""/>
+    </edge>
+    <edge id="Replication:ATR" from="Replication" to="ATR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1881,1438" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:FoxO3" from="ERK" to="FoxO3" minvalue="1" sign="negative">
+      <edgevisualsetting points="445,705" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:TSC2" from="ERK" to="TSC2" minvalue="1" sign="negative">
+      <edgevisualsetting points="774,763" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:GSK3" from="ERK" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting points="946,729" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:Myc" from="ERK" to="Myc" minvalue="1" sign="positive">
+      <edgevisualsetting points="1202,720" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:MCL_1" from="ERK" to="MCL_1" minvalue="1" sign="positive">
+      <edgevisualsetting points="861,663" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:BAD" from="ERK" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting points="840,364" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:BIM" from="ERK" to="BIM" minvalue="1" sign="negative">
+      <edgevisualsetting points="1204,709" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K_H:PIP3" from="PI3K_H" to="PIP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="575,331" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K_H:AKT_H" from="PI3K_H" to="AKT_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="435,449" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K_H:PLCgamma" from="PI3K_H" to="PLCgamma" minvalue="1" sign="positive">
+      <edgevisualsetting points="307,331" anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1:CyclinD1" from="CHK1" to="CyclinD1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1810,1237" anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1:CyclinE" from="CHK1" to="CyclinE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1414,1753" anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1:Cdc25A" from="CHK1" to="Cdc25A" minvalue="1" sign="negative">
+      <edgevisualsetting points="1822,2079 526,2079" anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1:Wee1" from="CHK1" to="Wee1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1330,1722" anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1:Cdc25C" from="CHK1" to="Cdc25C" minvalue="1" sign="negative">
+      <edgevisualsetting points="1815,1917" anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1:Cdk1" from="CHK1" to="Cdk1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1795,1937" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdt1:ORC" from="Cdt1" to="ORC" minvalue="1" sign="positive">
+      <edgevisualsetting points="319,1150" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdt1:Cdc6" from="Cdt1" to="Cdc6" minvalue="1" sign="positive">
+      <edgevisualsetting points="446,1267" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdt1:Pre_RC" from="Cdt1" to="Pre_RC" minvalue="1" sign="positive">
+      <edgevisualsetting points="331,1395" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21_mRNA:p21" from="p21_mRNA" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting points="381,1118" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:Emi1" from="U_Kinetochores" to="Emi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1552,1783" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:U_Kinetochores" from="U_Kinetochores" to="U_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NW" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:Mad2" from="U_Kinetochores" to="Mad2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1612,1888" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:A_Kinetochores" from="U_Kinetochores" to="A_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="1604,2111" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:Ect2" from="U_Kinetochores" to="Ect2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1817,1598" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:Casp2" from="U_Kinetochores" to="Casp2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1606,871" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:MCL_1" from="U_Kinetochores" to="MCL_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1626,642" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:BCLXL" from="U_Kinetochores" to="BCLXL" minvalue="1" sign="negative">
+      <edgevisualsetting points="1637,473" anchor="NE" style=""/>
+    </edge>
+    <edge id="U_Kinetochores:BCL2" from="U_Kinetochores" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1631,560" anchor="NE" style=""/>
+    </edge>
+    <edge id="Trail:DR4_5" from="Trail" to="DR4_5" minvalue="1" sign="positive">
+      <edgevisualsetting points="1506,95" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC2:AKT_B" from="mTORC2" to="AKT_B" minvalue="1" sign="positive">
+      <edgevisualsetting points="547,682" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC2:AKT_H" from="mTORC2" to="AKT_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="464,684" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc6:CyclinE" from="Cdc6" to="CyclinE" minvalue="1" sign="positive">
+      <edgevisualsetting points="556,1539" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc6:ORC" from="Cdc6" to="ORC" minvalue="1" sign="positive">
+      <edgevisualsetting points="543,1169" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc6:Cdc6" from="Cdc6" to="Cdc6" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc6:Cdt1" from="Cdc6" to="Cdt1" minvalue="1" sign="positive">
+      <edgevisualsetting points="445,1252" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc6:Pre_RC" from="Cdc6" to="Pre_RC" minvalue="1" sign="positive">
+      <edgevisualsetting points="529,1389" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:mTORC1" from="CyclinB" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="893,1047" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:p27Kip1" from="CyclinB" to="p27Kip1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1175,2035" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Emi1" from="CyclinB" to="Emi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1117,2031" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:FoxM1" from="CyclinB" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="934,1910" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Cdc25A" from="CyclinB" to="Cdc25A" minvalue="1" sign="positive">
+      <edgevisualsetting points="534,2035" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Wee1" from="CyclinB" to="Wee1" minvalue="1" sign="negative">
+      <edgevisualsetting points="884,1753" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:UbcH10" from="CyclinB" to="UbcH10" minvalue="1" sign="positive">
+      <edgevisualsetting points="814,2008" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:CyclinB" from="CyclinB" to="CyclinB" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Plk1" from="CyclinB" to="Plk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="722,2011" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Cdc25C" from="CyclinB" to="Cdc25C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1236,2038" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Cdk1" from="CyclinB" to="Cdk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1013,2027" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:pAPC" from="CyclinB" to="pAPC" minvalue="1" sign="positive">
+      <edgevisualsetting points="420,2043" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Cdc20" from="CyclinB" to="Cdc20" minvalue="1" sign="negative">
+      <edgevisualsetting points="765,2017" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Cdh1" from="CyclinB" to="Cdh1" minvalue="1" sign="negative">
+      <edgevisualsetting points="874,1816" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:U_Kinetochores" from="CyclinB" to="U_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="1589,2060" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:A_Kinetochores" from="CyclinB" to="A_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="865,2117" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Casp2" from="CyclinB" to="Casp2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1309,2044" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:MCL_1" from="CyclinB" to="MCL_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1317,2048" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:BCLXL" from="CyclinB" to="BCLXL" minvalue="1" sign="negative">
+      <edgevisualsetting points="2140,2069 2136,455" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:BCL2" from="CyclinB" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="2120,2055 2117,554" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:CyclinD1" from="p21" to="CyclinD1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1128,1216" anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:Emi1" from="p21" to="Emi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1088,1266" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp9:Casp3" from="Casp9" to="Casp3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1749,975" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp9:CAD" from="Casp9" to="CAD" minvalue="1" sign="positive">
+      <edgevisualsetting points="1788,1013" anchor="NE" style=""/>
+    </edge>
+    <edge id="S6K:mTORC2" from="S6K" to="mTORC2" minvalue="1" sign="negative">
+      <edgevisualsetting points="830,786" anchor="NE" style=""/>
+    </edge>
+    <edge id="S6K:GSK3" from="S6K" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting points="931,853" anchor="NE" style=""/>
+    </edge>
+    <edge id="S6K:BAD" from="S6K" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting points="888,371" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:FoxO3" from="Plk1" to="FoxO3" minvalue="1" sign="negative">
+      <edgevisualsetting points="172,1864 173,895" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:FoxO1" from="Plk1" to="FoxO1" minvalue="1" sign="negative">
+      <edgevisualsetting points="197,1856" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:Cdc6" from="Plk1" to="Cdc6" minvalue="1" sign="negative">
+      <edgevisualsetting points="683,1284" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:Emi1" from="Plk1" to="Emi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="708,1786" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:FoxM1" from="Plk1" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1010,1843" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:Wee1" from="Plk1" to="Wee1" minvalue="1" sign="negative">
+      <edgevisualsetting points="700,1733" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:Cdc25C" from="Plk1" to="Cdc25C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1190,1874" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:pAPC" from="Plk1" to="pAPC" minvalue="1" sign="positive">
+      <edgevisualsetting points="668,1907" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:A_Kinetochores" from="Plk1" to="A_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="694,2125" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:Plk1_H" from="Plk1" to="Plk1_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="1712,1861" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:BCLXL" from="Plk1" to="BCLXL" minvalue="1" sign="positive">
+      <edgevisualsetting points="686,2169 2152,2168 2151,444" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1:BCL2" from="Plk1" to="BCL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1474,1848" anchor="NE" style=""/>
+    </edge>
+    <edge id="Rheb:mTORC1" from="Rheb" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="598,994" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:mTORC1" from="Cdk1" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="904,1929 898,1037" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:p27Kip1" from="Cdk1" to="p27Kip1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1186,1933" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Emi1" from="Cdk1" to="Emi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1102,1909" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:FoxM1" from="Cdk1" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1022,1794" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Cdc25A" from="Cdk1" to="Cdc25A" minvalue="1" sign="positive">
+      <edgevisualsetting points="544,1936" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Wee1" from="Cdk1" to="Wee1" minvalue="1" sign="negative">
+      <edgevisualsetting points="990,1747" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Plk1" from="Cdk1" to="Plk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1010,1885" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Cdc25C" from="Cdk1" to="Cdc25C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1116,1915" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Cdk1" from="Cdk1" to="Cdk1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NW" style=""/>
+    </edge>
+    <edge id="Cdk1:pAPC" from="Cdk1" to="pAPC" minvalue="1" sign="positive">
+      <edgevisualsetting points="549,1943" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Cdc20" from="Cdk1" to="Cdc20" minvalue="1" sign="negative">
+      <edgevisualsetting points="999,1981" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Cdh1" from="Cdk1" to="Cdh1" minvalue="1" sign="negative">
+      <edgevisualsetting points="335,1952" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:U_Kinetochores" from="Cdk1" to="U_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="1577,1952" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:A_Kinetochores" from="Cdk1" to="A_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting points="1977,1944" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:Casp2" from="Cdk1" to="Casp2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1312,1942" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:MCL_1" from="Cdk1" to="MCL_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1346,1955" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:BCLXL" from="Cdk1" to="BCLXL" minvalue="1" sign="negative">
+      <edgevisualsetting points="2130,1964 2124,463" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdk1:BCL2" from="Cdk1" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1050,1012 1056,544" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ect2:f4N_DNA" from="Ect2" to="f4N_DNA" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc20:geminin" from="Cdc20" to="geminin" minvalue="1" sign="negative">
+      <edgevisualsetting points="264,2026" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc20:UbcH10" from="Cdc20" to="UbcH10" minvalue="1" sign="positive">
+      <edgevisualsetting points="804,1970" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc20:CyclinB" from="Cdc20" to="CyclinB" minvalue="1" sign="negative">
+      <edgevisualsetting points="752,2023" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc20:pAPC" from="Cdc20" to="pAPC" minvalue="1" sign="positive">
+      <edgevisualsetting points="428,2005" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc20:A_Kinetochores" from="Cdc20" to="A_Kinetochores" minvalue="1" sign="negative">
+      <edgevisualsetting points="600,2095" anchor="NE" style=""/>
+    </edge>
+    <edge id="BAX:Cyto_C" from="BAX" to="Cyto_C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1747,603" anchor="NE" style=""/>
+    </edge>
+    <edge id="BAX:SMAC" from="BAX" to="SMAC" minvalue="1" sign="positive">
+      <edgevisualsetting points="1733,671" anchor="NE" style=""/>
+    </edge>
+    <edge id="DAG:Rheb" from="DAG" to="Rheb" minvalue="1" sign="positive">
+      <edgevisualsetting points="673,875" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:mTORC1" from="GSK3" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="508,802" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:Myc" from="GSK3" to="Myc" minvalue="1" sign="negative">
+      <edgevisualsetting points="975,1041" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:CyclinD1" from="GSK3" to="CyclinD1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1367,813" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:Cdc25A" from="GSK3" to="Cdc25A" minvalue="1" sign="negative">
+      <edgevisualsetting points="621,797" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:MCL_1" from="GSK3" to="MCL_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1260,787" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:BIM" from="GSK3" to="BIM" minvalue="1" sign="positive">
+      <edgevisualsetting points="1365,801" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAD:RTK" from="CAD" to="RTK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1855,205" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAD:E2F1" from="CAD" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1004,1166" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAD:CyclinA_mRNA" from="CAD" to="CyclinA_mRNA" minvalue="1" sign="negative">
+      <edgevisualsetting points="717,1179" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAD:Replication" from="CAD" to="Replication" minvalue="1" sign="negative">
+      <edgevisualsetting points="1838,1280" anchor="NE" style=""/>
+    </edge>
+    <edge id="CAD:f4N_DNA" from="CAD" to="f4N_DNA" minvalue="1" sign="negative">
+      <edgevisualsetting points="1998,1164" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCLXL:BCL2" from="BCLXL" to="BCL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1246,533" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCLXL:BIK" from="BCLXL" to="BIK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1242,408" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCLXL:BIM" from="BCLXL" to="BIM" minvalue="1" sign="negative">
+      <edgevisualsetting points="1218,702" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCLXL:BID" from="BCLXL" to="BID" minvalue="1" sign="negative">
+      <edgevisualsetting points="1224,294" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCLXL:BAK" from="BCLXL" to="BAK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1388,432" anchor="NE" style=""/>
+    </edge>
+    <edge id="BCLXL:BAX" from="BCLXL" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting points="1718,467" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:RAF" from="Casp3" to="RAF" minvalue="1" sign="negative">
+      <edgevisualsetting points="1480,493" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:AKT_B" from="Casp3" to="AKT_B" minvalue="1" sign="negative">
+      <edgevisualsetting points="629,923" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:mTORC1" from="Casp3" to="mTORC1" minvalue="1" sign="negative">
+      <edgevisualsetting points="543,930" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:S6K" from="Casp3" to="S6K" minvalue="1" sign="negative">
+      <edgevisualsetting points="860,916" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:eIF4E" from="Casp3" to="eIF4E" minvalue="1" sign="negative">
+      <edgevisualsetting points="1080,964" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:p21" from="Casp3" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="1450,1131" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:pRB" from="Casp3" to="pRB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1458,1367" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:p27Kip1" from="Casp3" to="p27Kip1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1490,1412" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:CyclinE" from="Casp3" to="CyclinE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1502,1511" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:Cdc6" from="Casp3" to="Cdc6" minvalue="1" sign="negative">
+      <edgevisualsetting points="569,939" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:Wee1" from="Casp3" to="Wee1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1509,1729" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:Casp8" from="Casp3" to="Casp8" minvalue="1" sign="positive">
+      <edgevisualsetting points="1503,574" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:Casp2" from="Casp3" to="Casp2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1464,876" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:MCL_1" from="Casp3" to="MCL_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1491,651" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:BCLXL" from="Casp3" to="BCLXL" minvalue="1" sign="negative">
+      <edgevisualsetting points="1496,478" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:BCL2" from="Casp3" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1468,725" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:BAD" from="Casp3" to="BAD" minvalue="1" sign="positive">
+      <edgevisualsetting points="1486,342" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:Casp9" from="Casp3" to="Casp9" minvalue="1" sign="positive">
+      <edgevisualsetting points="1733,958" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:Casp3" from="Casp3" to="Casp3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp3:CAD" from="Casp3" to="CAD" minvalue="1" sign="positive">
+      <edgevisualsetting points="1540,1141" anchor="NE" style=""/>
+    </edge>
+    <edge id="p110_H:p110_H" from="p110_H" to="p110_H" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p110_H:PI3K_H" from="p110_H" to="PI3K_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="379,383" anchor="NE" style=""/>
+    </edge>
+    <edge id="p110_H:AKT_H" from="p110_H" to="AKT_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="397,579" anchor="NE" style=""/>
+    </edge>
+    <edge id="p110_H:PLCgamma" from="p110_H" to="PLCgamma" minvalue="1" sign="positive">
+      <edgevisualsetting points="322,603" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:PIP3" from="PI3K" to="PIP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="597,389" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:PDK1" from="PI3K" to="PDK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="641,447" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:PI3K_H" from="PI3K" to="PI3K_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="527,323" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp2:MCL_1" from="Casp2" to="MCL_1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1280,768" anchor="NE" style=""/>
+    </edge>
+    <edge id="Casp2:BID" from="Casp2" to="BID" minvalue="1" sign="positive">
+      <edgevisualsetting points="1653,847" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_B:AKT_H" from="AKT_B" to="AKT_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="519,656" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_B:FoxO3" from="AKT_B" to="FoxO3" minvalue="1" sign="negative">
+      <edgevisualsetting points="437,671" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_B:TSC2" from="AKT_B" to="TSC2" minvalue="1" sign="negative">
+      <edgevisualsetting points="744,681" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_B:PRAS40" from="AKT_B" to="PRAS40" minvalue="1" sign="negative">
+      <edgevisualsetting points="611,756" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_B:MCL_1" from="AKT_B" to="MCL_1" minvalue="1" sign="positive">
+      <edgevisualsetting points="818,651" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_B:BAD" from="AKT_B" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting points="697,359" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinE:p21" from="CyclinE" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting points="1100,1502" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinE:pRB" from="CyclinE" to="pRB" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinE:p27Kip1" from="CyclinE" to="p27Kip1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1194,1494" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinE:Cdt1" from="CyclinE" to="Cdt1" minvalue="1" sign="negative">
+      <edgevisualsetting points="317,1525" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinE:FoxM1" from="CyclinE" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="994,1546" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinE:Cdc25A" from="CyclinE" to="Cdc25A" minvalue="1" sign="positive">
+      <edgevisualsetting points="584,1532" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinE:Replication" from="CyclinE" to="Replication" minvalue="1" sign="positive">
+      <edgevisualsetting points="1832,1533" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25C:Cdk1" from="Cdc25C" to="Cdk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1148,1926" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25B:FoxM1" from="Cdc25B" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1126,1652" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25B:Cdc25C" from="Cdc25B" to="Cdc25C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1246,1815" anchor="NE" style=""/>
+    </edge>
+    <edge id="Grb2:Ras" from="Grb2" to="Ras" minvalue="1" sign="positive">
+      <edgevisualsetting points="797,241" anchor="NE" style=""/>
+    </edge>
+    <edge id="Grb2:PLCgamma" from="Grb2" to="PLCgamma" minvalue="1" sign="positive">
+      <edgevisualsetting points="299,259" anchor="NE" style=""/>
+    </edge>
+    <edge id="Grb2:SOS" from="Grb2" to="SOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="738,253" anchor="NE" style=""/>
+    </edge>
+    <edge id="IAPs:Casp9" from="IAPs" to="Casp9" minvalue="1" sign="negative">
+      <edgevisualsetting points="1671,816" anchor="NE" style=""/>
+    </edge>
+    <edge id="IAPs:Casp3" from="IAPs" to="Casp3" minvalue="1" sign="negative">
+      <edgevisualsetting points="1522,861" anchor="NE" style=""/>
+    </edge>
+    <edge id="NeddL4:p110_H" from="NeddL4" to="p110_H" minvalue="1" sign="negative">
+      <edgevisualsetting points="362,366" anchor="NE" style=""/>
+    </edge>
+    <edge id="geminin:Cdt1" from="geminin" to="Cdt1" minvalue="1" sign="negative">
+      <edgevisualsetting points="277,1506" anchor="NE" style=""/>
+    </edge>
+    <edge id="GF_High:GF" from="GF_High" to="GF" minvalue="1" sign="positive">
+      <edgevisualsetting points="437,68" anchor="NE" style=""/>
+    </edge>
+    <edge id="GF_High:RTK" from="GF_High" to="RTK" minvalue="1" sign="positive">
+      <edgevisualsetting points="517,124" anchor="NE" style=""/>
+    </edge>
+    <edge id="GF_High:Grb2" from="GF_High" to="Grb2" minvalue="1" sign="positive">
+      <edgevisualsetting points="616,76" anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3:NeddL4" from="IP3" to="NeddL4" minvalue="1" sign="positive">
+      <edgevisualsetting points="165,461" anchor="NE" style=""/>
+    </edge>
+    <edge id="IP3:Ca2" from="IP3" to="Ca2" minvalue="1" sign="positive">
+      <edgevisualsetting points="219,545" anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:Myc" from="pRB" to="Myc" minvalue="1" sign="negative">
+      <edgevisualsetting points="1241,1332" anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:CyclinD1" from="pRB" to="CyclinD1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1362,1327" anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:E2F1" from="pRB" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1012,1338" anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:CyclinE" from="pRB" to="CyclinE" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:Cdt1" from="pRB" to="Cdt1" minvalue="1" sign="negative">
+      <edgevisualsetting points="343,1344" anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:CyclinA_mRNA" from="pRB" to="CyclinA_mRNA" minvalue="1" sign="negative">
+      <edgevisualsetting points="756,1356" anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:Emi1" from="pRB" to="Emi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1353,1763" anchor="NE" style=""/>
+    </edge>
+    <edge id="pRB:Cdc25A" from="pRB" to="Cdc25A" minvalue="1" sign="negative">
+      <edgevisualsetting points="1344,1692" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:PRAS40" from="mTORC1" to="PRAS40" minvalue="1" sign="negative">
+      <edgevisualsetting points="535,938" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:S6K" from="mTORC1" to="S6K" minvalue="1" sign="positive">
+      <edgevisualsetting points="839,1011" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:eIF4E" from="mTORC1" to="eIF4E" minvalue="1" sign="positive">
+      <edgevisualsetting points="736,1018" anchor="NE" style=""/>
+    </edge>
+    <edge id="eIF4E:Myc" from="eIF4E" to="Myc" minvalue="1" sign="positive">
+      <edgevisualsetting points="1195,994" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinD1:pRB" from="CyclinD1" to="pRB" minvalue="1" sign="negative">
+      <edgevisualsetting points="1381,1321" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinD1:p27Kip1" from="CyclinD1" to="p27Kip1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1163,1239" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinD1:CyclinD1" from="CyclinD1" to="CyclinD1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3:p110_H" from="FoxO3" to="p110_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="375,725" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3:p21_mRNA" from="FoxO3" to="p21_mRNA" minvalue="1" sign="positive">
+      <edgevisualsetting points="335,907" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3:p27Kip1" from="FoxO3" to="p27Kip1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1180,909" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3:CyclinB" from="FoxO3" to="CyclinB" minvalue="1" sign="positive">
+      <edgevisualsetting points="149,882 142,2058" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3:Plk1_H" from="FoxO3" to="Plk1_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="1711,892" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3:BIM" from="FoxO3" to="BIM" minvalue="1" sign="positive">
+      <edgevisualsetting points="1401,887" anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:Grb2" from="RTK" to="Grb2" minvalue="1" sign="positive">
+      <edgevisualsetting points="575,230" anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:PI3K" from="RTK" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="501,310" anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:PI3K_H" from="RTK" to="PI3K_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="414,222" anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:PLCgamma" from="RTK" to="PLCgamma" minvalue="1" sign="positive">
+      <edgevisualsetting points="291,213" anchor="NE" style=""/>
+    </edge>
+    <edge id="GF:GF" from="GF" to="GF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NW" style=""/>
+    </edge>
+    <edge id="GF:RTK" from="GF" to="RTK" minvalue="1" sign="positive">
+      <edgevisualsetting points="471,163" anchor="NE" style=""/>
+    </edge>
+    <edge id="UbcH10:CyclinA" from="UbcH10" to="CyclinA" minvalue="1" sign="negative">
+      <edgevisualsetting points="546,1584" anchor="NE" style=""/>
+    </edge>
+    <edge id="UbcH10:UbcH10" from="UbcH10" to="UbcH10" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="SE" style=""/>
+    </edge>
+    <edge id="BIM:BCL2" from="BIM" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BIM:BAK" from="BIM" to="BAK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1607,702" anchor="NE" style=""/>
+    </edge>
+    <edge id="BIM:BAX" from="BIM" to="BAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="1721,710" anchor="NE" style=""/>
+    </edge>
+    <edge id="p27Kip1:pRB" from="p27Kip1" to="pRB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1288,1372" anchor="NE" style=""/>
+    </edge>
+    <edge id="p27Kip1:CyclinE" from="p27Kip1" to="CyclinE" minvalue="1" sign="negative">
+      <edgevisualsetting points="1202,1488" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRAS40:mTORC1" from="PRAS40" to="mTORC1" minvalue="1" sign="negative">
+      <edgevisualsetting points="525,912" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_H:FoxO3" from="AKT_H" to="FoxO3" minvalue="1" sign="negative">
+      <edgevisualsetting points="427,741" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_H:FoxO1" from="AKT_H" to="FoxO1" minvalue="1" sign="negative">
+      <edgevisualsetting points="414,808" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_H:TSC2" from="AKT_H" to="TSC2" minvalue="1" sign="negative">
+      <edgevisualsetting points="753,630" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_H:PRAS40" from="AKT_H" to="PRAS40" minvalue="1" sign="negative">
+      <edgevisualsetting points="581,637" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_H:GSK3" from="AKT_H" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting points="967,620" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_H:BAD" from="AKT_H" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting points="1114,606" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT_H:IAPs" from="AKT_H" to="IAPs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1554,613" anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinA_mRNA:CyclinA" from="CyclinA_mRNA" to="CyclinA" minvalue="1" sign="positive">
+      <edgevisualsetting points="401,1477" anchor="NE" style=""/>
+    </edge>
+    <edge id="BAD:BCLXL" from="BAD" to="BCLXL" minvalue="1" sign="negative">
+      <edgevisualsetting points="1205,364" anchor="NE" style=""/>
+    </edge>
+    <edge id="BAD:BCL2" from="BAD" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1451,351" anchor="NE" style=""/>
+    </edge>
+    <edge id="TSC2:Rheb" from="TSC2" to="Rheb" minvalue="1" sign="negative">
+      <edgevisualsetting points="738,911" anchor="NE" style=""/>
+    </edge>
+    <edge id="A_Kinetochores:Emi1" from="A_Kinetochores" to="Emi1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1131,2088" anchor="NE" style=""/>
+    </edge>
+    <edge id="A_Kinetochores:U_Kinetochores" from="A_Kinetochores" to="U_Kinetochores" minvalue="1" sign="negative">
+      <edgevisualsetting points="2027,1617" anchor="NE" style=""/>
+    </edge>
+    <edge id="A_Kinetochores:Mad2" from="A_Kinetochores" to="Mad2" minvalue="1" sign="negative">
+      <edgevisualsetting points="2010,1903" anchor="NE" style=""/>
+    </edge>
+    <edge id="A_Kinetochores:A_Kinetochores" from="A_Kinetochores" to="A_Kinetochores" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="SE" style=""/>
+    </edge>
+    <edge id="A_Kinetochores:Ect2" from="A_Kinetochores" to="Ect2" minvalue="1" sign="negative">
+      <edgevisualsetting points="2041,1895" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1_H:FoxO3" from="Plk1_H" to="FoxO3" minvalue="1" sign="negative">
+      <edgevisualsetting points="1700,900" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1_H:Plk1" from="Plk1_H" to="Plk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1703,1853" anchor="NE" style=""/>
+    </edge>
+    <edge id="Plk1_H:Plk1_H" from="Plk1_H" to="Plk1_H" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="SE" style=""/>
+    </edge>
+    <edge id="Plk1_H:Ect2" from="Plk1_H" to="Ect2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1732,1564" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ras:RAF" from="Ras" to="RAF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Ras:PI3K" from="Ras" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="665,397" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ras:PI3K_H" from="Ras" to="PI3K_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="460,404" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ras:AKT_H" from="Ras" to="AKT_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="459,411" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cyto_C:Casp9" from="Cyto_C" to="Casp9" minvalue="1" sign="positive">
+      <edgevisualsetting points="1787,730" anchor="NE" style=""/>
+    </edge>
+    <edge id="Emi1:CyclinA" from="Emi1" to="CyclinA" minvalue="1" sign="positive">
+      <edgevisualsetting points="412,1775" anchor="NE" style=""/>
+    </edge>
+    <edge id="Emi1:Cdc20" from="Emi1" to="Cdc20" minvalue="1" sign="negative">
+      <edgevisualsetting points="1110,1989" anchor="NE" style=""/>
+    </edge>
+    <edge id="Emi1:Cdh1" from="Emi1" to="Cdh1" minvalue="1" sign="negative">
+      <edgevisualsetting points="925,1761" anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK1:AKT_B" from="PDK1" to="AKT_B" minvalue="1" sign="positive">
+      <edgevisualsetting points="643,610" anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK1:AKT_H" from="PDK1" to="AKT_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="477,530" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxM1:CyclinA_mRNA" from="FoxM1" to="CyclinA_mRNA" minvalue="1" sign="positive">
+      <edgevisualsetting points="960,1480" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxM1:Cdc25A" from="FoxM1" to="Cdc25A" minvalue="1" sign="positive">
+      <edgevisualsetting points="832,1674" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxM1:CyclinB" from="FoxM1" to="CyclinB" minvalue="1" sign="positive">
+      <edgevisualsetting points="926,1866" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxM1:Cdc25B" from="FoxM1" to="Cdc25B" minvalue="1" sign="positive">
+      <edgevisualsetting points="1089,1668" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxM1:Plk1" from="FoxM1" to="Plk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1002,1838" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxM1:Plk1_H" from="FoxM1" to="Plk1_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="1694,1684" anchor="NE" style=""/>
+    </edge>
+    <edge id="MCL_1:BCLXL" from="MCL_1" to="BCLXL" minvalue="1" sign="positive">
+      <edgevisualsetting points="1230,640" anchor="NE" style=""/>
+    </edge>
+    <edge id="MCL_1:BCL2" from="MCL_1" to="BCL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1296,544" anchor="NE" style=""/>
+    </edge>
+    <edge id="MCL_1:BIK" from="MCL_1" to="BIK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1284,414" anchor="NE" style=""/>
+    </edge>
+    <edge id="MCL_1:BIM" from="MCL_1" to="BIM" minvalue="1" sign="negative">
+      <edgevisualsetting points="1380,664" anchor="NE" style=""/>
+    </edge>
+    <edge id="MCL_1:BID" from="MCL_1" to="BID" minvalue="1" sign="negative">
+      <edgevisualsetting points="1276,309" anchor="NE" style=""/>
+    </edge>
+    <edge id="MCL_1:BAK" from="MCL_1" to="BAK" minvalue="1" sign="negative">
+      <edgevisualsetting points="1593,621" anchor="NE" style=""/>
+    </edge>
+    <edge id="MCL_1:BAX" from="MCL_1" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting points="1705,636" anchor="NE" style=""/>
+    </edge>
+    <edge id="BID:BAK" from="BID" to="BAK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1561,319" anchor="NE" style=""/>
+    </edge>
+    <edge id="BID:BAX" from="BID" to="BAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="1745,322" anchor="NE" style=""/>
+    </edge>
+    <edge id="ORC:Cdc6" from="ORC" to="Cdc6" minvalue="1" sign="positive">
+      <edgevisualsetting points="556,1160" anchor="NE" style=""/>
+    </edge>
+    <edge id="ORC:Cdt1" from="ORC" to="Cdt1" minvalue="1" sign="positive">
+      <edgevisualsetting points="327,1163" anchor="NE" style=""/>
+    </edge>
+    <edge id="ORC:Pre_RC" from="ORC" to="Pre_RC" minvalue="1" sign="positive">
+      <edgevisualsetting points="441,1271" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLCgamma:DAG" from="PLCgamma" to="DAG" minvalue="1" sign="positive">
+      <edgevisualsetting points="300,725" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLCgamma:IP3" from="PLCgamma" to="IP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="193,664" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:geminin" from="Cdh1" to="geminin" minvalue="1" sign="negative">
+      <edgevisualsetting points="332,1702" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:Cdc25A" from="Cdh1" to="Cdc25A" minvalue="1" sign="negative">
+      <edgevisualsetting points="387,1698" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:CyclinA" from="Cdh1" to="CyclinA" minvalue="1" sign="negative">
+      <edgevisualsetting points="361,1650" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:UbcH10" from="Cdh1" to="UbcH10" minvalue="1" sign="negative">
+      <edgevisualsetting points="370,1619" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:CyclinB" from="Cdh1" to="CyclinB" minvalue="1" sign="negative">
+      <edgevisualsetting points="381,2050" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:Plk1" from="Cdh1" to="Plk1" minvalue="1" sign="negative">
+      <edgevisualsetting points="658,1790" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:Cdc20" from="Cdh1" to="Cdc20" minvalue="1" sign="negative">
+      <edgevisualsetting points="386,2015" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:U_Kinetochores" from="Cdh1" to="U_Kinetochores" minvalue="1" sign="negative">
+      <edgevisualsetting points="1564,1805" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:A_Kinetochores" from="Cdh1" to="A_Kinetochores" minvalue="1" sign="negative">
+      <edgevisualsetting points="357,2138" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdh1:Ect2" from="Cdh1" to="Ect2" minvalue="1" sign="positive">
+      <edgevisualsetting points="2056,1809" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:Cdt1" from="Cdc25A" to="Cdt1" minvalue="1" sign="negative">
+      <edgevisualsetting points="295,1676" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:FoxM1" from="Cdc25A" to="FoxM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="790,1665" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:CyclinA" from="Cdc25A" to="CyclinA" minvalue="1" sign="positive">
+      <edgevisualsetting points="424,1662" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:Plk1" from="Cdc25A" to="Plk1" minvalue="1" sign="positive">
+      <edgevisualsetting points="668,1701" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:Cdh1" from="Cdc25A" to="Cdh1" minvalue="1" sign="negative">
+      <edgevisualsetting points="379,1685" anchor="NE" style=""/>
+    </edge>
+    <edge id="Cdc25A:Replication" from="Cdc25A" to="Replication" minvalue="1" sign="positive">
+      <edgevisualsetting points="572,1326" anchor="NE" style=""/>
+    </edge>
+    <edge id="Pre_RC:CyclinE" from="Pre_RC" to="CyclinE" minvalue="1" sign="positive">
+      <edgevisualsetting points="410,1519" anchor="NE" style=""/>
+    </edge>
+    <edge id="Pre_RC:ORC" from="Pre_RC" to="ORC" minvalue="1" sign="positive">
+      <edgevisualsetting points="427,1266" anchor="NE" style=""/>
+    </edge>
+    <edge id="Pre_RC:Cdc6" from="Pre_RC" to="Cdc6" minvalue="1" sign="positive">
+      <edgevisualsetting points="518,1379" anchor="NE" style=""/>
+    </edge>
+    <edge id="Pre_RC:Cdt1" from="Pre_RC" to="Cdt1" minvalue="1" sign="positive">
+      <edgevisualsetting points="325,1411" anchor="NE" style=""/>
+    </edge>
+    <edge id="Pre_RC:Replication" from="Pre_RC" to="Replication" minvalue="1" sign="positive">
+      <edgevisualsetting points="450,1320" anchor="NE" style=""/>
+    </edge>
+    <edge id="Pre_RC:f4N_DNA" from="Pre_RC" to="f4N_DNA" minvalue="1" sign="positive">
+      <edgevisualsetting points="692,1398" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:mTORC2" from="PIP3" to="mTORC2" minvalue="1" sign="positive">
+      <edgevisualsetting points="533,523" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:PDK1" from="PIP3" to="PDK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="614,483" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:AKT_B" from="PIP3" to="AKT_B" minvalue="1" sign="positive">
+      <edgevisualsetting points="683,456" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:AKT_H" from="PIP3" to="AKT_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="467,450" anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:PLCgamma" from="PIP3" to="PLCgamma" minvalue="1" sign="positive">
+      <edgevisualsetting points="315,439" anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAC:IAPs" from="SMAC" to="IAPs" minvalue="1" sign="negative">
+      <edgevisualsetting points="1643,775" anchor="NE" style=""/>
+    </edge>
+    <annotation>
+      <linklist>
+        <link xlink:href="https://doi.org/10.1371/journal.pcbi.1006402"/>
+      </linklist>
+      <comment>Cell cycle control model published by Sizek et al (2019) [1].
+This Boolean model encompasses 87 components representing different molecular species and cellular processes involved in the regulation of cell proliferation versus apoptosis for a generic human cell. The authors conceived this complex model as an association of different functional modules:
+- Growth Signalling module (green nodes): incorportates growth signalling pathways driving cell cycle commitment, responsible for modeling the dynamics of PI3K, AKT1, MAPK and mTORC.
+- Restriction Switch (blue nodes): responsible for commitment to DNA synthesis.
+- Origin Licensing switch (yellow nodes): responsible for licensing and firing of replication origins.
+- Phase Switch (pink nodes): responsible for modeling cell cycle progression (G2 -&gt; M -&gt; G1). The switch was expanded to incorporate for the role of Polo like kinase 1 (Plk1) during mitosis.
+- Apoptosis Switch (red nodes): responsible for modeling cell survival versus apoptosis.
+- Cellular processes (orange nodes): helps to identify the phenotypic state and include some regulatory mechanisms.
+The resulting model reproduces hyperactive PI3K-driven cytokinesis failure and genome duplication and predicts the molecular drivers responsible for these failures by linking hyperactive PI3K to mis-regulation of Polo-like kinase 1 (Plk1) expression late in G2.</comment>
+    </annotation>
+  </graph>
+</gxl>

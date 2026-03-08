@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="reduced_network" nodeorder="Z1 Z2 W DMRT1 HEMGN SOX9 FOXL2 AROMATASE OESTROGEN">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="50" height="25" properties="intermediate:#ffff00 active:#ffc800"/>
+    <nodestyle name="Node style" shape="ELLIPSE" width="85"/>
+    <nodestyle name="Node style 2" width="60"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="Z1" maxvalue="1" input="true">
+      <nodevisualsetting x="31" y="175" style=""/>
+    </node>
+    <node id="Z2" maxvalue="1" input="true">
+      <nodevisualsetting x="31" y="212" style=""/>
+    </node>
+    <node id="W" maxvalue="1" input="true">
+      <nodevisualsetting x="30" y="137" style=""/>
+    </node>
+    <node id="DMRT1" maxvalue="2">
+      <parameter idActiveInteractions=" SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" W:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z2:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z2:DMRT1 W:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" W:DMRT1 HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" W:DMRT1 HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z2:DMRT1 HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z2:DMRT1 HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z2:DMRT1 W:DMRT1 HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z2:DMRT1 W:DMRT1 HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 W:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 W:DMRT1 HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 W:DMRT1 HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 Z2:DMRT1" val="1"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 Z2:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 Z2:DMRT1 HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 Z2:DMRT1 HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 Z2:DMRT1 W:DMRT1 SOX9:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 Z2:DMRT1 W:DMRT1 HEMGN:DMRT1" val="2"/>
+      <parameter idActiveInteractions=" Z1:DMRT1 Z2:DMRT1 W:DMRT1 HEMGN:DMRT1 SOX9:DMRT1" val="2"/>
+      <value val="2">
+        <exp str="(HEMGN | SOX9) &amp; !FOXL2"/>
+      </value>
+      <value val="1">
+        <exp str="Z1 &amp; Z2 &amp; !W &amp; !HEMGN &amp; !FOXL2 &amp; !SOX9"/>
+      </value>
+      <nodevisualsetting x="141" y="173" style="Node style 2"/>
+    </node>
+    <node id="HEMGN" maxvalue="1">
+      <parameter idActiveInteractions=" DMRT1:HEMGN" val="1"/>
+      <value val="1">
+        <exp str="!SOX9 &amp; DMRT1:1"/>
+      </value>
+      <nodevisualsetting x="142" y="283" style=""/>
+    </node>
+    <node id="SOX9" maxvalue="1">
+      <parameter idActiveInteractions=" SOX9:SOX9" val="1"/>
+      <parameter idActiveInteractions=" DMRT1:SOX9" val="1"/>
+      <parameter idActiveInteractions=" DMRT1:SOX9 SOX9:SOX9" val="1"/>
+      <value val="1">
+        <exp str="(SOX9 | DMRT1:2) &amp; !FOXL2"/>
+      </value>
+      <nodevisualsetting x="297" y="258" style=""/>
+    </node>
+    <node id="FOXL2" maxvalue="1">
+      <parameter val="1"/>
+      <parameter idActiveInteractions=" OESTROGEN:FOXL2" val="1"/>
+      <parameter idActiveInteractions=" SOX9:FOXL2 OESTROGEN:FOXL2" val="1"/>
+      <value val="1">
+        <exp str="(!DMRT1:2 &amp; !SOX9) | (OESTROGEN &amp; !DMRT1)"/>
+      </value>
+      <nodevisualsetting x="295" y="122" style=""/>
+    </node>
+    <node id="AROMATASE" maxvalue="1">
+      <parameter idActiveInteractions=" OESTROGEN:AROMATASE" val="1"/>
+      <parameter idActiveInteractions=" FOXL2:AROMATASE" val="1"/>
+      <parameter idActiveInteractions=" FOXL2:AROMATASE OESTROGEN:AROMATASE" val="1"/>
+      <value val="1">
+        <exp str="FOXL2 | OESTROGEN"/>
+      </value>
+      <nodevisualsetting x="126" y="51" style="Node style"/>
+    </node>
+    <node id="OESTROGEN" maxvalue="1">
+      <parameter idActiveInteractions=" AROMATASE:OESTROGEN" val="1"/>
+      <value val="1">
+        <exp str="AROMATASE"/>
+      </value>
+      <nodevisualsetting x="275" y="52" style="Node style"/>
+    </node>
+    <edge id="W:DMRT1" from="W" to="DMRT1" minvalue="1" sign="negative">
+      <edgevisualsetting points="147,156" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXL2:DMRT1" from="FOXL2" to="DMRT1" minvalue="1" sign="negative">
+      <edgevisualsetting points="301,185" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXL2:SOX9" from="FOXL2" to="SOX9" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXL2:AROMATASE" from="FOXL2" to="AROMATASE" minvalue="1" sign="positive">
+      <edgevisualsetting points="171,132" anchor="NE" style=""/>
+    </edge>
+    <edge id="Z2:DMRT1" from="Z2" to="DMRT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="150,232" anchor="NE" style=""/>
+    </edge>
+    <edge id="HEMGN:DMRT1" from="HEMGN" to="DMRT1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SOX9:DMRT1" from="SOX9" to="DMRT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="187,265" anchor="NE" style=""/>
+    </edge>
+    <edge id="SOX9:HEMGN" from="SOX9" to="HEMGN" minvalue="1" sign="negative">
+      <edgevisualsetting points="320,300" anchor="NE" style=""/>
+    </edge>
+    <edge id="SOX9:SOX9" from="SOX9" to="SOX9" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SOX9:FOXL2" from="SOX9" to="FOXL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="DMRT1:HEMGN" from="DMRT1" to="HEMGN" minvalue="1" sign="positive">
+      <edgevisualsetting points="179,220" anchor="NE" style=""/>
+    </edge>
+    <edge id="DMRT1:SOX9" from="DMRT1" to="SOX9" minvalue="2" sign="positive">
+      <edgevisualsetting points="302,193" anchor="NE" style=""/>
+    </edge>
+    <edge id="DMRT1:FOXL2" from="DMRT1" to="FOXL2" minvalue="2" sign="negative">
+      <edgevisualsetting points="156,141" anchor="NE" style=""/>
+    </edge>
+    <edge id="OESTROGEN:FOXL2" from="OESTROGEN" to="FOXL2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="OESTROGEN:AROMATASE" from="OESTROGEN" to="AROMATASE" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Z1:DMRT1" from="Z1" to="DMRT1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AROMATASE:OESTROGEN" from="AROMATASE" to="OESTROGEN" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+  </graph>
+</gxl>

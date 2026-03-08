@@ -1,0 +1,2327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="Karen_MoDC_25Jan2021" nodeorder="CSF2 IL4 CSF2R IL4R AhR AP1 ATF1 BATF3 CEBPa CEBPb FOS cMYC CREB ELK4 FOXO1 IRF4 IRF8 KLF4 MAFB NFKB1_RelA NFKB2 NR4A1 PRDM1 PU1 STAT3 STAT5 STAT6 USF1 NCOR2 JAK2 Src PI3K PIP3 AKT PTEN MEK1 MAGI1 CLIP1 mTORC1 SHC_GRB2_mSOS RAS RAF ERK JUN JNK TAU CPLA2 FLT3 GSK3B IKK JAK3 JAK1 SHP1 CIITA ITGAX LnC_DC IL4_gene DUOX1 SLAMF1 MAOA HLA_DR ALOX15 TIMP3 DUSP6 CCL2 CCL22 TLR3 TLR4 TLR6 TLR7 TLR8 CD48 CD1A CD1B CD1C CD40 CD86 CD83 CD209 CD141 CD226 DEC205 DCIR Tet2 PTPN1 SOCS CD14 SELL CD163 CD206 MERTK CCDC151 BCL2 BECN1">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="80" height="45"/>
+    <nodestyle name="TFs" background="#ffffa0" foreground="#000000" width="80"/>
+    <nodestyle name="Mac" background="#ffa07c" foreground="#000000" width="80"/>
+    <nodestyle name="moDCs" background="#b2f1ff" foreground="#000000" height="45"/>
+    <nodestyle name="Mo" background="#b78ec3" text="#000000"/>
+    <nodestyle name="Inputs" background="#00ff66" text="#000000" width="85" height="45"/>
+    <nodestyle name="Node style" width="110"/>
+    <nodestyle name="Node style 2" background="#ffffa0" foreground="#000000" width="80" height="55"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle name="Tick" line_width="3"/>
+    <edgestyle name="Non_functional" color="#999999"/>
+    <node id="CSF2" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P04141"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8145033"/>
+        </linklist>
+        <comment>Granulocyte-macrophage colony-stimulating factor [1]
+CSF2 stimulates the growth and differentiation of hematopoietic precursor cells from various lineages, including granulocytes, macrophages, eosinophils and erythrocytes.
+
+In 1994, Sallusto and Lazavecchia reported an in vitro protocol enabling the differentiation of human monocyte into dendritic cells  (moDC), in the presence of granulocyte macrophage colony stimulating factor (CSF2) and interleukin 4 (IL4) [2].</comment>
+      </annotation>
+      <nodevisualsetting x="310" y="0" style="Inputs"/>
+    </node>
+    <node id="IL4" maxvalue="1" input="true">
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P05112"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/8145033"/>
+        </linklist>
+        <comment>Interleukin-4 [1]
+IL4 participates in several B cell activation process.
+It induces the expression of class II MHC molecules in resting B  cells.
+
+In 1994, Sallusto and Lazavecchia reported an in vitro protocol enabling the differentiation of human monocyte into dendritic cells  (moDC), in the presence of granulocyte macrophage colony stimulating factor (CSF2) and interleukin 4 (IL4) [2].</comment>
+      </annotation>
+      <nodevisualsetting x="952" y="5" style="Inputs"/>
+    </node>
+    <node id="CSF2R" maxvalue="1">
+      <value val="1">
+        <exp str="CSF2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P15509"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>Granulocyte-macrophage colony-stimulating factor receptor [1].
+Low affinity receptor for granulocyte-macrophage colony-stimulating factor. 
+Upon CSF2 binding, CSF2R induces the proliferation, differentiation, and functional activation of hematopoietic cells [1].
+
+GM-CSFR contains two distinct subunits, a  specific-chain (GM CSFR; CD116) and a common chain, which is shared between the GM CSFR, the IL3 receptor, and the IL5 receptor. Signaling is initiated by the cytoplasmic tyrosine kinasejanus kinase 2 (JAK2), which then acts on various downstream proteins [2].</comment>
+      </annotation>
+      <nodevisualsetting x="315" y="62" style=""/>
+    </node>
+    <node id="IL4R" maxvalue="1">
+      <value val="1">
+        <exp str="IL4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P24394"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/25159217"/>
+        </linklist>
+        <comment>Receptor for both interleukin 4, activating the JAK (1,3)-STAT (3,6) pathway [1].
+
+Upon binding of  IL4,  the activation of the JAK-STAT pathway, enables the development of immature DCs [2].</comment>
+      </annotation>
+      <nodevisualsetting x="954" y="103" style=""/>
+    </node>
+    <node id="AhR" maxvalue="1">
+      <value val="1">
+        <exp str="(NCOR2 &amp; USF1 &amp; STAT6) | (IRF4 &amp; STAT6 &amp; !ERK)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P35869"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23430108/"/>
+        </linklist>
+        <comment>Aryl hydrocarbon receptor [1]
+Ligand-activated transcription factor that enables cells to adapt to changing conditions by sensing compounds from the environment, diet, microbiome and cellular metabolism, and which plays important roles in development, immunity and cancer.
+Whereas ERK inhibition upregulated AhR dependent transcriptionin in vitro generated monocyte derived cells (moDCs and Macrophages) [2]</comment>
+      </annotation>
+      <nodevisualsetting x="971" y="738" style="TFs"/>
+    </node>
+    <node id="AP1" maxvalue="1">
+      <value val="1">
+        <exp str="JUN &amp; FOS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P05412"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22550342/"/>
+        </linklist>
+        <comment>Transcription factor AP-1. Transcription factor that recognizes and binds to the enhancer heptamer motif 5'-TGA[CG]TCA-3' [1].
+
+Macrophage specific H3K4me1 regions were characterized by a distinct motif composition, including GT box, an AP1 like motif, an E box element, the consensus PU.1 motif, a composite CEBP_bZIP element, and a NFKB motif [2].</comment>
+      </annotation>
+      <nodevisualsetting x="230" y="822" style="TFs"/>
+    </node>
+    <node id="ATF1" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P18846"/>
+        </linklist>
+        <comment>Cyclic AMP-dependent transcription factor ATF-1 [1]. 
+ATF1 binds the cAMP response element (CRE) present in many viral and cellular promoters. Binds to the Tax-responsive element (TRE) of HTLV-I [1].
+
+Using matrix-scan, we predicted STAT6  binding sites in the regulatory region, annotated with chromHMM in this study, of the ATF1 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="1012" y="1047" style="TFs"/>
+    </node>
+    <node id="BATF3" maxvalue="1">
+      <value val="1">
+        <exp str="USF1 | IRF8"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9NR55"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28781277"/>
+        </linklist>
+        <comment>Basic leucine zipper transcriptional factor ATF-like 3 [1]
+AP-1 family transcription factor that controls the differentiation of CD8+ thymic conventional dendritic cells in the immune system.
+KLF4 and BATF3 serve as critical transcription factors downstream of IRF8 to induce the differentiation of monocytes and DCs, respectively [2]
+Using matrix-scan, we predicted binding of USF1, and IRF8 in the regulatory region, annotated with chromHMM in this study, of the BATF3 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="816" y="870" style="TFs"/>
+    </node>
+    <node id="CEBPa" maxvalue="1">
+      <value val="1">
+        <exp str="PU1 &amp; !FOXO1 &amp; !IRF8 &amp; !STAT5"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P49715"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21558273/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28781277"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>CCAAT/enhancer-binding protein alpha [1], expressed in myeloid progenetors [2] . 
+IRF8 blocks the activity of CEBPa to suppress the neutrophil differentiation program [3]. 
+CEBP transcription factors, and CEBPb in particular, have long been implicated in the regulation of monocyte macrophage differentiation, whereas CEBPa appears to be more important for the maturation of granulocytes.
+STAT5-mediated downregulation  [4].
+Using matrix-scan, we predicted binding sites for CEBBa, FOXO1, and PU.1 in the regulatory region, annotated with chromHMM in this study, of the CEBPa gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="431" y="962" style="TFs"/>
+    </node>
+    <node id="CEBPb" maxvalue="1">
+      <value val="1">
+        <exp str="PU1 &amp; (CEBPa | MAFB)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P17676"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22550342"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28584084/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/12966068/"/>
+        </linklist>
+        <comment>CCAAT/enhancer-binding protein beta [1]. 
+CEBP transcription factors, and CEBPb in particular, have long been implicated in the regulation of monocyte macrophage differentiation, whereas CEBPa appears to be more important for the maturation of granulocytes.
+Macrophage specific H3K4me1 regions were characterized by a distinct motif composition, including GT box, an AP1 like motif, an E box element, the consensus PU.1 motif, a composite CEBP_bZIP element, and a NFKB motif [2]
+C/EBPbeta almost always binds at C/EBPa binding sites and can rescue the formation of granulocytes in C/EBPalpha deficient mice [3].
+There is a consensus ets-binding site at 7.8-kb upstream and a consensus C/EBP-binding site at 86-bp upstream of the transcription initiation site of the MafB coding gene [4].
+Using matrix-scan, we predicted binding of CEBPa in the regulatory region, annotated with chromHMM in this study, of the CEBPb coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="609" y="962" style="Mac"/>
+    </node>
+    <node id="FOS" maxvalue="1">
+      <value val="1">
+        <exp str="ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P01100"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21725048/"/>
+        </linklist>
+        <comment>Proto-oncogene c-Fos [1].
+Nuclear phosphoprotein which to gether with JUN forms AP-1 complex. 
+Activated ERK in turn stabilizes c-Fos [2].</comment>
+      </annotation>
+      <nodevisualsetting x="336" y="598" style=""/>
+    </node>
+    <node id="cMYC" maxvalue="1">
+      <value val="1">
+        <exp str="ERK &amp; !GSK3B"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P01106"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23430108/"/>
+        </linklist>
+        <comment>Myc proto-oncogene protein [1]. 
+Transcription factor that binds DNA in a non-specific manner, but also specifically recognizes the core sequence 5'-CAC[GA]TG-3'. 
+Myc ctivates the transcription of growth-related genes.
+
+U0126 treatment significantly reduced the expression of wellknown targets of ERK (FOS, MYC, DUSP6) [2].</comment>
+      </annotation>
+      <nodevisualsetting x="3" y="591" style=""/>
+    </node>
+    <node id="CREB" maxvalue="1">
+      <value val="1">
+        <exp str="AKT | ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P16220"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27446931/"/>
+        </linklist>
+        <comment>Cyclic AMP-responsive element-binding protein 1. Phosphorylation-dependent transcription factor that stimulates transcription upon binding to the DNA cAMP response element (CRE), a sequence present in many viral and cellular promoters.
+
+It has been reported that the phosphorylation of CREB is mediated by p38 and by ERK-1/2 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="525" y="583" style="TFs"/>
+    </node>
+    <node id="ELK4" maxvalue="1">
+      <value val="1">
+        <exp str="ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P28324"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22550342/"/>
+        </linklist>
+        <comment>ETS domain-containing protein Elk-4 [1]. 
+Rlk-4 is Involved in both transcriptional activation and repression. 
+Interaction with SIRT7 leads to recruitment and stabilization of SIRT7 at promoters, followed by deacetylation of histone H3 at 'Lys-18' (H3K18Ac) and subsequent transcriptional repression [1].
+
+The expression of ELK4 is upregulated during human monocytic differentiation in vitro[2].
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1254" y="606" style="TFs"/>
+    </node>
+    <node id="FOXO1" maxvalue="1">
+      <value val="1">
+        <exp str="(PU1 | KLF4) &amp; !AKT"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q12778"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>Forkhead box protein O1. Transcription factor that is the main target of insulin signaling and regulates metabolic homeostasis in response to oxidative stress [1]. 
+
+Activated PKB regulates many targets, including the FOXO transcription factors, the TSC1 TSC2 complex, and the mTOR complex 1 (mTORC1) [2].
+
+Using matrix-scan, we predicted binding sites for KLF4, and PU.1 in the regulatory region, annotated with chromHMM in this study, of the FOXO1 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="303" y="877" style="TFs"/>
+    </node>
+    <node id="IRF4" maxvalue="1">
+      <value val="1">
+        <exp str="AhR | (PU1 &amp; STAT6 &amp; NFKB1_RelA &amp; IRF4)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q15306"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10453013"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29871928/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16272311/"/>
+        </linklist>
+        <comment>Interferon regulatory factor 4 [1]. 
+Transcriptional activator. Binds to the interferon-stimulated response element (ISRE) of the MHC class I promoter. Binds the immunoglobulin lambda light chain enhancer, together with PU.1 [1].
+
+DCs were found to express IRF4 mRNA and protein constitutively, and STAT and NFkB transcription factors play an important role inregulating IRF4 expression in DCs [2,3]. The promoter of IRF4, a gene involved in subset-specific DC development, also contains several putative NF-kB binding sites [4].
+
+Using matrix-scan, we predicted binding sites for AHR, IRF4 [2], PU.1, and STAT6 in the regulatory region, annotated with chromHMM in this study, of the IRF4 gene.
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="696" y="769" style="moDCs"/>
+    </node>
+    <node id="IRF8" maxvalue="1">
+      <value val="1">
+        <exp str="(PU1 | KLF4) &amp; !NCOR2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q02556"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23319570/"/>
+        </linklist>
+        <comment>Interferon regulatory factor 8. Transcription factor that specifically binds to the upstream regulatory region of type I interferon (IFN) and IFN-inducible MHC class I genes (the interferon consensus sequence (ICS) [1].  
+The differentiation of MO in vitro culture systems is multifaceted, integrating time-dependent signals delivered by GM-CSF and IL-4 and orchestrated by NCOR2 [2].
+Introduction of KLF4 into an Irf8(-/-) myeloid progenitor cell line induced a subset of IRF8 target genes and caused partial monocyte differentiation [3].
+
+Using matrix-scan, we predicted binding sites for KLF4, and PU.1 in the regulatory region, annotated with chromHMM in this study, of the IRF8 gene.
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="636" y="868" style="Mac"/>
+    </node>
+    <node id="KLF4" maxvalue="1">
+      <value val="1">
+        <exp str="(NR4A1 &amp; IRF8 &amp; AP1) | (PU1:1 &amp; !STAT5)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O43474"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/17762869"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28781277"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23319570/"/>
+        </linklist>
+        <comment>Krueppel-like factor 4 [1]
+KLF4 binds the 5'-CACCC-3' core sequence.
+PU.1 induced the KLF4 promoter 15 fold [2]
+KLF4 and BATF3 serve as critical transcription factors downstream of IRF8 to induce the differentiation of monocytes and DCs, respectively [3,4].
+
+Using matrix-scan, we predicted binding sites for AP1, NR4A1, and STAT5 in the regulatory region, annotated with chromHMM in this study, of the KLF4 gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="472" y="656" style="Mo"/>
+    </node>
+    <node id="MAFB" name="MAFB" maxvalue="1">
+      <value val="1">
+        <exp str="(CEBPb | IRF8) &amp; !AhR &amp; !PU1:2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9Y5Q3"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24070385"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22868453"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23319570/"/>
+        </linklist>
+        <comment>Transcription factor MafB [1]. Acts as a transcriptional activator or repressor. Plays a pivotal role in regulating lineage-specific hematopoiesis by repressing ETS1-mediated transcription of erythroid-specific genes in myeloid cells [1]. 
+Pu.1 in monocytes favors DC development at the expense of a macrophage fate by directly inhibiting expression of the macrophage factor, MafB, suggesting that Pu.1 could be an important decision factor between DC and macrophage commitment [2].
+MafB gene silencing improved the differentiation potential of CD14+ cells into mDCs, increasing the percentage of mDCs by &gt;75%. Furthermore, GATA-1+ and HLA-DR+ mDCs were increased following MafB silencing [3]. 
+IRF8-induced transcription factor genes such as MafB have also been implicated in monocyte differentiation [4].
+Using matrix-scan, we predicted binding sites for AHR, and CEBPb in the regulatory region, annotated with chromHMM in this study, of the MAFB gene.</comment>
+      </annotation>
+      <nodevisualsetting x="516" y="877" style="Mac"/>
+    </node>
+    <node id="NFKB1_RelA" maxvalue="1">
+      <value val="1">
+        <exp str="IKK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P19838"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16540365/"/>
+        </linklist>
+        <comment>Nuclear factor NF-kappa-B p105 subunit [1]. 
+NFkB  complexes are formed by  Rel like domain containing proteins RELA/p65, RELB, NFKB1/p105, NFKB1/p50, REL or NFKB2/p52.
+The heterodimeric p65-p50 complex appears to be most abundant. 
+NFkB activation is achieved through the IKK complex, which phosphorylates IkB [2, 3]. </comment>
+      </annotation>
+      <nodevisualsetting x="754" y="378" style=""/>
+    </node>
+    <node id="NFKB2" maxvalue="1">
+      <value val="1">
+        <exp str="NFKB1_RelA | STAT5"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q00653"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>Nuclear factor NF-kappa-B p100 subunit. 
+NF-kappa-B is a pleiotropic transcription factor present in almost all cell types and is the endpoint of a series of signal transduction events that are initiated by a vast array of stimuli related to many biological processes such as inflammation, immunity, differentiation, cell growth, tumorigenesis and apoptosis [1].
+
+GM CSF induced activation of STAT5 and canonical NFkB transcription factors increases the intrinsic immunogenicity of the DCs generated. STAT5-mediated downregulation of PU.1 and C/EBP. STAT5 activates NFKB2 by phosphorylation [2].</comment>
+      </annotation>
+      <nodevisualsetting x="748" y="982" style="TFs"/>
+    </node>
+    <node id="NR4A1" maxvalue="1">
+      <value val="1">
+        <exp str="ERK &amp; STAT6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.genome.jp/dbget-bin/www_bget?hsa04010"/>
+          <link xlink:href="https://www.uniprot.org/uniprot/P22736"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/26580501/"/>
+        </linklist>
+        <comment>Nuclear receptor subfamily 4 group A member 1 [1,2].  
+
+One of the main roles of Nr4a1 is related to its requirement in the differentiation of the Ly6Clo monocytes, which continually survey the blood vessel lumen. In the absence of Nr4a1, this specific population of monocytes is arrested in the bone marrow, as shown in studies of Nr4a1−/− mice [3].
+</comment>
+      </annotation>
+      <nodevisualsetting x="816" y="639" style="TFs"/>
+    </node>
+    <node id="PRDM1" maxvalue="1">
+      <value val="1">
+        <exp str="IRF4 &amp; AhR &amp; !KLF4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O75626"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28930664"/>
+        </linklist>
+        <comment>PR domain zinc finger protein 1 [1]. 
+Transcription factor that mediates a transcriptional program in various innate and adaptive immune tissue-resident lymphocyte T cell types such as tissue-resident memory T (Trm), natural killer (trNK) and natural killer T (NKT) cells and negatively regulates gene expression of proteins that promote the egress of tissue-resident T-cell populations from non-lymphoid organs. 
+PRDM1 silencing significantly decreased moDC differentiation, while increasingthe proportion of moMacs [2].
+Using matrix-scan, we predicted binding of IRF4 and KLF4 in the promoter region of PRDM1 coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="931" y="846" style="TFs"/>
+    </node>
+    <node id="PU1" maxvalue="2">
+      <value val="2">
+        <exp str="ERK &amp; STAT6"/>
+      </value>
+      <value val="1">
+        <exp str="(ERK | STAT6) &amp; !(ERK &amp; STAT6)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P17947"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11594748/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20510871/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/26758199/"/>
+        </linklist>
+        <comment>Transcription factor PU.1 [1]. 
+PU.1 binds to the PU-box, a purine-rich DNA sequence (5'-GAGGAA-3') that can act as a lymphoid-specific enhancer.
+This protein is a transcriptional activator is involved in the differentiation or activation of macrophages or B-cells [2].
+ PU.1 is necessary for all DC development because Sfpi1 homozygotic mutant neonates lacked thymic DCs and were unable to generate DCs in vitro in response to GMCSF [3].
+An alternative mechanism may involve STAT6 [4].
+</comment>
+      </annotation>
+      <nodevisualsetting x="442" y="742" style="Node style 2"/>
+    </node>
+    <node id="STAT3" maxvalue="2">
+      <value val="2">
+        <exp str="JAK1 &amp; !SHP1"/>
+      </value>
+      <value val="1">
+        <exp str="JAK1 &amp; SHP1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P40763"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24744378"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/30578415"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28465674"/>
+        </linklist>
+        <comment>Signal transducer and transcription activator that mediates cellular responses to interleukins, KITLG/SCF, LEP and other growth factors [1].
+SOCS proteins are themselves encoded by STAT target genes and thus provide a transcription dependent negative feedback mechanism [3].
+lncDC bound directly to STAT3 in the cytoplasm, which promoted STAT3 phosphorylation on tyrosine705 by preventing STAT3 binding to and dephosphorylation by SHP1 [2,4].
+</comment>
+      </annotation>
+      <nodevisualsetting x="876" y="989" style="TFs"/>
+    </node>
+    <node id="STAT5" maxvalue="1">
+      <value val="1">
+        <exp str="Src | JAK2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P42229"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>Signal transducer and activator of transcription 5A. Carries out a dual function: signal transduction and activation of transcription [1].
+ 
+Of the signaling proteins contributing to GM CSF driven DC development, JAK2 activated STAT5 is the clearest regulator of differentiation [2].</comment>
+      </annotation>
+      <nodevisualsetting x="171" y="939" style="TFs"/>
+    </node>
+    <node id="STAT6" maxvalue="1">
+      <value val="1">
+        <exp str="JAK3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P42226"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16540365"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/25159217"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10485906"/>
+        </linklist>
+        <comment>Signal transducer and activator of transcription 6. Carries out a dual function: signal transduction and activation of transcription. Involved in IL4/interleukin-4 and IL3/interleukin-3-mediated signaling [1].
+
+The IL4 receptor (IL4R) signals the activation of the JAK3-STAT6 pathway through its common gamma chain, which leads to the development of immature DCs [2,3,4].</comment>
+      </annotation>
+      <nodevisualsetting x="1031" y="917" style="TFs"/>
+    </node>
+    <node id="USF1" maxvalue="1">
+      <value val="1">
+        <exp str="PU1 | KLF4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P22415"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10085160"/>
+        </linklist>
+        <comment>Upstream stimulatory factor 1. Transcription factor that binds to a symmetrical DNA sequence (E-boxes) (5'-CACGTG-3') that is found in a variety of viral and cellular promoters [1].
+
+Involvement of USF in myeloid cell differentiation[2].
+
+Using matrix-scan, we predicted binding sites for KLF4, and PU.1 in the regulatory region, annotated with chromHMM in this study, of the USF1 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="393" y="829" style="TFs"/>
+    </node>
+    <node id="NCOR2" maxvalue="1">
+      <value val="1">
+        <exp str="IRF4 | AhR | STAT6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9Y618"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>Nuclear receptor corepressor 2 [1]. 
+Mediates the transcriptional repression activity of some nuclear receptors by promoting chromatin condensation, thus preventing access of the basal transcription [1].
+Using matrix-scan, we predicted binding sites for AHR, IRF4, and STAT6 in the regulatory region, annotated with chromHMM in this study, of the NCOR2 gene.
+
+NCOR2 was identified as a key transcriptional hub linked to IL4 dependent differentiation of MOs [2].</comment>
+      </annotation>
+      <nodevisualsetting x="672" y="608" style="moDCs"/>
+    </node>
+    <node id="JAK2" maxvalue="1">
+      <value val="1">
+        <exp str="CSF2R &amp; !PTPN1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O60674"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11694501"/>
+        </linklist>
+        <comment>Tyrosine-protein kinase JAK2 [1]. 
+Non-receptor tyrosine kinase involved in various processes such as cell growth, development, differentiation or histone modifications.
+JAK2 mediates  signaling events essential for both innate and adaptive immunity [1].
+Src kinases are recruited to BetaC by their SH2 domains that interact with phosphorylated Y612, Y695, and Y750 [2]. 
+The STATs are primarily phosphorylated by JAK2. PTP1B recognizes TYK2 on JAK2, but noton  JAK1, and can modulate signaling responses to IFNgamma and IFNalfa [3].</comment>
+      </annotation>
+      <nodevisualsetting x="306" y="133" style=""/>
+    </node>
+    <node id="Src" maxvalue="1">
+      <value val="1">
+        <exp str="CSF2R:1 | JAK2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P12931"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>Proto-oncogene tyrosine-protein kinase Src [1]. 
+Non-receptor protein tyrosine kinase activated following engagement of many different classes of cellular receptors including immune response receptors, integrins and other adhesion receptors, receptor protein tyrosine kinases, G protein-coupled receptors as well as cytokine receptors [1].
+
+Src kinases are recruited to BetaC by their SH2 domains that interact with phosphorylated Y612, Y695, and Y750. The STATs are primarily phosphorylated by JAK2, butalso by Src kinases [2].</comment>
+      </annotation>
+      <nodevisualsetting x="148" y="98" style=""/>
+    </node>
+    <node id="PI3K" maxvalue="1">
+      <value val="1">
+        <exp str="RAS | JAK2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P48736"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>Phosphatidylinositol 4,5-bisphosphate 3-kinase catalytic subunit gamma isoform [1]. 
+PI3K phosphorylates PtdIns(4,5)P2 (Phosphatidylinositol 4,5 bisphosphate) to generate phosphatidylinositol 3,4,5 trisphosphate (PIP3) [1]. 
+ 
+Activity of PI3K is promoted by JAK2 mediated phosphorylation of p85 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="307" y="194" style=""/>
+    </node>
+    <node id="PIP3" maxvalue="1">
+      <value val="1">
+        <exp str="PI3K &amp; !PTEN"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://en.wikipedia.org/wiki/Phosphatidylinositol_(3,4,5)-trisphosphate"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>Phosphatidylinositol (3,4,5) trisphosphate [1].
+PIP3 is the product of the phosphorylation of phosphatidylinositol (4,5) bisphosphate (PIP2) by  class I phosphoinositide 3 kinases (PI3K). 
+It is a phospholipid that resides on the plasma membrane [1].
+
+PI3K functions mainly through the generation of PIP3, an activity counteracted by phosphatases PTEN and SHIP [2].</comment>
+      </annotation>
+      <nodevisualsetting x="304" y="254" style=""/>
+    </node>
+    <node id="AKT" maxvalue="1">
+      <value val="1">
+        <exp str="PIP3 &amp; !NCOR2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P31749"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>RAC-alpha serine/threonine-protein kinase [1]. 
+There are three closely related serine/threonine-protein kinases (AKT1, AKT2 and AKT3), which regulate  metabolism, proliferation, cell survival, growth and angiogenesis.
+
+PIP3 acts as a second messenger, regulating a large variety of downstream targets, including the protein kinase B (PKB; also called AKT) [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="299" y="387" style=""/>
+    </node>
+    <node id="PTEN" maxvalue="1">
+      <value val="1">
+        <exp str="MAGI1 &amp; MEK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P60484"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23453810/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>Phosphatidylinositol 3,4,5 trisphosphate 3 phosphatase and dual-specificity protein phosphatase PTEN [1]. 
+PTEN acts as a dual specificity protein phosphatase, dephosphorylating tyrosine, serine and threonine phosphorylated proteins.
+It is activated by MEK1 [2]
+A ternary complex between MEK1, MAGI1 and PTEN mediates the translocation of PTEN to the membrane and thereby regulates the concentration of PIP3 and AKT activation. Both MEK1 and MAGI1 are necessary for complex formation, and PTEN will not bind to one component if the other is missing [3].</comment>
+      </annotation>
+      <nodevisualsetting x="470" y="242" style=""/>
+    </node>
+    <node id="MEK1" maxvalue="1">
+      <value val="1">
+        <exp str="RAF"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q02750"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23453810/"/>
+        </linklist>
+        <comment>Dual specificity mitogen-activated protein kinase kinase 1 (MAP2K1 or MEK1) [1]
+Phosphorylation of MEK1 T292 relays a negative feedback within the ERK pathway and initiates the deactivation of the PIP3 AKT pathway through the membrane localization of MAGI PTEN, acting as a temporal switch for both cascades. 
+ERK regulates the binding of MEK1 to WW domain containing proteins and may negatively affect survival by promoting the membrane recruitment of PTEN in the context of the MEK1/MAGI1/PTEN complex [2].</comment>
+      </annotation>
+      <nodevisualsetting x="570" y="320" style=""/>
+    </node>
+    <node id="MAGI1" maxvalue="1">
+      <value val="1">
+        <exp str="MEK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q96QZ7"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23453810/"/>
+        </linklist>
+        <comment>Membrane associated guanylate kinase, WW and PDZ domain containing protein 1 [1]. MAGI1 presumably plays a role as scaffolding protein at cell-cell junctions and regulates acid-induced ASIC3 currents by modulating its expression at the cell surface [1].
+MEK1 is essential for the formation of a complex containing MAGI1 and PTEN and for their membrane translocation upon growth factor stimulation.
+Mutation of the WW domains of MAGI1, in particular of WW2, strongly reduced MEK1 binding by a WW MAGI1 fragment or by full length MAGI1. A ternary complex involving MEK1, MAGI1, and PTEN, mediates the translocation of PTEN to the membrane and therebye regulates the concentration of PIP3 and AKT activation. Both MEK1 and MAGI1 are necessary for complex formation, and PTEN will not bind to one component if the other is missing. MEK1 ablation prevented MAGI1 membrane translocation [2].</comment>
+      </annotation>
+      <nodevisualsetting x="385" y="293" style=""/>
+    </node>
+    <node id="CLIP1" maxvalue="1">
+      <value val="1">
+        <exp str="mTORC1 | PU1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P30622"/>
+          <link xlink:href="https://www.genome.jp/dbget-bin/www_bget?hsa04150"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/21892142/"/>
+        </linklist>
+        <comment>CAP-Gly domain-containing linker protein 1 [1,2]. Binds to the plus end of microtubules and regulates the dynamics of the microtubule cytoskeleton. Promotes microtubule growth and microtubule bundling. Links cytoplasmic vesicles to microtubules and thereby plays an important role in intracellular vesicle trafficking. Plays a role macropinocytosis and endosome trafficking [1].
+
+The microtubule plus-end protein CLIP-170 (also known as CLIP1) is a direct AMPK substrate[3].</comment>
+      </annotation>
+      <nodevisualsetting x="1479" y="539" style=""/>
+    </node>
+    <node id="mTORC1" maxvalue="1">
+      <value val="1">
+        <exp str="AKT"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P42345"/>
+          <link xlink:href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=MTOR"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>Serine/threonine-protein kinase mTOR [1,2].
+The mTOR complex 1 (MTORC1) belongs to a family of phosphatidylinositol kinase-related kinases.  These kinases mediate cellular responses to stresses such as DNA damage and nutrient deprivation.  MTORC1 acts as the target for the cell-cycle arrest and immunosuppressive effects of the FKBP12-rapamycin complex [1].
+Activated PKB regulates the mTORC1 [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1153" y="525" style=""/>
+    </node>
+    <node id="SHC_GRB2_mSOS" maxvalue="1">
+      <value val="1">
+        <exp str="CSF2R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>Complex involving SHC, GRB2 and mSOS.
+The main MAPK pathway activated by the GM CSF receptor is the MEK/ERK pathway. 
+The recruitment of mSOS to the SHC GRB2 complex enables mSOS to catalyze RAS activation [1].</comment>
+      </annotation>
+      <nodevisualsetting x="549" y="111" style="Node style"/>
+    </node>
+    <node id="RAS" maxvalue="1">
+      <value val="1">
+        <exp str="SHC_GRB2_mSOS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P01116"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>GTPase KRas [1]. 
+Ras proteins bind GDP,GTP and possess intrinsic GTPase activity) [1].
+
+The main MAPK pathway activated by the GM CSF receptor is the MEK/ERK pathway. The recruitment of mSOS to the SHC GRB2 complex enables mSOS to catalyze RAS activation. Formation of active GTP bound RAS from inactive GDP bound RAS leads to the successive activation of RAF, MEK, and ERK [2].</comment>
+      </annotation>
+      <nodevisualsetting x="565" y="190" style=""/>
+    </node>
+    <node id="RAF" maxvalue="1">
+      <value val="1">
+        <exp str="RAS"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P04049"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>RAF proto-oncogene serine, threonine-protein kinase [1]. 
+RAF acts as a regulatory link between the membrane-associated Ras GTPases and the MAPK ERK cascade, and  functions as a switch determining cell fate decisions including proliferation, differentiation, apoptosis, survival and oncogenic transformation [2].</comment>
+      </annotation>
+      <nodevisualsetting x="567" y="249" style=""/>
+    </node>
+    <node id="ERK" maxvalue="1">
+      <value val="1">
+        <exp str="MEK1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P27361"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/9858808/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>Mitogen-activated protein kinase 3 [1]. 
+ERK acts as an essential component of the MAP kinase signal transduction pathway. MAPK1/ERK2 and MAPK3/ERK1 are the 2 MAPKs which play an important role in the MAPK/ERK cascade. 
+DUSP6 Inactivates MAP kinases, with a specificity for the ERK family [2,3].</comment>
+      </annotation>
+      <nodevisualsetting x="608" y="428" style=""/>
+    </node>
+    <node id="JUN" maxvalue="1">
+      <value val="1">
+        <exp str="JNK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P05412"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27446931/"/>
+        </linklist>
+        <comment>Proto-oncogene c-Jun [1].
+Nuclear phosphoprotein which to gether with FOS forms AP-1 complex. 
+In response to growth factors, ERK-1/2, c-Jun NH2-terminal kinase 1 (JNK-1), and p38 are activated [2].</comment>
+      </annotation>
+      <nodevisualsetting x="213" y="475" style=""/>
+    </node>
+    <node id="JNK" maxvalue="1">
+      <value val="1">
+        <exp str="ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P45983"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/17409820/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27446931/"/>
+        </linklist>
+        <comment>Jun N-Terminal Kinase. Extracellular stimuli such as proinflammatory cytokines or physical stress stimulate the stress-activated protein kinase/c-Jun N-terminal kinase (SAP/JNK) signaling pathway [1].
+
+Raf and MAPK (ERK) are not the only downstream targets of K-ras, the small GTP-binding proteins Rac and Rho, and the stress-activated protein kinase pathway (also referred to as the c-jun N-terminal kinase (JNK) pathway) [2,3]</comment>
+      </annotation>
+      <nodevisualsetting x="496" y="482" style=""/>
+    </node>
+    <node id="TAU" maxvalue="1">
+      <value val="1">
+        <exp str="ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P10636"/>
+          <link xlink:href="https://www.genome.jp/dbget-bin/www_bget?hsa04010"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/31908108/"/>
+        </linklist>
+        <comment>Microtubule-associated protein tau [1,2]. Promotes microtubule assembly and stability, and might be involved in the establishment and maintenance of neuronal polarity. The C-terminus binds axonal microtubules while the N-terminus binds neural plasma membrane components, suggesting that tau functions as a linker protein between both [1].
+
+ERK regulated TAU phosphorylation [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1472" y="463" style=""/>
+    </node>
+    <node id="CPLA2" maxvalue="1">
+      <value val="1">
+        <exp str="ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P47712"/>
+          <link xlink:href="https://www.genome.jp/dbget-bin/www_bget?hsa04010"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23430108/"/>
+        </linklist>
+        <comment>Cytosolic phospholipase A2. Has primarily calcium-dependent phospholipase and lysophospholipase activities, with a major role in membrane lipid remodeling and biosynthesis of lipid mediators of the inflammatory response [1,2].
+
+CPLA2 (PLA2G4) is downregulated when ERk is inhactive [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1471" y="372" style=""/>
+    </node>
+    <node id="FLT3" maxvalue="1">
+      <value val="1">
+        <exp str="PU1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P36888"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24070385"/>
+        </linklist>
+        <comment>Receptor-type tyrosine-protein kinase FLT3 [1]. 
+FLT3 acts as cell-surface receptor for the cytokine FLT3LG and regulates differentiation, proliferation and survival of hematopoietic progenitor cells and of dendritic cells. 
+PU1 directly regulated Flt3 expression in DCs and their precursors in a dose-dependent manner [2].</comment>
+      </annotation>
+      <nodevisualsetting x="3" y="679" style=""/>
+    </node>
+    <node id="GSK3B" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P49841"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>Glycogen synthase kinase-3 beta [1]. 
+GSK3B is negatively regulated by AKT dependent phosphorylation and is  required to avoid human monocyte to macrophage differentiationin monocyte derived DC differentiation cultures [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="100" y="595" style=""/>
+    </node>
+    <node id="IKK" maxvalue="1">
+      <value val="1">
+        <exp str="CSF2R | AKT"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>GM CSF induced canonical NFkB activation is scrucial to ensure differentiation and survival of DC precursors [1].</comment>
+      </annotation>
+      <nodevisualsetting x="723" y="105" style=""/>
+    </node>
+    <node id="JAK3" maxvalue="1">
+      <value val="1">
+        <exp str="IL4R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P52333"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/25159217/"/>
+        </linklist>
+        <comment>Tyrosine-protein kinase JAK3 [1]. 
+JAK3 mediates essential signaling events in both innate and adaptive immunity.
+The IL4 receptor (IL4R) signals the activation of the JAK3-STAT6 pathway through its common gamma chain, which leads to the development of immature DCs [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1059" y="298" style=""/>
+    </node>
+    <node id="JAK1" maxvalue="1">
+      <value val="1">
+        <exp str="IL4R"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P23458"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27165851/"/>
+        </linklist>
+        <comment>Tyrosine-protein kinase JAK1 [1]
+IL4R signal transduction is initiated by receptor-associated kinases, i.e. a member of JAK family, including JAK1 [2]. </comment>
+      </annotation>
+      <nodevisualsetting x="868" y="294" style=""/>
+    </node>
+    <node id="SHP1" maxvalue="1">
+      <value val="1">
+        <exp str="USF1:1 &amp; !LnC_DC"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P29350"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28465674"/>
+        </linklist>
+        <comment>Tyrosine-protein phosphatase non-receptor type 6 [1]. 
+SHP1 modulates signaling by tyrosine phosphorylated cell surface receptors such as KIT and the EGF receptor/EGFR. 
+The SH2 region interacts with other cellular components to modulate its own phosphatase activity against interacting substrates.
+LncDC promotes STAT3 phosphorylation via inhibiting the action of Src homology region 2 domain containing phosphatase 1 (SHP1) [2].</comment>
+      </annotation>
+      <nodevisualsetting x="833" y="806" style=""/>
+    </node>
+    <node id="CIITA" maxvalue="1">
+      <value val="1">
+        <exp str="STAT5"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P33076"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>MHC class II transactivator [1]. 
+CIITA is essential for transcriptional activity of the HLA class II promoter, via the proximal promoter. No DNA binding of in vitro translated CIITA was detected. It may act in a coactivator-like fashion through protein-protein interactions by contacting factors binding to the proximal MHC class II promoter, to elements of the transcription machinery, or both [1].
+ 
+STAT5 promotes the expression of MHC class II transactivatorprotein (CIITA), which is essential for proper transcription of the MHC class II promoter [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="163" y="1226" style=""/>
+    </node>
+    <node id="ITGAX" maxvalue="1">
+      <value val="1">
+        <exp str="IRF4 &amp; PU1 &amp; PRDM1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P20702"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29448070"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28338898/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27401672"/>
+        </linklist>
+        <comment>Integrin alpha-X [1]. 
+ITGAX is a receptor for fibrinogen and a moDC marker [2,3,5,6].
+It mediates cell-cell interaction during inflammatory responses.
+It is especially important for monocyte adhesion and chemotaxis.
+PU.1 transactivates the Itgax promoter via direct binding to the cis element on the gene in DCs and through gene regulation of a partner molecule, IRF4, which transactivates the Itgax gene in a synergistic manner with PU.1 [4].
+Using matrix-scan, we predicted binding sites for IRF4, PU.1 and PRDM1, in the regulatory region, annotated with chromHMM in this study, of the ITGAX coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1197" y="1094" style="moDCs"/>
+    </node>
+    <node id="LnC_DC" maxvalue="1">
+      <value val="1">
+        <exp str="PU1 &amp; IRF4 &amp; STAT5"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://omim.org/entry/615772"/>
+          <link xlink:href="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/50357"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/24744378"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/28465674"/>
+        </linklist>
+        <comment>Long non coding RNA espressed in DCs [1,2]. 
+This lncRNA lncDC regulates differentiation of dendritic cells (DCs), the most potent antigen-presenting cells of the immune system  [1].
+lncDC binds directly to STAT3 in the cytoplasm, which promoted STAT3 phosphorylation on tyrosine705 by preventing STAT3 binding to and dephosphorylation by SHP1 [3].
+PU.1 directs lncDC expression in human cDCs [4].
+Using matrix-scan, we predicted binding sites for IRF4, and STAT5 in the regulatory region, annotated with chromHMM in this study, of the LnC-DC gene.</comment>
+      </annotation>
+      <nodevisualsetting x="717" y="914" style=""/>
+    </node>
+    <node id="IL4_gene" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P05112"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16540365/"/>
+        </linklist>
+        <comment>Gene encoding Interleukin-4 [1].
+IL4 gene is regulated by STAT6 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="1463" y="1022" style=""/>
+    </node>
+    <node id="DUOX1" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6 &amp; IRF4 &amp; PU1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9NRD9"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/26758199"/>
+        </linklist>
+        <comment>Dual oxidase 1 [1]. 
+DUOX1 generates hydrogen peroxide which is required for the activity of thyroid peroxidase/TPO and lactoperoxidase/LPO [1]. 
+
+STAT6 did interacts specifically with DC-specific genes like DUOX1 and SLAMF1 in DC differentiation [2].
+
+Using matrix-scan, we predicted binding sites for IRF4, and Pu.1 in the regulatory region, annotated with chromHMM in this study, of the DUOX1 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="1313" y="685" style=""/>
+    </node>
+    <node id="SLAMF1" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6 &amp; IRF4 &amp; ELK4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q13291"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/26758199"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29284783/"/>
+        </linklist>
+        <comment>Signaling lymphocytic activation molecule [1]. 
+SLAM receptors triggered by homo- or heterotypic cell-cell interactions are modulating the activation and differentiation of a wide variety of immune cells and are involved in the regulation and interconnection of both innate and adaptive immune response [1]. 
+STAT6 did interacts specifically with DC-specific genes like DUOX1 and SLAMF1 in DC differentiation [2]. Number of TFs such as IRF4, STAT6, could bind to SLAMF1 promoter and regulate its activity [3].
+Using matrix-scan, we predicted binding sites for IRF4, and ELK4, in the regulatory region, annotated with chromHMM in this study, of the SLAMF1 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="1263" y="1208" style=""/>
+    </node>
+    <node id="MAOA" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6 &amp; NCOR2 &amp; PU1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P21397"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23124025"/>
+        </linklist>
+        <comment>Amine oxidase [flavin-containing] A  [1]. 
+MAOA catalyzes the oxidative deamination of biogenic and xenobiotic amines and has important functions in the metabolism of neuroactive and vasoactive amines in the central nervous system and peripheral tissues [1]. 
+The IL4/,Jak1/Stat3/Stat6 cascade regulates the expression of critical inflammatory genes, including ALOX15, monoamine oxidase A (MAOA), and the scavenger receptor CD36 [2].
+Using matrix-scan, we predicted binding sites for STAT6, and PU.1in the regulatory region, annotated with chromHMM in this study, of the MAOA coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1481" y="737" style=""/>
+    </node>
+    <node id="HLA_DR" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3 | (STAT6 &amp; CIITA)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P01911"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29448070"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450/"/>
+        </linklist>
+        <comment>HLA class II histocompatibility antigen, DRB1 beta chain [1], expressed by DCs [2,3]
+STAT5 promotes the expression of MHC class II transactivatorprotein (CIITA), which is essential for proper transcripiton of the MHC class II promoter [4].
+</comment>
+      </annotation>
+      <nodevisualsetting x="386" y="1235" style=""/>
+    </node>
+    <node id="ALOX15" maxvalue="1">
+      <value val="1">
+        <exp str="CREB &amp; STAT6 &amp; STAT3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P16050"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/16540365/"/>
+        </linklist>
+        <comment>Polyunsaturated fatty acid lipoxygenase ALOX15 [1]. 
+Non-heme iron-containing dioxygenase that catalyzes the stereo-specific peroxidation of free and esterified polyunsaturated fatty acids generating a spectrum of bioactive lipid mediators [1].
+The IL4-Jak1-Stat3-Stat6 cascade regulates the expression of critical inflammatory genes, including ALOX15 [2].
+Using matrix-scan, we predicted binding sites for STAT3,in the regulatory region, annotated with chromHMM in this study, of the ALOX15 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="1021" y="1191" style=""/>
+    </node>
+    <node id="TIMP3" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6 &amp; AP1 &amp; IRF4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P48032"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23124025"/>
+        </linklist>
+        <comment>Metalloproteinase inhibitor 3 [1]. 
+
+IL-4 specifically stimulates the expression of TIMP3 mRNA [2]. 
+
+Using matrix-scan, we predicted binding sites for AP1, and IRF4, in the regulatory region, annotated with chromHMM in this study, of the TIMP3 coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1314" y="791" style=""/>
+    </node>
+    <node id="DUSP6" maxvalue="1">
+      <value val="1">
+        <exp str="ERK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q16828"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/23430108/"/>
+        </linklist>
+        <comment>Dual specificity protein phosphatase 6 [1].
+DUSP6 inactivates MAP kinases and has a specificity for the ERK family. MEK1/2 inhibitor U0126 treatment significantly reduces the expression of wellknown targets of ERK (FOS, MYC, DUSP6) [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="654" y="328" style=""/>
+    </node>
+    <node id="CCL2" maxvalue="1">
+      <value val="1">
+        <exp str="ERK &amp; STAT5 &amp; STAT3 &amp; FOXO1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P13500"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.govd/23430108"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22328945"/>
+        </linklist>
+        <comment>C-C motif chemokine 2  [1]. 
+CCL2 is a chemokine constitutively produced by immature MDDCs, acting as a ligand for C-C chemokine receptor CCR2 [1].
+The CCL2 chemokine directs monocyte/macrophage recruitmentinto tissues under resting and inflamed conditions [2].
+ERK upregulated CCL2 expression while impairing the expression of DC maturation markers (RUNX3, ITGB7, IDO1) [3]. 
+Using matrix-scan, we predicted binding sites for FOXO1, STAT3, and STAT5 in the regulatory region, annotated with chromHMM in this study, of the CCL2 gene.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="759" y="1041" style="moDCs"/>
+    </node>
+    <node id="CCL22" maxvalue="1">
+      <value val="1">
+        <exp str="(AhR &amp; NCOR2 &amp; FOXO1) | (KLF4 &amp; MAFB)"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O00626"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>C-C motif chemokine 22 [1], moDC marker [2]. 
+May play a role in the trafficking of activated/effector T-lymphocytes to inflammatory sites and other aspects of activated T-lymphocyte physiology. Chemotactic for monocytes, dendritic cells and natural killer cells [1].
+
+Using Matrix-scan , we predicted binding sites for AHR, NCOR2, FOXO1, KLF4, and MAFB in the regulatory region, annotated with chromHMM in this study, of the CCL22 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="820" y="1190" style="moDCs"/>
+    </node>
+    <node id="TLR3" maxvalue="1">
+      <value val="1">
+        <exp str="IRF4 | PRDM1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O15455"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+        </linklist>
+        <comment>Toll-like receptor 3 [1], moDC marker[2].
+TLRs control host immune response against pathogens through recognition of molecular patterns specific to microorganisms [1].
+Using matrix-scan, we predicted binding sites for IRF4, and PRDM1, in the regulatory region, annotated with chromHMM in this study, of the TLR3 coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1167" y="882" style="moDCs"/>
+    </node>
+    <node id="TLR4" maxvalue="1">
+      <value val="1">
+        <exp str="AP1 | IRF4 | PRDM1 | PU1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O00206"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27022195/"/>
+        </linklist>
+        <comment>Toll-like receptor 4 [1], moDC marker [2,3]. 
+TLR4 cooperates with LY96 and CD14 to mediate the innate immune response to bacterial lipopolysaccharide (LPS) [1]). 
+Using matrix-scan, we predicted binding sites for AP1, IRF4, PRDM1, and PU.1 in the regulatory region, annotated with chromHMM in this study, of the TLR4 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="727" y="1160" style="moDCs"/>
+    </node>
+    <node id="TLR6" maxvalue="1">
+      <value val="1">
+        <exp str="CEBPa | CEBPb | STAT6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9Y2C9"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20037584/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29593736/"/>
+        </linklist>
+        <comment>Toll-like receptor 6 [1], moDC marker [2,3,4]. 
+TLR6 participates in the innate immune response to Gram-positive bacteria and fungi. TLR6 specifically recognizes diacylated and, to a lesser extent, triacylated lipopeptides [1].
+Using matrix-scan, we predicted binding sites for CEBPa, CEBPb, and STAT6 in the regulatory region, annotated with chromHMM in this study, of the TLR6 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="900" y="1097" style="moDCs"/>
+    </node>
+    <node id="TLR7" maxvalue="1">
+      <value val="1">
+        <exp str="CEBPa | CEBPb | IRF4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9NYK1"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+        </linklist>
+        <comment>Toll-like receptor 7 [1], moDC marker [2]. 
+Endosomal receptor that plays a key role in innate and adaptive immunity. Controls host immune response against pathogens through recognition of uridine containing single strand RNAs (ssRNAs) of viral origin or guanosine analogs [1]. 
+
+Using matrix-scan, we predicted binding sites for CEBPa, CEBPb, and IRF4 in the regulatory region, annotated with chromHMM in this study, of the TLR7 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="581" y="1227" style="moDCs"/>
+    </node>
+    <node id="TLR8" maxvalue="1">
+      <value val="1">
+        <exp str="KLF4 | CEBPa | STAT6 | BATF3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9NR97"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/31778653/"/>
+        </linklist>
+        <comment>Toll-like receptor 8 [1], moDC marker [2].
+Endosomal receptor that plays a key role in innate and adaptive immunity. 
+It controls host immune response against pathogens through recognition of RNA degradation products specific to microorganisms that are initially processed by RNASET2 [3]
+Using matrix-scan, we predicted binding sites for CEBPA, KLF4, and STAT6 in the regulatory region, annotated with chromHMM in this study, of TLR8 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="269" y="1077" style="moDCs"/>
+    </node>
+    <node id="CD48" maxvalue="1">
+      <value val="1">
+        <exp str="PU1 &amp; IRF4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P09326"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>CD48 antigen [1], expressed in moDC [2], ligand for CD2 and probably involved in regulating T-cell activation [1].
+
+Using matrix-scan, we predicted binding sites for IRF4, and PU.1, in the regulatory region, annotated with chromHMM in this study, of the CD48 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="497" y="1081" style="moDCs"/>
+    </node>
+    <node id="CD1A" maxvalue="1">
+      <value val="1">
+        <exp str="(BATF3 | CEBPa | CEBPb | CREB) &amp; IRF4 &amp; PU1 &amp; PRDM1 &amp; NCOR2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P06126"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/10629465/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>T-cell surface glycoprotein CD1a [1].
+Antigen-presenting protein that binds self and non-self lipid and glycolipid antigens and presents them to T-cell receptors on natural killer T-cells [1]. 
+
+IL4 signaling upregulates CD1a on cell surface of DC cells [2].
+
+The large majority of genes regulated by NCOR2 are IL-4 signature genes. NCOR2 silencing repressed CD1A, that is one of the IL-4 signature genes [3].
+
+Using matrix-scan, we predicted binding sites for BATF3, CEBPA, CEBPB, CREB1, IRF4, PRDM1, Pu.1, and NCOR2 in the regulatory region, annotated with chromHMM in this study, of the CD1A coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1178" y="645" style="moDCs"/>
+    </node>
+    <node id="CD1B" maxvalue="1">
+      <value val="1">
+        <exp str="(CEBPa | CEBPb | IRF4) &amp; PRDM1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P29016"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29448070"/>
+        </linklist>
+        <comment>T-cell surface glycoprotein CD1b [1]. 
+During protein synthesis and maturation, CD1 family members bind endogenous lipids that are replaced by lipid or glycolipid antigens when the proteins are internalized and pass through endosomes or lysosomes, before trafficking back to the cell surface [1]. 
+Human inflammatory moDC are HLADR CD11c cells that express markers found on classical DC such as CD1c, CD1a, CD1b [2]. 
+Using matrix-scan, we predicted binding sites for CEBPA, CEBPB, IRF4, and PRDM1, in the regulatory region, annotated with chromHMM in this study, of the CD1B coding gene.
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1347" y="1122" style="moDCs"/>
+    </node>
+    <node id="CD1C" maxvalue="1">
+      <value val="1">
+        <exp str="FOXO1 &amp; IRF4 &amp; NR4A1 &amp; PU1 &amp; STAT6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P29017"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29448070"/>
+        </linklist>
+        <comment>T-cell surface glycoprotein CD1c [1], expressed in DC [2].
+Antigen-presenting protein that binds self and non-self lipid and glycolipid antigens and presents them to T-cell receptors on natural killer T-cells.
+
+Using matrix-scan, we predicted binding sites for FOXO1, IRF4, NR4A1, PU.1, and STAT6 in the regulatory region, annotated with chromHMM in this study, of the CD1C coding gene.
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="774" y="1286" style="moDCs"/>
+    </node>
+    <node id="CD40" maxvalue="1">
+      <value val="1">
+        <exp str="AP1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P25942"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/31331973/"/>
+        </linklist>
+        <comment>Tumor necrosis factor receptor superfamily member 5 [1], moDC marker [2].
+Receptor for TNFSF5/CD40LG [3]. 
+CD40 transduces TRAF6- and MAP3K8-mediated signals that activate ERK in macrophages and B cells, leading to induction of immunoglobulin secretion [1].
+
+Using matrix-scan, we predicted binding sites for AP1 in the regulatory region, annotated with chromHMM in this study, of the CD40 coding gene.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="10" y="890" style=""/>
+    </node>
+    <node id="CD86" maxvalue="1">
+      <value val="1">
+        <exp str="AP1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P42081"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27401672"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>T-lymphocyte activation antigen CD86 [1], moDC marker [2,3]. 
+Receptor involved in the costimulatory signal essential for T-lymphocyte proliferation and interleukin-2 production, by binding CD28 or CTLA-4. 
+CD86 may play a critical role in the early events of T-cell activation and costimulation of naive T-cells [1].
+
+Using matrix-scan, we predicted binding sites for AP1 in the regulatory region, annotated with chromHMM in this study, of the CD86 coding gene.</comment>
+      </annotation>
+      <nodevisualsetting x="3" y="786" style=""/>
+    </node>
+    <node id="CD83" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6 &amp; NFKB2 &amp; IRF4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q01151"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/27401672"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/26758199/"/>
+        </linklist>
+        <comment>CD83 antigen [1], moDC marker [2,3]. May play a significant role in antigen presentation or the cellular interactions that follow lymphocyte activation [1].
+
+Using matrix-scan, we predicted binding sites for IRF4, NFKB2, and STAT6 in the regulatory region, annotated with chromHMM in this study, of the CD83 gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="529" y="1167" style="moDCs"/>
+    </node>
+    <node id="CD209" maxvalue="1">
+      <value val="1">
+        <exp str="AP1 &amp; CREB &amp; ELK4 &amp; IRF4 &amp; PU1 &amp; STAT6"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9NNX6"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/26758199/"/>
+        </linklist>
+        <comment>CD209 antigen [1], moDC marker [2]. 
+Pathogen-recognition receptor expressed on the surface of immature dendritic cells (DCs) and involved in initiation of primary immune response. 
+CD209  mediates the endocytosis of pathogen,s which are subsequently degraded in lysosomal compartments. 
+CD209 was found exclusively expressed by MOs GMCS IL4 (0 tp 72h) [3]. 
+Treatment with a STAT6 inhibitor affected the presence of the surface markers CD209 and CD83 during GM-CSF/IL-4-mediated differentiation to DCs [4].
+Using matrix-scan, we predicted binding sites for AP1, CREB1, ELK4, IRF4, PU.1, and STAT6, in the regulatory region, annotated with chromHMM in this study, of the CD209 coding gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="1132" y="1155" style="moDCs"/>
+    </node>
+    <node id="CD141" maxvalue="1">
+      <value val="1">
+        <exp str="(CEBPa | CREB) &amp; USF1 &amp; ATF1 &amp; IRF4"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P07204"/>
+          <link xlink:href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=THBD&amp;keywords=CD141"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29448070"/>
+        </linklist>
+        <comment>Thrombomodulin [1,2], marker for moDC [3].
+CD141 is a specific endothelial cell receptor that forms a 1:1 stoichiometric complex with thrombin. This complex is responsible for the conversion of protein C to the activated protein Ca [1]. 
+Using matrix-scan, we predicted binding sites for ATF1, CEBPa, CREB1, IRF4, and USF1 in the regulatory region, annotated with chromHMM in this study, of the CD141 gene.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="578" y="1068" style="moDCs"/>
+    </node>
+    <node id="CD226" maxvalue="1">
+      <value val="1">
+        <exp str="(BATF3 | CEBPa) &amp; FOXO1 &amp; IRF4 &amp; PRDM1 &amp; PU1 &amp; STAT3 &amp; STAT5 &amp; STAT6 &amp; USF1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q15762"/>
+          <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/29262348"/>
+        </linklist>
+        <comment>CD226 antigen [1], expressed in moDCs [2].
+Involved in intercellular adhesion, stimulates T-cell proliferation and cytokine production [1].
+Using matrix-scan, we predicted binding sites for BATF3, CEBPa, FOXO1, IRF4, PRDM1, PU.1, STAT3, STAT5, STAT6, and USF1 in the regulatory region, annotated with chromHMM in this study, of the CD226 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="389" y="1103" style="moDCs"/>
+    </node>
+    <node id="DEC205" maxvalue="1">
+      <value val="1">
+        <exp str="FOXO1 &amp; AP1 &amp; PRDM1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O60449"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+        </linklist>
+        <comment>Lymphocyte antigen 75 [1], moDC marker [2]. 
+Acts as an endocytic receptor to direct captured antigens from the extracellular space to a specialized antigen-processing compartment (By similarity). Causes reduced proliferation of B-lymphocytes [1].
+
+Using matrix-scan, we predicted binding sites for FOXO1, AP1, and PRDM1 in the regulatory region, annotated with chromHMM in this study, of the DEC205 gene.
+</comment>
+      </annotation>
+      <nodevisualsetting x="302" y="1323" style="moDCs"/>
+    </node>
+    <node id="DCIR" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6 &amp; PU1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q9UMR7"/>
+          <link xlink:href="https://www.genecards.org/cgi-bin/carddisp.pl?gene=CLEC4A&amp;keywords=DCIR"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/24513968"/>
+        </linklist>
+        <comment>C-type lectin domain family 4 member A [1,2], moDC marker [3].
+
+Using matrix-scan, we predicted binding sites for STAT6, and PU.1 in the regulatory region, annotated with chromHMM in this study, of the DCIR gene.
+
+
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="620" y="1164" style="moDCs"/>
+    </node>
+    <node id="Tet2" maxvalue="1">
+      <value val="1">
+        <exp str="PU1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q6N021"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/26758199"/>
+        </linklist>
+        <comment>Methylcytosine dioxygenase Te2 [1]. 
+Dioxygenase that catalyzes the conversion of the modified genomic base 5-methylcytosine (5mC) into 5-hydroxymethylcytosine (5hmC) and plays a key role in active DNA demethylation. Tet2 has a preference for 5-hydroxymethylcytosine in CpG motifs [1]. 
+TET2 downregulation partially impaired demethylation of both common and DC/
+MAC-specific genes. PU.1 has been shown to associate and recruit TET2 [2].</comment>
+      </annotation>
+      <nodevisualsetting x="3" y="732" style=""/>
+    </node>
+    <node id="PTPN1" maxvalue="1">
+      <value val="1">
+        <exp str="AhR"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P18031"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/11694501"/>
+        </linklist>
+        <comment>Tyrosine-protein phosphatase non-receptor type 1 [1]. 
+PTPN1 acts as a regulator of endoplasmic reticulum unfolded protein response. 
+It mediates the dephosphorylation of EIF2AK3 and PERK and thereby inactivates their protein kinase [2].</comment>
+      </annotation>
+      <nodevisualsetting x="453" y="147" style=""/>
+    </node>
+    <node id="SOCS" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/O15524"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/30578415"/>
+        </linklist>
+        <comment>Suppressor of cytokine signaling 1 [1]. 
+SOCS family proteins form part of a classical negative feedback system that regulates cytokine signal transduction. SOCS1 is involved in negative regulation of cytokines that signal through the JAK/STAT3 pathway [1].
+By far the most important negative regulation occurs at the level of receptor mediated STAT3 activation and is conferred by suppressor of cytokine signalling (SOCS) E3 ubiquitin ligases that enable the degradation of cytokine receptor complexes. SOCS proteins are themselves encoded by STAT target genes and thus provide a transcription dependent negative feedback mechanism [2].
+</comment>
+      </annotation>
+      <nodevisualsetting x="938" y="923" style=""/>
+    </node>
+    <node id="CD14" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3 &amp; FOXO1 &amp; KLF4 &amp; !STAT5"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P08571"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/20133493/"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/17762869"/>
+        </linklist>
+        <comment>Monocyte differentiation antigen CD14 [1]. 
+Coreceptor for bacterial lipopolysaccharide [1]. 
+In concert with LBP,CD14  binds to monomeric lipopolysaccharide and delivers it to the LY96/TLR4 complex, thereby mediating the innate immune response to bacterial lipopolysaccharide [2].
+The CD14 promoter is induced by KLF4 [3].
+Using matrix-scan, we predict binding sites for FOXO1, KLF4, STAT3, and STAT5 in the regulatory region, annotated with chromHMM in this study, of CD14 coding gene.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="108" y="1090" style="Mo"/>
+    </node>
+    <node id="SELL" maxvalue="1">
+      <value val="1">
+        <exp str="STAT6 &amp; FOXO1 &amp; !PRDM1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P14151"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>L-selectin, monocyte associated [1], expressed in monocytes [2]. 
+Calcium-dependent lectin that mediates cell adhesion by binding to glycoproteins on neighboring cells [1].
+Using matrix-scan, we predicted binding sites for STAT6, FOXO1 and PRDM1 in the regulatory region, annotated with chromHMM in this study, of the SELL coding gene.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="988" y="1310" style="Mo"/>
+    </node>
+    <node id="CD163" maxvalue="1">
+      <value val="1">
+        <exp str="MAFB &amp; IRF8 &amp; !PRDM1:1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q86VB7"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>Scavenger receptor cysteine-rich type 1 protein M130 [1], expressed in macrophages [2].
+Acute phase-regulated receptor involved in clearance and endocytosis of hemoglobin/haptoglobin complexes by macrophages, presumably thereby protecting tissues from free hemoglobin-mediated oxidative damage [1].
+Using matrix-scan, we predicted a binding sites for PRDM1, IRF8 and MAF8 in the regulatory region, annotated with chromHMM in this study, of  theCD163 gene.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="873" y="1292" style="Mac"/>
+    </node>
+    <node id="CD206" maxvalue="1">
+      <value val="1">
+        <exp str="MAFB &amp; IRF8 &amp; USF1 &amp; !PRDM1"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P22897"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>Macrophage mannose receptor 1 [1], expressed in macrophage [2]. 
+CD206 mediates the endocytosis of glycoproteins by macrophages. 
+CD206 binds both sulfated and non-sulfated polysaccharide chains [1].
+Using matrix-scan, we predicted binding sites for MAFB, IRF8, USF1, and PRDM1 in the regulatory region, annotated with chromHMM in this study, of the CD206 gene.</comment>
+      </annotation>
+      <nodevisualsetting x="682" y="1307" style="Mac"/>
+    </node>
+    <node id="MERTK" maxvalue="1">
+      <value val="1">
+        <exp str="IRF8 &amp; MAFB"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q12866"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/29262348"/>
+        </linklist>
+        <comment>Tyrosine-protein kinase Mer [1], expressed in macrophages [2].
+MERTK transduces signals from the extracellular matrix into the cytoplasm by binding to several ligands including LGALS3, TUB, TULP1 or GAS6.  It regulates many physiological processes including cell survival, migration, differentiation, and phagocytosis of apoptotic cells [1]. 
+Using matrix-scan, we predicted binding sites for IRF8, and MAFB in the regulatory region, annotated with chromHMM in this study, of the MERTK gene.</comment>
+      </annotation>
+      <nodevisualsetting x="531" y="1299" style="Mac"/>
+    </node>
+    <node id="CCDC151" maxvalue="1">
+      <value val="1">
+        <exp str="PU1:1 &amp; AP1 &amp; CEBPb"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/A5D8V7"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/28093525"/>
+        </linklist>
+        <comment>Coiled-coil domain-containing protein 115 [1], expressed in macrophages [2].
+Ciliary protein involved in outer dynein arm assembly and required for motile cilia function [1].
+Using matrix-scan, we predicted TFBS for PU.1, CEBPB, and AP1 in the regulatory region, annotated with chromHMM in this study, of the CCDC151 coding gene.
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="34" y="1019" style="Mac"/>
+    </node>
+    <node id="BCL2" maxvalue="1">
+      <value val="1">
+        <exp str="!JNK &amp; STAT3:2"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/P10415"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/30578415"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+        </linklist>
+        <comment>Apoptosis regulator Bcl-2 [1].
+Bcl-2 suppresses apoptosis in a variety of cell systems including factor-dependent lymphohematopoietic and neural cells. Bcl-2 regulates cell death by controlling the mitochondrial membrane permeability. It is involves in a feedback loop system with caspases. It inhibits caspase activity either by preventing the release of cytochrome c from the mitochondria, and/or by binding to the apoptosis-activating factor (APAF-1) [1].
+GM CSF  induces autophagy by activating JNK and, subsequently, the release of Beclin1 from Bcl2 during monocyte differentiation [2].
+STAT3 blocks the formation of autophagosomes by driving increased expression of antiautophagic genes Bcl2, Bcl2l1 and Mcl1 and suppression of the proautophagic gene Becn1, which encodes beclin 1 [3].</comment>
+      </annotation>
+      <nodevisualsetting x="1367" y="629" style=""/>
+    </node>
+    <node id="BECN1" maxvalue="1">
+      <value val="1">
+        <exp str="!STAT3 &amp; !BCL2 &amp; JNK"/>
+      </value>
+      <annotation>
+        <linklist>
+          <link xlink:href="https://www.uniprot.org/uniprot/Q14457"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/22323450"/>
+          <link xlink:href="https://pubmed.ncbi.nlm.nih.gov/30578415"/>
+        </linklist>
+        <comment>Beclin-1 [1]. 
+Plays a central role in autophagy and acts as core subunit of the PI3K complex that mediates formation of phosphatidylinositol 3-phosphate. Different complex forms play a role in multiple membrane trafficking pathways: PI3KC3-C1 is involved in initiation of autophagosomes, wjile PI3KC3-C2 plays a role in maturation of autophagosomes and endocytosis [1].
+GM CSF presumably induces autophagy by activating JNK, leading to the release of Beclin1 during monocyte differentiation [2].
+STAT3 blocks the formation of autophagosomes by driving increased expression of antiautophagic genes Bcl2, Bcl2l1 and Mcl1 and suppressing the proautophagic gene Becn1, which encodes beclin 1 [3].
+</comment>
+      </annotation>
+      <nodevisualsetting x="1414" y="890" style=""/>
+    </node>
+    <edge id="ERK:NR4A1" from="ERK" to="NR4A1" minvalue="1" sign="positive">
+      <edgevisualsetting points="856,461" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ERK:CREB" from="ERK" to="CREB" minvalue="1" sign="positive">
+      <edgevisualsetting points="637,592" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ERK:TAU" from="ERK" to="TAU" minvalue="1" sign="positive">
+      <edgevisualsetting points="1515,443" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:CPLA2" from="ERK" to="CPLA2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1513,433" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:cMYC" from="ERK" to="cMYC" minvalue="1" sign="positive">
+      <edgevisualsetting points="41,445" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:FOS" from="ERK" to="FOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="649,636" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ERK:PU1" from="ERK" to="PU1" minvalue="1" sign="positive">
+      <edgevisualsetting points="453,451" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ERK:DUSP6" from="ERK" to="DUSP6" minvalue="1" sign="positive">
+      <edgevisualsetting points="663,396" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ERK:AhR" from="ERK" to="AhR" minvalue="1" sign="negative">
+      <edgevisualsetting points="1006,456" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ERK:CCL2" from="ERK" to="CCL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="804,467" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:ELK4" from="ERK" to="ELK4" minvalue="1" sign="positive">
+      <edgevisualsetting points="962,450 1288,447" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:JNK" from="ERK" to="JNK" minvalue="1" sign="positive">
+      <edgevisualsetting points="630,492" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ERK:MEK1" from="ERK" to="MEK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="627,428 627,383" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="NFKB2:CD83" from="NFKB2" to="CD83" minvalue="1" sign="positive">
+      <edgevisualsetting points="597,1018" anchor="NE" style=""/>
+    </edge>
+    <edge id="PTPN1:JAK2" from="PTPN1" to="JAK2" minvalue="1" sign="negative">
+      <edgevisualsetting points="433,166" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PTEN:PIP3" from="PTEN" to="PIP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="420,255" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="RAF:MEK1" from="RAF" to="MEK1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="USF1:CD206" from="USF1" to="CD206" minvalue="1" sign="positive">
+      <edgevisualsetting points="728,854" anchor="NE" style=""/>
+    </edge>
+    <edge id="USF1:AhR" from="USF1" to="AhR" minvalue="1" sign="positive">
+      <edgevisualsetting points="418,731" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="USF1:SHP1" from="USF1" to="SHP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="829,833" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="USF1:BATF3" from="USF1" to="BATF3" minvalue="1" sign="positive">
+      <edgevisualsetting points="706,854 842,855" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="USF1:CD226" from="USF1" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="419,900" anchor="NE" style=""/>
+    </edge>
+    <edge id="USF1:CD141" from="USF1" to="CD141" minvalue="1" sign="positive">
+      <edgevisualsetting points="604,851" anchor="NE" style=""/>
+    </edge>
+    <edge id="MEK1:MAGI1" from="MEK1" to="MAGI1" minvalue="1" sign="positive">
+      <edgevisualsetting points="419,355" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="MEK1:PTEN" from="MEK1" to="PTEN" minvalue="1" sign="positive">
+      <edgevisualsetting points="502,335" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="MEK1:ERK" from="MEK1" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting points="641,375 642,422" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ELK4:CD209" from="ELK4" to="CD209" minvalue="1" sign="positive">
+      <edgevisualsetting points="1284,1180" anchor="NE" style=""/>
+    </edge>
+    <edge id="ELK4:SLAMF1" from="ELK4" to="SLAMF1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1299,1105" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:ITGAX" from="IRF4" to="ITGAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="1257,804" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:TLR3" from="IRF4" to="TLR3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1191,809" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:IRF4" from="IRF4" to="IRF4" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="SW" style="Tick"/>
+    </edge>
+    <edge id="IRF4:TLR4" from="IRF4" to="TLR4" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD1B" from="IRF4" to="CD1B" minvalue="1" sign="positive">
+      <edgevisualsetting points="1398,780" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:AhR" from="IRF4" to="AhR" minvalue="1" sign="positive">
+      <edgevisualsetting points="872,774" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IRF4:PRDM1" from="IRF4" to="PRDM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="933,800" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IRF4:NCOR2" from="IRF4" to="NCOR2" minvalue="1" sign="positive">
+      <edgevisualsetting points="722,705" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IRF4:TLR7" from="IRF4" to="TLR7" minvalue="1" sign="positive">
+      <edgevisualsetting points="619,792" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD226" from="IRF4" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="734,1135" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD209" from="IRF4" to="CD209" minvalue="1" sign="positive">
+      <edgevisualsetting points="1160,774" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD1C" from="IRF4" to="CD1C" minvalue="1" sign="positive">
+      <edgevisualsetting points="815,812" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD1A" from="IRF4" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1211,798" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:LnC_DC" from="IRF4" to="LnC_DC" minvalue="1" sign="positive">
+      <edgevisualsetting points="730,828" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD48" from="IRF4" to="CD48" minvalue="1" sign="positive">
+      <edgevisualsetting points="522,800" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:SLAMF1" from="IRF4" to="SLAMF1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1304,805" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:DUOX1" from="IRF4" to="DUOX1" minvalue="1" sign="positive">
+      <edgevisualsetting points="777,707" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:TIMP3" from="IRF4" to="TIMP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1137,789" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD83" from="IRF4" to="CD83" minvalue="1" sign="positive">
+      <edgevisualsetting points="597,789" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF4:CD141" from="IRF4" to="CD141" minvalue="1" sign="positive">
+      <edgevisualsetting points="616,793" anchor="NE" style=""/>
+    </edge>
+    <edge id="AhR:PTPN1" from="AhR" to="PTPN1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1023,171" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AhR:NCOR2" from="AhR" to="NCOR2" minvalue="1" sign="positive">
+      <edgevisualsetting points="994,618" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AhR:IRF4" from="AhR" to="IRF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="878,765" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AhR:PRDM1" from="AhR" to="PRDM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="998,823" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AhR:CCL22" from="AhR" to="CCL22" minvalue="1" sign="positive">
+      <edgevisualsetting points="986,1210" anchor="NE" style=""/>
+    </edge>
+    <edge id="AhR:MAFB" from="AhR" to="MAFB" minvalue="1" sign="negative">
+      <edgevisualsetting points="571,753" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT3:HLA_DR" from="STAT3" to="HLA_DR" minvalue="1" sign="positive">
+      <edgevisualsetting points="907,1272" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:SOCS" from="STAT3" to="SOCS" minvalue="2" sign="positive">
+      <edgevisualsetting points="976,994" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT3:CD226" from="STAT3" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="469,1021" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:CCL2" from="STAT3" to="CCL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="899,1059" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:CD14" from="STAT3" to="CD14" minvalue="1" sign="positive">
+      <edgevisualsetting points="165,1030" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:ALOX15" from="STAT3" to="ALOX15" minvalue="1" sign="positive">
+      <edgevisualsetting points="1022,1021" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:BCL2" from="STAT3" to="BCL2" minvalue="2" sign="positive">
+      <edgevisualsetting points="1406,1000" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:BECN1" from="STAT3" to="BECN1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1467,1008" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3B:cMYC" from="GSK3B" to="cMYC" minvalue="1" sign="negative">
+      <edgevisualsetting points="88,612" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAFB:CCL22" from="MAFB" to="CCL22" minvalue="1" sign="positive">
+      <edgevisualsetting points="851,919" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAFB:CD163" from="MAFB" to="CD163" minvalue="1" sign="positive">
+      <edgevisualsetting points="926,897" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAFB:MERTK" from="MAFB" to="MERTK" minvalue="1" sign="positive">
+      <edgevisualsetting points="566,1176" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAFB:CD206" from="MAFB" to="CD206" minvalue="1" sign="positive">
+      <edgevisualsetting points="709,919" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAFB:CEBPb" from="MAFB" to="CEBPb" minvalue="1" sign="positive">
+      <edgevisualsetting points="565,968" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IL4:IL4R" from="IL4" to="IL4R" minvalue="1" sign="positive">
+      <edgevisualsetting points="997,68" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="KLF4:CD14" from="KLF4" to="CD14" minvalue="1" sign="positive">
+      <edgevisualsetting points="139,665" anchor="NE" style=""/>
+    </edge>
+    <edge id="KLF4:FOXO1" from="KLF4" to="FOXO1" minvalue="1" sign="positive">
+      <edgevisualsetting points="340,690" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="KLF4:USF1" from="KLF4" to="USF1" minvalue="1" sign="positive">
+      <edgevisualsetting points="405,697" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="KLF4:TLR8" from="KLF4" to="TLR8" minvalue="1" sign="positive">
+      <edgevisualsetting points="333,681" anchor="NE" style=""/>
+    </edge>
+    <edge id="KLF4:CCL22" from="KLF4" to="CCL22" minvalue="1" sign="positive">
+      <edgevisualsetting points="859,692" anchor="NE" style=""/>
+    </edge>
+    <edge id="KLF4:IRF8" from="KLF4" to="IRF8" minvalue="1" sign="positive">
+      <edgevisualsetting points="648,704" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="KLF4:PRDM1" from="KLF4" to="PRDM1" minvalue="1" sign="negative">
+      <edgevisualsetting points="942,689" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:ITGAX" from="PU1" to="ITGAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="1275,758" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:LnC_DC" from="PU1" to="LnC_DC" minvalue="1" sign="positive">
+      <edgevisualsetting points="490,934" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:MAFB" from="PU1" to="MAFB" minvalue="2" sign="negative">
+      <edgevisualsetting points="557,787" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:FLT3" from="PU1" to="FLT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="445,705" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:Tet2" from="PU1" to="Tet2" minvalue="1" sign="positive">
+      <edgevisualsetting points="250,754" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:KLF4" from="PU1" to="KLF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="476,705" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:USF1" from="PU1" to="USF1" minvalue="1" sign="positive">
+      <edgevisualsetting points="427,777" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:IRF8" from="PU1" to="IRF8" minvalue="1" sign="positive">
+      <edgevisualsetting points="643,776" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:CLIP1" from="PU1" to="CLIP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="460,577" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:CCDC151" from="PU1" to="CCDC151" minvalue="1" sign="positive">
+      <edgevisualsetting points="506,1038" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:TLR4" from="PU1" to="TLR4" minvalue="1" sign="positive">
+      <edgevisualsetting points="756,768" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:CD48" from="PU1" to="CD48" minvalue="2" sign="positive">
+      <edgevisualsetting points="513,1048" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:CD226" from="PU1" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="389,771" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:CD209" from="PU1" to="CD209" minvalue="1" sign="positive">
+      <edgevisualsetting points="1155,780" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:CD1C" from="PU1" to="CD1C" minvalue="1" sign="positive">
+      <edgevisualsetting points="484,1283" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:CD1A" from="PU1" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1201,744" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:FOXO1" from="PU1" to="FOXO1" minvalue="1" sign="positive">
+      <edgevisualsetting points="350,766" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:CEBPb" from="PU1" to="CEBPb" minvalue="1" sign="positive">
+      <edgevisualsetting points="619,781" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:CEBPa" from="PU1" to="CEBPa" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:IRF4" from="PU1" to="IRF4" minvalue="2" sign="positive">
+      <edgevisualsetting points="624,767" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PU1:DUOX1" from="PU1" to="DUOX1" minvalue="2" sign="positive">
+      <edgevisualsetting points="512,716" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:MAOA" from="PU1" to="MAOA" minvalue="2" sign="positive">
+      <edgevisualsetting points="1304,751" anchor="NE" style=""/>
+    </edge>
+    <edge id="PU1:DCIR" from="PU1" to="DCIR" minvalue="2" sign="positive">
+      <edgevisualsetting points="671,769" anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:CLIP1" from="mTORC1" to="CLIP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1341,552" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:PI3K" from="RAS" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="493,205" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="RAS:RAF" from="RAS" to="RAF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CIITA:HLA_DR" from="CIITA" to="HLA_DR" minvalue="1" sign="positive">
+      <edgevisualsetting points="315,1254" anchor="NE" style=""/>
+    </edge>
+    <edge id="CREB:ALOX15" from="CREB" to="ALOX15" minvalue="1" sign="positive">
+      <edgevisualsetting points="1095,603" anchor="NE" style=""/>
+    </edge>
+    <edge id="CREB:CD1A" from="CREB" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1233,598" anchor="NE" style=""/>
+    </edge>
+    <edge id="CREB:CD209" from="CREB" to="CD209" minvalue="1" sign="positive">
+      <edgevisualsetting points="1160,608" anchor="NE" style=""/>
+    </edge>
+    <edge id="CREB:CD141" from="CREB" to="CD141" minvalue="1" sign="positive">
+      <edgevisualsetting points="611,616" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:mTORC1" from="AKT" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting points="346,570" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:IKK" from="AKT" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting points="749,413" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AKT:FOXO1" from="AKT" to="FOXO1" minvalue="1" sign="negative">
+      <edgevisualsetting points="314,711" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AKT:CREB" from="AKT" to="CREB" minvalue="1" sign="positive">
+      <edgevisualsetting points="334,590" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AKT:GSK3B" from="AKT" to="GSK3B" minvalue="1" sign="negative">
+      <edgevisualsetting points="134,410" anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:MEK1" from="AKT" to="MEK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="606,397" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="ATF1:CD141" from="ATF1" to="CD141" minvalue="1" sign="positive">
+      <edgevisualsetting points="928,1089" anchor="NE" style=""/>
+    </edge>
+    <edge id="NR4A1:CD1C" from="NR4A1" to="CD1C" minvalue="1" sign="positive">
+      <edgevisualsetting points="809,673" anchor="NE" style=""/>
+    </edge>
+    <edge id="NR4A1:KLF4" from="NR4A1" to="KLF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="688,669" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="BATF3:CD226" from="BATF3" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="433,892" anchor="NE" style=""/>
+    </edge>
+    <edge id="BATF3:CD1A" from="BATF3" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1228,899" anchor="NE" style=""/>
+    </edge>
+    <edge id="BATF3:TLR8" from="BATF3" to="TLR8" minvalue="1" sign="positive">
+      <edgevisualsetting points="291,901" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5:NFKB2" from="STAT5" to="NFKB2" minvalue="1" sign="positive">
+      <edgevisualsetting points="233,1012" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5:CEBPa" from="STAT5" to="CEBPa" minvalue="1" sign="negative">
+      <edgevisualsetting points="327,970" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT5:CIITA" from="STAT5" to="CIITA" minvalue="1" sign="positive">
+      <edgevisualsetting points="209,1020" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5:CD226" from="STAT5" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="218,1134" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5:CCL2" from="STAT5" to="CCL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="224,1064" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5:CD14" from="STAT5" to="CD14" minvalue="1" sign="negative">
+      <edgevisualsetting points="157,962" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT5:KLF4" from="STAT5" to="KLF4" minvalue="1" sign="negative">
+      <edgevisualsetting points="207,674" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT5:LnC_DC" from="STAT5" to="LnC_DC" minvalue="1" sign="positive">
+      <edgevisualsetting points="480,942" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CSF2:CSF2R" from="CSF2" to="CSF2R" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JAK2:PI3K" from="JAK2" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="347,183" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JAK2:STAT5" from="JAK2" to="STAT5" minvalue="1" sign="positive">
+      <edgevisualsetting points="200,150" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JAK2:Src" from="JAK2" to="Src" minvalue="1" sign="positive">
+      <edgevisualsetting points="280,136" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JAK2:CSF2R" from="JAK2" to="CSF2R" minvalue="1" sign="positive">
+      <edgevisualsetting points="345,116" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PIP3:AKT" from="PIP3" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="342,336" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="FOS:AP1" from="FOS" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="290,624" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="LnC_DC:SHP1" from="LnC_DC" to="SHP1" minvalue="1" sign="negative">
+      <edgevisualsetting points="901,937" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="SHP1:STAT3" from="SHP1" to="STAT3" minvalue="1" sign="negative">
+      <edgevisualsetting points="911,937" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="FOXO1:CCL22" from="FOXO1" to="CCL22" minvalue="1" sign="positive">
+      <edgevisualsetting points="367,1215" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:DEC205" from="FOXO1" to="DEC205" minvalue="1" sign="positive">
+      <edgevisualsetting points="355,1088" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:CD226" from="FOXO1" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="375,1120" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:CD1C" from="FOXO1" to="CD1C" minvalue="1" sign="positive">
+      <edgevisualsetting points="318,1287" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:CCL2" from="FOXO1" to="CCL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="796,905" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:SELL" from="FOXO1" to="SELL" minvalue="1" sign="positive">
+      <edgevisualsetting points="1006,913" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:CD14" from="FOXO1" to="CD14" minvalue="1" sign="positive">
+      <edgevisualsetting points="147,922" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:CEBPa" from="FOXO1" to="CEBPa" minvalue="1" sign="negative">
+      <edgevisualsetting points="453,905" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JAK3:STAT6" from="JAK3" to="STAT6" minvalue="1" sign="positive">
+      <edgevisualsetting points="1110,470" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="NCOR2:MAOA" from="NCOR2" to="MAOA" minvalue="1" sign="positive">
+      <edgevisualsetting points="742,760" anchor="NE" style=""/>
+    </edge>
+    <edge id="NCOR2:IRF8" from="NCOR2" to="IRF8" minvalue="1" sign="negative">
+      <edgevisualsetting points="673,759" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="NCOR2:AKT" from="NCOR2" to="AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="321,648" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="NCOR2:CD1A" from="NCOR2" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1223,607" anchor="NE" style=""/>
+    </edge>
+    <edge id="NCOR2:CCL22" from="NCOR2" to="CCL22" minvalue="1" sign="positive">
+      <edgevisualsetting points="846,632" anchor="NE" style=""/>
+    </edge>
+    <edge id="NCOR2:AhR" from="NCOR2" to="AhR" minvalue="1" sign="positive">
+      <edgevisualsetting points="978,625" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JNK:JUN" from="JNK" to="JUN" minvalue="1" sign="positive">
+      <edgevisualsetting points="496,501" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JNK:BCL2" from="JNK" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting points="1403,516" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JNK:BECN1" from="JNK" to="BECN1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1460,505" anchor="NE" style=""/>
+    </edge>
+    <edge id="IKK:NFKB1_RelA" from="IKK" to="NFKB1_RelA" minvalue="1" sign="positive">
+      <edgevisualsetting points="777,233" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CEBPb:CCDC151" from="CEBPb" to="CCDC151" minvalue="1" sign="positive">
+      <edgevisualsetting points="656,1047" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPb:TLR7" from="CEBPb" to="TLR7" minvalue="1" sign="positive">
+      <edgevisualsetting points="661,1127" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPb:TLR6" from="CEBPb" to="TLR6" minvalue="1" sign="positive">
+      <edgevisualsetting points="666,1125" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPb:CD1B" from="CEBPb" to="CD1B" minvalue="1" sign="positive">
+      <edgevisualsetting points="676,1145" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPb:CD1A" from="CEBPb" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1249,982" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPb:MAFB" from="CEBPb" to="MAFB" minvalue="1" sign="positive">
+      <edgevisualsetting points="548,980" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CEBPb:CEBPb" from="CEBPb" to="CEBPb" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style="Non_functional"/>
+    </edge>
+    <edge id="JAK1:STAT3" from="JAK1" to="STAT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="919,529" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CEBPa:CD1A" from="CEBPa" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1253,992" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPa:CD1B" from="CEBPa" to="CD1B" minvalue="1" sign="positive">
+      <edgevisualsetting points="1374,1013" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPa:TLR6" from="CEBPa" to="TLR6" minvalue="1" sign="positive">
+      <edgevisualsetting points="496,1132" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPa:TLR8" from="CEBPa" to="TLR8" minvalue="1" sign="positive">
+      <edgevisualsetting points="340,988" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPa:TLR7" from="CEBPa" to="TLR7" minvalue="1" sign="positive">
+      <edgevisualsetting points="491,1249" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPa:CD226" from="CEBPa" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="452,1087" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPa:CD141" from="CEBPa" to="CD141" minvalue="1" sign="positive">
+      <edgevisualsetting points="593,998" anchor="NE" style=""/>
+    </edge>
+    <edge id="CEBPa:CEBPb" from="CEBPa" to="CEBPb" minvalue="1" sign="positive">
+      <edgevisualsetting points="549,995" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CEBPa:CEBPa" from="CEBPa" to="CEBPa" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style="Non_functional"/>
+    </edge>
+    <edge id="Src:STAT5" from="Src" to="STAT5" minvalue="1" sign="positive">
+      <edgevisualsetting points="190,216" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="DUSP6:ERK" from="DUSP6" to="ERK" minvalue="1" sign="negative">
+      <edgevisualsetting points="675,396" anchor="NE" style="Non_functional"/>
+    </edge>
+    <edge id="MAGI1:PTEN" from="MAGI1" to="PTEN" minvalue="1" sign="positive">
+      <edgevisualsetting points="419,266" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PRDM1:CD163" from="PRDM1" to="CD163" minvalue="1" sign="negative">
+      <edgevisualsetting points="935,1221" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:CD206" from="PRDM1" to="CD206" minvalue="1" sign="negative">
+      <edgevisualsetting points="968,1346" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:SELL" from="PRDM1" to="SELL" minvalue="1" sign="negative">
+      <edgevisualsetting points="992,1228" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:TLR4" from="PRDM1" to="TLR4" minvalue="1" sign="positive">
+      <edgevisualsetting points="745,873" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:TLR3" from="PRDM1" to="TLR3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1119,889" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:CD226" from="PRDM1" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="429,883" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:CD1B" from="PRDM1" to="CD1B" minvalue="1" sign="positive">
+      <edgevisualsetting points="1381,863" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:CD1A" from="PRDM1" to="CD1A" minvalue="1" sign="positive">
+      <edgevisualsetting points="1212,855" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:DEC205" from="PRDM1" to="DEC205" minvalue="1" sign="positive">
+      <edgevisualsetting points="979,1360" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:ITGAX" from="PRDM1" to="ITGAX" minvalue="1" sign="positive">
+      <edgevisualsetting points="1264,873" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL4R:JAK3" from="IL4R" to="JAK3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1101,123" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IL4R:JAK1" from="IL4R" to="JAK1" minvalue="1" sign="positive">
+      <edgevisualsetting points="896,122" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AP1:CCDC151" from="AP1" to="CCDC151" minvalue="1" sign="positive">
+      <edgevisualsetting points="100,868" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:TLR4" from="AP1" to="TLR4" minvalue="1" sign="positive">
+      <edgevisualsetting points="738,842" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:DEC205" from="AP1" to="DEC205" minvalue="1" sign="positive">
+      <edgevisualsetting points="259,1348" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:CD209" from="AP1" to="CD209" minvalue="1" sign="positive">
+      <edgevisualsetting points="267,1153" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:AP1" from="AP1" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NW" style="Non_functional"/>
+    </edge>
+    <edge id="AP1:KLF4" from="AP1" to="KLF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="298,682" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="AP1:TIMP3" from="AP1" to="TIMP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1251,825" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:CD40" from="AP1" to="CD40" minvalue="1" sign="positive">
+      <edgevisualsetting points="50,862" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:CD86" from="AP1" to="CD86" minvalue="1" sign="positive">
+      <edgevisualsetting points="51,853" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF8:KLF4" from="IRF8" to="KLF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="655,697" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IRF8:CD206" from="IRF8" to="CD206" minvalue="1" sign="positive">
+      <edgevisualsetting points="701,1222" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF8:MERTK" from="IRF8" to="MERTK" minvalue="1" sign="positive">
+      <edgevisualsetting points="681,1314" anchor="NE" style=""/>
+    </edge>
+    <edge id="IRF8:MAFB" from="IRF8" to="MAFB" minvalue="1" sign="positive">
+      <edgevisualsetting points="618,893" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IRF8:BATF3" from="IRF8" to="BATF3" minvalue="1" sign="positive">
+      <edgevisualsetting points="746,895" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IRF8:CEBPa" from="IRF8" to="CEBPa" minvalue="1" sign="negative">
+      <edgevisualsetting points="482,867" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="IRF8:CD163" from="IRF8" to="CD163" minvalue="1" sign="positive">
+      <edgevisualsetting points="914,903" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFKB1_RelA:NFKB2" from="NFKB1_RelA" to="NFKB2" minvalue="1" sign="positive">
+      <edgevisualsetting points="811,653" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFKB1_RelA:IRF4" from="NFKB1_RelA" to="IRF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="767,648" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="PI3K:PIP3" from="PI3K" to="PIP3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="JUN:AP1" from="JUN" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="SOCS:STAT3" from="SOCS" to="STAT3" minvalue="1" sign="negative">
+      <edgevisualsetting points="952,969" anchor="NE" style="Non_functional"/>
+    </edge>
+    <edge id="SHC_GRB2_mSOS:RAS" from="SHC_GRB2_mSOS" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting points="605,177" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="BCL2:BECN1" from="BCL2" to="BECN1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1426,810" anchor="NE" style=""/>
+    </edge>
+    <edge id="CSF2R:JAK2" from="CSF2R" to="JAK2" minvalue="1" sign="positive">
+      <edgevisualsetting points="358,123" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CSF2R:SHC_GRB2_mSOS" from="CSF2R" to="SHC_GRB2_mSOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="605,92" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CSF2R:IKK" from="CSF2R" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting points="765,75" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="CSF2R:Src" from="CSF2R" to="Src" minvalue="1" sign="positive">
+      <edgevisualsetting points="194,73" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT6:NFKB1_RelA" from="STAT6" to="NFKB1_RelA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1099,404" anchor="NE" style="Non_functional"/>
+    </edge>
+    <edge id="STAT6:IL4_gene" from="STAT6" to="IL4_gene" minvalue="1" sign="positive">
+      <edgevisualsetting points="1509,954" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:DUOX1" from="STAT6" to="DUOX1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1103,721" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:SLAMF1" from="STAT6" to="SLAMF1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1115,1241" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:MAOA" from="STAT6" to="MAOA" minvalue="1" sign="positive">
+      <edgevisualsetting points="1515,945" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:HLA_DR" from="STAT6" to="HLA_DR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1031,1277" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:ALOX15" from="STAT6" to="ALOX15" minvalue="1" sign="positive">
+      <edgevisualsetting points="1060,1052" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:CD83" from="STAT6" to="CD83" minvalue="1" sign="positive">
+      <edgevisualsetting points="587,940" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:CD209" from="STAT6" to="CD209" minvalue="1" sign="positive">
+      <edgevisualsetting points="1137,958" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:TIMP3" from="STAT6" to="TIMP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1350,938" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:DCIR" from="STAT6" to="DCIR" minvalue="1" sign="positive">
+      <edgevisualsetting points="694,948" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:TLR8" from="STAT6" to="TLR8" minvalue="1" sign="positive">
+      <edgevisualsetting points="329,954" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:TLR6" from="STAT6" to="TLR6" minvalue="1" sign="positive">
+      <edgevisualsetting points="1043,1113" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:CD226" from="STAT6" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="442,935" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:CD1C" from="STAT6" to="CD1C" minvalue="1" sign="positive">
+      <edgevisualsetting points="1108,1281" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:ATF1" from="STAT6" to="ATF1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1071,980" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:SELL" from="STAT6" to="SELL" minvalue="1" sign="positive">
+      <edgevisualsetting points="1051,1028" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT6:NR4A1" from="STAT6" to="NR4A1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1074,653" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT6:PU1" from="STAT6" to="PU1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1064,709 500,712" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT6:AhR" from="STAT6" to="AhR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1045,838" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT6:IRF4" from="STAT6" to="IRF4" minvalue="1" sign="positive">
+      <edgevisualsetting points="1034,794" anchor="NE" style="Tick"/>
+    </edge>
+    <edge id="STAT6:NCOR2" from="STAT6" to="NCOR2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1086,612" anchor="NE" style="Tick"/>
+    </edge>
+    <annotation>
+      <linklist>
+        <link xlink:href="https://www.ncbi.nlm.nih.gov/pubmed/8145033"/>
+        <link xlink:href="http://rsat.eu"/>
+        <link xlink:href="http://jaspar.genereg.net/"/>
+      </linklist>
+      <comment>Sallusto and Lazavecchia (1994) describe for the first time a protocol enabling the differentiate human monocytes into dendritic cells (moDC)  in vitro, in the presence of granulocyte macrophage colony stimulating factor (CSF2) and interleukin 4 (IL4) [1].
+This model integrates current data on the signaling pathways involved in this differentiation process, together with relevant transcription factor ChIP-seq data
+In particular, we consider novel putative regulatory interactions based on the analysis of target gene promoters, using the tool matrix-scan from the RSAT software suite [2] and selected  transcriptional factor binding profiles from the JASPAR database [3]</comment>
+    </annotation>
+  </graph>
+</gxl>

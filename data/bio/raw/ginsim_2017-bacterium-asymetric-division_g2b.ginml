@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="g2b_binary" nodeorder="CtrAb DivK PleC DivJ DivL CckA ChpT CpdR ClpXP-RcdA">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="45" height="25"/>
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="45" height="25"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="CtrAb" maxvalue="1">
+      <value val="1">
+        <exp str="ChpT &amp; !ClpXP-RcdA"/>
+      </value>
+      <value val="0">
+        <exp str="(!ChpT &amp; !ClpXP-RcdA) | ((ChpT | !ChpT) &amp; ClpXP-RcdA)"/>
+      </value>
+      <nodevisualsetting x="824" y="158" style=""/>
+    </node>
+    <node id="DivK" maxvalue="1">
+      <value val="1">
+        <exp str="DivJ &amp; !PleC"/>
+      </value>
+      <value val="0">
+        <exp str="!DivJ | PleC"/>
+      </value>
+      <nodevisualsetting x="679" y="160" style=""/>
+    </node>
+    <node id="PleC" maxvalue="1">
+      <value val="1">
+        <exp str="!DivK"/>
+      </value>
+      <value val="0">
+        <exp str="DivK"/>
+      </value>
+      <nodevisualsetting x="611" y="93" style=""/>
+    </node>
+    <node id="DivJ" maxvalue="1">
+      <value val="1">
+        <exp str="DivK &amp; !PleC"/>
+      </value>
+      <value val="0">
+        <exp str="!DivK | PleC"/>
+      </value>
+      <nodevisualsetting x="677" y="94" style=""/>
+    </node>
+    <node id="DivL" maxvalue="1">
+      <value val="1">
+        <exp str="!DivK"/>
+      </value>
+      <value val="0">
+        <exp str="DivK"/>
+      </value>
+      <nodevisualsetting x="750" y="160" style=""/>
+    </node>
+    <node id="CckA" maxvalue="1">
+      <value val="1">
+        <exp str="DivL"/>
+      </value>
+      <value val="0">
+        <exp str="!DivL"/>
+      </value>
+      <nodevisualsetting x="750" y="95" style=""/>
+    </node>
+    <node id="ChpT" maxvalue="1">
+      <value val="1">
+        <exp str="CckA"/>
+      </value>
+      <value val="0">
+        <exp str="!CckA"/>
+      </value>
+      <nodevisualsetting x="822" y="95" style=""/>
+    </node>
+    <node id="CpdR" maxvalue="1">
+      <value val="1">
+        <exp str="ChpT"/>
+      </value>
+      <value val="0">
+        <exp str="!ChpT"/>
+      </value>
+      <nodevisualsetting x="909" y="96" style=""/>
+    </node>
+    <node id="ClpXP-RcdA" maxvalue="1">
+      <value val="1">
+        <exp str="!CpdR"/>
+      </value>
+      <value val="0">
+        <exp str="CpdR"/>
+      </value>
+      <nodevisualsetting x="909" y="157" style=""/>
+    </node>
+    <edge id="DivK:DivL" from="DivK" to="DivL" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="DivK:DivJ" from="DivK" to="DivJ" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="DivK:PleC" from="DivK" to="PleC" minvalue="1" sign="negative">
+      <edgevisualsetting points="680,168 667,168 641,129" style=""/>
+    </edge>
+    <edge id="CckA:ChpT" from="CckA" to="ChpT" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="PleC:DivJ" from="PleC" to="DivJ" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="PleC:DivK" from="PleC" to="DivK" minvalue="1" sign="negative">
+      <edgevisualsetting points="626,120 628,135 658,177" style=""/>
+    </edge>
+    <edge id="ChpT:CpdR" from="ChpT" to="CpdR" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="ChpT:CtrAb" from="ChpT" to="CtrAb" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="DivL:CckA" from="DivL" to="CckA" minvalue="1" sign="positive">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="DivJ:DivK" from="DivJ" to="DivK" minvalue="1" sign="positive">
+      <edgevisualsetting points="712,152" style=""/>
+    </edge>
+    <edge id="ClpXP-RcdA:CtrAb" from="ClpXP-RcdA" to="CtrAb" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="CpdR:ClpXP-RcdA" from="CpdR" to="ClpXP-RcdA" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+  </graph>
+</gxl>

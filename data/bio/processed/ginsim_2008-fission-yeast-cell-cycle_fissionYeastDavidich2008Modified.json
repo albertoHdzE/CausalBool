@@ -1,0 +1,310 @@
+{
+  "name": "ginsim_2008-fission-yeast-cell-cycle_fissionYeastDavidich2008Modified",
+  "nodes": [
+    "Cdc25",
+    "Start",
+    "Cdc2_Cdc13",
+    "Ste9",
+    "PP",
+    "Wee1_Mik1",
+    "Slp1",
+    "Rum1",
+    "SK"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Cdc25": "(Cdc2_Cdc13:1 & !PP) | Cdc2_Cdc13:2",
+    "Cdc2_Cdc13": "!Ste9 & !Slp1 & !Rum1 & (!Cdc25 | Wee1_Mik1)",
+    "Ste9": "!(SK | Cdc2_Cdc13) | PP",
+    "PP": "Slp1",
+    "Wee1_Mik1": "PP | !Cdc2_Cdc13",
+    "Slp1": "Cdc2_Cdc13",
+    "Rum1": "!(SK | Cdc2_Cdc13) | PP",
+    "SK": "Start"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "Cdc25": {
+      "inputs": [
+        "Cdc2_Cdc13",
+        "PP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Cdc2_Cdc13": {
+      "inputs": [
+        "Cdc25",
+        "Ste9",
+        "Wee1_Mik1",
+        "Slp1",
+        "Rum1"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Ste9": {
+      "inputs": [
+        "Cdc2_Cdc13",
+        "PP",
+        "SK"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "PP": {
+      "inputs": [
+        "Slp1"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Wee1_Mik1": {
+      "inputs": [
+        "Cdc2_Cdc13",
+        "PP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Slp1": {
+      "inputs": [
+        "Cdc2_Cdc13"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Rum1": {
+      "inputs": [
+        "Cdc2_Cdc13",
+        "PP",
+        "SK"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "SK": {
+      "inputs": [
+        "Start"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 5,
+    "IDENTITY": 3
+  },
+  "n": 9,
+  "n_edges": 18,
+  "edges": [
+    {
+      "source": "Cdc25",
+      "target": "Cdc2_Cdc13",
+      "type": "activation"
+    },
+    {
+      "source": "Start",
+      "target": "SK",
+      "type": "activation"
+    },
+    {
+      "source": "Cdc2_Cdc13",
+      "target": "Cdc25",
+      "type": "activation"
+    },
+    {
+      "source": "Cdc2_Cdc13",
+      "target": "Cdc25",
+      "type": "activation"
+    },
+    {
+      "source": "Cdc2_Cdc13",
+      "target": "Ste9",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdc2_Cdc13",
+      "target": "Rum1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdc2_Cdc13",
+      "target": "Wee1_Mik1",
+      "type": "inhibition"
+    },
+    {
+      "source": "Cdc2_Cdc13",
+      "target": "Slp1",
+      "type": "activation"
+    },
+    {
+      "source": "Ste9",
+      "target": "Cdc2_Cdc13",
+      "type": "inhibition"
+    },
+    {
+      "source": "PP",
+      "target": "Ste9",
+      "type": "activation"
+    },
+    {
+      "source": "PP",
+      "target": "Rum1",
+      "type": "activation"
+    },
+    {
+      "source": "PP",
+      "target": "Wee1_Mik1",
+      "type": "activation"
+    },
+    {
+      "source": "PP",
+      "target": "Cdc25",
+      "type": "inhibition"
+    },
+    {
+      "source": "Wee1_Mik1",
+      "target": "Cdc2_Cdc13",
+      "type": "inhibition"
+    },
+    {
+      "source": "Slp1",
+      "target": "PP",
+      "type": "activation"
+    },
+    {
+      "source": "Slp1",
+      "target": "Cdc2_Cdc13",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rum1",
+      "target": "Cdc2_Cdc13",
+      "type": "inhibition"
+    },
+    {
+      "source": "SK",
+      "target": "Ste9",
+      "type": "inhibition"
+    },
+    {
+      "source": "SK",
+      "target": "Rum1",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    1,
+    1,
+    5,
+    1,
+    4,
+    1,
+    2,
+    1,
+    2
+  ]
+}

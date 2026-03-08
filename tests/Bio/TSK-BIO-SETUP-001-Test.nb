@@ -1,0 +1,62 @@
+(* Mathematica Unit Test for BioLink *)
+
+(* Determine Project Root - Assuming script is run from project root *)
+projectRoot = Directory[];
+Print["Running from: ", projectRoot];
+
+(* Add Package Path *)
+(* Package is in src/integration *)
+packagePath = FileNameJoin[{projectRoot, "src", "integration"}];
+AppendTo[$Path, packagePath];
+Print["Added to $Path: ", packagePath];
+
+(* Test 1: Load Package *)
+Get["BioLink.m"];
+
+If[Length[Names["Integration`BioLink`*"]] > 0,
+    Print["[PASS] Package Loaded Successfully"],
+    Print["[FAIL] Package Failed to Load. Path: ", $Path]; Exit[1]
+];
+
+(* Test 2: Write Test JSON from Mathematica (simulate external file) *)
+testData = <|
+    "nodes" -> {"G1", "G2"},
+    "cm" -> {{0, 1}, {1, 0}},
+    "logic" -> <|"G1" -> "OR", "G2" -> "AND"|>
+|>;
+
+(* Use BioBridgePath from the package *)
+processedDir = Integration`BioLink`BioBridgePath[];
+Print["Processed Dir: ", processedDir];
+
+If[!DirectoryQ[processedDir], 
+    Print["Creating directory: ", processedDir];
+    CreateDirectory[processedDir, CreateIntermediateDirectories->True]
+];
+
+testFile = FileNameJoin[{processedDir, "math_test.json"}];
+Export[testFile, testData, "JSON"];
+
+(* Test 3: Import via BioLink *)
+(* Note: ImportNetworkJSON handles full path or relative to BioBridgePath *)
+imported = Integration`BioLink`ImportNetworkJSON["math_test.json"];
+
+If[imported["nodes"] === {"G1", "G2"} && imported["logic"]["G1"] === "OR",
+    Print["[PASS] ImportJSON Correct"],
+    Print["[FAIL] ImportJSON Incorrect: ", imported]; Exit[1]
+];
+
+(* Test 4: Export Results *)
+resultData = <|"D" -> 10.5, "p_value" -> 0.001|>;
+outFile = Integration`BioLink`ExportResultsJSON["math_test_results.json", resultData];
+
+If[FileExistsQ[outFile],
+    Print["[PASS] ExportResultsJSON File Created"],
+    Print["[FAIL] ExportResultsJSON File Not Created"]; Exit[1]
+];
+
+(* Cleanup *)
+DeleteFile[testFile];
+DeleteFile[outFile];
+
+Print["[ALL TESTS PASSED]"];

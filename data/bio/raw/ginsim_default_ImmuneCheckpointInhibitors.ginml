@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="supp_mat_model_ICI" nodeorder="IFNGR IL27R TGFbR PD1 CTLA4 NFkB MAPKs Ca_NFAT PI3K_AKT Tbet FOXP3 FOXO1 TCR CD4 CD28 LAT_complex VAV PLCG PKC_teta TIM3 TIGIT TNFRs ICOS TRAFs CK2 PTEN PP2A SHIP SHP LAG3 AP1 YY1 NFAT LCK_FYN STAT1 SMAD2_3 SMAD7 STAT3 NFIL3 GRB2 CD80_86 LAG3_L TIM3_L TIGIT_L PD1_L MHCII MHCI Antigen CD8 GSK3 TNFRs_L ICOS_L IFNG IL27 TGFb Proliferation_Survival Treg IL2 Th1_CTL CD226 PRDM1 MAF anti_CTLA4 IL12R STAT4 IL12">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="95" height="50"/>
+    <nodestyle name="Node style" background="#cccccc" shape="RECTANGLE" width="120"/>
+    <nodestyle name="Node style 2" background="#999999" shape="RECTANGLE" width="130"/>
+    <nodestyle name="Node style 3" background="#999999" shape="ELLIPSE" width="70" height="100"/>
+    <nodestyle name="Node style 4" background="#cccccc" width="55" height="85"/>
+    <nodestyle name="Node style 5" background="#ff0000" width="55" height="95"/>
+    <nodestyle name="Node style 6" background="#ff0033" width="95"/>
+    <nodestyle name="Node style 7" background="#ffffff" width="60" height="95"/>
+    <nodestyle name="Node style 8" background="#00cc00" width="95" height="60"/>
+    <nodestyle name="Node style 9" background="#ffcccc"/>
+    <nodestyle name="Node style 10" background="#ffffff"/>
+    <nodestyle name="Node style 11" background="#ccccff" shape="RECTANGLE" width="235" height="50"/>
+    <nodestyle name="Node style 8" background="#00cc00" width="110"/>
+    <nodestyle name="Node style 15" background="#0099ff" width="80"/>
+    <nodestyle name="Node style 16" background="#ffcc00" width="75"/>
+    <nodestyle name="Node style 9" background="#ffcccc" width="105"/>
+    <nodestyle name="Node style 10" background="#ccffcc" width="80"/>
+    <nodestyle name="Node style 4" background="#cccccc" width="55" height="100"/>
+    <nodestyle name="Node style 22" background="#99ccff" width="65"/>
+    <nodestyle name="Node style 10" background="#ccffcc"/>
+    <nodestyle name="Node style 9" background="#ffcccc"/>
+    <nodestyle name="Node style 12"/>
+    <nodestyle name="Node style 4" background="#cccccc" width="55" height="85"/>
+    <nodestyle name="Node style 10" background="#ccffcc"/>
+    <nodestyle name="Node style" background="#cccccc" shape="RECTANGLE" width="140"/>
+    <nodestyle name="Node style 9" background="#ffcccc"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="2" properties="positive:#00cc33 negative:#ff0000 dual:#0000c8"/>
+    <edgestyle name="Edge style" line_width="2"/>
+    <edgestyle name="Edge style 2" line_width="2"/>
+    <edgestyle name="Edge style 3"/>
+    <edgestyle name="Edge style 4"/>
+    <edgestyle name="Edge style 5" line_width="7"/>
+    <edgestyle name="Edge style 6" color="#33cc00" line_width="5"/>
+    <edgestyle name="Edge style 6" color="#ff0000" line_width="6"/>
+    <node id="IFNGR" maxvalue="1">
+      <value val="1">
+        <exp str="IFNG"/>
+      </value>
+      <nodevisualsetting x="1728" y="1352" style="Node style 9"/>
+    </node>
+    <node id="IL27R" maxvalue="1">
+      <value val="1">
+        <exp str="IL27"/>
+      </value>
+      <nodevisualsetting x="1855" y="1490" style="Node style 9"/>
+    </node>
+    <node id="TGFbR" maxvalue="1">
+      <value val="1">
+        <exp str="TGFb"/>
+      </value>
+      <nodevisualsetting x="636" y="1345" style="Node style 9"/>
+    </node>
+    <node id="PD1" maxvalue="1">
+      <value val="1">
+        <exp str="PD1_L &amp; (Ca_NFAT | NFAT | YY1 | AP1 | FOXO1 | MAF | PRDM1) &amp; !Tbet"/>
+      </value>
+      <nodevisualsetting x="606" y="1084" style="Node style 8"/>
+    </node>
+    <node id="CTLA4" maxvalue="1">
+      <value val="1">
+        <exp str="CD80_86 &amp; (FOXP3 | Ca_NFAT) &amp; !NFIL3 &amp; !anti_CTLA4"/>
+      </value>
+      <nodevisualsetting x="616" y="206" style="Node style 8"/>
+    </node>
+    <node id="NFkB" maxvalue="1">
+      <value val="1">
+        <exp str="PKC_teta | TRAFs | LAT_complex"/>
+      </value>
+      <nodevisualsetting x="1027" y="842" style="Node style"/>
+    </node>
+    <node id="MAPKs" maxvalue="1">
+      <value val="1">
+        <exp str="ICOS | VAV | LAT_complex"/>
+      </value>
+      <nodevisualsetting x="1251" y="840" style="Node style"/>
+    </node>
+    <node id="Ca_NFAT" maxvalue="1">
+      <value val="1">
+        <exp str="(PLCG | ICOS) &amp; !LAG3"/>
+      </value>
+      <nodevisualsetting x="1417" y="839" style="Node style"/>
+    </node>
+    <node id="PI3K_AKT" maxvalue="1">
+      <value val="1">
+        <exp str="(TRAFs | ICOS | CD28 | LAT_complex) &amp; !PP2A &amp; !SHIP &amp; !PTEN"/>
+      </value>
+      <nodevisualsetting x="724" y="846" style="Node style"/>
+    </node>
+    <node id="Tbet" maxvalue="1">
+      <value val="1">
+        <exp str="STAT1 | STAT4 | !GSK3"/>
+      </value>
+      <nodevisualsetting x="847" y="1024" style=""/>
+    </node>
+    <node id="FOXP3" maxvalue="1">
+      <value val="1">
+        <exp str="!PI3K_AKT &amp; !NFIL3 &amp; (NFkB | CTLA4 | Ca_NFAT | AP1 | MAPKs | FOXO1 | STAT1 | SMAD2_3) &amp; !STAT3"/>
+      </value>
+      <nodevisualsetting x="994" y="1281" style="Node style 10"/>
+    </node>
+    <node id="FOXO1" maxvalue="1">
+      <value val="1">
+        <exp str="!PI3K_AKT"/>
+      </value>
+      <nodevisualsetting x="684" y="945" style="Node style 10"/>
+    </node>
+    <node id="TCR" maxvalue="1">
+      <value val="1">
+        <exp str="Antigen &amp; !SHP &amp; LCK_FYN"/>
+      </value>
+      <nodevisualsetting x="1272" y="199" style=""/>
+    </node>
+    <node id="CD4" maxvalue="1">
+      <value val="1">
+        <exp str="MHCII &amp; !LAG3"/>
+      </value>
+      <nodevisualsetting x="1140" y="227" style=""/>
+    </node>
+    <node id="CD28" maxvalue="1">
+      <value val="1">
+        <exp str="!CTLA4 &amp; CD80_86 &amp; !SHP"/>
+      </value>
+      <nodevisualsetting x="785" y="212" style="Node style 6"/>
+    </node>
+    <node id="LAT_complex" maxvalue="1">
+      <value val="1">
+        <exp str="TCR"/>
+      </value>
+      <nodevisualsetting x="1267" y="505" style=""/>
+    </node>
+    <node id="VAV" maxvalue="1">
+      <value val="1">
+        <exp str="GRB2 | CD226"/>
+      </value>
+      <nodevisualsetting x="880" y="700" style=""/>
+    </node>
+    <node id="PLCG" maxvalue="1">
+      <value val="1">
+        <exp str="LAT_complex"/>
+      </value>
+      <nodevisualsetting x="1359" y="560" style=""/>
+    </node>
+    <node id="PKC_teta" maxvalue="1">
+      <value val="1">
+        <exp str="VAV"/>
+      </value>
+      <nodevisualsetting x="1014" y="758" style=""/>
+    </node>
+    <node id="TIM3" maxvalue="1">
+      <value val="1">
+        <exp str="TIM3_L &amp; (Tbet | MAF | PRDM1 | NFIL3)"/>
+      </value>
+      <nodevisualsetting x="489" y="788" style="Node style 8"/>
+    </node>
+    <node id="TIGIT" maxvalue="1">
+      <value val="1">
+        <exp str="(FOXP3 | MAF | PRDM1) &amp; TIGIT_L"/>
+      </value>
+      <nodevisualsetting x="432" y="1075" style="Node style 8"/>
+    </node>
+    <node id="TNFRs" maxvalue="1">
+      <value val="1">
+        <exp str="(NFkB | MAPKs | FOXP3 | AP1) &amp; !Ca_NFAT &amp; TNFRs_L &amp; !NFIL3"/>
+      </value>
+      <nodevisualsetting x="1709" y="705" style="Node style 6"/>
+    </node>
+    <node id="ICOS" maxvalue="1">
+      <value val="1">
+        <exp str="(NFAT | FOXP3 | MAPKs | Ca_NFAT | PRDM1) &amp; ICOS_L &amp; !NFIL3"/>
+      </value>
+      <nodevisualsetting x="1923" y="894" style="Node style 6"/>
+    </node>
+    <node id="TRAFs" maxvalue="1">
+      <value val="1">
+        <exp str="TNFRs"/>
+      </value>
+      <nodevisualsetting x="1348" y="932" style="Node style 9"/>
+    </node>
+    <node id="CK2" maxvalue="1">
+      <value val="1">
+        <exp str="!PD1"/>
+      </value>
+      <nodevisualsetting x="562" y="988" style="Node style 10"/>
+    </node>
+    <node id="PTEN" maxvalue="1">
+      <value val="1">
+        <exp str="!CK2"/>
+      </value>
+      <nodevisualsetting x="569" y="905" style="Node style 10"/>
+    </node>
+    <node id="PP2A" maxvalue="1">
+      <value val="1">
+        <exp str="CTLA4"/>
+      </value>
+      <nodevisualsetting x="536" y="457" style="Node style 10"/>
+    </node>
+    <node id="SHIP" maxvalue="1">
+      <value val="1">
+        <exp str="TIGIT"/>
+      </value>
+      <nodevisualsetting x="554" y="661" style="Node style 10"/>
+    </node>
+    <node id="SHP" maxvalue="1">
+      <value val="1">
+        <exp str="PD1"/>
+      </value>
+      <nodevisualsetting x="698" y="618" style="Node style 10"/>
+    </node>
+    <node id="LAG3" maxvalue="1">
+      <value val="1">
+        <exp str="(YY1 | MAF | PRDM1) &amp; !Tbet &amp; (LAG3_L | MHCII)"/>
+      </value>
+      <nodevisualsetting x="1096" y="543" style="Node style 8"/>
+    </node>
+    <node id="AP1" maxvalue="1">
+      <value val="1">
+        <exp str="MAPKs"/>
+      </value>
+      <nodevisualsetting x="1303" y="1062" style=""/>
+    </node>
+    <node id="YY1" maxvalue="1">
+      <value val="1">
+        <exp str="MAPKs"/>
+      </value>
+      <nodevisualsetting x="1088" y="1028" style=""/>
+    </node>
+    <node id="NFAT" maxvalue="1">
+      <value val="1">
+        <exp str="Ca_NFAT &amp; !GSK3"/>
+      </value>
+      <nodevisualsetting x="1577" y="993" style=""/>
+    </node>
+    <node id="LCK_FYN" maxvalue="1">
+      <value val="1">
+        <exp str="(CD4 | CD8) &amp; !TIM3"/>
+      </value>
+      <nodevisualsetting x="976" y="391" style=""/>
+    </node>
+    <node id="STAT1" maxvalue="1">
+      <value val="1">
+        <exp str="IFNGR | IL27R"/>
+      </value>
+      <nodevisualsetting x="1316" y="1374" style="Node style 9"/>
+    </node>
+    <node id="SMAD2_3" maxvalue="1">
+      <value val="1">
+        <exp str="!SMAD7 &amp; TGFbR"/>
+      </value>
+      <nodevisualsetting x="637" y="1415" style="Node style 9"/>
+    </node>
+    <node id="SMAD7" maxvalue="1">
+      <value val="1">
+        <exp str="!FOXP3"/>
+      </value>
+      <nodevisualsetting x="796" y="1382" style="Node style 9"/>
+    </node>
+    <node id="STAT3" maxvalue="1">
+      <value val="1">
+        <exp str="IL27R"/>
+      </value>
+      <nodevisualsetting x="1596" y="1576" style="Node style 9"/>
+    </node>
+    <node id="NFIL3" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3 &amp; !SMAD2_3"/>
+      </value>
+      <nodevisualsetting x="843" y="1590" style="Node style 9"/>
+    </node>
+    <node id="GRB2" maxvalue="1">
+      <value val="1">
+        <exp str="CD28"/>
+      </value>
+      <nodevisualsetting x="866" y="390" style=""/>
+    </node>
+    <node id="CD80_86" maxvalue="1" input="true">
+      <nodevisualsetting x="715" y="15" style="Node style 3"/>
+    </node>
+    <node id="LAG3_L" maxvalue="1" input="true">
+      <nodevisualsetting x="241" y="491" style="Node style 3"/>
+    </node>
+    <node id="TIM3_L" maxvalue="1" input="true">
+      <nodevisualsetting x="246" y="771" style="Node style 3"/>
+    </node>
+    <node id="TIGIT_L" maxvalue="1" input="true">
+      <nodevisualsetting x="243" y="1087" style="Node style 3"/>
+    </node>
+    <node id="PD1_L" maxvalue="1" input="true">
+      <nodevisualsetting x="251" y="1228" style="Node style 3"/>
+    </node>
+    <node id="MHCII" maxvalue="1" input="true">
+      <nodevisualsetting x="1148" y="17" style="Node style 3"/>
+    </node>
+    <node id="MHCI" maxvalue="1" input="true">
+      <nodevisualsetting x="1398" y="18" style="Node style 3"/>
+    </node>
+    <node id="Antigen" maxvalue="1" input="true">
+      <nodevisualsetting x="1269" y="19" style="Node style 3"/>
+    </node>
+    <node id="CD8" maxvalue="1">
+      <value val="1">
+        <exp str="MHCI"/>
+      </value>
+      <nodevisualsetting x="1411" y="252" style=""/>
+    </node>
+    <node id="GSK3" maxvalue="1">
+      <value val="1">
+        <exp str="!PI3K_AKT"/>
+      </value>
+      <nodevisualsetting x="921" y="848" style="Node style 10"/>
+    </node>
+    <node id="TNFRs_L" maxvalue="1" input="true">
+      <nodevisualsetting x="2078" y="677" style="Node style 3"/>
+    </node>
+    <node id="ICOS_L" maxvalue="1" input="true">
+      <nodevisualsetting x="2081" y="859" style="Node style 3"/>
+    </node>
+    <node id="IFNG" maxvalue="1" input="true">
+      <nodevisualsetting x="2128" y="1327" style="Node style 3"/>
+    </node>
+    <node id="IL27" maxvalue="1" input="true">
+      <nodevisualsetting x="2129" y="1469" style="Node style 3"/>
+    </node>
+    <node id="TGFb" maxvalue="1" input="true">
+      <nodevisualsetting x="250" y="1341" style="Node style 3"/>
+    </node>
+    <node id="Proliferation_Survival" maxvalue="1">
+      <value val="1">
+        <exp str="IL2 &amp; PI3K_AKT"/>
+      </value>
+      <nodevisualsetting x="1130" y="1819" style="Node style 2"/>
+    </node>
+    <node id="Treg" maxvalue="1">
+      <value val="1">
+        <exp str="FOXP3"/>
+      </value>
+      <nodevisualsetting x="546" y="1812" style="Node style 2"/>
+    </node>
+    <node id="IL2" maxvalue="1">
+      <value val="1">
+        <exp str="NFAT &amp; NFkB &amp; AP1"/>
+      </value>
+      <nodevisualsetting x="1138" y="1672" style="Node style 9"/>
+    </node>
+    <node id="Th1_CTL" maxvalue="1">
+      <value val="1">
+        <exp str="Tbet &amp; Ca_NFAT"/>
+      </value>
+      <nodevisualsetting x="1441" y="1812" style="Node style 2"/>
+    </node>
+    <node id="CD226" maxvalue="1">
+      <value val="1">
+        <exp str="TIGIT_L &amp; !TIGIT"/>
+      </value>
+      <nodevisualsetting x="1636" y="1145" style="Node style 6"/>
+    </node>
+    <node id="PRDM1" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3"/>
+      </value>
+      <nodevisualsetting x="1056" y="1540" style="Node style 9"/>
+    </node>
+    <node id="MAF" maxvalue="1">
+      <value val="1">
+        <exp str="STAT3"/>
+      </value>
+      <nodevisualsetting x="1258" y="1459" style="Node style 9"/>
+    </node>
+    <node id="anti_CTLA4" maxvalue="1" input="true">
+      <nodevisualsetting x="505" y="17" style="Node style 3"/>
+    </node>
+    <node id="IL12R" maxvalue="1">
+      <value val="1">
+        <exp str="IL12"/>
+      </value>
+      <nodevisualsetting x="1858" y="1689" style="Node style 9"/>
+    </node>
+    <node id="STAT4" maxvalue="1">
+      <value val="1">
+        <exp str="IL12R"/>
+      </value>
+      <nodevisualsetting x="1599" y="1685" style="Node style 9"/>
+    </node>
+    <node id="IL12" maxvalue="1" input="true">
+      <nodevisualsetting x="2131" y="1658" style="Node style 3"/>
+    </node>
+    <edge id="PD1_L:PD1" from="PD1_L" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="646,1281" anchor="NE" style=""/>
+    </edge>
+    <edge id="VAV:PKC_teta" from="VAV" to="PKC_teta" minvalue="1" sign="positive">
+      <edgevisualsetting points="919,780" anchor="NE" style=""/>
+    </edge>
+    <edge id="VAV:MAPKs" from="VAV" to="MAPKs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1173,722 1175,877" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD8:LCK_FYN" from="CD8" to="LCK_FYN" minvalue="1" sign="positive">
+      <edgevisualsetting points="1442,401" anchor="NE" style=""/>
+    </edge>
+    <edge id="IFNG:IFNGR" from="IFNG" to="IFNGR" minvalue="1" sign="positive">
+      <edgevisualsetting points="2096,1376" anchor="NE" style=""/>
+    </edge>
+    <edge id="MHCII:CD4" from="MHCII" to="CD4" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MHCII:LAG3" from="MHCII" to="LAG3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1124,70" anchor="NE" style=""/>
+    </edge>
+    <edge id="TIM3:LCK_FYN" from="TIM3" to="LCK_FYN" minvalue="1" sign="negative">
+      <edgevisualsetting points="538,751 842,753 841,608 1014,607" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:LAG3" from="PRDM1" to="LAG3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1223,1551 1221,584" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:TIM3" from="PRDM1" to="TIM3" minvalue="1" sign="positive">
+      <edgevisualsetting points="515,1564" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:PD1" from="PRDM1" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="617,1539" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:TIGIT" from="PRDM1" to="TIGIT" minvalue="1" sign="positive">
+      <edgevisualsetting points="478,1549" anchor="NE" style=""/>
+    </edge>
+    <edge id="PRDM1:ICOS" from="PRDM1" to="ICOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1847,1571 1847,917" anchor="NE" style=""/>
+    </edge>
+    <edge id="TRAFs:NFkB" from="TRAFs" to="NFkB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1101,948" anchor="NE" style=""/>
+    </edge>
+    <edge id="TRAFs:PI3K_AKT" from="TRAFs" to="PI3K_AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="813,960" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFIL3:FOXP3" from="NFIL3" to="FOXP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="1013,1605" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFIL3:CTLA4" from="NFIL3" to="CTLA4" minvalue="1" sign="negative">
+      <edgevisualsetting points="402,1606 397,212" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFIL3:ICOS" from="NFIL3" to="ICOS" minvalue="1" sign="negative">
+      <edgevisualsetting points="1965,1634" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFIL3:TNFRs" from="NFIL3" to="TNFRs" minvalue="1" sign="negative">
+      <edgevisualsetting points="1561,1611 1562,753" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFIL3:TIM3" from="NFIL3" to="TIM3" minvalue="1" sign="positive">
+      <edgevisualsetting points="560,1632" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFbR:SMAD2_3" from="TGFbR" to="SMAD2_3" minvalue="1" sign="positive">
+      <edgevisualsetting points="677,1411" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD80_86:CTLA4" from="CD80_86" to="CTLA4" minvalue="1" sign="positive">
+      <edgevisualsetting points="659,70" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD80_86:CD28" from="CD80_86" to="CD28" minvalue="1" sign="positive">
+      <edgevisualsetting points="867,67" anchor="NE" style=""/>
+    </edge>
+    <edge id="Antigen:TCR" from="Antigen" to="TCR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1300,138" anchor="NE" style=""/>
+    </edge>
+    <edge id="YY1:PD1" from="YY1" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1144,1108" anchor="NE" style=""/>
+    </edge>
+    <edge id="YY1:LAG3" from="YY1" to="LAG3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1161,668" anchor="NE" style=""/>
+    </edge>
+    <edge id="TNFRs_L:TNFRs" from="TNFRs_L" to="TNFRs" minvalue="1" sign="positive">
+      <edgevisualsetting points="2041,733" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:PD1" from="FOXO1" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="666,968" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO1:FOXP3" from="FOXO1" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="719,1295" anchor="NE" style=""/>
+    </edge>
+    <edge id="ICOS_L:ICOS" from="ICOS_L" to="ICOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="2039,909" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K_AKT:FOXP3" from="PI3K_AKT" to="FOXP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="783,1288" anchor="NE" style="Edge style 3"/>
+    </edge>
+    <edge id="PI3K_AKT:FOXO1" from="PI3K_AKT" to="FOXO1" minvalue="1" sign="negative">
+      <edgevisualsetting points="741,923" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K_AKT:GSK3" from="PI3K_AKT" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting points="901,869" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K_AKT:Proliferation_Survival" from="PI3K_AKT" to="Proliferation_Survival" minvalue="1" sign="positive">
+      <edgevisualsetting points="768,1765 1163,1766" anchor="NE" style=""/>
+    </edge>
+    <edge id="TNFRs:TRAFs" from="TNFRs" to="TRAFs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1732,960" anchor="NE" style=""/>
+    </edge>
+    <edge id="anti_CTLA4:CTLA4" from="anti_CTLA4" to="CTLA4" minvalue="1" sign="negative">
+      <edgevisualsetting points="646,71" anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD2_3:FOXP3" from="SMAD2_3" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1040,1464" anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD2_3:NFIL3" from="SMAD2_3" to="NFIL3" minvalue="1" sign="negative">
+      <edgevisualsetting points="671,1617" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAG3:CD4" from="LAG3" to="CD4" minvalue="1" sign="negative">
+      <edgevisualsetting points="1166,329" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAG3:Ca_NFAT" from="LAG3" to="Ca_NFAT" minvalue="1" sign="negative">
+      <edgevisualsetting points="1261,568 1261,803 1459,803" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:PI3K_AKT" from="CD28" to="PI3K_AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="830,291" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD28:GRB2" from="CD28" to="GRB2" minvalue="1" sign="positive">
+      <edgevisualsetting points="925,241" anchor="NE" style=""/>
+    </edge>
+    <edge id="TIM3_L:TIM3" from="TIM3_L" to="TIM3" minvalue="1" sign="positive">
+      <edgevisualsetting points="346,820" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT_complex:PLCG" from="LAT_complex" to="PLCG" minvalue="1" sign="positive">
+      <edgevisualsetting points="1396,519" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT_complex:MAPKs" from="LAT_complex" to="MAPKs" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT_complex:NFkB" from="LAT_complex" to="NFkB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1246,532 1245,857" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAT_complex:PI3K_AKT" from="LAT_complex" to="PI3K_AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="794,523" anchor="NE" style=""/>
+    </edge>
+    <edge id="CTLA4:PP2A" from="CTLA4" to="PP2A" minvalue="1" sign="positive">
+      <edgevisualsetting points="568,247" anchor="NE" style=""/>
+    </edge>
+    <edge id="CTLA4:CD28" from="CTLA4" to="CD28" minvalue="1" sign="negative">
+      <edgevisualsetting points="767,228" anchor="NE" style=""/>
+    </edge>
+    <edge id="CTLA4:FOXP3" from="CTLA4" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="441,237 435,1313" anchor="NE" style="Edge style 3"/>
+    </edge>
+    <edge id="PKC_teta:NFkB" from="PKC_teta" to="NFkB" minvalue="1" sign="positive">
+      <edgevisualsetting points="1061,805" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:PD1" from="AP1" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1329,1116" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:TNFRs" from="AP1" to="TNFRs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1748,1101" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:FOXP3" from="AP1" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1347,1147 1347,1291" anchor="NE" style=""/>
+    </edge>
+    <edge id="AP1:IL2" from="AP1" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1184,1089" anchor="NE" style=""/>
+    </edge>
+    <edge id="TCR:LAT_complex" from="TCR" to="LAT_complex" minvalue="1" sign="positive">
+      <edgevisualsetting points="1311,348" anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD7:SMAD2_3" from="SMAD7" to="SMAD2_3" minvalue="1" sign="negative">
+      <edgevisualsetting points="843,1447" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:NFIL3" from="STAT3" to="NFIL3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1386,1618" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:PRDM1" from="STAT3" to="PRDM1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1579,1586" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:MAF" from="STAT3" to="MAF" minvalue="1" sign="positive">
+      <edgevisualsetting points="1613,1485" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT3:FOXP3" from="STAT3" to="FOXP3" minvalue="1" sign="negative">
+      <edgevisualsetting points="1643,1338" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:CTLA4" from="FOXP3" to="CTLA4" minvalue="1" sign="positive">
+      <edgevisualsetting points="416,1322 412,869 416,222" anchor="NE" style="Edge style 3"/>
+    </edge>
+    <edge id="FOXP3:TNFRs" from="FOXP3" to="TNFRs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1761,1315" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:ICOS" from="FOXP3" to="ICOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1980,1325" anchor="NE" style="Edge style 3"/>
+    </edge>
+    <edge id="FOXP3:TIGIT" from="FOXP3" to="TIGIT" minvalue="1" sign="positive">
+      <edgevisualsetting points="500,1301" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:SMAD7" from="FOXP3" to="SMAD7" minvalue="1" sign="negative">
+      <edgevisualsetting points="1001,1401" anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXP3:Treg" from="FOXP3" to="Treg" minvalue="1" sign="positive">
+      <edgevisualsetting points="1029,1698 603,1701" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD226:VAV" from="CD226" to="VAV" minvalue="1" sign="positive">
+      <edgevisualsetting points="1666,714" anchor="NE" style=""/>
+    </edge>
+    <edge id="SHP:TCR" from="SHP" to="TCR" minvalue="1" sign="negative">
+      <edgevisualsetting points="758,356 1276,354" anchor="NE" style=""/>
+    </edge>
+    <edge id="SHP:CD28" from="SHP" to="CD28" minvalue="1" sign="negative">
+      <edgevisualsetting points="749,241" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL2:Proliferation_Survival" from="IL2" to="Proliferation_Survival" minvalue="1" sign="positive">
+      <edgevisualsetting points="1189,1794" anchor="NE" style=""/>
+    </edge>
+    <edge id="PP2A:PI3K_AKT" from="PP2A" to="PI3K_AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="774,479" anchor="NE" style=""/>
+    </edge>
+    <edge id="SHIP:PI3K_AKT" from="SHIP" to="PI3K_AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="588,855" anchor="NE" style=""/>
+    </edge>
+    <edge id="LAG3_L:LAG3" from="LAG3_L" to="LAG3" minvalue="1" sign="positive">
+      <edgevisualsetting points="788,549" anchor="NE" style=""/>
+    </edge>
+    <edge id="MHCI:CD8" from="MHCI" to="CD8" minvalue="1" sign="positive">
+      <edgevisualsetting points="1438,168" anchor="NE" style=""/>
+    </edge>
+    <edge id="PLCG:Ca_NFAT" from="PLCG" to="Ca_NFAT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1470,596" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12:IL12R" from="IL12" to="IL12R" minvalue="1" sign="positive">
+      <edgevisualsetting points="2058,1710" anchor="NE" style=""/>
+    </edge>
+    <edge id="TIGIT:SHIP" from="TIGIT" to="SHIP" minvalue="1" sign="positive">
+      <edgevisualsetting points="469,688" anchor="NE" style=""/>
+    </edge>
+    <edge id="TIGIT:CD226" from="TIGIT" to="CD226" minvalue="1" sign="negative">
+      <edgevisualsetting points="511,1162" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL27R:STAT1" from="IL27R" to="STAT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1887,1413" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL27R:STAT3" from="IL27R" to="STAT3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1904,1615" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL27:IL27R" from="IL27" to="IL27R" minvalue="1" sign="positive">
+      <edgevisualsetting points="2102,1514" anchor="NE" style=""/>
+    </edge>
+    <edge id="CD4:LCK_FYN" from="CD4" to="LCK_FYN" minvalue="1" sign="positive">
+      <edgevisualsetting points="1028,272" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT:PD1" from="NFAT" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1581,1133 796,1136" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT:ICOS" from="NFAT" to="ICOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1951,1016" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFAT:IL2" from="NFAT" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1591,1698" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:TNFRs" from="NFkB" to="TNFRs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1143,742" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:FOXP3" from="NFkB" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1038,1077 1037,1081" anchor="NE" style=""/>
+    </edge>
+    <edge id="NFkB:IL2" from="NFkB" to="IL2" minvalue="1" sign="positive">
+      <edgevisualsetting points="1066,1216 1168,1217" anchor="NE" style=""/>
+    </edge>
+    <edge id="ICOS:MAPKs" from="ICOS" to="MAPKs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1343,906" anchor="NE" style=""/>
+    </edge>
+    <edge id="ICOS:PI3K_AKT" from="ICOS" to="PI3K_AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="827,917" anchor="NE" style=""/>
+    </edge>
+    <edge id="ICOS:Ca_NFAT" from="ICOS" to="Ca_NFAT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1947,871" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca_NFAT:NFAT" from="Ca_NFAT" to="NFAT" minvalue="1" sign="positive">
+      <edgevisualsetting points="1584,884" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca_NFAT:TNFRs" from="Ca_NFAT" to="TNFRs" minvalue="1" sign="negative">
+      <edgevisualsetting points="1519,725" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca_NFAT:CTLA4" from="Ca_NFAT" to="CTLA4" minvalue="1" sign="positive">
+      <edgevisualsetting points="1500,153 668,154" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca_NFAT:PD1" from="Ca_NFAT" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1476,1124" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca_NFAT:ICOS" from="Ca_NFAT" to="ICOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1957,855" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca_NFAT:FOXP3" from="Ca_NFAT" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1463,1302" anchor="NE" style=""/>
+    </edge>
+    <edge id="Ca_NFAT:Th1_CTL" from="Ca_NFAT" to="Th1_CTL" minvalue="1" sign="positive">
+      <edgevisualsetting points="1498,1725" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAF:TIGIT" from="MAF" to="TIGIT" minvalue="1" sign="positive">
+      <edgevisualsetting points="488,1474" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAF:PD1" from="MAF" to="PD1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1308,1144" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAF:TIM3" from="MAF" to="TIM3" minvalue="1" sign="positive">
+      <edgevisualsetting points="544,1500" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAF:LAG3" from="MAF" to="LAG3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1239,1468 1237,576" anchor="NE" style=""/>
+    </edge>
+    <edge id="CK2:PTEN" from="CK2" to="PTEN" minvalue="1" sign="negative">
+      <edgevisualsetting points="601,961" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT1:FOXP3" from="STAT1" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1057,1399" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT1:Tbet" from="STAT1" to="Tbet" minvalue="1" sign="positive">
+      <edgevisualsetting points="900,1419" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:Tbet" from="GSK3" to="Tbet" minvalue="1" sign="negative">
+      <edgevisualsetting points="962,1038" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:NFAT" from="GSK3" to="NFAT" minvalue="1" sign="negative">
+      <edgevisualsetting points="984,1016" anchor="NE" style=""/>
+    </edge>
+    <edge id="PD1:CK2" from="PD1" to="CK2" minvalue="1" sign="negative">
+      <edgevisualsetting points="595,1098" anchor="NE" style=""/>
+    </edge>
+    <edge id="PD1:SHP" from="PD1" to="SHP" minvalue="1" sign="positive">
+      <edgevisualsetting points="681,645" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFb:TGFbR" from="TGFb" to="TGFbR" minvalue="1" sign="positive">
+      <edgevisualsetting points="579,1372" anchor="NE" style=""/>
+    </edge>
+    <edge id="TIGIT_L:TIGIT" from="TIGIT_L" to="TIGIT" minvalue="1" sign="positive">
+      <edgevisualsetting points="308,1101" anchor="NE" style=""/>
+    </edge>
+    <edge id="TIGIT_L:CD226" from="TIGIT_L" to="CD226" minvalue="1" sign="positive">
+      <edgevisualsetting points="553,1177" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT4:Tbet" from="STAT4" to="Tbet" minvalue="1" sign="positive">
+      <edgevisualsetting points="1548,1708 1539,1201 920,1202" anchor="NE" style=""/>
+    </edge>
+    <edge id="GRB2:VAV" from="GRB2" to="VAV" minvalue="1" sign="positive">
+      <edgevisualsetting points="910,581" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbet:PD1" from="Tbet" to="PD1" minvalue="1" sign="negative">
+      <edgevisualsetting points="887,1101" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbet:TIM3" from="Tbet" to="TIM3" minvalue="1" sign="positive">
+      <edgevisualsetting points="531,1059" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbet:LAG3" from="Tbet" to="LAG3" minvalue="1" sign="negative">
+      <edgevisualsetting points="873,567" anchor="NE" style=""/>
+    </edge>
+    <edge id="Tbet:Th1_CTL" from="Tbet" to="Th1_CTL" minvalue="1" sign="positive">
+      <edgevisualsetting points="742,1073 736,1540 736,1739 1478,1737" anchor="NE" style=""/>
+    </edge>
+    <edge id="LCK_FYN:TCR" from="LCK_FYN" to="TCR" minvalue="1" sign="positive">
+      <edgevisualsetting points="1292,422" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL12R:STAT4" from="IL12R" to="STAT4" minvalue="1" sign="positive">
+      <edgevisualsetting points="1787,1709" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAPKs:AP1" from="MAPKs" to="AP1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1330,1010" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAPKs:YY1" from="MAPKs" to="YY1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1265,1061" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAPKs:TNFRs" from="MAPKs" to="TNFRs" minvalue="1" sign="positive">
+      <edgevisualsetting points="1349,679 1728,681" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAPKs:ICOS" from="MAPKs" to="ICOS" minvalue="1" sign="positive">
+      <edgevisualsetting points="1323,773 1971,778" anchor="NE" style=""/>
+    </edge>
+    <edge id="MAPKs:FOXP3" from="MAPKs" to="FOXP3" minvalue="1" sign="positive">
+      <edgevisualsetting points="1292,1283" anchor="NE" style=""/>
+    </edge>
+    <edge id="PTEN:PI3K_AKT" from="PTEN" to="PI3K_AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="588,874" anchor="NE" style=""/>
+    </edge>
+    <edge id="IFNGR:STAT1" from="IFNGR" to="STAT1" minvalue="1" sign="positive">
+      <edgevisualsetting points="1577,1388" anchor="NE" style=""/>
+    </edge>
+  </graph>
+</gxl>

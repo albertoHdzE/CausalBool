@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="AGS_ReducedModel_12May2015" nodeorder="MEK ERK TAK1 p38alpha AKT PI3K GSK3 betacatenin Antisurvival Prosurvival">
+    <nodestyle background="#ffcc33" foreground="#000000" text="#000000" shape="ELLIPSE" width="80" height="40"/>
+    <nodestyle background="#ffcc33" foreground="#000000" text="#000000" shape="ELLIPSE" width="80" height="40"/>
+    <nodestyle name="Node style" background="#ffcccc" shape="RECTANGLE" width="80" height="40"/>
+    <nodestyle name="Node style 2" background="#ccccff"/>
+    <nodestyle name="Node style 3" background="#ccffcc" shape="RECTANGLE"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="2" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="2" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="MEK" maxvalue="1">
+      <value val="1">
+        <exp str="!(ERK &amp; TAK1 &amp; p38alpha &amp; AKT &amp; !GSK3 &amp; !betacatenin)"/>
+      </value>
+      <nodevisualsetting x="189" y="173" style=""/>
+    </node>
+    <node id="ERK" maxvalue="1">
+      <value val="1">
+        <exp str="MEK | (!ERK &amp; !AKT)"/>
+      </value>
+      <nodevisualsetting x="124" y="282" style="Node style 2"/>
+    </node>
+    <node id="TAK1" maxvalue="1">
+      <value val="1">
+        <exp str="!p38alpha"/>
+      </value>
+      <nodevisualsetting x="69" y="38" style=""/>
+    </node>
+    <node id="p38alpha" maxvalue="1">
+      <value val="1">
+        <exp str="!ERK &amp; !p38alpha"/>
+      </value>
+      <nodevisualsetting x="486" y="222" style=""/>
+    </node>
+    <node id="AKT" maxvalue="1">
+      <value val="1">
+        <exp str="PI3K &amp; (betacatenin | GSK3 | !TAK1)"/>
+        <exp str="!ERK &amp; !TAK1 &amp; !AKT &amp; GSK3"/>
+      </value>
+      <nodevisualsetting x="348" y="363" style=""/>
+    </node>
+    <node id="PI3K" maxvalue="1">
+      <value val="1">
+        <exp str="!(TAK1 &amp; ERK) | betacatenin | GSK3"/>
+      </value>
+      <nodevisualsetting x="360" y="104" style=""/>
+    </node>
+    <node id="GSK3" maxvalue="1" input="true">
+      <nodevisualsetting x="637" y="48" style=""/>
+    </node>
+    <node id="betacatenin" maxvalue="1" input="true">
+      <nodevisualsetting x="548" y="288" style=""/>
+    </node>
+    <node id="Antisurvival" maxvalue="3">
+      <value val="3">
+        <exp str="!ERK &amp; !TAK1 &amp; !AKT &amp; p38alpha &amp; PI3K"/>
+      </value>
+      <value val="2">
+        <exp str="!AKT &amp; !ERK &amp; TAK1 &amp; p38alpha &amp; PI3K &amp; (GSK3 | betacatenin)"/>
+        <exp str="!AKT &amp; !TAK1 &amp; !(p38alpha &amp; PI3K &amp; !ERK)"/>
+      </value>
+      <value val="1">
+        <exp str="!ERK &amp; !TAK1 &amp; AKT &amp; !p38alpha"/>
+        <exp str="TAK1 &amp; ERK &amp; !AKT"/>
+        <exp str="TAK1 &amp; AKT &amp; !ERK &amp; !p38alpha"/>
+        <exp str="!ERK &amp; TAK1 &amp; !AKT &amp; !(p38alpha &amp; PI3K &amp; (GSK3 | betacatenin))"/>
+      </value>
+      <nodevisualsetting x="247" y="452" style="Node style"/>
+    </node>
+    <node id="Prosurvival" maxvalue="3">
+      <value val="3">
+        <exp str="ERK &amp; PI3K &amp; (!TAK1 | betacatenin)"/>
+      </value>
+      <value val="2">
+        <exp str="((TAK1 &amp; betacatenin) | !TAK1) &amp; !(ERK &amp; PI3K)"/>
+      </value>
+      <value val="1">
+        <exp str="ERK &amp; PI3K &amp; GSK3 &amp; TAK1 &amp; !betacatenin"/>
+      </value>
+      <nodevisualsetting x="433" y="515" style="Node style 3"/>
+    </node>
+    <edge id="betacatenin:MEK" from="betacatenin" to="MEK" minvalue="1" sign="positive">
+      <edgevisualsetting points="253,308" style=""/>
+    </edge>
+    <edge id="betacatenin:AKT" from="betacatenin" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="570,386" style=""/>
+    </edge>
+    <edge id="betacatenin:PI3K" from="betacatenin" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="610,123" style=""/>
+    </edge>
+    <edge id="betacatenin:Antisurvival" from="betacatenin" to="Antisurvival" minvalue="1" sign="positive">
+      <edgevisualsetting points="605,474" style=""/>
+    </edge>
+    <edge id="betacatenin:Prosurvival" from="betacatenin" to="Prosurvival" minvalue="1" sign="positive">
+      <edgevisualsetting points="617,520" style=""/>
+    </edge>
+    <edge id="ERK:MEK" from="ERK" to="MEK" minvalue="1" sign="negative">
+      <edgevisualsetting points="148,206" style=""/>
+    </edge>
+    <edge id="ERK:ERK" from="ERK" to="ERK" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="ERK:p38alpha" from="ERK" to="p38alpha" minvalue="1" sign="negative">
+      <edgevisualsetting points="176,233" style=""/>
+    </edge>
+    <edge id="ERK:AKT" from="ERK" to="AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="166,369" style=""/>
+    </edge>
+    <edge id="ERK:PI3K" from="ERK" to="PI3K" minvalue="1" sign="negative">
+      <edgevisualsetting points="135,122" style=""/>
+    </edge>
+    <edge id="ERK:Antisurvival" from="ERK" to="Antisurvival" minvalue="1" sign="negative">
+      <edgevisualsetting points="186,459" style=""/>
+    </edge>
+    <edge id="ERK:Prosurvival" from="ERK" to="Prosurvival" minvalue="1" sign="positive">
+      <edgevisualsetting points="138,526" style=""/>
+    </edge>
+    <edge id="GSK3:MEK" from="GSK3" to="MEK" minvalue="1" sign="positive">
+      <edgevisualsetting points="241,71" style=""/>
+    </edge>
+    <edge id="GSK3:AKT" from="GSK3" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="672,396" style=""/>
+    </edge>
+    <edge id="GSK3:PI3K" from="GSK3" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting points="412,82" style=""/>
+    </edge>
+    <edge id="GSK3:Antisurvival" from="GSK3" to="Antisurvival" minvalue="1" sign="positive">
+      <edgevisualsetting points="686,485" style=""/>
+    </edge>
+    <edge id="GSK3:Prosurvival" from="GSK3" to="Prosurvival" minvalue="1" sign="positive">
+      <edgevisualsetting points="699,543" style=""/>
+    </edge>
+    <edge id="TAK1:MEK" from="TAK1" to="MEK" minvalue="1" sign="negative">
+      <edgevisualsetting points="109,192" style=""/>
+    </edge>
+    <edge id="TAK1:AKT" from="TAK1" to="AKT" minvalue="1" sign="negative">
+      <edgevisualsetting points="103,386" style=""/>
+    </edge>
+    <edge id="TAK1:PI3K" from="TAK1" to="PI3K" minvalue="1" sign="negative">
+      <edgevisualsetting points="382,59" style=""/>
+    </edge>
+    <edge id="TAK1:Antisurvival" from="TAK1" to="Antisurvival" minvalue="1" sign="negative">
+      <edgevisualsetting points="89,476" style=""/>
+    </edge>
+    <edge id="TAK1:Prosurvival" from="TAK1" to="Prosurvival" minvalue="1" sign="negative">
+      <edgevisualsetting points="77,544" style=""/>
+    </edge>
+    <edge id="PI3K:AKT" from="PI3K" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting points="401,290" style=""/>
+    </edge>
+    <edge id="PI3K:Antisurvival" from="PI3K" to="Antisurvival" minvalue="1" sign="positive">
+      <edgevisualsetting points="292,134" style=""/>
+    </edge>
+    <edge id="PI3K:Prosurvival" from="PI3K" to="Prosurvival" minvalue="1" sign="positive">
+      <edgevisualsetting points="467,140" style=""/>
+    </edge>
+    <edge id="p38alpha:MEK" from="p38alpha" to="MEK" minvalue="1" sign="negative">
+      <edgevisualsetting points="513,191" style=""/>
+    </edge>
+    <edge id="p38alpha:TAK1" from="p38alpha" to="TAK1" minvalue="1" sign="negative">
+      <edgevisualsetting points="534,47" style=""/>
+    </edge>
+    <edge id="p38alpha:p38alpha" from="p38alpha" to="p38alpha" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="p38alpha:Antisurvival" from="p38alpha" to="Antisurvival" minvalue="1" sign="dual">
+      <edgevisualsetting points="532,465" style=""/>
+    </edge>
+    <edge id="MEK:ERK" from="MEK" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting points="244,307" style=""/>
+    </edge>
+    <edge id="AKT:MEK" from="AKT" to="MEK" minvalue="1" sign="negative">
+      <edgevisualsetting points="378,205" style=""/>
+    </edge>
+    <edge id="AKT:ERK" from="AKT" to="ERK" minvalue="1" sign="negative">
+      <edgevisualsetting points="364,320" style=""/>
+    </edge>
+    <edge id="AKT:AKT" from="AKT" to="AKT" minvalue="1" sign="negative">
+      <edgevisualsetting style=""/>
+    </edge>
+    <edge id="AKT:Antisurvival" from="AKT" to="Antisurvival" minvalue="1" sign="negative">
+      <edgevisualsetting points="306,398" style=""/>
+    </edge>
+  </graph>
+</gxl>

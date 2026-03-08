@@ -1,0 +1,276 @@
+{
+  "name": "ginsim_default_g2b",
+  "nodes": [
+    "CtrAb",
+    "DivK",
+    "PleC",
+    "DivJ",
+    "DivL",
+    "CckA",
+    "ChpT",
+    "CpdR",
+    "ClpXP-RcdA"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ]
+  ],
+  "logic": {
+    "CtrAb": "ChpT & !ClpXP-RcdA",
+    "DivK": "DivJ & !PleC",
+    "PleC": "!DivK",
+    "DivJ": "DivK & !PleC",
+    "DivL": "!DivK",
+    "CckA": "DivL",
+    "ChpT": "CckA",
+    "CpdR": "ChpT",
+    "ClpXP-RcdA": "!CpdR"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "CtrAb": {
+      "inputs": [
+        "ChpT",
+        "ClpXP-RcdA"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "DivK": {
+      "inputs": [
+        "PleC",
+        "DivJ"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "PleC": {
+      "inputs": [
+        "DivK"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "DivJ": {
+      "inputs": [
+        "DivK",
+        "PleC"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "DivL": {
+      "inputs": [
+        "DivK"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CckA": {
+      "inputs": [
+        "DivL"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "ChpT": {
+      "inputs": [
+        "CckA"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "CpdR": {
+      "inputs": [
+        "ChpT"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "ClpXP-RcdA": {
+      "inputs": [
+        "CpdR"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 6,
+    "IDENTITY": 3
+  },
+  "n": 9,
+  "n_edges": 12,
+  "edges": [
+    {
+      "source": "DivK",
+      "target": "DivL",
+      "type": "inhibition"
+    },
+    {
+      "source": "DivK",
+      "target": "DivJ",
+      "type": "activation"
+    },
+    {
+      "source": "DivK",
+      "target": "PleC",
+      "type": "inhibition"
+    },
+    {
+      "source": "CckA",
+      "target": "ChpT",
+      "type": "activation"
+    },
+    {
+      "source": "PleC",
+      "target": "DivJ",
+      "type": "inhibition"
+    },
+    {
+      "source": "PleC",
+      "target": "DivK",
+      "type": "inhibition"
+    },
+    {
+      "source": "ChpT",
+      "target": "CpdR",
+      "type": "activation"
+    },
+    {
+      "source": "ChpT",
+      "target": "CtrAb",
+      "type": "activation"
+    },
+    {
+      "source": "DivL",
+      "target": "CckA",
+      "type": "activation"
+    },
+    {
+      "source": "DivJ",
+      "target": "DivK",
+      "type": "activation"
+    },
+    {
+      "source": "ClpXP-RcdA",
+      "target": "CtrAb",
+      "type": "inhibition"
+    },
+    {
+      "source": "CpdR",
+      "target": "ClpXP-RcdA",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    0,
+    3,
+    2,
+    1,
+    1,
+    1,
+    2,
+    1,
+    1
+  ]
+}

@@ -1,0 +1,197 @@
+{
+  "name": "lac_operon",
+  "nodes": [
+    "lacI",
+    "lacZ",
+    "lacY",
+    "lacA",
+    "CRP",
+    "glucose",
+    "lactose"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "lacZ": "AND(NOT(lacI), CRP)",
+    "lacY": "AND(NOT(lacI), CRP)",
+    "lacA": "NOT(lacI)",
+    "lacI": "NOT(lactose)",
+    "CRP": "NOT(glucose)"
+  },
+  "reference": "Santos-Zavaleta et al., Nucleic Acids Research 2019",
+  "description": "E. coli lac operon regulatory module",
+  "source": "RegulonDB/Literature",
+  "essentiality": {
+    "lacI": 1,
+    "lacZ": 1,
+    "lacY": 1,
+    "lacA": 0,
+    "CRP": 1,
+    "glucose": 0,
+    "lactose": 0
+  },
+  "gates": {
+    "lacI": {
+      "inputs": [
+        "lactose"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "lacZ": {
+      "inputs": [
+        "lacI",
+        "CRP"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "lacY": {
+      "inputs": [
+        "lacI",
+        "CRP"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "lacA": {
+      "inputs": [
+        "lacI"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "CRP": {
+      "inputs": [
+        "glucose"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "NOT": 3,
+    "CANALISING": 2
+  },
+  "n": 7,
+  "n_edges": 7,
+  "edges": [
+    {
+      "source": "lacI",
+      "target": "lacZ",
+      "type": "repression"
+    },
+    {
+      "source": "lacI",
+      "target": "lacY",
+      "type": "repression"
+    },
+    {
+      "source": "lacI",
+      "target": "lacA",
+      "type": "repression"
+    },
+    {
+      "source": "lactose",
+      "target": "lacI",
+      "type": "inhibition"
+    },
+    {
+      "source": "CRP",
+      "target": "lacZ",
+      "type": "activation"
+    },
+    {
+      "source": "CRP",
+      "target": "lacY",
+      "type": "activation"
+    },
+    {
+      "source": "glucose",
+      "target": "CRP",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    3,
+    0,
+    0,
+    0,
+    2,
+    1,
+    1
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/lac_operon.json",
+  "category": "Maintainer"
+}

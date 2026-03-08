@@ -1,0 +1,504 @@
+{
+  "name": "ginsim_2013-drosophila-dpp_Dpp__Pathway_11Jun2013",
+  "nodes": [
+    "Scw",
+    "Tsg",
+    "Tld",
+    "Brk",
+    "Dpp",
+    "Dad",
+    "Shn",
+    "Gbb",
+    "Sax",
+    "Tkv",
+    "Nej",
+    "Sog",
+    "MadMed",
+    "Punt",
+    "Targets"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Brk": "!MadMed:1 & !Shn:1",
+    "Dad": "MadMed:2 & !Brk",
+    "Sax": "Punt & (Gbb:1 | Scw:1 | Dpp) & !Sog",
+    "Tkv": "Punt & (Dpp:1 | Scw | Gbb) & !(Sog | Tsg) & !Dpp:2",
+    "Sog": "!Tld",
+    "MadMed": "(Tkv:1 | Sax:1) & !Dad:1 & !Tkv:2",
+    "Targets": "MadMed & Nej:1 & !Brk:1"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "Brk": {
+      "inputs": [
+        "Shn",
+        "MadMed"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Dad": {
+      "inputs": [
+        "Brk",
+        "MadMed"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Sax": {
+      "inputs": [
+        "Scw",
+        "Dpp",
+        "Gbb",
+        "Sog",
+        "Punt"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Tkv": {
+      "inputs": [
+        "Scw",
+        "Tsg",
+        "Dpp",
+        "Gbb",
+        "Sog",
+        "Punt"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Sog": {
+      "inputs": [
+        "Tld"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "MadMed": {
+      "inputs": [
+        "Dad",
+        "Sax",
+        "Tkv"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Targets": {
+      "inputs": [
+        "Brk",
+        "Nej",
+        "MadMed"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 7
+  },
+  "n": 15,
+  "n_edges": 22,
+  "edges": [
+    {
+      "source": "Scw",
+      "target": "Sax",
+      "type": "activation"
+    },
+    {
+      "source": "Scw",
+      "target": "Tkv",
+      "type": "activation"
+    },
+    {
+      "source": "Tsg",
+      "target": "Tkv",
+      "type": "inhibition"
+    },
+    {
+      "source": "Tld",
+      "target": "Sog",
+      "type": "inhibition"
+    },
+    {
+      "source": "Brk",
+      "target": "Targets",
+      "type": "inhibition"
+    },
+    {
+      "source": "Brk",
+      "target": "Dad",
+      "type": "inhibition"
+    },
+    {
+      "source": "Dpp",
+      "target": "Sax",
+      "type": "activation"
+    },
+    {
+      "source": "Dpp",
+      "target": "Tkv",
+      "type": "activation"
+    },
+    {
+      "source": "Dpp",
+      "target": "Tkv",
+      "type": "activation"
+    },
+    {
+      "source": "Dad",
+      "target": "MadMed",
+      "type": "inhibition"
+    },
+    {
+      "source": "Shn",
+      "target": "Brk",
+      "type": "inhibition"
+    },
+    {
+      "source": "Gbb",
+      "target": "Sax",
+      "type": "activation"
+    },
+    {
+      "source": "Gbb",
+      "target": "Tkv",
+      "type": "activation"
+    },
+    {
+      "source": "Sax",
+      "target": "MadMed",
+      "type": "activation"
+    },
+    {
+      "source": "Tkv",
+      "target": "MadMed",
+      "type": "activation"
+    },
+    {
+      "source": "Tkv",
+      "target": "MadMed",
+      "type": "activation"
+    },
+    {
+      "source": "Nej",
+      "target": "Targets",
+      "type": "activation"
+    },
+    {
+      "source": "Sog",
+      "target": "Tkv",
+      "type": "inhibition"
+    },
+    {
+      "source": "Sog",
+      "target": "Sax",
+      "type": "inhibition"
+    },
+    {
+      "source": "MadMed",
+      "target": "Brk",
+      "type": "inhibition"
+    },
+    {
+      "source": "MadMed",
+      "target": "Targets",
+      "type": "activation"
+    },
+    {
+      "source": "MadMed",
+      "target": "Targets",
+      "type": "activation"
+    },
+    {
+      "source": "MadMed",
+      "target": "Dad",
+      "type": "activation"
+    },
+    {
+      "source": "Punt",
+      "target": "Sax",
+      "type": "activation"
+    },
+    {
+      "source": "Punt",
+      "target": "Tkv",
+      "type": "activation"
+    }
+  ],
+  "out_degrees": [
+    2,
+    1,
+    1,
+    2,
+    2,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    2,
+    3,
+    2,
+    0
+  ]
+}

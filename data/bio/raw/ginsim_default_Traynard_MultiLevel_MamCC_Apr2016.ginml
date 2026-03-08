@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="Traynard_MultiLevel_MamCC_Apr2016" nodeorder="CycD Rb E2F CycE CycA CycB p27 Cdc20 Cdh1 UbcH10 Skp2">
+    <node id="CycD" maxvalue="1" input="true">
+      <annotation>
+        <comment>CycD stands here for the whole cdk4/6-Cyclin D complex.
+The positive signals or growth factors ultimately elicit the activation of Cyclin D in the cell.
+CycD level depends on the presence of growth factor. 
+Here, Cyc D is considered as  a constant input, maintained through the positive loop.
+In our model, CycD is necessary for the inactivation of the retinoblastoma protein Rb, and for the sequestration of p27/Kip1.</comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="111" y="51" width="90" height="60" backgroundColor="#cc99ff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Rb" maxvalue="2">
+      <value val="2">
+        <exp str="!CycD &amp; !CycE &amp; ((!CycA &amp; !CycB) | p27)"/>
+        <exp str="!CycD &amp; p27 &amp; CycE &amp; (!CycA | !CycB)"/>
+      </value>
+      <value val="1">
+        <exp str="CycD &amp; !CycE &amp; !CycA &amp; !CycB"/>
+        <exp str="!CycD &amp; p27 &amp; CycE &amp; CycA &amp; CycB"/>
+        <exp str="CycD &amp; (CycE | CycA | CycB) &amp; p27"/>
+      </value>
+      <value val="0">
+        <exp str="!p27 &amp; CycE"/>
+        <exp str="!CycE &amp; (CycA | CycB) &amp; !p27"/>
+      </value>
+      <annotation>
+        <comment>Rb is a key tumour suppressor, which is found mutated in a large variety of cancers. 
+Rb is expressed in the absence of the cyclins, which inhibit it by phosphorylation. The phosphorylation of Rb is a progressive process (Henley et al., 2012).
+
+The phosphorylation of Rb begins in early G1 phase, involving CycD:CDK complexes (Narasimha et al., 2014). This allows some E2F to be released and initiates the transcription and subsequent production of CycE. The CycE:CDK2 kinase activity then leads to hyper-phosphorylation of Rb. As the majority of phosphorylation sites on Rb need to be modified to abrogate E2F binding, different activities are associated with different phosphorylation levels of Rb, with CycE playing a key role in driving the cell cycle into S-phase. Later on, Rb is maintained in a hyper-phosphorylated state by CycA and CycB complexes in S, G2, and M phases.
+
+In this model we introduce a ternary node for Rb, with the levels 0, 1 and 2 corresponding to the hyper-phosphorylated, partly-phosphorylated and un-phosphorylated states respectively. The cyclins phosphorylate and inhibit Rb. In the absence of cyclins, Rb is un-phosphorylated (level 2). CycD alone initiates the partial phosphorylation at the beginning of the cell cycle, and thus leads Rb down to the level 1. It requires the assistance of another cyclin to complete this phosphorylation, leading Rb down to the level 0, in the absence of p27. CycA and CycB have symmetrical roles, keeping Rb hyper-phosphorylated during S, G2 and M phases. p27 binds to the CycA/E/B:CDK complexes and inhibits their kinase activities, thereby indirectly activating Rb.</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="117" y="180" width="85" height="55" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="E2F" maxvalue="1">
+      <value val="1">
+        <exp str="(!CycA | (p27:1 &amp; !Skp2) | p27:2) &amp; !Rb &amp; !(Cdc20 &amp; CycB)"/>
+      </value>
+      <annotation>
+        <comment>E2F  factors form dimeric transcription factors,with members of the DP family. The E2F family is usually divided into activators E2Fs (E2F1, E2F2, E2F3a) and repressors E2Fs (E2F3b, E2F4, E2F5), plus the recently discovered E2F6, E2F7 and E2F8, whose structure, regulation and mode of action are slightly different from those of the regular E2Fs (Dimova and Dyson, 2005). 
+In our present model, E2F represents the activator members (together with their DP partners), the other E2Fs being implicit.
+E2F is active in the absence of Rb, that blocks E2F self-transcriptional activation (Helin, 1998), and in the absence of CycA and CycB, that inhibit E2F (Novak and Tyson, 2004).
+E2F can be active in presence of CycA when its inhibitory activity is blocked by p27 (Coqueret, 2003). 
+At the G1/S transition, E2F activates the transcription of Cyclin E, which in turns causes the inactivation of Rb. 
+Phosphorylated Rb dissociates from E2F, allowing Cyclin A to be transcribed.
+
+Cdc20, and to a lesser extend Cdh1, is responsible for degrading E2F in early mitosis when E2F is freed from complexes with DP1. It has been proposed by Weis et al. (2014) that phosphorylation by CycB enables the release of E2F, exposing it to Cdc20.</comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="180" y="288" width="90" height="60" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CycE" maxvalue="1">
+      <value val="1">
+        <exp str="E2F &amp; !Rb"/>
+      </value>
+      <annotation>
+        <comment>CycE stands here for the whole cdk2-Cyclin E complex.
+At the G1/S transition, E2F activates the transcription of Cyclin E.
+CycE activity requires the presence of E2f and the absence of Rb (Helin, 1998).
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="259" y="114" width="90" height="60" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CycA" maxvalue="1">
+      <value val="1">
+        <exp str="((E2F &amp; !Rb) | CycA) &amp; (!UbcH10 | (!Cdh1 &amp; !Cdc20))"/>
+      </value>
+      <annotation>
+        <comment>CycA stands here for the whole cdk2-Cyclin A complex.
+The transcription of CycA is activated by E2F in the absence of Rb, which blocks this activation, slightly after Cyclin E, when Rb is more completely inactivated (Helin, 1998, Zhang et al., 2000), in the absence of Cdc20, as well as of the pair formed by Cdh1 and UbcH10,  which both lead to the degradation of CycA (Harper et al., 2002; Rape and Kirschner, 2004).
+CycA is stable in the absence of its inhibitors Rb, Cdc20, and of the pair Cdh1 and UbcH10.
+The action of CycA contributes to maintain Rb and p27 inhibition, inactivates E2F and CycE and most importantly, inactivates the Anaphase Promoting Complex (APC).</comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="413" y="177" width="90" height="60" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="CycB" maxvalue="1">
+      <value val="1">
+        <exp str="(!UbcH10 | !Cdc20) &amp; !Cdh1"/>
+      </value>
+      <annotation>
+        <comment>Stands for Cdk2/Cyclin B.
+During M phase, Cyclin B activates Cdc20, sowing the seeds of its own destruction, since CycB is a target of Cdc20. 
+CycB is active in the absence of both Cdc20 and Cdh1, which target CycB for destruction (Harper et al, 2002). </comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="349" y="441" width="90" height="60" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="p27" maxvalue="2">
+      <value val="2">
+        <exp str="!CycD &amp; ((!CycB &amp; (!CycA | p27) &amp; (!CycE | (p27:2 &amp; !CycA))) | !Skp2)"/>
+      </value>
+      <value val="1">
+        <exp str="CycD &amp; ((!CycB &amp; (!CycA | p27) &amp; (!CycE | (p27:2 &amp; !CycA))) | !Skp2)"/>
+      </value>
+      <annotation>
+        <comment>p27 is a cdk inhibitor that sequesters cdk2/Cyclin E (CycE) and cdk2/Cyclin A (CycA), preventing them from phosphorylating their targets (reviewed in Coqueret, 2003). A saturation of p27 inhibitory activity by the different cyclins is also  considered in the corresponding logical rule.
+
+p27 is phosphorylated by Cyclin E and Cyclin A associated CDKs, and Skp2 promotes the degradation of phosphorylated p27. 
+
+Cyclin D also sequestrates p27 during the cell cycle, but a direct inhibition of p27 by CycD overlooks the role of p27 in the transition from G1 to S.
+We associate a ternary node with p27 and distinguish two activation levels, in the presence versus the absence of CycD.
+</comment>
+      </annotation>
+      <nodevisualsetting>
+        <rect x="541" y="221" width="85" height="55" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Cdc20" maxvalue="1">
+      <value val="1">
+        <exp str="CycB"/>
+      </value>
+      <annotation>
+        <comment>Cdc20 is one of the activator of the APC, which is an important E3 ubiquitin ligase that is activated in a cyclic fashion (reviewed in Harper et al., 2002) . 
+Cdc20 is responsible for the metaphase-to-anaphase transition: it activates separase through the destruction of its inhibitor securin; this activation elicits the cleavage of the cohesin complexes that maintain the cohesion between the sister chromatids, thus leading to their separation.
+Cdc20 also participates in degrading CycA, and indirectly activates Cdh1.
+CycB indirectly activates Cdc20 (Harper et al., 2002). </comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="348" y="270" width="90" height="60" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Cdh1" name="Cdh1" maxvalue="1">
+      <value val="1">
+        <exp str="(!CycA | (p27:1 &amp; !Skp2) | p27:2) &amp; (!CycB | p27)"/>
+      </value>
+      <annotation>
+        <comment>Cdh1 is one of the activator of the APC, which is an important E3 ubiquitin ligase that is activated in a cyclic fashion (reviewed in Harper et al., 2002) . 
+Around the G2-to-M-phase transition, CycA inactivates Cdh1, which switches the APC OFF, allowing Cyclin B to appear. 
+Cdh1 completes CycA and CycB inactivation, and inactivates Cdc20. 
+In absence of its inhibitors, E2F can be reactivated and a new cycle begins.
+The activity of Cdh1 requires the absence of CycB and CycA, which inhibit it by phosphorylation (Harper et al., 2002).
+Cdc20 further activates Cdh1 (Novak and Tyson, 2004).
+Cdh1 can be expressed in presence of CycA when p27 blocks its inhibitory activity. </comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="442" y="347" width="90" height="60" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="UbcH10" name="UbdH10" maxvalue="1">
+      <value val="1">
+        <exp str="!Cdh1"/>
+        <exp str="Cdh1 &amp; UbcH10 &amp; (CycA | Cdc20 | CycB)"/>
+      </value>
+      <annotation>
+        <comment>The E2 ubiquitin conjugating enzyme UbcH10 is necessary for Cdh1 dependent degradation of Cyclin A and Cyclin B, but not of the other APC substrates.
+UbcH10 activity can be maintained in the presence of Cdh1 when at least one of its other targets is present (CycA, Cdc20, or CycB) :
+"Throughout mitosis, the APC/C is saturated with targeting proteins, which spares UBE2C degradation as well as APC/C inactivation. After complete target protein destruction, the APC/C ubiquitinates UBE2C." (Meyer and Rape, 2011; Rape and Kirschner, 2004). 
+Once all of Cdh1 substrates have been degraded, UbcH10 can ubiquitinate itself, preventing the APC from degrading Cyclin A, which can thus reappear. 
+These findings make the activation of Cyclin A in S phase coherent with the observation that Cdh1 is still active at this point of the cycle.</comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="255" y="347" width="90" height="60" backgroundColor="#ccccff" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <node id="Skp2" maxvalue="1">
+      <value val="1">
+        <exp str="!Cdh1 | !Rb"/>
+      </value>
+      <annotation>
+        <comment>"Skp2 is an F box protein and constitutes the substrate recognition subunit of an SCF (Skp1/Cul1/F box protein) ubiquitin ligase complex that targets the CKIs p21 and p27 for degradation. Degradation of Skp2 by APC/CCdh1 contributes to increase the levels of these CKIs in quiescent cells." (Guardavaccaro &amp; Pagano, 2006)
+
+"Unphosphorylated pRb is also able to bind APC/CCdh1. pRb acts as a modulator of APC/CCdh1 ubiquitination activity and enhances the degradation of Skp2, thus promoting the accumulation of p27 and cell-cycle exit."  (Santamaria &amp; Pagano, 2007)</comment>
+      </annotation>
+      <nodevisualsetting>
+        <ellipse x="625" y="345" width="90" height="60" backgroundColor="#ccffcc" foregroundColor="#000000"/>
+      </nodevisualsetting>
+    </node>
+    <edge id="CycD:Rb" from="CycD" to="Rb" minvalue="1" sign="negative">
+      <annotation>
+        <comment>The phosphorylation of Rb begins in early G1 phase, involving CycD:CDK complexes (Narasimha et al., 2014). </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="150,113 150,130 150,177" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycD:p27" from="CycD" to="p27" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Cyclin D sequestrates p27 during the cell cycle, but a direct inhibition of p27 by CycD overlooks the role of p27 in the transition from G1 to S.
+We associate a ternary node with p27 and distinguish two activation levels, in the presence versus the absence of CycD.
+A saturation of p27 inhibitory activity by the different cyclins is further considered in the corresponding logical rule.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="203,81 607,81 607,218" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Rb:Skp2" from="Rb" to="Skp2" minvalue="2" sign="negative">
+      <annotation>
+        <comment>Unphosphorylated Rb binds to Cdh1 and thereby participates in the ubiquitin-mediated degradation of Skp2 (Binné et al., 2007; Liu et al., 2008).</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="144,237 144,530 671,529 671,408" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Rb:CycE" from="Rb" to="CycE" minvalue="2" sign="negative">
+      <annotation>
+        <comment>"In G0 and G1, the pocket proteins cooperate to prevent the transcription of E2F regulated genes. The E2F target genes that are subject to this regulation include cell cycle regulators such as cyclins A and E." (Henley et al., 2012)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="180,178 180,136 256,136" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Rb:CycA" from="Rb" to="CycA" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"In G0 and G1, the pocket proteins cooperate to prevent the transcription of E2F regulated genes. The E2F target genes that are subject to this regulation include cell cycle regulators such as cyclins A and E." (Henley et al., 2012)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="204,196 261,196 410,196" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Rb:E2F" from="Rb" to="E2F" minvalue="2" sign="negative">
+      <annotation>
+        <comment>"In G0 and G1, the pocket proteins cooperate to prevent the transcription of E2F regulated genes. The E2F target genes that are subject to this regulation include cell cycle regulators such as cyclins A and E." (Henley et al., 2012)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="194,237 194,265 194,285" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdc20:CycB" from="Cdc20" to="CycB" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Early in mitosis, APC/CCdc20 is inhibited by the spindle assembly checkpoint, but few APC/C-substrates, such as cyclin A or Nek2A, are degraded. (Meyer2011)
+- Once the spindle check-point has been satisfied, the APC/C ubiquitinates a small number of proteins, including cyclin B1, that are delivered by a WD40- repeat protein, Cdc20.  (Meyer2011)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="377,332 377,386 377,438" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdc20:CycA" from="Cdc20" to="CycA" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Cdc20 participates in degrading CycA.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="440,301 444,301 444,240" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdc20:UbcH10" from="Cdc20" to="UbcH10" minvalue="1" sign="positive">
+      <annotation>
+        <comment>UBE2C is degraded in a process described as autoubiquitination, in association with APC/CCdh1 but not APC/CCDC20 (Grutzmann et al., 2004; Rape and Kirschner, 2004). Throughout mitosis, the APC/C is saturated with targeting proteins, which spares UBE2C degradation as well as APC/C inactivation. After complete target protein destruction, the APC/C ubiquitinates UBE2C (Meyer and Rape, 2011; Rape and Kirschner, 2004). The degradation of UBE2C is a slow process because of deubiquitination enzymes (DUBs), which remove ubiquitin from UBE2C. (Xie2014)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="368,332 368,360 348,360" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdc20:E2F" from="Cdc20" to="E2F" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Cdc20, and to a lesser extend Cdh1, is responsible for degrading E2F in early mitosis when E2F is freed from complexes with DP1. It has been proposed by Weis et al. (2014) that phosphorylation by CycB enables the release of E2F, exposing it to Cdc20.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="346,303 336,303 273,303" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycE:Rb" from="CycE" to="Rb" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"The majority of phosphorylation sites on pRB need to be modified to abrogate E2F binding. The sequential phosphorylation of pRB by ckd4/6 followed by cdk2 is necessary because cdk4/6 alone is unable to completely phosphorylate pRB." (Henley et al., 2012) </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="257,126 164,126 164,177" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycE:p27" from="CycE" to="p27" minvalue="1" sign="negative">
+      <annotation>
+        <comment>p27 is phosphorylated by Cyclin E and Cyclin A associated CDKs, and Skp2 promotes the degradation of phosphorylated p27.  (Nakayama et al., 2004).</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="351,144 563,144 563,218" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="E2F:CycA" from="E2F" to="CycA" minvalue="1" sign="positive">
+      <annotation>
+        <comment>The transcription of CycA is activated by E2F in the absence of Rb, which blocks this activation, slightly after Cyclin E, when Rb is more completely inactivated. (Helin, 1998, Zhang et al., 2000)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="226,286 226,207 410,207" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="E2F:CycE" from="E2F" to="CycE" minvalue="1" sign="positive">
+      <annotation>
+        <comment>At the G1/S transition, E2F activates the transcription of Cyclin E, which in turns causes the inactivation of Rb. </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="218,286 218,146 256,146" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycB:p27" from="CycB" to="p27" minvalue="1" sign="negative">
+      <annotation>
+        <comment>The interaction between the Skp2 subunit of the SCF(Skp2) complex and p27 is dependent upon Cdk2:Cyclin A/E mediated phosphorylation of p27 at Thr 187. There is evidence that Cyclin A/B:Cdk1 can also bind and phosphorylate p27 on Thr 187. This phosphorylation is also essential for the subsequent ubiquitination of p27. (Carrano et al, 1999; Tsvetkov et al, 1999, Nakayama et al., 2004).</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="441,470 594,470 594,279" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycB:Cdh1" from="CycB" to="Cdh1" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"After mitosis the drop in cyclin B1-levels leads to the activation of a different APC/C-adaptor with much broader substrate spectrum, Cdh1." (Meyer et al., 2011)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="441,455 473,455 473,410" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycB:Cdc20" from="CycB" to="Cdc20" minvalue="1" sign="positive">
+      <annotation>
+        <comment>CycB indirectly activates Cdc20 (Harper et al., 2002). </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="391,439 391,387 391,333" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycB:UbcH10" from="CycB" to="UbcH10" minvalue="1" sign="positive">
+      <annotation>
+        <comment>UBE2C is degraded in a process described as autoubiquitination, in association with APC/CCdh1 but not APC/CCDC20 (Grutzmann et al., 2004; Rape and Kirschner, 2004). Throughout mitosis, the APC/C is saturated with targeting proteins, which spares UBE2C degradation as well as APC/C inactivation. After complete target protein destruction, the APC/C ubiquitinates UBE2C (Meyer and Rape, 2011; Rape and Kirschner, 2004). Tbiolohe degradation of UBE2C is a slow process because of deubiquitination enzymes (DUBs), which remove ubiquitin from UBE2C. (Xie2014)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="347,449 322,449 322,410" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycB:Rb" from="CycB" to="Rb" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"Cyclin A:Cdk2 and cyclin B:Cdk1 maintain Rb in an inactive hyper-phosphorylated state during S, G2 and M phases." (Narasimha et al., 2014) </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="347,472 170,472 170,238" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycB:E2F" from="CycB" to="E2F" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Cdc20, and to a lesser extend Cdh1, is responsible for degrading E2F in early mitosis when E2F is freed from complexes with DP1. It has been proposed by Weis et al. (2014) that phosphorylation by CycB enables the release of E2F, exposing it to Cdc20.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="347,466 223,466 223,351" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdh1:CycB" from="Cdh1" to="CycB" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Cdh1 completes the elimination of mitotic cyclins. Cdh1 is not required for mitotic exit. (Skaar &amp; Pagano, 2008)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="440,383 405,383 405,438" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdh1:CycA" from="Cdh1" to="CycA" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Cdh1 completes the elimination of mitotic cyclins.  (Skaar &amp; Pagano, 2008)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="459,345 459,318 459,240" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdh1:UbcH10" from="Cdh1" to="UbcH10" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"UBE2C is degraded in a process described as autoubiquitination, in association with APC/CCdh1 but not APC/CCDC20" (Grutzmann et al., 2004; Rape and Kirschner, 2004). 
+"Throughout mitosis, the APC/C is saturated with targeting proteins, which spares UBE2C degradation as well as APC/C inactivation. After complete target protein destruction, the APC/C ubiquitinates UBE2C" (Meyer and Rape, 2011; Rape and Kirschner, 2004). </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="440,374 383,374 348,374" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Cdh1:Skp2" from="Cdh1" to="Skp2" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Unphosphorylated Rb binds to Cdh1 and thereby participates in the ubiquitin-mediated degradation of Skp2 (Binné et al., 2007; Liu et al., 2008).</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="534,367 561,367 577,367 622,367" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p27:p27" from="p27" to="p27" effects="1:positive 2:positive">
+      <annotation>
+        <comment>The CDK inhibitor p27 binds CycE and CycA, thereby inhibiting their activities. This inhibitory activity is modelled by opposite regulations on the targets of CycE and CycA.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="577,219 577,204 585,200 596,204 596,218" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p27:E2F" from="p27" to="E2F" effects="1:positive 2:positive">
+      <annotation>
+        <comment>The CDK inhibitor p27 binds CycE and CycA, thereby inhibiting their activities. This inhibitory activity is modelled by opposite regulations on the targets of CycE and CycA.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="539,251 253,251 253,285" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p27:Rb" from="p27" to="Rb" minvalue="1" sign="positive">
+      <annotation>
+        <comment>p27/Kip1 is a cdk inhibitor that sequesters cdk2/Cyclin E and cdk2/Cyclin A.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="608,278 608,516 158,518 158,238" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="p27:Cdh1" from="p27" to="Cdh1" effects="1:positive 2:positive">
+      <annotation>
+        <comment>The CDK inhibitor p27 binds CycE and CycA, thereby inhibiting their activities. This inhibitory activity is modelled by opposite regulations on the targets of CycE and CycA.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="539,258 492,258 492,344" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycA:Cdh1" from="CycA" to="Cdh1" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Phosphorylation of the APC activator Cdh1 by cyclin A/Cdk2. (Rape and Kirschner, 2004)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="473,239 473,282 473,344" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycA:E2F" from="CycA" to="E2F" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Cyclin A/ CDK2 binds directly to E2F-1 and inhibits the DNA-binding activity of E2F-1/ DP-1 by phosphorylation. (Krek-Xu 1994)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="411,215 240,215 240,285" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycA:CycA" from="CycA" to="CycA" minvalue="1" sign="positive">
+      <annotation>
+        <comment>CycA is stable in the absence of its inhibitors Rb, Cdc20, and of the pair Cdh1 and UbcH10.</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="443,175 443,158 455,154 466,158 466,174" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycA:p27" from="CycA" to="p27" minvalue="1" sign="negative">
+      <annotation>
+        <comment>p27 is phosphorylated by Cyclin E and Cyclin A associated CDKs, and Skp2 promotes the degradation of phosphorylated p27.  (Nakayama et al., 2004).</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="505,197 550,197 550,218" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycA:UbcH10" from="CycA" to="UbcH10" minvalue="1" sign="positive">
+      <annotation>
+        <comment>UBE2C is degraded in a process described as autoubiquitination, in association with APC/CCdh1 but not APC/CCDC20 (Grutzmann et al., 2004; Rape and Kirschner, 2004). Throughout mitosis, the APC/C is saturated with targeting proteins, which spares UBE2C degradation as well as APC/C inactivation. After complete target protein destruction, the APC/C ubiquitinates UBE2C (Meyer and Rape, 2011; Rape and Kirschner, 2004). The degradation of UBE2C is a slow process because of deubiquitination enzymes (DUBs), which remove ubiquitin from UBE2C. (Xie2014)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="411,222 280,222 280,344" line_color="#00c800" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="CycA:Rb" from="CycA" to="Rb" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"Cyclin A:Cdk2 and cyclin B:Cdk1 maintain Rb in an inactive hyper-phosphorylated state during S, G2 and M phases." (Narasimha et al., 2014) </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="411,186 264,186 205,186" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Skp2:p27" from="Skp2" to="p27" minvalue="1" sign="negative">
+      <annotation>
+        <comment>Skp2 promotes the degradation of phosphorylated p27 by CycE and CycA associated CDKs. (Nakayama et al., 2004).</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="668,343 668,248 629,248" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Skp2:E2F" from="Skp2" to="E2F" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"Skp2-cyclin A interaction is separable from Skp2 ability to mediate p27 ubiquitylation. Skp2-cyclin A interaction serves to directly protect cyclin A-Cdk2 from inhibition by p27 through competitive binding." (Ji et al., 2006)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="660,407 660,524 213,524 213,351" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="Skp2:Cdh1" from="Skp2" to="Cdh1" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"Skp2-cyclin A interaction is separable from Skp2 ability to mediate p27 ubiquitylation. Skp2-cyclin A interaction serves to directly protect cyclin A-Cdk2 from inhibition by p27 through competitive binding." (Ji et al., 2006)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="623,388 594,388 540,388 535,388" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="UbcH10:CycA" from="UbcH10" to="CycA" minvalue="1" sign="negative">
+      <annotation>
+        <comment>UBE2C, as an exclusive partner of APC/C, participates in the degradation of a family of APC/C target proteins. UBE2C is required for the destruction of mitotic cyclins and other mitosis-related substrates: UBE2C-APC/CCDC20 induces degradation of cyclin B rendering Cdk1 inactive. (Xie2014)
+
+Dominant-negative UbcH10 proteins inhibits the destruction of both cyclin A and B, arrests cells in M phase, and inhibits the onset of anaphase, presumably by blocking the ubiquitin-dependent proteolysis of pro- teins responsible for sister chromatid separation. (Townsley1997)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="323,345 323,230 410,230" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="UbcH10:UbcH10" from="UbcH10" to="UbcH10" minvalue="1" sign="positive">
+      <annotation>
+        <comment>"Throughout mitosis, the APC/C is saturated with targeting proteins, which spares UBE2C degradation as well as APC/C inactivation. After complete target protein destruction, the APC/C ubiquitinates UBE2C." (Meyer and Rape, 2011; Rape and Kirschner, 2004). </comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="288,345 288,328 300,324 311,328 311,344" line_color="#00c800" line_style="curve" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <edge id="UbcH10:CycB" from="UbcH10" to="CycB" minvalue="1" sign="negative">
+      <annotation>
+        <comment>"UBE2C, as an exclusive partner of APC/C, participates in the degradation of a family of APC/C target proteins. UBE2C is required for the destruction of mitotic cyclins and other mitosis-related substrates: UBE2C-APC/CCDC20 induces degradation of cyclin B rendering Cdk1 inactive." (Xie2014)</comment>
+      </annotation>
+      <edgevisualsetting>
+        <polyline points="306,409 306,459 346,459" line_color="#c80000" line_style="straight" line_width="2" routage="auto"/>
+      </edgevisualsetting>
+    </edge>
+    <annotation>
+      <comment>This model is an extension of the seminal model of the G1/S restriction point control of mammalian cell cycle, published by Fauré et al (2006). We have used model-checking and computing tree logics (CTL) to progressively refine Fauré's model in order to fit recent experimental observations. The resulting model accounts for the sequential activation of cyclins, the role of Skp2, and emphasizes a multifunctional role for the cell cycle inhibitor Rb.</comment>
+    </annotation>
+  </graph>
+</gxl>

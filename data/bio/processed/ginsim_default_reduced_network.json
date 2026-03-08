@@ -1,0 +1,285 @@
+{
+  "name": "ginsim_default_reduced_network",
+  "nodes": [
+    "Z1",
+    "Z2",
+    "W",
+    "DMRT1",
+    "HEMGN",
+    "SOX9",
+    "FOXL2",
+    "AROMATASE",
+    "OESTROGEN"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ]
+  ],
+  "logic": {
+    "DMRT1": "Z1 & Z2 & !W & !HEMGN & !FOXL2 & !SOX9",
+    "HEMGN": "!SOX9 & DMRT1:1",
+    "SOX9": "(SOX9 | DMRT1:2) & !FOXL2",
+    "FOXL2": "(!DMRT1:2 & !SOX9) | (OESTROGEN & !DMRT1)",
+    "AROMATASE": "FOXL2 | OESTROGEN",
+    "OESTROGEN": "AROMATASE"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "DMRT1": {
+      "inputs": [
+        "Z1",
+        "Z2",
+        "W",
+        "HEMGN",
+        "SOX9",
+        "FOXL2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "HEMGN": {
+      "inputs": [
+        "DMRT1",
+        "SOX9"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "SOX9": {
+      "inputs": [
+        "DMRT1",
+        "FOXL2"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "FOXL2": {
+      "inputs": [
+        "DMRT1",
+        "SOX9",
+        "OESTROGEN"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "AROMATASE": {
+      "inputs": [
+        "FOXL2",
+        "OESTROGEN"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "OESTROGEN": {
+      "inputs": [
+        "AROMATASE"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 4,
+    "OR": 1,
+    "IDENTITY": 1
+  },
+  "n": 9,
+  "n_edges": 16,
+  "edges": [
+    {
+      "source": "W",
+      "target": "DMRT1",
+      "type": "inhibition"
+    },
+    {
+      "source": "FOXL2",
+      "target": "DMRT1",
+      "type": "inhibition"
+    },
+    {
+      "source": "FOXL2",
+      "target": "SOX9",
+      "type": "inhibition"
+    },
+    {
+      "source": "FOXL2",
+      "target": "AROMATASE",
+      "type": "activation"
+    },
+    {
+      "source": "Z2",
+      "target": "DMRT1",
+      "type": "activation"
+    },
+    {
+      "source": "HEMGN",
+      "target": "DMRT1",
+      "type": "activation"
+    },
+    {
+      "source": "SOX9",
+      "target": "DMRT1",
+      "type": "activation"
+    },
+    {
+      "source": "SOX9",
+      "target": "HEMGN",
+      "type": "inhibition"
+    },
+    {
+      "source": "SOX9",
+      "target": "SOX9",
+      "type": "activation"
+    },
+    {
+      "source": "SOX9",
+      "target": "FOXL2",
+      "type": "inhibition"
+    },
+    {
+      "source": "DMRT1",
+      "target": "HEMGN",
+      "type": "activation"
+    },
+    {
+      "source": "DMRT1",
+      "target": "SOX9",
+      "type": "activation"
+    },
+    {
+      "source": "DMRT1",
+      "target": "FOXL2",
+      "type": "inhibition"
+    },
+    {
+      "source": "OESTROGEN",
+      "target": "FOXL2",
+      "type": "activation"
+    },
+    {
+      "source": "OESTROGEN",
+      "target": "AROMATASE",
+      "type": "activation"
+    },
+    {
+      "source": "Z1",
+      "target": "DMRT1",
+      "type": "activation"
+    },
+    {
+      "source": "AROMATASE",
+      "target": "OESTROGEN",
+      "type": "activation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    1,
+    1,
+    3,
+    1,
+    3,
+    3,
+    1,
+    2
+  ]
+}

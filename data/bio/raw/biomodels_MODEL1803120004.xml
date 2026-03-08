@@ -1,0 +1,1472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbml xmlns="http://www.sbml.org/sbml/level3/version2/core" xmlns:arrays="http://www.sbml.org/sbml/level3/version1/arrays/version1" xmlns:distrib="http://www.sbml.org/sbml/level3/version1/distrib/version1" level="3" version="2" arrays:required="true">
+  <model>
+    <listOfFunctionDefinitions>
+      <functionDefinition id="uniform">
+        <annotation>
+          <distribution xmlns="http://sbml.org/annotations/distribution" definition="http://en.wikipedia.org/wiki/Uniform_distribution_(continuous)"/>
+        </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> a </ci>
+            </bvar>
+            <bvar>
+              <ci> b </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <ci> a </ci>
+                <ci> b </ci>
+              </apply>
+              <cn type="integer"> 2 </cn>
+            </apply>
+          </lambda>
+        </math>
+        <distrib:drawFromDistribution>
+          <distrib:listOfDistribInputs>
+            <distrib:distribInput distrib:id="a" distrib:index="0"/>
+            <distrib:distribInput distrib:id="b" distrib:index="1"/>
+          </distrib:listOfDistribInputs>
+          <UncertML xmlns="http://www.uncertml.org/3.0">
+            <UniformDistribution definition="http://www.uncertml.org/distributions">
+              <minimum>
+                <var varId="a"/>
+              </minimum>
+              <maximum>
+                <var varId="b"/>
+              </maximum>
+            </UniformDistribution>
+          </UncertML>
+        </distrib:drawFromDistribution>
+      </functionDefinition>
+      <functionDefinition id="min">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <lambda>
+            <bvar>
+              <ci> a </ci>
+            </bvar>
+            <bvar>
+              <ci> b </ci>
+            </bvar>
+            <piecewise>
+              <piece>
+                <ci> a </ci>
+                <apply>
+                  <lt/>
+                  <ci> a </ci>
+                  <ci> b </ci>
+                </apply>
+              </piece>
+              <otherwise>
+                <ci> b </ci>
+              </otherwise>
+            </piecewise>
+          </lambda>
+        </math>
+      </functionDefinition>
+    </listOfFunctionDefinitions>
+    <listOfUnitDefinitions>
+      <unitDefinition id="Individual">
+        <listOfUnits>
+          <unit kind="item" exponent="0" scale="0" multiplier="1"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfParameters>
+      <parameter id="SimulationSize" value="100" units="Individual" constant="true"/>
+      <parameter id="InstructionNumber" value="0" constant="false">
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </parameter>
+      <parameter id="Random" value="-1" constant="false">
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </parameter>
+      <parameter id="Time" value="-1" constant="false">
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </parameter>
+      <parameter id="Healthy" value="0" constant="false">
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </parameter>
+      <parameter id="Sick" value="0" constant="false">
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </parameter>
+      <parameter id="Dead" value="0" constant="false">
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </parameter>
+      <parameter id="Male" value="0" constant="false">
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </parameter>
+    </listOfParameters>
+    <listOfInitialAssignments>
+      <initialAssignment symbol="Healthy">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <selector/>
+            <vector>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+            </vector>
+            <ci> d0 </ci>
+          </apply>
+        </math>
+        <arrays:listOfIndices>
+          <arrays:index arrays:referencedAttribute="symbol" arrays:arrayDimension="0">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <ci> d0 </ci>
+            </math>
+          </arrays:index>
+        </arrays:listOfIndices>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </initialAssignment>
+      <initialAssignment symbol="Sick">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <selector/>
+            <vector>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+            </vector>
+            <ci> d0 </ci>
+          </apply>
+        </math>
+        <arrays:listOfIndices>
+          <arrays:index arrays:referencedAttribute="symbol" arrays:arrayDimension="0">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <ci> d0 </ci>
+            </math>
+          </arrays:index>
+        </arrays:listOfIndices>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </initialAssignment>
+      <initialAssignment symbol="Dead">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <selector/>
+            <vector>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+            </vector>
+            <ci> d0 </ci>
+          </apply>
+        </math>
+        <arrays:listOfIndices>
+          <arrays:index arrays:referencedAttribute="symbol" arrays:arrayDimension="0">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <ci> d0 </ci>
+            </math>
+          </arrays:index>
+        </arrays:listOfIndices>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </initialAssignment>
+      <initialAssignment symbol="Male">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <apply>
+            <selector/>
+            <vector>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 0 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+              <cn type="integer"> 1 </cn>
+            </vector>
+            <ci> d0 </ci>
+          </apply>
+        </math>
+        <arrays:listOfIndices>
+          <arrays:index arrays:referencedAttribute="symbol" arrays:arrayDimension="0">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <ci> d0 </ci>
+            </math>
+          </arrays:index>
+        </arrays:listOfIndices>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </initialAssignment>
+    </listOfInitialAssignments>
+    <listOfEvents>
+      <event name="TimeIncrease" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <eq/>
+              <apply>
+                <selector/>
+                <ci> InstructionNumber </ci>
+                <ci> d0 </ci>
+              </apply>
+              <cn type="integer"> 0 </cn>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 0 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="Time">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <apply>
+                <plus/>
+                <apply>
+                  <selector/>
+                  <ci> Time </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn> 0.1 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="ResultSamplePoint" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <eq/>
+              <apply>
+                <selector/>
+                <ci> InstructionNumber </ci>
+                <ci> d0 </ci>
+              </apply>
+              <cn> 0.1 </cn>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 0 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn> 0.2 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Terminate" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <and/>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> InstructionNumber </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn> 0.2 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> Dead </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 0 </cn>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <selector/>
+                  <ci> Time </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 10 </cn>
+              </apply>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 0 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 1 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Healthy_Transition_Lead" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <eq/>
+              <apply>
+                <selector/>
+                <ci> InstructionNumber </ci>
+                <ci> d0 </ci>
+              </apply>
+              <cn type="integer"> 1 </cn>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 0 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="Random">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <apply>
+                <ci> uniform </ci>
+                <cn type="integer"> 0 </cn>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn> 1.5 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Healthy_Transition_0" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <and/>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> InstructionNumber </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn> 1.5 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> Healthy </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+              <apply>
+                <geq/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 0 </cn>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.01 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="Healthy">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="Dead">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 1 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Healthy_Transition_1" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <and/>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> InstructionNumber </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn> 1.5 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> Healthy </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+              <apply>
+                <geq/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.01 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.01 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 0.1 </cn>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <selector/>
+                        <ci> Male </ci>
+                        <ci> d0 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="Healthy">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="Sick">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 1 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Healthy_Transition_2" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <and/>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> InstructionNumber </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn> 1.5 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> Healthy </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+              <apply>
+                <geq/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.01 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 0.1 </cn>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <selector/>
+                        <ci> Male </ci>
+                        <ci> d0 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Sick_Transition_Lead" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <eq/>
+              <apply>
+                <selector/>
+                <ci> InstructionNumber </ci>
+                <ci> d0 </ci>
+              </apply>
+              <cn type="integer"> 1 </cn>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 0 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="Random">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <apply>
+                <ci> uniform </ci>
+                <cn type="integer"> 0 </cn>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn> 1.5 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Sick_Transition_0" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <and/>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> InstructionNumber </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn> 1.5 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> Sick </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+              <apply>
+                <geq/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 0 </cn>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="Sick">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="Healthy">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 1 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Sick_Transition_1" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <and/>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> InstructionNumber </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn> 1.5 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> Sick </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+              <apply>
+                <geq/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.1 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.1 </cn>
+                  <cn> 0.3 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="Sick">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="Dead">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 1 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+      <event name="Sick_Transition_2" useValuesFromTriggerTime="false">
+        <trigger initialValue="false" persistent="false">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+              <and/>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> InstructionNumber </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn> 1.5 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <apply>
+                  <selector/>
+                  <ci> Sick </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+              <apply>
+                <geq/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 0 </cn>
+                  <cn> 0.1 </cn>
+                  <cn> 0.3 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <selector/>
+                  <ci> Random </ci>
+                  <ci> d0 </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+          </math>
+        </trigger>
+        <delay>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </delay>
+        <priority>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <cn type="integer"> 1 </cn>
+          </math>
+        </priority>
+        <listOfEventAssignments>
+          <eventAssignment variable="InstructionNumber">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <cn type="integer"> 0 </cn>
+            </math>
+            <arrays:listOfIndices>
+              <arrays:index arrays:referencedAttribute="variable" arrays:arrayDimension="0">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <ci> d0 </ci>
+                </math>
+              </arrays:index>
+            </arrays:listOfIndices>
+          </eventAssignment>
+        </listOfEventAssignments>
+        <arrays:listOfDimensions>
+          <arrays:dimension arrays:id="d0" arrays:size="SimulationSize" arrays:arrayDimension="0"/>
+        </arrays:listOfDimensions>
+      </event>
+    </listOfEvents>
+  </model>
+</sbml>

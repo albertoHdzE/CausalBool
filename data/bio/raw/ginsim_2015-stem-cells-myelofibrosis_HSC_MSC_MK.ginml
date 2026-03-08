@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="HSC_MSC_MK_FINAL" nodeorder="HSC_proliferation HSC_migration PMF TPO lTLR TLRs4_M TGFb_MK ERK_M PI3KAkt_M NfkB_M FoxO3a_M GSK3B_M ROS_M Bcatenin_M VCAM1_M VLA4_H CXCL12_M CXCR4_H PI3KAkt_H NfkB_H FoxO3a_H GSK3B_H ROS_H ERK_H Bcatenin_H TLRs4_H JAK_H STAT_H SOCS_H VLA4_MK TLRs4_MK JAK_MK STAT_MK SOCS_MK PI3KAkt_MK NfkB_MK PF4_MK IL1 IL6 GCSF">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="75" height="25" properties="intermediate:#ffff00 active:#ffc800"/>
+    <nodestyle name="input" background="#ffff00" width="95" height="30"/>
+    <nodestyle name="output" background="#ff00ff" width="115" height="30"/>
+    <nodestyle name="output" background="#ff00ff" height="30"/>
+    <nodestyle name="HSC" background="#3399ff" foreground="#3399ff" text="#ffffff" width="95" height="30"/>
+    <nodestyle name="MSC" background="#006666" foreground="#006666" text="#ffffff" width="95" height="30"/>
+    <nodestyle name="MK" background="#ff3333" foreground="#ff3333" text="#ffffff" width="95" height="30"/>
+    <nodestyle name="inflammatory_cytokines" background="#33ff33" foreground="#000000" width="95" height="30"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="HSC_proliferation" name="HSC_quiescence" maxvalue="2">
+      <value val="2">
+        <exp str="PI3KAkt_H:2"/>
+      </value>
+      <value val="1">
+        <exp str="PI3KAkt_H:1"/>
+      </value>
+      <nodevisualsetting x="1174" y="207" style="output"/>
+    </node>
+    <node id="HSC_migration" maxvalue="1">
+      <value val="1">
+        <exp str="(PI3KAkt_H &amp; (!CXCL12_M | !CXCR4_H)) | (PI3KAkt_H &amp; (!VCAM1_M | !VLA4_H))"/>
+      </value>
+      <nodevisualsetting x="1179" y="291" style="output"/>
+    </node>
+    <node id="PMF" maxvalue="1">
+      <value val="1">
+        <exp str="HSC_migration &amp; TGFb_MK &amp; HSC_proliferation"/>
+      </value>
+      <nodevisualsetting x="1377" y="511" style="output"/>
+    </node>
+    <node id="TPO" maxvalue="1" input="true">
+      <value val="1">
+        <exp str=""/>
+      </value>
+      <nodevisualsetting x="53" y="549" style="input"/>
+    </node>
+    <node id="lTLR" name="lTLR" maxvalue="1" input="true">
+      <annotation>
+        <comment>Because recent studies implicate Toll-like receptors (TLRs) in the pathogenesis of fibrosis, we sought to investigate the in vitro and in vivo role and mechanism of TLR4-mediated fibroblast responses in fibrogenesis.
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3538029/
+</comment>
+      </annotation>
+      <nodevisualsetting x="40" y="55" style="input"/>
+    </node>
+    <node id="TLRs4_M" name="TLRs_M" maxvalue="1">
+      <value val="1">
+        <exp str="lTLR"/>
+      </value>
+      <nodevisualsetting x="7" y="304" style="MSC"/>
+    </node>
+    <node id="TGFb_MK" maxvalue="1">
+      <value val="1">
+        <exp str="PI3KAkt_MK:2 &amp; TLRs4_MK"/>
+      </value>
+      <annotation>
+        <comment>TLR4 activation with LPS increased the suppressive effect of DF-MSCs by enhancing their TGF-β production but abrogated that of DP-MSCs by inhibiting their TGF-β production and IDO-1 expression. These contrasting effects were suggested to be correlated with the higher expression of TLR3 and TLR4 in DP-MSCs compared with DF-MSCs. Additionally, activation of TLR3 with Poly(I:C) enhanced the suppressive functions of T-MSCs against Th17 differentiation by increasing programmed death ligand-1 (PD-L1) expression (95).
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5407987/
+
+
+Because recent studies implicate Toll-like receptors (TLRs) in the pathogenesis of fibrosis, we sought to investigate the in vitro and in vivo role and mechanism of TLR4-mediated fibroblast responses in fibrogenesis. We found that TLR4 was constitutively expressed, and accumulation of endogenous TLR4 ligands significantly elevated, in lesional skin and lung tissues from patients with scleroderma. Activation of TLR4 signaling in explanted fibroblasts resulted in enhanced collagen synthesis and increased expression of multiple genes involved in tissue remodeling and extracellular matrix homeostasis. Moreover, TLR4 dramatically enhanced the sensitivity of fibroblasts to the stimulatory effect of transforming growth factor-β1
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3538029/
+</comment>
+      </annotation>
+      <nodevisualsetting x="1191" y="512" style="MK"/>
+    </node>
+    <node id="ERK_M" name="ERK_M" maxvalue="1">
+      <value val="1">
+        <exp str="!FoxO3a_M &amp; (ROS_M | TLRs4_M | PF4_MK)"/>
+      </value>
+      <nodevisualsetting x="605" y="418" style="MSC"/>
+    </node>
+    <node id="PI3KAkt_M" maxvalue="1">
+      <value val="1">
+        <exp str="TLRs4_M | ROS_M | TGFb_MK"/>
+      </value>
+      <nodevisualsetting x="252" y="350" style="MSC"/>
+    </node>
+    <node id="NfkB_M" maxvalue="1">
+      <value val="1">
+        <exp str="ROS_M | PI3KAkt_M | ERK_M | TLRs4_M"/>
+      </value>
+      <nodevisualsetting x="251" y="424" style="MSC"/>
+    </node>
+    <node id="FoxO3a_M" name="FoxO3a_M" maxvalue="1">
+      <value val="1">
+        <exp str="(Bcatenin_M | ROS_M) &amp; !PI3KAkt_M"/>
+      </value>
+      <nodevisualsetting x="617" y="254" style="MSC"/>
+    </node>
+    <node id="GSK3B_M" name="GSK3B_M" maxvalue="1">
+      <value val="1">
+        <exp str="!PI3KAkt_M"/>
+      </value>
+      <nodevisualsetting x="613" y="322" style="MSC"/>
+    </node>
+    <node id="ROS_M" name="ROS_M" maxvalue="1">
+      <value val="1">
+        <exp str="IL1 | TLRs4_M | !FoxO3a_M"/>
+      </value>
+      <nodevisualsetting x="792" y="254" style="MSC"/>
+    </node>
+    <node id="Bcatenin_M" name="Bcatenin_M" maxvalue="1">
+      <value val="1">
+        <exp str="!GSK3B_M"/>
+      </value>
+      <nodevisualsetting x="787" y="294" style="MSC"/>
+    </node>
+    <node id="VCAM1_M" name="VCAM1_M" maxvalue="1">
+      <value val="1">
+        <exp str="!Bcatenin_M | NfkB_M | PI3KAkt_M | !TGFb_MK"/>
+      </value>
+      <nodevisualsetting x="467" y="329" style="MSC"/>
+    </node>
+    <node id="VLA4_H" name="VLA4_H" maxvalue="1">
+      <value val="1">
+        <exp str="VCAM1_M &amp; CXCR4_H"/>
+      </value>
+      <nodevisualsetting x="466" y="261" style="HSC"/>
+    </node>
+    <node id="CXCL12_M" name="CXCL12_M" maxvalue="1">
+      <value val="1">
+        <exp str="!TGFb_MK | !Bcatenin_M"/>
+      </value>
+      <annotation>
+        <comment>obstructing of CXCr4-CXCL12 axis leads to HSc proliferation (naumann et al., 2010)
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4827072/
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="123" y="303" style="MSC"/>
+    </node>
+    <node id="CXCR4_H" name="CXCR4_H" maxvalue="1">
+      <value val="1">
+        <exp str="CXCL12_M &amp; !GCSF"/>
+      </value>
+      <nodevisualsetting x="254" y="273" style="HSC"/>
+    </node>
+    <node id="PI3KAkt_H" name="PI3KAkt_H" maxvalue="2">
+      <value val="2">
+        <exp str="(CXCR4_H | ROS_H | TLRs4_H | VLA4_H | TGFb_MK) &amp; STAT_H:2"/>
+      </value>
+      <value val="1">
+        <exp str="(CXCR4_H | ROS_H | TLRs4_H | VLA4_H | TGFb_MK) &amp; STAT_H:1"/>
+      </value>
+      <nodevisualsetting x="269" y="204" style="HSC"/>
+    </node>
+    <node id="NfkB_H" name="NfkB_H" maxvalue="2">
+      <value val="2">
+        <exp str="PI3KAkt_H:2"/>
+      </value>
+      <value val="1">
+        <exp str="(ROS_H &amp; !PI3KAkt_H:2) | (ERK_H &amp; !PI3KAkt_H:2) | (TLRs4_H &amp; !PI3KAkt_H:2)"/>
+      </value>
+      <nodevisualsetting x="479" y="53" style="HSC"/>
+    </node>
+    <node id="FoxO3a_H" name="FoxO3a_H" maxvalue="1">
+      <value val="1">
+        <exp str="(Bcatenin_H | ROS_H) &amp; !PI3KAkt_H"/>
+      </value>
+      <nodevisualsetting x="679" y="117" style="HSC"/>
+    </node>
+    <node id="GSK3B_H" name="GSK3B_H" maxvalue="1">
+      <value val="1">
+        <exp str="!PI3KAkt_H:2"/>
+      </value>
+      <nodevisualsetting x="619" y="58" style="HSC"/>
+    </node>
+    <node id="ROS_H" name="ROS_H" maxvalue="1">
+      <value val="1">
+        <exp str="!FoxO3a_H | IL1 | TLRs4_H"/>
+      </value>
+      <nodevisualsetting x="801" y="126" style="HSC"/>
+    </node>
+    <node id="ERK_H" name="ERK_H" maxvalue="1">
+      <value val="1">
+        <exp str="((CXCR4_H &amp; PI3KAkt_H) | ROS_H | VLA4_H | PF4_MK) &amp; !(FoxO3a_H | GSK3B_H)"/>
+      </value>
+      <annotation>
+        <comment>ERK activates NfkB in HSC
+https://www.nature.com/articles/s41467-020-14478-8
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="618" y="180" style="HSC"/>
+    </node>
+    <node id="Bcatenin_H" name="Bcatenin_H" maxvalue="1">
+      <value val="1">
+        <exp str="!GSK3B_H"/>
+      </value>
+      <nodevisualsetting x="798" y="58" style="HSC"/>
+    </node>
+    <node id="TLRs4_H" name="TLRs_H" maxvalue="1">
+      <value val="1">
+        <exp str="lTLR"/>
+      </value>
+      <nodevisualsetting x="255" y="55" style="HSC"/>
+    </node>
+    <node id="JAK_H" maxvalue="2">
+      <value val="2">
+        <exp str="TPO &amp; IL6 &amp; !SOCS_H"/>
+      </value>
+      <value val="1">
+        <exp str="(IL6 &amp; !TPO &amp; !SOCS_H) | (TPO &amp; !IL6 &amp; !SOCS_H) | (!IL6 &amp; !TPO &amp; !SOCS_H)"/>
+      </value>
+      <nodevisualsetting x="940" y="55" style="HSC"/>
+    </node>
+    <node id="STAT_H" maxvalue="2">
+      <value val="2">
+        <exp str="JAK_H:2"/>
+      </value>
+      <value val="1">
+        <exp str="JAK_H:1"/>
+      </value>
+      <nodevisualsetting x="940" y="105" style="HSC"/>
+    </node>
+    <node id="SOCS_H" maxvalue="1">
+      <value val="1">
+        <exp str="STAT_H"/>
+      </value>
+      <nodevisualsetting x="1042" y="54" style="HSC"/>
+    </node>
+    <node id="VLA4_MK" maxvalue="1">
+      <value val="1">
+        <exp str="VCAM1_M"/>
+      </value>
+      <nodevisualsetting x="139" y="614" style="MK"/>
+    </node>
+    <node id="TLRs4_MK" maxvalue="1">
+      <value val="1">
+        <exp str="lTLR"/>
+      </value>
+      <nodevisualsetting x="136" y="651" style="MK"/>
+    </node>
+    <node id="JAK_MK" maxvalue="2">
+      <value val="2">
+        <exp str="TPO &amp; IL6 &amp; !SOCS_MK"/>
+      </value>
+      <value val="1">
+        <exp str="(IL6 &amp; !TPO &amp; !SOCS_MK) | (TPO &amp; !IL6 &amp; !SOCS_MK) | (!IL6 &amp; !TPO &amp; !SOCS_MK)"/>
+      </value>
+      <nodevisualsetting x="1015" y="556" style="MK"/>
+    </node>
+    <node id="STAT_MK" maxvalue="2">
+      <value val="2">
+        <exp str="JAK_MK:2"/>
+      </value>
+      <value val="1">
+        <exp str="JAK_MK:1"/>
+      </value>
+      <nodevisualsetting x="1015" y="607" style="MK"/>
+    </node>
+    <node id="SOCS_MK" maxvalue="1">
+      <value val="1">
+        <exp str="STAT_MK"/>
+      </value>
+      <nodevisualsetting x="1123" y="554" style="MK"/>
+    </node>
+    <node id="PI3KAkt_MK" maxvalue="2">
+      <parameter idActiveInteractions=" STAT_MK:PI3KAkt_MK:1 VLA4_MK:PI3KAkt_MK" val="2"/>
+      <value val="2">
+        <exp str="STAT_MK:2"/>
+      </value>
+      <value val="1">
+        <exp str="(VLA4_MK &amp; !STAT_MK) | (STAT_MK:1 &amp; !VLA4_MK)"/>
+      </value>
+      <nodevisualsetting x="861" y="608" style="MK"/>
+    </node>
+    <node id="NfkB_MK" name="NfkB_H" maxvalue="2">
+      <value val="2">
+        <exp str="TLRs4_MK &amp; PI3KAkt_MK"/>
+      </value>
+      <value val="1">
+        <exp str="(TLRs4_MK &amp; !PI3KAkt_MK) | (PI3KAkt_MK &amp; !TLRs4_MK)"/>
+      </value>
+      <nodevisualsetting x="698" y="560" style="MK"/>
+    </node>
+    <node id="PF4_MK" maxvalue="1">
+      <value val="1">
+        <exp str="TLRs4_MK"/>
+      </value>
+      <nodevisualsetting x="856" y="529" style="MK"/>
+    </node>
+    <node id="IL1" maxvalue="1">
+      <value val="1">
+        <exp str="ROS_H | ROS_M | NfkB_M | NfkB_H"/>
+      </value>
+      <nodevisualsetting x="119" y="88" style="inflammatory_cytokines"/>
+    </node>
+    <node id="IL6" maxvalue="1">
+      <value val="1">
+        <exp str="NfkB_M | NfkB_MK | NfkB_H | PF4_MK"/>
+      </value>
+      <nodevisualsetting x="936" y="9" style="inflammatory_cytokines"/>
+    </node>
+    <node id="GCSF" maxvalue="1">
+      <value val="1">
+        <exp str="lTLR"/>
+      </value>
+      <nodevisualsetting x="39" y="187" style="inflammatory_cytokines"/>
+    </node>
+    <edge id="STAT_H:SOCS_H" from="STAT_H" to="SOCS_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="1086,117" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT_H:PI3KAkt_H" from="STAT_H" to="PI3KAkt_H" effects="1:positive 2:positive">
+      <edgevisualsetting points="974,201" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFb_MK:CXCL12_M" from="TGFb_MK" to="CXCL12_M" minvalue="1" sign="negative">
+      <annotation>
+        <comment>
+
+TGFb rapidly reduces SDF1a expression in most osteoblastic cell lines 
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4827072/
+
+To examine the role of canonical TGF-β signaling in the induction of myelofibrosis, we cultured bone marrow derived MSCs from wildtype and Osx-Cre; Smad4f/f mice, in which canonical TGF-β signaling is abrogated. Treatment of wildtype MSC cultures with TGF-β1 induced the expression of fibrosis associated genes, including Col1a1 and Acta2, and down-regulated expression of key niche factors, including Cxcl12, Scf, and Bglap.
+https://ashpublications.org/blood/article/134/Supplement_1/470/426388/TGF-Signaling-Contributes-to-Myelofibrosis-and
+</comment>
+      </annotation>
+      <edgevisualsetting points="153,516" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFb_MK:PI3KAkt_H" from="TGFb_MK" to="PI3KAkt_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="464,507 323,506" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFb_MK:PI3KAkt_M" from="TGFb_MK" to="PI3KAkt_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="301,526" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFb_MK:PMF" from="TGFb_MK" to="PMF" minvalue="1" sign="positive">
+      <edgevisualsetting points="1364,529" anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFb_MK:VCAM1_M" from="TGFb_MK" to="VCAM1_M" minvalue="1" sign="negative">
+      <edgevisualsetting points="1249,359" anchor="NE" style=""/>
+    </edge>
+    <edge id="HSC_proliferation:PMF" from="HSC_proliferation" to="PMF" minvalue="2" sign="positive">
+      <edgevisualsetting points="1411,216" anchor="NE" style=""/>
+    </edge>
+    <edge id="PF4_MK:IL6" from="PF4_MK" to="IL6" minvalue="1" sign="positive">
+      <edgevisualsetting points="911,281 911,26" anchor="NE" style=""/>
+    </edge>
+    <edge id="PF4_MK:ERK_M" from="PF4_MK" to="ERK_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="648,533" anchor="NE" style=""/>
+    </edge>
+    <edge id="PF4_MK:ERK_H" from="PF4_MK" to="ERK_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="923,196" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_M:ERK_M" from="TLRs4_M" to="ERK_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="53,473 658,473" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_M:ROS_M" from="TLRs4_M" to="ROS_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="42,481 705,480 890,482 890,272" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_M:NfkB_M" from="TLRs4_M" to="NfkB_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="71,452" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_M:PI3KAkt_M" from="TLRs4_M" to="PI3KAkt_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="295,330 296,353" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK_H:NfkB_H" from="ERK_H" to="NfkB_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="525,178" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_M:ERK_M" from="ROS_M" to="ERK_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="900,262 901,430" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_M:FoxO3a_M" from="ROS_M" to="FoxO3a_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="781,273 721,273" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_M:NfkB_M" from="ROS_M" to="NfkB_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="852,498 289,498" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_M:PI3KAkt_M" from="ROS_M" to="PI3KAkt_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="866,365 345,368" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_M:IL1" from="ROS_M" to="IL1" minvalue="1" sign="positive">
+      <edgevisualsetting points="605,261 158,262" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_H:NfkB_H" from="TLRs4_H" to="NfkB_H" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_H:PI3KAkt_H" from="TLRs4_H" to="PI3KAkt_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="295,84 295,204 313,207" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_H:ROS_H" from="TLRs4_H" to="ROS_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="279,51 890,52 889,142" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3a_M:ROS_M" from="FoxO3a_M" to="ROS_M" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3a_M:ERK_M" from="FoxO3a_M" to="ERK_M" minvalue="1" sign="negative">
+      <edgevisualsetting points="671,416" anchor="NE" style=""/>
+    </edge>
+    <edge id="NfkB_MK:IL6" from="NfkB_MK" to="IL6" minvalue="1" sign="positive">
+      <edgevisualsetting points="737,544 739,28" anchor="NE" style=""/>
+    </edge>
+    <edge id="TPO:JAK_MK" from="TPO" to="JAK_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="132,557 984,557" anchor="NE" style=""/>
+    </edge>
+    <edge id="TPO:JAK_H" from="TPO" to="JAK_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="118,35 976,42" anchor="NE" style=""/>
+    </edge>
+    <edge id="CXCL12_M:CXCR4_H" from="CXCL12_M" to="CXCR4_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="186,275" anchor="NE" style=""/>
+    </edge>
+    <edge id="CXCL12_M:HSC_migration" from="CXCL12_M" to="HSC_migration" minvalue="1" sign="negative">
+      <edgevisualsetting points="187,341 1270,338" anchor="NE" style=""/>
+    </edge>
+    <edge id="Bcatenin_M:FoxO3a_M" from="Bcatenin_M" to="FoxO3a_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="659,298" anchor="NE" style=""/>
+    </edge>
+    <edge id="Bcatenin_M:VCAM1_M" from="Bcatenin_M" to="VCAM1_M" minvalue="1" sign="negative">
+      <edgevisualsetting points="517,300" anchor="NE" style=""/>
+    </edge>
+    <edge id="Bcatenin_M:CXCL12_M" from="Bcatenin_M" to="CXCL12_M" minvalue="1" sign="negative">
+      <edgevisualsetting points="385,318" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_H:ERK_H" from="PI3KAkt_H" to="ERK_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="314,195" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_H:FoxO3a_H" from="PI3KAkt_H" to="FoxO3a_H" minvalue="1" sign="negative">
+      <edgevisualsetting points="507,217 506,140" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_H:GSK3B_H" from="PI3KAkt_H" to="GSK3B_H" effects="1:negative 2:negative">
+      <edgevisualsetting points="338,26 641,27" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_H:NfkB_H" from="PI3KAkt_H" to="NfkB_H" effects="1:positive 2:positive">
+      <edgevisualsetting points="346,58 472,58" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_H:HSC_proliferation" from="PI3KAkt_H" to="HSC_proliferation" effects="1:positive 2:positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_H:HSC_migration" from="PI3KAkt_H" to="HSC_migration" minvalue="1" sign="positive">
+      <edgevisualsetting points="1230,239" anchor="NE" style=""/>
+    </edge>
+    <edge id="Bcatenin_H:FoxO3a_H" from="Bcatenin_H" to="FoxO3a_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="713,78" anchor="NE" style=""/>
+    </edge>
+    <edge id="JAK_H:STAT_H" from="JAK_H" to="STAT_H" effects="1:positive 2:positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT_MK:SOCS_MK" from="STAT_MK" to="SOCS_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1168,621" anchor="NE" style=""/>
+    </edge>
+    <edge id="STAT_MK:PI3KAkt_MK" from="STAT_MK" to="PI3KAkt_MK" effects="1:positive 2:positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="IL6:JAK_H" from="IL6" to="JAK_H" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="IL6:JAK_MK" from="IL6" to="JAK_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="1050,16 1046,566" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1:ROS_M" from="IL1" to="ROS_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="162,125 162,253" anchor="NE" style=""/>
+    </edge>
+    <edge id="IL1:ROS_H" from="IL1" to="ROS_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="853,104" anchor="NE" style=""/>
+    </edge>
+    <edge id="GCSF:CXCR4_H" from="GCSF" to="CXCR4_H" minvalue="1" sign="negative">
+      <edgevisualsetting points="85,282" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_M:NfkB_M" from="PI3KAkt_M" to="NfkB_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="294,382" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_M:FoxO3a_M" from="PI3KAkt_M" to="FoxO3a_M" minvalue="1" sign="negative">
+      <edgevisualsetting points="638,351" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_M:VCAM1_M" from="PI3KAkt_M" to="VCAM1_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="461,358" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_M:GSK3B_M" from="PI3KAkt_M" to="GSK3B_M" minvalue="1" sign="negative">
+      <edgevisualsetting points="319,397 653,397" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_H:ERK_H" from="ROS_H" to="ERK_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="835,192" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_H:FoxO3a_H" from="ROS_H" to="FoxO3a_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="776,135" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_H:NfkB_H" from="ROS_H" to="NfkB_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="835,93 510,94" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_H:PI3KAkt_H" from="ROS_H" to="PI3KAkt_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="840,222" anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS_H:IL1" from="ROS_H" to="IL1" minvalue="1" sign="positive">
+      <edgevisualsetting points="845,250 152,259" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_MK:NfkB_MK" from="TLRs4_MK" to="NfkB_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="212,570" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_MK:PF4_MK" from="TLRs4_MK" to="PF4_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="201,541" anchor="NE" style=""/>
+    </edge>
+    <edge id="TLRs4_MK:TGFb_MK" from="TLRs4_MK" to="TGFb_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="260,664 1244,664" anchor="NE" style=""/>
+    </edge>
+    <edge id="NfkB_H:IL1" from="NfkB_H" to="IL1" minvalue="2" sign="positive">
+      <edgevisualsetting points="157,61" anchor="NE" style=""/>
+    </edge>
+    <edge id="NfkB_H:IL6" from="NfkB_H" to="IL6" minvalue="2" sign="positive">
+      <edgevisualsetting points="507,19" anchor="NE" style=""/>
+    </edge>
+    <edge id="VLA4_MK:PI3KAkt_MK" from="VLA4_MK" to="PI3KAkt_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="893,643" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3B_M:Bcatenin_M" from="GSK3B_M" to="Bcatenin_M" minvalue="1" sign="negative">
+      <edgevisualsetting points="735,335 825,335" anchor="NE" style=""/>
+    </edge>
+    <edge id="CXCR4_H:ERK_H" from="CXCR4_H" to="ERK_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="446,282 446,186" anchor="NE" style=""/>
+    </edge>
+    <edge id="CXCR4_H:PI3KAkt_H" from="CXCR4_H" to="PI3KAkt_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="310,249" anchor="NE" style=""/>
+    </edge>
+    <edge id="CXCR4_H:VLA4_H" from="CXCR4_H" to="VLA4_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="398,289" anchor="NE" style=""/>
+    </edge>
+    <edge id="CXCR4_H:HSC_migration" from="CXCR4_H" to="HSC_migration" minvalue="1" sign="negative">
+      <edgevisualsetting points="290,305" anchor="NE" style=""/>
+    </edge>
+    <edge id="lTLR:TLRs4_M" from="lTLR" to="TLRs4_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="47,102" anchor="NE" style=""/>
+    </edge>
+    <edge id="lTLR:TLRs4_H" from="lTLR" to="TLRs4_H" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="lTLR:TLRs4_MK" from="lTLR" to="TLRs4_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="18,64 14,661" anchor="NE" style=""/>
+    </edge>
+    <edge id="lTLR:GCSF" from="lTLR" to="GCSF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSC_migration:PMF" from="HSC_migration" to="PMF" minvalue="1" sign="positive">
+      <edgevisualsetting points="1397,300" anchor="NE" style=""/>
+    </edge>
+    <edge id="SOCS_H:JAK_H" from="SOCS_H" to="JAK_H" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SOCS_MK:JAK_MK" from="SOCS_MK" to="JAK_MK" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_MK:NfkB_MK" from="PI3KAkt_MK" to="NfkB_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="744,617" anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3KAkt_MK:TGFb_MK" from="PI3KAkt_MK" to="TGFb_MK" effects="1:positive 2:positive">
+      <edgevisualsetting points="928,644 1259,645" anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3B_H:Bcatenin_H" from="GSK3B_H" to="Bcatenin_H" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3B_H:ERK_H" from="GSK3B_H" to="ERK_H" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK_M:NfkB_M" from="ERK_M" to="NfkB_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="638,447" anchor="NE" style=""/>
+    </edge>
+    <edge id="NfkB_M:VCAM1_M" from="NfkB_M" to="VCAM1_M" minvalue="1" sign="positive">
+      <edgevisualsetting points="504,424" anchor="NE" style=""/>
+    </edge>
+    <edge id="NfkB_M:IL1" from="NfkB_M" to="IL1" minvalue="1" sign="positive">
+      <edgevisualsetting points="138,440" anchor="NE" style=""/>
+    </edge>
+    <edge id="NfkB_M:IL6" from="NfkB_M" to="IL6" minvalue="1" sign="positive">
+      <edgevisualsetting points="993,440" anchor="NE" style=""/>
+    </edge>
+    <edge id="VLA4_H:ERK_H" from="VLA4_H" to="ERK_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="521,200" anchor="NE" style=""/>
+    </edge>
+    <edge id="VLA4_H:PI3KAkt_H" from="VLA4_H" to="PI3KAkt_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="495,228" anchor="NE" style=""/>
+    </edge>
+    <edge id="VLA4_H:HSC_migration" from="VLA4_H" to="HSC_migration" minvalue="1" sign="negative">
+      <edgevisualsetting points="1218,268" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3a_H:ERK_H" from="FoxO3a_H" to="ERK_H" minvalue="1" sign="negative">
+      <edgevisualsetting points="713,185" anchor="NE" style=""/>
+    </edge>
+    <edge id="FoxO3a_H:ROS_H" from="FoxO3a_H" to="ROS_H" minvalue="1" sign="negative">
+      <edgevisualsetting points="724,107 817,107" anchor="NE" style=""/>
+    </edge>
+    <edge id="JAK_MK:STAT_MK" from="JAK_MK" to="STAT_MK" effects="1:positive 2:positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="VCAM1_M:VLA4_H" from="VCAM1_M" to="VLA4_H" minvalue="1" sign="positive">
+      <edgevisualsetting points="505,327" anchor="NE" style=""/>
+    </edge>
+    <edge id="VCAM1_M:VLA4_MK" from="VCAM1_M" to="VLA4_MK" minvalue="1" sign="positive">
+      <edgevisualsetting points="486,620" anchor="NE" style=""/>
+    </edge>
+    <edge id="VCAM1_M:HSC_migration" from="VCAM1_M" to="HSC_migration" minvalue="1" sign="negative">
+      <edgevisualsetting points="1218,327" anchor="NE" style=""/>
+    </edge>
+    <annotation>
+      <comment>IL-1 induces the rapid activation of the latent transcription factor nuclear factor κB (NF-κB) (3, 30, 31). 
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC84278/
+
+
+Differential spatial expression of the chemokine CXCL4/platelet factor-4 marks the progression of fibrosis.
+The absence of hematopoietic CXCL4 ameliorates the MPN phenotype and reduces stromal cell activation and BM fibrosis.
+
+https://ashpublications.org/blood/article/136/18/2051/461599/Increased-CXCL4-expression-in-hematopoietic-cells
+</comment>
+    </annotation>
+  </graph>
+</gxl>

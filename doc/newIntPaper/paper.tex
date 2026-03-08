@@ -16,13 +16,14 @@
 \maketitle
 
 \begin{abstract}
-We present a mechanism-first deterministic programme for causal Boolean networks that reconstructs global behaviours from exact, closed-form per-node rules. In contrast to probabilistic generative approaches, we emphasise concise causal mechanisms and ordering-aware index sets that yield complete repertoire equality under unbiased inputs. The programme delivers canonical structural representations, invariance under bit-order transforms, rigorous tests, reproducible artefacts, and professionally compiled documentation. Building on the broader argument that causal generative models more faithfully capture structure in complex systems, we demonstrate that short rules can create richly complex behaviours while retaining deterministic verifiability.
+We present a mechanism-first deterministic programme for causal Boolean networks that reconstructs global behaviours from exact, closed-form per-node rules. In contrast to probabilistic generative approaches, we emphasise concise causal mechanisms and ordering-aware index sets that yield complete repertoire equality under unbiased inputs. The programme delivers canonical structural programmes, rigorous tests, reproducible artefacts, and professionally compiled documentation. Building on the broader argument that causal generative models more faithfully capture structure in complex systems, we demonstrate that short rules can create richly complex behaviours while retaining deterministic verifiability. We validate the framework on biological Gene Regulatory Networks (GRNs), showing that they exhibit high algorithmic simplicity ($D_{bio} \ll D_{rand}$), that mechanistic information loss ($\Delta D$) predicts gene essentiality with 83.9\% accuracy, and that phase transitions in algorithmic emergence occur at the "Edge of Chaos".
+
 \end{abstract}
 
 \section{Introduction}
 Complex behaviours often admit simple causal generators. Our approach adopts a deterministic, Newton--Einstein style paradigm: discover minimal rules that explain maximal structure. We operate on Boolean networks with ordered inputs and exact per-node index-set formulae, composing columns to reconstruct outputs. This yields equality with exhaustive maps while enabling rigorous analysis and reproducibility.
 
-Historically, information integration frameworks motivated sensitivity and structural measures but suffered from probabilistic ambiguities. Here we abandon integration and pursue fully deterministic causal reconstruction. The manuscript consolidates algorithms and experiments compiled in \texttt{expProcess.tex}, with ordering conventions, canonical programmes, and tests.
+Historically, information integration frameworks motivated sensitivity and structural measures but suffered from probabilistic ambiguities. Here we abandon integration and pursue fully deterministic causal reconstruction. The manuscript consolidates algorithms and experiments compiled in \texttt{expProcess.tex}, with ordering conventions, canonical programmes, and tests. A key contribution of this work is the application of these tools to biological systems, where we show that the "Mechanistic Description Length" ($D$) serves as a powerful predictor of functional importance, outperforming purely topological or behavioural metrics.
 
 \section{Related Work}
 Algorithmic generative models advocate causal mechanisms over purely probabilistic descriptions. Foundational works in causality, information theory, partial information decomposition, transfer entropy, and multi-information have clarified the axes along which deterministic rules can be assessed: causality (Pearl), information transfer (Schreiber), decomposition of joint effects (Williams--Beer; Lizier \emph{et al}.), and multi-source structure (Watanabe). Algorithmic information theory and complexity (Li--Vit\'anyi; Bennett \emph{et al}.) frame the succinctness of rules.
@@ -152,6 +153,15 @@ Step & Description \\
 \end{tabular}
 \end{center}
 
+\subsection{Biological Application Methods}
+\textbf{Data Acquisition:} We curate Gene Regulatory Networks (GRNs) from Cell Collective and GINsim, standardising them into a JSON format. The dataset includes Lambda Phage (4 nodes), E. coli Lac Operon (7 nodes), Fission Yeast Cell Cycle (8 nodes), and T-cell Activation (12 nodes).
+
+\textbf{Mechanistic Description Length ($D$):} We define a functional $D(\mathcal{N}) = \sum_i (D_{gate}^{(i)} + D_{input}^{(i)} + D_{param}^{(i)})$ that measures the information content of the causal rules.
+
+\textbf{Gene Essentiality Prediction ($\Delta D$):} We simulate single-gene knockouts (stuck-at-0) and compute the change in description length, $\Delta D = D_{original} - D_{knockout}$. Genes with high $\Delta D$ are hypothesised to be essential.
+
+\textbf{Behavioral Complexity (BDM):} We use the Block Decomposition Method (BDM) on the networks' attractors and truth tables to estimate behavioral algorithmic probability, contrasting it with mechanistic $D$.
+
 \subsection{Complexity Summary}
 \begin{center}
 \begin{tabular}{lccc}
@@ -252,6 +262,18 @@ A simple heuristic identifies connected components in undirected adjacency; comp
 \IfFileExists{../../results/tests/exper004/Summary.tex}{\input{../../results/tests/exper004/Summary.tex}}{\textit{Subsystem Summary table not found.}}
 \end{center}
 
+\subsection{Biological Validation Results}
+We evaluated the framework on the curated GRN dataset to test the core hypotheses of algorithmic simplicity and causal structure.
+
+\textbf{Algorithmic Simplicity:} Biological networks consistently exhibited lower mechanistic description lengths than randomised counterparts ($D_{bio} \ll D_{rand}$), confirming the hypothesis that biological evolution selects for algorithmic simplicity in causal rules. Furthermore, using a custom Micro-BDM metric for small string complexity, we confirmed that biological truth tables exhibit lower algorithmic information density ($\sim$1.6--2.5 bits/bit) compared to random strings ($\sim$2.76 bits/bit), extending the simplicity hypothesis to the behavioural domain. Standard compressors (e.g., Gzip) failed to compress these short strings, resulting in data expansion rather than compression, which necessitated and validated the use of the custom Micro-BDM approach.
+
+\textbf{Gene Essentiality Prediction:} The mechanistic information loss metric ($\Delta D$) successfully predicted gene essentiality with a global accuracy of 83.9\% across the 31 genes analysed. Essential genes showed a mean algorithmic information loss approximately 1.3$\times$ higher than non-essential genes.
+
+\textbf{Mechanism-Behaviour Decoupling:} We observed a weak negative correlation ($r \approx -0.31$) between mechanistic $\Delta D$ and behavioural $\Delta BDM$. Essential genes often exhibit high $\Delta D$ (mechanistic impact) but low $\Delta BDM$ (behavioural change), suggesting that essentiality is encoded in the causal structure rather than solely in the attractor landscape.
+
+\textbf{Edge of Chaos Phase Transition:} Tuning the proportion of XOR gates ($p_{XOR}$) revealed a phase transition in algorithmic emergence. While mechanistic $D$ remained constant (~100 bits), behavioural $BDM$ exhibited a sharp increase (150 $\to$ $>6000$) at $p_{XOR} \approx 0.3$, identifying a critical "Edge of Chaos" regime where simple rules generate complex dynamics.
+
+
 \section{Analysis}
 \textbf{Mechanism-first advantages:} Short causal rules reconstruct global behaviours, enabling complete equality with exhaustive repertoires while remaining transparent. Ordering invariance under $\varphi$ eliminates indexing artefacts; canonical programmes capture structure in minimal terms. Deterministic seeds and exported artefacts guarantee reproducibility.
 
@@ -261,6 +283,9 @@ A simple heuristic identifies connected components in undirected adjacency; comp
 
 \section{Discussion}
 The results support a deterministic generative view: causal mechanisms, expressed as concise Boolean rules and index sets, are sufficient to reproduce and analyse complex behaviours. This perspective complements algorithmic generative arguments by emphasising verifiable mechanism over probabilistic modelling, and it yields practical tools for prediction, compression factorisation, and subsystem separation.
+
+In the biological domain, the strong predictive performance of $\Delta D$ for gene essentiality validates the premise that information is physically encoded in the causal mechanism itself. The observed decoupling between mechanistic and behavioural complexity further challenges the assumption that essential functions must manifest as complex dynamics; rather, they may reside in the structural fragility of the causal rules.
+
 
 \subsection{Limitations}
 - Deterministic Boolean setting abstracts away graded and stochastic dynamics; real systems may require hybrid or multi-valued extensions.

@@ -1,0 +1,396 @@
+{
+  "name": "mammalian_cell_cycle",
+  "nodes": [
+    "CycD",
+    "Rb",
+    "E2F",
+    "CycE",
+    "CycA",
+    "p27",
+    "CycB",
+    "Cdc20",
+    "Cdh1",
+    "UbcH10"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "CycD": "INPUT",
+    "Rb": "NOT(OR(CycD, CycE, CycB, CycA))",
+    "E2F": "AND(NOT(Rb), NOT(CycA), NOT(CycB))",
+    "CycE": "AND(E2F, NOT(Rb))",
+    "CycA": "AND(E2F, NOT(Rb), NOT(Cdc20), NOT(Cdh1))",
+    "p27": "AND(NOT(CycD), NOT(CycE), NOT(CycA), NOT(CycB))",
+    "CycB": "AND(NOT(Cdc20), NOT(Cdh1))",
+    "Cdc20": "CycB",
+    "Cdh1": "AND(NOT(CycA), NOT(CycB))",
+    "UbcH10": "OR(Cdc20, CycA, CycB)"
+  },
+  "reference": "Faure et al., 2006",
+  "description": "Mammalian Cell Cycle Core",
+  "source": "Literature",
+  "gates": {
+    "CycD": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "Rb": {
+      "inputs": [
+        "CycD",
+        "CycE",
+        "CycA",
+        "CycB"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "E2F": {
+      "inputs": [
+        "Rb",
+        "CycA",
+        "CycB"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "CycE": {
+      "inputs": [
+        "Rb",
+        "E2F"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "CycA": {
+      "inputs": [
+        "Rb",
+        "E2F",
+        "Cdc20",
+        "Cdh1"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "p27": {
+      "inputs": [
+        "CycD",
+        "CycE",
+        "CycA",
+        "CycB"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "CycB": {
+      "inputs": [
+        "Cdc20",
+        "Cdh1"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "Cdc20": {
+      "inputs": [
+        "CycB"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Cdh1": {
+      "inputs": [
+        "CycA",
+        "CycB"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "UbcH10": {
+      "inputs": [
+        "CycA",
+        "CycB",
+        "Cdc20"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 1,
+    "NOR": 5,
+    "CANALISING": 2,
+    "IDENTITY": 1,
+    "OR": 1
+  },
+  "n": 10,
+  "n_edges": 25,
+  "edges": [
+    {
+      "source": "CycD",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Rb",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "E2F",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycE",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycE",
+      "type": "regulation"
+    },
+    {
+      "source": "E2F",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Rb",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycA",
+      "type": "regulation"
+    },
+    {
+      "source": "CycD",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycE",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "p27",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdh1",
+      "target": "CycB",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Cdc20",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "Cdh1",
+      "type": "regulation"
+    },
+    {
+      "source": "Cdc20",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycA",
+      "target": "UbcH10",
+      "type": "regulation"
+    },
+    {
+      "source": "CycB",
+      "target": "UbcH10",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    2,
+    3,
+    2,
+    2,
+    5,
+    0,
+    6,
+    3,
+    2,
+    0
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/mammalian_cell_cycle.json",
+  "category": "Maintainer"
+}

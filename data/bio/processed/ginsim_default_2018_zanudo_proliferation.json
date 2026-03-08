@@ -1,0 +1,662 @@
+{
+  "name": "ginsim_default_2018_zanudo_proliferation",
+  "nodes": [
+    "RTK",
+    "RAS",
+    "PI3K",
+    "MAPK",
+    "PIP3",
+    "FOXO3",
+    "AKT",
+    "cycE",
+    "TSC",
+    "PRAS40",
+    "Rb",
+    "mTORC1",
+    "E2F",
+    "EIF4F",
+    "S6K",
+    "Proliferation",
+    "GFs"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "RTK": "GFs & (FOXO3 | (!S6K & !MAPK))",
+    "RAS": "RTK",
+    "PI3K": "RTK | RAS",
+    "MAPK": "RAS | PIP3",
+    "PIP3": "PI3K",
+    "FOXO3": "!AKT | !MAPK",
+    "AKT": "PIP3",
+    "cycE": "(AKT & !FOXO3) | E2F",
+    "TSC": "!MAPK & !AKT",
+    "PRAS40": "!AKT",
+    "Rb": "!cycE",
+    "mTORC1": "!TSC & !PRAS40",
+    "E2F": "!Rb",
+    "EIF4F": "mTORC1",
+    "S6K": "mTORC1",
+    "Proliferation": "(!E2F & EIF4F & S6K) | (E2F & (!EIF4F | !S6K))"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "RTK": {
+      "inputs": [
+        "MAPK",
+        "FOXO3",
+        "S6K",
+        "GFs"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "RAS": {
+      "inputs": [
+        "RTK"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "PI3K": {
+      "inputs": [
+        "RTK",
+        "RAS"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "MAPK": {
+      "inputs": [
+        "RAS",
+        "PIP3"
+      ],
+      "gate": "OR",
+      "parameters": {}
+    },
+    "PIP3": {
+      "inputs": [
+        "PI3K"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "FOXO3": {
+      "inputs": [
+        "MAPK",
+        "AKT"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "AKT": {
+      "inputs": [
+        "PIP3"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "cycE": {
+      "inputs": [
+        "FOXO3",
+        "AKT",
+        "E2F"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "TSC": {
+      "inputs": [
+        "MAPK",
+        "AKT"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "PRAS40": {
+      "inputs": [
+        "AKT"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Rb": {
+      "inputs": [
+        "cycE"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "mTORC1": {
+      "inputs": [
+        "TSC",
+        "PRAS40"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "E2F": {
+      "inputs": [
+        "Rb"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "EIF4F": {
+      "inputs": [
+        "mTORC1"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "S6K": {
+      "inputs": [
+        "mTORC1"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Proliferation": {
+      "inputs": [
+        "E2F",
+        "EIF4F",
+        "S6K"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 9,
+    "IDENTITY": 5,
+    "OR": 2
+  },
+  "n": 17,
+  "n_edges": 28,
+  "edges": [
+    {
+      "source": "MAPK",
+      "target": "FOXO3",
+      "type": "inhibition"
+    },
+    {
+      "source": "MAPK",
+      "target": "TSC",
+      "type": "inhibition"
+    },
+    {
+      "source": "MAPK",
+      "target": "RTK",
+      "type": "inhibition"
+    },
+    {
+      "source": "RAS",
+      "target": "PI3K",
+      "type": "activation"
+    },
+    {
+      "source": "RAS",
+      "target": "MAPK",
+      "type": "activation"
+    },
+    {
+      "source": "PI3K",
+      "target": "PIP3",
+      "type": "activation"
+    },
+    {
+      "source": "AKT",
+      "target": "cycE",
+      "type": "activation"
+    },
+    {
+      "source": "AKT",
+      "target": "FOXO3",
+      "type": "inhibition"
+    },
+    {
+      "source": "AKT",
+      "target": "TSC",
+      "type": "inhibition"
+    },
+    {
+      "source": "AKT",
+      "target": "PRAS40",
+      "type": "inhibition"
+    },
+    {
+      "source": "EIF4F",
+      "target": "Proliferation",
+      "type": "activation"
+    },
+    {
+      "source": "mTORC1",
+      "target": "EIF4F",
+      "type": "activation"
+    },
+    {
+      "source": "mTORC1",
+      "target": "S6K",
+      "type": "activation"
+    },
+    {
+      "source": "S6K",
+      "target": "Proliferation",
+      "type": "activation"
+    },
+    {
+      "source": "S6K",
+      "target": "RTK",
+      "type": "inhibition"
+    },
+    {
+      "source": "GFs",
+      "target": "RTK",
+      "type": "activation"
+    },
+    {
+      "source": "TSC",
+      "target": "mTORC1",
+      "type": "inhibition"
+    },
+    {
+      "source": "cycE",
+      "target": "Rb",
+      "type": "inhibition"
+    },
+    {
+      "source": "Rb",
+      "target": "E2F",
+      "type": "inhibition"
+    },
+    {
+      "source": "FOXO3",
+      "target": "RTK",
+      "type": "activation"
+    },
+    {
+      "source": "FOXO3",
+      "target": "cycE",
+      "type": "inhibition"
+    },
+    {
+      "source": "E2F",
+      "target": "cycE",
+      "type": "activation"
+    },
+    {
+      "source": "E2F",
+      "target": "Proliferation",
+      "type": "activation"
+    },
+    {
+      "source": "RTK",
+      "target": "RAS",
+      "type": "activation"
+    },
+    {
+      "source": "RTK",
+      "target": "PI3K",
+      "type": "activation"
+    },
+    {
+      "source": "PIP3",
+      "target": "MAPK",
+      "type": "activation"
+    },
+    {
+      "source": "PIP3",
+      "target": "AKT",
+      "type": "activation"
+    },
+    {
+      "source": "PRAS40",
+      "target": "mTORC1",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    2,
+    2,
+    1,
+    3,
+    2,
+    2,
+    4,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    1,
+    2,
+    0,
+    1
+  ]
+}

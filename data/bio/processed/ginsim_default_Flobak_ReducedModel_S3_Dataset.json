@@ -1,0 +1,420 @@
+{
+  "name": "ginsim_default_Flobak_ReducedModel_S3_Dataset",
+  "nodes": [
+    "MEK",
+    "ERK",
+    "TAK1",
+    "p38alpha",
+    "AKT",
+    "PI3K",
+    "GSK3",
+    "betacatenin",
+    "Antisurvival",
+    "Prosurvival"
+  ],
+  "cm": [
+    [
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "MEK": "!(ERK & TAK1 & p38alpha & AKT & !GSK3 & !betacatenin)",
+    "ERK": "MEK | (!ERK & !AKT)",
+    "TAK1": "!p38alpha",
+    "p38alpha": "!ERK & !p38alpha",
+    "AKT": "PI3K & (betacatenin | GSK3 | !TAK1)",
+    "PI3K": "!(TAK1 & ERK) | betacatenin | GSK3",
+    "Antisurvival": "!ERK & !TAK1 & AKT & !p38alpha",
+    "Prosurvival": "ERK & PI3K & GSK3 & TAK1 & !betacatenin"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "MEK": {
+      "inputs": [
+        "ERK",
+        "TAK1",
+        "p38alpha",
+        "AKT",
+        "GSK3",
+        "betacatenin"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "ERK": {
+      "inputs": [
+        "MEK",
+        "AKT"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "TAK1": {
+      "inputs": [
+        "p38alpha"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "p38alpha": {
+      "inputs": [
+        "ERK"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "AKT": {
+      "inputs": [
+        "ERK",
+        "TAK1",
+        "PI3K",
+        "GSK3",
+        "betacatenin"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "PI3K": {
+      "inputs": [
+        "ERK",
+        "TAK1",
+        "GSK3",
+        "betacatenin"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Antisurvival": {
+      "inputs": [
+        "ERK",
+        "TAK1",
+        "p38alpha",
+        "AKT",
+        "PI3K",
+        "GSK3",
+        "betacatenin"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Prosurvival": {
+      "inputs": [
+        "ERK",
+        "TAK1",
+        "PI3K",
+        "GSK3",
+        "betacatenin"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 8
+  },
+  "n": 10,
+  "n_edges": 31,
+  "edges": [
+    {
+      "source": "betacatenin",
+      "target": "MEK",
+      "type": "activation"
+    },
+    {
+      "source": "betacatenin",
+      "target": "AKT",
+      "type": "activation"
+    },
+    {
+      "source": "betacatenin",
+      "target": "PI3K",
+      "type": "activation"
+    },
+    {
+      "source": "betacatenin",
+      "target": "Antisurvival",
+      "type": "activation"
+    },
+    {
+      "source": "betacatenin",
+      "target": "Prosurvival",
+      "type": "activation"
+    },
+    {
+      "source": "ERK",
+      "target": "MEK",
+      "type": "inhibition"
+    },
+    {
+      "source": "ERK",
+      "target": "ERK",
+      "type": "inhibition"
+    },
+    {
+      "source": "ERK",
+      "target": "p38alpha",
+      "type": "inhibition"
+    },
+    {
+      "source": "ERK",
+      "target": "AKT",
+      "type": "inhibition"
+    },
+    {
+      "source": "ERK",
+      "target": "PI3K",
+      "type": "inhibition"
+    },
+    {
+      "source": "ERK",
+      "target": "Antisurvival",
+      "type": "inhibition"
+    },
+    {
+      "source": "ERK",
+      "target": "Prosurvival",
+      "type": "activation"
+    },
+    {
+      "source": "GSK3",
+      "target": "MEK",
+      "type": "activation"
+    },
+    {
+      "source": "GSK3",
+      "target": "AKT",
+      "type": "activation"
+    },
+    {
+      "source": "GSK3",
+      "target": "PI3K",
+      "type": "activation"
+    },
+    {
+      "source": "GSK3",
+      "target": "Antisurvival",
+      "type": "activation"
+    },
+    {
+      "source": "GSK3",
+      "target": "Prosurvival",
+      "type": "activation"
+    },
+    {
+      "source": "TAK1",
+      "target": "MEK",
+      "type": "inhibition"
+    },
+    {
+      "source": "TAK1",
+      "target": "AKT",
+      "type": "inhibition"
+    },
+    {
+      "source": "TAK1",
+      "target": "PI3K",
+      "type": "inhibition"
+    },
+    {
+      "source": "TAK1",
+      "target": "Antisurvival",
+      "type": "inhibition"
+    },
+    {
+      "source": "TAK1",
+      "target": "Prosurvival",
+      "type": "inhibition"
+    },
+    {
+      "source": "PI3K",
+      "target": "AKT",
+      "type": "activation"
+    },
+    {
+      "source": "PI3K",
+      "target": "Antisurvival",
+      "type": "activation"
+    },
+    {
+      "source": "PI3K",
+      "target": "Prosurvival",
+      "type": "activation"
+    },
+    {
+      "source": "p38alpha",
+      "target": "MEK",
+      "type": "inhibition"
+    },
+    {
+      "source": "p38alpha",
+      "target": "TAK1",
+      "type": "inhibition"
+    },
+    {
+      "source": "p38alpha",
+      "target": "p38alpha",
+      "type": "inhibition"
+    },
+    {
+      "source": "p38alpha",
+      "target": "Antisurvival",
+      "type": "dual"
+    },
+    {
+      "source": "MEK",
+      "target": "ERK",
+      "type": "activation"
+    },
+    {
+      "source": "AKT",
+      "target": "MEK",
+      "type": "inhibition"
+    },
+    {
+      "source": "AKT",
+      "target": "ERK",
+      "type": "inhibition"
+    },
+    {
+      "source": "AKT",
+      "target": "AKT",
+      "type": "inhibition"
+    },
+    {
+      "source": "AKT",
+      "target": "Antisurvival",
+      "type": "inhibition"
+    }
+  ],
+  "out_degrees": [
+    1,
+    6,
+    5,
+    3,
+    3,
+    3,
+    5,
+    5,
+    0,
+    0
+  ]
+}

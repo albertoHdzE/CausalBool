@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://gin.univ-mrs.fr/GINsim/GINML_2_1.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+	<graph id="phenomenological_cellular" class="regulatory" nodeorder="Operculum Floor Roof EGF BMP Roof_adj anterior">
+<node id="Roof_adj" maxvalue="1" input="true">
+			<nodevisualsetting>
+				<ellipse x="207" y="332" width="105" height="25" backgroundColor="#ff0033" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="BMP" maxvalue="1" input="true">
+			<nodevisualsetting>
+				<ellipse x="207" y="100" width="105" height="25" backgroundColor="#9900ff" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="Operculum" maxvalue="1">
+  <parameter idActiveInteractions=" EGF:Operculum:1 BMP:Operculum anterior:Operculum" val="1"/>
+  <parameter idActiveInteractions=" EGF:Operculum:2 anterior:Operculum" val="1"/>
+  <parameter idActiveInteractions=" EGF:Operculum:2 BMP:Operculum anterior:Operculum" val="1"/>
+
+			<nodevisualsetting>
+				<ellipse x="31" y="265" width="105" height="25" backgroundColor="#009900" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="EGF" maxvalue="2" input="true">
+			<nodevisualsetting>
+				<rect x="31" y="98" width="105" height="25" backgroundColor="#ff9900" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="anterior" maxvalue="1" input="true">
+			<nodevisualsetting>
+				<ellipse x="383" y="99" width="105" height="25" backgroundColor="#ffffff" foregroundColor="#333333"/>
+			</nodevisualsetting>
+</node>
+<node id="Floor" maxvalue="1">
+  <parameter idActiveInteractions=" EGF:Floor:1 BMP:Floor Roof_adj:Floor anterior:Floor" val="1"/>
+  <parameter idActiveInteractions=" EGF:Floor:2 Roof_adj:Floor anterior:Floor" val="1"/>
+  <parameter idActiveInteractions=" EGF:Floor:2 BMP:Floor Roof_adj:Floor anterior:Floor" val="1"/>
+
+			<nodevisualsetting>
+				<ellipse x="207" y="236" width="105" height="25" backgroundColor="#3300ff" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="Roof" maxvalue="1">
+  <parameter idActiveInteractions=" EGF:Roof:1 anterior:Roof" val="1"/>
+
+			<nodevisualsetting>
+				<ellipse x="384" y="269" width="105" height="25" backgroundColor="#ff0033" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+		<edge id="Roof_adj:Operculum" from="Roof_adj" to="Operculum" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="259,344 84,344 83,277" line_style="straight" line_color="#ff0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Roof_adj:Floor" from="Roof_adj" to="Floor" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="259,344 259,248" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="BMP:Operculum" from="BMP" to="Operculum" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="259,112 83,277" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="BMP:Floor" from="BMP" to="Floor" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="259,112 259,248" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="BMP:Roof" from="BMP" to="Roof" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="259,112 436,281" line_style="straight" line_color="#ff0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="EGF:Operculum:1" from="EGF" to="Operculum" minvalue="1" maxvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="83,110 83,277" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="EGF:Operculum:2" from="EGF" to="Operculum" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="83,110 83,277" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="EGF:Floor:1" from="EGF" to="Floor" minvalue="1" maxvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="83,110 259,248" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="EGF:Floor:2" from="EGF" to="Floor" minvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="83,110 259,248" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="EGF:Roof:1" from="EGF" to="Roof" minvalue="1" maxvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="83,110 436,281" line_style="straight" line_color="#cc0099" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="EGF:Roof:2" from="EGF" to="Roof" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="83,110 436,281" line_style="straight" line_color="#cc0099" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="anterior:Operculum" from="anterior" to="Operculum" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="435,111 83,277" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="anterior:Floor" from="anterior" to="Floor" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="435,111 259,248" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="anterior:Roof" from="anterior" to="Roof" minvalue="1" sign="positive">
+			<edgevisualsetting>
+				<polyline points="435,111 436,281" line_style="straight" line_color="#33cc00" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+	</graph>
+</gxl>

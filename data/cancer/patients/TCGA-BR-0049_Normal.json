@@ -1,0 +1,316 @@
+{
+  "name": "egfr_signaling",
+  "nodes": [
+    "EGF",
+    "EGFR",
+    "GRB2",
+    "SOS",
+    "Ras",
+    "Raf",
+    "MEK",
+    "ERK",
+    "PI3K",
+    "AKT"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ]
+  ],
+  "logic": {
+    "EGF": "INPUT",
+    "EGFR": "EGF",
+    "GRB2": "EGFR",
+    "SOS": "AND(GRB2, NOT(ERK))",
+    "Ras": "SOS",
+    "Raf": "AND(Ras, NOT(AKT))",
+    "MEK": "Raf",
+    "ERK": "MEK",
+    "PI3K": "EGFR",
+    "AKT": "PI3K"
+  },
+  "reference": "Samaga et al., 2009",
+  "description": "EGFR/MAPK/PI3K Core Signaling",
+  "source": "Literature",
+  "gates": {
+    "EGF": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "EGFR": {
+      "inputs": [
+        "EGF"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "GRB2": {
+      "inputs": [
+        "EGFR"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "SOS": {
+      "inputs": [
+        "GRB2",
+        "ERK"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "Ras": {
+      "inputs": [
+        "SOS"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "Raf": {
+      "inputs": [
+        "Ras",
+        "AKT"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 0,
+        "canalisedOutput": 0
+      }
+    },
+    "MEK": {
+      "inputs": [
+        "Raf"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "ERK": {
+      "inputs": [
+        "MEK"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "PI3K": {
+      "inputs": [
+        "EGFR"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "AKT": {
+      "inputs": [
+        "PI3K"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 1,
+    "IDENTITY": 7,
+    "CANALISING": 2
+  },
+  "n": 10,
+  "n_edges": 11,
+  "edges": [
+    {
+      "source": "EGF",
+      "target": "EGFR",
+      "type": "regulation"
+    },
+    {
+      "source": "EGFR",
+      "target": "GRB2",
+      "type": "regulation"
+    },
+    {
+      "source": "GRB2",
+      "target": "SOS",
+      "type": "regulation"
+    },
+    {
+      "source": "ERK",
+      "target": "SOS",
+      "type": "regulation"
+    },
+    {
+      "source": "SOS",
+      "target": "Ras",
+      "type": "regulation"
+    },
+    {
+      "source": "Ras",
+      "target": "Raf",
+      "type": "regulation"
+    },
+    {
+      "source": "AKT",
+      "target": "Raf",
+      "type": "regulation"
+    },
+    {
+      "source": "Raf",
+      "target": "MEK",
+      "type": "regulation"
+    },
+    {
+      "source": "MEK",
+      "target": "ERK",
+      "type": "regulation"
+    },
+    {
+      "source": "EGFR",
+      "target": "PI3K",
+      "type": "regulation"
+    },
+    {
+      "source": "PI3K",
+      "target": "AKT",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/egfr_signaling.json",
+  "category": "Processor",
+  "metadata": {
+    "patient_id": "TCGA-BR-0049",
+    "tissue_type": "Normal",
+    "mutations": {},
+    "base_model": "data/bio/processed/egfr_signaling.json"
+  }
+}

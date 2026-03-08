@@ -1,0 +1,190 @@
+{
+  "name": "ginsim_2017-bacterium-asymetric-division_g2a",
+  "nodes": [
+    "CtrA",
+    "GcrA",
+    "DnaA",
+    "CcrM",
+    "SciP"
+  ],
+  "cm": [
+    [
+      0,
+      1,
+      0,
+      1,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "CtrA": "(CtrA | GcrA) & !CcrM & !SciP",
+    "GcrA": "DnaA & !CtrA",
+    "DnaA": "CtrA & CcrM & !GcrA & !DnaA",
+    "CcrM": "CtrA & !CcrM & !SciP",
+    "SciP": "CtrA & !DnaA"
+  },
+  "reference": null,
+  "description": null,
+  "source": "published",
+  "gates": {
+    "CtrA": {
+      "inputs": [
+        "GcrA",
+        "CcrM",
+        "SciP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "GcrA": {
+      "inputs": [
+        "CtrA",
+        "DnaA"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "DnaA": {
+      "inputs": [
+        "CtrA",
+        "GcrA",
+        "CcrM"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CcrM": {
+      "inputs": [
+        "CtrA",
+        "SciP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "SciP": {
+      "inputs": [
+        "CtrA",
+        "DnaA"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 5
+  },
+  "n": 5,
+  "n_edges": 12,
+  "edges": [
+    {
+      "source": "GcrA",
+      "target": "CtrA",
+      "type": "activation"
+    },
+    {
+      "source": "GcrA",
+      "target": "DnaA",
+      "type": "inhibition"
+    },
+    {
+      "source": "CtrA",
+      "target": "CtrA",
+      "type": "activation"
+    },
+    {
+      "source": "CtrA",
+      "target": "SciP",
+      "type": "activation"
+    },
+    {
+      "source": "CtrA",
+      "target": "CcrM",
+      "type": "activation"
+    },
+    {
+      "source": "CtrA",
+      "target": "GcrA",
+      "type": "inhibition"
+    },
+    {
+      "source": "CtrA",
+      "target": "DnaA",
+      "type": "activation"
+    },
+    {
+      "source": "DnaA",
+      "target": "DnaA",
+      "type": "inhibition"
+    },
+    {
+      "source": "DnaA",
+      "target": "GcrA",
+      "type": "activation"
+    },
+    {
+      "source": "DnaA",
+      "target": "SciP",
+      "type": "inhibition"
+    },
+    {
+      "source": "SciP",
+      "target": "CtrA",
+      "type": "inhibition"
+    },
+    {
+      "source": "SciP",
+      "target": "CcrM",
+      "type": "inhibition"
+    },
+    {
+      "source": "CcrM",
+      "target": "CtrA",
+      "type": "inhibition"
+    },
+    {
+      "source": "CcrM",
+      "target": "CcrM",
+      "type": "inhibition"
+    },
+    {
+      "source": "CcrM",
+      "target": "DnaA",
+      "type": "activation"
+    }
+  ],
+  "out_degrees": [
+    4,
+    2,
+    2,
+    2,
+    2
+  ]
+}

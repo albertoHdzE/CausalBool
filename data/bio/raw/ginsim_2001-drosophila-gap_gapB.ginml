@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://gin.univ-mrs.fr/GINsim/GINML_2_1.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+	<graph id="gapA" class="regulatory" nodeorder="Gt Hb Kr Kni">
+<node id="Hb" maxvalue="3">
+  <parameter val="2"/>
+  <parameter idActiveInteractions=" Kr:Hb" val="2"/>
+
+			<nodevisualsetting>
+				<rect x="326" y="50" width="55" height="25" backgroundColor="#000000" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="Kni" maxvalue="1">
+			<nodevisualsetting>
+				<rect x="50" y="151" width="55" height="25" backgroundColor="#000000" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="Gt" maxvalue="1">
+  <parameter val="1"/>
+  <parameter idActiveInteractions=" Hb:Gt" val="1"/>
+
+			<nodevisualsetting>
+				<rect x="327" y="151" width="55" height="25" backgroundColor="#000000" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+<node id="Kr" maxvalue="2">
+  <parameter idActiveInteractions=" Hb:Kr:1" val="2"/>
+  <parameter idActiveInteractions=" Hb:Kr:1 Kni:Kr" val="1"/>
+  <parameter idActiveInteractions=" Gt:Kr Hb:Kr:1" val="1"/>
+
+			<nodevisualsetting>
+				<rect x="51" y="50" width="55" height="25" backgroundColor="#000000" foregroundColor="#ffffff"/>
+			</nodevisualsetting>
+</node>
+		<edge id="Hb:Gt" from="Hb" to="Gt" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="353,62 354,163" line_style="curve" line_color="#cc0000" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Hb:Kni" from="Hb" to="Kni" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="353,62 77,163" line_style="curve" line_color="#cc0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Hb:Kr:1" from="Hb" to="Kr" minvalue="1" maxvalue="2" sign="positive">
+			<edgevisualsetting>
+				<polyline points="353,62 219,39 78,62" line_style="curve" line_color="#660066" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Hb:Kr:2" from="Hb" to="Kr" minvalue="3" sign="negative">
+			<edgevisualsetting>
+				<polyline points="353,62 219,39 78,62" line_style="curve" line_color="#660066" line_width="2" routage="manual"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Kni:Kr" from="Kni" to="Kr" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="77,163 78,62" line_style="curve" line_color="#cc0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Gt:Kni" from="Gt" to="Kni" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="354,163 77,163" line_style="curve" line_color="#cc0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Gt:Kr" from="Gt" to="Kr" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="354,163 221,98 78,62" line_style="curve" line_color="#cc0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Kr:Hb" from="Kr" to="Hb" minvalue="2" sign="negative">
+			<edgevisualsetting>
+				<polyline points="78,62 216,77 353,62" line_style="curve" line_color="#cc0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+		<edge id="Kr:Gt" from="Kr" to="Gt" minvalue="1" sign="negative">
+			<edgevisualsetting>
+				<polyline points="78,62 211,127 354,163" line_style="curve" line_color="#cc0000" line_width="2" routage="auto"/>
+			</edgevisualsetting>
+		</edge>
+	</graph>
+</gxl>

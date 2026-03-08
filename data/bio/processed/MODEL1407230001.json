@@ -1,0 +1,1019 @@
+{
+  "name": "MODEL1407230001",
+  "nodes": [
+    "Bile",
+    "Ca",
+    "CaMem",
+    "CaSteadyState",
+    "PMCh",
+    "ATP",
+    "NADH",
+    "ROS",
+    "Pot",
+    "Pores",
+    "CytC",
+    "AntiOx",
+    "Apt",
+    "Necr"
+  ],
+  "cm": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "Ca": "OR(AND(NOT(Bile), EQ(Ca, 2), NOT(CaSteadyState)), AND(Bile, NOT(Ca)), AND(Bile, Ca, NOT(PMCh), LEQ(ATP, 1)), AND(Bile, Ca, PMCh), AND(Bile, EQ(Ca, 2), NOT(CaSteadyState)), AND(Bile, EQ(Ca, 2), CaSteadyState, NOT(PMCh), LEQ(ATP, 1)), AND(Bile, EQ(Ca, 2), CaSteadyState, PMCh), AND(EQ(Bile, 2), NOT(Ca), CaMem, NOT(CaSteadyState)), AND(EQ(Bile, 2), Ca, NOT(CaSteadyState), NOT(PMCh), LEQ(ATP, 1)), AND(EQ(Bile, 2), Ca, NOT(CaSteadyState), PMCh), AND(EQ(Bile, 2), EQ(Ca, 2), NOT(CaSteadyState)))",
+    "CaMem": "Ca",
+    "CaSteadyState": "AND(NOT(Ca), NOT(CaMem))",
+    "PMCh": "EQ(Ca, 2)",
+    "ATP": "OR(AND(NOT(ATP), NOT(Pot)), AND(ATP, NOT(Pot)))",
+    "NADH": "OR(AND(LEQ(Ca, 1), LEQ(NADH, 1), LEQ(ROS, 1)), AND(LEQ(Ca, 1), EQ(NADH, 2)), AND(EQ(Ca, 2), NOT(NADH), LEQ(ROS, 1)))",
+    "ROS": "OR(AND(NOT(Ca), NOT(ROS), Pot), AND(NOT(Ca), ROS, Pot, NOT(CytC)), AND(NOT(Ca), ROS, Pot, CytC, EQ(AntiOx, 2)), AND(NOT(Ca), ROS, EQ(Pot, 2), EQ(AntiOx, 2)), AND(NOT(Ca), EQ(ROS, 2), LEQ(Pot, 1), NOT(CytC)), AND(NOT(Ca), EQ(ROS, 2), LEQ(Pot, 1), CytC, EQ(AntiOx, 2)), AND(NOT(Ca), EQ(ROS, 2), EQ(Pot, 2), EQ(AntiOx, 2)), AND(Ca, NOT(ROS), Pot), AND(Ca, ROS, Pot, NOT(CytC), EQ(AntiOx, 2)), AND(Ca, EQ(ROS, 2), NOT(Pot), NOT(CytC), EQ(AntiOx, 2)), AND(Ca, EQ(ROS, 2), Pot, NOT(CytC), EQ(AntiOx, 2)))",
+    "Pot": "OR(AND(LEQ(NADH, 1), LEQ(Pot, 1), LEQ(Pores, 1)), AND(LEQ(NADH, 1), EQ(Pot, 2)), AND(EQ(NADH, 2), NOT(Pot), LEQ(Pores, 1)), AND(EQ(NADH, 2), EQ(Pot, 2), EQ(Pores, 2)))",
+    "Pores": "OR(AND(NOT(Ca), LEQ(ROS, 1), EQ(Pores, 2)), AND(NOT(Ca), EQ(ROS, 2)), AND(NOT(Ca), EQ(ROS, 3), EQ(Pores, 2)), AND(Ca, NOT(CaMem)), AND(Ca, CaMem, NOT(Pores)))",
+    "CytC": "OR(AND(LEQ(ROS, 1), EQ(CytC, 2)), EQ(ROS, 2), AND(EQ(ROS, 3), NOT(CytC)))",
+    "AntiOx": "OR(AND(NOT(Ca), LEQ(NADH, 1)), AND(NOT(Ca), EQ(NADH, 2), LEQ(Pores, 1), NOT(AntiOx)), AND(NOT(Ca), EQ(NADH, 2), EQ(Pores, 2)), Ca, AND(EQ(Ca, 2), LEQ(Pores, 1)), AND(EQ(Ca, 2), EQ(Pores, 2), EQ(AntiOx, 2)))",
+    "Apt": "AND(ATP, Pores, CytC)",
+    "Necr": "OR(AND(Ca, CaMem, ATP, Pores, EQ(CytC, 2)), AND(EQ(Ca, 2), CaMem, ATP, Pores, EQ(CytC, 2)))",
+    "Bile": "INPUT"
+  },
+  "reference": null,
+  "description": "Imported from biomodels_MODEL1407230001.xml",
+  "source": "BioModels",
+  "gates": {
+    "Bile": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    },
+    "Ca": {
+      "inputs": [
+        "Bile",
+        "CaMem",
+        "CaSteadyState",
+        "PMCh",
+        "ATP"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CaMem": {
+      "inputs": [
+        "Ca"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "CaSteadyState": {
+      "inputs": [
+        "Ca",
+        "CaMem"
+      ],
+      "gate": "NOR",
+      "parameters": {}
+    },
+    "PMCh": {
+      "inputs": [
+        "Ca"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "ATP": {
+      "inputs": [
+        "Pot"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "NADH": {
+      "inputs": [
+        "Ca",
+        "ROS"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "ROS": {
+      "inputs": [
+        "Ca",
+        "Pot",
+        "CytC",
+        "AntiOx"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Pot": {
+      "inputs": [
+        "NADH",
+        "Pores"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Pores": {
+      "inputs": [
+        "Ca",
+        "CaMem",
+        "ROS"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "CytC": {
+      "inputs": [
+        "ROS"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "AntiOx": {
+      "inputs": [
+        "Ca",
+        "NADH",
+        "Pores"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "Apt": {
+      "inputs": [
+        "ATP",
+        "Pores",
+        "CytC"
+      ],
+      "gate": "AND",
+      "parameters": {}
+    },
+    "Necr": {
+      "inputs": [
+        "Ca",
+        "CaMem",
+        "ATP",
+        "Pores",
+        "CytC"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "INPUT": 1,
+    "CUSTOM": 10,
+    "IDENTITY": 1,
+    "NOR": 1,
+    "AND": 1
+  },
+  "n": 14,
+  "n_edges": 33,
+  "edges": [
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "PMCh",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "ATP",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "PMCh",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "PMCh",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "ATP",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "PMCh",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaMem",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "PMCh",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "ATP",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "PMCh",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Bile",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "CaSteadyState",
+      "target": "Ca",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "CaMem",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "CaSteadyState",
+      "type": "regulation"
+    },
+    {
+      "source": "CaMem",
+      "target": "CaSteadyState",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "PMCh",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ATP",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ATP",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "NADH",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "NADH",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "NADH",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "NADH",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "NADH",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "AntiOx",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "AntiOx",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "AntiOx",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "AntiOx",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "AntiOx",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "AntiOx",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "Pot",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "AntiOx",
+      "target": "ROS",
+      "type": "regulation"
+    },
+    {
+      "source": "NADH",
+      "target": "Pot",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "Pot",
+      "type": "regulation"
+    },
+    {
+      "source": "NADH",
+      "target": "Pot",
+      "type": "regulation"
+    },
+    {
+      "source": "NADH",
+      "target": "Pot",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "Pot",
+      "type": "regulation"
+    },
+    {
+      "source": "NADH",
+      "target": "Pot",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "Pot",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "CaMem",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "CaMem",
+      "target": "Pores",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "CytC",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "CytC",
+      "type": "regulation"
+    },
+    {
+      "source": "ROS",
+      "target": "CytC",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "NADH",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "NADH",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "NADH",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "AntiOx",
+      "type": "regulation"
+    },
+    {
+      "source": "ATP",
+      "target": "Apt",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "Apt",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "Apt",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "CaMem",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "ATP",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "Ca",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "CaMem",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "ATP",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "Pores",
+      "target": "Necr",
+      "type": "regulation"
+    },
+    {
+      "source": "CytC",
+      "target": "Necr",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    8,
+    4,
+    1,
+    1,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3,
+    1,
+    0,
+    0
+  ]
+}

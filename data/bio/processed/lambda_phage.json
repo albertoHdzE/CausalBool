@@ -1,0 +1,121 @@
+{
+  "name": "lambda_phage",
+  "nodes": [
+    "CI",
+    "Cro",
+    "CII",
+    "N"
+  ],
+  "cm": [
+    [
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "CI": "AND(CII, NOT(Cro))",
+    "Cro": "NOT(CI)",
+    "CII": "N",
+    "N": "INPUT"
+  },
+  "reference": "Gardner et al., Nature 2000",
+  "description": "Lambda phage lysis-lysogeny genetic switch",
+  "source": "CellCollective/Literature",
+  "essentiality": {
+    "CI": 1,
+    "Cro": 1,
+    "CII": 0,
+    "N": 0
+  },
+  "gates": {
+    "CI": {
+      "inputs": [
+        "Cro",
+        "CII"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "Cro": {
+      "inputs": [
+        "CI"
+      ],
+      "gate": "NOT",
+      "parameters": {}
+    },
+    "CII": {
+      "inputs": [
+        "N"
+      ],
+      "gate": "IDENTITY",
+      "parameters": {}
+    },
+    "N": {
+      "inputs": [],
+      "gate": "INPUT",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CANALISING": 1,
+    "NOT": 1,
+    "IDENTITY": 1,
+    "INPUT": 1
+  },
+  "n": 4,
+  "n_edges": 4,
+  "edges": [
+    {
+      "source": "Cro",
+      "target": "CI",
+      "type": "repression"
+    },
+    {
+      "source": "CI",
+      "target": "Cro",
+      "type": "repression"
+    },
+    {
+      "source": "N",
+      "target": "CII",
+      "type": "activation"
+    },
+    {
+      "source": "CII",
+      "target": "CI",
+      "type": "activation"
+    }
+  ],
+  "out_degrees": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "path": "/Users/alberto/Documents/projects/CausalBoolIntegration/data/bio/processed/lambda_phage.json",
+  "category": "Decider"
+}

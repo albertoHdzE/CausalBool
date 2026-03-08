@@ -1,0 +1,327 @@
+{
+  "name": "MODEL1411170000",
+  "nodes": [
+    "TBET",
+    "GATA3",
+    "FOXP3",
+    "RORGT",
+    "BCL6",
+    "TH1e",
+    "TH2e",
+    "TREGe",
+    "TH17e",
+    "TFHe"
+  ],
+  "cm": [
+    [
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "logic": {
+    "TBET": "AND(OR(TH1e, TBET), NOT(OR(GATA3, BCL6)))",
+    "GATA3": "AND(OR(TH2e, GATA3), NOT(OR(TBET, BCL6)))",
+    "FOXP3": "AND(OR(TREGe, FOXP3), NOT(RORGT))",
+    "RORGT": "AND(TH17e, NOT(OR(TBET, GATA3, FOXP3, BCL6)))",
+    "BCL6": "AND(TFHe, NOT(TBET))",
+    "TH1e": "TH1e",
+    "TH2e": "TH2e",
+    "TREGe": "TREGe",
+    "TH17e": "TH17e",
+    "TFHe": "TFHe"
+  },
+  "reference": null,
+  "description": "Imported from biomodels_BIOMD0000000592.xml",
+  "source": "BioModels",
+  "gates": {
+    "TBET": {
+      "inputs": [
+        "GATA3",
+        "BCL6",
+        "TH1e"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "GATA3": {
+      "inputs": [
+        "TBET",
+        "BCL6",
+        "TH2e"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "FOXP3": {
+      "inputs": [
+        "RORGT",
+        "TREGe"
+      ],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "RORGT": {
+      "inputs": [
+        "TBET",
+        "GATA3",
+        "FOXP3",
+        "BCL6",
+        "TH17e"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "BCL6": {
+      "inputs": [
+        "TBET",
+        "TFHe"
+      ],
+      "gate": "CANALISING",
+      "parameters": {
+        "canalisingIndex": 1,
+        "canalisingValue": 1,
+        "canalisedOutput": 0
+      }
+    },
+    "TH1e": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "TH2e": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "TREGe": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "TH17e": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    },
+    "TFHe": {
+      "inputs": [],
+      "gate": "CUSTOM",
+      "parameters": {}
+    }
+  },
+  "gate_histogram": {
+    "CUSTOM": 8,
+    "CANALISING": 2
+  },
+  "n": 10,
+  "n_edges": 15,
+  "edges": [
+    {
+      "source": "TH1e",
+      "target": "TBET",
+      "type": "regulation"
+    },
+    {
+      "source": "GATA3",
+      "target": "TBET",
+      "type": "regulation"
+    },
+    {
+      "source": "BCL6",
+      "target": "TBET",
+      "type": "regulation"
+    },
+    {
+      "source": "TH2e",
+      "target": "GATA3",
+      "type": "regulation"
+    },
+    {
+      "source": "TBET",
+      "target": "GATA3",
+      "type": "regulation"
+    },
+    {
+      "source": "BCL6",
+      "target": "GATA3",
+      "type": "regulation"
+    },
+    {
+      "source": "TREGe",
+      "target": "FOXP3",
+      "type": "regulation"
+    },
+    {
+      "source": "RORGT",
+      "target": "FOXP3",
+      "type": "regulation"
+    },
+    {
+      "source": "TH17e",
+      "target": "RORGT",
+      "type": "regulation"
+    },
+    {
+      "source": "TBET",
+      "target": "RORGT",
+      "type": "regulation"
+    },
+    {
+      "source": "GATA3",
+      "target": "RORGT",
+      "type": "regulation"
+    },
+    {
+      "source": "FOXP3",
+      "target": "RORGT",
+      "type": "regulation"
+    },
+    {
+      "source": "BCL6",
+      "target": "RORGT",
+      "type": "regulation"
+    },
+    {
+      "source": "TFHe",
+      "target": "BCL6",
+      "type": "regulation"
+    },
+    {
+      "source": "TBET",
+      "target": "BCL6",
+      "type": "regulation"
+    }
+  ],
+  "out_degrees": [
+    3,
+    2,
+    1,
+    1,
+    3,
+    1,
+    1,
+    1,
+    1,
+    1
+  ]
+}

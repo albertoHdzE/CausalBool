@@ -1,0 +1,2301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gxl SYSTEM "http://ginsim.org/GINML_2_2.dtd">
+<gxl xmlns:xlink="http://www.w3.org/1999/xlink">
+  <graph class="regulatory" id="PC_20191219" nodeorder="Acidosis AKT AMP_ATP AMPK Androgen Apoptosis AR ATM ATR AXIN1 BAD Bak BAX BCL2 Bcl_XL beta_catenin BIRC5 BRCA1 BRCA2 Carcinogen Caspase8 Caspase9 CDH2 cFLAR CHK1_2 COX4I2 CyclinB CyclinD CytoC APAF1 DAXX DNA_Damage DNA_Repair Dsh E2F1 E_cadherin eEF2 eEF2K EMT EP300 ERG ERK ETS1 ETV1 EZH2 FADD FOS JUN FOXA1 FOXO EGF EGFR FGF FGFR3 FRS2 GADD45 GLI GLUT1 GSH GSK3 HIF1 HSPs Hypoxia IDH1 Invasion IKK JNK Lactic_acid LDHA MAP3K1_3 MDM2 MED12 MEK1_2 Metastasis Migration ZBTB17 mTORC2 MXI1 MYC MYC_MAX NCOA3 NCOR1 NCOR2 NF1 NF_kB Nutrients p14ARF p15 p21 p38 p53 p70S6kab p90RSK PDK1 PHDs PI3K PIP3 PKC Proliferation PTCH1 PTEN RAF RAGS RAS RB1 Rheb ROS RTK RUNX2 SHH Slug SMAD SMO Snail SPOP TAK1 TCF TERT TGFb TGFBR fused_event TNFalpha TSC1_2 TWIST1 VEGF VHL WNT YWHAZ AR_ERG BMP2 Caspase3 NKX3_1 mTORC1">
+    <nodestyle background="#ffffff" foreground="#000000" text="#000000" shape="RECTANGLE" width="80" height="30" properties="intermediate:#ffff00 active:#ffc800"/>
+    <nodestyle name="Node style" background="#ff3300" text="#ffffff" shape="RECTANGLE" width="85"/>
+    <nodestyle name="Node style 2" background="#3399ff" text="#ffffff" shape="RECTANGLE" width="85"/>
+    <nodestyle name="Node style 3" background="#ffcc33" shape="RECTANGLE" width="85"/>
+    <edgestyle color="#000000" pattern="SIMPLE" line_width="1" properties="positive:#00c800 negative:#c80000 dual:#0000c8"/>
+    <node id="Acidosis" maxvalue="1" input="true">
+      <nodevisualsetting x="915" y="72" style="Node style 3"/>
+    </node>
+    <node id="AKT" maxvalue="1">
+      <value val="1">
+        <exp str="(HSPs | (PDK1 &amp; PIP3) | PIP3 | (SHH &amp; PIP3)) &amp; !PTCH1"/>
+      </value>
+      <nodevisualsetting x="1226" y="624" style=""/>
+    </node>
+    <node id="AMP_ATP" maxvalue="1">
+      <value val="1">
+        <exp str="!Nutrients"/>
+      </value>
+      <nodevisualsetting x="660" y="114" style=""/>
+    </node>
+    <node id="AMPK" maxvalue="1">
+      <value val="1">
+        <exp str="(ATR | HIF1 | AMP_ATP | ATM) &amp; !EGFR &amp; !FGFR3"/>
+      </value>
+      <nodevisualsetting x="687" y="183" style=""/>
+    </node>
+    <node id="Androgen" maxvalue="1" input="true">
+      <nodevisualsetting x="1057" y="10" style="Node style 3"/>
+    </node>
+    <node id="Apoptosis" maxvalue="1">
+      <value val="1">
+        <exp str="Caspase9 | Caspase8 | Caspase3"/>
+      </value>
+      <nodevisualsetting x="1606" y="986" style="Node style 2"/>
+    </node>
+    <node id="AR" maxvalue="1">
+      <value val="1">
+        <exp str="Androgen &amp; (EZH2 | GLI | PKC | EP300 | HSPs | NKX3_1 | NCOA3 | SMAD) &amp; !PTEN &amp; !NCOR1 &amp; !NCOR2 &amp; !MDM2"/>
+      </value>
+      <annotation>
+        <comment>(GLI | EP300 | HSPs | NKX3_1 | EZH2 | NCOA3 | PKC | SMAD | Androgen) &amp; !PTEN &amp; !NCOR1 &amp; !NCOR2 &amp; !MDM2
+
+Androgen &amp; (EZH2 | PKC)  &amp; (GLI | EP300 | HSPs | NKX3_1 | NCOA3 | SMAD) &amp; !PTEN &amp; !NCOR1 &amp; !NCOR2 &amp; !MDM2</comment>
+      </annotation>
+      <nodevisualsetting x="1078" y="623" style=""/>
+    </node>
+    <node id="ATM" maxvalue="1">
+      <value val="1">
+        <exp str="DNA_Damage"/>
+      </value>
+      <nodevisualsetting x="1397" y="256" style=""/>
+    </node>
+    <node id="ATR" maxvalue="1">
+      <value val="1">
+        <exp str="DNA_Damage | p14ARF"/>
+      </value>
+      <nodevisualsetting x="1518" y="218" style=""/>
+    </node>
+    <node id="AXIN1" maxvalue="1">
+      <value val="1">
+        <exp str="GSK3"/>
+      </value>
+      <nodevisualsetting x="1228" y="344" style=""/>
+    </node>
+    <node id="BAD" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT &amp; !HIF1 &amp; !p90RSK &amp; !RAF &amp; !YWHAZ &amp; (!Caspase3 | Caspase3)"/>
+      </value>
+      <nodevisualsetting x="1515" y="748" style=""/>
+    </node>
+    <node id="Bak" maxvalue="1">
+      <value val="1">
+        <exp str="Caspase8"/>
+      </value>
+      <nodevisualsetting x="1625" y="742" style=""/>
+    </node>
+    <node id="BAX" maxvalue="1">
+      <value val="1">
+        <exp str="!BCL2 &amp; !HIF1 &amp; !YWHAZ &amp; (JNK | HIF1 | p53) &amp; !ETS1"/>
+      </value>
+      <nodevisualsetting x="1635" y="651" style=""/>
+    </node>
+    <node id="BCL2" maxvalue="1">
+      <value val="1">
+        <exp str="(HSPs | NF_kB | RUNX2) &amp; !BAX &amp; !p53 &amp; !DAXX &amp; !BAD"/>
+      </value>
+      <nodevisualsetting x="1542" y="670" style=""/>
+    </node>
+    <node id="Bcl_XL" maxvalue="1">
+      <value val="1">
+        <exp str="!BAD &amp; !p53 &amp; AR"/>
+      </value>
+      <nodevisualsetting x="1703" y="693" style=""/>
+    </node>
+    <node id="beta_catenin" maxvalue="1">
+      <value val="1">
+        <exp str="!GSK3 &amp; !p53 &amp; !AXIN1 &amp; (EZH2 | YWHAZ)"/>
+      </value>
+      <nodevisualsetting x="1039" y="727" style=""/>
+    </node>
+    <node id="BIRC5" maxvalue="1">
+      <value val="1">
+        <exp str="HSPs &amp; !p53"/>
+      </value>
+      <nodevisualsetting x="1622" y="785" style=""/>
+    </node>
+    <node id="BRCA1" maxvalue="1">
+      <value val="1">
+        <exp str="(E2F1 | ATM | ATR | (E2F1 &amp; EP300) | (ATM &amp; EP300) | (ATR &amp; EP300)) &amp; !CyclinD &amp; !Caspase3"/>
+      </value>
+      <annotation>
+        <comment>IN:
+CyclinD: 17334399
+Caspase3: 12149654</comment>
+      </annotation>
+      <nodevisualsetting x="1473" y="382" style=""/>
+    </node>
+    <node id="BRCA2" maxvalue="1">
+      <value val="1">
+        <exp str="ATM &amp; ATR &amp; EP300"/>
+      </value>
+      <nodevisualsetting x="1635" y="329" style=""/>
+    </node>
+    <node id="Carcinogen" maxvalue="1" input="true">
+      <nodevisualsetting x="1512" y="2" style="Node style 3"/>
+    </node>
+    <node id="Caspase8" maxvalue="1">
+      <value val="1">
+        <exp str="!cFLAR &amp; FADD"/>
+      </value>
+      <nodevisualsetting x="1564" y="857" style=""/>
+    </node>
+    <node id="Caspase9" maxvalue="1">
+      <value val="1">
+        <exp str="(!AKT &amp; CytoC &amp; APAF1 &amp; PTCH1) | (!AKT &amp; BIRC5 &amp; CytoC &amp; APAF1) | (!AKT &amp; BIRC5 &amp; CytoC &amp; APAF1 &amp; PTCH1)"/>
+      </value>
+      <nodevisualsetting x="1656" y="855" style=""/>
+    </node>
+    <node id="CDH2" maxvalue="1">
+      <value val="1">
+        <exp str="TWIST1"/>
+      </value>
+      <nodevisualsetting x="1094" y="887" style=""/>
+    </node>
+    <node id="cFLAR" maxvalue="1">
+      <value val="1">
+        <exp str="(AKT | AR) &amp; !JNK"/>
+      </value>
+      <nodevisualsetting x="1486" y="530" style=""/>
+    </node>
+    <node id="CHK1_2" maxvalue="1">
+      <value val="1">
+        <exp str="ATM &amp; ATR &amp; BRCA1"/>
+      </value>
+      <nodevisualsetting x="1366" y="339" style=""/>
+    </node>
+    <node id="COX4I2" maxvalue="1">
+      <value val="1">
+        <exp str="HIF1"/>
+      </value>
+      <nodevisualsetting x="886" y="484" style=""/>
+    </node>
+    <node id="CyclinB" maxvalue="1">
+      <value val="1">
+        <exp str="!p21 &amp; E2F1:1"/>
+      </value>
+      <nodevisualsetting x="150" y="872" style=""/>
+    </node>
+    <node id="CyclinD" maxvalue="1">
+      <value val="1">
+        <exp str="(GLI | TCF | NF_kB) &amp; MYC_MAX &amp; !p21 &amp; !FOXO &amp; !p15 &amp; !GSK3"/>
+      </value>
+      <annotation>
+        <comment>(GLI | TCF | JUN | FOS | NF_kB | MYC_MAX) &amp; !p21 &amp; !FOXO &amp; !p15 &amp; !GSK3
+(GLI | TCF | JUN | FOS | NF_kB | MYC_MAX) &amp; !FOXO &amp; !GSK3
+
+(GLI | TCF | JUN | FOS | NF_kB | MYC_MAX) &amp; !p21 &amp; !FOXO &amp; !p15 &amp; !GSK3</comment>
+      </annotation>
+      <nodevisualsetting x="276" y="864" style=""/>
+    </node>
+    <node id="CytoC" maxvalue="1">
+      <value val="1">
+        <exp str="(Caspase8 | BAX | p53 | Bak) &amp; !Bcl_XL &amp; !BCL2 &amp; !AKT"/>
+      </value>
+      <nodevisualsetting x="1719" y="750" style=""/>
+    </node>
+    <node id="APAF1" maxvalue="1">
+      <value val="1">
+        <exp str="(Caspase8 | BAX | p53 | Bak | HSPs) &amp; !Bcl_XL &amp; !BCL2 &amp; !AKT"/>
+      </value>
+      <nodevisualsetting x="1522" y="798" style=""/>
+    </node>
+    <node id="DAXX" maxvalue="1">
+      <value val="1">
+        <exp str="!ATM &amp; !ATR &amp; !SPOP"/>
+      </value>
+      <nodevisualsetting x="1518" y="318" style=""/>
+    </node>
+    <node id="DNA_Damage" maxvalue="1">
+      <value val="1">
+        <exp str="(Carcinogen | (Carcinogen &amp; ROS)) &amp; !SPOP"/>
+      </value>
+      <nodevisualsetting x="1494" y="136" style=""/>
+    </node>
+    <node id="DNA_Repair" maxvalue="1">
+      <value val="1">
+        <exp str="ATM &amp; ATR &amp; (BRCA1 | BRCA2 | p14ARF)"/>
+      </value>
+      <nodevisualsetting x="1784" y="405" style="Node style 2"/>
+    </node>
+    <node id="Dsh" maxvalue="1">
+      <value val="1">
+        <exp str="WNT"/>
+      </value>
+      <nodevisualsetting x="1117" y="373" style=""/>
+    </node>
+    <node id="E2F1" maxvalue="1">
+      <value val="1">
+        <exp str="(AR | (AR &amp; (FOXA1 | ATR | ATM))) &amp; !RB1 &amp; !MXI1"/>
+      </value>
+      <nodevisualsetting x="211" y="710" style=""/>
+    </node>
+    <node id="E_cadherin" maxvalue="1">
+      <value val="1">
+        <exp str="(beta_catenin | AR_ERG) &amp; !Snail &amp; !ERG &amp; !NF_kB &amp; !Slug"/>
+      </value>
+      <nodevisualsetting x="762" y="672" style=""/>
+    </node>
+    <node id="eEF2" maxvalue="1">
+      <value val="1">
+        <exp str="!eEF2K"/>
+      </value>
+      <nodevisualsetting x="568" y="324" style=""/>
+    </node>
+    <node id="eEF2K" maxvalue="1">
+      <value val="1">
+        <exp str="p90RSK | p70S6kab"/>
+      </value>
+      <nodevisualsetting x="574" y="268" style=""/>
+    </node>
+    <node id="EMT" maxvalue="1">
+      <value val="1">
+        <exp str="CDH2 &amp; !E_cadherin &amp; !FOXA1"/>
+      </value>
+      <nodevisualsetting x="955" y="880" style=""/>
+    </node>
+    <node id="EP300" maxvalue="1">
+      <value val="1">
+        <exp str="AKT"/>
+      </value>
+      <nodevisualsetting x="1481" y="470" style=""/>
+    </node>
+    <node id="ERG" maxvalue="1">
+      <value val="1">
+        <exp str="ERK"/>
+      </value>
+      <annotation>
+        <comment>(AR &amp; !ERK &amp; !NKX3_1 &amp; TMPRSS2) | (AR &amp; ERK &amp; TMPRSS2)
+
+Si TMRSS2 sols està actiu si està amb fusió am ERG, igual cal alliberar ERK per a tenir Metastasis:
+(AR &amp; !ERK &amp; !NKX3_1 &amp; TMPRSS2) | (AR &amp; ERK &amp; TMPRSS2) | ERK</comment>
+      </annotation>
+      <nodevisualsetting x="995" y="439" style=""/>
+    </node>
+    <node id="ERK" maxvalue="1">
+      <value val="1">
+        <exp str="RAF | MEK1_2"/>
+      </value>
+      <annotation>
+        <comment>in: 
+SMAD: from Cohen</comment>
+      </annotation>
+      <nodevisualsetting x="69" y="481" style=""/>
+    </node>
+    <node id="ETS1" maxvalue="1">
+      <value val="1">
+        <exp str="!p53 &amp; (RTK | ERK)"/>
+      </value>
+      <annotation>
+        <comment>Signor:
+MAPK3 (ERK1/2) and MAPK7 -&gt; ETS1</comment>
+      </annotation>
+      <nodevisualsetting x="463" y="621" style=""/>
+    </node>
+    <node id="ETV1" maxvalue="1">
+      <value val="1">
+        <exp str="ETS1 | MEK1_2"/>
+      </value>
+      <nodevisualsetting x="489" y="706" style=""/>
+    </node>
+    <node id="EZH2" maxvalue="1">
+      <value val="1">
+        <exp str="AKT &amp; E2F1 &amp; (ERG | AR_ERG)"/>
+      </value>
+      <annotation>
+        <comment>AKT &amp; E2F1 &amp; (ERG | AR_ERG)</comment>
+      </annotation>
+      <nodevisualsetting x="921" y="715" style=""/>
+    </node>
+    <node id="FADD" maxvalue="1">
+      <value val="1">
+        <exp str="(PTCH1 | TNFalpha) &amp; !SHH &amp; !MAP3K1_3"/>
+      </value>
+      <nodevisualsetting x="1605" y="565" style=""/>
+    </node>
+    <node id="FOS" maxvalue="1">
+      <value val="1">
+        <exp str="ERK | ETS1 | AR"/>
+      </value>
+      <nodevisualsetting x="295" y="515" style=""/>
+    </node>
+    <node id="JUN" maxvalue="1">
+      <value val="1">
+        <exp str="AR | ETS1 | JNK"/>
+      </value>
+      <nodevisualsetting x="385" y="516" style=""/>
+    </node>
+    <node id="FOXA1" maxvalue="1">
+      <value val="1">
+        <exp str="FOXO"/>
+      </value>
+      <annotation>
+        <comment>Genecard:
+QIAGEN binding sites: FOXO4 -&gt; FOXA1</comment>
+      </annotation>
+      <nodevisualsetting x="838" y="740" style=""/>
+    </node>
+    <node id="FOXO" maxvalue="1">
+      <value val="1">
+        <exp str="JNK &amp; !AKT"/>
+      </value>
+      <annotation>
+        <comment>PMID: 19951971
+</comment>
+      </annotation>
+      <nodevisualsetting x="1247" y="776" style=""/>
+    </node>
+    <node id="EGF" maxvalue="1" input="true">
+      <nodevisualsetting x="103" y="31" style="Node style 3"/>
+    </node>
+    <node id="EGFR" maxvalue="1">
+      <value val="1">
+        <exp str="(!TGFBR &amp; !FRS2 &amp; !EGFR &amp; !PKC &amp; ERK &amp; (Androgen | EGF)) | (!TGFBR &amp; !FRS2 &amp; (Androgen | EGF))"/>
+      </value>
+      <annotation>
+        <comment>(Androgen | ERK | EGF) &amp; !FRS2 &amp; !TGFBR &amp; !PKC
+
+(!TGFBR &amp; !FRS2 &amp; !EGFR &amp; !PKC &amp; (ERK | Androgen | EGF)) | (!TGFBR &amp; !FRS2 &amp; (Androgen | EGF))</comment>
+      </annotation>
+      <nodevisualsetting x="107" y="142" style=""/>
+    </node>
+    <node id="FGF" maxvalue="1" input="true">
+      <nodevisualsetting x="278" y="26" style="Node style 3"/>
+    </node>
+    <node id="FGFR3" maxvalue="1">
+      <value val="1">
+        <exp str="(FGF | (FGF &amp; RUNX2)) &amp; !FRS2 &amp; !PKC &amp; !TGFBR"/>
+      </value>
+      <nodevisualsetting x="281" y="131" style=""/>
+    </node>
+    <node id="FRS2" maxvalue="1">
+      <value val="1">
+        <exp str="!ERK &amp; EGFR &amp; FGFR3 &amp; !FRS2 &amp; !TGFBR"/>
+      </value>
+      <nodevisualsetting x="285" y="244" style=""/>
+    </node>
+    <node id="GADD45" maxvalue="1">
+      <value val="1">
+        <exp str="SMAD | p53"/>
+      </value>
+      <nodevisualsetting x="953" y="397" style=""/>
+    </node>
+    <node id="GLI" maxvalue="1">
+      <value val="1">
+        <exp str="(WNT | SMO) &amp; !SPOP"/>
+      </value>
+      <nodevisualsetting x="1191" y="165" style=""/>
+    </node>
+    <node id="GLUT1" maxvalue="1">
+      <value val="1">
+        <exp str="(HIF1 | MYC_MAX | AKT) &amp; Nutrients"/>
+      </value>
+      <nodevisualsetting x="856" y="808" style=""/>
+    </node>
+    <node id="GSH" maxvalue="1">
+      <value val="1">
+        <exp str="MYC_MAX | NF_kB | p21"/>
+      </value>
+      <nodevisualsetting x="719" y="460" style=""/>
+    </node>
+    <node id="GSK3" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT &amp; !Dsh &amp; MEK1_2 &amp; !mTORC2 &amp; !p90RSK"/>
+      </value>
+      <nodevisualsetting x="1124" y="283" style=""/>
+    </node>
+    <node id="HIF1" maxvalue="1">
+      <value val="1">
+        <exp str="!PHDs &amp; !VHL &amp; !p53 &amp; !FOXO &amp; (HSPs | mTORC1 | mTORC2 | Hypoxia | MYC_MAX)"/>
+      </value>
+      <annotation>
+        <comment>!PHDs &amp; !VHL &amp; !p53 &amp; !FOXO &amp; (HSPs | mTOR | Hypoxia | MYC_MAX)
+
+!PHDs &amp; !VHL &amp; !p53 &amp; !FOXO &amp; HSPs &amp; mTOR &amp; Hypoxia &amp; MYC_MAX</comment>
+      </annotation>
+      <nodevisualsetting x="777" y="617" style=""/>
+    </node>
+    <node id="HSPs" maxvalue="1">
+      <value val="1">
+        <exp str="(PKC | FOXA1 | Carcinogen) &amp; !BRCA1 &amp; !E2F1 &amp; !AKT"/>
+      </value>
+      <annotation>
+        <comment>out:
+TGFBT: 18591668
+AR: 15861399
+APAF1: 10944114
+
+in: 
+PKC: 2507541
+FOXA1: 19486887
+BRCA1: 18776923
+E2F1: 18840615
+AKT: 19593530</comment>
+      </annotation>
+      <nodevisualsetting x="1096" y="155" style=""/>
+    </node>
+    <node id="Hypoxia" maxvalue="1" input="true">
+      <nodevisualsetting x="830" y="15" style="Node style 3"/>
+    </node>
+    <node id="IDH1" maxvalue="1">
+      <value val="1">
+        <exp str="SMAD | FOXA1 | mTORC2 | ((SMAD | mTORC2 | FOXA1) &amp; MEK1_2)"/>
+      </value>
+      <annotation>
+        <comment>Gene has two gene enhancers sequences: GH02I208264 and GH02I208251
+SMAD and FOXA1 are part of the genes that could regulate these sequences</comment>
+      </annotation>
+      <nodevisualsetting x="743" y="740" style=""/>
+    </node>
+    <node id="Invasion" maxvalue="1">
+      <value val="1">
+        <exp str="(CDH2 &amp; SMAD) | (CDH2 &amp; SMAD &amp; EZH2) | beta_catenin"/>
+      </value>
+      <nodevisualsetting x="1079" y="981" style="Node style 2"/>
+    </node>
+    <node id="IKK" maxvalue="1">
+      <value val="1">
+        <exp str="(mTORC2 | AKT) &amp; (PKC | TAK1 | ETS1) &amp; !PHDs &amp; !p53"/>
+      </value>
+      <nodevisualsetting x="824" y="434" style=""/>
+    </node>
+    <node id="JNK" maxvalue="1">
+      <value val="1">
+        <exp str="(ATM | GADD45 | TAK1 | MAP3K1_3) &amp; !ERK &amp; !p38"/>
+      </value>
+      <nodevisualsetting x="476" y="501" style=""/>
+    </node>
+    <node id="Lactic_acid" maxvalue="1">
+      <value val="1">
+        <exp str="LDHA"/>
+      </value>
+      <nodevisualsetting x="752" y="870" style=""/>
+    </node>
+    <node id="LDHA" maxvalue="1">
+      <value val="1">
+        <exp str="HIF1 | MYC_MAX | IDH1"/>
+      </value>
+      <nodevisualsetting x="742" y="809" style=""/>
+    </node>
+    <node id="MAP3K1_3" maxvalue="1">
+      <value val="1">
+        <exp str="RAS &amp; !(FOS | JUN | JNK | p38)"/>
+      </value>
+      <nodevisualsetting x="234" y="408" style=""/>
+    </node>
+    <node id="MDM2" maxvalue="1">
+      <value val="1">
+        <exp str="(AKT | p53) &amp; DAXX &amp; !p14ARF &amp; !ATR &amp; !ATM"/>
+      </value>
+      <annotation>
+        <comment>(AKT | p53 | ((AKT | p53) &amp; DAXX)) &amp; !p14ARF &amp; !ATR &amp; !ATM
+
+((AKT | p53) &amp; DAXX) &amp; !p14ARF &amp; !ATR &amp; !ATM</comment>
+      </annotation>
+      <nodevisualsetting x="1355" y="465" style=""/>
+    </node>
+    <node id="MED12" maxvalue="1">
+      <value val="1">
+        <exp str="!GLI"/>
+      </value>
+      <annotation>
+        <comment>PMID: 17000779</comment>
+      </annotation>
+      <nodevisualsetting x="966" y="180" style=""/>
+    </node>
+    <node id="MEK1_2" maxvalue="1">
+      <value val="1">
+        <exp str="MAP3K1_3 | RAF | PDK1"/>
+      </value>
+      <nodevisualsetting x="210" y="542" style=""/>
+    </node>
+    <node id="Metastasis" maxvalue="1">
+      <value val="1">
+        <exp str="AR_ERG:1 &amp; Migration:1"/>
+      </value>
+      <nodevisualsetting x="990" y="1052" style="Node style 2"/>
+    </node>
+    <node id="Migration" maxvalue="1">
+      <value val="1">
+        <exp str="((AKT &amp; ERK) | (AKT &amp; ETV1) | AR) &amp; Invasion &amp; EMT"/>
+      </value>
+      <nodevisualsetting x="876" y="986" style="Node style 2"/>
+    </node>
+    <node id="ZBTB17" name="ZBTB17" maxvalue="1">
+      <value val="1">
+        <exp str="!MYC_MAX &amp; AR"/>
+      </value>
+      <annotation>
+        <comment>ZBTB17, was Miz_1
+(!MYC_MAX &amp; AR) | AR</comment>
+      </annotation>
+      <nodevisualsetting x="540" y="790" style=""/>
+    </node>
+    <node id="mTORC2" maxvalue="1">
+      <parameter idActiveInteractions=" AKT:mTORC2 AMPK:mTORC2 RAGS:mTORC2 Rheb:mTORC2" val="1"/>
+      <value val="1">
+        <exp str="(!AMPK &amp; RAGS &amp; Rheb) | (AKT &amp; !AMPK &amp; Rheb) | (AKT &amp; !AMPK &amp; RAGS) | (AKT &amp; RAGS &amp; Rheb &amp; !AMPK)"/>
+      </value>
+      <nodevisualsetting x="761" y="364" style=""/>
+    </node>
+    <node id="MXI1" maxvalue="1">
+      <value val="1">
+        <exp str="HIF1"/>
+      </value>
+      <nodevisualsetting x="617" y="654" style=""/>
+    </node>
+    <node id="MYC" maxvalue="1">
+      <value val="1">
+        <exp str="(GLI | ERK | TCF | JUN | FOS | AR_ERG | ERG | NF_kB | SHH) &amp; (mTORC1 | E2F1 | p38) &amp; !HIF1"/>
+      </value>
+      <annotation>
+        <comment>(GLI | ERK | TCF | JUN | FOS | AR_ERG | ERG | NF_kB | SHH) &amp; (mTORC1 | E2F1 | p38) &amp; !HIF1
+
+(GLI | ERK | TCF | JUN | FOS | AR_ERG | ERG | NF_kB | SHH | E2F1 | p38) &amp; !HIF1</comment>
+      </annotation>
+      <nodevisualsetting x="602" y="489" style=""/>
+    </node>
+    <node id="MYC_MAX" maxvalue="1">
+      <value val="1">
+        <exp str="MYC &amp; !MXI1 &amp; !TGFBR &amp; !SMAD"/>
+      </value>
+      <annotation>
+        <comment>MAX &amp; MYC &amp; !MXI1 &amp; !RBL1 &amp; !TGFBR &amp; !SMAD
+MAX &amp; MYC &amp; !MXI1 &amp; !TGFBR &amp; !SMAD</comment>
+      </annotation>
+      <nodevisualsetting x="560" y="584" style=""/>
+    </node>
+    <node id="NCOA3" maxvalue="1">
+      <value val="1">
+        <exp str="!SPOP &amp; p38"/>
+      </value>
+      <nodevisualsetting x="1300" y="420" style=""/>
+    </node>
+    <node id="NCOR1" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT"/>
+      </value>
+      <nodevisualsetting x="1166" y="569" style=""/>
+    </node>
+    <node id="NCOR2" maxvalue="1">
+      <value val="1">
+        <exp str="!AKT &amp; !FOXO"/>
+      </value>
+      <nodevisualsetting x="1177" y="704" style=""/>
+    </node>
+    <node id="NF1" maxvalue="1">
+      <value val="1">
+        <exp str="!PKC"/>
+      </value>
+      <nodevisualsetting x="316" y="362" style=""/>
+    </node>
+    <node id="NF_kB" maxvalue="1">
+      <value val="1">
+        <exp str="(E_cadherin | IKK | DNA_Damage) &amp; (NCOA3 | PIP3 | Snail)"/>
+      </value>
+      <nodevisualsetting x="629" y="359" style=""/>
+    </node>
+    <node id="Nutrients" maxvalue="1" input="true">
+      <nodevisualsetting x="703" y="27" style="Node style 3"/>
+    </node>
+    <node id="p14ARF" maxvalue="1">
+      <value val="1">
+        <exp str="E2F1 &amp; MYC_MAX &amp; RAS"/>
+      </value>
+      <nodevisualsetting x="1268" y="547" style=""/>
+    </node>
+    <node id="p15" maxvalue="1">
+      <value val="1">
+        <exp str="ZBTB17"/>
+      </value>
+      <nodevisualsetting x="428" y="835" style=""/>
+    </node>
+    <node id="p21" maxvalue="1">
+      <value val="1">
+        <exp str="(p53 | SMAD | HIF1 | ZBTB17) &amp; !TERT &amp; !MYC_MAX &amp; !MDM2 &amp; !AKT &amp; !ERK"/>
+      </value>
+      <annotation>
+        <comment>IN:
+ERK: Cohen et al</comment>
+      </annotation>
+      <nodevisualsetting x="320" y="754" style=""/>
+    </node>
+    <node id="p38" maxvalue="1">
+      <value val="1">
+        <exp str="MAP3K1_3 &amp; !ERK &amp; !GADD45"/>
+      </value>
+      <nodevisualsetting x="823" y="546" style=""/>
+    </node>
+    <node id="p53" maxvalue="1">
+      <value val="1">
+        <exp str="(Acidosis | CHK1_2 | p38 | HIF1 | p14ARF) &amp; !BCL2 &amp; !MDM2 &amp; !HSPs"/>
+      </value>
+      <annotation>
+        <comment>IN:
+Snail: Cohen et al</comment>
+      </annotation>
+      <nodevisualsetting x="947" y="620" style=""/>
+    </node>
+    <node id="p70S6kab" maxvalue="1">
+      <value val="1">
+        <exp str="mTORC2 | PDK1"/>
+      </value>
+      <nodevisualsetting x="787" y="298" style=""/>
+    </node>
+    <node id="p90RSK" maxvalue="1">
+      <value val="1">
+        <exp str="PDK1 | ERK"/>
+      </value>
+      <nodevisualsetting x="548" y="415" style=""/>
+    </node>
+    <node id="PDK1" maxvalue="1">
+      <value val="1">
+        <exp str="HIF1 | MYC_MAX | PIP3"/>
+      </value>
+      <nodevisualsetting x="718" y="505" style=""/>
+    </node>
+    <node id="PHDs" maxvalue="1">
+      <value val="1">
+        <exp str="!Hypoxia &amp; ROS"/>
+      </value>
+      <nodevisualsetting x="918" y="226" style=""/>
+    </node>
+    <node id="PI3K" maxvalue="1">
+      <value val="1">
+        <exp str="EGFR | FRS2 | TGFBR"/>
+      </value>
+      <nodevisualsetting x="426" y="222" style=""/>
+    </node>
+    <node id="PIP3" maxvalue="1">
+      <value val="1">
+        <exp str="(!p53 &amp; PI3K &amp; !PTEN) | (!p53 &amp; PI3K)"/>
+      </value>
+      <annotation>
+        <comment>(!p53 &amp; PI3K &amp; !PTEN) | (!p53 &amp; PI3K)  | (PI3K &amp; !PTEN)</comment>
+      </annotation>
+      <nodevisualsetting x="436" y="332" style=""/>
+    </node>
+    <node id="PKC" maxvalue="1">
+      <value val="1">
+        <exp str="WNT &amp; RTK"/>
+      </value>
+      <nodevisualsetting x="301" y="299" style=""/>
+    </node>
+    <node id="Proliferation" maxvalue="1">
+      <value val="1">
+        <exp str="CyclinB | CyclinD"/>
+      </value>
+      <nodevisualsetting x="210" y="942" style="Node style 2"/>
+    </node>
+    <node id="PTCH1" maxvalue="1">
+      <value val="1">
+        <exp str="!SHH &amp; GLI"/>
+      </value>
+      <nodevisualsetting x="1682" y="491" style=""/>
+    </node>
+    <node id="PTEN" maxvalue="1">
+      <value val="1">
+        <exp str="(!NF_kB &amp; !Snail &amp; FGFR3 &amp; p53) | (!NF_kB &amp; !Snail &amp; p53)"/>
+      </value>
+      <nodevisualsetting x="410" y="390" style=""/>
+    </node>
+    <node id="RAF" maxvalue="1">
+      <value val="1">
+        <exp str="(!EZH2 &amp; RAS) | EZH2"/>
+      </value>
+      <nodevisualsetting x="24" y="372" style=""/>
+    </node>
+    <node id="RAGS" maxvalue="1">
+      <value val="1">
+        <exp str="!Hypoxia &amp; Nutrients"/>
+      </value>
+      <nodevisualsetting x="771" y="177" style=""/>
+    </node>
+    <node id="RAS" maxvalue="1">
+      <value val="1">
+        <exp str="EGFR | RTK | FRS2"/>
+      </value>
+      <nodevisualsetting x="39" y="269" style=""/>
+    </node>
+    <node id="RB1" maxvalue="1">
+      <value val="1">
+        <exp str="!CyclinB &amp; !CyclinD &amp; CHK1_2 &amp; !p53 &amp; !AMPK"/>
+      </value>
+      <nodevisualsetting x="126" y="769" style=""/>
+    </node>
+    <node id="Rheb" maxvalue="1">
+      <value val="1">
+        <exp str="!TSC1_2"/>
+      </value>
+      <nodevisualsetting x="852" y="207" style=""/>
+    </node>
+    <node id="ROS" maxvalue="1">
+      <value val="1">
+        <exp str="(COX4I2 | Hypoxia) &amp; !GSH"/>
+      </value>
+      <nodevisualsetting x="1275" y="243" style=""/>
+    </node>
+    <node id="RTK" maxvalue="1">
+      <value val="1">
+        <exp str="EGFR | FGFR3"/>
+      </value>
+      <nodevisualsetting x="193" y="280" style=""/>
+    </node>
+    <node id="RUNX2" maxvalue="1">
+      <value val="1">
+        <exp str="((ETS1 &amp; Slug) | ETS1 | SMAD | p38) &amp; !FOXO"/>
+      </value>
+      <nodevisualsetting x="1363" y="714" style=""/>
+    </node>
+    <node id="SHH" maxvalue="1">
+      <parameter idActiveInteractions=" BMP2:SHH" val="1"/>
+      <value val="1">
+        <exp str="!BMP2 &amp; !ATR"/>
+      </value>
+      <annotation>
+        <comment>in:
+BMP2: 10.1242/dev.036418, 25605783
+ATR: 22266795, 18955550
+
+out: 
+AKT: 17688959
+
+</comment>
+      </annotation>
+      <nodevisualsetting x="1678" y="191" style=""/>
+    </node>
+    <node id="Slug" maxvalue="1">
+      <value val="1">
+        <exp str="(TCF | NF_kB) &amp; !DAXX &amp; !p53 &amp; !MDM2"/>
+      </value>
+      <nodevisualsetting x="1160" y="441" style=""/>
+    </node>
+    <node id="SMAD" maxvalue="1">
+      <value val="1">
+        <exp str="(TNFalpha | TGFBR) &amp; !AR"/>
+      </value>
+      <nodevisualsetting x="515" y="213" style=""/>
+    </node>
+    <node id="SMO" maxvalue="1">
+      <value val="1">
+        <exp str="!PTCH1 &amp; SHH"/>
+      </value>
+      <nodevisualsetting x="1737" y="266" style=""/>
+    </node>
+    <node id="Snail" maxvalue="1">
+      <value val="1">
+        <exp str="(GLI | NF_kB | SMAD) &amp; !GSK3 &amp; !beta_catenin"/>
+      </value>
+      <nodevisualsetting x="989" y="120" style=""/>
+    </node>
+    <node id="SPOP" maxvalue="1" input="true">
+      <annotation>
+        <comment>SPOP, the adaptor protein of Cullin 3 family E3 ligase, specifically interacted with Cdc20, and promoted the poly-ubiquitination and subsequent degradation of Cdc20 in a degron-dependent manner. Importantly, prostate cancer-derived SPOP mutants failed to interact with Cdc20 to promote its degradation. As a result, SPOP-deficient prostate cancer cells with elevated Cdc20 expression became resistant to a pharmacological Cdc20 inhibitor.</comment>
+      </annotation>
+      <nodevisualsetting x="1377" y="98" style="Node style 3"/>
+    </node>
+    <node id="TAK1" maxvalue="1">
+      <value val="1">
+        <exp str="TGFBR | TNFalpha"/>
+      </value>
+      <nodevisualsetting x="995" y="265" style=""/>
+    </node>
+    <node id="TCF" maxvalue="1">
+      <value val="1">
+        <exp str="(beta_catenin | AR_ERG | ERG) &amp; !TAK1"/>
+      </value>
+      <nodevisualsetting x="695" y="405" style=""/>
+    </node>
+    <node id="TERT" maxvalue="1">
+      <value val="1">
+        <exp str="!eEF2 &amp; (GLI | AKT | HIF1 | MYC_MAX | NF1 | NF_kB) &amp; !ZBTB17 &amp; !p53 &amp; !SMAD"/>
+      </value>
+      <nodevisualsetting x="446" y="447" style=""/>
+    </node>
+    <node id="TGFb" maxvalue="1" input="true">
+      <nodevisualsetting x="479" y="19" style="Node style 3"/>
+    </node>
+    <node id="TGFBR" maxvalue="1">
+      <value val="1">
+        <exp str="(TGFb | (HIF1 &amp; TGFb)) &amp; !MED12"/>
+      </value>
+      <nodevisualsetting x="483" y="141" style=""/>
+    </node>
+    <node id="fused_event" name=" " maxvalue="1" input="true">
+      <annotation>
+        <comment>Proxy for TMRSS2-ERG fusion gene</comment>
+      </annotation>
+      <nodevisualsetting x="1177" y="23" style="Node style 3"/>
+    </node>
+    <node id="TNFalpha" maxvalue="1" input="true">
+      <nodevisualsetting x="1372" y="22" style="Node style 3"/>
+    </node>
+    <node id="TSC1_2" maxvalue="1">
+      <parameter val="1"/>
+      <parameter idActiveInteractions=" p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" HIF1:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" HIF1:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" HIF1:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" ERK:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" ERK:TSC1_2 HIF1:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 HIF1:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 HIF1:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 HIF1:TSC1_2 p90RSK:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 HIF1:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 HIF1:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 HIF1:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 HIF1:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 HIF1:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 ERK:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 RAF:TSC1_2" val="1"/>
+      <parameter idActiveInteractions=" AKT:TSC1_2 AMPK:TSC1_2 ERK:TSC1_2 HIF1:TSC1_2 p53:TSC1_2 p90RSK:TSC1_2" val="1"/>
+      <value val="1">
+        <exp str="(AMPK | p53 | HIF1) &amp; !AKT &amp; !ERK &amp; !RAF &amp; !p90RSK"/>
+      </value>
+      <nodevisualsetting x="683" y="266" style=""/>
+    </node>
+    <node id="TWIST1" maxvalue="1">
+      <value val="1">
+        <exp str="Snail | beta_catenin"/>
+      </value>
+      <nodevisualsetting x="1097" y="789" style=""/>
+    </node>
+    <node id="VEGF" maxvalue="1">
+      <value val="1">
+        <exp str="HIF1 &amp; MYC_MAX"/>
+      </value>
+      <nodevisualsetting x="633" y="738" style=""/>
+    </node>
+    <node id="VHL" maxvalue="1">
+      <value val="1">
+        <exp str="!Hypoxia &amp; !ROS"/>
+      </value>
+      <nodevisualsetting x="867" y="343" style=""/>
+    </node>
+    <node id="WNT" maxvalue="1">
+      <value val="1">
+        <exp str="(((ERG | AR_ERG) &amp; GLI) | ERG | AR_ERG) &amp; !p53"/>
+      </value>
+      <nodevisualsetting x="988" y="330" style=""/>
+    </node>
+    <node id="YWHAZ" maxvalue="1">
+      <value val="1">
+        <exp str="AR"/>
+      </value>
+      <nodevisualsetting x="1419" y="606" style=""/>
+    </node>
+    <node id="AR_ERG" maxvalue="1">
+      <value val="1">
+        <exp str="(AR &amp; fused_event) | (AR &amp; fused_event &amp; !NKX3_1)"/>
+      </value>
+      <nodevisualsetting x="1039" y="392" style=""/>
+    </node>
+    <node id="BMP2" maxvalue="1">
+      <value val="1">
+        <exp str="GLI &amp; (TGFBR | FGFR3)"/>
+      </value>
+      <annotation>
+        <comment>in: 
+FGF: 22298955
+TGFB: 22298955
+GLI: 16880529</comment>
+      </annotation>
+      <nodevisualsetting x="1239" y="94" style=""/>
+    </node>
+    <node id="Caspase3" maxvalue="1">
+      <value val="1">
+        <exp str="Caspase9 | Caspase8"/>
+      </value>
+      <nodevisualsetting x="1719" y="792" style=""/>
+    </node>
+    <node id="NKX3_1" maxvalue="1">
+      <value val="1">
+        <exp str="PKC &amp; AR &amp; !ERG &amp; !AR_ERG"/>
+      </value>
+      <nodevisualsetting x="1081" y="497" style=""/>
+    </node>
+    <node id="mTORC1" maxvalue="1">
+      <value val="1">
+        <exp str="(AKT | (AKT &amp; Rheb)) &amp; !AMPK &amp; !TSC1_2"/>
+      </value>
+      <nodevisualsetting x="665" y="586" style=""/>
+    </node>
+    <edge id="EGF:EGFR" from="EGF" to="EGFR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p14ARF:MDM2" from="p14ARF" to="MDM2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p14ARF:p53" from="p14ARF" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p14ARF:ATR" from="p14ARF" to="ATR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p14ARF:DNA_Repair" from="p14ARF" to="DNA_Repair" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TNFalpha:FADD" from="TNFalpha" to="FADD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TNFalpha:SMAD" from="TNFalpha" to="SMAD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TNFalpha:TAK1" from="TNFalpha" to="TAK1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:AR" from="GLI" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:CyclinD" from="GLI" to="CyclinD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:MYC" from="GLI" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:Snail" from="GLI" to="Snail" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:WNT" from="GLI" to="WNT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:TERT" from="GLI" to="TERT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:MED12" from="GLI" to="MED12" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:BMP2" from="GLI" to="BMP2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GLI:PTCH1" from="GLI" to="PTCH1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NCOR1:AR" from="NCOR1" to="AR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:AMPK" from="ATM" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:BRCA1" from="ATM" to="BRCA1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:BRCA2" from="ATM" to="BRCA2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:CHK1_2" from="ATM" to="CHK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:DAXX" from="ATM" to="DAXX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:DNA_Repair" from="ATM" to="DNA_Repair" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:JNK" from="ATM" to="JNK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:MDM2" from="ATM" to="MDM2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATM:E2F1" from="ATM" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="DAXX:BCL2" from="DAXX" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="DAXX:Slug" from="DAXX" to="Slug" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="DAXX:MDM2" from="DAXX" to="MDM2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TWIST1:CDH2" from="TWIST1" to="CDH2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Rheb:mTORC2" from="Rheb" to="mTORC2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Rheb:mTORC1" from="Rheb" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="cFLAR:Caspase8" from="cFLAR" to="Caspase8" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Snail:E_cadherin" from="Snail" to="E_cadherin" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Snail:NF_kB" from="Snail" to="NF_kB" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Snail:TWIST1" from="Snail" to="TWIST1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Snail:PTEN" from="Snail" to="PTEN" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BAX:BCL2" from="BAX" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BAX:CytoC" from="BAX" to="CytoC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BAX:APAF1" from="BAX" to="APAF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:beta_catenin" from="GSK3" to="beta_catenin" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:CyclinD" from="GSK3" to="CyclinD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:Snail" from="GSK3" to="Snail" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GSK3:AXIN1" from="GSK3" to="AXIN1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Slug:E_cadherin" from="Slug" to="E_cadherin" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Slug:RUNX2" from="Slug" to="RUNX2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMO:GLI" from="SMO" to="GLI" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MAP3K1_3:JNK" from="MAP3K1_3" to="JNK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MAP3K1_3:MEK1_2" from="MAP3K1_3" to="MEK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MAP3K1_3:p38" from="MAP3K1_3" to="p38" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MAP3K1_3:FADD" from="MAP3K1_3" to="FADD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:MAP3K1_3" from="RAS" to="MAP3K1_3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:p14ARF" from="RAS" to="p14ARF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAS:RAF" from="RAS" to="RAF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="IKK:NF_kB" from="IKK" to="NF_kB" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MED12:TGFBR" from="MED12" to="TGFBR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p90RSK:BAD" from="p90RSK" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p90RSK:eEF2K" from="p90RSK" to="eEF2K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p90RSK:GSK3" from="p90RSK" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p90RSK:TSC1_2" from="p90RSK" to="TSC1_2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC:MYC_MAX" from="MYC" to="MYC_MAX" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Migration:Metastasis" from="Migration" to="Metastasis" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:Metastasis" from="AR_ERG" to="Metastasis" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:EMT" from="AR_ERG" to="EMT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:EZH2" from="AR_ERG" to="EZH2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:MYC" from="AR_ERG" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:E_cadherin" from="AR_ERG" to="E_cadherin" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:WNT" from="AR_ERG" to="WNT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:TCF" from="AR_ERG" to="TCF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR_ERG:NKX3_1" from="AR_ERG" to="NKX3_1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:PKC" from="RTK" to="PKC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:ETS1" from="RTK" to="ETS1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RTK:RAS" from="RTK" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GADD45:JNK" from="GADD45" to="JNK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GADD45:p38" from="GADD45" to="p38" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Carcinogen:DNA_Damage" from="Carcinogen" to="DNA_Damage" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Carcinogen:p53" from="Carcinogen" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Carcinogen:HSPs" from="Carcinogen" to="HSPs" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF1:TERT" from="NF1" to="TERT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AXIN1:beta_catenin" from="AXIN1" to="beta_catenin" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="JNK:BAX" from="JNK" to="BAX" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="JNK:cFLAR" from="JNK" to="cFLAR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="JNK:JUN" from="JNK" to="JUN" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="JNK:MAP3K1_3" from="JNK" to="MAP3K1_3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="JNK:FOXO" from="JNK" to="FOXO" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="fused_event:AR_ERG" from="fused_event" to="AR_ERG" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EGFR:AMPK" from="EGFR" to="AMPK" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EGFR:EGFR" from="EGFR" to="EGFR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EGFR:FRS2" from="EGFR" to="FRS2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EGFR:PI3K" from="EGFR" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EGFR:RAS" from="EGFR" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EGFR:RTK" from="EGFR" to="RTK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TCF:MYC" from="TCF" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TCF:Slug" from="TCF" to="Slug" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TCF:CyclinD" from="TCF" to="CyclinD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSPs:AKT" from="HSPs" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSPs:AR" from="HSPs" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSPs:BCL2" from="HSPs" to="BCL2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSPs:BIRC5" from="HSPs" to="BIRC5" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSPs:p53" from="HSPs" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSPs:HIF1" from="HSPs" to="HIF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HSPs:APAF1" from="HSPs" to="APAF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E_cadherin:EMT" from="E_cadherin" to="EMT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E_cadherin:NF_kB" from="E_cadherin" to="NF_kB" minvalue="1" sign="positive">
+      <edgevisualsetting points="715,521" anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:ERG" from="ERK" to="ERG" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:FOS" from="ERK" to="FOS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:EGFR" from="ERK" to="EGFR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:FRS2" from="ERK" to="FRS2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:JNK" from="ERK" to="JNK" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:Migration" from="ERK" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:MYC" from="ERK" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:p38" from="ERK" to="p38" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:p90RSK" from="ERK" to="p90RSK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:TSC1_2" from="ERK" to="TSC1_2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:ETS1" from="ERK" to="ETS1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERK:p21" from="ERK" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SHH:MYC" from="SHH" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SHH:PTCH1" from="SHH" to="PTCH1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SHH:AKT" from="SHH" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SHH:FADD" from="SHH" to="FADD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SHH:SMO" from="SHH" to="SMO" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FADD:Caspase8" from="FADD" to="Caspase8" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="DNA_Damage:ATM" from="DNA_Damage" to="ATM" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="DNA_Damage:ATR" from="DNA_Damage" to="ATR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="DNA_Damage:NF_kB" from="DNA_Damage" to="NF_kB" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:BAX" from="p53" to="BAX" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:BCL2" from="p53" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:Bcl_XL" from="p53" to="Bcl_XL" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:beta_catenin" from="p53" to="beta_catenin" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:BIRC5" from="p53" to="BIRC5" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:CytoC" from="p53" to="CytoC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:APAF1" from="p53" to="APAF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:GADD45" from="p53" to="GADD45" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:HIF1" from="p53" to="HIF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:IKK" from="p53" to="IKK" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:MDM2" from="p53" to="MDM2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:p21" from="p53" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:PIP3" from="p53" to="PIP3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:PTEN" from="p53" to="PTEN" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:Slug" from="p53" to="Slug" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:TERT" from="p53" to="TERT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:TSC1_2" from="p53" to="TSC1_2" minvalue="1" sign="positive">
+      <edgevisualsetting points="810,392" anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:WNT" from="p53" to="WNT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:ETS1" from="p53" to="ETS1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p53:RB1" from="p53" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TAK1:IKK" from="TAK1" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TAK1:JNK" from="TAK1" to="JNK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TAK1:TCF" from="TAK1" to="TCF" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Bak:CytoC" from="Bak" to="CytoC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Bak:APAF1" from="Bak" to="APAF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Nutrients:AMP_ATP" from="Nutrients" to="AMP_ATP" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Nutrients:RAGS" from="Nutrients" to="RAGS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Nutrients:GLUT1" from="Nutrients" to="GLUT1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TERT:p21" from="TERT" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CytoC:Caspase9" from="CytoC" to="Caspase9" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="IDH1:LDHA" from="IDH1" to="LDHA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase8:Apoptosis" from="Caspase8" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase8:Bak" from="Caspase8" to="Bak" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase8:CytoC" from="Caspase8" to="CytoC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase8:APAF1" from="Caspase8" to="APAF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase8:Caspase3" from="Caspase8" to="Caspase3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:Bcl_XL" from="AR" to="Bcl_XL" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:cFLAR" from="AR" to="cFLAR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:E2F1" from="AR" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:FOS" from="AR" to="FOS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:JUN" from="AR" to="JUN" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:Migration" from="AR" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:SMAD" from="AR" to="SMAD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:YWHAZ" from="AR" to="YWHAZ" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:AR_ERG" from="AR" to="AR_ERG" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:ZBTB17" from="AR" to="ZBTB17" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AR:NKX3_1" from="AR" to="NKX3_1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EMT:Migration" from="EMT" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RUNX2:BCL2" from="RUNX2" to="BCL2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RUNX2:FGFR3" from="RUNX2" to="FGFR3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:BCL2" from="NF_kB" to="BCL2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:CyclinD" from="NF_kB" to="CyclinD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:E_cadherin" from="NF_kB" to="E_cadherin" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:GSH" from="NF_kB" to="GSH" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:MYC" from="NF_kB" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:PTEN" from="NF_kB" to="PTEN" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:Slug" from="NF_kB" to="Slug" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:Snail" from="NF_kB" to="Snail" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NF_kB:TERT" from="NF_kB" to="TERT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AMPK:mTORC2" from="AMPK" to="mTORC2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AMPK:TSC1_2" from="AMPK" to="TSC1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AMPK:RB1" from="AMPK" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AMPK:mTORC1" from="AMPK" to="mTORC1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CDH2:EMT" from="CDH2" to="EMT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CDH2:Invasion" from="CDH2" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase3:BRCA1" from="Caspase3" to="BRCA1" minvalue="1" sign="negative">
+      <edgevisualsetting points="1786,459" anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase3:BAD" from="Caspase3" to="BAD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase3:Apoptosis" from="Caspase3" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:AMPK" from="ATR" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:BRCA1" from="ATR" to="BRCA1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:BRCA2" from="ATR" to="BRCA2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:CHK1_2" from="ATR" to="CHK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:DAXX" from="ATR" to="DAXX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:DNA_Repair" from="ATR" to="DNA_Repair" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:MDM2" from="ATR" to="MDM2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:SHH" from="ATR" to="SHH" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ATR:E2F1" from="ATR" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p70S6kab:eEF2K" from="p70S6kab" to="eEF2K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PHDs:HIF1" from="PHDs" to="HIF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PHDs:IKK" from="PHDs" to="IKK" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:BRCA1" from="E2F1" to="BRCA1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:EZH2" from="E2F1" to="EZH2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:MYC" from="E2F1" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:p14ARF" from="E2F1" to="p14ARF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:CyclinB" from="E2F1" to="CyclinB" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="E2F1:HSPs" from="E2F1" to="HSPs" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:MYC" from="mTORC1" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC1:HIF1" from="mTORC1" to="HIF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p38:JNK" from="p38" to="JNK" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p38:MYC" from="p38" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p38:p53" from="p38" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p38:MAP3K1_3" from="p38" to="MAP3K1_3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p38:NCOA3" from="p38" to="NCOA3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p38:RUNX2" from="p38" to="RUNX2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ZBTB17:p15" from="ZBTB17" to="p15" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ZBTB17:p21" from="ZBTB17" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ZBTB17:TERT" from="ZBTB17" to="TERT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MXI1:MYC_MAX" from="MXI1" to="MYC_MAX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MXI1:E2F1" from="MXI1" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FGFR3:AMPK" from="FGFR3" to="AMPK" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FGFR3:FRS2" from="FGFR3" to="FRS2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FGFR3:RAS" from="FGFR3" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FGFR3:RTK" from="FGFR3" to="RTK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FGFR3:PTEN" from="FGFR3" to="PTEN" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FGFR3:BMP2" from="FGFR3" to="BMP2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NCOA3:AR" from="NCOA3" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NCOA3:NF_kB" from="NCOA3" to="NF_kB" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFb:TGFBR" from="TGFb" to="TGFBR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOS:MYC" from="FOS" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOS:MAP3K1_3" from="FOS" to="MAP3K1_3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SPOP:DAXX" from="SPOP" to="DAXX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SPOP:DNA_Damage" from="SPOP" to="DNA_Damage" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SPOP:GLI" from="SPOP" to="GLI" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SPOP:NCOA3" from="SPOP" to="NCOA3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:Proliferation" from="CyclinB" to="Proliferation" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinB:RB1" from="CyclinB" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETV1:Migration" from="ETV1" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK1:AKT" from="PDK1" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK1:p70S6kab" from="PDK1" to="p70S6kab" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK1:p90RSK" from="PDK1" to="p90RSK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PDK1:MEK1_2" from="PDK1" to="MEK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MEK1_2:ERK" from="MEK1_2" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MEK1_2:GSK3" from="MEK1_2" to="GSK3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MEK1_2:ETV1" from="MEK1_2" to="ETV1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MEK1_2:IDH1" from="MEK1_2" to="IDH1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC2:GSK3" from="mTORC2" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC2:HIF1" from="mTORC2" to="HIF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC2:IKK" from="mTORC2" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC2:p70S6kab" from="mTORC2" to="p70S6kab" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="mTORC2:IDH1" from="mTORC2" to="IDH1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="LDHA:Lactic_acid" from="LDHA" to="Lactic_acid" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FRS2:EGFR" from="FRS2" to="EGFR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FRS2:FGFR3" from="FRS2" to="FGFR3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FRS2:FRS2" from="FRS2" to="FRS2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FRS2:PI3K" from="FRS2" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FRS2:RAS" from="FRS2" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:AMPK" from="HIF1" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:BAD" from="HIF1" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:BAX" from="HIF1" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:COX4I2" from="HIF1" to="COX4I2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:GLUT1" from="HIF1" to="GLUT1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:LDHA" from="HIF1" to="LDHA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:MXI1" from="HIF1" to="MXI1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:MYC" from="HIF1" to="MYC" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:p21" from="HIF1" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:p53" from="HIF1" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:PDK1" from="HIF1" to="PDK1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:TERT" from="HIF1" to="TERT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:TGFBR" from="HIF1" to="TGFBR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:TSC1_2" from="HIF1" to="TSC1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="HIF1:VEGF" from="HIF1" to="VEGF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BRCA2:DNA_Repair" from="BRCA2" to="DNA_Repair" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="JUN:MYC" from="JUN" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="JUN:MAP3K1_3" from="JUN" to="MAP3K1_3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EP300:AR" from="EP300" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EP300:BRCA1" from="EP300" to="BRCA1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EP300:BRCA2" from="EP300" to="BRCA2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:AR" from="SMAD" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:GADD45" from="SMAD" to="GADD45" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:Invasion" from="SMAD" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:p21" from="SMAD" to="p21" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:Snail" from="SMAD" to="Snail" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:TERT" from="SMAD" to="TERT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:IDH1" from="SMAD" to="IDH1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:MYC_MAX" from="SMAD" to="MYC_MAX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="SMAD:RUNX2" from="SMAD" to="RUNX2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:BAX" from="BCL2" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:CytoC" from="BCL2" to="CytoC" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:APAF1" from="BCL2" to="APAF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BCL2:p53" from="BCL2" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="COX4I2:ROS" from="COX4I2" to="ROS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAGS:mTORC2" from="RAGS" to="mTORC2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="eEF2K:eEF2" from="eEF2K" to="eEF2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BRCA1:CHK1_2" from="BRCA1" to="CHK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BRCA1:DNA_Repair" from="BRCA1" to="DNA_Repair" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BRCA1:HSPs" from="BRCA1" to="HSPs" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERG:E_cadherin" from="ERG" to="E_cadherin" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERG:MYC" from="ERG" to="MYC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERG:TCF" from="ERG" to="TCF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERG:WNT" from="ERG" to="WNT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERG:NKX3_1" from="ERG" to="NKX3_1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ERG:EZH2" from="ERG" to="EZH2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:CyclinD" from="MYC_MAX" to="CyclinD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:GLUT1" from="MYC_MAX" to="GLUT1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:GSH" from="MYC_MAX" to="GSH" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:LDHA" from="MYC_MAX" to="LDHA" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:ZBTB17" from="MYC_MAX" to="ZBTB17" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:p14ARF" from="MYC_MAX" to="p14ARF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:p21" from="MYC_MAX" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:PDK1" from="MYC_MAX" to="PDK1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:TERT" from="MYC_MAX" to="TERT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:VEGF" from="MYC_MAX" to="VEGF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MYC_MAX:HIF1" from="MYC_MAX" to="HIF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PI3K:PIP3" from="PI3K" to="PIP3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PTCH1:Caspase9" from="PTCH1" to="Caspase9" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PTCH1:SMO" from="PTCH1" to="SMO" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PTCH1:AKT" from="PTCH1" to="AKT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PTCH1:FADD" from="PTCH1" to="FADD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETS1:BCL2" from="ETS1" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETS1:FOS" from="ETS1" to="FOS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETS1:JUN" from="ETS1" to="JUN" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETS1:IKK" from="ETS1" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETS1:RUNX2" from="ETS1" to="RUNX2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETS1:ETV1" from="ETS1" to="ETV1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ETS1:BAX" from="ETS1" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:BAD" from="AKT" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:Caspase9" from="AKT" to="Caspase9" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:cFLAR" from="AKT" to="cFLAR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:CytoC" from="AKT" to="CytoC" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:APAF1" from="AKT" to="APAF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:EP300" from="AKT" to="EP300" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:EZH2" from="AKT" to="EZH2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:FOXO" from="AKT" to="FOXO" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:GLUT1" from="AKT" to="GLUT1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:GSK3" from="AKT" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:IKK" from="AKT" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:MDM2" from="AKT" to="MDM2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:Migration" from="AKT" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:mTORC2" from="AKT" to="mTORC2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:NCOR1" from="AKT" to="NCOR1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:NCOR2" from="AKT" to="NCOR2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:p21" from="AKT" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:TERT" from="AKT" to="TERT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:TSC1_2" from="AKT" to="TSC1_2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:HSPs" from="AKT" to="HSPs" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AKT:mTORC1" from="AKT" to="mTORC1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BAD:BCL2" from="BAD" to="BCL2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BAD:Bcl_XL" from="BAD" to="Bcl_XL" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Invasion:Migration" from="Invasion" to="Migration" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="APAF1:Caspase9" from="APAF1" to="Caspase9" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase9:Apoptosis" from="Caspase9" to="Apoptosis" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Caspase9:Caspase3" from="Caspase9" to="Caspase3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BMP2:SHH" from="BMP2" to="SHH" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NKX3_1:AR" from="NKX3_1" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NKX3_1:AR_ERG" from="NKX3_1" to="AR_ERG" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EZH2:AR" from="EZH2" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EZH2:beta_catenin" from="EZH2" to="beta_catenin" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EZH2:RAF" from="EZH2" to="RAF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="EZH2:Invasion" from="EZH2" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="GSH:ROS" from="GSH" to="ROS" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MDM2:AR" from="MDM2" to="AR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MDM2:p53" from="MDM2" to="p53" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MDM2:Slug" from="MDM2" to="Slug" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="MDM2:p21" from="MDM2" to="p21" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="beta_catenin:E_cadherin" from="beta_catenin" to="E_cadherin" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="beta_catenin:EMT" from="beta_catenin" to="EMT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="beta_catenin:Invasion" from="beta_catenin" to="Invasion" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="beta_catenin:TCF" from="beta_catenin" to="TCF" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="beta_catenin:TWIST1" from="beta_catenin" to="TWIST1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="beta_catenin:Snail" from="beta_catenin" to="Snail" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="BIRC5:Caspase9" from="BIRC5" to="Caspase9" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:AKT" from="PIP3" to="AKT" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:NF_kB" from="PIP3" to="NF_kB" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PIP3:PDK1" from="PIP3" to="PDK1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="NCOR2:AR" from="NCOR2" to="AR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="AMP_ATP:AMPK" from="AMP_ATP" to="AMPK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:EGFR" from="TGFBR" to="EGFR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:FGFR3" from="TGFBR" to="FGFR3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:FRS2" from="TGFBR" to="FRS2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:MYC_MAX" from="TGFBR" to="MYC_MAX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:PI3K" from="TGFBR" to="PI3K" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:RAS" from="TGFBR" to="RAS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:SMAD" from="TGFBR" to="SMAD" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:TAK1" from="TGFBR" to="TAK1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TGFBR:BMP2" from="TGFBR" to="BMP2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RB1:E2F1" from="RB1" to="E2F1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="WNT:Dsh" from="WNT" to="Dsh" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="WNT:GLI" from="WNT" to="GLI" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="WNT:PKC" from="WNT" to="PKC" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="YWHAZ:beta_catenin" from="YWHAZ" to="beta_catenin" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="YWHAZ:BAD" from="YWHAZ" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="YWHAZ:BAX" from="YWHAZ" to="BAX" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Acidosis:p53" from="Acidosis" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXA1:E2F1" from="FOXA1" to="E2F1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXA1:EMT" from="FOXA1" to="EMT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXA1:IDH1" from="FOXA1" to="IDH1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXA1:HSPs" from="FOXA1" to="HSPs" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:CyclinB" from="p21" to="CyclinB" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:CyclinD" from="p21" to="CyclinD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p21:GSH" from="p21" to="GSH" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="eEF2:TERT" from="eEF2" to="TERT" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO:HIF1" from="FOXO" to="HIF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO:NCOR2" from="FOXO" to="NCOR2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO:RUNX2" from="FOXO" to="RUNX2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO:FOXA1" from="FOXO" to="FOXA1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FOXO:CyclinD" from="FOXO" to="CyclinD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="FGF:FGFR3" from="FGF" to="FGFR3" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinD:Proliferation" from="CyclinD" to="Proliferation" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinD:BRCA1" from="CyclinD" to="BRCA1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CyclinD:RB1" from="CyclinD" to="RB1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Bcl_XL:CytoC" from="Bcl_XL" to="CytoC" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Bcl_XL:APAF1" from="Bcl_XL" to="APAF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1_2:p53" from="CHK1_2" to="p53" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="CHK1_2:RB1" from="CHK1_2" to="RB1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TSC1_2:Rheb" from="TSC1_2" to="Rheb" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="TSC1_2:mTORC1" from="TSC1_2" to="mTORC1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Dsh:GSK3" from="Dsh" to="GSK3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PTEN:AR" from="PTEN" to="AR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PTEN:PIP3" from="PTEN" to="PIP3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAF:BAD" from="RAF" to="BAD" minvalue="1" sign="negative">
+      <edgevisualsetting points="1107,647" anchor="NE" style=""/>
+    </edge>
+    <edge id="RAF:ERK" from="RAF" to="ERK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAF:MEK1_2" from="RAF" to="MEK1_2" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="RAF:TSC1_2" from="RAF" to="TSC1_2" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS:DNA_Damage" from="ROS" to="DNA_Damage" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS:PHDs" from="ROS" to="PHDs" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="ROS:VHL" from="ROS" to="VHL" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Hypoxia:HIF1" from="Hypoxia" to="HIF1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Hypoxia:PHDs" from="Hypoxia" to="PHDs" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Hypoxia:RAGS" from="Hypoxia" to="RAGS" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Hypoxia:VHL" from="Hypoxia" to="VHL" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Hypoxia:ROS" from="Hypoxia" to="ROS" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="p15:CyclinD" from="p15" to="CyclinD" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="VHL:HIF1" from="VHL" to="HIF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Androgen:AR" from="Androgen" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="Androgen:EGFR" from="Androgen" to="EGFR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKC:AR" from="PKC" to="AR" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKC:EGFR" from="PKC" to="EGFR" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKC:FGFR3" from="PKC" to="FGFR3" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKC:IKK" from="PKC" to="IKK" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKC:NF1" from="PKC" to="NF1" minvalue="1" sign="negative">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKC:HSPs" from="PKC" to="HSPs" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+    <edge id="PKC:NKX3_1" from="PKC" to="NKX3_1" minvalue="1" sign="positive">
+      <edgevisualsetting anchor="NE" style=""/>
+    </edge>
+  </graph>
+</gxl>
