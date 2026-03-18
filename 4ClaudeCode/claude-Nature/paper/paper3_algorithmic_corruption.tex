@@ -1,0 +1,150 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{authblk}
+\usepackage{xcolor}
+
+\geometry{a4paper, margin=1in}
+
+\title{Algorithmic Corruption in Paired TCGA Samples: Expression-Conditioned EGFR Pathway Models Exhibit Structural Simplification}
+
+\author[1,*]{Alberto Hernández-Espinosa}
+\author[1]{Oxford Complexity Science Group}
+\affil[1]{Department of Computer Science, University of Oxford}
+\affil[*]{Corresponding author: alberto.hernandez@oxford.ac.uk}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+Cancer is fundamentally a disease of dysregulated information processing. While genomic alterations change the molecular components of signaling networks, it remains unclear how disease perturbs the minimal description length of executable network models. Here we operationalize ``algorithmic corruption'' in a paired design by instantiating patient-specific Boolean pathway models from real TCGA tumor/normal RNA-seq. Across 10 TCGA projects (n=50 paired cases), we start from a fixed 10-node EGFR signaling scaffold and deterministically apply gain-/loss-of-function state-fixing events when tumor expression deviates from the project-specific normal baseline by a frozen log$_2$ fold-change threshold. We quantify structural description length using the $D^{(v2)}$ encoder on the adjacency matrix. Tumor models exhibit significant within-patient structural simplification relative to matched normals (mean $\Delta D^{(v2)}=-5.83$; paired t-test $t=-5.69$, $p=7.0\times 10^{-7}$), and the magnitude of simplification scales with the inferred mutation count (Pearson $r=-0.91$, $p=2.3\times 10^{-20}$). A sensitivity sweep over discretization thresholds (0.5/1.0/1.5) preserves effect direction (mean $\Delta D^{(v2)}=-11.50/-5.83/-2.33$). These results establish a provenance-frozen, auditable pipeline for mapping real tumor transcriptomes into executable pathway models and reveal a robust, expression-driven loss-of-integration signature in this scaffold construction.
+\end{abstract}
+
+\section*{Introduction}
+
+Cancer arises from the accumulation of genetic mutations that alter the molecular components of signaling networks\cite{Hanahan2011, Vogelstein2013}. Yet cancer is not merely a collection of mutated genes---it is a \textit{systems failure}, a breakdown in the information processing that maintains cellular homeostasis. While we have cataloged the genetic alterations in cancer, we lack a principled understanding of how these alterations affect the \textit{computational architecture} of the cell.
+
+Healthy tissues have evolved algorithmically efficient gene regulatory networks that achieve robust function with minimal description length\cite{Hernandez2025}. Natural selection favors networks that can be specified compactly---those with structured wiring, reusable motifs, and hierarchical organization that enable compression. Cancer, as a breakdown of evolved regulation, may represent a departure from this efficient architecture.
+
+We hypothesize that disease involves ``algorithmic corruption'': perturbations to network logic and structure that change the minimal description length of executable models. In general, such corruption could manifest as either increased complexity (added irregular wiring) or decreased complexity (loss of integration through node fixation and edge pruning). In this paired TCGA pathway instantiation, corruption manifests as:
+\begin{enumerate}
+    \item Reduced structural description length ($D^{(v2)}$) in tumor models compared to matched normals
+    \item Strong coupling between $\Delta D^{(v2)}$ and the number of inferred state-fixing events
+\end{enumerate}
+
+Algorithmic corruption, if present, would represent a systems-level hallmark of disease that is complementary to molecular hallmarks\cite{Hanahan2011}. In this work we test a constrained, provenance-frozen version of the hypothesis in a paired design: do executable pathway models instantiated from real TCGA tumor RNA-seq differ systematically in structural description length from models instantiated from matched normal samples?
+
+We quantify algorithmic corruption using our structural complexity metric ($D^{(v2)}$) and evaluate paired tumor-vs-normal differences and their robustness to discretization thresholds.
+
+\section*{Methods (Paired TCGA Pilot)}
+
+\subsection*{Paired TCGA Acquisition and Model Instantiation}
+
+We download paired TCGA RNA-seq gene-count files for 10 projects (5 matched tumor/normal cases per project; n=50 pairs). For each project, we compute per-gene expression as log$_2$(count+1) and define a project-specific normal baseline per pathway node as the median node activity across the project normal samples. Node activity is defined as the maximum expression among genes mapped to that node (e.g., Ras $\leftarrow\{\text{KRAS, NRAS, HRAS}\}$).
+
+Starting from a fixed EGFR signaling scaffold (10 nodes), each tumor sample is instantiated by applying deterministic state-fixing events:
+\begin{itemize}
+    \item Gain-of-function: if tumor activity exceeds baseline by at least a threshold $\tau$, fix the node state to 1 and sever all incoming edges.
+    \item Loss-of-function: if tumor activity is below baseline by at least $\tau$, fix the node state to 0 and sever all incoming edges.
+\end{itemize}
+
+Normal models use the unmodified scaffold. This construction produces paired, auditable tumor/normal pathway models conditioned on real TCGA samples; it does not claim to infer causal gene regulatory networks de novo.
+
+\subsection*{Algorithmic Corruption Quantification}
+
+For each instantiated model, we compute the structural description length $D^{(v2)}$ from the adjacency matrix using the universal $D^{(v2)}$ encoder. The paired corruption signal is quantified as:
+\begin{equation}
+\Delta D^{(v2)} = D^{(v2)}_{\mathrm{tumor}} - D^{(v2)}_{\mathrm{normal}}.
+\end{equation}
+
+We test $\Delta D^{(v2)}$ against 0 using paired t-tests (equivalently, one-sample tests on paired differences) and quantify coupling between $\Delta D^{(v2)}$ and inferred mutation count with Pearson correlation. Robustness is assessed by rerunning the entire pipeline across multiple discretization thresholds $\tau$.
+
+\section*{Results}
+
+\subsection*{Paired TCGA tumor vs. normal (n=50 pairs)}
+
+Under the fixed EGFR scaffold, $D^{(v2)}_{\mathrm{normal}}$ is constant across patients because normal models are unmodified. Tumor models are sample-specific due to deterministic state-fixing and incoming-edge severing events triggered by tumor-vs-baseline expression deltas. Across 10 projects ($5$ pairs each; $n=50$ paired cases total), tumor models show significant within-patient structural simplification:
+\begin{itemize}
+    \item Mean $D^{(v2)}_{\mathrm{normal}} = 46.52$
+    \item Mean $D^{(v2)}_{\mathrm{tumor}} = 40.70$
+    \item Mean $\Delta D^{(v2)} = -5.83$
+    \item Paired t-test ($\Delta D^{(v2)}$ vs 0): $t=-5.69$, $p=7.0\times 10^{-7}$
+    \item Pearson correlation ($\Delta D^{(v2)}$ vs inferred mutation\_count): $r=-0.91$, $p=2.3\times 10^{-20}$
+\end{itemize}
+
+\subsection*{Discretization threshold sensitivity}
+
+We repeat the full paired analysis across multiple log$_2$ fold-change thresholds $\tau$ for calling state-fixing events. The direction of the paired effect and the sign of the coupling to mutation\_count are stable, while the magnitude attenuates as $\tau$ increases:
+\begin{itemize}
+    \item $\tau=0.5$: mean $\Delta D^{(v2)}=-11.50$; $t=-9.80$, $p=4.0\times 10^{-13}$; $r=-0.89$, $p=3.8\times 10^{-18}$
+    \item $\tau=1.0$: mean $\Delta D^{(v2)}=-5.83$; $t=-5.69$, $p=7.0\times 10^{-7}$; $r=-0.91$, $p=2.3\times 10^{-20}$
+    \item $\tau=1.5$: mean $\Delta D^{(v2)}=-2.33$; $t=-3.24$, $p=2.2\times 10^{-3}$; $r=-0.83$, $p=9.2\times 10^{-14}$
+\end{itemize}
+
+\section*{Limitations}
+
+This paired TCGA pilot constructs executable pathway \emph{models} conditioned on transcript counts, but it does not infer causal gene regulatory networks from data. The scaffold has only 10 nodes and abstracts multi-gene families (e.g., Ras), and the inferred mutation\_count is the number of expression-triggered state-fixing events rather than a genomic mutation count. Consequently, interpretation should be limited to the properties of this construction: expression-driven node fixation prunes incoming regulation, which in turn reduces structural description length. External biological anchoring (e.g., DepMap gene effect), while feasible in the same scaffold, remains underpowered at $n=10$ nodes even with lineage-matched dependency summaries.
+
+\section*{Reproducibility}
+
+The paired cohort is provenance-frozen via per-project manifests under \texttt{data/cancer/tcga\_paired/<PROJECT>/manifest.csv} and a paired index table at \texttt{results/cancer/tcga\_expression\_networks\_index\_paired.csv}. The corruption analysis and threshold sensitivity sweep are implemented in \texttt{src/analysis/Cancer\_Corruption.py} and produce:
+\begin{itemize}
+    \item \texttt{results/cancer/tcga\_corruption\_metrics\_paired\_\_tcga\_paired\_sweep.csv}
+    \item \texttt{results/cancer/tcga\_corruption\_metrics\_paired\_\_tcga\_paired\_sweep\_summary.csv}
+\end{itemize}
+
+\begin{thebibliography}{10}
+
+\bibitem{Hanahan2011}
+Hanahan, D. \& Weinberg, R. A.
+Hallmarks of cancer: the next generation.
+\textit{Cell} \textbf{144}, 646-674 (2011).
+
+\bibitem{Vogelstein2013}
+Vogelstein, B. et al.
+Cancer genome landscapes.
+\textit{Science} \textbf{339}, 1546-1558 (2013).
+
+\bibitem{Hernandez2025}
+Hernández-Espinosa, A. et al.
+Evolution selects for algorithmic efficiency in gene regulatory networks.
+\textit{Nature} (2025, in press).
+
+\bibitem{TCGA2013}
+The Cancer Genome Atlas Research Network.
+Comprehensive molecular characterization of clear cell renal cell carcinoma.
+\textit{Nature} \textbf{499}, 43-49 (2013).
+
+\bibitem{Barabasi2016}
+Barabási, A. L., Gulbahce, N. \& Loscalzo, J.
+Network medicine: a network-based approach to human disease.
+\textit{Nat. Rev. Genet.} \textbf{12}, 56-68 (2011).
+
+\bibitem{COSMIC}
+Sondka, Z. et al.
+The COSMIC Cancer Gene Census: describing genetic dysfunction across all human cancers.
+\textit{Nucleic Acids Res.} \textbf{46}, D941-D947 (2018).
+
+\bibitem{DepMap}
+Meyers, R. M. et al.
+Computational correction of copy number effect improves specificity of CRISPR-Cas9 essentiality screens in cancer cells.
+\textit{Nat. Genet.} \textbf{49}, 1779-1784 (2017).
+
+\bibitem{Zenil2018}
+Zenil, H. et al.
+A decomposition method for global evaluation of Shannon entropy and local estimations of algorithmic complexity.
+\textit{Nat. Commun.} \textbf{9}, 4567 (2018).
+
+\end{thebibliography}
+
+\end{document}
