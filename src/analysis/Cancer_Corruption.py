@@ -13,6 +13,7 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
+from data.cancer_network_builder import CancerNetworkBuilder
 
 # Configuration
 DATA_DIR = os.getenv("CANCER_DATA_DIR", "data/cancer/patients")
@@ -117,19 +118,13 @@ def main():
             base_cm = np.array(base.get("cm", []), dtype=int)
             d_normal = compute_d_v2_from_cm(base_cm)
 
-            node_to_genes = {
-                "EGF": ["EGF"],
-                "EGFR": ["EGFR"],
-                "GRB2": ["GRB2"],
-                "SOS": ["SOS1", "SOS2"],
-                "Ras": ["KRAS", "NRAS", "HRAS"],
-                "Raf": ["BRAF", "RAF1"],
-                "MEK": ["MAP2K1", "MAP2K2"],
-                "ERK": ["MAPK1", "MAPK3"],
-                "PI3K": ["PIK3CA", "PIK3CB", "PIK3CD"],
-                "AKT": ["AKT1", "AKT2", "AKT3"],
-            }
-            gene_set = set(sum(node_to_genes.values(), []))
+            node_to_genes = CancerNetworkBuilder.default_node_to_genes_for_nodes(nodes)
+            node_to_genes = {k: list(v) for k, v in dict(node_to_genes).items() if k in set(nodes)}
+            gene_set = set()
+            for genes in node_to_genes.values():
+                for g in genes:
+                    if g:
+                        gene_set.add(str(g))
 
             thresholds = [float(x) for x in str(TCGA_SWEEP_THRESHOLDS).split(",") if str(x).strip()]
             idx = pd.read_csv(TCGA_INDEX_PATH)

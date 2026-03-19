@@ -35,6 +35,7 @@ class DepMapValidation:
         depmap_model_path: str | None = None,
         depmap_oncotree_codes: list[str] | None = None,
         depmap_oncotree_lineages: list[str] | None = None,
+        node_gene_map: dict[str, list[str]] | None = None,
     ):
         """
         Initialize the DepMap Validation pipeline.
@@ -51,18 +52,30 @@ class DepMapValidation:
         self.depmap_model_path = depmap_model_path
         self.depmap_oncotree_codes = depmap_oncotree_codes
         self.depmap_oncotree_lineages = depmap_oncotree_lineages
-        self.node_gene_map = {
-            "EGF": ["EGF"],
-            "EGFR": ["EGFR"],
-            "GRB2": ["GRB2"],
-            "SOS": ["SOS1", "SOS2"],
-            "RAS": ["KRAS", "NRAS", "HRAS"],
-            "RAF": ["BRAF", "RAF1"],
-            "MEK": ["MAP2K1", "MAP2K2"],
-            "ERK": ["MAPK1", "MAPK3"],
-            "PI3K": ["PIK3CA", "PIK3CB", "PIK3CD"],
-            "AKT": ["AKT1", "AKT2", "AKT3"],
-        }
+        if node_gene_map is None:
+            node_gene_map = {
+                "EGF": ["EGF"],
+                "EGFR": ["EGFR"],
+                "GRB2": ["GRB2"],
+                "SOS": ["SOS1", "SOS2"],
+                "RAS": ["KRAS", "NRAS", "HRAS"],
+                "RAF": ["BRAF", "RAF1"],
+                "MEK": ["MAP2K1", "MAP2K2"],
+                "ERK": ["MAPK1", "MAPK3"],
+                "PI3K": ["PIK3CA", "PIK3CB", "PIK3CD"],
+                "AKT": ["AKT1", "AKT2", "AKT3"],
+            }
+
+        canon = {}
+        for node, genes in dict(node_gene_map).items():
+            k = self._normalize_gene_symbol(node).strip().upper()
+            gs = []
+            for g in list(genes or []):
+                gg = self._normalize_gene_symbol(g).strip().upper()
+                if gg:
+                    gs.append(gg)
+            canon[k] = gs
+        self.node_gene_map = canon
         self.depmap_data = self._load_depmap()
         self.depmap_map = (
             self.depmap_data.dropna(subset=["Gene", "Dependency"])
@@ -79,12 +92,17 @@ class DepMapValidation:
         return name
 
     def _dep_score_for_node(self, node: str) -> float:
+        return self._dep_score_for_node_with_map(node, self.node_gene_map)
+
+    def _dep_score_for_node_with_map(self, node: str, node_gene_map: dict[str, list[str]] | None) -> float:
         key = self._normalize_gene_symbol(node).strip().upper()
         direct = self.depmap_map.get(key, np.nan)
         if not np.isnan(direct):
             return float(direct)
 
-        genes = self.node_gene_map.get(key)
+        genes = None
+        if node_gene_map is not None:
+            genes = node_gene_map.get(key)
         if not genes:
             return np.nan
 
@@ -96,6 +114,23 @@ class DepMapValidation:
         if not vals:
             return np.nan
         return float(np.mean(vals))
+
+    def _canonicalize_node_gene_map(self, node_gene_map: dict | None) -> dict[str, list[str]]:
+        if not isinstance(node_gene_map, dict):
+            return {}
+        out: dict[str, list[str]] = {}
+        for node, genes in node_gene_map.items():
+            k = self._normalize_gene_symbol(node).strip().upper()
+            if not k:
+                continue
+            gs = []
+            if isinstance(genes, (list, tuple)):
+                for g in genes:
+                    gg = self._normalize_gene_symbol(g).strip().upper()
+                    if gg:
+                        gs.append(gg)
+            out[k] = gs
+        return out
 
     @staticmethod
     def _is_dependency_table(df: pd.DataFrame) -> bool:
@@ -369,6 +404,7 @@ class DepMapValidation:
             
         nodes = net.get("nodes", [])
         cm = np.array(net.get("cm", []))
+        meta_map = self._canonicalize_node_gene_map(net.get("metadata", {}).get("node_gene_map"))
         
         if len(cm) == 0:
             return {}
@@ -392,7 +428,7 @@ class DepMapValidation:
             delta_d = d_baseline - d_ko
             
             # Get DepMap score if available
-            dep_score = self._dep_score_for_node(gene)
+            dep_score = self._dep_score_for_node_with_map(gene, meta_map if meta_map else self.node_gene_map)
                 
             results[gene] = {
                 "delta_d": delta_d,

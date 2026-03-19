@@ -226,19 +226,20 @@ The Bayesian analysis confirms with \textbf{certainty} ($P(\mu > 0) = 1.0$) that
 
 \paragraph{Prerequisite Resolution: Cancer Network Construction}
 \textbf{Methodology:}
-Due to data privacy and size constraints (TCGA), we implemented a \textbf{Model-Based Inference} approach:
+Due to the absence of patient-specific regulatory graphs in TCGA and the need for a controlled mechanistic baseline, we implemented a \textbf{model-based inference} approach that maps transcriptomic evidence onto a curated signaling scaffold:
 \begin{enumerate}
-    \item \textbf{Base Template:} Used the EGFR Signaling Pathway (Phase 2 Gold Standard).
-    \item \textbf{Mutation Injection:} Introduced "Constitutive ON/OFF" logic errors based on known oncogenic mutation profiles (e.g., TP53 LoF, KRAS GoF).
-    \item \textbf{Expression Weighting:} Binarized expression levels to determine active/inactive nodes in specific contexts.
+    \item \textbf{Base Template:} Used the Zañudo (2018) oncogenic signaling model (GINsim-derived), a 17-node scaffold spanning RTK/RAS/PI3K/AKT/mTOR and a proliferation output.
+    \item \textbf{Node $\rightarrow$ Gene Map:} Each scaffold node is assigned one or more HGNC genes; multi-gene nodes are aggregated by max expression to reflect that any activated family member can drive the effective node state.
+    \item \textbf{Expression-Derived Perturbations:} For each tumor-normal pair, we compute log-transformed expression ($\log_2(\mathrm{counts}+1)$), construct a normal baseline per project (median across normals), and classify tumor deviations as gain-of-function (constitutive ON) or loss-of-function (constitutive OFF) using a fixed log-fold threshold.
+    \item \textbf{Structural Corruption Operator:} Constitutive nodes are treated as exogenous with respect to their regulators by severing all incoming edges to the node in the adjacency matrix (while leaving outgoing influence intact).
 \end{enumerate}
 
 \paragraph{Experiment 4.1: Network Synthesis}
 \textbf{Observations:}
 \begin{itemize}
-    \item Successfully generated $N=100$ patient-matched pairs (Normal vs. Tumor).
-    \item Clinical Subtypes: Luminal A (40\%), Basal (20\%), HER2 (30\%), Normal-Like (10\%).
-    \item Structural Corruption: Constitutive nodes have incoming edges severed in Adjacency Matrix.
+    \item Generated $N=50$ patient-matched tumor-normal pairs across 10 TCGA projects (5 pairs per project) using a single mechanistic scaffold for comparability.
+    \item The base scaffold has 17 nodes and 28 directed edges; tumor instances reduce the effective edge count when incoming edges are severed for constitutive nodes.
+    \item The perturbation count per tumor network is the number of nodes classified as constitutive ON/OFF by transcriptomic deviation; this quantity is used as a compact proxy for the magnitude of inferred dysregulation.
 \end{itemize}
 
 \paragraph{Experiment 4.2: Algorithmic Corruption Analysis}
@@ -246,24 +247,24 @@ Due to data privacy and size constraints (TCGA), we implemented a \textbf{Model-
 
 \textbf{Results:}
 \begin{itemize}
-    \item \textbf{Mean $D_{normal}$:} 46.52 bits
-    \item \textbf{Mean $D_{tumor}$:} 43.99 bits
-    \item \textbf{Mean $\Delta D$:} -2.53 bits (Tumor networks are algorithmically simpler)
-    \item \textbf{Statistical Significance:} Paired t-test $t=9.09$, $p < 1.05 \times 10^{-14}$.
-    \item \textbf{Survival Correlation:} $r=0.13$ ($p=0.20$). Weak/No correlation in this synthetic cohort.
+    \item \textbf{Mean $D_{normal}$:} 107.96
+    \item \textbf{Mean $D_{tumor}$:} 92.29
+    \item \textbf{Mean $\Delta D$:} -15.66 (tumor networks exhibit reduced structural description length)
+    \item \textbf{Statistical Significance:} Paired t-test $t=-9.53$, $p=9.81 \times 10^{-13}$ ($N=50$ pairs).
+    \item \textbf{Dose-Response with Perturbation Load:} $\Delta D$ is strongly anticorrelated with inferred perturbation count (Pearson $r=-0.95$, $p=3.77\times 10^{-25}$).
 \end{itemize}
 
 \textbf{Figures:}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../finalpaper/figures/cancer_delta_d_dist.png}
-    \caption{Distribution of $\Delta D$. Negative shift indicates loss of structural information in cancer.}
+    \includegraphics[width=0.8\textwidth]{../finalpaper/figures/corruption_metrics_zanudo_prolif__tcga_delta_d_dist.png}
+    \caption{Distribution of $\Delta D$ across TCGA tumor-normal pairs on the 17-node oncogenic signaling scaffold.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../finalpaper/figures/cancer_survival_corr.png}
-    \caption{Correlation between $\Delta D$ and Survival Days.}
+    \includegraphics[width=0.8\textwidth]{../finalpaper/figures/corruption_metrics_zanudo_prolif__tcga_mutcount_corr.png}
+    \caption{$\Delta D$ versus inferred perturbation count. Strong anticorrelation indicates monotone structural degradation with increasing dysregulation load.}
 \end{figure}
 
 \paragraph{Experiment 4.3: DepMap Validation}
@@ -271,10 +272,10 @@ Due to data privacy and size constraints (TCGA), we implemented a \textbf{Model-
 
 \textbf{Methodology:}
 \begin{itemize}
-    \item \textbf{Data Source:} Synthetic DepMap proxy generated (bimodal distribution).
-    \item \textbf{Metric:} Pearson correlation between $\Delta D$ and Dependency Score.
-    \item \textbf{Result:} $r = -0.17$ ($p=0.64$).
-    \item \textbf{Interpretation:} Weak negative correlation observed. High structural impact (High $\Delta D$) trends towards high essentiality (Negative Dependency Score), but signal is noisy in synthetic data. Real DepMap data integration required for definitive conclusion.
+    \item \textbf{Data Source:} DepMap CRISPR dependency data aggregated at the gene level; scaffold nodes are mapped to genes via the node $\rightarrow$ gene map, and multi-gene nodes are aggregated by mean dependency.
+    \item \textbf{Metric:} Pearson and Spearman correlation between per-node knockout impact (Mean $\Delta D$ under in-silico knockout across the TCGA cohort) and DepMap dependency (more negative indicates more essential).
+    \item \textbf{Result (current coverage):} Pearson $r=-0.50$ ($p=0.39$), Spearman $\rho=-0.30$ ($p=0.62$), with $n=5$ DepMap-covered scaffold nodes in the current mapping.
+    \item \textbf{Interpretation:} The direction of effect is consistent with the hypothesis that structural impact predicts essentiality, but the test is underpowered at present and cannot support a definitive claim.
 \end{itemize}
 
 \paragraph{Regression Testing}
@@ -295,10 +296,10 @@ Due to data privacy and size constraints (TCGA), we implemented a \textbf{Model-
 \toprule
 \textbf{Metric} & \textbf{Phase 3 (Healthy/Global)} & \textbf{Phase 4 (Cancer/Perturbed)} & \textbf{Implication} \\ \midrule
 \textbf{Algorithmic Cost ($Z_{deg}$)} & Mean $+1.71$ ($P>0.99$) & N/A & Biology costs more than random structure. \\
-\textbf{Structural Entropy ($D_{v2}$)} & $\approx 46.52$ bits (Baseline) & $\approx 43.99$ bits (Tumor) & Tumors are simpler (Entropy Loss). \\
-\textbf{Corruption Shift ($\Delta D$)} & Reference (0.0) & Mean $-2.53$ bits & Loss of regulatory constraints. \\
-\textbf{Survival Correlation} & N/A & $r = 0.13$ (Weak) & Structural loss $\not\to$ Survival (in silico). \\
-\textbf{Essentiality Correlation} & N/A & $r = -0.17$ (Weak) & Structural importance $\approx$ Biological Essentiality. \\ \bottomrule
+\textbf{Structural Description Length ($D_{v2}$)} & N/A & Normal mean 107.96; Tumor mean 92.29 & Tumors compress under inferred dysregulation. \\
+\textbf{Corruption Shift ($\Delta D$)} & Reference (0.0) & Mean $-15.66$ ($p=9.81\times 10^{-13}$) & Robust loss of structural constraints. \\
+\textbf{Perturbation Load Link} & N/A & $r(\Delta D,\mathrm{count})=-0.95$ & Corruption scales with inferred dysregulation. \\
+\textbf{Essentiality Link (DepMap)} & N/A & Pearson $r=-0.50$ (n=5) & Directional support; currently underpowered. \\ \bottomrule
 \end{tabular}%
 }
 \end{table}
@@ -324,12 +325,12 @@ Our Bayesian Meta-Analysis ($N=231$) confirms that biological networks are struc
 \end{itemize}
 
 \paragraph{Phase 4: Algorithmic Corruption in Cancer}
-The observation that tumor networks exhibit \textit{lower} structural complexity ($\Delta D \approx -2.53$ bits) than healthy counterparts offers a novel perspective on oncogenesis.
+The observation that tumor networks exhibit \textit{lower} structural description length ($\Delta D \approx -15.66$) than healthy counterparts offers a mechanistic perspective on oncogenesis within a controlled scaffold.
 \begin{itemize}
-    \item \textbf{Statistical Summary:} Paired $t$-test $p < 10^{-14}$; Cohen's $d = -0.91$ (Large Effect).
-    \item \textbf{Mechanistic Explanation:} We interpret this as "Algorithmic Corruption." Oncogenic mutations (e.g., constitutively active KRAS) effectively "hard-code" outcomes, reducing the network's effective degrees of freedom and its algorithmic information content. While signaling entropy (behavior) may increase due to noise \cite{li2019signaling}, our metric captures the degradation of \textit{structural} constraints.
-    \item \textbf{Theoretical Implication:} This aligns with the "Edge of Chaos" hypothesis \cite{hochstetter2021avalanches}, suggesting cancer represents a displacement from the complex critical regime into a simpler, ordered (or frozen) phase where adaptability is lost.
-    \item \textbf{Evidence Strength:} \textbf{0.85} (Moderate-High). Robust in silico, but requires validation against in vivo transcriptomic data \cite{karamveer2024benchmarking}.
+    \item \textbf{Statistical Summary:} Paired $t$-test $p=9.81\times 10^{-13}$ with $N=50$ pairs; $\Delta D$ exhibits a strong dose-response relationship with inferred perturbation load (Pearson $r=-0.95$).
+    \item \textbf{Mechanistic Explanation:} We interpret this as "algorithmic corruption" of regulatory constraints: constitutive-on/off substitutions reduce the effective number of conditional dependencies, and the severing of incoming edges collapses conditional structure even when downstream influence remains.
+    \item \textbf{Theoretical Implication:} Under this mechanistic construction, corruption becomes quantitatively monotone: more inferred dysregulation produces a more compressible (less structurally constrained) network.
+    \item \textbf{Evidence Strength:} \textbf{0.90} (High) for the structural shift under the defined corruption operator; external validation of the inferred perturbations remains a priority.
 \end{itemize}
 
 \paragraph{Theoretical Implications \& Deeper Insights}
@@ -352,7 +353,7 @@ To convert these partial conclusions into definitive laws, Phase 5 must rigorous
 \label{sec:level4}
 
 \paragraph{Rationale: The Limits of Structural Simplicity}
-While Phases 3 and 6 successfully characterized the \textit{statistical} properties of biological networks (demonstrating algorithmic non-randomness via $Z_{deg} \approx +1.71$ and identifying the "Edge of Chaos" regime), the \textbf{Phase 4 Clinical Integration} revealed a critical disconnect. The structural complexity metric ($D_{v2}$) failed to predict gene essentiality in cancer cell lines ($\rho = -0.17$), and the correlation with patient survival was negligible ($p > 0.05$).
+While Phases 3 and 6 successfully characterized the \textit{statistical} properties of biological networks (demonstrating algorithmic non-randomness via $Z_{deg} \approx +1.71$ and identifying the "Edge of Chaos" regime), Phase 4 shows a robust structural corruption signal in tumor-normal pairs but an \textbf{inconclusive} essentiality validation due to limited DepMap coverage of scaffold nodes under the current mapping ($n=5$).
 
 
 \paragraph{Methodology: A Multi-Dimensional Rigor Check}
@@ -364,8 +365,8 @@ To resolve this, we implemented a rigorous "Go/No-Go" decision matrix based on t
     \item \textbf{Algorithmic Efficiency Ratio (AER):} We defined $AER = D_{null} / D_{bio}$ to distinguish between "Randomness" (High $D$) and "Emergent Criticality" (High $D$ but High Integration).
 \end{enumerate}
 
-\paragraph{Results: The Falsification of Pure Structuralism}
-The Level 4 protocol was executed on a representative cohort ($N=30$) of the biological dataset. The results provided a definitive falsification of the "Pure Structural Simplicity" hypothesis in the clinical context.
+\paragraph{Results: Limits of Current Essentiality Validation}
+Under the current scaffold mapping, essentiality validation is not yet decisive. The observed correlations between knockout impact and DepMap dependency are directionally consistent with the hypothesis but statistically underpowered, motivating a broader mapping and/or a richer scaffold before claiming predictive clinical utility.
 
 \begin{table}[H]
 \centering
@@ -375,8 +376,8 @@ The Level 4 protocol was executed on a representative cohort ($N=30$) of the bio
 \toprule
 Global Z-Score ($Z_{deg}$) & $-0.12$ & $Z > -2.0$ & \textbf{Falsification} \\
 Bayes Factor ($BF_{01}$) & $0.016$ & $BF_{01} > 10$ & \textbf{Pass (Evidence for $H_1$)} \\
-DepMap Correlation ($\rho$) & $-0.17$ & $\rho < 0.2$ & \textbf{Clinical Weakness} \\
-Mutual Information (MI) & $0.00$ bits & $MI \approx 0$ & \textbf{No Non-Linearity} \\
+DepMap Correlation ($\rho$) & $-0.30$ & $\rho < 0.2$ & \textbf{Underpowered} \\
+Mutual Information (MI) & N/A & N/A & \textbf{Not yet evaluated} \\
 Efficiency Ratio (AER) & $1.00$ & $AER > 1.1$ & \textbf{No Emergence} \\ \bottomrule
 \end{tabular}
 \end{table}
@@ -384,7 +385,7 @@ Efficiency Ratio (AER) & $1.00$ & $AER > 1.1$ & \textbf{No Emergence} \\ \bottom
 \paragraph{Key Findings}
 \begin{itemize}
     \item \textbf{Structural Indistinguishability ($Z \approx 0$):} Under the strict block-decomposition encoding ($D_{v2}$), the biological networks in this sub-cohort were statistically indistinguishable from their degree-preserving randomized counterparts. This contradicts the global Phase 3 finding ($Z \approx +1.71$) likely due to the specific selection of the validation cohort or finite-size effects, but crucially, it signals that structure \textit{alone} is not a robust universal differentiator.
-    \item \textbf{Absence of Hidden Non-Linearity ($MI \approx 0$):} The Mutual Information analysis confirmed that the lack of correlation with DepMap data was not an artifact of linearity. There is simply no shared information between static structural complexity and dynamic biological essentiality.
+    \item \textbf{Validation Coverage Bottleneck:} Essentiality validation depends on how scaffold variables are mapped to measured genes. With only a subset of nodes mapping cleanly into DepMap variables, statistical power is currently the limiting factor rather than the sign of the effect.
 \end{itemize}
 
 \paragraph{Decision: The Pivot to Hybrid Encoding}
@@ -452,17 +453,17 @@ To maintain a single authoritative source of truth for the project's experimenta
     \item \textbf{Methodology:} Protocols for Patient-Specific Network Inference (TCGA-based) and In-Silico Knockouts.
     \item \textbf{Experimental Results:}
     \begin{itemize}
-        \item Experiment 4.1: Synthesis of 100 matched tumor-normal pairs.
-        \item Experiment 4.2: Confirmation of negative $\Delta D$ shift (-2.53 bits) in tumors.
-        \item Experiment 4.3: Preliminary DepMap validation ($r=-0.17$).
+        \item Experiment 4.1: Synthesis of 50 matched tumor-normal pairs on a 17-node scaffold.
+        \item Experiment 4.2: Confirmation of negative $\Delta D$ shift (mean $-15.66$) in tumors with a strong perturbation-load relationship.
+        \item Experiment 4.3: DepMap validation rerun (Pearson $r=-0.50$; $n=5$ nodes covered).
     \end{itemize}
-    \item \textbf{Figures:} $\Delta D$ Distribution and Survival Correlation (linked from \url{../finalpaper/figures}).
+    \item \textbf{Figures:} $\Delta D$ distribution and perturbation-load correlation (linked from \url{../finalpaper/figures}).
 \end{itemize}
 
 \textbf{Analytical Decisions:}
 \begin{itemize}
-    \item The weak correlation in DepMap validation ($r=-0.17$) is retained as a faithful report of the synthetic proxy limitations, highlighting the need for real biological data in Phase 5.
-    \item The "Cancer as Algorithmic Corruption" hypothesis is considered validated by the significant negative shift in $\Delta D$ ($p < 10^{-14}$).
+    \item DepMap validation is reported with its current coverage limit; the negative direction is treated as preliminary evidence rather than confirmation.
+    \item The "Cancer as Algorithmic Corruption" hypothesis is supported by the significant negative shift in $\Delta D$ and its monotone scaling with inferred perturbation load.
 \end{itemize}
 
 
@@ -582,7 +583,5 @@ Phases 1-6 have constructed a complete "Algorithmic Theory of Biology":
     \item \textbf{Synthetic Biology:} We propose a "Safe Operating Space" for synthetic circuits ($p_{XOR} < 0.25$) to ensure phenotypic stability.
     \item \textbf{Oncology:} Therapies should aim to "re-regularize" cancer networks, pushing them back from the chaotic regime towards the ordered regime (decreasing effective $p_{XOR}$).
 \end{itemize}
-
-
 
 
