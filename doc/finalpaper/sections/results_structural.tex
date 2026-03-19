@@ -274,8 +274,9 @@ Due to the absence of patient-specific regulatory graphs in TCGA and the need fo
 \begin{itemize}
     \item \textbf{Data Source:} DepMap CRISPR dependency data aggregated at the gene level; scaffold nodes are mapped to genes via the node $\rightarrow$ gene map, and multi-gene nodes are aggregated by mean dependency.
     \item \textbf{Metric:} Pearson and Spearman correlation between per-node knockout impact (Mean $\Delta D$ under in-silico knockout across the TCGA cohort) and DepMap dependency (more negative indicates more essential).
-    \item \textbf{Result (current coverage):} Pearson $r=-0.50$ ($p=0.39$), Spearman $\rho=-0.30$ ($p=0.62$), with $n=5$ DepMap-covered scaffold nodes in the current mapping.
-    \item \textbf{Interpretation:} The direction of effect is consistent with the hypothesis that structural impact predicts essentiality, but the test is underpowered at present and cannot support a definitive claim.
+    \item \textbf{Result (24Q4 global mean):} Pearson $r=-0.35$ ($p=0.20$), Spearman $\rho=-0.31$ ($p=0.27$), MI $=0.25$ bits (weak), with $n=15$ DepMap-covered scaffold nodes.
+    \item \textbf{Lineage check:} Across lineage-matched DepMap subsets (Breast, Bowel, Head and Neck, Kidney, Liver, Lung, Prostate, Thyroid), Pearson $r$ remains negative (approximately $-0.39$ to $-0.32$, $n=15$ per lineage).
+    \item \textbf{Interpretation:} The direction is consistent with the hypothesis that higher structural knockout impact implies higher essentiality (more negative dependency), but with only 15 nodes the test is not yet decisive.
 \end{itemize}
 
 \paragraph{Regression Testing}
@@ -299,7 +300,7 @@ Due to the absence of patient-specific regulatory graphs in TCGA and the need fo
 \textbf{Structural Description Length ($D_{v2}$)} & N/A & Normal mean 107.96; Tumor mean 92.29 & Tumors compress under inferred dysregulation. \\
 \textbf{Corruption Shift ($\Delta D$)} & Reference (0.0) & Mean $-15.66$ ($p=9.81\times 10^{-13}$) & Robust loss of structural constraints. \\
 \textbf{Perturbation Load Link} & N/A & $r(\Delta D,\mathrm{count})=-0.95$ & Corruption scales with inferred dysregulation. \\
-\textbf{Essentiality Link (DepMap)} & N/A & Pearson $r=-0.50$ (n=5) & Directional support; currently underpowered. \\ \bottomrule
+\textbf{Essentiality Link (DepMap)} & N/A & Pearson $r=-0.35$ (n=15) & Directional support; modest evidence. \\ \bottomrule
 \end{tabular}%
 }
 \end{table}
@@ -353,7 +354,7 @@ To convert these partial conclusions into definitive laws, Phase 5 must rigorous
 \label{sec:level4}
 
 \paragraph{Rationale: The Limits of Structural Simplicity}
-While Phases 3 and 6 successfully characterized the \textit{statistical} properties of biological networks (demonstrating algorithmic non-randomness via $Z_{deg} \approx +1.71$ and identifying the "Edge of Chaos" regime), Phase 4 shows a robust structural corruption signal in tumor-normal pairs but an \textbf{inconclusive} essentiality validation due to limited DepMap coverage of scaffold nodes under the current mapping ($n=5$).
+While Phases 3 and 6 successfully characterized the \textit{statistical} properties of biological networks (demonstrating algorithmic non-randomness via $Z_{deg} \approx +1.71$ and identifying the "Edge of Chaos" regime), Phase 4 shows a robust structural corruption signal in tumor-normal pairs but an \textbf{not-yet-decisive} essentiality validation due to limited node count available for correlation ($n=15$ scaffold nodes with DepMap mapping).
 
 
 \paragraph{Methodology: A Multi-Dimensional Rigor Check}
@@ -455,7 +456,7 @@ To maintain a single authoritative source of truth for the project's experimenta
     \begin{itemize}
         \item Experiment 4.1: Synthesis of 50 matched tumor-normal pairs on a 17-node scaffold.
         \item Experiment 4.2: Confirmation of negative $\Delta D$ shift (mean $-15.66$) in tumors with a strong perturbation-load relationship.
-        \item Experiment 4.3: DepMap validation rerun (Pearson $r=-0.50$; $n=5$ nodes covered).
+        \item Experiment 4.3: DepMap validation rerun (Pearson $r=-0.35$; $n=15$ nodes covered).
     \end{itemize}
     \item \textbf{Figures:} $\Delta D$ distribution and perturbation-load correlation (linked from \url{../finalpaper/figures}).
 \end{itemize}
@@ -583,5 +584,4 @@ Phases 1-6 have constructed a complete "Algorithmic Theory of Biology":
     \item \textbf{Synthetic Biology:} We propose a "Safe Operating Space" for synthetic circuits ($p_{XOR} < 0.25$) to ensure phenotypic stability.
     \item \textbf{Oncology:} Therapies should aim to "re-regularize" cancer networks, pushing them back from the chaotic regime towards the ordered regime (decreasing effective $p_{XOR}$).
 \end{itemize}
-
 

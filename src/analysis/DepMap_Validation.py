@@ -36,6 +36,7 @@ class DepMapValidation:
         depmap_oncotree_codes: list[str] | None = None,
         depmap_oncotree_lineages: list[str] | None = None,
         node_gene_map: dict[str, list[str]] | None = None,
+        force_rebuild_depmap_cache: bool = False,
     ):
         """
         Initialize the DepMap Validation pipeline.
@@ -52,6 +53,7 @@ class DepMapValidation:
         self.depmap_model_path = depmap_model_path
         self.depmap_oncotree_codes = depmap_oncotree_codes
         self.depmap_oncotree_lineages = depmap_oncotree_lineages
+        self.force_rebuild_depmap_cache = bool(force_rebuild_depmap_cache)
         if node_gene_map is None:
             node_gene_map = {
                 "EGF": ["EGF"],
@@ -64,6 +66,20 @@ class DepMapValidation:
                 "ERK": ["MAPK1", "MAPK3"],
                 "PI3K": ["PIK3CA", "PIK3CB", "PIK3CD"],
                 "AKT": ["AKT1", "AKT2", "AKT3"],
+                "GFs": ["EGF", "TGFA", "IGF1"],
+                "RTK": ["EGFR", "ERBB2", "ERBB3"],
+                "MAPK": ["MAPK1", "MAPK3"],
+                "PIP3": [],
+                "FOXO3": ["FOXO3"],
+                "cycE": ["CCNE1", "CCNE2"],
+                "TSC": ["TSC1", "TSC2"],
+                "PRAS40": ["AKT1S1"],
+                "Rb": ["RB1"],
+                "mTORC1": ["MTOR", "RPTOR"],
+                "E2F": ["E2F1", "E2F2", "E2F3"],
+                "EIF4F": ["EIF4E", "EIF4G1", "EIF4A1"],
+                "S6K": ["RPS6KB1", "RPS6KB2"],
+                "Proliferation": [],
             }
 
         canon = {}
@@ -277,7 +293,7 @@ class DepMapValidation:
                 derived_suffix = "__" + "__".join(derived_parts)
 
         derived_path = self.depmap_path + f".gene_mean{derived_suffix}.csv"
-        if not os.path.exists(derived_path):
+        if self.force_rebuild_depmap_cache or not os.path.exists(derived_path):
             print(f"[{datetime.now()}] Building gene-level dependency table from: {self.depmap_path}{derived_suffix}")
             self._build_dependency_table_from_gene_effect_matrix(
                 self.depmap_path,
@@ -405,6 +421,13 @@ class DepMapValidation:
         nodes = net.get("nodes", [])
         cm = np.array(net.get("cm", []))
         meta_map = self._canonicalize_node_gene_map(net.get("metadata", {}).get("node_gene_map"))
+        if not meta_map and nodes:
+            try:
+                from src.data.cancer_network_builder import CancerNetworkBuilder
+                inferred = CancerNetworkBuilder.default_node_to_genes_for_nodes(list(nodes))
+                meta_map = self._canonicalize_node_gene_map(inferred)
+            except Exception:
+                meta_map = {}
         
         if len(cm) == 0:
             return {}
@@ -731,6 +754,7 @@ if __name__ == "__main__":
     DEPMAP_ONCOTREE_LINEAGE_SWEEP = os.environ.get("DEPMAP_ONCOTREE_LINEAGE_SWEEP") or os.environ.get("DEPMAP_ONCOTREE_LINEAGES_SWEEP")
     N_PATIENTS = os.environ.get("DEPMAP_N_PATIENTS")
     RECURSIVE = os.environ.get("DEPMAP_RECURSIVE", "0").strip() == "1"
+    FORCE_REBUILD = os.environ.get("DEPMAP_FORCE_REBUILD", "0").strip() == "1"
     OUT_PREFIX = os.environ.get("DEPMAP_OUT_PREFIX", "results/cancer/depmap_validation")
     os.makedirs("results/cancer", exist_ok=True)
     
@@ -777,6 +801,7 @@ if __name__ == "__main__":
                 depmap_model_path=DEPMAP_MODEL_PATH,
                 depmap_oncotree_codes=oncotree_codes,
                 depmap_oncotree_lineages=[lin],
+                force_rebuild_depmap_cache=FORCE_REBUILD,
             )
             cohort_results = v.run_cohort_analysis(n_patients=n_patients, recursive=RECURSIVE)
             try:
@@ -814,6 +839,7 @@ if __name__ == "__main__":
         depmap_model_path=DEPMAP_MODEL_PATH,
         depmap_oncotree_codes=oncotree_codes,
         depmap_oncotree_lineages=lineages,
+        force_rebuild_depmap_cache=FORCE_REBUILD,
     )
     cohort_results = validator.run_cohort_analysis(n_patients=n_patients, recursive=RECURSIVE)
     
