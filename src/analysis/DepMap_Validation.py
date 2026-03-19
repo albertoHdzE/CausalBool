@@ -692,6 +692,7 @@ if __name__ == "__main__":
     DEPMAP_MODEL_PATH = os.environ.get("DEPMAP_MODEL_PATH")
     DEPMAP_ONCOTREE_CODES = os.environ.get("DEPMAP_ONCOTREE_CODES")
     DEPMAP_ONCOTREE_LINEAGES = os.environ.get("DEPMAP_ONCOTREE_LINEAGES")
+    DEPMAP_ONCOTREE_LINEAGE_SWEEP = os.environ.get("DEPMAP_ONCOTREE_LINEAGE_SWEEP") or os.environ.get("DEPMAP_ONCOTREE_LINEAGES_SWEEP")
     N_PATIENTS = os.environ.get("DEPMAP_N_PATIENTS")
     RECURSIVE = os.environ.get("DEPMAP_RECURSIVE", "0").strip() == "1"
     OUT_PREFIX = os.environ.get("DEPMAP_OUT_PREFIX", "results/cancer/depmap_validation")
@@ -726,6 +727,50 @@ if __name__ == "__main__":
         lineages = [l.strip() for l in str(DEPMAP_ONCOTREE_LINEAGES).split(",") if l.strip()]
 
     n_patients = int(N_PATIENTS) if N_PATIENTS else 20
+
+    if DEPMAP_ONCOTREE_LINEAGE_SWEEP:
+        sweep_lineages = [l.strip() for l in str(DEPMAP_ONCOTREE_LINEAGE_SWEEP).split(",") if l.strip()]
+        rows = []
+        for lin in sweep_lineages:
+            keep_ids = None
+            if DEPMAP_MODEL_PATH:
+                keep_ids = DepMapValidation._select_model_ids_for_lineage(DEPMAP_MODEL_PATH, [lin])
+            v = DepMapValidation(
+                DATA_DIR,
+                DEPMAP_PATH,
+                depmap_model_path=DEPMAP_MODEL_PATH,
+                depmap_oncotree_codes=oncotree_codes,
+                depmap_oncotree_lineages=[lin],
+            )
+            cohort_results = v.run_cohort_analysis(n_patients=n_patients, recursive=RECURSIVE)
+            try:
+                x = cohort_results["Mean_Delta_D"].to_numpy(dtype=float, copy=False)
+                y = cohort_results["Dependency"].to_numpy(dtype=float, copy=False)
+                n_nodes_used = int(np.sum(~(np.isnan(x) | np.isnan(y))))
+            except Exception:
+                n_nodes_used = 0
+            stats_res = v.compute_correlation(cohort_results)
+            row = {
+                "Lineage": str(lin),
+                "N_DepMap_Models": int(len(keep_ids)) if keep_ids is not None else 0,
+                "N_Nodes_Used": int(n_nodes_used),
+                "Pearson_r": float(stats_res.get("rho", 0.0)),
+                "Pearson_p": float(stats_res.get("pval", 1.0)),
+                "Spearman_rho": float(stats_res.get("spearman_rho", 0.0)),
+                "Spearman_p": float(stats_res.get("spearman_pval", 1.0)),
+                "MI_bits": float(stats_res.get("mi_bits", 0.0)),
+                "MI_interpretation": str(stats_res.get("mi_interpretation", "")),
+            }
+            rows.append(row)
+
+        out_csv = OUT_PREFIX + "__lineage_sweep_summary.csv"
+        out_json = OUT_PREFIX + "__lineage_sweep_summary.json"
+        pd.DataFrame(rows).to_csv(out_csv, index=False)
+        with open(out_json, "w") as f:
+            json.dump({"rows": rows}, f, indent=4)
+        print(f"Wrote {out_csv}")
+        print(f"Wrote {out_json}")
+        sys.exit(0)
 
     validator = DepMapValidation(
         DATA_DIR,

@@ -286,9 +286,9 @@
 - Overlap size:
   - `n_nodes_used = 10` (EGFR pathway nodes; fixed by scaffold)
 - Pearson:
-  - `r = -0.290`, `p = 0.416`
+  - `r = -0.332`, `p = 0.349`
 - Spearman:
-  - `rho = -0.176`, `p = 0.627`
+  - `rho = -0.248`, `p = 0.489`
 - Mutual information (KNN estimator wrapper):
   - `MI_bits = 0.0` (“No Dependency” classification)
 
@@ -297,13 +297,45 @@
 
 **Consistency with thesis + prior numbers**
 - Direction: consistent with the theory-facing expectation that higher structural importance (larger mean $\Delta D$ under in-silico KO) should align with stronger essentiality (more negative DepMap gene effect), i.e., a negative association.
-- Magnitude: the lineage-matched $r=-0.290$ is weaker than the context-agnostic real-TCGA paired-node result previously logged in the manuscript ($r=-0.438$), which is expected under a filter that changes the dependency baseline and reduces the effective sample of cell lines.
+- Magnitude: the lineage-matched $r=-0.332$ is weaker than the context-agnostic real-TCGA paired-node result previously logged in the manuscript ($r=-0.438$), which is expected under a filter that changes the dependency baseline and reduces the effective sample of cell lines.
 - Inference status: neither the context-agnostic nor lineage-matched external anchor is statistically significant at $n=10$ nodes, so these results remain supportive as a directionality check and provenance anchor, not as confirmatory validation.
 
 **Implications (research-level)**
 - What the new result adds: it removes a major interpretability objection (“DepMap is averaged across irrelevant tissues”) by demonstrating that context matching does not flip the direction.
 - What it does not add: it does not materially strengthen evidential weight for the external-validation claim because the dominant limitation remains node coverage (EGFR scaffold only) and gene-family aggregation.
 - What it suggests next: scale node coverage (larger pathways / multi-pathway models) and run the same lineage-matched evaluation with confound controls (degree, expression proxies, CNV) before any incremental-value claim.
+
+---
+
+## Entry LEV8-2026-03-18-007 — Multi-lineage DepMap sensitivity sweep on real TCGA paired-tumor models
+**Date:** 2026-03-18  
+**Operator:** Trae/GPT  
+**Gate Alignment:** Gate C (context matching), Gate B (robustness)  
+
+**Objective**
+- Test whether the external-anchor direction (ΔD vs essentiality) is stable across the relevant TCGA project lineages, not just Breast.
+
+**Design**
+- Same cohort and scaffold as LEV8-2026-03-18-006 (real TCGA paired-tumor pathway models; $n=50$ tumors; 10 nodes).
+- Recompute DepMap dependency by filtering DepMap models by `OncotreeLineage` and averaging CRISPR gene effect across the lineage-filtered models.
+- Lineages tested (matching the 10-project TCGA pilot): Breast, Lung, Bowel, Prostate, Kidney, Head and Neck, Thyroid, Liver.
+
+**Command (frozen)**
+- `DEPMAP_DATA_DIR="data/cancer/tcga_patients_paired" DEPMAP_RECURSIVE=1 DEPMAP_PATH="data/depmap/24Q4/raw/CRISPRGeneEffect.csv" DEPMAP_MODEL_PATH="data/depmap/24Q4/raw/Model.csv" DEPMAP_ONCOTREE_LINEAGE_SWEEP="Breast,Lung,Bowel,Prostate,Kidney,Head and Neck,Thyroid,Liver" DEPMAP_N_PATIENTS=50 DEPMAP_OUT_PREFIX="results/cancer/depmap_validation_tcga_paired_24Q4" python -u src/analysis/DepMap_Validation.py`
+
+**Outputs saved**
+- `results/cancer/depmap_validation_tcga_paired_24Q4__lineage_sweep_summary.csv`
+- `results/cancer/depmap_validation_tcga_paired_24Q4__lineage_sweep_summary.json`
+
+**Results (Pearson, n=10 nodes in all lineages)**
+- All lineages show negative $r$ (direction preserved).
+- Range across tested lineages:
+  - $r \in [-0.531, -0.284]$
+  - Smallest $p$ observed: Lung ($r=-0.453$, $p=0.188$); Bowel ($r=-0.531$, $p=0.114$)
+
+**Interpretation**
+- The external-anchor sign is stable under tissue matching across multiple lineages, which strengthens the thesis-level coherence claim (no direction reversal under context matching).
+- This sweep does not resolve statistical validation: with only 10 pathway nodes, all lineage-matched tests remain underpowered, and heterogeneity in effect magnitude is plausible given lineage-specific essentiality baselines.
 
 ---
 
