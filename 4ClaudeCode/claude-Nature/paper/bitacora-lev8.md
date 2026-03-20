@@ -659,10 +659,13 @@
 - Outputs:
   - Metrics table (all thresholds): `results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_sweep.csv`
   - Metrics table (threshold=1.0 slice): `results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif.csv`
+  - Per-project summary (threshold=1.0 slice): `results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_per_project_summary.csv`
   - Summary (per project, per threshold): `results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_sweep_summary.csv`
   - Figures:
     - `figures/corruption_metrics_zanudo_prolif__tcga_delta_d_dist.png` (thr=1.0)
     - `figures/corruption_metrics_zanudo_prolif__tcga_mutcount_corr.png` (thr=1.0)
+    - `figures/corruption_metrics_zanudo_prolif__delta_d_by_project.png` (thr=1.0)
+    - `figures/corruption_metrics_zanudo_prolif__tcga_dv2_tumor_vs_normal.png` (thr=1.0)
     - `figures/corruption_metrics_zanudo_prolif__tcga_sweep_mean_delta_d.png`
     - `figures/corruption_metrics_zanudo_prolif__tcga_sweep_corr_vs_thr.png`
 

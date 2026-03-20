@@ -268,6 +268,9 @@ def main():
                 normal_path = os.path.join(DATA_DIR, project, f"{pid}_Normal.json")
                 tumor_path = os.path.join(DATA_DIR, project, f"{pid}_Tumor.json")
                 if not os.path.exists(normal_path) or not os.path.exists(tumor_path):
+                    normal_path = os.path.join(DATA_DIR, f"{pid}_Normal.json")
+                    tumor_path = os.path.join(DATA_DIR, f"{pid}_Tumor.json")
+                if not os.path.exists(normal_path) or not os.path.exists(tumor_path):
                     print(f"Warning: Missing files for {project} {pid}")
                     continue
 
@@ -399,6 +402,8 @@ def main():
             mutation_count = int(row["mutation_count"])
 
             path = os.path.join(DATA_DIR, project, f"{pid}_{tissue_type}.json")
+            if not os.path.exists(path):
+                path = os.path.join(DATA_DIR, f"{pid}_{tissue_type}.json")
             if not os.path.exists(path):
                 print(f"Warning: Missing file for {project} {pid} {tissue_type}")
                 continue
