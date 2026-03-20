@@ -148,6 +148,20 @@ TCGA-PRAD & 5 & -4.95 & 5.02 & -2.21 & 0.092 & -0.77 & 0.126 \\
 \end{tabular}
 \end{table}
 
+\subsection*{Paired TCGA threshold sensitivity (Figure 6)}
+To test robustness to the frozen discretization threshold $\tau$ used to trigger gain-/loss-of-function state-fixing events, we rerun the full paired pipeline across a threshold sweep and track both the mean paired corruption shift and the coupling to inferred perturbation count. Full sweep outputs are stored at:
+\begin{center}
+\path{results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_sweep.csv}\\
+\path{results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_sweep_summary.csv}
+\end{center}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.49\textwidth]{figures/corruption_metrics_zanudo_prolif__tcga_sweep_mean_delta_d.png}
+    \includegraphics[width=0.49\textwidth]{figures/corruption_metrics_zanudo_prolif__tcga_sweep_corr_vs_thr.png}
+    \caption{\textbf{Paired TCGA threshold sensitivity under the frozen expression-to-network protocol.} (Left) Mean paired $\Delta D^{(v2)}$ as a function of discretization threshold $\tau$ (negative indicates tumor structural simplification). (Right) Pearson coupling between $\Delta D^{(v2)}$ and inferred perturbation count as a function of $\tau$.}
+\end{figure}
+
 \section*{Reproducibility and Regression Control}
 Level 8 executes the full Python and WolframKernel test suites and records the aggregate status in \texttt{bitacora-lev8.md}. The Mathematica suite runs 87 MUnit test files with 0 failures, and the Python suite executes 24 ticketed test scripts successfully. All Level 8 manuscript artifacts (figures and validation outputs) are recorded with SHA-256 checksums.
 
