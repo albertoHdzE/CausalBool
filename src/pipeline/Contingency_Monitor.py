@@ -17,7 +17,7 @@ class ContingencyMonitor:
     ACTIONS = {
         "CONTINUE": "Signal is robust. Continue Phase 3.",
         "ITERATE": "Signal is noisy ($0.2 < \\rho < 0.4$). Increase N and refine features.",
-        "PIVOT_HYBRID": "Theoretical Falsification ($Z > -2.0$ or $BF_{01} > 10$). Pivot to Hybrid Encoding.",
+        "PIVOT_HYBRID": "Theoretical Falsification ($Z < 2.0$ or $BF_{01} > 10$). Pivot to Hybrid Encoding.",
         "PIVOT_CELL": "Clinical Weakness ($\\rho < 0.2$ and $MI \\approx 0$). Switch to Cell Lines.",
         "PUBLISH_EMERGENCE": "High Complexity but High Efficiency ($AER > 1.0$). Publish 'Edge of Chaos' finding."
     }
@@ -56,13 +56,13 @@ class ContingencyMonitor:
 
         # 1. Check Falsification (Universality)
         # Z-score > -2.0 means D_bio is close to D_rand (Not simple).
-        # Note: Z = (D_bio - Mean_Rand) / Std_Rand. 
-        # If D_bio << Mean_Rand, Z is negative (e.g. -5). 
+        # Note: Z = (Mean_Rand - D_bio) / Std_Rand.
+        # If D_bio << Mean_Rand, Z is positive (e.g. +5).
         # If D_bio approx Mean_Rand, Z approx 0.
-        # So Z > -2.0 is indeed "Failure to separate".
-        if z > -2.0:
+        # So Z < 2.0 is indeed "Failure to separate".
+        if z < 2.0:
             action = "PIVOT_HYBRID"
-            reasons.append(f"Z-Score ({z:.2f}) > -2.0 indicates failure to separate Bio from Null.")
+            reasons.append(f"Z-Score ({z:.2f}) < 2.0 indicates failure to separate Bio from Null.")
         elif bf01 > 10.0:
             action = "PIVOT_HYBRID"
             reasons.append(f"Bayes Factor BF01 ({bf01:.2f}) > 10 strongly favors Null Model.")

@@ -123,7 +123,7 @@ def main():
         if std_rand == 0:
             z_score = 0
         else:
-            z_score = (d_bio - mean_rand) / std_rand
+            z_score = (mean_rand - d_bio) / std_rand
             
         print(f"{name:<25} | {n:<3} | {d_bio:10.2f} | {mean_rand:10.2f} | {z_score:8.2f}")
         

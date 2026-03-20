@@ -198,7 +198,7 @@ def process_networks(
             def zscore(x: float, xs: List[float]) -> Tuple[float, float, float]:
                 mu = float(np.mean(xs))
                 sd = float(np.std(xs)) if len(xs) > 1 else 0.0
-                z  = (x - mu) / sd if sd > 0 else 0.0
+                z  = (mu - x) / sd if sd > 0 else 0.0
                 return z, mu, sd
             
             z_er,  mu_er,  sd_er  = zscore(D_bio, null_scores_er)

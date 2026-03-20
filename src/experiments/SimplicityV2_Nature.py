@@ -166,7 +166,7 @@ def main():
         sigma_null = np.std(null_Dv2_scores)
         
         if sigma_null > 0:
-            z_score = (D_v2 - mu_null) / sigma_null
+            z_score = (mu_null - D_v2) / sigma_null
         else:
             z_score = 0.0
             
