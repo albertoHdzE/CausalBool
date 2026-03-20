@@ -105,22 +105,48 @@ Using paired TCGA models instantiated on the same 17-node scaffold, we measure a
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.49\textwidth]{figures/tcga_corruption_metrics_paired__tcga_delta_d_dist.png}
-    \includegraphics[width=0.49\textwidth]{figures/tcga_corruption_metrics_paired__tcga_mutcount_corr.png}
-    \caption{\textbf{Paired TCGA corruption under an expression-to-network scaffold.} (Left) Distribution of paired $\Delta D = D_{\mathrm{tumor}}-D_{\mathrm{normal}}$ across $n=50$ patients (negative values indicate tumor networks are more compressible). (Right) Correlation between $\Delta D$ and inferred mutation\_count under the frozen discretization protocol.}
+    \includegraphics[width=0.49\textwidth]{figures/corruption_metrics_zanudo_prolif__tcga_delta_d_dist.png}
+    \includegraphics[width=0.49\textwidth]{figures/corruption_metrics_zanudo_prolif__tcga_mutcount_corr.png}
+    \caption{\textbf{Paired TCGA corruption under a frozen expression-to-network scaffold (17-node oncogenic signaling model).} (Left) Distribution of paired $\Delta D^{(v2)}$ across $n=50$ patients (negative values indicate tumor networks are more compressible). (Right) Coupling between $\Delta D^{(v2)}$ and the inferred perturbation count (reported as \texttt{mutation\_count} by the pipeline).}
 \end{figure}
 
 The per-patient corruption metrics and mutation burdens are stored at:
 \begin{center}
 \path{results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif.csv}
 \end{center}
+The per-project summary computed from this table is stored at:
+\begin{center}
+\path{results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_per_project_summary.csv}
+\end{center}
 Project-level summaries and paired tests are computed from this table.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{figures/tcga_corruption_metrics_paired__delta_d_by_project.png}
-    \caption{\textbf{Paired $\Delta D$ by TCGA project.} Boxplots of within-patient $\Delta D$ across the 10-project pilot (5 pairs per project). This diagnostic plot supports between-project heterogeneity assessment and guides cohort scaling.}
+    \includegraphics[width=0.49\textwidth]{figures/corruption_metrics_zanudo_prolif__delta_d_by_project.png}
+    \includegraphics[width=0.49\textwidth]{figures/corruption_metrics_zanudo_prolif__tcga_dv2_tumor_vs_normal.png}
+    \caption{\textbf{Project stratification and within-pair shifts.} (Left) $\Delta D^{(v2)}$ stratified by TCGA project (each project contributes $n=5$ pairs). (Right) Paired $D^{(v2)}_{\mathrm{tumor}}$ vs $D^{(v2)}_{\mathrm{normal}}$ scatter; the dashed identity line indicates no within-pair change. Points below the identity line correspond to tumor structural simplification.}
 \end{figure}
+
+\begin{table}[H]
+\centering
+\caption{\textbf{Per-project paired corruption summary (17-node scaffold; $\tau=1.0$).} Each TCGA project contributes five tumor/normal pairs. $\Delta D^{(v2)} = D^{(v2)}_{\mathrm{tumor}} - D^{(v2)}_{\mathrm{normal}}$. Within each project, $r$ reports the Pearson coupling between $\Delta D^{(v2)}$ and inferred perturbation count.}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Project & $n$ & mean $\Delta D^{(v2)}$ & sd $\Delta D^{(v2)}$ & $t$ & $p$ & $r$ & $p_r$ \\
+\midrule
+TCGA-LIHC & 5 & -30.90 & 10.57 & -6.53 & 0.003 & -0.91 & 0.034 \\
+TCGA-LUAD & 5 & -23.69 & 15.02 & -3.53 & 0.024 & -0.97 & 0.007 \\
+TCGA-COAD & 5 & -21.00 & 11.59 & -4.05 & 0.015 & -0.98 & 0.004 \\
+TCGA-BRCA & 5 & -17.85 & 5.70 & -7.00 & 0.002 & -0.94 & 0.016 \\
+TCGA-KIRC & 5 & -14.85 & 5.63 & -5.90 & 0.004 & -0.78 & 0.119 \\
+TCGA-KIRP & 5 & -13.45 & 8.71 & -3.45 & 0.026 & -0.98 & 0.005 \\
+TCGA-LUSC & 5 & -11.73 & 5.78 & -4.54 & 0.011 & -0.90 & 0.040 \\
+TCGA-HNSC & 5 & -10.89 & 7.56 & -3.22 & 0.032 & -0.88 & 0.050 \\
+TCGA-THCA & 5 & -7.33 & 15.20 & -1.08 & 0.342 & -1.00 & 3.69$\times 10^{-4}$ \\
+TCGA-PRAD & 5 & -4.95 & 5.02 & -2.21 & 0.092 & -0.77 & 0.126 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section*{Reproducibility and Regression Control}
 Level 8 executes the full Python and WolframKernel test suites and records the aggregate status in \texttt{bitacora-lev8.md}. The Mathematica suite runs 87 MUnit test files with 0 failures, and the Python suite executes 24 ticketed test scripts successfully. All Level 8 manuscript artifacts (figures and validation outputs) are recorded with SHA-256 checksums.
