@@ -21,7 +21,7 @@ class BioNetworkOverlay:
         self.processed_dir = os.path.join(os.path.dirname(__file__), '../../data/bio/processed')
         self.sweep_path = os.path.join(os.path.dirname(__file__), '../../results/bio/phase_transition/phase_transition_sweep.csv')
         self.output_csv = os.path.join(os.path.dirname(__file__), '../../results/bio/phase_transition/bio_overlay.csv')
-        self.output_plot = os.path.join(os.path.dirname(__file__), '../../doc/finalpaper/figures/phase_transition_overlay.png')
+        self.output_plot = os.path.join(os.path.dirname(__file__), '../../4ClaudeCode/claude-Nature/paper/figures/phase_transition_overlay.png')
 
     def load_network(self, filepath):
         with open(filepath, 'r') as f:

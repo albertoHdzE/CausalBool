@@ -3,7 +3,7 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{hyperref}
+\usepackage[hypertexnames=false]{hyperref}
 \usepackage{geometry}
 \usepackage{float}
 \usepackage{authblk}
@@ -23,31 +23,33 @@
 
 \begin{abstract}
 \noindent
-Level 8 establishes an end-to-end reproducibility record for CausalBool analyses and introduces external validation anchors using DepMap CRISPR gene effect data (24Q4) and paired TCGA tumor/normal RNA-seq cohorts. We freeze canonical sign conventions and evaluation semantics for algorithmic efficiency and differential complexity, regenerate manuscript figures with immutable checksums, and run a full automated test sweep across Python and WolframKernel suites. DepMap integration provides provenance-complete dataset acquisition and a pilot correlation analysis linking network-derived $\Delta D$ to population-scale genetic dependency. Paired TCGA cohorts enable a within-patient tumor-vs-normal corruption analysis, showing a significant negative shift in tumor structural complexity under the frozen expression-to-network corruption protocol.
+Level 8 establishes an end-to-end reproducibility record for CausalBool analyses and introduces external validation anchors using DepMap CRISPR gene effect data (24Q4) and paired TCGA tumor/normal RNA-seq cohorts. We freeze canonical sign conventions and evaluation semantics for algorithmic efficiency and differential complexity, regenerate manuscript figures with immutable checksums, and run a full automated test sweep across Python and WolframKernel suites. DepMap integration provides provenance-complete dataset acquisition and a pilot node-level validation on a 17-node oncogenic signaling scaffold by correlating mean in-silico knockout structural impact ($\Delta D_{\mathrm{KO}}$) with DepMap dependency (Pearson $r=-0.35$, $p=0.20$, $n=15$ nodes). Paired TCGA cohorts enable a within-patient tumor-vs-normal corruption analysis, showing a significant negative shift in tumor structural complexity under the frozen expression-to-network corruption protocol (mean $\Delta D^{(v2)}=-15.66$, paired $p=9.81\times 10^{-13}$; $n=50$ pairs).
 \end{abstract}
 
 \section*{Level 8 Definition Contract}
-All Level 8 results adhere to a frozen contract recorded in \texttt{paper/bitacora-lev8.md}. The canonical definitions used in the generated artifacts are:
+All Level 8 results adhere to a frozen contract recorded in \texttt{bitacora-lev8.md}. The canonical definitions used in the generated artifacts are:
 \begin{itemize}
-    \item Structural complexity proxy: $D(cm) = \mathrm{len}(\mathrm{gzip}(cm.\mathrm{tobytes}()))$ (compressed bytes).
+    \item Structural complexity proxy (GRN corpus): $D_{\mathrm{gzip}}(cm) = \mathrm{len}(\mathrm{gzip}(cm.\mathrm{tobytes}()))$ (compressed bytes).
+    \item Structural complexity proxy (cancer/DepMap): $D^{(v2)}(cm)$ computed by the universal $D^{(v2)}$ encoder on the adjacency matrix (bits).
     \item Degree-preserved null: Maslov--Sneppen edge swaps with $n_{\mathrm{swaps}} = 20N$, seeded.
     \item Efficiency z-score: $z = (\mathbb{E}[D_{\mathrm{null}}] - D_{\mathrm{bio}})/\mathrm{sd}(D_{\mathrm{null}})$ (so $z>0$ indicates algorithmic efficiency).
-    \item Differential complexity: $\Delta D(v) = D(G\setminus v) - D(G)$ (so $\Delta D>0$ indicates a node contributes to compressibility).
+    \item Knockout impact (DepMap validation): $\Delta D_{\mathrm{KO}}(v) = D(G) - D(G\setminus v)$ (so $\Delta D_{\mathrm{KO}}>0$ indicates structural impact under knockout).
+    \item Corruption shift (paired TCGA): $\Delta D^{(v2)} = D^{(v2)}_{\mathrm{tumor}} - D^{(v2)}_{\mathrm{normal}}$ (so $\Delta D^{(v2)}<0$ indicates tumor structural simplification).
 \end{itemize}
 
 \section*{Data and Artifacts}
 \subsection*{GRN corpus}
-The Level 8 figure regeneration uses the processed GRN corpus under \texttt{data/bio/processed}, with summaries emitted to \texttt{paper/figures/results\_summary.csv} and \texttt{paper/figures/supplementary\_table\_per\_network.csv}.
+The Level 8 figure regeneration uses the processed GRN corpus under \path{data/bio/processed}, with summaries emitted to \path{figures/results_summary.csv} and \path{figures/supplementary_table_per_network.csv}.
 
 \subsection*{DepMap 24Q4 external anchor}
-DepMap 24Q4 Public artifacts were acquired from the Figshare+ distribution endpoint and verified via SHA-256 checksums (see \texttt{paper/bitacora-lev8.md}). A derived gene-level dependency table was constructed by averaging CRISPR gene effect across all cell lines:
+DepMap 24Q4 Public artifacts were acquired from the Figshare+ distribution endpoint and verified via SHA-256 checksums (see \texttt{bitacora-lev8.md}). A derived gene-level dependency table was constructed by averaging CRISPR gene effect across all cell lines:
 \begin{equation}
 \mathrm{Dependency}(g) = \frac{1}{|\mathcal{L}_g|}\sum_{\ell \in \mathcal{L}_g} \mathrm{GeneEffect}(\ell,g).
 \end{equation}
-This derived table is stored at \texttt{data/depmap/24Q4/derived/depmap\_24Q4\_gene\_effect\_mean.csv}.
+This derived table is stored at \path{data/depmap/24Q4/derived/depmap_24Q4_gene_effect_mean.csv}.
 
 \subsection*{Paired TCGA tumor/normal RNA-seq cohorts (pilot acquisition + pairing)}
-To move beyond synthetic ``TCGA-BR'' pathway cohorts and enable within-patient tumor-vs-normal comparisons, we acquired real TCGA RNA-seq gene expression quantification from the NCI GDC API using the \texttt{STAR - Counts} workflow and explicitly enforced tumor/normal pairing by selecting GDC cases present in both \texttt{Primary Tumor} and \texttt{Solid Tissue Normal} queries. We froze a small paired pilot cohort of 5 tumor/normal pairs per project for the following set: TCGA-BRCA, TCGA-LUAD, TCGA-COAD, TCGA-PRAD, TCGA-KIRC, TCGA-HNSC, TCGA-THCA, TCGA-LUSC, TCGA-LIHC, TCGA-KIRP. Raw per-sample augmented STAR count tables and derived gene $\times$ sample count matrices are stored under \texttt{data/cancer/tcga\_paired/<PROJECT>/raw/} and \texttt{data/cancer/tcga\_paired/<PROJECT>/processed/}. Using the frozen expression-to-network corruption protocol recorded in \texttt{paper/bitacora-lev8.md}, we instantiated paired patient-specific EGFR pathway Boolean models under \texttt{data/cancer/tcga\_patients\_paired/<PROJECT>/}, with the paired cohort index at \texttt{results/cancer/tcga\_expression\_networks\_index\_paired.csv}.
+To move beyond synthetic ``TCGA-BR'' pathway cohorts and enable within-patient tumor-vs-normal comparisons, we acquired real TCGA RNA-seq gene expression quantification from the NCI GDC API using the \texttt{STAR - Counts} workflow and explicitly enforced tumor/normal pairing by selecting GDC cases present in both \texttt{Primary Tumor} and \texttt{Solid Tissue Normal} queries. We froze a small paired pilot cohort of 5 tumor/normal pairs per project for the following set: TCGA-BRCA, TCGA-LUAD, TCGA-COAD, TCGA-PRAD, TCGA-KIRC, TCGA-HNSC, TCGA-THCA, TCGA-LUSC, TCGA-LIHC, TCGA-KIRP. Raw per-sample augmented STAR count tables and derived gene $\times$ sample count matrices are stored under \path{data/cancer/tcga_paired/<PROJECT>/raw/} and \path{data/cancer/tcga_paired/<PROJECT>/processed/}. Using the frozen expression-to-network corruption protocol recorded in \texttt{bitacora-lev8.md}, we instantiated paired patient-specific oncogenic signaling Boolean models under \path{data/cancer/patients_zanudo_prolif/<PROJECT>/}, with the paired cohort index at \path{data/cancer/tcga_index_zanudo_prolif_byproject.csv}.
 
 \section*{Results}
 \subsection*{Algorithmic efficiency (Figure 1)}
@@ -55,7 +57,7 @@ Regenerated outputs show a consistent positive shift in $z$ under the canonical 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{figures/figure1_algorithmic_efficiency.pdf}
+    \includegraphics[width=0.95\textwidth]{figures/figure1_algorithmic_efficiency.png}
     \caption{\textbf{Algorithmic efficiency under degree-preserved nulls (regenerated).} The canonical sign convention is $z=(\mathbb{E}[D_{\mathrm{null}}]-D_{\mathrm{bio}})/\mathrm{sd}(D_{\mathrm{null}})$, so $z>0$ indicates biological networks are more compressible than their degree-preserving null ensemble.}
 \end{figure}
 
@@ -64,32 +66,42 @@ The extended essentiality evaluation over \texttt{essentiality\_prediction\_data
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{figures/figure2_essentiality_extended.pdf}
+    \includegraphics[width=0.95\textwidth]{figures/figure2_essentiality_extended.png}
     \caption{\textbf{Extended essentiality evaluation (regenerated).} This figure is treated as diagnostic rather than a Nature-facing claim until label definitions and evaluation protocol are reconciled across essentiality sources.}
 \end{figure}
 
 \subsection*{DepMap pilot validation (Figure 3)}
-DepMap 24Q4 integration enables a first external validation anchor. The current tumor cohort networks (\texttt{data/cancer/patients}) are synthetic pathway graphs with only 10 genes; therefore, overlap with DepMap dependency is fixed at $n=10$ and the external validation is underpowered. Using the gene-wise mean $\Delta D$ across 50 patient tumor networks, the pilot correlation is negative but not statistically significant (Pearson $r=-0.311$, $p=0.382$; Spearman $\rho=-0.097$, $p=0.790$; one-sided permutation $p_{\mathrm{left}}=0.214$).
+DepMap 24Q4 integration enables a provenance-complete external validation anchor. We validate a 17-node oncogenic signaling scaffold (\path{ginsim_2020-mammal-oncogenic-signaling_2018_zanudo_proliferation}) by correlating per-node mean in-silico knockout impact $\Delta D_{\mathrm{KO}}$ (averaged across a $n=50$ TCGA tumor cohort) with DepMap dependency (gene effect mean; negative = more essential). Node $\rightarrow$ gene mapping is frozen and multi-gene nodes are aggregated by mean dependency. The association is negative but not statistically significant at $n=15$ DepMap-covered scaffold nodes (Pearson $r=-0.35$, $p=0.20$; Spearman $\rho=-0.31$, $p=0.27$; MI $=0.25$ bits).
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.90\textwidth]{figures/figure3_depmap_validation_24Q4.pdf}
-    \caption{\textbf{DepMap 24Q4 pilot external validation.} DepMap gene effect is averaged across cell lines (negative = more essential). The current cohort contains only the EGFR pathway nodes, so this plot should be treated as a provenance-complete pilot anchor, not a final Gate C pass.}
+    \includegraphics[width=0.90\textwidth]{figures/figure3_depmap_validation_24Q4.png}
+    \caption{\textbf{DepMap 24Q4 external validation anchor on a 17-node oncogenic signaling scaffold.} DepMap dependency is averaged across cell lines (negative = more essential). Node-wise $\Delta D_{\mathrm{KO}}$ is computed by in-silico knockout and averaged across the TCGA tumor cohort; mapping and aggregation rules are frozen in \texttt{bitacora-lev8.md}.}
 \end{figure}
 
-\subsection*{DepMap validation on TCGA RNA-seq--instantiated tumor models (Figure 4)}
-Using tumor pathway models instantiated from real paired TCGA tumor/normal RNA-seq (\texttt{data/cancer/tcga\_patients\_paired}), we recompute mean node-wise $\Delta D$ over $n=50$ tumor samples and compare against DepMap 24Q4. Because several pathway nodes represent gene families (e.g., Ras), DepMap dependency is aggregated to nodes by taking the mean gene effect across mapped genes (mapping frozen in \texttt{paper/bitacora-lev8.md}). The resulting association is negative but not statistically significant at $n=10$ nodes (Pearson $r=-0.438$, $p=0.206$; Spearman $\rho=-0.491$, $p=0.150$), reinforcing that the main limitation is node coverage rather than substrate provenance.
+\subsection*{Lineage-matched DepMap sensitivity sweep (Table 1)}
+To test whether context matching changes the external-anchor direction, we recompute DepMap dependency after filtering DepMap models by OncotreeLineage and repeating the same node-level aggregation (mean across mapped genes). Across the set of TCGA-relevant lineages (Breast, Bowel, Head and Neck, Kidney, Liver, Lung, Prostate, Thyroid), the Pearson association remains negative in all tested lineages, with effect sizes clustered around $r\approx -0.32$ to $-0.39$ at $n=15$ nodes per lineage.
 
-As a context-matched sensitivity analysis, we recompute DepMap dependency after filtering DepMap models to the breast lineage (OncotreeLineage = Breast) and repeating the same node-level aggregation. The lineage-matched association remains negative but is also not statistically significant (Pearson $r=-0.332$, $p=0.349$; Spearman $\rho=-0.248$, $p=0.489$), consistent with an underpowered ($n=10$) validation rather than a direction reversal.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/figure5_depmap_validation_tcga_paired_24Q4.png}
-    \caption{\textbf{DepMap 24Q4 vs real TCGA paired-tumor networks (EGFR pathway).} DepMap dependency is mapped to pathway nodes via a frozen gene-family aggregation rule. This is a real-substrate, underpowered ($n=10$) external anchor.}
-\end{figure}
+\begin{table}[H]
+\centering
+\caption{\textbf{Lineage-matched DepMap sensitivity sweep (node-level, $n=15$).} DepMap models are filtered by OncotreeLineage before computing gene-mean dependency.}
+\label{tab:depmap_lineage_sweep}
+\begin{tabular}{@{}l r r r@{}}
+\toprule
+\textbf{Lineage} & \textbf{DepMap models} & \textbf{Pearson $r$} & \textbf{$p$} \\ \midrule
+Breast & 96 & -0.389 & 0.152 \\
+Bowel & 99 & -0.323 & 0.240 \\
+Head and Neck & 95 & -0.323 & 0.240 \\
+Kidney & 73 & -0.366 & 0.180 \\
+Liver & 29 & -0.373 & 0.171 \\
+Lung & 260 & -0.318 & 0.249 \\
+Prostate & 15 & -0.376 & 0.168 \\
+Thyroid & 25 & -0.383 & 0.158 \\ \bottomrule
+\end{tabular}
+\end{table}
 
 \subsection*{Paired TCGA tumor/normal corruption (Figure 5)}
-Using the paired TCGA models, we measure a within-patient corruption signal as $\Delta D^{(v2)} = D^{(v2)}_{\mathrm{tumor}} - D^{(v2)}_{\mathrm{normal}}$ computed on the adjacency matrix of each paired Boolean model. Across $n=50$ tumor/normal pairs, tumor models show lower structural complexity than matched normal controls (mean $D^{(v2)}_{\mathrm{normal}}=46.52$, mean $D^{(v2)}_{\mathrm{tumor}}=40.70$, mean $\Delta D^{(v2)}=-5.83$), with a strong paired effect ($t=-5.69$, $p=7.00\times 10^{-7}$). The corruption magnitude scales with inferred mutation count (Pearson $r=-0.91$, $p=2.29\times 10^{-20}$), consistent with the frozen mechanistic scaffold in which constitutive perturbations sever regulatory inputs and simplify network structure. A discretization sensitivity sweep over log$_2$ thresholds $\tau\in\{0.5,1.0,1.5\}$ preserves the sign of $\Delta D^{(v2)}$ and the negative coupling to mutation\_count, while attenuating magnitude as $\tau$ increases (see sweep outputs in \texttt{results/cancer/tcga\_corruption\_metrics\_paired\_\_tcga\_paired\_sweep\_summary.csv}).
+Using paired TCGA models instantiated on the same 17-node scaffold, we measure a within-patient corruption signal as $\Delta D^{(v2)} = D^{(v2)}_{\mathrm{tumor}} - D^{(v2)}_{\mathrm{normal}}$ computed on the adjacency matrix of each paired Boolean model. Across $n=50$ tumor/normal pairs, tumor models show lower structural complexity than matched normal controls (mean $D^{(v2)}_{\mathrm{normal}}=107.96$, mean $D^{(v2)}_{\mathrm{tumor}}=92.29$, mean $\Delta D^{(v2)}=-15.66$), with a strong paired effect ($t=-9.53$, $p=9.81\times 10^{-13}$). The corruption magnitude scales with inferred perturbation count (Pearson $r=-0.95$, $p=3.77\times 10^{-25}$), consistent with the frozen mechanistic scaffold in which constitutive perturbations sever regulatory inputs and simplify network structure.
 
 \begin{figure}[H]
     \centering
@@ -98,7 +110,11 @@ Using the paired TCGA models, we measure a within-patient corruption signal as $
     \caption{\textbf{Paired TCGA corruption under an expression-to-network scaffold.} (Left) Distribution of paired $\Delta D = D_{\mathrm{tumor}}-D_{\mathrm{normal}}$ across $n=50$ patients (negative values indicate tumor networks are more compressible). (Right) Correlation between $\Delta D$ and inferred mutation\_count under the frozen discretization protocol.}
 \end{figure}
 
-Project-level summaries (means, paired tests, and within-project $\Delta D$--mutation\_count correlations) are stored in \texttt{results/cancer/tcga\_corruption\_summary\_paired.csv}.
+The per-patient corruption metrics and mutation burdens are stored at:
+\begin{center}
+\path{results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif.csv}
+\end{center}
+Project-level summaries and paired tests are computed from this table.
 
 \begin{figure}[H]
     \centering
@@ -107,13 +123,13 @@ Project-level summaries (means, paired tests, and within-project $\Delta D$--mut
 \end{figure}
 
 \section*{Reproducibility and Regression Control}
-Level 8 executes the full Python and WolframKernel test suites and records the aggregate status in \texttt{paper/bitacora-lev8.md}. The Mathematica suite runs 87 MUnit test files with 0 failures, and the Python suite executes 24 ticketed test scripts successfully. All Level 8 manuscript artifacts (figures and validation outputs) are recorded with SHA-256 checksums.
+Level 8 executes the full Python and WolframKernel test suites and records the aggregate status in \texttt{bitacora-lev8.md}. The Mathematica suite runs 87 MUnit test files with 0 failures, and the Python suite executes 24 ticketed test scripts successfully. All Level 8 manuscript artifacts (figures and validation outputs) are recorded with SHA-256 checksums.
 
 \section*{Implications for Gate C}
-The DepMap anchor provides the required external dataset provenance and a concrete analysis pathway, but it does not yet satisfy Gate C as a publishable biological punch because the current cancer cohort networks are synthetic and extremely small, and the dependency summary used is context-agnostic (averaged across lineages). The next Gate C pass requires tissue-specific tumor network construction and an evaluation design that demonstrates incremental value beyond topology baselines under leakage-safe cohort splitting.
+The DepMap anchor provides the required external dataset provenance and a concrete analysis pathway, but it does not yet satisfy Gate C as a publishable biological punch because the external validation is node-limited: even after expanding scaffold coverage, the test operates at $n=15$ nodes, which constrains statistical power and makes confound control difficult. The next Gate C pass requires scaling node coverage (larger scaffolds and/or multi-scaffold aggregation) and adding context-matched controls (degree, expression proxies, copy-number) under a leakage-safe evaluation design.
 
-Paired TCGA cohorts reduce the substrate risk and provide a paired-design, real-data-dependent corruption signal within a frozen expression-to-network scaffold. The remaining Gate C work is to generalize beyond a 10-node pathway model, validate robustness across modeling choices (threshold sensitivity, pathway size and mapping), and connect the corruption signal to external biology in a context-matched design (lineage-matched DepMap and clinically-relevant endpoints).
+Paired TCGA cohorts reduce substrate risk and provide a paired-design, real-data-dependent corruption signal within a frozen expression-to-network scaffold. The remaining Gate C work is to generalize beyond a single scaffold, quantify robustness across mapping/threshold choices at scale, and connect the corruption signal to external biology in a context-matched design (lineage-matched DepMap and clinically relevant endpoints).
 
-The lineage-matched DepMap sensitivity check is direction-consistent with the context-agnostic anchor but does not change the evidential status of the external validation: at $n=10$ nodes, statistical power is insufficient to treat the DepMap association as confirmatory. A multi-lineage sweep matching the 10-project TCGA pilot (Breast, Lung, Bowel, Prostate, Kidney, Head and Neck, Thyroid, Liver) preserves the negative direction in all tested lineages (Pearson $r \in [-0.531, -0.284]$), reinforcing that the primary bottleneck is model coverage rather than data provenance.
+The lineage-matched DepMap sensitivity sweep is direction-consistent with the context-agnostic anchor but does not change evidential status: at $n=15$ nodes, statistical power is still insufficient to treat the DepMap association as confirmatory. The multi-lineage sweep preserves negative direction across all tested lineages (Table~\ref{tab:depmap_lineage_sweep}), reinforcing that the primary bottleneck is model coverage rather than data provenance.
 
 \end{document}

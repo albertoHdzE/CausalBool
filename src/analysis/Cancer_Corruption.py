@@ -21,7 +21,7 @@ METADATA_PATH = os.getenv("CANCER_METADATA_PATH", "data/cancer/clinical_metadata
 TCGA_INDEX_PATH = os.getenv("TCGA_INDEX_PATH", "")
 OUTPUT_DIR = os.getenv("CANCER_OUTPUT_DIR", "results/cancer")
 OUTPUT_BASENAME = os.getenv("CANCER_OUTPUT_BASENAME", "corruption_metrics.csv")
-FIGURE_DIR = os.getenv("CANCER_FIGURE_DIR", "doc/finalpaper/figures")
+FIGURE_DIR = os.getenv("CANCER_FIGURE_DIR", "4ClaudeCode/claude-Nature/paper/figures")
 TCGA_SWEEP_THRESHOLDS = os.getenv("TCGA_SWEEP_THRESHOLDS", "")
 TCGA_COUNTS_ROOT = os.getenv("TCGA_COUNTS_ROOT", "data/cancer/tcga_paired")
 TCGA_BASE_NETWORK_PATH = os.getenv("TCGA_BASE_NETWORK_PATH", "data/bio/processed/egfr_signaling.json")
@@ -304,7 +304,7 @@ def main():
                 print(f"[{datetime.now()}] Not enough paired samples for statistical tests.")
                 return
 
-            t_stat, p_val = stats.ttest_rel(results_df["D_normal"], results_df["D_tumor"])
+            t_stat, p_val = stats.ttest_rel(results_df["D_tumor"], results_df["D_normal"])
             corr, p_corr = stats.pearsonr(results_df["Delta_D"], results_df["mutation_count"])
             print(f"\nStatistical Summary:")
             print(f"  Mean D_normal: {results_df['D_normal'].mean():.2f}")
@@ -313,20 +313,79 @@ def main():
             print(f"  Paired t-test: t={t_stat:.2f}, p={p_val:.2e}")
             print(f"  Correlation (Delta_D vs mutation_count): r={corr:.2f}, p={p_corr:.2e}")
 
+            per_project_rows = []
+            for project, g in results_df.groupby("project"):
+                delta = g["Delta_D"].to_numpy(dtype=float, copy=False)
+                t0 = stats.ttest_1samp(delta, popmean=0.0, nan_policy="omit")
+                tp = stats.ttest_rel(g["D_tumor"], g["D_normal"], nan_policy="omit")
+                if len(g) >= 3:
+                    r, p = stats.pearsonr(g["mutation_count"].to_numpy(dtype=float), delta)
+                else:
+                    r, p = np.nan, np.nan
+                per_project_rows.append(
+                    {
+                        "project": str(project),
+                        "n_pairs": int(len(g)),
+                        "mean_D_normal": float(g["D_normal"].mean()),
+                        "mean_D_tumor": float(g["D_tumor"].mean()),
+                        "mean_Delta_D": float(g["Delta_D"].mean()),
+                        "std_Delta_D": float(g["Delta_D"].std(ddof=1)) if len(g) > 1 else 0.0,
+                        "paired_t_t": float(tp.statistic) if np.isfinite(tp.statistic) else np.nan,
+                        "paired_t_p": float(tp.pvalue) if np.isfinite(tp.pvalue) else np.nan,
+                        "t_test_vs0_t": float(t0.statistic) if np.isfinite(t0.statistic) else np.nan,
+                        "t_test_vs0_p": float(t0.pvalue) if np.isfinite(t0.pvalue) else np.nan,
+                        "corr_mutcount_delta_r": float(r) if np.isfinite(r) else np.nan,
+                        "corr_mutcount_delta_p": float(p) if np.isfinite(p) else np.nan,
+                    }
+                )
+            per_project_df = pd.DataFrame(per_project_rows).sort_values("mean_Delta_D")
+            per_project_path = os.path.join(OUTPUT_DIR, f"{plot_prefix}__tcga_paired_per_project_summary.csv")
+            per_project_df.to_csv(per_project_path, index=False)
+            print(f"[{datetime.now()}] Per-project summary saved to {per_project_path}")
+
             plt.figure(figsize=(10, 6))
             sns.histplot(results_df["Delta_D"], kde=True, color="firebrick")
             plt.axvline(0, color="k", linestyle="--")
-            plt.title("Distribution of Algorithmic Corruption ($\\Delta D$) — TCGA pilot")
+            plt.title("Distribution of Algorithmic Corruption ($\\Delta D$) — Paired TCGA")
             plt.xlabel("$\\Delta D = D_{tumor} - D_{normal}$ (bits)")
-            plt.savefig(os.path.join(FIGURE_DIR, f"{plot_prefix}__tcga_delta_d_dist.png"))
+            plt.tight_layout()
+            plt.savefig(os.path.join(FIGURE_DIR, f"{plot_prefix}__tcga_delta_d_dist.png"), dpi=300)
+            plt.close()
 
             plt.figure(figsize=(10, 6))
             sns.scatterplot(data=results_df, x="Delta_D", y="mutation_count", hue="project", palette="viridis")
             sns.regplot(data=results_df, x="Delta_D", y="mutation_count", scatter=False, color="gray")
-            plt.title(f"Algorithmic Corruption vs Mutation Proxy (r={corr:.2f}) — TCGA pilot")
+            plt.title(f"Algorithmic Corruption vs Mutation Proxy (r={corr:.2f}) — Paired TCGA")
             plt.xlabel("$\\Delta D$ (structural information loss)")
             plt.ylabel("mutation_count (thresholded nodes)")
-            plt.savefig(os.path.join(FIGURE_DIR, f"{plot_prefix}__tcga_mutcount_corr.png"))
+            plt.tight_layout()
+            plt.savefig(os.path.join(FIGURE_DIR, f"{plot_prefix}__tcga_mutcount_corr.png"), dpi=300)
+            plt.close()
+
+            plt.figure(figsize=(10, 6))
+            order = results_df.groupby("project")["Delta_D"].mean().sort_values().index.tolist()
+            sns.boxplot(data=results_df, x="project", y="Delta_D", order=order, color="lightgray")
+            sns.stripplot(data=results_df, x="project", y="Delta_D", order=order, color="black", alpha=0.6, size=3)
+            plt.axhline(0, color="k", linestyle="--", linewidth=1)
+            plt.title("Algorithmic Corruption by Project — Paired TCGA")
+            plt.xlabel("")
+            plt.ylabel("$\\Delta D$ (bits)")
+            plt.xticks(rotation=45, ha="right")
+            plt.tight_layout()
+            plt.savefig(os.path.join(FIGURE_DIR, f"{plot_prefix}__delta_d_by_project.png"), dpi=300)
+            plt.close()
+
+            plt.figure(figsize=(10, 6))
+            sns.scatterplot(data=results_df, x="D_normal", y="D_tumor", hue="project", palette="viridis")
+            mn = float(min(results_df["D_normal"].min(), results_df["D_tumor"].min()))
+            mx = float(max(results_df["D_normal"].max(), results_df["D_tumor"].max()))
+            plt.plot([mn, mx], [mn, mx], linestyle="--", color="gray", linewidth=1)
+            plt.title("Paired $D_{tumor}$ vs $D_{normal}$ — TCGA")
+            plt.xlabel("$D_{normal}$ (bits)")
+            plt.ylabel("$D_{tumor}$ (bits)")
+            plt.tight_layout()
+            plt.savefig(os.path.join(FIGURE_DIR, f"{plot_prefix}__tcga_dv2_tumor_vs_normal.png"), dpi=300)
+            plt.close()
 
             print(f"[{datetime.now()}] Plots saved to {FIGURE_DIR}")
             return

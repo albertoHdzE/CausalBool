@@ -28,7 +28,7 @@
 - `/Users/alberto/Documents/projects/CausalBool/venv/bin/python /Users/alberto/Documents/projects/CausalBool/4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py`
 
 **Fix Applied Before Run**
-- Updated output directory resolution to write into `paper/figures` rather than `../figures`, which caused a PermissionError.
+- Updated output directory resolution to write into `figures` rather than `../figures`, which caused a PermissionError.
 - File changed: [analysis_pipeline.py](file:///Users/alberto/Documents/projects/CausalBool/4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py#L437-L512)
 
 **Console Summary**
@@ -41,11 +41,11 @@
 - Paired t-test p-value: 5.14e-12
 
 **Outputs Produced**
-- `paper/figures/figure1_algorithmic_efficiency.pdf`
-- `paper/figures/figure1_algorithmic_efficiency.png`
-- `paper/figures/figure2_essentiality_prediction.pdf`
-- `paper/figures/figure2_essentiality_prediction.png`
-- `paper/figures/results_summary.csv`
+- `figures/figure1_algorithmic_efficiency.pdf`
+- `figures/figure1_algorithmic_efficiency.png`
+- `figures/figure2_essentiality_prediction.pdf`
+- `figures/figure2_essentiality_prediction.png`
+- `figures/results_summary.csv`
 
 **Checksums (SHA-256)**
 - figure1_algorithmic_efficiency.pdf: `935e5e4dc92577499cf1c1d5588b1a9c2cdef36589e4b328884068ae2dabcdca`
@@ -72,11 +72,11 @@
 - `/Users/alberto/Documents/projects/CausalBool/venv/bin/python /Users/alberto/Documents/projects/CausalBool/4ClaudeCode/claude-Nature/paper/code/essentiality_analysis.py`
 
 **Fix Applied Before Run**
-- Updated default input/output paths to resolve relative to `paper/figures`.
+- Updated default input/output paths to resolve relative to `figures`.
 - File changed: [essentiality_analysis.py](file:///Users/alberto/Documents/projects/CausalBool/4ClaudeCode/claude-Nature/paper/code/essentiality_analysis.py#L14-L60)
 
 **Dataset Loaded**
-- `paper/figures/essentiality_prediction_dataset.csv`
+- `figures/essentiality_prediction_dataset.csv`
 - Loaded: 642 genes from 20 networks
 - Essential: 24
 - Non-essential: 618
@@ -93,9 +93,9 @@
   - Combined: 0.460 ± 0.055
 
 **Outputs Produced**
-- `paper/figures/figure2_essentiality_extended.pdf`
-- `paper/figures/figure2_essentiality_extended.png`
-- `paper/figures/supplementary_table_per_network.csv`
+- `figures/figure2_essentiality_extended.pdf`
+- `figures/figure2_essentiality_extended.png`
+- `figures/supplementary_table_per_network.csv`
 
 **Checksums (SHA-256)**
 - essentiality_prediction_dataset.csv: `77799372819839ab6dda8c49e752bc0f72f07fa13de70c58918116a12b4fc008`
@@ -221,33 +221,33 @@
 
 **Pilot validation run**
 - Networks analyzed:
-  - `data/cancer/patients/*_Tumor.json` (synthetic EGFR “pathway” networks with pseudo-patient IDs like `TCGA-BR-0000` (not real TCGA cases); each has 10 nodes: `EGF, EGFR, GRB2, SOS, Ras, Raf, MEK, ERK, PI3K, AKT`)
-  - Patients used: 50 (first 50 tumor networks)
+  - `data/cancer/patients_zanudo_prolif/*_Tumor.json` (paired TCGA tumor instances instantiated on the fixed 17-node oncogenic signaling scaffold)
+  - Patients used: 50 (10 projects × 5 paired cases; tumor instances only)
 - DepMap predictor:
   - `Dependency(gene)`: mean DepMap 24Q4 gene effect across cell lines (more negative = more essential)
 - CausalBool predictor:
   - `Mean_Delta_D(gene)`: mean ΔD_v2 across patient tumor networks (as implemented in `DepMap_Validation.py`)
 - Outputs saved:
-  - `results/cancer/depmap_validation_24Q4.csv` (SHA-256: `356a2d8bbf874669429e4cd598af2f0ffa126522b4f089bddb16d3b09af51d08`)
-  - `results/cancer/depmap_stats_24Q4.json` (SHA-256: `3c9a1a7ad9341ada958ce2c34a2c58a05dfaffe5124eca270392e61706163ef0`)
-  - `paper/figures/figure3_depmap_validation_24Q4.png` (SHA-256: `5d4bd5049b341ac5569f4bbc7f733986565848c414a5bab5d23272cef91987b1`)
-  - `paper/figures/figure3_depmap_validation_24Q4.pdf` (SHA-256: `6934dc69fcd40596d1887f49d62556aa61b8d7fa64d03d30c32a62e9a5261301`)
+  - `results/cancer_zanudo_prolif/depmap_validation_zanudo_prolif.csv`
+  - `results/cancer_zanudo_prolif/depmap_validation_zanudo_prolif_stats.json`
+  - `figures/figure3_depmap_validation_24Q4.png` (SHA-256: `5d4bd5049b341ac5569f4bbc7f733986565848c414a5bab5d23272cef91987b1`)
+  - `figures/figure3_depmap_validation_24Q4.pdf` (SHA-256: `6934dc69fcd40596d1887f49d62556aa61b8d7fa64d03d30c32a62e9a5261301`)
 
 **Results (pilot)**
 - Overlap size:
-  - `n_genes_used = 10` (only the pathway genes present in the synthetic tumor networks)
+  - `n_nodes_used = 15` (DepMap-covered scaffold nodes after mapping/aggregation)
 - Pearson:
-  - `r = -0.311`, `p = 0.382`
+  - `r = -0.352`, `p = 0.198`
 - Spearman:
-  - `rho = -0.097`, `p = 0.790`
+  - `rho = -0.307`, `p = 0.265`
 - Mutual information (KNN estimator wrapper):
-  - `MI_bits = 0.0` (“No Dependency” classification)
+  - `MI_bits = 0.253` (“Weak Dependency” classification)
 - Permutation test (Dependency permuted across genes; one-sided in expected negative direction):
   - `n_perm = 500`, `p_left = 0.214`
 
 **Interpretation**
 - Directionally consistent with the biological expectation (more “structurally important” genes should trend toward stronger essentiality / more negative gene effect), but this pilot is massively underpowered because:
-  - the current “tumor cohort” networks are synthetic EGFR-pathway graphs with only 10 genes,
+  - the validation operates at node-level with only 15 DepMap-covered nodes,
   - the DepMap dependency summary used is context-agnostic (mean across all lineages),
   - no confound controls are included yet (degree, expression, CNV).
 
@@ -593,15 +593,13 @@
 **Corruption analysis (paired $\Delta D$)**
 - Implementation: [Cancer_Corruption.py](file:///Users/alberto/Documents/projects/CausalBool/src/analysis/Cancer_Corruption.py)
 - Inputs:
-  - `CANCER_DATA_DIR=data/cancer/tcga_patients_paired`
   - `TCGA_INDEX_PATH=results/cancer/tcga_expression_networks_index_paired.csv`
 - Outputs:
   - Metrics table: `results/cancer/tcga_corruption_metrics_paired.csv`
-  - Per-project summary: `results/cancer/tcga_corruption_summary_paired.csv`
   - Figures:
-    - `paper/figures/tcga_corruption_metrics_paired__tcga_delta_d_dist.png`
-    - `paper/figures/tcga_corruption_metrics_paired__tcga_mutcount_corr.png`
-    - `paper/figures/tcga_corruption_metrics_paired__delta_d_by_project.png`
+    - `figures/tcga_corruption_metrics_paired__tcga_delta_d_dist.png`
+    - `figures/tcga_corruption_metrics_paired__tcga_mutcount_corr.png`
+    - `figures/tcga_corruption_metrics_paired__delta_d_by_project.png`
 
 **Results (n=50 paired tumor/normal patients; 10 projects × 5 pairs)**
 - Summary (global):
@@ -624,21 +622,62 @@
 - Outputs:
   - `results/cancer/tcga_corruption_metrics_paired__tcga_paired_sweep.csv`
   - `results/cancer/tcga_corruption_metrics_paired__tcga_paired_sweep_summary.csv`
-  - `paper/figures/tcga_corruption_metrics_paired__tcga_sweep_mean_delta_d.png`
-  - `paper/figures/tcga_corruption_metrics_paired__tcga_sweep_corr_vs_thr.png`
+  - `figures/tcga_corruption_metrics_paired__tcga_sweep_mean_delta_d.png`
+  - `figures/tcga_corruption_metrics_paired__tcga_sweep_corr_vs_thr.png`
 - Global (n=50 pairs) stability across discretization thresholds:
   - Threshold 0.5: mean $\Delta D^{(v2)}=-11.50$; $t=-9.80$, $p=4.0\times 10^{-13}$; $r(\Delta D^{(v2)},\mathrm{mutation\_count})=-0.89$, $p=3.8\times 10^{-18}$; mean mutation\_count $=5.84$
   - Threshold 1.0: mean $\Delta D^{(v2)}=-5.83$; $t=-5.69$, $p=7.0\times 10^{-7}$; $r(\Delta D^{(v2)},\mathrm{mutation\_count})=-0.91$, $p=2.3\times 10^{-20}$; mean mutation\_count $=3.34$
   - Threshold 1.5: mean $\Delta D^{(v2)}=-2.33$; $t=-3.24$, $p=2.2\times 10^{-3}$; $r(\Delta D^{(v2)},\mathrm{mutation\_count})=-0.83$, $p=9.2\times 10^{-14}$; mean mutation\_count $=1.98$
 
 **Nature-facing plots and summary tables**
-- Plots (minimum):
-  - Distribution of paired $\Delta D$ with 0-reference line (global + per project).
-  - $\Delta D$ vs mutation\_count with regression and per-project markers.
-  - Paired $D_{\mathrm{tumor}}$ vs $D_{\mathrm{normal}}$ scatter (identity line), to visualize within-pair shifts.
-- Summary tables (minimum):
-  - Per-project: $n$, mean/SD $\Delta D$, paired test statistic and p-value, and $r(\Delta D,\mathrm{mutation\_count})$.
-  - Sensitivity: rerun results across discretization thresholds and report effect direction stability.
+- Plots:
+  - `figures/tcga_corruption_metrics_paired__tcga_delta_d_dist.png`
+  - `figures/tcga_corruption_metrics_paired__tcga_mutcount_corr.png`
+  - `figures/tcga_corruption_metrics_paired__delta_d_by_project.png`
+  - `figures/tcga_corruption_metrics_paired__tcga_dv2_tumor_vs_normal.png`
+- Summary tables:
+  - Per-pair metrics: `results/cancer/tcga_corruption_metrics_paired.csv`
+  - Per-project summary: `results/cancer/tcga_corruption_metrics_paired__tcga_paired_per_project_summary.csv`
+  - Sensitivity sweep: `results/cancer/tcga_corruption_metrics_paired__tcga_paired_sweep_summary.csv`
+
+---
+
+## Entry LEV8-2026-03-18-007B — Paired TCGA tumor/normal corruption analysis (paired index, 17-node oncogenic signaling scaffold)
+**Date:** 2026-03-18  
+**Operator:** Trae/GPT  
+**Gate Alignment:** Gate A (pairing correctness), Gate B (paired design), Gate C (domain signal)  
+
+**Goal**
+- Repeat the paired tumor/normal corruption analysis on the frozen 17-node oncogenic signaling scaffold (Zañudo proliferation model), using the same paired TCGA RNA-seq substrate and discretization protocol.
+
+**Corruption analysis (paired $\Delta D$; Zanudo scaffold)**
+- Implementation: [Cancer_Corruption.py](file:///Users/alberto/Documents/projects/CausalBool/src/analysis/Cancer_Corruption.py) (paired sweep mode)
+- Inputs:
+  - `TCGA_INDEX_PATH=data/cancer/tcga_index_zanudo_prolif_byproject.csv`
+  - `TCGA_COUNTS_ROOT=data/cancer/tcga_paired`
+  - `TCGA_BASE_NETWORK_PATH=data/bio/processed/ginsim_default_2018_zanudo_proliferation.json`
+- Outputs:
+  - Metrics table (all thresholds): `results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_sweep.csv`
+  - Metrics table (threshold=1.0 slice): `results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif.csv`
+  - Summary (per project, per threshold): `results/cancer_zanudo_prolif/corruption_metrics_zanudo_prolif__tcga_paired_sweep_summary.csv`
+  - Figures:
+    - `figures/corruption_metrics_zanudo_prolif__tcga_delta_d_dist.png` (thr=1.0)
+    - `figures/corruption_metrics_zanudo_prolif__tcga_mutcount_corr.png` (thr=1.0)
+    - `figures/corruption_metrics_zanudo_prolif__tcga_sweep_mean_delta_d.png`
+    - `figures/corruption_metrics_zanudo_prolif__tcga_sweep_corr_vs_thr.png`
+
+**Results (n=50 paired tumor/normal patients; 10 projects × 5 pairs; threshold=1.0)**
+- Summary (global):
+  - Mean $D^{(v2)}_{\mathrm{normal}} = 107.96$
+  - Mean $D^{(v2)}_{\mathrm{tumor}} = 92.29$
+  - Mean $\Delta D^{(v2)} = -15.66$
+  - Paired t-test ($\Delta D^{(v2)}$ vs 0): $t=-9.53$, $p=9.81\\times 10^{-13}$
+  - Pearson correlation ($\Delta D^{(v2)}$ vs mutation\_count): $r=-0.95$, $p=3.77\\times 10^{-25}$
+
+**Threshold sensitivity (global; n=50 pairs)**
+- Threshold 0.5: mean $\Delta D^{(v2)}=-31.61$; $t=-17.83$, $p=4.65\\times 10^{-23}$; $r=-0.96$, $p=2.34\\times 10^{-28}$; mean mutation\_count $=9.40$
+- Threshold 1.0: mean $\Delta D^{(v2)}=-15.66$; $t=-9.53$, $p=9.81\\times 10^{-13}$; $r=-0.95$, $p=3.77\\times 10^{-25}$; mean mutation\_count $=4.92$
+- Threshold 1.5: mean $\Delta D^{(v2)}=-9.61$; $t=-8.58$, $p=2.49\\times 10^{-11}$; $r=-0.89$, $p=2.38\\times 10^{-18}$; mean mutation\_count $=2.80$
 
 ---
 
@@ -668,7 +707,7 @@
 **Outputs**
 - Validation table: `results/cancer/depmap_validation_tcga_paired_24Q4.csv`
 - Stats JSON: `results/cancer/depmap_stats_tcga_paired_24Q4.json`
-- Figure: `paper/figures/figure5_depmap_validation_tcga_paired_24Q4.png`
+- Figure: `figures/figure5_depmap_validation_tcga_paired_24Q4.png`
 
 **Results (node-level; n=10)**
 - Pearson (Mean $\Delta D$ vs DepMap dependency): $r=-0.438$, $p=0.206$

@@ -9,7 +9,7 @@ import os
 # Configuration
 INPUT_FILE = "results/bio/null_stats.json"
 OUTPUT_DIR = "results/stats"
-FIGURE_DIR = "doc/finalpaper/figures"
+FIGURE_DIR = "4ClaudeCode/claude-Nature/paper/figures"
 SEED = 42
 CHAINS = 4
 DRAWS = 5000
