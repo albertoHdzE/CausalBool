@@ -96,6 +96,27 @@ Under the fixed oncogenic signaling scaffold, $D^{(v2)}_{\mathrm{normal}}$ is co
     \caption{\textbf{Project stratification and within-pair shifts.} (Left) $\Delta D^{(v2)}$ stratified by TCGA project (each project contributes $n=5$ pairs). (Right) Paired $D^{(v2)}_{\mathrm{tumor}}$ vs $D^{(v2)}_{\mathrm{normal}}$ scatter; the dashed identity line indicates no within-pair change. Points below the identity line correspond to tumor structural simplification.}
 \end{figure}
 
+\begin{table}[H]
+    \centering
+    \caption{\textbf{Per-project paired corruption summary (17-node scaffold; $\tau=1.0$).} Each TCGA project contributes five tumor/normal pairs. $\Delta D^{(v2)} = D^{(v2)}_{\mathrm{tumor}} - D^{(v2)}_{\mathrm{normal}}$. Within each project, $r$ reports the Pearson coupling between $\Delta D^{(v2)}$ and inferred perturbation count. Because the normal models are unmodified in this construction, $D^{(v2)}_{\mathrm{normal}}$ is constant across all projects and the project-to-project signal arises from tumor-specific model instantiation.}
+    \begin{tabular}{lrrrrrrr}
+        \toprule
+        Project & $n$ & mean $\Delta D^{(v2)}$ & sd $\Delta D^{(v2)}$ & $t$ & $p$ & $r$ & $p_r$ \\
+        \midrule
+        TCGA-LIHC & 5 & -30.90 & 10.57 & -6.53 & 0.003 & -0.91 & 0.034 \\
+        TCGA-LUAD & 5 & -23.69 & 15.02 & -3.53 & 0.024 & -0.97 & 0.007 \\
+        TCGA-COAD & 5 & -21.00 & 11.59 & -4.05 & 0.015 & -0.98 & 0.004 \\
+        TCGA-BRCA & 5 & -17.85 & 5.70 & -7.00 & 0.002 & -0.94 & 0.016 \\
+        TCGA-KIRC & 5 & -14.85 & 5.63 & -5.90 & 0.004 & -0.78 & 0.119 \\
+        TCGA-KIRP & 5 & -13.45 & 8.71 & -3.45 & 0.026 & -0.98 & 0.005 \\
+        TCGA-LUSC & 5 & -11.73 & 5.78 & -4.54 & 0.011 & -0.90 & 0.040 \\
+        TCGA-HNSC & 5 & -10.89 & 7.56 & -3.22 & 0.032 & -0.88 & 0.050 \\
+        TCGA-THCA & 5 & -7.33 & 15.20 & -1.08 & 0.342 & -1.00 & 3.69$\times 10^{-4}$ \\
+        TCGA-PRAD & 5 & -4.95 & 5.02 & -2.21 & 0.092 & -0.77 & 0.126 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 \section*{Limitations}
 
 This paired TCGA pilot constructs executable pathway \emph{models} conditioned on transcript counts, but it does not infer causal gene regulatory networks from data. The scaffold is a fixed mechanistic abstraction with only 17 nodes, and the inferred perturbation\_count is the number of expression-triggered state-fixing events rather than a genomic mutation count. Consequently, interpretation should be limited to the properties of this construction: expression-driven node fixation prunes incoming regulation, which in turn reduces structural description length. External biological anchoring (e.g., DepMap gene effect), while feasible in the same scaffold, remains node-limited, so validation should be treated as directional support rather than confirmatory evidence.
