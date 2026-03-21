@@ -512,7 +512,7 @@ To claim true universality, we adopt the 2D Block Decomposition Method.
 \item   Compute \$\Delta AER = AER\_{cancer} - AER\_{normal}\$.
 \item   Correlate \$\Delta D\$ with Tumor Grade and Survival.
 \item   \textbf{Unit Test ID}: `tests/Nature/TSK-NATURE-LEV3-CANCER-001-Test.py`
-\item   \textbf{Validation Method}: \$\Delta D > 0\$ expected for 70\%+ of tumors (loss of regulation = increased entropy/complexity).
+\item   \textbf{Validation Method}: \$\Delta D < 0\$ expected for 70\%+ of tumors (state-fixing and incoming-edge pruning yield more compressible tumor scaffolds).
 \item   \textbf{Context}: Defining cancer as an "Algorithmic Disease."
 \item   \textbf{Execution Log / Results}:
 \item   \textit{(To be filled during execution)}
@@ -1851,7 +1851,7 @@ We executed a comprehensive re-validation pipeline (\texttt{src/experiments/run\
     \item We computed the baseline hybrid complexity $D_{hybrid}^{WT}$.
     \item We simulated a knockout (KO) by fixing the gene state to 0.
     \item We computed the knockout hybrid complexity $D_{hybrid}^{KO}$.
-    \item We calculated the algorithmic information loss $\Delta D = D^{WT} - D^{KO}$.
+    \item We calculated the algorithmic information loss $\Delta D = D^{KO} - D^{WT}$.
 \end{enumerate}
 
 \subsection{Optimization of Hybrid Weights}
@@ -2532,7 +2532,7 @@ This strong positive association confirms that the mechanistic encoder $D$ is al
 \textbf{Objective:} Test the hypothesis that essential genes contribute more to the algorithmic description length of the system than non-essential genes.
 
 \textbf{Methodology:}
-We compute $\Delta D_i = D(\mathcal{N}) - D(\mathcal{N}_{\setminus i})$ (stuck-at-0 knockout).
+We compute $\Delta D_i = D(\mathcal{N}_{\setminus i}) - D(\mathcal{N})$ (stuck-at-0 knockout).
 
 \textbf{Global Validation Stats ($N=31$ genes):}
 \begin{itemize}

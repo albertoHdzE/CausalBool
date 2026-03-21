@@ -890,3 +890,60 @@
 
 **Implication**
 - This converts the DepMap anchor into a real-cancer-substrate run while preserving provenance. A Nature-facing Gate C pass still requires increasing node/gene coverage (beyond a single pathway) and adopting lineage-matched DepMap summaries or other context-matched endpoints.
+
+---
+
+## Entry LEV8-2026-03-21-004 — ΔD Sign Unification Across Manuscript Artifacts + Essentiality Re-run
+**Date:** 2026-03-21  
+**Operator:** Trae/GPT  
+**Gate Alignment:** Gate A (coherence)  
+
+**Goal**
+- Remove cross-document contradictions in the definition of $\Delta D$ for knockout/removal impact.
+- Re-run the Level 8 essentiality script to confirm that ROC/AUC scoring uses the frozen direction (no implicit negations).
+
+**Canonical convention (re-affirmed)**
+- Node removal impact (Level 8): $\Delta D(v)=D(G\setminus v)-D(G)$, so $\Delta D>0$ means removal increases complexity (the node contributed to compressibility/efficiency).
+- Score orientation for ROC/AUC: higher scores = more essential; use $\Delta D$ directly (no sign flip).
+
+**Manuscript-facing corrections (sign reconciliation)**
+- Several manuscript drafts used the opposite sign (e.g., $D(\mathcal{N})-D(\mathcal{N}_{\setminus i})$ or $D^{WT}-D^{KO}$) while still interpreting “higher $\Delta D$” as stronger impact. These have been rewritten to match the canonical convention without changing the intended interpretation.
+- Files updated:
+  - `doc/finalpaper/nature_draft.tex`
+  - `doc/finalpaper/final-draft.tex`
+  - `doc/finalpaper/sections/results_hybrid.tex`
+  - `doc/finalpaper/together_full.tex`
+  - `doc/newIntPaper/bioProcess.tex`
+  - `doc/newIntPaper/bioProcessLev5.tex`
+
+**Essentiality re-run (Level 8 figures)**
+- Command:
+  - `/Users/alberto/Documents/projects/CausalBool/venv/bin/python /Users/alberto/Documents/projects/CausalBool/4ClaudeCode/claude-Nature/paper/code/essentiality_analysis.py`
+- Dataset resolved by script to:
+  - `results/bio/essentiality_prediction_dataset.csv` (642 genes, 20 networks; Essential=24, Non-essential=618)
+- Console summary (as produced by script):
+  - Bootstrap AUC (95% CI):
+    - $\Delta D$: 0.547 [0.445–0.643]
+    - Degree: 0.511 [0.369–0.644]
+    - Betweenness: 0.521 [0.398–0.635]
+  - Cross-validated AUC (5-fold):
+    - $\Delta D$: 0.461 ± 0.080
+    - Degree: 0.406 ± 0.101
+    - Betweenness: 0.364 ± 0.125
+    - Combined: 0.406 ± 0.103
+- Outputs produced (regenerated):
+  - `paper/figures/figure2_essentiality_extended.pdf`
+  - `paper/figures/figure2_essentiality_extended.png`
+  - `paper/figures/supplementary_table_per_network.csv`
+
+**BioProcess update**
+- `paper/bioProcessLev8.tex` updated to match the re-run values exactly (CI bounds and combined model AUC).
+
+**PDF build**
+- Command:
+  - `latexmk -pdf -interaction=nonstopmode -halt-on-error bioProcessLev8.tex`
+- SHA-256:
+  - `bioProcessLev8.pdf`: `4ab340d849d534806613ea54c25494dabec8191b37ed1ca2d95f9b92b2f0fc5a`
+
+**Note on prior entry**
+- Entry LEV8-2026-03-17-003 contains an earlier bootstrap AUC line for $\Delta D$ (0.453 [0.357–0.555]) that is superseded by the current deterministic run above under the frozen sign convention and current script version.
