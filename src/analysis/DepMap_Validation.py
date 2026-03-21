@@ -28,6 +28,23 @@ class CorrelationResult(dict):
         yield self.get("pval", 1.0)
 
 class DepMapValidation:
+    @staticmethod
+    def _log(msg: str) -> None:
+        print(f"[{datetime.now()}] {msg}")
+
+    @staticmethod
+    def _sha256_file(path: str, chunk_bytes: int = 8 * 1024 * 1024) -> str:
+        import hashlib
+
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            while True:
+                b = f.read(chunk_bytes)
+                if not b:
+                    break
+                h.update(b)
+        return h.hexdigest()
+
     def __init__(
         self,
         data_dir,
@@ -160,6 +177,9 @@ class DepMapValidation:
         chunksize: int = 500,
         keep_model_ids: set[str] | None = None,
         gene_whitelist: set[str] | None = None,
+        progress_every_chunks: int = 50,
+        validate_streaming: bool = False,
+        validate_n_genes: int = 5,
     ) -> str:
         header = pd.read_csv(gene_effect_path, nrows=0)
         cols = list(header.columns)
@@ -184,6 +204,14 @@ class DepMapValidation:
             pd.DataFrame(columns=["Gene", "Dependency"]).to_csv(out_path, index=False)
             return out_path
 
+        DepMapValidation._log(
+            "DepMap gene-effect matrix detected: "
+            f"path={gene_effect_path} id_col={id_col!r} total_gene_cols={len(all_gene_cols)} selected_gene_cols={len(gene_cols)} "
+            f"whitelist_terms={len(gene_whitelist) if gene_whitelist is not None else 0} chunksize={int(chunksize)}"
+        )
+        if keep_model_ids is not None:
+            DepMapValidation._log(f"Model filtering enabled: n_keep_model_ids={len(keep_model_ids)}")
+
         reader = pd.read_csv(
             gene_effect_path,
             usecols=[id_col, *gene_cols],
@@ -193,24 +221,64 @@ class DepMapValidation:
 
         sums = np.zeros(len(gene_cols), dtype=np.float64)
         counts = np.zeros(len(gene_cols), dtype=np.int64)
+        n_rows_raw = 0
+        n_rows_used = 0
 
-        def ingest(chunk: pd.DataFrame) -> None:
+        for chunk_idx, chunk in enumerate(reader, start=1):
+            n_rows_raw += int(len(chunk))
             if keep_model_ids is not None:
-                chunk = chunk[chunk[id_col].isin(keep_model_ids)]
-                if len(chunk) == 0:
-                    return
-            block = chunk[gene_cols]
+                mask = chunk[id_col].isin(keep_model_ids)
+                n_kept = int(mask.sum())
+                if n_kept == 0:
+                    if progress_every_chunks and (chunk_idx % int(progress_every_chunks) == 0):
+                        DepMapValidation._log(f"Streaming progress: chunk={chunk_idx} raw_rows={n_rows_raw} used_rows={n_rows_used}")
+                    continue
+                n_rows_used += n_kept
+                block = chunk.loc[mask, gene_cols]
+            else:
+                n_rows_used += int(len(chunk))
+                block = chunk[gene_cols]
+
             sums[:] += block.sum(axis=0, skipna=True).to_numpy(dtype=np.float64, copy=False)
             counts[:] += block.count(axis=0).to_numpy(dtype=np.int64, copy=False)
-
-        for chunk in reader:
-            ingest(chunk)
+            if progress_every_chunks and (chunk_idx % int(progress_every_chunks) == 0):
+                DepMapValidation._log(f"Streaming progress: chunk={chunk_idx} raw_rows={n_rows_raw} used_rows={n_rows_used}")
 
         means = np.divide(sums, counts, out=np.full_like(sums, np.nan), where=counts != 0)
         genes = [DepMapValidation._normalize_gene_symbol(c) for c in gene_cols]
 
+        DepMapValidation._log(f"Streaming complete: raw_rows={n_rows_raw} used_rows={n_rows_used}")
+        n_missing = int(np.sum(counts == 0))
+        if n_missing:
+            DepMapValidation._log(f"Missing columns with zero observations: n={n_missing}")
+        DepMapValidation._log(
+            "Dependency summary (gene effects): "
+            f"n_genes={int(np.sum(~np.isnan(means)))} mean={float(np.nanmean(means)):.6g} sd={float(np.nanstd(means)):.6g} "
+            f"p05={float(np.nanpercentile(means, 5)):.6g} p50={float(np.nanpercentile(means, 50)):.6g} p95={float(np.nanpercentile(means, 95)):.6g}"
+        )
+
+        if validate_streaming:
+            try:
+                rng = np.random.default_rng(0)
+                k = int(min(int(validate_n_genes), len(gene_cols)))
+                idx = rng.choice(len(gene_cols), size=k, replace=False).tolist()
+                cols_check = [gene_cols[i] for i in idx]
+                DepMapValidation._log(f"Validation pass enabled: recomputing means for k={k} genes")
+                dfv = pd.read_csv(gene_effect_path, usecols=[id_col, *cols_check], low_memory=False)
+                if keep_model_ids is not None:
+                    dfv = dfv[dfv[id_col].isin(keep_model_ids)]
+                recomputed = dfv[cols_check].mean(axis=0, skipna=True).to_numpy(dtype=float, copy=False)
+                streamed = means[idx]
+                diffs = np.abs(recomputed - streamed)
+                DepMapValidation._log(
+                    f"Validation diffs: max_abs={float(np.nanmax(diffs)):.6g} mean_abs={float(np.nanmean(diffs)):.6g}"
+                )
+            except Exception as e:
+                DepMapValidation._log(f"Validation pass failed (non-fatal): {type(e).__name__}: {e}")
+
         df = pd.DataFrame({"Gene": genes, "Dependency": means}).dropna(subset=["Dependency"])
         df.to_csv(out_path, index=False)
+        DepMapValidation._log(f"Wrote derived dependency table: {out_path} n_rows={len(df)}")
         return out_path
 
     @staticmethod
@@ -252,13 +320,21 @@ class DepMapValidation:
             print(f"Warning: DepMap file {self.depmap_path} not found.")
             return pd.DataFrame(columns=["Gene", "Dependency"])
         try:
-            preview = pd.read_csv(self.depmap_path, nrows=5)
-        except Exception:
+            header = pd.read_csv(self.depmap_path, nrows=0, low_memory=False)
+        except Exception as e:
+            self._log(f"Failed to read DepMap header: {type(e).__name__}: {e}")
             return pd.DataFrame(columns=["Gene", "Dependency"])
 
-        if self._is_dependency_table(preview):
+        cols = list(header.columns)
+        self._log(
+            f"DepMap input header: path={self.depmap_path} n_cols={len(cols)} "
+            f"first_cols={cols[:5]}"
+        )
+
+        if self._is_dependency_table(header):
             df = pd.read_csv(self.depmap_path)
             df["Gene"] = df["Gene"].map(self._normalize_gene_symbol)
+            self._log(f"Loaded dependency table: n_rows={len(df)}")
             return df
 
         wl = set()
@@ -266,6 +342,20 @@ class DepMapValidation:
             wl.add(str(node).strip().upper())
             for g in genes:
                 wl.add(str(g).strip().upper())
+
+        if self.depmap_model_path and os.path.exists(self.depmap_model_path):
+            try:
+                model_df = pd.read_csv(self.depmap_model_path, usecols=["ModelID"], low_memory=False)
+                model_ids = set(model_df["ModelID"].astype(str).tolist())
+                id_col = cols[0]
+                ge_ids = pd.read_csv(self.depmap_path, usecols=[id_col], low_memory=False)[id_col].astype(str)
+                ge_set = set(ge_ids.tolist())
+                self._log(
+                    "Model overlap check: "
+                    f"gene_effect_models={len(ge_set)} model_csv_models={len(model_ids)} intersection={len(ge_set & model_ids)}"
+                )
+            except Exception as e:
+                self._log(f"Model overlap check failed (non-fatal): {type(e).__name__}: {e}")
 
         keep_ids = None
         derived_suffix = ""
@@ -292,19 +382,28 @@ class DepMapValidation:
             if derived_parts:
                 derived_suffix = "__" + "__".join(derived_parts)
 
-        derived_path = self.depmap_path + f".gene_mean{derived_suffix}.csv"
+        cache_dir = os.environ.get("DEPMAP_CACHE_DIR")
+        if cache_dir:
+            os.makedirs(cache_dir, exist_ok=True)
+            derived_path = os.path.join(cache_dir, os.path.basename(self.depmap_path) + f".gene_mean{derived_suffix}.csv")
+        else:
+            derived_path = self.depmap_path + f".gene_mean{derived_suffix}.csv"
         if self.force_rebuild_depmap_cache or not os.path.exists(derived_path):
-            print(f"[{datetime.now()}] Building gene-level dependency table from: {self.depmap_path}{derived_suffix}")
+            self._log(f"Building gene-level dependency table from: {self.depmap_path}{derived_suffix}")
             self._build_dependency_table_from_gene_effect_matrix(
                 self.depmap_path,
                 derived_path,
                 chunksize=500,
                 keep_model_ids=keep_ids,
                 gene_whitelist=wl,
+                progress_every_chunks=int(os.environ.get("DEPMAP_LOG_EVERY_CHUNKS", "50") or "50"),
+                validate_streaming=(os.environ.get("DEPMAP_VALIDATE_STREAMING", "0").strip() == "1"),
+                validate_n_genes=int(os.environ.get("DEPMAP_VALIDATE_N_GENES", "5") or "5"),
             )
 
         df = pd.read_csv(derived_path)
         df["Gene"] = df["Gene"].map(self._normalize_gene_symbol)
+        self._log(f"Loaded derived dependency table: path={derived_path} n_rows={len(df)}")
         return df
 
     def compute_d_v2(self, cm):
@@ -445,10 +544,11 @@ class DepMapValidation:
             
             d_ko = self.compute_d_v2(cm_ko)
             
-            # Delta D = D_baseline - D_knockout
-            # Positive Delta D means the node contributed structural information (Complexity dropped)
-            # Negative Delta D means the node was "noise" (Complexity increased)
-            delta_d = d_baseline - d_ko
+            # ΔD_remove(v) = D(G \ v) - D(G)
+            # Positive ΔD means removing the node increases complexity (the node contributed
+            # to compressibility/efficiency). This matches the Level 8 convention used in
+            # the GRN corpus and essentiality pipeline.
+            delta_d = d_ko - d_baseline
             
             # Get DepMap score if available
             dep_score = self._dep_score_for_node_with_map(gene, meta_map if meta_map else self.node_gene_map)
@@ -736,7 +836,7 @@ class DepMapValidation:
         fig = plt.figure(figsize=(5, 4), dpi=200)
         ax = fig.add_subplot(111)
         ax.scatter(x, y, s=30, alpha=0.85)
-        ax.set_xlabel("Mean ΔD (in-silico KO)")
+        ax.set_xlabel("Mean ΔD (node removal)")
         ax.set_ylabel("DepMap CRISPR gene effect")
         ax.set_title(f"ΔD vs DepMap (n={len(x)})")
         fig.tight_layout()
@@ -744,10 +844,81 @@ class DepMapValidation:
         plt.close(fig)
         return out_path
 
+def _audit_depmap_release(depmap_dir: str, model_csv_path: str | None, files: list[str]) -> int:
+    DepMapValidation._log(f"DepMap audit start: depmap_dir={depmap_dir}")
+    model_ids: set[str] | None = None
+    if model_csv_path and os.path.exists(model_csv_path):
+        try:
+            dfm = pd.read_csv(model_csv_path, usecols=["ModelID"], low_memory=False)
+            model_ids = set(dfm["ModelID"].astype(str).tolist())
+            DepMapValidation._log(f"Loaded Model.csv IDs: n={len(model_ids)}")
+        except Exception as e:
+            DepMapValidation._log(f"Failed loading Model.csv IDs (non-fatal): {type(e).__name__}: {e}")
+
+    failures = 0
+    for fname in files:
+        path = os.path.join(depmap_dir, fname)
+        if not os.path.exists(path):
+            DepMapValidation._log(f"Missing file: {path}")
+            failures += 1
+            continue
+
+        try:
+            size_bytes = os.path.getsize(path)
+        except Exception:
+            size_bytes = -1
+
+        try:
+            header = pd.read_csv(path, nrows=0, low_memory=False)
+            cols = list(header.columns)
+        except Exception as e:
+            DepMapValidation._log(f"Unreadable header: path={path} err={type(e).__name__}: {e}")
+            failures += 1
+            continue
+
+        DepMapValidation._log(f"File: {fname} size_bytes={size_bytes} n_cols={len(cols)} first_cols={cols[:5]}")
+        if len(cols) < 2:
+            DepMapValidation._log(f"Schema warning: <2 columns for {fname}")
+            failures += 1
+            continue
+
+        id_col = cols[0]
+        try:
+            ids_preview = pd.read_csv(path, usecols=[id_col], nrows=2000, low_memory=False)[id_col].astype(str)
+            uniq = int(ids_preview.nunique(dropna=False))
+            DepMapValidation._log(
+                f"ID column: name={id_col!r} preview_rows={len(ids_preview)} unique_ids={uniq} first_ids={ids_preview.head(3).tolist()}"
+            )
+            if model_ids is not None:
+                s = set(ids_preview.tolist())
+                DepMapValidation._log(
+                    f"ID overlap with Model.csv: intersection={len(s & model_ids)}/{len(s)} "
+                    f"({(len(s & model_ids) / max(len(s), 1)):.3f})"
+                )
+        except Exception as e:
+            DepMapValidation._log(f"ID sampling failed (non-fatal): file={fname} err={type(e).__name__}: {e}")
+
+        sample_cols = cols[1:6]
+        try:
+            dfv = pd.read_csv(path, usecols=[id_col, *sample_cols], nrows=200, low_memory=False)
+            numeric_ok = 0
+            for c in sample_cols:
+                v = pd.to_numeric(dfv[c], errors="coerce")
+                frac = float(np.mean(~np.isnan(v.to_numpy(dtype=float, copy=False))))
+                if frac > 0.5:
+                    numeric_ok += 1
+                DepMapValidation._log(f"Sample col parse: file={fname} col={c!r} numeric_frac={frac:.3f}")
+            if numeric_ok == 0 and len(cols) > 20:
+                DepMapValidation._log(f"Schema note: wide file with low numeric parse rate in sample cols (may be categorical): {fname}")
+        except Exception as e:
+            DepMapValidation._log(f"Value sampling failed (non-fatal): file={fname} err={type(e).__name__}: {e}")
+
+    DepMapValidation._log(f"DepMap audit complete: failures={failures}")
+    return 0 if failures == 0 else 2
+
 if __name__ == "__main__":
-    # Example Usage
     DATA_DIR = os.environ.get("DEPMAP_DATA_DIR", "data/cancer/patients")
-    DEPMAP_PATH = os.environ.get("DEPMAP_PATH", "data/cancer/depmap_crispr.csv")
+    DEPMAP_PATH = os.environ.get("DEPMAP_PATH", "data/depmap/CRISPRGeneEffect.csv")
     DEPMAP_MODEL_PATH = os.environ.get("DEPMAP_MODEL_PATH")
     DEPMAP_ONCOTREE_CODES = os.environ.get("DEPMAP_ONCOTREE_CODES")
     DEPMAP_ONCOTREE_LINEAGES = os.environ.get("DEPMAP_ONCOTREE_LINEAGES")
@@ -756,27 +927,77 @@ if __name__ == "__main__":
     RECURSIVE = os.environ.get("DEPMAP_RECURSIVE", "0").strip() == "1"
     FORCE_REBUILD = os.environ.get("DEPMAP_FORCE_REBUILD", "0").strip() == "1"
     OUT_PREFIX = os.environ.get("DEPMAP_OUT_PREFIX", "results/cancer/depmap_validation")
-    os.makedirs("results/cancer", exist_ok=True)
-    
-    # Check if DepMap exists, if not create dummy
+    AUDIT = os.environ.get("DEPMAP_AUDIT", "0").strip() == "1"
+    AUDIT_DIR = os.environ.get("DEPMAP_AUDIT_DIR", "data/depmap")
+    AUDIT_FILES = os.environ.get("DEPMAP_AUDIT_FILES")
+
+    def first_existing(paths: list[str | None]) -> str | None:
+        for p in paths:
+            if not p:
+                continue
+            if os.path.exists(p):
+                return p
+        return None
+
+    def infer_depmap_from_release_dir(release_dir: str) -> tuple[str | None, str | None]:
+        rd = str(release_dir)
+        gene_effect = first_existing([
+            os.path.join(rd, "CRISPRGeneEffect.csv"),
+            os.path.join(rd, "raw", "CRISPRGeneEffect.csv"),
+        ])
+        model = first_existing([
+            os.path.join(rd, "Model.csv"),
+            os.path.join(rd, "raw", "Model.csv"),
+        ])
+        return gene_effect, model
+
     if not os.path.exists(DEPMAP_PATH):
-        print("DepMap file not found. Generating synthetic DepMap data for testing...")
-        # Create dummy based on genes in a random file
+        release_dir = os.environ.get("DEPMAP_RELEASE_DIR")
+        if release_dir:
+            inferred_path, inferred_model = infer_depmap_from_release_dir(release_dir)
+            if inferred_path:
+                DEPMAP_PATH = inferred_path
+                DEPMAP_MODEL_PATH = DEPMAP_MODEL_PATH or inferred_model
+        else:
+            for candidate in ("data/depmap", "data/depmap/24Q4"):
+                inferred_path, inferred_model = infer_depmap_from_release_dir(candidate)
+                if inferred_path:
+                    DEPMAP_PATH = inferred_path
+                    DEPMAP_MODEL_PATH = DEPMAP_MODEL_PATH or inferred_model
+                    break
+
+    if AUDIT:
+        model_csv = DEPMAP_MODEL_PATH or os.path.join(AUDIT_DIR, "Model.csv")
+        if AUDIT_FILES:
+            audit_files = [f.strip() for f in str(AUDIT_FILES).split(",") if f.strip()]
+        else:
+            audit_files = [
+                "CRISPRGeneEffect.csv",
+                "CRISPRGeneDependency.csv",
+                "OmicsExpressionProteinCodingGenesTPMLogp1.csv",
+                "OmicsCNGene.csv",
+                "OmicsSomaticMutationsProfile.csv",
+                "OmicsFusionFiltered.csv",
+            ]
+        sys.exit(_audit_depmap_release(AUDIT_DIR, model_csv, audit_files))
+
+    allow_synth = os.environ.get("DEPMAP_ALLOW_SYNTHETIC", "0").strip() == "1"
+    if not os.path.exists(DEPMAP_PATH):
+        if not allow_synth:
+            raise SystemExit(
+                "DepMap input not found. Set DEPMAP_PATH to a dependency table (Gene,Dependency) or to CRISPRGeneEffect.csv, "
+                "or set DEPMAP_RELEASE_DIR to a DepMap release directory. For smoke tests only, set DEPMAP_ALLOW_SYNTHETIC=1."
+            )
+
+        os.makedirs("results/cancer", exist_ok=True)
+        synth_path = "results/cancer/depmap_synthetic.csv"
+        print(f"DepMap input not found. Generating synthetic dependency table at {synth_path} (smoke test only).")
         sample_file = [f for f in os.listdir(DATA_DIR) if f.endswith(".json")][0]
         with open(os.path.join(DATA_DIR, sample_file)) as f:
             genes = json.load(f)["nodes"]
-            
-        df = pd.DataFrame({
-            "Gene": genes,
-            "Dependency": np.random.normal(-0.5, 1.0, len(genes)) # Mix of essential (-1.5) and non-essential (0)
-        })
-        # Force some essential genes
-        essentials = ["EGFR", "GRB2", "RAS", "MEK", "ERK"]
-        for g in essentials:
-            if g in genes:
-                df.loc[df["Gene"] == g, "Dependency"] = -2.0 # Highly essential
-                
-        df.to_csv(DEPMAP_PATH, index=False)
+        df = pd.DataFrame({"Gene": genes, "Dependency": np.random.normal(-0.5, 1.0, len(genes))})
+        df.to_csv(synth_path, index=False)
+        DEPMAP_PATH = synth_path
         
     oncotree_codes = None
     if DEPMAP_ONCOTREE_CODES:
@@ -786,7 +1007,7 @@ if __name__ == "__main__":
     if DEPMAP_ONCOTREE_LINEAGES:
         lineages = [l.strip() for l in str(DEPMAP_ONCOTREE_LINEAGES).split(",") if l.strip()]
 
-    n_patients = int(N_PATIENTS) if N_PATIENTS else 20
+    n_patients = int(N_PATIENTS) if N_PATIENTS else None
 
     if DEPMAP_ONCOTREE_LINEAGE_SWEEP:
         sweep_lineages = [l.strip() for l in str(DEPMAP_ONCOTREE_LINEAGE_SWEEP).split(",") if l.strip()]
@@ -845,6 +1066,9 @@ if __name__ == "__main__":
     
     # Save
     out_csv = OUT_PREFIX + ".csv"
+    out_dir = os.path.dirname(out_csv)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     cohort_results.to_csv(out_csv, index=False)
     
     # Correlation
