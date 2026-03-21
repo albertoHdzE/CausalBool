@@ -174,10 +174,15 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-00-002: Freeze Manuscript Scope (Nature core)
 **Gate Alignment:** Gate A, Gate B, Gate C  
 **Description:** Decide primary killer (A recommended) and what B/C become (Extended Data vs follow-ups).  
-**Status:** NOT STARTED — No single “Core claim / evidence / implication” freeze statement is present as a stored artifact.  
+**Status:** DONE — A single “Core claim / evidence / implication” freeze statement is recorded below and must be treated as the scope contract for Level 8.  
 **Acceptance Criteria:**
 - One paragraph: “Core claim, core evidence, core implication.”
 - Excludes all mention of “7 protocol levels” from planned Nature main text.
+
+**Scope freeze statement (Nature core; authoritative)**
+- **Core claim:** Evolved gene-regulatory networks exhibit measurable algorithmic efficiency: under a frozen encoding and null family, biological wiring diagrams are systematically more compressible than matched random controls, consistent with selection for mechanistic simplicity under constraints.
+- **Core evidence:** A single, reproducible pipeline evaluates \(D\) and \(z\) for \(N\ge 200\) curated GRNs against three null families (ER, degree-preserved, gate-permuted) and reports effect sizes with uncertainty (fold-reduction with CI, Cohen’s \(d\), paired tests, robustness vs null ensemble size) under frozen sign conventions and thresholds.
+- **Core implication:** Mechanistic information loss under in-silico knockouts (\(\Delta D\)) provides a principled causal importance score; the primary biological validation target is **KR-A (essentiality)** with leakage-safe benchmarking vs strong baselines and an external anchor (DepMap minimum). Disease corruption (KR-B) and evolution-vs-design (KR-C) are executed in parallel but are treated as Extended Data or follow-up results unless they independently clear Gate C.
 
 #### TSK-LEV8-00-003: Bitácora Template for Runs
 **Gate Alignment:** Gate A, Gate B, Gate C  

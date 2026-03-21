@@ -947,3 +947,25 @@
 
 **Note on prior entry**
 - Entry LEV8-2026-03-17-003 contains an earlier bootstrap AUC line for $\Delta D$ (0.453 [0.357–0.555]) that is superseded by the current deterministic run above under the frozen sign convention and current script version.
+
+---
+
+## Entry LEV8-2026-03-21-005 — Nature Scope Freeze Statement (TSK-LEV8-00-002)
+**Date:** 2026-03-21  
+**Operator:** Trae/GPT  
+**Gate Alignment:** Gate A, Gate B, Gate C  
+
+**Goal**
+- Freeze a single Nature-facing “core claim / core evidence / core implication” statement to prevent scope drift.
+- Eliminate manuscript dependence on a multi-level protocol narrative; the Nature main text must read as one coherent method and one story.
+
+**Scope contract (authoritative)**
+- **Core claim:** evolved GRNs are systematically more compressible than matched nulls under a frozen encoding (algorithmic efficiency under constraints).
+- **Core evidence:** a reproducible three-null analysis (ER, degree-preserved, gate-permuted) reported with effect sizes and uncertainty under frozen sign conventions and pass thresholds.
+- **Core implication:** mechanistic information loss under in-silico knockout (\(\Delta D\)) is the causal importance score; KR-A (essentiality) is the primary biological validation target and must be leakage-safe, baseline-benchmarked, and externally anchored (DepMap minimum). KR-B/KR-C remain parallel tracks unless they independently clear Gate C.
+
+**Artifacts updated**
+- Plan contract recorded in:
+  - `paper/bioPlanLev-8.md` (TSK-LEV8-00-002 marked DONE; scope statement added)
+- Manuscript support recorded in:
+  - `paper/bioProcessLev8.tex` (\textit{Scope freeze} section added)
