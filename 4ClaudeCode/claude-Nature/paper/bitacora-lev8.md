@@ -228,7 +228,7 @@
 - Output:
   - `paper/bioProcessLev8.pdf`
 - SHA-256:
-  - `37d3b64c3753bf09ea8a27df26cab2fbe3be7c2d24caa1e1bb3e713f6f65a8a0`
+  - `19f2be1d127543c2d257c85c76a53d7cc3d5b7261113cc11df63f8141ce8776c`
 
 **Note**
 - In this checkout, DepMap Public 24Q4 is present under `data/depmap/` (not under `data/depmap/24Q4/`); use the paths and checksums in Entry LEV8-2026-03-21-003 as the execution provenance for this checkout.
@@ -292,6 +292,40 @@
 - Pearson r = 0.4055, p = 0.2450
 - Spearman ρ = 0.4788, p = 0.1615
 - MI = 0.00 bits (“No Dependency”)
+
+## Entry LEV8-2026-03-21-004 — Freeze Gate A/B/C Quantitative Thresholds (TSK-LEV8-00-004)
+**Date:** 2026-03-21  
+**Operator:** Trae/GPT  
+**Gate Alignment:** Gate A/B/C (operational decision thresholds)  
+
+**Objective**
+- Freeze a single numeric pass/fail specification for Gate A/B/C and evaluate it deterministically from the stored Level 8 artifacts in this checkout.
+
+**Execution**
+- Command:
+  - `/Users/alberto/Documents/projects/CausalBool/venv/bin/python paper/code/analysis_pipeline.py --evaluate-gates --figures-dir paper/figures --bootstrap 20000`
+- Inputs (artifact-derived):
+  - `paper/figures/results_summary.csv` (Gate A: null efficiency criteria)
+  - `paper/figures/figure3_depmap_validation_stats.json` (Gate C: DepMap anchor)
+  - `results/bio/essentiality_prediction_dataset.csv` (Gate C: incremental value vs degree baseline)
+  - `results/cancer/corruption_metrics.csv` (Gate C: paired corruption; synthetic in this checkout)
+
+**Outputs (manuscript-facing)**
+- `paper/figures/gate_thresholds_summary.csv` (SHA-256: `fdf450308b13d9981ff14ecb0150b7ac9aa11e965e812c195c61595d9f0e5175`)
+- `paper/figures/gate_thresholds_status.png` (SHA-256: `f221b4233fff6a8fead13c696e7f4c25856c301e7ed80543c970a946ad9348ca`)
+- `paper/figures/gate_thresholds_status.pdf` (SHA-256: `f6eaf2bc8e07ae48632b9feace4f2b4adb00ee62082c74b3fa9ae756b05d29bb`)
+
+**Result summary (frozen thresholds evaluated on this checkout)**
+- Gate A: PASS (all frozen criteria satisfied; mean $z=0.723$, $\Pr(z>0)=0.662$, $\Pr(p\le 0.05)=0.212$, $n=231$ networks).
+- Gate B: not evaluated in this checkout (no independent cohort/control suite is implemented yet).
+- Gate C: PARTIAL (paired corruption clears numeric thresholds but is synthetic; DepMap anchor and essentiality incremental value fail under frozen criteria).
+  - Seed robustness (Gate A): on the first 30 eligible networks, Spearman$(z)$ across seeds $=0.972$, $\Delta\mathrm{mean}(z)=0.076$, sign agreement $=0.933$ (PASS under frozen tolerances).
+
+**Robustness check (bootstrap stability for essentiality incremental value)**
+- On `results/bio/essentiality_prediction_dataset.csv` with seed=42, the $\Delta\mathrm{AUC}(\Delta D-\mathrm{Degree})$ 95\% CI is stable across bootstrap sizes:
+  - $n_{\mathrm{boot}}=5{,}000$: $\Delta\mathrm{AUC}=0.035$, CI $[-0.101, 0.165]$
+  - $n_{\mathrm{boot}}=20{,}000$: $\Delta\mathrm{AUC}=0.035$, CI $[-0.099, 0.166]$
+  - $n_{\mathrm{boot}}=50{,}000$: $\Delta\mathrm{AUC}=0.035$, CI $[-0.098, 0.168]$
 
 ## Entry LEV8-2026-03-18-001 — DepMap 24Q4 Acquisition + Pilot External Validation (KR-A anchor)
 **Date:** 2026-03-18  

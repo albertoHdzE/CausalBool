@@ -12,6 +12,7 @@ Date: March 2026
 """
 
 import json
+import argparse
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -81,6 +82,263 @@ def load_all_networks(data_dir: Optional[str] = None) -> Dict[str, dict]:
         msg += f" (skipped {skipped_files} non-network JSON files)"
     print(msg)
     return networks
+
+
+def _repo_root() -> Path:
+    for parent in _SCRIPT_PATH.parents:
+        if (parent / "src").is_dir() and (parent / "results").is_dir():
+            return parent
+    return _SCRIPT_PATH.parents[2]
+
+
+def _paper_figures_dir() -> Path:
+    return _SCRIPT_PATH.parent.parent / "figures"
+
+
+def _load_json(path: Path) -> dict:
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+def _bootstrap_auc(
+    y: np.ndarray,
+    score: np.ndarray,
+    n_boot: int,
+    rng: np.random.Generator,
+) -> tuple[float, float, float, np.ndarray]:
+    base_auc = float(roc_auc_score(y, score))
+    idx = np.arange(len(y))
+    boot = np.empty(n_boot, dtype=float)
+    for i in range(n_boot):
+        sample = rng.choice(idx, size=len(idx), replace=True)
+        boot[i] = roc_auc_score(y[sample], score[sample])
+    lo, hi = np.quantile(boot, [0.025, 0.975])
+    return base_auc, float(lo), float(hi), boot
+
+
+def evaluate_gate_thresholds(
+    figures_dir: Optional[str] = None,
+    n_boot: int = 10000,
+    seed: int = 42,
+    reproducibility_networks: int = 30,
+) -> pd.DataFrame:
+    repo_root = _repo_root()
+    fig_dir = Path(figures_dir) if figures_dir is not None else _paper_figures_dir()
+
+    results_summary_path = fig_dir / "results_summary.csv"
+    depmap_stats_path = fig_dir / "figure3_depmap_validation_stats.json"
+    essentiality_path = repo_root / "results" / "bio" / "essentiality_prediction_dataset.csv"
+    corruption_path = repo_root / "results" / "cancer" / "corruption_metrics.csv"
+
+    rows: list[dict] = []
+
+    rs = pd.read_csv(results_summary_path)
+    z = rs["z_score"].astype(float).to_numpy()
+    p = rs["p_value"].astype(float).to_numpy()
+    frac_pos = float(np.mean(z > 0))
+    frac_sig = float(np.mean(p <= 0.05))
+    mean_z = float(np.mean(z))
+    median_z = float(np.median(z))
+
+    gate_a_min_mean_z = 0.5
+    gate_a_min_frac_pos = 0.6
+    gate_a_min_frac_sig = 0.15
+
+    rows.append(
+        {
+            "Gate": "A",
+            "Criterion": "Null efficiency directionality",
+            "Threshold": f"mean(z) ≥ {gate_a_min_mean_z:.2f}",
+            "Observed": f"{mean_z:.3f} (median {median_z:.3f})",
+            "Pass": mean_z >= gate_a_min_mean_z,
+            "Notes": f"n={len(z)}; z>0={frac_pos:.3f}; p≤0.05={frac_sig:.3f}",
+        }
+    )
+    rows.append(
+        {
+            "Gate": "A",
+            "Criterion": "Null efficiency prevalence",
+            "Threshold": f"Pr(z>0) ≥ {gate_a_min_frac_pos:.2f}",
+            "Observed": f"{frac_pos:.3f}",
+            "Pass": frac_pos >= gate_a_min_frac_pos,
+            "Notes": "",
+        }
+    )
+    rows.append(
+        {
+            "Gate": "A",
+            "Criterion": "Null efficiency significance rate",
+            "Threshold": f"Pr(p≤0.05) ≥ {gate_a_min_frac_sig:.2f}",
+            "Observed": f"{frac_sig:.3f}",
+            "Pass": frac_sig >= gate_a_min_frac_sig,
+            "Notes": "Per-network one-sided empirical p-value against degree-preserved null.",
+        }
+    )
+
+    gate_a_seed1 = 42
+    gate_a_seed2 = 314159
+    gate_a_min_spearman = 0.90
+    gate_a_max_abs_mean_z_diff = 0.10
+    gate_a_min_sign_agreement = 0.90
+
+    networks = load_all_networks()
+    eligible: list[str] = []
+    for name, data in networks.items():
+        cm = get_adjacency_matrix(data)
+        if 5 <= cm.shape[0] <= 100:
+            eligible.append(name)
+    eligible = sorted(eligible)
+    sample = eligible[: max(0, min(reproducibility_networks, len(eligible)))]
+
+    z1 = []
+    z2 = []
+    for name in sample:
+        cm = get_adjacency_matrix(networks[name])
+        z1.append(compute_D_bio_vs_random(cm, n_random=50, seed_base=gate_a_seed1)["z_score"])
+        z2.append(compute_D_bio_vs_random(cm, n_random=50, seed_base=gate_a_seed2)["z_score"])
+    z1 = np.asarray(z1, dtype=float)
+    z2 = np.asarray(z2, dtype=float)
+
+    if len(sample) >= 5:
+        rho = float(stats.spearmanr(z1, z2).correlation)
+    else:
+        rho = float("nan")
+    mean_diff = float(np.mean(z2) - np.mean(z1)) if len(sample) else float("nan")
+    sign_agree = float(np.mean(np.sign(z1) == np.sign(z2))) if len(sample) else float("nan")
+
+    rows.append(
+        {
+            "Gate": "A",
+            "Criterion": "Seed robustness (z ranks + mean)",
+            "Threshold": f"Spearman(z) ≥ {gate_a_min_spearman:.2f}, |Δmean(z)| ≤ {gate_a_max_abs_mean_z_diff:.2f}, sign≥{gate_a_min_sign_agreement:.2f}",
+            "Observed": f"n={len(sample)}; Spearman={rho:.3f}; Δmean(z)={mean_diff:.3f}; sign={sign_agree:.3f}",
+            "Pass": (len(sample) >= 5)
+            and (rho >= gate_a_min_spearman)
+            and (abs(mean_diff) <= gate_a_max_abs_mean_z_diff)
+            and (sign_agree >= gate_a_min_sign_agreement),
+            "Notes": f"Recomputed on fixed subset (first {len(sample)} eligible networks) with seed_base={gate_a_seed1} vs {gate_a_seed2}, n_random=50.",
+        }
+    )
+
+    gate_b_min_independent_cohorts = 1
+    gate_b_min_networks_per_cohort = 100
+    gate_b_required_sensitivity_axes = 3
+    rows.append(
+        {
+            "Gate": "B",
+            "Criterion": "Independent cohort replication",
+            "Threshold": f"≥{gate_b_min_independent_cohorts} independent cohort with ≥{gate_b_min_networks_per_cohort} networks passing size filters",
+            "Observed": "N/A (not implemented in this checkout)",
+            "Pass": False,
+            "Notes": "Independence requires non-overlapping acquisition/curation pipeline; criteria evaluated with the same Gate A contract.",
+        }
+    )
+    rows.append(
+        {
+            "Gate": "B",
+            "Criterion": "Sensitivity analysis suite",
+            "Threshold": f"≥{gate_b_required_sensitivity_axes} perturbation axes reported; Gate A remains PASS in ≥2/3",
+            "Observed": "N/A (not implemented in this checkout)",
+            "Pass": False,
+            "Notes": "Perturbation axes are pre-registered (null size, swap budget, ordering); failures must be explained or trigger Gate A rework.",
+        }
+    )
+
+    if depmap_stats_path.exists():
+        dep = _load_json(depmap_stats_path)
+        r = float(dep.get("rho", float("nan")))
+        pval = float(dep.get("pval", float("nan")))
+        n_nodes = 10
+        gate_c_min_n = 50
+        gate_c_min_abs_r = 0.3
+        gate_c_max_p = 0.01
+        rows.append(
+            {
+                "Gate": "C",
+                "Criterion": "DepMap external anchor",
+                "Threshold": f"n≥{gate_c_min_n}, |r|≥{gate_c_min_abs_r:.2f}, p≤{gate_c_max_p:.2g}",
+                "Observed": f"n={n_nodes}, r={r:.3f}, p={pval:.3f}",
+                "Pass": (n_nodes >= gate_c_min_n) and (abs(r) >= gate_c_min_abs_r) and (pval <= gate_c_max_p),
+                "Notes": "Current checkout uses 10-node EGFR scaffold; treated as pilot only.",
+            }
+        )
+    else:
+        rows.append(
+            {
+                "Gate": "C",
+                "Criterion": "DepMap external anchor",
+                "Threshold": "n≥50, |r|≥0.30, p≤0.01",
+                "Observed": "missing figure3_depmap_validation_stats.json",
+                "Pass": False,
+                "Notes": "",
+            }
+        )
+
+    ess = pd.read_csv(essentiality_path)
+    y = ess["Is_Essential"].astype(int).to_numpy()
+    rng = np.random.default_rng(seed)
+    auc_dd, dd_lo, dd_hi, dd_boot = _bootstrap_auc(y, ess["Delta_D"].to_numpy(), n_boot=n_boot, rng=rng)
+    auc_deg, deg_lo, deg_hi, deg_boot = _bootstrap_auc(y, ess["Degree"].to_numpy(), n_boot=n_boot, rng=rng)
+
+    delta_auc = auc_dd - auc_deg
+    delta_boot = dd_boot - deg_boot
+    delta_lo, delta_hi = np.quantile(delta_boot, [0.025, 0.975])
+
+    gate_c_min_delta_auc = 0.05
+    rows.append(
+        {
+            "Gate": "C",
+            "Criterion": "Essentiality incremental value",
+            "Threshold": f"ΔAUC(ΔD−Degree) ≥ {gate_c_min_delta_auc:.2f} with 95% CI > 0",
+            "Observed": f"ΔAUC={delta_auc:.3f} (95% CI [{delta_lo:.3f},{delta_hi:.3f}]); AUCΔD={auc_dd:.3f} [{dd_lo:.3f},{dd_hi:.3f}] vs AUCdeg={auc_deg:.3f} [{deg_lo:.3f},{deg_hi:.3f}]",
+            "Pass": (delta_auc >= gate_c_min_delta_auc) and (delta_lo > 0),
+            "Notes": f"Bootstrap resampling over genes (n={len(ess)}; seed={seed}; n_boot={n_boot}).",
+        }
+    )
+
+    cor = pd.read_csv(corruption_path)
+    diffs = cor["Delta_D"].astype(float).to_numpy()
+    mean_delta = float(np.mean(diffs))
+    sd_delta = float(np.std(diffs, ddof=1))
+    t_res = stats.ttest_1samp(diffs, popmean=0.0, alternative="less")
+    d = mean_delta / sd_delta if sd_delta > 0 else float("nan")
+
+    gate_c_max_mean_delta = -1.0
+    gate_c_max_paired_p = 1e-6
+    gate_c_min_abs_d = 0.5
+    rows.append(
+        {
+            "Gate": "C",
+            "Criterion": "Paired tumor/normal corruption",
+            "Threshold": f"mean(ΔD^(v2)) ≤ {gate_c_max_mean_delta:.1f} bits, p≤{gate_c_max_paired_p:.0e}, |d|≥{gate_c_min_abs_d:.1f}",
+            "Observed": f"mean={mean_delta:.3f} bits; d={d:.3f}; p={float(t_res.pvalue):.2e} (n={len(diffs)})",
+            "Pass": (mean_delta <= gate_c_max_mean_delta) and (float(t_res.pvalue) <= gate_c_max_paired_p) and (abs(d) >= gate_c_min_abs_d),
+            "Notes": "Current cohort is synthetic in this checkout; numerical signal is not treated as Gate C pass.",
+        }
+    )
+
+    out = pd.DataFrame(rows)
+    out_path = fig_dir / "gate_thresholds_summary.csv"
+    out.to_csv(out_path, index=False)
+
+    gate_order = ["A", "B", "C"]
+    summary = out.groupby("Gate")["Pass"].agg(["mean", "count"]).reindex(gate_order).fillna(0)
+    fig, ax = plt.subplots(figsize=(6, 3))
+    ax.bar(summary.index, summary["mean"], color=["#2ecc71", "#f1c40f", "#e74c3c"])
+    ax.set_ylim(0, 1)
+    ax.set_ylabel("Pass fraction (criteria)")
+    ax.set_title("Gate criteria status (frozen thresholds)")
+    for i, (gate, row) in enumerate(summary.iterrows()):
+        ax.text(i, row["mean"] + 0.03, f"{row['mean']:.2f} ({int(row['count'])})", ha="center", va="bottom", fontsize=9)
+    plt.tight_layout()
+    plt.savefig(fig_dir / "gate_thresholds_status.png")
+    plt.savefig(fig_dir / "gate_thresholds_status.pdf")
+    plt.close()
+
+    print(f"Wrote: {out_path}")
+    print(f"Wrote: {fig_dir / 'gate_thresholds_status.png'}")
+
+    return out
 
 
 def load_essentiality_data(data_dir: Optional[str] = None) -> pd.DataFrame:
@@ -209,7 +467,7 @@ def randomize_matrix_deg_preserve(cm: np.ndarray, n_swaps: int = None, seed: int
     return cm_rand
 
 
-def compute_D_bio_vs_random(cm: np.ndarray, n_random: int = 100) -> Dict:
+def compute_D_bio_vs_random(cm: np.ndarray, n_random: int = 100, seed_base: int = 42) -> Dict:
     """
     Compute algorithmic complexity D for biological network and random ensemble.
 
@@ -226,7 +484,7 @@ def compute_D_bio_vs_random(cm: np.ndarray, n_random: int = 100) -> Dict:
     # Random ensemble
     D_randoms = []
     for i in range(n_random):
-        cm_rand = randomize_matrix_deg_preserve(cm, seed=42+i)
+        cm_rand = randomize_matrix_deg_preserve(cm, seed=seed_base + i)
         D_rand = compute_compression_complexity(cm_rand)
         D_randoms.append(D_rand)
 
@@ -466,14 +724,14 @@ def generate_figure2(ess_df: pd.DataFrame, metrics_df: pd.DataFrame,
 # SECTION 5: MAIN ANALYSIS
 # ============================================================================
 
-def run_full_analysis():
+def run_full_analysis(output_dir: Optional[str] = None):
     """Run complete analysis pipeline."""
     print("=" * 60)
     print("PAPER 1: Algorithmic Efficiency of Biological Networks")
     print("=" * 60)
 
     # Create output directory
-    output_dir = Path(__file__).resolve().parent.parent / "figures"
+    output_dir = Path(output_dir) if output_dir is not None else (Path(__file__).resolve().parent.parent / "figures")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load data
@@ -545,5 +803,19 @@ def run_full_analysis():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--evaluate-gates", action="store_true")
+    parser.add_argument("--figures-dir", type=str, default=None)
+    parser.add_argument("--bootstrap", type=int, default=10000)
+    parser.add_argument("--repro-nets", type=int, default=30)
+    args = parser.parse_args()
+
     np.random.seed(42)
-    results = run_full_analysis()
+    if args.evaluate_gates:
+        evaluate_gate_thresholds(
+            figures_dir=args.figures_dir,
+            n_boot=args.bootstrap,
+            reproducibility_networks=args.repro_nets,
+        )
+    else:
+        run_full_analysis(output_dir=args.figures_dir)

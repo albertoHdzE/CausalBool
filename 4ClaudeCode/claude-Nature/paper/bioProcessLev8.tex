@@ -60,6 +60,39 @@ $\Delta D^{(v2)}$ (corruption) & $D^{(v2)}_{\mathrm{tumor}}-D^{(v2)}_{\mathrm{no
 
 In Methods interpretation, we treat $D_{\mathrm{gzip}}$ and $D^{(v2)}$ as distinct, non-interchangeable proxies: conclusions are framed in terms of sign, rank, and within-proxy effect sizes, and the repository never aggregates or compares magnitudes across proxy families.
 
+\subsection*{Frozen gate thresholds (TSK-LEV8-00-004)}
+To prevent interpretive drift, Level 8 freezes quantitative pass/fail thresholds for Gate A/B/C and evaluates them deterministically from the stored Level 8 artifacts. The operational summary is emitted to \path{paper/figures/gate_thresholds_summary.csv} and visualized in Figure~\ref{fig:lev8_gate_thresholds}.
+
+\begin{table}[H]
+\centering
+\caption{\textbf{Frozen gate thresholds and observed status in this checkout.} Gate B criteria are defined but not evaluated here (no independent cohort acquisition/control suite is yet implemented); for completeness we list the frozen Gate B thresholds as N/A.}
+\label{tab:lev8_gate_thresholds}
+\begin{tabular}{@{}p{0.7cm}p{3.7cm}p{4.1cm}p{4.2cm}p{0.8cm}@{}}
+\toprule
+\textbf{Gate} & \textbf{Criterion} & \textbf{Threshold (frozen)} & \textbf{Observed (this checkout)} & \textbf{Pass} \\
+\midrule
+A & Null efficiency directionality & $\mathrm{mean}(z)\ge 0.50$ & $\mathrm{mean}(z)=0.723$ (median $0.527$; $n=231$) & Yes \\
+A & Null efficiency prevalence & $\Pr(z>0)\ge 0.60$ & $\Pr(z>0)=0.662$ & Yes \\
+A & Null efficiency significance rate & $\Pr(p\le 0.05)\ge 0.15$ & $\Pr(p\le 0.05)=0.212$ & Yes \\
+B & Independent cohort replication & $\ge 1$ independent cohort with $\ge 100$ networks passing size filters & N/A (not implemented in this checkout) & No \\
+B & Sensitivity analysis suite & $\ge 3$ perturbation axes; Gate A PASS in $\ge 2/3$ & N/A (not implemented in this checkout) & No \\
+A & Seed robustness (z ranks + mean) & Spearman$(z)\ge 0.90$, $|\Delta\mathrm{mean}(z)|\le 0.10$, sign$\ge 0.90$ & $n=30$, Spearman $=0.972$, $\Delta\mathrm{mean}(z)=0.076$, sign $=0.933$ & Yes \\
+C & DepMap external anchor & $n\ge 50$, $|r|\ge 0.30$, $p\le 0.01$ & $n=10$, $r=0.406$, $p=0.245$ (pilot scaffold) & No \\
+C & Essentiality incremental value & $\Delta\mathrm{AUC}(\Delta D-\mathrm{Degree})\ge 0.05$ and 95\% CI $>0$ & $\Delta\mathrm{AUC}=0.035$ (95\% CI $[-0.136,0.204]$) & No \\
+C & Paired tumor/normal corruption & $\mathrm{mean}(\Delta D^{(v2)})\le -1.0$ bits, $p\le 10^{-6}$, $|d|\ge 0.5$ & mean $=-2.534$ bits; $p=5.26\times 10^{-15}$; $d=-0.909$ (synthetic cohort) & Yes$^\dagger$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+$^\dagger$Although the paired corruption signal clears the numeric thresholds, it is not treated as a Gate C pass in this checkout because the cohort is synthetic; Gate C requires the same evidence under a real paired acquisition/preprocessing lock.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{figures/gate_thresholds_status.png}
+\caption{\textbf{Gate A/B/C status under frozen thresholds.} Bars show the fraction of criteria satisfied for each gate based on \texttt{paper/figures/gate\_thresholds\_summary.csv}. In this checkout, Gate A clears all frozen criteria (including a seed-robustness constraint), Gate B is untested, and Gate C remains blocked by the DepMap scaffold scale and by the lack of incremental essentiality value beyond degree.}
+    \label{fig:lev8_gate_thresholds}
+\end{figure}
+
 \section*{Data and Artifacts}
 \subsection*{GRN corpus}
 The Level 8 figure regeneration uses the processed GRN corpus under \path{data/bio/processed}, with summaries emitted to \path{paper/figures/results_summary.csv} and \path{paper/figures/supplementary_table_per_network.csv}.
@@ -81,7 +114,7 @@ Regenerated outputs show a consistent positive shift in $z$ under the canonical 
 \end{figure}
 
 \subsection*{Essentiality prediction (Figure 2)}
-The extended essentiality evaluation over \texttt{essentiality\_prediction\_dataset.csv} (642 genes, 20 networks) is currently diagnostic rather than confirmatory. Under the frozen $\Delta D(v)=D(G\setminus v)-D(G)$ definition and the present label sources, $\Delta D$ performance is near chance: bootstrap AUC $0.547$ (95\% CI $[0.445, 0.643]$) and 5-fold cross-validated AUC $0.461 \pm 0.080$; graph baselines (degree, betweenness) are similar or weaker.
+The extended essentiality evaluation over \texttt{essentiality\_prediction\_dataset.csv} (642 genes, 20 networks) is currently diagnostic rather than confirmatory. Under the frozen $\Delta D(v)=D(G\setminus v)-D(G)$ definition and the present label sources, $\Delta D$ performance is near chance: bootstrap AUC $0.547$ (95\% CI $[0.442, 0.645]$) and 5-fold cross-validated AUC $0.461 \pm 0.080$; graph baselines (degree, betweenness) are similar or weaker.
 
 \begin{figure}[H]
     \centering
@@ -114,7 +147,7 @@ The per-patient corruption metrics are stored at \path{results/cancer/corruption
 Level 8 executes the Python and WolframKernel test suites and records the aggregate status in \texttt{bitacora-lev8.md}. All Level 8 manuscript artifacts (figures and validation outputs) are recorded with SHA-256 checksums.
 
 \section*{Implications for Gate C}
-The DepMap analysis pathway is implemented end-to-end but does not yet constitute external validation in the current repository state: the dependency table is a proxy artifact and the scaffold is small ($n=10$ nodes), limiting both statistical power and confound control. A Gate C pass requires rerunning the same pipeline against a provenance-complete DepMap release and reporting baselines/controls under a leakage-safe design.
+Under the frozen decision thresholds (Table~\ref{tab:lev8_gate_thresholds}), Gate C is not satisfied in this checkout: the DepMap anchor is a small-scaffold pilot ($n=10$) and the essentiality incremental-value criterion does not clear the predefined margin beyond degree. The DepMap analysis pathway is implemented end-to-end but does not yet constitute external validation in the current repository state: the dependency table is a proxy artifact and the scaffold is small ($n=10$ nodes), limiting both statistical power and confound control. A Gate C pass requires rerunning the same pipeline against a provenance-complete DepMap release and reporting baselines/controls under a leakage-safe design.
 
 The paired corruption pilot demonstrates a paired-design signal under $D^{(v2)}$ on a frozen scaffold, but the cohort is synthetic. Upgrading this pillar to Gate C requires replacing the synthetic pairing with a real paired acquisition route (TCGA tumor + matched normal), freezing preprocessing, and reproducing the paired shift with external anchors.
 

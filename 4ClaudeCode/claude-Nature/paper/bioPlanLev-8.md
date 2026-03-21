@@ -189,7 +189,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-00-004: Freeze quantitative pass thresholds for Gate A/B/C (mandatory)
 **Gate Alignment:** Gate A, Gate B, Gate C  
 **Description:** Define and freeze numeric thresholds used to decide “pass/fail” at each gate and to prevent subjective interpretation drift.  
-**Status:** NOT STARTED — Gate definitions exist, but quantitative thresholds are not frozen as a single explicit numeric spec.  
+**Status:** DONE — Frozen numeric thresholds are emitted as a single executable spec and summarized to `paper/figures/gate_thresholds_summary.csv`, with a manuscript-facing plot at `paper/figures/gate_thresholds_status.png` and execution provenance in `bitacora-lev8.md`.  
 **Acceptance Criteria:**
 - Gate A thresholds frozen:
   - sign conventions and units for D/ΔD/z fixed and referenced everywhere
