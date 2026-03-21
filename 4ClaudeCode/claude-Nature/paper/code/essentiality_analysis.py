@@ -48,7 +48,17 @@ def _default_figures_dir() -> Path:
 def load_essentiality_data(filepath: str | None = None) -> pd.DataFrame:
     """Load the essentiality prediction dataset."""
     if filepath is None:
-        filepath = str(_default_figures_dir() / "essentiality_prediction_dataset.csv")
+        candidates = [
+            _default_figures_dir() / "essentiality_prediction_dataset.csv",
+            Path(__file__).resolve().parents[4] / "results" / "bio" / "essentiality_prediction_dataset.csv",
+        ]
+        existing = next((p for p in candidates if p.exists()), None)
+        if existing is None:
+            raise FileNotFoundError(
+                "Essentiality dataset not found. Looked for: "
+                + ", ".join(str(p) for p in candidates)
+            )
+        filepath = str(existing)
     df = pd.read_csv(filepath)
     print(f"Loaded {len(df)} genes from {df['Network'].nunique()} networks")
     print(f"  Essential: {(df['Is_Essential'] == 1).sum()}")

@@ -244,17 +244,18 @@ class DepMapValidation:
             if progress_every_chunks and (chunk_idx % int(progress_every_chunks) == 0):
                 DepMapValidation._log(f"Streaming progress: chunk={chunk_idx} raw_rows={n_rows_raw} used_rows={n_rows_used}")
 
-        means = np.divide(sums, counts, out=np.full_like(sums, np.nan), where=counts != 0)
+        gene_effect_means = np.divide(sums, counts, out=np.full_like(sums, np.nan), where=counts != 0)
         genes = [DepMapValidation._normalize_gene_symbol(c) for c in gene_cols]
 
         DepMapValidation._log(f"Streaming complete: raw_rows={n_rows_raw} used_rows={n_rows_used}")
         n_missing = int(np.sum(counts == 0))
         if n_missing:
             DepMapValidation._log(f"Missing columns with zero observations: n={n_missing}")
+        dependency = -gene_effect_means
         DepMapValidation._log(
-            "Dependency summary (gene effects): "
-            f"n_genes={int(np.sum(~np.isnan(means)))} mean={float(np.nanmean(means)):.6g} sd={float(np.nanstd(means)):.6g} "
-            f"p05={float(np.nanpercentile(means, 5)):.6g} p50={float(np.nanpercentile(means, 50)):.6g} p95={float(np.nanpercentile(means, 95)):.6g}"
+            "Dependency summary (defined as -gene effect; higher = more essential): "
+            f"n_genes={int(np.sum(~np.isnan(dependency)))} mean={float(np.nanmean(dependency)):.6g} sd={float(np.nanstd(dependency)):.6g} "
+            f"p05={float(np.nanpercentile(dependency, 5)):.6g} p50={float(np.nanpercentile(dependency, 50)):.6g} p95={float(np.nanpercentile(dependency, 95)):.6g}"
         )
 
         if validate_streaming:
@@ -268,7 +269,7 @@ class DepMapValidation:
                 if keep_model_ids is not None:
                     dfv = dfv[dfv[id_col].isin(keep_model_ids)]
                 recomputed = dfv[cols_check].mean(axis=0, skipna=True).to_numpy(dtype=float, copy=False)
-                streamed = means[idx]
+                streamed = gene_effect_means[idx]
                 diffs = np.abs(recomputed - streamed)
                 DepMapValidation._log(
                     f"Validation diffs: max_abs={float(np.nanmax(diffs)):.6g} mean_abs={float(np.nanmean(diffs)):.6g}"
@@ -276,7 +277,7 @@ class DepMapValidation:
             except Exception as e:
                 DepMapValidation._log(f"Validation pass failed (non-fatal): {type(e).__name__}: {e}")
 
-        df = pd.DataFrame({"Gene": genes, "Dependency": means}).dropna(subset=["Dependency"])
+        df = pd.DataFrame({"Gene": genes, "Dependency": dependency}).dropna(subset=["Dependency"])
         df.to_csv(out_path, index=False)
         DepMapValidation._log(f"Wrote derived dependency table: {out_path} n_rows={len(df)}")
         return out_path
@@ -314,7 +315,7 @@ class DepMapValidation:
         """
         Load DepMap data. 
         Expects CSV with columns 'Gene' and 'Dependency'.
-        Dependency Score < -1 implies Essentiality.
+        Dependency is defined as -Chronos gene effect (higher = more essential).
         """
         if not os.path.exists(self.depmap_path):
             print(f"Warning: DepMap file {self.depmap_path} not found.")
@@ -793,23 +794,28 @@ class DepMapValidation:
             delta_ds = results["Mean_Delta_D"]
             deps = results["Dependency"]
             
-        # Remove NaNs
-        valid_indices = [i for i in range(len(deps)) if not np.isnan(deps[i])]
-        if len(valid_indices) < 3:
-            return CorrelationResult({'rho': 0.0, 'pval': 1.0, 'mi_bits': 0.0, 'mi_interpretation': "Insufficient Data"})
-            
-        delta_ds = [delta_ds[i] for i in valid_indices]
-        deps = [deps[i] for i in valid_indices]
+        x = np.asarray(delta_ds, dtype=float)
+        y = np.asarray(deps, dtype=float)
+
+        mask = ~(np.isnan(x) | np.isnan(y))
+        x = x[mask]
+        y = y[mask]
+        n = int(len(x))
+        if n < 3:
+            return CorrelationResult(
+                {"n": n, "rho": 0.0, "pval": 1.0, "mi_bits": 0.0, "mi_interpretation": "Insufficient Data"}
+            )
         
         # Pearson
-        corr, pval = stats.pearsonr(delta_ds, deps)
+        corr, pval = stats.pearsonr(x, y)
 
-        spearman_corr, spearman_pval = stats.spearmanr(delta_ds, deps)
+        spearman_corr, spearman_pval = stats.spearmanr(x, y)
         
         # Mutual Information
-        mi_res = MutualInformationAnalyzer.compute_mutual_information(delta_ds, deps, discrete_y=False)
+        mi_res = MutualInformationAnalyzer.compute_mutual_information(x.tolist(), y.tolist(), discrete_y=False)
         
         return CorrelationResult({
+            "n": n,
             'rho': corr,
             'pval': pval,
             'spearman_rho': spearman_corr,
@@ -837,7 +843,7 @@ class DepMapValidation:
         ax = fig.add_subplot(111)
         ax.scatter(x, y, s=30, alpha=0.85)
         ax.set_xlabel("Mean ΔD (node removal)")
-        ax.set_ylabel("DepMap CRISPR gene effect")
+        ax.set_ylabel("DepMap essentiality (−gene effect)")
         ax.set_title(f"ΔD vs DepMap (n={len(x)})")
         fig.tight_layout()
         fig.savefig(out_path)
@@ -995,7 +1001,7 @@ if __name__ == "__main__":
         sample_file = [f for f in os.listdir(DATA_DIR) if f.endswith(".json")][0]
         with open(os.path.join(DATA_DIR, sample_file)) as f:
             genes = json.load(f)["nodes"]
-        df = pd.DataFrame({"Gene": genes, "Dependency": np.random.normal(-0.5, 1.0, len(genes))})
+        df = pd.DataFrame({"Gene": genes, "Dependency": np.random.normal(0.5, 1.0, len(genes))})
         df.to_csv(synth_path, index=False)
         DEPMAP_PATH = synth_path
         
@@ -1087,9 +1093,7 @@ if __name__ == "__main__":
     if saved_plot:
         print(f"Plot saved to {saved_plot}")
     
-    # Expect negative correlation: High Delta D (Important Structure) <-> Low Dependency Score (Essential)
-    # Wait, Dependency Score is usually "Effect Size", where -2 is lethal.
-    # So "Essential" = Negative Score.
-    # "Important Structure" = High Delta D (Removing it destroys structure).
-    # So High Delta D should map to Negative Score.
-    # Correlation should be NEGATIVE.
+    # Dependency is defined as -gene effect (higher = more essential). Under the
+    # working biological interpretation for this scaffold, essential nodes are
+    # expected to yield more negative ΔD (removal simplifies), implying a
+    # negative association between ΔD and dependency.

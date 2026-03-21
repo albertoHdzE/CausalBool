@@ -248,7 +248,7 @@ def evaluate_gate_thresholds(
         dep = _load_json(depmap_stats_path)
         r = float(dep.get("rho", float("nan")))
         pval = float(dep.get("pval", float("nan")))
-        n_nodes = 10
+        n_nodes = int(dep.get("n", 0) or 0)
         gate_c_min_n = 50
         gate_c_min_abs_r = 0.3
         gate_c_max_p = 0.01

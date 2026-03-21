@@ -228,7 +228,7 @@
 - Output:
   - `paper/bioProcessLev8.pdf`
 - SHA-256:
-  - `19f2be1d127543c2d257c85c76a53d7cc3d5b7261113cc11df63f8141ce8776c`
+  - `fe629499d53eaa409fce0883032e6e15135fc808b902f5379bc804b8d8c9a6cf`
 
 **Note**
 - In this checkout, DepMap Public 24Q4 is present under `data/depmap/` (not under `data/depmap/24Q4/`); use the paths and checksums in Entry LEV8-2026-03-21-003 as the execution provenance for this checkout.
@@ -259,8 +259,8 @@
 **Derived dependency summary**
 - Goal: reduce the model-level `CRISPRGeneEffect.csv` matrix to the legacy `Gene,Dependency` table used by the Level 8 validation pipeline.
 - Method:
-  - For each mapped gene, compute mean gene effect across all DepMap models (ignore NaNs).
-  - Map scaffold nodes to one or more genes (e.g., SOS→SOS1/SOS2; RAS→KRAS/NRAS/HRAS), and average those gene effects to a node-level dependency value.
+  - For each mapped gene, compute mean gene effect across all DepMap models (ignore NaNs), then define dependency as `-mean_gene_effect` (higher = more essential).
+  - Map scaffold nodes to one or more genes (e.g., SOS→SOS1/SOS2; RAS→KRAS/NRAS/HRAS), and average those gene-level dependency values to a node-level dependency proxy.
 - Cache location:
   - `DEPMAP_CACHE_DIR=results/cancer/depmap_cache`
 
@@ -287,10 +287,14 @@
 - `paper/figures/figure3_depmap_validation.csv`
 - `paper/figures/figure3_depmap_validation_stats.json`
 - `paper/figures/figure3_depmap_validation_scatter.png`
+- SHA-256:
+  - `figure3_depmap_validation.csv`: `618682d78d6da747a8e5738d29e9f669a7d2ecd3a695c62294969c92b1798fd1`
+  - `figure3_depmap_validation_stats.json`: `6e109866a57ee41a0904f4c3c03534adae8efbdabeb5738f9dd024892eb3df8f`
+  - `figure3_depmap_validation_scatter.png`: `2f86a41b1e5dce153e6d4ed4cf80e2300c7512da7e9b2ef13c1009e5fc9e4905`
 
 **Result summary (10-node EGFR scaffold; n=100 tumor networks aggregated)**
-- Pearson r = 0.4055, p = 0.2450
-- Spearman ρ = 0.4788, p = 0.1615
+- Pearson r = -0.4055, p = 0.2450
+- Spearman ρ = -0.4788, p = 0.1615
 - MI = 0.00 bits (“No Dependency”)
 
 ## Entry LEV8-2026-03-21-004 — Freeze Gate A/B/C Quantitative Thresholds (TSK-LEV8-00-004)
@@ -311,9 +315,9 @@
   - `results/cancer/corruption_metrics.csv` (Gate C: paired corruption; synthetic in this checkout)
 
 **Outputs (manuscript-facing)**
-- `paper/figures/gate_thresholds_summary.csv` (SHA-256: `fdf450308b13d9981ff14ecb0150b7ac9aa11e965e812c195c61595d9f0e5175`)
+- `paper/figures/gate_thresholds_summary.csv` (SHA-256: `909c821de942fd2743d6075a8e8d83b98459565e873eebb69d2a106eb0e192da`)
 - `paper/figures/gate_thresholds_status.png` (SHA-256: `f221b4233fff6a8fead13c696e7f4c25856c301e7ed80543c970a946ad9348ca`)
-- `paper/figures/gate_thresholds_status.pdf` (SHA-256: `f6eaf2bc8e07ae48632b9feace4f2b4adb00ee62082c74b3fa9ae756b05d29bb`)
+- `paper/figures/gate_thresholds_status.pdf` (SHA-256: `52ad2d8287dde4b96c14bfe698305fe9131ddee37194f1a325004d07656876d2`)
 
 **Result summary (frozen thresholds evaluated on this checkout)**
 - Gate A: PASS (all frozen criteria satisfied; mean $z=0.723$, $\Pr(z>0)=0.662$, $\Pr(p\le 0.05)=0.212$, $n=231$ networks).
