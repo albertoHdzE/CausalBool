@@ -969,3 +969,28 @@
   - `paper/bioPlanLev-8.md` (TSK-LEV8-00-002 marked DONE; scope statement added)
 - Manuscript support recorded in:
   - `paper/bioProcessLev8.tex` (\textit{Scope freeze} section added)
+
+---
+
+## Entry LEV8-2026-03-21-006 — Theory→Computation Mapping Propagated to Nature Methods (TSK-LEV8-01-001)
+**Date:** 2026-03-21  
+**Operator:** Trae/GPT  
+**Gate Alignment:** Gate A (exactness boundary)  
+
+**Goal**
+- Eliminate proxy-vs-exactness ambiguity in the Nature-facing Methods text by explicitly stating what is computed in code (and in which units), and what is only a conceptual/theoretical object.
+
+**Canonical mapping (re-affirmed)**
+- GRN corpus results: $D_{\mathrm{gzip}}(cm)=\mathrm{len}(\mathrm{gzip}(cm.\mathrm{tobytes}()))$ (compressed bytes).
+- Cancer/DepMap results: $D^{(v2)}(cm)$ via the universal $D^{(v2)}$ encoder (bits).
+- Knockout/removal impact: $\Delta D = D(\mathrm{KO}) - D(\mathrm{WT}) = D(G\setminus v) - D(G)$ (context-appropriate $D$ proxy).
+- Efficiency score: $z=(\mathbb{E}[D_{\mathrm{null}}]-D_{\mathrm{bio}})/\mathrm{sd}(D_{\mathrm{null}})$ (so $z>0$ indicates algorithmic efficiency).
+
+**Edits applied**
+- Added an explicit “Exactness boundary and computed proxies (implementation)” block to the Nature Methods draft and aligned the Z-score sign convention to the Level 8 contract:
+  - `doc/finalpaper/nature_draft.tex`
+- Marked the mapping ticket as DONE in the Level 8 plan:
+  - `paper/bioPlanLev-8.md`
+
+**Implication**
+- Any future manuscript text that introduces $D$ as an exact Kolmogorov complexity quantity (or that compares magnitudes across proxy families) is out of contract unless it is explicitly framed as conceptual and not used for reported numbers.

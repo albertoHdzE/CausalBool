@@ -28,7 +28,7 @@ Biological systems exhibit remarkable order, yet quantitative metrics for this o
 
 \section{Introduction}
 
-The central dogma of systems biology posits that function emerges from structure. However, the definition of "structure" has long been dominated by topological metrics—degree distribution, clustering coefficients, and modularity \cite{Barabasi2004}. While these metrics characterize the "hardware" of the cell, they remain blind to the "software": the causal logic that dictates how signals are processed, integrated, and propagated. A scale-free network can implement random, incompressible logic just as easily as it can implement a precise homeostatic control system.
+The central dogma of systems biology posits that function emerges from structure. However, the definition of "structure" has long been dominated by topological metrics—degree distribution, clustering coefficients, and modularity. While these metrics characterize the "hardware" of the cell, they remain blind to the "software": the causal logic that dictates how signals are processed, integrated, and propagated. A scale-free network can implement random, incompressible logic just as easily as it can implement a precise homeostatic control system.
 
 We hypothesize that evolution acts as an algorithmic compressor, selecting not just for functional fitness but for \textit{Algorithmic Simplicity}. According to Occam's Razor, among all networks that satisfy a biological function, the one with the shortest description length is the most robust and evolvable.
 
@@ -39,12 +39,20 @@ In this study, we formalize this hypothesis using Algorithmic Information Theory
 
 \section{Methods}
 
-\subsection{Mechanistic Description Length ($D$)}
-We define the mechanistic complexity of a network $\mathcal{N}$ as the sum of the Shannon entropy of its wiring diagram and the Kolmogorov complexity of its logic functions. For a network with $n$ genes and inputs $k_i$, the description length is given by:
+\subsection{Exactness boundary and computed proxies (implementation)}
+All $D$ quantities reported from repository pipelines are encoding-dependent proxies for mechanistic/structural description length under a frozen representation; no claim is made to compute Kolmogorov complexity exactly. Two proxy families are used and are not compared by magnitude across families:
+\begin{itemize}
+    \item \textbf{GRN corpus (universality):} $D_{\mathrm{gzip}}(cm)=\mathrm{len}(\mathrm{gzip}(cm.\mathrm{tobytes}()))$ on the adjacency matrix $cm$ (units: compressed bytes).
+    \item \textbf{Cancer/DepMap analyses:} $D^{(v2)}(cm)$ computed by the universal $D^{(v2)}$ encoder on the adjacency matrix (units: bits).
+\end{itemize}
+We treat conclusions in terms of sign, rank, and within-proxy effect sizes under a fixed serialization and ordering policy.
+
+\subsection{Knockout impact (Mechanistic Information Loss, $\Delta D$)}
+For an in-silico knockout or node removal $i$, we define:
 \begin{equation}
-D(\mathcal{N}) = \sum_{i=1}^{n} \left[ \log_2 |\mathcal{G}| + \log_2 \binom{n}{k_i} + K(f_i) \right]
+\Delta D_i = D(\mathcal{N}_i^{\mathrm{ko}}) - D(\mathcal{N})
 \end{equation}
-where $K(f_i)$ is approximated via the Block Decomposition Method (BDM) applied to the truth table of the Boolean function $f_i$.
+so $\Delta D_i>0$ indicates that the knockout increases description length (the node contributed to compressibility/efficiency). For structural node deletion on a graph $G$, the same convention reads $\Delta D(v)=D(G\setminus v)-D(G)$ under the context-appropriate $D$ proxy.
 
 \subsection{Structural Description Length ($D_{v2}$)}
 To capture higher-order regularities (motifs, hierarchies), we introduce $D_{v2}$, a structural encoding metric. $D_{v2}$ compresses the adjacency matrix by identifying:
@@ -57,9 +65,9 @@ The final metric is $D_{v2}(G) = \min(L_{\mathrm{motif}}, L_{\mathrm{hierarchy}}
 \subsection{Null Models and Z-Scores}
 To validate universality, we generated 100 \textbf{Degree-Preserving Null Models} for each biological network using the Directed Configuration Model. We computed the Z-score of the structural complexity:
 \begin{equation}
-Z = \frac{D_{v2}(G_{bio}) - \mu(D_{v2}^{null})}{\sigma(D_{v2}^{null})}
+Z = \frac{\mu(D^{null}) - D(G_{bio})}{\sigma(D^{null})}
 \end{equation}
-A negative Z-score indicates statistically significant simplicity.
+A positive Z-score indicates statistically significant simplicity (biological networks are more compressible than their nulls).
 
 \section{Results}
 
@@ -130,20 +138,6 @@ Cancer cells often rewire their networks to bypass regulatory checkpoints. Our $
 We propose that disease states can be modeled as "Algorithmic Corruptions." A healthy network operates at an optimal $D_{v2}$ minimum. Pathological mutations (e.g., constitutively active signaling) increase the Kolmogorov complexity of the local logic, moving the system away from its optimal Z-score. $D_{v2}$ could thus serve as a novel biomarker for network dysregulation, detectable before gross topological changes occur.
 
 \subsubsection{3. Synthetic Biology and Circuit Design}
-The "Ultra-Simple" architecture of the Lac Operon ($Z=-11.5$) provides a blueprint for synthetic biology. To design robust synthetic circuits (e.g., for CAR-T cell logic), we should not merely mimic topology but minimize $D_{v2}$. Synthetic circuits with low structural description length are predicted to be more evolutionarily stable and less prone to "leakiness" or stochastic failure.
-
-\section{Conclusion}
-We have bridged the gap between graph topology and algorithmic information in systems biology. By validating $\Delta D$ as a predictor of essentiality and proving the statistical significance of $D_{v2}$ in natural networks, we provide a formal basis for the intuition that life is "simple but complex." The future of medicine may well lie in debugging the code of life, restoring the algorithmic simplicity that evolution so carefully curated.
-
-\section{References}
-\begin{enumerate}
-    \item Faure, A., et al. (2006). \textit{Bioinformatics}, 22(14).
-    \item Albert, R., \& Othmer, H. G. (2003). \textit{J. Theor. Biol.}, 223(1).
-    \item Zenil, H., et al. (2018). \textit{Nature Machine Intelligence}, 1.
-    \item Kauffman, S. A. (1969). \textit{J. Theor. Biol.}, 22(3).
-\end{enumerate}
-
-\end{document}
 The "Ultra-Simple" architecture of the Lac Operon ($Z=-11.5$) provides a blueprint for synthetic biology. To design robust synthetic circuits (e.g., for CAR-T cell logic), we should not merely mimic topology but minimize $D_{v2}$. Synthetic circuits with low structural description length are predicted to be more evolutionarily stable and less prone to "leakiness" or stochastic failure.
 
 \section{Conclusion}

@@ -216,7 +216,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-01-001: Map Theory Objects → Computed Quantities
 **Gate Alignment:** Gate A  
 **Description:** Produce a mapping table: theorem objects → what is computed in code → units → limitations.  
-**Status:** PARTIAL — A canonical mapping table is now stored in `bioProcessLev8.tex` (objects → computed quantities → units → artifacts), but multiple D proxies remain in use across code paths (gzip bytes vs D(v2) bits) and the mapping still needs to be propagated into the Nature manuscript Methods text.  
+**Status:** DONE — A canonical mapping table is stored in `bioProcessLev8.tex` (objects → computed quantities → units → artifacts) and the proxy boundary is now explicitly stated in the Nature Methods draft (`doc/finalpaper/nature_draft.tex`) to prevent proxy-vs-exactness confusion.  
 **Acceptance Criteria:**
 - Table includes D and ΔD, and explicitly states what is exact and what is a proxy.
 - The mapping is reflected in Methods language.
