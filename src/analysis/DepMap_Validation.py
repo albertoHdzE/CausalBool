@@ -545,11 +545,7 @@ class DepMapValidation:
             
             d_ko = self.compute_d_v2(cm_ko)
             
-            # ΔD_remove(v) = D(G \ v) - D(G)
-            # Positive ΔD means removing the node increases complexity (the node contributed
-            # to compressibility/efficiency). This matches the Level 8 convention used in
-            # the GRN corpus and essentiality pipeline.
-            delta_d = d_ko - d_baseline
+            delta_d = d_baseline - d_ko
             
             # Get DepMap score if available
             dep_score = self._dep_score_for_node_with_map(gene, meta_map if meta_map else self.node_gene_map)
@@ -1093,7 +1089,3 @@ if __name__ == "__main__":
     if saved_plot:
         print(f"Plot saved to {saved_plot}")
     
-    # Dependency is defined as -gene effect (higher = more essential). Under the
-    # working biological interpretation for this scaffold, essential nodes are
-    # expected to yield more negative ΔD (removal simplifies), implying a
-    # negative association between ΔD and dependency.

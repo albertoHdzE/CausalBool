@@ -1169,3 +1169,57 @@
 
 **Interpretation**
 - The Gate A “algorithmic efficiency” direction is robust to: (i) moderate shifts in inclusion thresholds, (ii) removal of any single major source subset, and (iii) trimming extreme densities. Notably, several sensitivity conditions increase $\overline{z}$ rather than reduce it, consistent with the effect strengthening in larger or moderately dense networks rather than being driven by a narrow, extreme subset.
+
+---
+
+## Entry LEV8-2026-03-23-006 — DepMap 24Q4 Provenance Lock + Real-data Figure 3 Regeneration (TSK-LEV8-04-001)
+**Date:** 2026-03-23  
+**Operator:** Trae/GPT  
+**Gate Alignment:** Gate C (external validation provenance), Gate A (artifact locking)  
+
+**Objective**
+- Replace the “proxy / synthetic DepMap” ambiguity by locking a concrete DepMap Public 24Q4 release directory with immutable checksums and by regenerating Figure 3 from the real Chronos model-level gene-effect matrix.
+
+**DepMap release directory (local, immutable)**
+- `data/DepMap/` (contains `README.txt` stating “DepMap Public 24Q4”)
+
+**Manifest (checksums + roles)**
+- `data/DepMap/manifest_24Q4.json`  
+  - SHA-256: `715912b1f28dca4eec6fe35ff96cc02ff6255ae6ecfb85bd2b6e528d4b28c854`
+
+**Key raw files (required + recommended)**
+- `data/DepMap/CRISPRGeneEffect.csv` (Chronos; ModelID × Gene)  
+  - SHA-256: `3d8f3ec6dbf2db7ff834b79b508622ec0b226f3518003fe96ecf5a4fcf167e3b`
+- `data/DepMap/Model.csv` (model metadata; Oncotree annotations)  
+  - SHA-256: `b7a0c1385e6cef30132b56aff61f1261d11e3f490490b355c430d32ee0dbdcfa`
+- `data/DepMap/Gene.csv` (gene ID mapping reference)  
+  - SHA-256: `dfb5f74496ca17baf67f215a44f06197ddd835685813aede75754876b62b19db`
+- `data/DepMap/OmicsExpressionProteinCodingGenesTPMLogp1BatchCorrected.csv` (expression confound control; recommended)  
+  - SHA-256: `f7a03a4184b42817971d94b052759c12a246d109cbe451bb63181d14cd066617`
+- `data/DepMap/OmicsCNGene.csv` (copy-number confound control; recommended)  
+  - SHA-256: `4851d3e939d48837a39a0f01294deb90fa507a85703586a927b77474f999134c`
+
+**Audit (schema + ID overlap sanity)**
+- Command:
+  - `DEPMAP_AUDIT=1 DEPMAP_AUDIT_DIR=data/DepMap python src/analysis/DepMap_Validation.py`
+- Result:
+  - PASS (`failures=0`), with ModelID overlap checks confirming expected joins for wide matrices.
+
+**Figure 3 regeneration (real DepMap 24Q4)**
+- Command:
+  - `DEPMAP_RELEASE_DIR=data/DepMap DEPMAP_PATH=data/DepMap/CRISPRGeneEffect.csv DEPMAP_MODEL_PATH=data/DepMap/Model.csv DEPMAP_OUT_PREFIX=paper/figures/figure3_depmap_validation DEPMAP_FORCE_REBUILD=1 python src/analysis/DepMap_Validation.py`
+- Derived dependency table (whitelist-restricted gene means; defined as $-\,$gene effect):
+  - `data/DepMap/CRISPRGeneEffect.csv.gene_mean.csv`  
+    - SHA-256: `619403455f10e96535aaa43135c40dedac231dbfb8a357bc2fa52615bb16538c`
+- Outputs:
+  - `paper/figures/figure3_depmap_validation_stats.json`  
+    - SHA-256: `3479a8944dfee218bbed87531a534f5a674b4ca146f58cf827141353a3a20fd4`
+  - `paper/figures/figure3_depmap_validation_scatter.png`  
+    - SHA-256: `6d6dacd2ae1883949c644ee7df7148ba3ead4ea3e1c01017e642eec1e90e0453`
+
+**Observed statistics (this checkout)**
+- Global Spearman correlation ($\Delta D$ vs Dependency): $\rho=0.41$, $p=2.45\times 10^{-1}$.
+- Mutual information estimator output: $0.00$ bits (“No Dependency” under the current discretization settings).
+
+**Interpretation**
+- DepMap provenance is now concrete and auditable (release identified, checksums recorded, schema validated). The current DepMap correlation remains a low-power pilot due to the small scaffold and whitelist-restricted mapping (41 genes available in the derived table for the current node→gene map), and therefore does not upgrade Gate C. The correct scientific posture is: “external anchor pipeline is reproducible and provenance-complete; power and coverage remain limiting.”

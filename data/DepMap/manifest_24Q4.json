@@ -1,0 +1,46 @@
+{
+  "dataset": "DepMap Public 24Q4",
+  "acquired_date": "2026-03-23",
+  "source": {
+    "homepage": "https://depmap.org/portal/download/",
+    "notes": "Files correspond to DepMap Public 24Q4 as indicated by README.txt in this directory."
+  },
+  "root_dir": "data/DepMap",
+  "reference_readme": {
+    "path": "data/DepMap/README.txt",
+    "sha256": "f744a5cf5c112e01276e772679157aac8e85cdc4a8f6d3b86d808e3bfd332891"
+  },
+  "required_files": [
+    {
+      "path": "data/DepMap/CRISPRGeneEffect.csv",
+      "role": "Chronos model-level gene-effect matrix (rows=ModelID, cols=Gene).",
+      "sha256": "3d8f3ec6dbf2db7ff834b79b508622ec0b226f3518003fe96ecf5a4fcf167e3b"
+    },
+    {
+      "path": "data/DepMap/Model.csv",
+      "role": "Cell-line metadata (ModelID, Oncotree lineage/codes, etc) for cohort filtering.",
+      "sha256": "b7a0c1385e6cef30132b56aff61f1261d11e3f490490b355c430d32ee0dbdcfa"
+    },
+    {
+      "path": "data/DepMap/Gene.csv",
+      "role": "Gene identifier mapping reference.",
+      "sha256": "dfb5f74496ca17baf67f215a44f06197ddd835685813aede75754876b62b19db"
+    }
+  ],
+  "recommended_files": [
+    {
+      "path": "data/DepMap/OmicsExpressionProteinCodingGenesTPMLogp1BatchCorrected.csv",
+      "role": "Expression confound control (batch-corrected log(TPM+1)).",
+      "sha256": "f7a03a4184b42817971d94b052759c12a246d109cbe451bb63181d14cd066617"
+    },
+    {
+      "path": "data/DepMap/OmicsCNGene.csv",
+      "role": "Copy-number confound control.",
+      "sha256": "4851d3e939d48837a39a0f01294deb90fa507a85703586a927b77474f999134c"
+    }
+  ],
+  "integrity": {
+    "hash_algorithm": "sha256",
+    "policy": "Raw files are treated as immutable; checksum mismatch invalidates downstream analyses."
+  }
+}

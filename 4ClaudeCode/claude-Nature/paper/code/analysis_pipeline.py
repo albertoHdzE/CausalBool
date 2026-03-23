@@ -2549,6 +2549,10 @@ def generate_figure3_depmap(output_dir: Path) -> bool:
     out_prefix = output_dir / "figure3_depmap_validation"
     env = os.environ.copy()
     env["DEPMAP_OUT_PREFIX"] = str(out_prefix)
+    depmap_release_dir = repo_root / "data" / "DepMap"
+    if depmap_release_dir.exists():
+        env.setdefault("DEPMAP_RELEASE_DIR", str(depmap_release_dir))
+        env.setdefault("DEPMAP_AUDIT_DIR", str(depmap_release_dir))
 
     proc = subprocess.run(
         [sys.executable, str(script)],
