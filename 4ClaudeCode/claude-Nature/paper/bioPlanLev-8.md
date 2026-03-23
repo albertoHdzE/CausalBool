@@ -224,7 +224,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-01-002: Resolve ΔD Directionality & Classifier Direction
 **Gate Alignment:** Gate A, Gate C  
 **Description:** Choose the sign convention and ensure ROC/PR uses it consistently.  
-**Status:** PARTIAL — ΔD direction is now unified across the GRN corpus, essentiality pipeline, and DepMap validation as ΔD(v)=D(G\setminus v)−D(G), but it is not yet fully unified across manuscript-facing Methods/Results artifacts and ROC scoring direction is not locked across all evaluation scripts.  
+**Status:** DONE — ΔD direction is unified across code and manuscript artifacts as ΔD(v)=D(G)−D(G\setminus v), and ROC scoring direction is locked as “higher score = more essential” without implicit sign flips.  
 **Acceptance Criteria:**
 - ΔD definition is identical in Methods, Results, and figure captions.
 - ROC scoring direction is consistent with the biological interpretation.
@@ -252,7 +252,7 @@ Every ticket must include the following before it can be considered complete:
 - effect sizes (Cohen’s d),
 - paired tests,
 - robustness vs null ensemble size.  
-**Status:** PARTIAL — Null statistics exist (`results/bio/null_stats.json`, `null_summary.json`), but the manuscript-facing Figure 1 suite and robustness/CI requirements are not yet implemented as specified (3-panel ER/deg/gate + robustness panel/Extended Data).  
+**Status:** DONE — A manuscript-facing Figure 1 suite is generated from the paper pipeline with ER + degree-preserved + gate-permuted null families (gate-permuted reported on the subset of networks with gate annotations), plus a robustness panel vs null ensemble size; summary stats and effect sizes are emitted to `paper/figures/null_meta_summary.json` with the full long-form table at `paper/figures/null_results_long.csv`.  
 **Acceptance Criteria:**
 - Final “Figure 1” has 3 panels: ER, degree-preserved, gate-permuted.
 - Report mean fold reduction + CI, and a clear interpretation.
@@ -262,7 +262,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-02-002: Essentiality (KR-A) Full Reanalysis
 **Gate Alignment:** Gate C  
 **Description:** Compute ROC and PR curves for ΔD vs degree vs betweenness and combined model; quantify uncertainty.  
-**Status:** PARTIAL — An extended essentiality analysis script and outputs exist, but the required stratified analyses and manuscript-grade protocol lock are not complete.  
+**Status:** DONE — Manuscript Figure 2 now includes ROC + PR curves for ΔD vs degree vs betweenness and a network-held-out combined model, with network-resampled bootstrap 95% CIs and paired bootstrap comparisons; stratified results (organism group, network size bins, source dataset) are emitted to `paper/figures/essentiality_stratified.csv` with summary stats in `paper/figures/essentiality_summary.json`.  
 **Acceptance Criteria:**
 - AUC with bootstrap 95% CI for each predictor.
 - Proper statistical comparison of AUCs (predefined test).
@@ -274,7 +274,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-02-002B: Benchmark against strong non-CausalBool baselines (mandatory)
 **Gate Alignment:** Gate C  
 **Description:** Compare ΔD against modern baseline predictors and simple ML models, with strict evaluation design.  
-**Status:** NOT STARTED — No locked comparison against external predictors (e.g., LOEUF/pLI, expression, copy number) with leakage-safe evaluation is present as a stored artifact.  
+**Status:** DONE — Added a leakage-safe, network-held-out benchmarking suite in the paper pipeline: logistic regression baselines (ΔD; graph centralities; gnomAD constraint (pLI + LOEUF); DepMap mean expression + mean copy number; and ablations/combos) plus a non-linear sanity-check model (random forest) evaluated via group-stratified CV by Network with network-resampled bootstrap uncertainty. Calibration is reported via Brier score (with CI) and reliability curves. Artifacts are emitted to `paper/figures/essentiality_benchmark_summary.json` (protocol + metrics), `paper/figures/essentiality_benchmark_oof_full.csv`, `paper/figures/essentiality_benchmark_oof_depmap.csv`, `paper/figures/essentiality_benchmark_oof_gnomad.csv` (out-of-fold probabilities), and plotted as `paper/figures/figure2_essentiality_benchmarks_full.{png,pdf}` / `paper/figures/figure2_essentiality_benchmarks_depmap.{png,pdf}` / `paper/figures/figure2_essentiality_benchmarks_gnomad.{png,pdf}`.  
 **Baselines (minimum):**
 - graph baselines: degree, betweenness (already), plus closeness/eigenvector if stable
 - curated constraint: LOEUF / pLI (gnomAD) where applicable
@@ -300,7 +300,7 @@ Every ticket must include the following before it can be considered complete:
 - null swaps,
 - null sample count,
 - ordering assumptions (if any).  
-**Status:** NOT STARTED — No predeclared stress-test grid with tolerance thresholds is stored.  
+**Status:** DONE — Implemented and executed a predeclared reproducibility stress-test grid with pass/fail tolerances and mitigation hooks. Outputs are written to `paper/figures/reproducibility_stress_grid.csv` (per-condition measurements) and `paper/figures/reproducibility_stress_summary.json` (protocol + thresholds + pass/fail). Stress axes include: seed robustness for null z-scores (rank + sign agreement), stabilization across null ensemble size (n_random; requiring ≥25), sensitivity to degree-preserving swap intensity (n_swaps), permutation/ordering stability of the compression-based D estimator (degree-sorted canonicalization with WL-style deterministic tie-breaking), and seed sensitivity for essentiality CV AUC across representative feature sets.  
 **Acceptance Criteria:**
 - Δ in effect sizes and AUC is within predefined tolerance thresholds.
 - Failures trigger a defined mitigation path (increase null ensemble or adjust method).
@@ -315,7 +315,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-03-001: Formalize the Bias Objection (Steelman)
 **Gate Alignment:** Gate B  
 **Description:** Write the strongest possible reviewer critique about curation bias and define the counter-tests.  
-**Status:** NOT STARTED — No dedicated steelman objection artifact and counter-test plan is stored.  
+**Status:** DONE — Steelman objection + counter-test suite is now encoded in the Nature-facing Level 8 process report (`paper/bioProcessLev8.tex`) and instantiated as executable sensitivity analyses over the Gate A corpus (`paper/code/analysis_pipeline.py --bias-tests`), with locked artifacts under `paper/figures/` (`bias_defense_summary.json`, `bias_defense_grid.csv`, `bias_defense_stratified.csv`, and bias-defense plots) and provenance recorded in `paper/bitacora-lev8.md`.  
 **Acceptance Criteria:**
 - Bias critique is explicitly stated.
 - Each critique has at least one quantitative counter-test.
