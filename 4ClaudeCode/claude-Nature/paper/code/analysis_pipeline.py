@@ -16,6 +16,7 @@ import argparse
 import os
 import sys
 import subprocess
+import time
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -1150,6 +1151,9 @@ def generate_figure1(results_long: pd.DataFrame, output_dir: str = "../figures")
         ("gate_permuted", "Gate-permuted null"),
     ]
 
+    summary_rows = []
+    robustness_rows = []
+
     for ax, (null_key, label) in zip(axes[:3], null_order):
         sub = results_long[results_long["null_model"] == null_key].copy()
         if len(sub) == 0:
@@ -1158,6 +1162,16 @@ def generate_figure1(results_long: pd.DataFrame, output_dir: str = "../figures")
 
         folds = (sub["D_random_mean"].to_numpy(dtype=float) / sub["D_bio"].to_numpy(dtype=float))
         mean_fold, lo, hi = _bootstrap_mean_ci(folds, n_boot=5000, seed=42)
+        summary_rows.append(
+            {
+                "null_model": str(null_key),
+                "label": str(label),
+                "n_networks": int(len(sub)),
+                "mean_fold_reduction": float(mean_fold),
+                "ci95_lo": float(lo),
+                "ci95_hi": float(hi),
+            }
+        )
 
         ax.hist(folds, bins=25, color="#3498db", edgecolor="white", alpha=0.85)
         ax.axvline(1.0, color="red", linestyle="--", lw=1)
@@ -1198,6 +1212,16 @@ def generate_figure1(results_long: pd.DataFrame, output_dir: str = "../figures")
             means.append(m)
             los.append(lo)
             his.append(hi)
+            robustness_rows.append(
+                {
+                    "null_model": "degree_preserved",
+                    "k": int(k),
+                    "mean_fold_reduction": float(m),
+                    "ci95_lo": float(lo),
+                    "ci95_hi": float(hi),
+                    "n_used": int(len(folds_k)),
+                }
+            )
 
         ax.plot(ks, means, "-o", color="#2ecc71", lw=2)
         ax.fill_between(ks, los, his, color="#2ecc71", alpha=0.2)
@@ -1211,6 +1235,21 @@ def generate_figure1(results_long: pd.DataFrame, output_dir: str = "../figures")
     plt.savefig(f"{output_dir}/figure1_algorithmic_efficiency.png")
     print(f"Saved Figure 1 to {output_dir}/")
     plt.close()
+
+    out_csv = Path(output_dir) / "figure1_algorithmic_efficiency_summary.csv"
+    out_json = Path(output_dir) / "figure1_algorithmic_efficiency_summary.json"
+    df_sum = pd.DataFrame(summary_rows).sort_values("null_model").reset_index(drop=True)
+    df_sum.to_csv(out_csv, index=False)
+    with open(out_json, "w") as f:
+        json.dump(
+            {
+                "figure": "Figure 1 (algorithmic efficiency across null families)",
+                "summary": df_sum.to_dict(orient="records"),
+                "robustness_curve_degree_preserved": robustness_rows,
+            },
+            f,
+            indent=2,
+        )
 
 
 def generate_figure2(ess_df: pd.DataFrame, networks: Dict[str, dict], output_dir: str = "../figures"):
@@ -2576,6 +2615,788 @@ def generate_figure3_depmap(output_dir: Path) -> bool:
     return True
 
 
+def generate_depmap_lineage_meta(output_dir: Path) -> bool:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    sweep_csv = output_dir / "figure3_depmap_validation_mapk_large__lineage_sweep_summary.csv"
+    if not sweep_csv.exists():
+        return False
+
+    df = pd.read_csv(sweep_csv)
+    df = df.replace([np.inf, -np.inf], np.nan).copy()
+    if "Conditioned_spearman_rho" not in df.columns:
+        return False
+    df = df.dropna(subset=["Conditioned_spearman_rho"]).copy()
+    if len(df) == 0:
+        return False
+
+    vals = df["Conditioned_spearman_rho"].to_numpy(dtype=float, copy=False)
+    m, lo, hi = _bootstrap_mean_ci(vals, n_boot=5000, seed=20260406)
+
+    out_csv = output_dir / "figure3_depmap_validation_mapk_large__lineage_meta.csv"
+    out_json = output_dir / "figure3_depmap_validation_mapk_large__lineage_meta.json"
+    df_out = df.sort_values("Lineage").reset_index(drop=True)
+    df_out.to_csv(out_csv, index=False)
+    with out_json.open("w") as f:
+        json.dump(
+            {
+                "figure": "Figure 3 lineage meta-analysis (MAPK-large)",
+                "n_lineages": int(len(df_out)),
+                "mean_conditioned_spearman": float(m),
+                "ci95": [float(lo), float(hi)],
+                "lineages": df_out.to_dict(orient="records"),
+            },
+            f,
+            indent=2,
+        )
+
+    out_png = output_dir / "figure3_depmap_validation_mapk_large__lineage_meta.png"
+    try:
+        fig, ax = plt.subplots(1, 1, figsize=(7.9, 3.6))
+        xs = np.arange(len(df_out))
+        ys = df_out["Conditioned_spearman_rho"].to_numpy(dtype=float, copy=False)
+        ax.bar(xs, ys, color="#4C72B0", alpha=0.9)
+        ax.axhline(0.0, color="black", linestyle="--", linewidth=1.0)
+        ax.axhline(float(m), color="#55A868", linewidth=2.0)
+        ax.fill_between([-0.5, len(df_out) - 0.5], float(lo), float(hi), color="#55A868", alpha=0.15)
+        ax.set_xticks(xs)
+        ax.set_xticklabels(df_out["Lineage"].astype(str).tolist(), rotation=25, ha="right")
+        ax.set_ylabel("Conditioned Spearman ρ(ΔD, Dependency)")
+        ax.set_title("Lineage-matched DepMap anchor (MAPK-large; conditioned)")
+        fig.tight_layout()
+        fig.savefig(out_png, dpi=300, bbox_inches="tight")
+        plt.close(fig)
+    except Exception:
+        pass
+
+    return True
+
+
+def run_cellcollective_independent_cohort(output_dir: Optional[str] = None, null_samples: int = 200) -> dict:
+    output_dir = Path(output_dir) if output_dir is not None else (Path(__file__).resolve().parent.parent / "figures")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    repo_root = _repo_root()
+    sbml_dir = repo_root / "src" / "external" / "ccapi" / "src" / "ccapi" / "data" / "models" / "boolean" / "sbml"
+    sbml_files = sorted(sbml_dir.glob("*.sbml")) if sbml_dir.exists() else []
+    sbml_sha256 = {}
+    for p in sbml_files:
+        h = hashlib.sha256()
+        with p.open("rb") as f:
+            for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                h.update(chunk)
+        sbml_sha256[p.name] = h.hexdigest()
+
+    networks = load_all_networks()
+    cc_names = sorted([n for n in networks.keys() if str(n).startswith("cc_sbml_")])
+    if not cc_names:
+        raise FileNotFoundError("No Cell Collective SBML-derived networks found (expected names like cc_sbml_* in data/bio/processed).")
+
+    rows = []
+    for name in cc_names:
+        data = networks[name]
+        cm = get_adjacency_matrix(data)
+        res = compute_D_bio_vs_random(
+            cm,
+            n_random=int(null_samples),
+            seed_base=42000,
+            null_model="degree_preserved",
+            sort_by_degree=True,
+            tie_breaker="wl",
+        )
+        folds = np.array(res["D_random_all"], dtype=float) / float(res["D_bio"]) if float(res["D_bio"]) > 0 else np.full(int(null_samples), np.nan)
+        folds = folds[np.isfinite(folds)]
+        rows.append(
+            {
+                "Network": str(name),
+                "n_nodes": int(cm.shape[0]),
+                "n_edges": int(cm.sum()),
+                "D_bio": float(res["D_bio"]),
+                "D_random_mean": float(res["D_random_mean"]),
+                "z_score": float(res["z_score"]),
+                "p_value": float(res["p_value"]),
+                "fold_mean": float(np.mean(folds)) if len(folds) else float("nan"),
+                "fold_q025": float(np.quantile(folds, 0.025)) if len(folds) else float("nan"),
+                "fold_q975": float(np.quantile(folds, 0.975)) if len(folds) else float("nan"),
+                "null_samples": int(null_samples),
+                "null_model": "degree_preserved",
+                "tie_breaker": "wl",
+            }
+        )
+
+    df = pd.DataFrame(rows).sort_values(["n_nodes", "Network"]).reset_index(drop=True)
+    out_csv = output_dir / "cellcollective_independent_cohort.csv"
+    df.to_csv(out_csv, index=False)
+
+    baseline = {}
+    null_long = output_dir / "null_results_long.csv"
+    if null_long.exists():
+        base_df = pd.read_csv(null_long)
+        base_df = base_df[base_df["null_model"] == "degree_preserved"].copy()
+        base_df = base_df.replace([np.inf, -np.inf], np.nan).dropna(subset=["D_bio", "D_random_mean"])
+        base_df["fold_reduction"] = base_df["D_random_mean"].astype(float) / base_df["D_bio"].astype(float)
+        vals = base_df["fold_reduction"].to_numpy(dtype=float, copy=False)
+        vals = vals[np.isfinite(vals)]
+        if len(vals):
+            baseline = {
+                "n_networks": int(len(vals)),
+                "fold_mean": float(np.mean(vals)),
+                "fold_q025": float(np.quantile(vals, 0.025)),
+                "fold_q975": float(np.quantile(vals, 0.975)),
+            }
+
+    out_png = output_dir / "cellcollective_independent_cohort.png"
+    try:
+        fig, ax = plt.subplots(1, 1, figsize=(7.5, 3.6))
+        xs = np.arange(len(df))
+        means = df["fold_mean"].to_numpy(dtype=float, copy=False)
+        lo = df["fold_q025"].to_numpy(dtype=float, copy=False)
+        hi = df["fold_q975"].to_numpy(dtype=float, copy=False)
+        ax.bar(xs, means, color="#4C72B0", alpha=0.9)
+        ax.errorbar(xs, means, yerr=[means - lo, hi - means], fmt="none", ecolor="black", elinewidth=1.2, capsize=3)
+        ax.axhline(1.0, color="red", linestyle="--", linewidth=1.0)
+        if baseline:
+            ax.axhline(float(baseline["fold_mean"]), color="#55A868", linewidth=2.0)
+            ax.fill_between(
+                [-0.5, len(df) - 0.5],
+                float(baseline["fold_q025"]),
+                float(baseline["fold_q975"]),
+                color="#55A868",
+                alpha=0.15,
+            )
+        ax.set_xticks(xs)
+        ax.set_xticklabels(df["Network"].astype(str).tolist(), rotation=25, ha="right")
+        ax.set_ylabel("Fold reduction (D_null / D_bio)")
+        ax.set_title("Independent cohort (Cell Collective SBML-qual) vs degree-preserved null")
+        fig.tight_layout()
+        fig.savefig(out_png, dpi=300, bbox_inches="tight")
+        plt.close(fig)
+    except Exception:
+        pass
+
+    out_json = output_dir / "cellcollective_independent_cohort_summary.json"
+    summary = {
+        "cohort": df.to_dict(orient="records"),
+        "baseline_gate_a": baseline,
+        "sbml_source_dir": str(sbml_dir),
+        "sbml_sha256": sbml_sha256,
+        "outputs": {
+            "csv": str(out_csv),
+            "plot": str(out_png),
+        },
+    }
+    with out_json.open("w") as f:
+        json.dump(summary, f, indent=2)
+
+    return summary
+
+
+def run_human_designed_vs_evolved(output_dir: Optional[str] = None, n_pairs: int = 60, null_samples: int = 100) -> dict:
+    out_dir = Path(output_dir) if output_dir is not None else _paper_figures_dir()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    seed = 8128
+    rng = np.random.default_rng(int(seed))
+
+    results_path = out_dir / "results_summary.csv"
+    if not results_path.exists():
+        run_full_analysis(output_dir=str(out_dir), skip_depmap=True, null_samples=max(int(null_samples), 50))
+
+    base_df = pd.read_csv(results_path)
+    base_df = base_df[base_df["null_model"] == "degree_preserved"].copy()
+    base_df = base_df[(base_df["n_nodes"] >= 5) & (base_df["n_nodes"] <= 100)].copy()
+    base_df = base_df.replace([np.inf, -np.inf], np.nan).dropna(subset=["D_bio", "D_random_mean", "n_nodes", "n_edges"])
+    base_df = base_df.sample(frac=1.0, random_state=int(seed)).reset_index(drop=True)
+
+    networks = load_all_networks()
+
+    def _design_graph(n_nodes: int, n_edges: int, seed_local: int) -> np.ndarray:
+        r = np.random.default_rng(int(seed_local))
+        n_nodes = int(n_nodes)
+        n_edges = int(n_edges)
+        if n_nodes < 2:
+            return np.zeros((n_nodes, n_nodes), dtype=int)
+
+        n_modules = int(np.clip(round(np.sqrt(n_nodes)), 2, 6))
+        module_sizes = [n_nodes // n_modules for _ in range(n_modules)]
+        for i in range(n_nodes - sum(module_sizes)):
+            module_sizes[i] += 1
+        module_ranges = []
+        start = 0
+        for s in module_sizes:
+            module_ranges.append((start, start + s))
+            start += s
+
+        cm = np.zeros((n_nodes, n_nodes), dtype=int)
+
+        def _add_edge(t: int, s: int) -> None:
+            if t == s:
+                return
+            cm[t, s] = 1
+
+        for (a0, a1), (b0, b1) in zip(module_ranges[:-1], module_ranges[1:]):
+            a_nodes = list(range(a0, a1))
+            b_nodes = list(range(b0, b1))
+            k = max(1, min(len(a_nodes), len(b_nodes), 3))
+            srcs = r.choice(a_nodes, size=k, replace=False)
+            tgts = r.choice(b_nodes, size=k, replace=False)
+            for s, t in zip(srcs, tgts):
+                _add_edge(int(t), int(s))
+
+        for (m0, m1) in module_ranges:
+            nodes = list(range(m0, m1))
+            if len(nodes) < 2:
+                continue
+            for i, u in enumerate(nodes):
+                v = nodes[(i + 1) % len(nodes)]
+                _add_edge(int(v), int(u))
+            extra = max(0, int(round(0.35 * len(nodes) * len(nodes))))
+            for _ in range(extra):
+                s = int(r.choice(nodes))
+                t = int(r.choice(nodes))
+                if s == t:
+                    continue
+                if t < s:
+                    s, t = t, s
+                _add_edge(t, s)
+
+        for i in range(n_modules):
+            a0, a1 = module_ranges[i]
+            nodes = list(range(a0, a1))
+            if len(nodes) < 4:
+                continue
+            u, v, w = r.choice(nodes, size=3, replace=False)
+            _add_edge(int(w), int(u))
+            _add_edge(int(w), int(v))
+            _add_edge(int(v), int(u))
+
+        edges = list(zip(*np.nonzero(cm)))
+        if len(edges) > n_edges:
+            keep = set(r.choice(np.arange(len(edges)), size=int(n_edges), replace=False).tolist())
+            cm2 = np.zeros_like(cm)
+            for i, (t, s) in enumerate(edges):
+                if i in keep:
+                    cm2[t, s] = 1
+            return cm2
+
+        attempts = 0
+        max_attempts = int(n_edges) * 50 + 1000
+        while int(cm.sum()) < n_edges and attempts < max_attempts:
+            attempts += 1
+            if r.random() < 0.80:
+                mi = int(r.integers(0, n_modules))
+                m0, m1 = module_ranges[mi]
+                nodes = list(range(m0, m1))
+                if len(nodes) < 2:
+                    continue
+                s = int(r.choice(nodes))
+                t = int(r.choice(nodes))
+                if s == t:
+                    continue
+                if t < s and r.random() < 0.85:
+                    s, t = t, s
+                _add_edge(t, s)
+            else:
+                ma = int(r.integers(0, n_modules - 1))
+                mb = int(r.integers(ma + 1, n_modules))
+                a0, a1 = module_ranges[ma]
+                b0, b1 = module_ranges[mb]
+                s = int(r.integers(a0, a1))
+                t = int(r.integers(b0, b1))
+                _add_edge(t, s)
+        return cm
+
+    paired = base_df.head(int(n_pairs)).copy()
+    rows = []
+    synth_payload = []
+    for i, r0 in paired.iterrows():
+        name = str(r0["name"])
+        n_nodes = int(r0["n_nodes"])
+        n_edges = int(r0["n_edges"])
+
+        bio_data = networks.get(name)
+        if not isinstance(bio_data, dict):
+            continue
+        cm_bio = get_adjacency_matrix(bio_data)
+        if cm_bio.shape[0] != n_nodes:
+            n_nodes = int(cm_bio.shape[0])
+            n_edges = int(cm_bio.sum())
+
+        res_bio = compute_D_bio_vs_random(
+            cm_bio,
+            n_random=int(null_samples),
+            seed_base=10000 + int(i) * 7,
+            null_model="degree_preserved",
+            n_swaps=int(n_nodes) * 20,
+            sort_by_degree=True,
+            tie_breaker="wl",
+        )
+        fold_bio = float(res_bio["D_random_mean"] / res_bio["D_bio"]) if float(res_bio["D_bio"]) > 0 else float("nan")
+
+        cm_syn = _design_graph(n_nodes, n_edges, seed_local=seed + int(i) * 13)
+        res_syn = compute_D_bio_vs_random(
+            cm_syn,
+            n_random=int(null_samples),
+            seed_base=20000 + int(i) * 11,
+            null_model="degree_preserved",
+            n_swaps=int(n_nodes) * 20,
+            sort_by_degree=True,
+            tie_breaker="wl",
+        )
+        fold_syn = float(res_syn["D_random_mean"] / res_syn["D_bio"]) if float(res_syn["D_bio"]) > 0 else float("nan")
+
+        rows.append(
+            {
+                "group": "evolved",
+                "name": name,
+                "n_nodes": int(n_nodes),
+                "n_edges": int(n_edges),
+                "D_bio": float(res_bio["D_bio"]),
+                "D_random_mean": float(res_bio["D_random_mean"]),
+                "z_score": float(res_bio["z_score"]),
+                "p_value": float(res_bio["p_value"]),
+                "fold_reduction": fold_bio,
+            }
+        )
+        rows.append(
+            {
+                "group": "human_designed",
+                "name": f"design_match_{name}",
+                "n_nodes": int(n_nodes),
+                "n_edges": int(n_edges),
+                "D_bio": float(res_syn["D_bio"]),
+                "D_random_mean": float(res_syn["D_random_mean"]),
+                "z_score": float(res_syn["z_score"]),
+                "p_value": float(res_syn["p_value"]),
+                "fold_reduction": fold_syn,
+            }
+        )
+        synth_payload.append(
+            {
+                "match_to": name,
+                "n_nodes": int(n_nodes),
+                "n_edges": int(n_edges),
+                "seed": int(seed + int(i) * 13),
+                "cm": cm_syn.tolist(),
+            }
+        )
+
+    df = pd.DataFrame(rows)
+    df = df.replace([np.inf, -np.inf], np.nan).dropna(subset=["fold_reduction"]).reset_index(drop=True)
+    out_csv = out_dir / "human_vs_evolved_matched.csv"
+    df.to_csv(out_csv, index=False)
+
+    synth_path = out_dir / "human_vs_evolved_synthetic_networks.json"
+    with synth_path.open("w") as f:
+        json.dump({"seed": int(seed), "synthetic_networks": synth_payload}, f, indent=2)
+
+    def _cohens_d(a: np.ndarray, b: np.ndarray) -> float:
+        a = a[np.isfinite(a)]
+        b = b[np.isfinite(b)]
+        if len(a) < 2 or len(b) < 2:
+            return float("nan")
+        va = float(np.var(a, ddof=1))
+        vb = float(np.var(b, ddof=1))
+        sp = np.sqrt(((len(a) - 1) * va + (len(b) - 1) * vb) / (len(a) + len(b) - 2))
+        return float((float(np.mean(a)) - float(np.mean(b))) / sp) if sp > 0 else float("nan")
+
+    evo = df[df["group"] == "evolved"]["fold_reduction"].to_numpy(dtype=float)
+    hum = df[df["group"] == "human_designed"]["fold_reduction"].to_numpy(dtype=float)
+    d_eff = _cohens_d(evo, hum)
+    diff = float(np.mean(evo) - float(np.mean(hum))) if len(evo) and len(hum) else float("nan")
+    boot = []
+    rng2 = np.random.default_rng(int(seed) + 1)
+    for _ in range(5000):
+        a = rng2.choice(evo, size=len(evo), replace=True)
+        b = rng2.choice(hum, size=len(hum), replace=True)
+        boot.append(float(np.mean(a) - np.mean(b)))
+    boot = np.asarray(boot, dtype=float)
+    ci_lo = float(np.quantile(boot, 0.025)) if len(boot) else float("nan")
+    ci_hi = float(np.quantile(boot, 0.975)) if len(boot) else float("nan")
+
+    out_png = out_dir / "human_vs_evolved_matched.png"
+    try:
+        fig, ax = plt.subplots(1, 1, figsize=(7.6, 3.8))
+        ax.hist(hum, bins=20, alpha=0.70, label="human-designed (matched)", color="#DD8452")
+        ax.hist(evo, bins=20, alpha=0.70, label="evolved (matched)", color="#4C72B0")
+        ax.axvline(1.0, color="black", linestyle="--", linewidth=1.0)
+        ax.set_xlabel("Fold reduction (D_null / D_bio)")
+        ax.set_ylabel("Count")
+        ax.set_title("Human-designed vs evolved (matched by N and E)")
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig(out_png, dpi=300, bbox_inches="tight")
+        plt.close(fig)
+    except Exception:
+        pass
+
+    out_json = out_dir / "human_vs_evolved_summary.json"
+    summary = {
+        "protocol": {
+            "match": "per-network N and E",
+            "null_model": "degree_preserved",
+            "n_swaps": "20*N",
+            "ordering": "degree sort + WL tie-break",
+            "n_pairs_target": int(n_pairs),
+            "n_pairs_realized": int(len(df[df['group']=='evolved'])),
+            "null_samples": int(null_samples),
+            "seed": int(seed),
+        },
+        "effect": {
+            "mean_fold_evolved": float(np.mean(evo)) if len(evo) else float("nan"),
+            "mean_fold_human": float(np.mean(hum)) if len(hum) else float("nan"),
+            "mean_diff_evolved_minus_human": float(diff),
+            "mean_diff_ci95": [float(ci_lo), float(ci_hi)],
+            "cohens_d": float(d_eff),
+        },
+        "outputs": {
+            "csv": str(out_csv),
+            "plot": str(out_png),
+            "synthetic_networks": str(synth_path),
+        },
+    }
+    with out_json.open("w") as f:
+        json.dump(summary, f, indent=2)
+    return summary
+
+
+def run_wetlab_readiness_pack(output_dir: Optional[str] = None, top_k: int = 8) -> dict:
+    out_dir = Path(output_dir) if output_dir is not None else (_repo_root() / "4ClaudeCode" / "claude-Nature" / "paper" / "results")
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    repo_root = _repo_root()
+    depmap_release_dir = repo_root / "data" / "DepMap"
+    depmap_effect = depmap_release_dir / "CRISPRGeneEffect.csv"
+    depmap_model = depmap_release_dir / "Model.csv"
+
+    fig_dir = _paper_figures_dir()
+    mapk_csv = fig_dir / "figure3_depmap_validation_mapk_large.csv"
+    if not mapk_csv.exists():
+        raise FileNotFoundError(f"Expected MAPK-large DepMap dataset at {mapk_csv}")
+
+    df = pd.read_csv(mapk_csv)
+    df = df.replace([np.inf, -np.inf], np.nan).dropna(subset=["Mean_Delta_D", "Dependency"]).copy()
+    df["Gene"] = df["Gene"].astype(str)
+    df = df.sort_values("Mean_Delta_D", ascending=False).reset_index(drop=True)
+
+    k = int(min(int(top_k), len(df)))
+    selected = df.head(k).copy()
+    neg_controls = df.tail(min(4, len(df))).copy()
+
+    lineage_table = None
+    if depmap_model.exists():
+        lineage_table = pd.read_csv(depmap_model, low_memory=False)
+        keep_cols = [c for c in ["ModelID", "OncotreeLineage", "OncotreeCode"] if c in lineage_table.columns]
+        lineage_table = lineage_table[keep_cols].copy() if keep_cols else None
+
+    cell_line_recs = {}
+    if depmap_effect.exists() and lineage_table is not None and "ModelID" in lineage_table.columns:
+        header = pd.read_csv(depmap_effect, nrows=0, low_memory=False)
+        cols = header.columns.tolist()
+        id_col = cols[0]
+        symbol_to_col = {}
+        for c in cols[1:]:
+            sym = str(c).split(" (", 1)[0].strip().upper()
+            if sym and sym not in symbol_to_col:
+                symbol_to_col[sym] = c
+
+        needed = []
+        for g in selected["Gene"].astype(str).tolist():
+            key = str(g).strip().upper()
+            if key in symbol_to_col:
+                needed.append(symbol_to_col[key])
+        if needed:
+            usecols = [id_col, *needed]
+            mat = pd.read_csv(depmap_effect, usecols=usecols, low_memory=False)
+            mat = mat.rename(columns={id_col: "ModelID"})
+            mat["ModelID"] = mat["ModelID"].astype(str)
+            merged = mat.merge(lineage_table.astype({"ModelID": str}), on="ModelID", how="left")
+            for g in selected["Gene"].astype(str).tolist():
+                key = str(g).strip().upper()
+                col = symbol_to_col.get(key)
+                if col is None or col not in merged.columns:
+                    continue
+                dep = -pd.to_numeric(merged[col], errors="coerce")
+                tmp = merged[["ModelID"]].copy()
+                tmp["Dependency"] = dep
+                tmp["OncotreeLineage"] = merged.get("OncotreeLineage")
+                tmp["OncotreeCode"] = merged.get("OncotreeCode")
+                tmp = tmp.replace([np.inf, -np.inf], np.nan).dropna(subset=["Dependency"])
+                if len(tmp) == 0:
+                    continue
+                tmp["OncotreeLineage"] = tmp["OncotreeLineage"].astype(str).replace({"nan": ""})
+                lin = tmp.groupby("OncotreeLineage")["Dependency"].mean().sort_values(ascending=False)
+                top_lineages = [l for l in lin.index.tolist() if l and l.lower() != "nan"][:3]
+                picks = []
+                for l in top_lineages:
+                    sub = tmp[tmp["OncotreeLineage"] == l].sort_values("Dependency", ascending=False).head(5)
+                    picks.append(
+                        {
+                            "lineage": str(l),
+                            "mean_dependency_in_lineage": float(lin.loc[l]),
+                            "top_models": sub[["ModelID", "Dependency"]].to_dict(orient="records"),
+                        }
+                    )
+                cell_line_recs[key] = picks
+
+    payload = {
+        "run_id": "LEV8-2026-04-05-007",
+        "objective": "Wet-lab collaboration readiness pack (5–10 testable predictions) grounded in ΔD and external anchors",
+        "inputs": {
+            "mapk_large_node_table": str(mapk_csv),
+            "depmap_release_dir": str(depmap_release_dir),
+            "depmap_gene_effect": str(depmap_effect) if depmap_effect.exists() else None,
+            "depmap_model": str(depmap_model) if depmap_model.exists() else None,
+        },
+        "selection": {
+            "top_k": int(k),
+            "selected_by": "Mean_Delta_D (MAPK-large node set with DepMap mapping)",
+            "selected_genes": selected.to_dict(orient="records"),
+            "negative_controls": neg_controls[["Gene", "Mean_Delta_D", "Dependency"]].to_dict(orient="records"),
+        },
+        "cell_line_recommendations": cell_line_recs,
+        "decision_rule": {
+            "primary_endpoint": "Viability/fitness after perturbation (CRISPRi/CRISPR KO) vs controls",
+            "success_criterion": "At least 6/8 top-ΔD predictions show stronger viability loss than low-ΔD controls in ≥2 lineage-matched cell lines, with the sign consistent across replicates",
+            "negative_controls": "Low-ΔD nodes matched by expression band where feasible",
+        },
+    }
+    out_json = out_dir / "wetlab_readiness_pack.json"
+    with out_json.open("w") as f:
+        json.dump(payload, f, indent=2)
+
+    md_lines = []
+    md_lines.append("# Wet-lab Collaboration Readiness Pack (LEV8)\n")
+    md_lines.append("## Objective\n")
+    md_lines.append("Produce a collaborator-facing, testable prediction set grounded in the mechanistic information-loss score ΔD, with explicit negative controls and decision rules.\n")
+    md_lines.append("## What ΔD means experimentally\n")
+    md_lines.append("- ΔD(v)=D(G)−D(G\\v) quantifies the information lost when removing a node from the wiring diagram under a frozen encoding.\n")
+    md_lines.append("- The operational hypothesis for wet-lab: high-ΔD perturbations should induce larger functional disruption than low-ΔD perturbations under lineage-matched conditions.\n")
+    md_lines.append("## Candidate targets (MAPK-large scaffold; DepMap-mapped subset)\n")
+    md_lines.append("|Gene|Mean ΔD|DepMap dependency proxy|Notes|\n|---|---:|---:|---|\n")
+    for _, r0 in selected.iterrows():
+        md_lines.append(f"|{r0['Gene']}|{float(r0['Mean_Delta_D']):.4g}|{float(r0['Dependency']):.4g}|Top-ΔD candidate|\n")
+    md_lines.append("\n## Negative controls (low-ΔD; same scaffold)\n")
+    md_lines.append("|Gene|Mean ΔD|DepMap dependency proxy|\n|---|---:|---:|\n")
+    for _, r0 in neg_controls.iterrows():
+        md_lines.append(f"|{r0['Gene']}|{float(r0['Mean_Delta_D']):.4g}|{float(r0['Dependency']):.4g}|\n")
+    md_lines.append("\n## Experimental design (minimal viable)\n")
+    md_lines.append("- Perturbation: CRISPRi (preferred for graded loss) or CRISPR knockout for non-essential viability endpoints.\n")
+    md_lines.append("- Readout: viability/fitness (primary), plus at least one pathway-relevant phenotype (e.g., ERK phosphorylation for MAPK nodes) if feasible.\n")
+    md_lines.append("- Cell lines: choose lineage-matched lines where the target gene shows strong DepMap dependency; recommended candidates per gene are recorded in the JSON bundle.\n")
+    md_lines.append("- Controls: low-ΔD genes + non-targeting guides; match expression band when possible.\n")
+    md_lines.append("- Decision rule: success if ≥6/8 high-ΔD targets exceed control viability impact in ≥2 lineage-matched lines with consistent sign.\n")
+    md_lines.append("\n## Provenance\n")
+    md_lines.append(f"- Inputs: {mapk_csv}\n")
+    md_lines.append(f"- DepMap release dir: {depmap_release_dir}\n")
+    md_lines.append(f"- Machine-readable bundle: {out_json}\n")
+
+    out_md = out_dir / "wetlab_readiness_pack.md"
+    out_md.write_text("".join(md_lines))
+
+    return {"json": str(out_json), "md": str(out_md)}
+
+
+def freeze_massive_test_matrix(output_dir: Optional[str] = None) -> dict:
+    out_dir = Path(output_dir) if output_dir is not None else _paper_figures_dir()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    matrix = []
+    seeds = [42, 314159, 271828]
+    orderings = [("degree", "wl")]
+    null_models = ["degree_preserved", "er"]
+    n_randoms = [25, 50, 100]
+    swap_mults = [5, 20, 100]
+
+    cohorts = [
+        {"cohort": "gate_a_corpus", "analysis": "universality_D_vs_null"},
+        {"cohort": "cellcollective_sbml", "analysis": "universality_D_vs_null"},
+        {"cohort": "synthetic_design_match", "analysis": "human_vs_evolved"},
+        {"cohort": "depmap_scaffold_egfr", "analysis": "depmap_anchor"},
+        {"cohort": "depmap_scaffold_mapk_large", "analysis": "depmap_anchor"},
+    ]
+
+    tolerances = {
+        "mean_z_drift_max": 0.25,
+        "mean_fold_drift_rel_max": 0.08,
+        "auc_drift_max": 0.03,
+        "ordering_rel_sd_max": 0.002,
+    }
+
+    for c in cohorts:
+        for nm in null_models:
+            for (ord_name, tie) in orderings:
+                for s in seeds:
+                    for nr in n_randoms:
+                        for sm in swap_mults:
+                            matrix.append(
+                                {
+                                    "cohort": c["cohort"],
+                                    "analysis": c["analysis"],
+                                    "null_model": nm,
+                                    "n_random": int(nr),
+                                    "n_swaps_mult": int(sm) if nm == "degree_preserved" else None,
+                                    "seed": int(s),
+                                    "ordering": ord_name,
+                                    "tie_breaker": tie,
+                                    "tolerances_ref": "TSK-LEV8-00-004 / reproducibility_stress_summary.json",
+                                }
+                            )
+
+    df = pd.DataFrame(matrix)
+    out_csv = out_dir / "massive_test_matrix.csv"
+    df.to_csv(out_csv, index=False)
+    out_json = out_dir / "massive_test_matrix_summary.json"
+    with out_json.open("w") as f:
+        json.dump({"tolerances": tolerances, "matrix": matrix}, f, indent=2)
+    return {"csv": str(out_csv), "json": str(out_json), "n_rows": int(len(df))}
+
+
+def run_runtime_scaling_characterization(output_dir: Optional[str] = None, n_networks: int = 30, null_samples_grid: Optional[list[int]] = None) -> dict:
+    out_dir = Path(output_dir) if output_dir is not None else _paper_figures_dir()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if null_samples_grid is None:
+        null_samples_grid = [25, 50, 100]
+
+    nets = load_all_networks()
+    candidates = []
+    for name, data in nets.items():
+        cm = get_adjacency_matrix(data)
+        n = int(cm.shape[0])
+        if 5 <= n <= 120:
+            candidates.append((str(name), data))
+    candidates = sorted(candidates, key=lambda x: len(x[1].get("nodes", [])))
+    pick = candidates[:: max(1, len(candidates) // int(n_networks))][: int(n_networks)]
+
+    rows = []
+    for i, (name, data) in enumerate(pick):
+        cm = get_adjacency_matrix(data)
+        n = int(cm.shape[0])
+        e = int(cm.sum())
+        for nr in null_samples_grid:
+            t0 = time.perf_counter()
+            _ = compute_D_bio_vs_random(
+                cm,
+                n_random=int(nr),
+                seed_base=90000 + i * 13,
+                null_model="degree_preserved",
+                n_swaps=int(n) * 20,
+                sort_by_degree=True,
+                tie_breaker="wl",
+            )
+            dt = time.perf_counter() - t0
+            rows.append(
+                {
+                    "name": str(name),
+                    "n_nodes": int(n),
+                    "n_edges": int(e),
+                    "n_random": int(nr),
+                    "seconds": float(dt),
+                }
+            )
+
+    df = pd.DataFrame(rows)
+    out_csv = out_dir / "runtime_scaling.csv"
+    df.to_csv(out_csv, index=False)
+
+    out_png = out_dir / "runtime_scaling.png"
+    try:
+        fig, ax = plt.subplots(1, 1, figsize=(7.8, 3.8))
+        for nr in sorted(set(df["n_random"].tolist())):
+            sub = df[df["n_random"] == nr].copy().sort_values("n_nodes")
+            ax.plot(sub["n_nodes"], sub["seconds"], marker="o", linewidth=1.5, label=f"n_null={int(nr)}")
+        ax.set_xlabel("n_nodes")
+        ax.set_ylabel("Runtime (seconds)")
+        ax.set_title("Runtime scaling for compute_D_bio_vs_random (degree-preserved)")
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig(out_png, dpi=300, bbox_inches="tight")
+        plt.close(fig)
+    except Exception:
+        pass
+
+    out_json = out_dir / "runtime_scaling_summary.json"
+    summary = {
+        "protocol": {
+            "n_networks": int(len(pick)),
+            "null_samples_grid": [int(x) for x in null_samples_grid],
+            "null_model": "degree_preserved",
+            "n_swaps": "20*N",
+            "ordering": "degree sort + WL tie-break",
+        },
+        "outputs": {"csv": str(out_csv), "plot": str(out_png)},
+    }
+    with out_json.open("w") as f:
+        json.dump(summary, f, indent=2)
+    return summary
+
+
+def run_repro_lock_manifest(output_dir: Optional[str] = None) -> dict:
+    out_dir = Path(output_dir) if output_dir is not None else _paper_figures_dir()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = out_dir.resolve()
+
+    patterns = [
+        "figure1_algorithmic_efficiency.png",
+        "figure2_essentiality_*.png",
+        "essentiality_*.json",
+        "essentiality_*.csv",
+        "bias_defense_*.json",
+        "bias_defense_*.csv",
+        "figure_bias_defense_*.png",
+        "reproducibility_stress_*.json",
+        "reproducibility_stress_*.csv",
+        "reproducibility_stress_*.png",
+        "gate_thresholds_*.csv",
+        "gate_thresholds_*.png",
+        "figure3_depmap_validation*.png",
+        "figure3_depmap_validation*.json",
+        "figure3_depmap_validation*.csv",
+        "cellcollective_independent_cohort.*",
+        "human_vs_evolved_*.*",
+        "massive_test_matrix.*",
+    ]
+
+    files = []
+    for pat in patterns:
+        files.extend(sorted(out_dir.glob(pat)))
+    files = sorted({p.resolve() for p in files if p.is_file()})
+
+    manifest = {"generated_at": time.strftime("%Y-%m-%d"), "base_dir": str(out_dir), "files": []}
+    for p in files:
+        h = hashlib.sha256()
+        with p.open("rb") as f:
+            for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                h.update(chunk)
+        rel = str(p.relative_to(out_dir))
+        manifest["files"].append({"path": rel, "sha256": h.hexdigest()})
+
+    out_json = out_dir / "repro_lock_manifest.json"
+    with out_json.open("w") as f:
+        json.dump(manifest, f, indent=2)
+    return {"json": str(out_json), "n_files": int(len(manifest["files"]))}
+
+
+def verify_repro_lock_manifest(manifest_path: str) -> dict:
+    p = Path(manifest_path)
+    data = json.loads(p.read_text())
+    base_dir = Path(data["base_dir"])
+    failures = []
+    for item in data.get("files", []):
+        fp = base_dir / item["path"]
+        if not fp.exists():
+            failures.append({"path": item["path"], "reason": "missing"})
+            continue
+        h = hashlib.sha256()
+        with fp.open("rb") as f:
+            for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                h.update(chunk)
+        actual = h.hexdigest()
+        if str(actual).lower() != str(item["sha256"]).lower():
+            failures.append({"path": item["path"], "reason": "checksum_mismatch", "expected": item["sha256"], "actual": actual})
+    return {"manifest": str(p), "n_files": int(len(data.get("files", []))), "n_failures": int(len(failures)), "failures": failures}
+
+
 # ============================================================================
 # SECTION 5: MAIN ANALYSIS
 # ============================================================================
@@ -2697,11 +3518,19 @@ if __name__ == "__main__":
     parser.add_argument("--evaluate-gates", action="store_true")
     parser.add_argument("--stress-tests", action="store_true")
     parser.add_argument("--bias-tests", action="store_true")
+    parser.add_argument("--cellcollective-cohort", action="store_true")
+    parser.add_argument("--human-vs-evolved", action="store_true")
+    parser.add_argument("--wetlab-pack", action="store_true")
+    parser.add_argument("--massive-test-matrix", action="store_true")
+    parser.add_argument("--scaling-report", action="store_true")
+    parser.add_argument("--repro-lock", action="store_true")
+    parser.add_argument("--repro-verify", type=str, default=None)
     parser.add_argument("--figures-dir", type=str, default=None)
     parser.add_argument("--bootstrap", type=int, default=10000)
     parser.add_argument("--repro-nets", type=int, default=30)
     parser.add_argument("--skip-depmap", action="store_true")
     parser.add_argument("--null-samples", type=int, default=50)
+    parser.add_argument("--hv-pairs", type=int, default=60)
     args = parser.parse_args()
 
     np.random.seed(42)
@@ -2715,5 +3544,20 @@ if __name__ == "__main__":
         run_reproducibility_stress_tests(output_dir=args.figures_dir, n_networks=args.repro_nets)
     elif args.bias_tests:
         run_bias_defense_suite(output_dir=args.figures_dir)
+    elif args.cellcollective_cohort:
+        run_cellcollective_independent_cohort(output_dir=args.figures_dir, null_samples=max(int(args.null_samples), 200))
+    elif args.human_vs_evolved:
+        run_human_designed_vs_evolved(output_dir=args.figures_dir, n_pairs=int(args.hv_pairs), null_samples=max(int(args.null_samples), 100))
+    elif args.wetlab_pack:
+        run_wetlab_readiness_pack(output_dir=args.figures_dir, top_k=8)
+    elif args.massive_test_matrix:
+        freeze_massive_test_matrix(output_dir=args.figures_dir)
+    elif args.scaling_report:
+        run_runtime_scaling_characterization(output_dir=args.figures_dir, n_networks=max(int(args.repro_nets), 30))
+    elif args.repro_lock:
+        run_repro_lock_manifest(output_dir=args.figures_dir)
+    elif args.repro_verify:
+        res = verify_repro_lock_manifest(args.repro_verify)
+        print(json.dumps(res, indent=2))
     else:
         run_full_analysis(output_dir=args.figures_dir, skip_depmap=args.skip_depmap, null_samples=args.null_samples)

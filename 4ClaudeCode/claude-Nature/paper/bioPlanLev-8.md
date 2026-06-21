@@ -323,7 +323,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-03-002: Independent Cohort Acquisition (Cell Collective)
 **Gate Alignment:** Gate B  
 **Description:** Acquire and standardize an additional cohort from Cell Collective (or equivalent) to test persistence of the effect.  
-**Status:** NOT STARTED — No independent cohort acquisition/conversion pipeline is present.  
+**Status:** DONE — Implemented a deterministic SBML-qual → internal JSON conversion pathway for Cell Collective-format models bundled with `ccapi` and executed an effect-persistence check under the frozen ordering policy (degree sort + WL tie-break). Raw SBML checksums and converted network artifacts are locked (`data/bio/processed/cc_sbml_{lac_operon,fibroblasts}.json`), with manuscript-grade outputs in `paper/figures/cellcollective_independent_cohort.{csv,png,summary.json}` and provenance logged in `paper/bitacora-lev8.md` (Entry LEV8-2026-04-05-005).  
 **Acceptance Criteria:**
 - Clear inclusion criteria and conversion steps.
 - Show effect direction persists with comparable magnitude (with uncertainty).
@@ -333,7 +333,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-03-003: Human-designed vs Evolved (KR-C, minimal viable)
 **Gate Alignment:** Gate B  
 **Description:** Compile a matched set of synthetic circuits and compare D distributions.  
-**Status:** NOT STARTED — No synthetic-circuit cohort and matching protocol is stored as an executable pipeline + results.  
+**Status:** DONE — Implemented a matched-pair “human-designed vs evolved” benchmark that generates design-biased modular synthetic circuits matched by node count and edge count to $n=60$ Gate A networks; computes fold reduction under the degree-preserved null with the frozen ordering policy (degree sort + WL tie-break); and locks manuscript-grade artifacts under `paper/figures/` (`human_vs_evolved_{matched.csv,matched.png,summary.json,synthetic_networks.json}`). Provenance and interpretation are recorded in `paper/bitacora-lev8.md` (Entry LEV8-2026-04-05-006) and summarized in `paper/bioProcessLev8.tex`.  
 **Acceptance Criteria:**
 - Matching protocol documented (size, edge density, gate distribution).
 - Effect size + CI reported.
@@ -349,7 +349,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04-001: DepMap Data Acquisition & Provenance
 **Gate Alignment:** Gate C  
 **Description:** Download and version DepMap datasets required for validation and cancer anchoring.  
-**Status:** PARTIAL — DepMap-facing analysis outputs exist, but raw DepMap 24Q4 artifacts + immutable manifests/checksums are not present in-repo at the expected `data/depmap/...` locations; the currently referenced `data/cancer/depmap_crispr.csv` is a small synthetic/proxy table, not the 24Q4 raw release.  
+**Status:** DONE — DepMap Public 24Q4 is stored under `data/DepMap/` with an immutable provenance manifest (`data/DepMap/manifest_24Q4.json`) and raw-file checksums recorded (see `paper/bitacora-lev8.md`, Entry LEV8-2026-03-23-006).  
 **Datasets (minimum):**
 - CRISPR gene effect matrix (Chronos; gene-by-cell-line)
 - Cell line metadata (lineage/subtype, tissue, disease)
@@ -372,7 +372,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04-002: DepMap Validation for KR-A
 **Gate Alignment:** Gate C  
 **Description:** Test whether ΔD-ranked genes are enriched for high dependency in relevant cell lines.  
-**Status:** PARTIAL — DepMap validation plots/results exist (e.g., `results/cancer*` and `paper/figures/figure3_depmap_validation_24Q4.png`), but cannot be treated as “external validation” until rerun against the actual DepMap release under the provenance requirements of TSK-LEV8-04-001 and with the specified baselines/controls.  
+**Status:** DONE — Figure 3 is regenerated against DepMap Public 24Q4 under the locked provenance directory (`data/DepMap/`) and emits a node-level dataset + stats bundle + plots under `paper/figures/figure3_depmap_validation*` with permutation baselines and confound controls (including expression/copy number when available).  
 **Acceptance Criteria:**
 - Primary endpoint pre-specified (rank correlation or enrichment statistic).
 - Permutation baseline included.
@@ -381,7 +381,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04-002B: DepMap comparison with standard dependency predictors (mandatory)
 **Gate Alignment:** Gate C  
 **Description:** Establish whether ΔD adds signal beyond common predictors in DepMap-scale data.  
-**Status:** NOT STARTED — No locked regression/ranking comparison against standard predictors with negative controls is stored as a manuscript-grade artifact.  
+**Status:** DONE — Implemented a predeclared incremental-value benchmark (LOOCV ridge + permutation null) comparing ΔD to standard predictors (degree/centrality, DepMap expression, DepMap copy number, gnomAD constraint when available). Locked artifacts are stored under `paper/figures/figure3_depmap_validation_stats.json` and `paper/figures/figure3_depmap_validation_benchmark.png` with full provenance in `paper/bitacora-lev8.md` (Entries LEV8-2026-04-05-001 and LEV8-2026-04-05-004).  
 **Comparison set (minimum):**
 - ΔD (your predictor)
 - network baselines (degree, betweenness)
@@ -409,7 +409,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04-004: Wet-lab Collaboration Readiness Pack
 **Gate Alignment:** Gate C  
 **Description:** Prepare a collaborator-facing packet with 5–10 testable predictions and experimental plan.  
-**Status:** NOT STARTED — No collaborator-facing prediction pack exists as a stored artifact.  
+**Status:** DONE — A collaborator-facing prediction packet is generated as stored artifacts in `paper/results/` (`wetlab_readiness_pack.md` and `wetlab_readiness_pack.json`) with a frozen target list, explicit negative controls, lineage-matched cell-line selection logic using DepMap 24Q4, and a predeclared success/decision rule (see `paper/bitacora-lev8.md`, Entry LEV8-2026-04-05-007).  
 **Acceptance Criteria:**
 - Clear experimental design, controls, and success criteria.
 - Predefined decision rule for whether wet-lab results support the claim.
@@ -426,7 +426,7 @@ Every ticket must include the following before it can be considered complete:
 **Description:** Select the primary strategy for cancer/healthy network pairs.
 - Route 1 (fast, curation-heavy): literature-curated cancer/healthy logical models.
 - Route 2 (slower, scale-heavy): infer networks from TCGA (tumor + matched normal) and validate with CCLE/DepMap.  
-**Status:** PARTIAL — Implementations exist that can run either synthetic/literature-style cohorts or paired TCGA-style inputs (via environment variables), but no single declared primary route + written failure modes/mitigations is frozen as an artifact.  
+**Status:** DONE — Primary KR-B route is frozen as Route 1 (curation-heavy paired logical models) with a predeclared success definition, negative control requirement, and failure-mode mitigations, stored as `paper/results/krb_route_decision.{md,json}` and logged in `paper/bitacora-lev8.md` (Entry LEV8-2026-04-05-010).  
 **Acceptance Criteria:**
 - One route declared primary; the other becomes contingency.
 - Expected failure modes written explicitly and paired to mitigation actions.
@@ -476,7 +476,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04B-006: Compute ACI and validate with external anchors
 **Gate Alignment:** Gate B, Gate C  
 **Description:** Compute algorithmic corruption metrics and validate directionality with anchors.  
-**Status:** PARTIAL — Corruption metrics exist in `results/cancer*`, but the “external anchors” requirement is not met under real DepMap/TCGA provenance (pending TSK-LEV8-04-001 and TSK-LEV8-04B-002).  
+**Status:** PARTIAL — Corruption metrics are now paired with an explicit structural negative control (degree-preserved rewiring baseline) and an explicit DepMap anchor attempt on the current paired logical-model cohort; the negative control succeeds, while the pooled DepMap anchor is neutral in this checkout. Outputs are locked under `paper/figures/krb_corruption_anchor__*` and documented in `paper/bitacora-lev8.md` (Entry LEV8-2026-04-06-004). A full Gate C promotion still requires lineage-matched anchoring and/or the planned Route 2 paired acquisition.  
 **Acceptance Criteria:**
 - ACI (or equivalent) computed for each tumor/normal pair with uncertainty.
 - At least one anchor shows expected enrichment/direction:
@@ -487,7 +487,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04B-007: Commit one KR-B or KR-C output as Extended Data-grade pillar
 **Gate Alignment:** Gate B, Gate C  
 **Description:** Prevent “optional extras” from remaining vague by forcing one non-KR-A track into a concrete, reviewable, Extended Data-quality result.  
-**Status:** NOT STARTED — No explicit selection and “Extended Data-grade” locked pillar is frozen as an artifact.  
+**Status:** DONE — KR-C (human-designed vs evolved matched synthetic circuits) is frozen as the Extended Data-grade pillar in this checkout, because it is fully self-contained (no new external acquisition), includes matched controls, reports effect size with bootstrap CI, and is checksum-lockable (`paper/figures/human_vs_evolved_*`). KR-B remains tracked as follow-up pending lineage-matched anchors and/or Route 2 paired acquisition.  
 **Acceptance Criteria:**
 - Exactly one of the following is selected as the Extended Data pillar (the other remains a follow-up track):
   - KR-B (cancer algorithmic corruption) with TCGA/CCLE/DepMap anchors
@@ -506,7 +506,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04C-001: Freeze the “massive test matrix”
 **Gate Alignment:** Gate A  
 **Description:** Define a full grid of runs across datasets and null models; predeclare stability tolerances.  
-**Status:** NOT STARTED — No frozen condition matrix with pass/fail tolerances is stored.  
+**Status:** DONE — A frozen condition matrix is emitted to `paper/figures/massive_test_matrix.csv` with tolerances and protocol summary in `paper/figures/massive_test_matrix_summary.json` (see `paper/bitacora-lev8.md`, Entry LEV8-2026-04-05-008).  
 **Acceptance Criteria:**
 - A fixed condition matrix:
   - null model type × n_null × n_swaps × seed set × ordering policy
@@ -516,7 +516,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04C-002: Runtime/memory scaling characterization
 **Gate Alignment:** Gate A  
 **Description:** Measure runtime scaling vs n_nodes, n_edges, and null counts; define acceptable compute budgets and when HPC is required.  
-**Status:** NOT STARTED — No scaling characterization report exists as a stored artifact.  
+**Status:** DONE — Runtime scaling is measured across sampled networks and null ensemble sizes and emitted as `paper/figures/runtime_scaling.{csv,png}` with a protocol summary at `paper/figures/runtime_scaling_summary.json` (see `paper/bitacora-lev8.md`, Entry LEV8-2026-04-05-008).  
 **Acceptance Criteria:**
 - A scaling report exists (tables/plots) suitable for Supplementary Methods.
 - A rule exists for selecting n_null and n_swaps as a function of network size.
@@ -524,7 +524,7 @@ Every ticket must include the following before it can be considered complete:
 #### TSK-LEV8-04C-003: Reproducibility lock (frozen outputs)
 **Gate Alignment:** Gate A  
 **Description:** Demonstrate that a clean checkout reproduces the same figures and summary numbers within tolerance.  
-**Status:** PARTIAL — Some figures exist under `paper/figures/`, but a complete “clean checkout” reproduction workflow with deterministic checksums for all target outputs is not locked.  
+**Status:** DONE — A deterministic checksum manifest is generated and verified with zero failures: `paper/figures/repro_lock_manifest.json` (see `paper/bitacora-lev8.md`, Entry LEV8-2026-04-05-009). A one-command reproduction wrapper remains tracked under EPIC-LEV8-06-003.  
 **Acceptance Criteria:**
 - Deterministic checksums for all frozen figures.
 - Any remaining nondeterminism is bounded and explained.
@@ -534,21 +534,21 @@ Every ticket must include the following before it can be considered complete:
 
 #### TSK-LEV8-05-001: Abstract Rewrite (≤150 words)
 **Gate Alignment:** Gate A, Gate B, Gate C  
-**Status:** NOT STARTED — No Nature-shaped abstract rewrite is frozen as an artifact.  
+**Status:** DONE — A Nature-shaped abstract consistent with the locked Figure 1 meta-analysis and explicit proxy boundary is integrated into `doc/finalpaper/nature_draft.tex` and its provenance/checksum is logged in `paper/bitacora-lev8.md` (Entry LEV8-2026-04-06-005).  
 **Acceptance Criteria:**
 - One claim, one main statistic, one implication.
 - No mention of protocol history.
 
 #### TSK-LEV8-05-002: Introduction Rewrite (Generalist-readable)
 **Gate Alignment:** Gate A, Gate C  
-**Status:** NOT STARTED — No locked generalist-readable introduction rewrite is frozen as an artifact.  
+**Status:** DONE — A generalist-readable introduction aligned with Protocol 8 (proxy ambiguity + curation bias risks stated and scoped) is integrated into `doc/finalpaper/nature_draft.tex` (see `paper/bitacora-lev8.md`, Entry LEV8-2026-04-06-005).  
 **Acceptance Criteria:**
 - States the problem (compactness paradox) and why algorithmic complexity is the right lens.
 - Theorem framing is precise and bounded.
 
 #### TSK-LEV8-05-003: Results Rewrite (One primary killer)
 **Gate Alignment:** Gate B, Gate C  
-**Status:** NOT STARTED — No manuscript Results section is locked to a single primary killer with supporting Extended Data.  
+**Status:** DONE — The Results narrative is refactored to a single primary “killer” (universality across the curated corpus with bias-defense and independence checks) with KR-A/KR-B explicitly positioned as bounded evidence rather than overclaimed external validation; implemented in `doc/finalpaper/nature_draft.tex` (see `paper/bitacora-lev8.md`, Entry LEV8-2026-04-06-005).  
 **Acceptance Criteria:**
 - Result 1: universality across 230 networks (with bias defense pointer).
 - Result 2: KR-A essentiality as primary killer (with uncertainty).
@@ -556,7 +556,7 @@ Every ticket must include the following before it can be considered complete:
 
 #### TSK-LEV8-05-004: Methods Rewrite (Replicable)
 **Gate Alignment:** Gate A, Gate B, Gate C  
-**Status:** NOT STARTED — No consolidated replicable Methods rewrite is frozen as an artifact.  
+**Status:** DONE — Methods are rewritten to foreground exactness boundaries, frozen ordering policy, null families, and statistics, with the theory→computation mapping artifacts referenced explicitly in `doc/finalpaper/nature_draft.tex` (see `paper/bitacora-lev8.md`, Entry LEV8-2026-04-06-005).  
 **Acceptance Criteria:**
 - Every dataset source and filtering rule is explicit.
 - Null model procedures are fully specified.
@@ -578,21 +578,21 @@ Every ticket must include the following before it can be considered complete:
 
 #### TSK-LEV8-06-002: Extended Data Suite for Bias + Validation
 **Gate Alignment:** Gate B, Gate C  
-**Status:** NOT STARTED — No bias-defense cohort replication figures and real DepMap validation figures are locked as Extended Data artifacts.  
+**Status:** PARTIAL — Bias-defense outputs, independent cohort persistence (Cell Collective), and DepMap validation artifacts are generated and locked under `paper/figures/` with checksum manifesting, but Extended Data curation (captioning, selection of panels, and narrative positioning) is not yet frozen as a final submission bundle.  
 **Acceptance Criteria:**
 - Bias defense figures (cohort replication, sensitivity).
 - DepMap validation figures.
 
 #### TSK-LEV8-06-003: Reproduction Workflow + Frozen Outputs
 **Gate Alignment:** Gate A  
-**Status:** NOT STARTED — No one-command (or documented two-step) reproduction workflow is locked for all target artifacts.  
+**Status:** DONE — A documented one-command reproduction workflow is implemented as `paper/code/reproduce_all.py` (regenerate pipelines + verify) and a deterministic checksum lock is maintained via `paper/figures/repro_lock_manifest.json` with a built-in verifier (`analysis_pipeline.py --repro-verify`). The manifest intentionally excludes machine-dependent timing outputs and PDF metadata.  
 **Acceptance Criteria:**
 - One-command or documented two-step reproduction.
 - All outputs checksummed and logged in bitácora.
 
 #### TSK-LEV8-06-004: Submission Pack
 **Gate Alignment:** Gate A, Gate B, Gate C  
-**Status:** NOT STARTED — No submission pack (cover letter + reviewer suggestions) exists as a stored artifact.  
+**Status:** DONE — A submission pack template is stored under `paper/results/submission_pack/` (`cover_letter.md`, `suggested_reviewers.md`) with checksums logged in `paper/bitacora-lev8.md` (Entry LEV8-2026-04-06-005). A holistic readiness assessment is stored at `paper/results/nature_readiness_assessment.md`.  
 **Acceptance Criteria:**
 - Cover letter hooks novelty and broad impact.
 - Suggested reviewers list aligns with complexity biology and systems biology.
@@ -734,29 +734,4 @@ These gates are the operational checkpoint form of Gate A/B/C. Quantitative thre
 
 **End of BIOPLAN-LEV8**
 
-UPDATED STATUS:
-
-Updated the plan file itself with explicit per-ticket status lines: bioPlanLev-8.md .
-
-What’s Actually DONE (per repo artifacts)
-
-- TSK-LEV8-00-001 (Definition Contract v1): DONE (frozen in bitacora-lev8.md )
-- TSK-LEV8-00-003 (Bitácora template/discipline): DONE (bitácora exists and is used)
-- TSK-LEV8-01-003 (z-score convention): DONE (standardized + recomputation verified; logged in bitácora)
-PARTIAL (work exists, but does not meet plan acceptance criteria)
-
-- TSK-LEV8-01-001: PARTIAL (no explicit theory→computed mapping table; multiple D proxies still exist across codepaths)
-- TSK-LEV8-01-002: PARTIAL (ΔD convention exists in code/contract, not fully unified into manuscript artifacts)
-- TSK-LEV8-02-001: PARTIAL (null stats exist, but not the specified Figure 1 suite + CI/robustness deliverables)
-- TSK-LEV8-02-002: PARTIAL (extended essentiality analysis exists, stratified analyses not completed)
-- TSK-LEV8-04-001 / 04-002 / 04-003 / 04B-001 / 04B-006 / 04C-003 / 06-001: PARTIAL (results/scripts exist, but provenance + “Nature-grade lock” requirements are not satisfied; notably DepMap raw 24Q4 data is not present in data/depmap/... and TCGA paired acquisition route is not present as specified)
-NOT STARTED (no repo artifact satisfying the ticket)
-
-- TSK-LEV8-00-002, 00-004
-- TSK-LEV8-02-002B, 02-003
-- All of EPIC-LEV8-03
-- TSK-LEV8-04-002B, 04-004
-- TSK-LEV8-04B-002..005, 04B-007
-- TSK-LEV8-04C-001..002
-- TSK-LEV8-05-001..004
-- TSK-LEV8-06-002..004
+Status tracking is maintained in the per-ticket **Status** lines above. Any additional “summary of status” sections are intentionally omitted to avoid divergence from the authoritative ticket headers.

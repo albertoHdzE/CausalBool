@@ -7,6 +7,7 @@ from scipy import stats
 from datetime import datetime
 import sys
 import re
+from pathlib import Path
 try:
     import matplotlib.pyplot as plt
 except Exception:
@@ -86,12 +87,33 @@ class DepMapValidation:
                 "GFs": ["EGF", "TGFA", "IGF1"],
                 "RTK": ["EGFR", "ERBB2", "ERBB3"],
                 "MAPK": ["MAPK1", "MAPK3"],
+                "TGFBR": ["TGFBR1", "TGFBR2"],
+                "MEK1_2": ["MAP2K1", "MAP2K2"],
+                "MAP3K1_3": ["MAP3K1", "MAP3K3"],
+                "TAK1": ["MAP3K7"],
+                "MTK1": ["MAP3K4"],
+                "TAOK": ["TAOK1", "TAOK2", "TAOK3"],
+                "JNK": ["MAPK8", "MAPK9", "MAPK10"],
+                "p38": ["MAPK14", "MAPK11", "MAPK12", "MAPK13"],
+                "RSK": ["RPS6KA1", "RPS6KA2", "RPS6KA3", "RPS6KA4", "RPS6KA5", "RPS6KA6"],
+                "MSK": ["RPS6KA4", "RPS6KA5"],
+                "p70": ["RPS6KB1", "RPS6KB2"],
+                "PKC": ["PRKCA", "PRKCB", "PRKCD", "PRKCE", "PRKCQ", "PRKCZ", "PRKCI", "PRKCG"],
+                "PLCG": ["PLCG1", "PLCG2"],
                 "PIP3": [],
                 "FOXO3": ["FOXO3"],
                 "cycE": ["CCNE1", "CCNE2"],
                 "TSC": ["TSC1", "TSC2"],
                 "PRAS40": ["AKT1S1"],
                 "Rb": ["RB1"],
+                "p53": ["TP53"],
+                "p21": ["CDKN1A"],
+                "p14": ["CDKN2A"],
+                "SMAD": ["SMAD2", "SMAD3", "SMAD4"],
+                "AP1": ["FOS", "JUN"],
+                "CREB": ["CREB1"],
+                "SPRY": ["SPRY1", "SPRY2", "SPRY4"],
+                "GADD45": ["GADD45A", "GADD45B", "GADD45G"],
                 "mTORC1": ["MTOR", "RPTOR"],
                 "E2F": ["E2F1", "E2F2", "E2F3"],
                 "EIF4F": ["EIF4E", "EIF4G1", "EIF4A1"],
@@ -108,6 +130,40 @@ class DepMapValidation:
                 if gg:
                     gs.append(gg)
             canon[k] = gs
+
+        try:
+            wl_max_nodes = int(os.environ.get("DEPMAP_WL_MAX_NODES", "2000") or "2000")
+            wl_max_files = int(os.environ.get("DEPMAP_WL_MAX_FILES", "50") or "50")
+        except Exception:
+            wl_max_nodes = 2000
+            wl_max_files = 50
+        try:
+            if self.data_dir and os.path.isdir(self.data_dir) and wl_max_nodes > 0 and wl_max_files > 0:
+                candidates = []
+                for f in sorted(os.listdir(self.data_dir)):
+                    if f.endswith("_Tumor.json") or f.endswith(".json"):
+                        candidates.append(os.path.join(self.data_dir, f))
+                    if len(candidates) >= wl_max_files:
+                        break
+                added = 0
+                for p in candidates:
+                    try:
+                        with open(p, "r", encoding="utf-8") as h:
+                            net = json.load(h)
+                    except Exception:
+                        continue
+                    for n in list(net.get("nodes", []) or []):
+                        k = self._normalize_gene_symbol(n).strip().upper()
+                        if not k or k in canon:
+                            continue
+                        canon[k] = [k]
+                        added += 1
+                        if added >= wl_max_nodes:
+                            break
+                    if added >= wl_max_nodes:
+                        break
+        except Exception:
+            pass
         self.node_gene_map = canon
         self.depmap_data = self._load_depmap()
         self.depmap_map = (
@@ -117,6 +173,16 @@ class DepMapValidation:
             .mean()
             .to_dict()
         )
+        self.keep_model_ids = self._select_keep_model_ids()
+        wl = set()
+        for node, genes in self.node_gene_map.items():
+            wl.add(str(node).strip().upper())
+            for g in genes:
+                wl.add(str(g).strip().upper())
+        wl = {g for g in wl if g}
+        self.depmap_expr_map = self._load_feature_map_from_matrix(self._infer_depmap_expr_path(), wl, keep_model_ids=self.keep_model_ids)
+        self.depmap_cn_map = self._load_feature_map_from_matrix(self._infer_depmap_cn_path(), wl, keep_model_ids=self.keep_model_ids)
+        self.gnomad_pli_map, self.gnomad_loeuf_map = self._load_gnomad_maps(wl)
         
     @staticmethod
     def _normalize_gene_symbol(name: str) -> str:
@@ -124,8 +190,167 @@ class DepMapValidation:
         name = re.sub(r"\s*\(\d+\)$", "", name)
         return name
 
+    @staticmethod
+    def _safe_tag(s: str) -> str:
+        s = str(s)
+        s = s.strip().upper()
+        s = re.sub(r"[^A-Z0-9._-]+", "_", s)
+        s = re.sub(r"_+", "_", s)
+        s = s.strip("_")
+        return s or "NA"
+
+    def _select_keep_model_ids(self) -> set[str] | None:
+        if not self.depmap_model_path or not os.path.exists(self.depmap_model_path):
+            return None
+        keep_ids_codes = None
+        keep_ids_lineage = None
+        if self.depmap_oncotree_codes:
+            keep_ids_codes = self._select_model_ids_for_oncotree(self.depmap_model_path, self.depmap_oncotree_codes)
+        if self.depmap_oncotree_lineages:
+            keep_ids_lineage = self._select_model_ids_for_lineage(self.depmap_model_path, self.depmap_oncotree_lineages)
+        if keep_ids_codes is not None and keep_ids_lineage is not None:
+            return set(keep_ids_codes & keep_ids_lineage)
+        if keep_ids_codes is not None:
+            return set(keep_ids_codes)
+        if keep_ids_lineage is not None:
+            return set(keep_ids_lineage)
+        return None
+
+    @staticmethod
+    def _infer_depmap_expr_path() -> str | None:
+        override = os.environ.get("DEPMAP_EXPR_PATH")
+        if override and os.path.exists(override):
+            return override
+        release_dir = os.environ.get("DEPMAP_RELEASE_DIR")
+        if release_dir:
+            p = os.path.join(release_dir, "OmicsExpressionProteinCodingGenesTPMLogp1BatchCorrected.csv")
+            if os.path.exists(p):
+                return p
+        candidates = [
+            os.path.join("data", "DepMap", "OmicsExpressionProteinCodingGenesTPMLogp1BatchCorrected.csv"),
+            os.path.join("data", "depmap", "OmicsExpressionProteinCodingGenesTPMLogp1BatchCorrected.csv"),
+        ]
+        return next((p for p in candidates if os.path.exists(p)), None)
+
+    @staticmethod
+    def _infer_depmap_cn_path() -> str | None:
+        override = os.environ.get("DEPMAP_CN_PATH")
+        if override and os.path.exists(override):
+            return override
+        release_dir = os.environ.get("DEPMAP_RELEASE_DIR")
+        if release_dir:
+            p = os.path.join(release_dir, "OmicsCNGene.csv")
+            if os.path.exists(p):
+                return p
+        candidates = [
+            os.path.join("data", "DepMap", "OmicsCNGene.csv"),
+            os.path.join("data", "depmap", "OmicsCNGene.csv"),
+        ]
+        return next((p for p in candidates if os.path.exists(p)), None)
+
+    @staticmethod
+    def _load_feature_map_from_matrix(
+        matrix_path: str | None,
+        gene_whitelist: set[str],
+        keep_model_ids: set[str] | None = None,
+    ) -> dict[str, float]:
+        if not matrix_path or not os.path.exists(matrix_path):
+            return {}
+        try:
+            header = pd.read_csv(matrix_path, nrows=0, low_memory=False)
+        except Exception:
+            return {}
+        cols = list(header.columns)
+        if len(cols) < 2:
+            return {}
+        id_col = cols[0]
+        gene_whitelist = {str(g).strip().upper() for g in gene_whitelist if str(g).strip()}
+        symbol_to_col: dict[str, str] = {}
+        for c in cols[1:]:
+            sym = str(c).split(" (", 1)[0]
+            sym = DepMapValidation._normalize_gene_symbol(sym).strip().upper()
+            if sym and sym not in symbol_to_col:
+                symbol_to_col[sym] = c
+        selected_cols = [symbol_to_col[g] for g in sorted(gene_whitelist) if g in symbol_to_col]
+        if not selected_cols:
+            return {}
+        df = pd.read_csv(matrix_path, usecols=[id_col, *selected_cols], low_memory=False)
+        if keep_model_ids is not None:
+            df = df[df[id_col].astype(str).isin(keep_model_ids)]
+        means = df[selected_cols].mean(axis=0, skipna=True)
+        out: dict[str, float] = {}
+        for col in selected_cols:
+            sym = str(col).split(" (", 1)[0]
+            sym = DepMapValidation._normalize_gene_symbol(sym).strip().upper()
+            out[sym] = float(means[col])
+        return out
+
+    @staticmethod
+    def _load_gnomad_maps(gene_whitelist: set[str]) -> tuple[dict[str, float], dict[str, float]]:
+        root = Path(os.environ.get("GNOMAD_DIR", os.path.join("data", "gnomAD")))
+        path = root / "gnomad_v2.1.1_constraint.tsv.bgz"
+        if not path.exists():
+            return {}, {}
+        genes = {str(g).strip().upper() for g in gene_whitelist if str(g).strip()}
+        if not genes:
+            return {}, {}
+        pli: dict[str, float] = {}
+        loeuf: dict[str, float] = {}
+        try:
+            reader = pd.read_csv(
+                path,
+                sep="\t",
+                compression="gzip",
+                usecols=["gene", "pLI", "oe_lof_upper"],
+                chunksize=250_000,
+                low_memory=False,
+            )
+        except Exception:
+            return {}, {}
+        for chunk in reader:
+            chunk = chunk.rename(columns={"gene": "Gene"})
+            chunk["Gene"] = chunk["Gene"].astype(str).str.strip().str.upper()
+            sub = chunk[chunk["Gene"].isin(genes)]
+            if len(sub) == 0:
+                continue
+            sub = sub.copy()
+            sub["pLI"] = pd.to_numeric(sub["pLI"], errors="coerce")
+            sub["oe_lof_upper"] = pd.to_numeric(sub["oe_lof_upper"], errors="coerce")
+            for g, grp in sub.groupby("Gene"):
+                p = float(np.nanmax(grp["pLI"].to_numpy(dtype=float, copy=False)))
+                o = float(np.nanmin(grp["oe_lof_upper"].to_numpy(dtype=float, copy=False)))
+                if np.isfinite(p):
+                    pli[g] = max(float(pli.get(g, float("-inf"))), p)
+                if np.isfinite(o):
+                    loeuf[g] = min(float(loeuf.get(g, float("inf"))), o)
+        return pli, loeuf
+
     def _dep_score_for_node(self, node: str) -> float:
         return self._dep_score_for_node_with_map(node, self.node_gene_map)
+
+    def _feature_for_node_with_map(
+        self,
+        node: str,
+        feature_map: dict[str, float],
+        node_gene_map: dict[str, list[str]] | None,
+    ) -> float:
+        key = self._normalize_gene_symbol(node).strip().upper()
+        direct = feature_map.get(key, np.nan)
+        if not np.isnan(direct):
+            return float(direct)
+        genes = None
+        if node_gene_map is not None:
+            genes = node_gene_map.get(key)
+        if not genes:
+            return np.nan
+        vals = []
+        for g in genes:
+            v = feature_map.get(str(g).strip().upper(), np.nan)
+            if not np.isnan(v):
+                vals.append(float(v))
+        if not vals:
+            return np.nan
+        return float(np.mean(vals))
 
     def _dep_score_for_node_with_map(self, node: str, node_gene_map: dict[str, list[str]] | None) -> float:
         key = self._normalize_gene_symbol(node).strip().upper()
@@ -343,6 +568,14 @@ class DepMapValidation:
             wl.add(str(node).strip().upper())
             for g in genes:
                 wl.add(str(g).strip().upper())
+        wl = {g for g in wl if g}
+        try:
+            import hashlib
+
+            wl_bytes = "\n".join(sorted(wl)).encode("utf-8")
+            wl_hash = hashlib.sha256(wl_bytes).hexdigest()[:12]
+        except Exception:
+            wl_hash = "unknown"
 
         if self.depmap_model_path and os.path.exists(self.depmap_model_path):
             try:
@@ -367,11 +600,11 @@ class DepMapValidation:
 
             if self.depmap_oncotree_codes:
                 keep_ids_codes = self._select_model_ids_for_oncotree(self.depmap_model_path, self.depmap_oncotree_codes)
-                derived_parts.append("oncotree_" + "-".join([str(c).strip().upper() for c in self.depmap_oncotree_codes]))
+                derived_parts.append("oncotree_" + "-".join([self._safe_tag(c) for c in self.depmap_oncotree_codes]))
 
             if self.depmap_oncotree_lineages:
                 keep_ids_lineage = self._select_model_ids_for_lineage(self.depmap_model_path, self.depmap_oncotree_lineages)
-                derived_parts.append("lineage_" + "-".join([str(l).strip().upper() for l in self.depmap_oncotree_lineages]))
+                derived_parts.append("lineage_" + "-".join([self._safe_tag(l) for l in self.depmap_oncotree_lineages]))
 
             if keep_ids_codes is not None and keep_ids_lineage is not None:
                 keep_ids = keep_ids_codes & keep_ids_lineage
@@ -382,6 +615,7 @@ class DepMapValidation:
 
             if derived_parts:
                 derived_suffix = "__" + "__".join(derived_parts)
+        derived_suffix = derived_suffix + f"__wl_{wl_hash}"
 
         cache_dir = os.environ.get("DEPMAP_CACHE_DIR")
         if cache_dir:
@@ -549,10 +783,18 @@ class DepMapValidation:
             
             # Get DepMap score if available
             dep_score = self._dep_score_for_node_with_map(gene, meta_map if meta_map else self.node_gene_map)
+            expr = self._feature_for_node_with_map(gene, self.depmap_expr_map, meta_map if meta_map else self.node_gene_map)
+            cn = self._feature_for_node_with_map(gene, self.depmap_cn_map, meta_map if meta_map else self.node_gene_map)
+            pli = self._feature_for_node_with_map(gene, self.gnomad_pli_map, meta_map if meta_map else self.node_gene_map)
+            loeuf = self._feature_for_node_with_map(gene, self.gnomad_loeuf_map, meta_map if meta_map else self.node_gene_map)
                 
             results[gene] = {
                 "delta_d": delta_d,
                 "dependency": dep_score,
+                "DepMapExpr_mean": expr,
+                "DepMapCN_mean": cn,
+                "gnomAD_pLI": pli,
+                "gnomAD_LOEUF": loeuf,
                 **feats.get(gene, {})
             }
             
@@ -595,6 +837,10 @@ class DepMapValidation:
                     aggregated_results[gene] = {
                         "delta_ds": [],
                         "dep_score": metrics["dependency"],
+                        "DepMapExpr_mean": metrics.get("DepMapExpr_mean", np.nan),
+                        "DepMapCN_mean": metrics.get("DepMapCN_mean", np.nan),
+                        "gnomAD_pLI": metrics.get("gnomAD_pLI", np.nan),
+                        "gnomAD_LOEUF": metrics.get("gnomAD_LOEUF", np.nan),
                         "InDegree": [],
                         "OutDegree": [],
                         "TotalDegree": [],
@@ -618,6 +864,10 @@ class DepMapValidation:
                 "Gene": gene,
                 "Mean_Delta_D": mean_delta_d,
                 "Dependency": data["dep_score"],
+                "DepMapExpr_mean": float(data.get("DepMapExpr_mean", np.nan)),
+                "DepMapCN_mean": float(data.get("DepMapCN_mean", np.nan)),
+                "gnomAD_pLI": float(data.get("gnomAD_pLI", np.nan)),
+                "gnomAD_LOEUF": float(data.get("gnomAD_LOEUF", np.nan)),
                 "InDegree": float(np.nanmean(data["InDegree"])) if len(data["InDegree"]) else np.nan,
                 "OutDegree": float(np.nanmean(data["OutDegree"])) if len(data["OutDegree"]) else np.nan,
                 "TotalDegree": float(np.nanmean(data["TotalDegree"])) if len(data["TotalDegree"]) else np.nan,
@@ -702,78 +952,148 @@ class DepMapValidation:
         return {"pearson_r": float(pr), "pearson_p": float(pp), "spearman_r": float(sr), "spearman_p": float(sp), "n": int(len(x))}
 
     def compare_predictors(self, df: pd.DataFrame, random_state: int = 2026) -> dict:
-        predictors = ["Mean_Delta_D", "InDegree", "OutDegree", "TotalDegree", "Betweenness", "PageRank", "EigenvectorCentrality"]
-        out = {"univariate": {}, "multivariate": {}}
+        predictors = [
+            "Mean_Delta_D",
+            "TotalDegree",
+            "Betweenness",
+            "PageRank",
+            "EigenvectorCentrality",
+            "DepMapExpr_mean",
+            "DepMapCN_mean",
+            "gnomAD_pLI",
+            "gnomAD_LOEUF",
+        ]
+        out = {"univariate": {}, "incremental": {}, "conditioned": {}}
         y = df["Dependency"].to_numpy(dtype=float, copy=False)
 
         for col in predictors:
+            if col not in df.columns:
+                continue
             x = df[col].to_numpy(dtype=float, copy=False)
             out["univariate"][col] = self._corr_pair(x, y)
 
-        base_cols = ["InDegree", "OutDegree", "TotalDegree", "Betweenness", "PageRank", "EigenvectorCentrality"]
-        df_mv = df[["Dependency", "Mean_Delta_D", *base_cols]].copy()
-        df_mv = df_mv.replace([np.inf, -np.inf], np.nan).dropna()
-        if len(df_mv) < 20:
-            out["multivariate"] = {"n": int(len(df_mv))}
+        candidate_base = ["TotalDegree", "Betweenness", "DepMapExpr_mean", "DepMapCN_mean", "gnomAD_pLI", "gnomAD_LOEUF"]
+        available_base = [c for c in candidate_base if c in df.columns]
+        df_mv = df[["Dependency", "Mean_Delta_D", *available_base]].copy()
+        df_mv = df_mv.replace([np.inf, -np.inf], np.nan).dropna().reset_index(drop=True)
+        n = int(len(df_mv))
+        if n < 6:
+            out["incremental"] = {"n": n, "status": "insufficient_rows"}
             return out
 
-        df_mv = df_mv.sample(frac=1.0, random_state=random_state).reset_index(drop=True)
-        y_mv = df_mv["Dependency"].to_numpy(dtype=float, copy=False)
+        max_p = max(1, n - 4)
+        base_cols = available_base[:max_p]
+        cols_full = ["Mean_Delta_D", *base_cols]
 
-        x_base = df_mv[base_cols].to_numpy(dtype=float, copy=False)
-        x_full = df_mv[["Mean_Delta_D", *base_cols]].to_numpy(dtype=float, copy=False)
+        def _ridge_loocv(y0: np.ndarray, x0: np.ndarray, lam: float) -> np.ndarray:
+            yhat = np.full(len(y0), np.nan, dtype=float)
+            for i in range(len(y0)):
+                mask = np.ones(len(y0), dtype=bool)
+                mask[i] = False
+                x_tr = x0[mask]
+                y_tr = y0[mask]
+                x_te = x0[~mask]
+                x_mean = np.nanmean(x_tr, axis=0)
+                x_std = np.nanstd(x_tr, axis=0, ddof=0)
+                x_std = np.where(x_std == 0, 1.0, x_std)
+                x_tr_s = (x_tr - x_mean) / x_std
+                x_te_s = (x_te - x_mean) / x_std
+                y_mean = float(np.nanmean(y_tr))
+                y_tr_c = y_tr - y_mean
+                xtx = x_tr_s.T @ x_tr_s
+                a = xtx + lam * np.eye(xtx.shape[0], dtype=float)
+                b = x_tr_s.T @ y_tr_c
+                w = np.linalg.solve(a, b)
+                yhat[i] = y_mean + float((x_te_s @ w).ravel()[0])
+            return yhat
 
-        def standardize(x, mean, std):
-            return (x - mean) / std
+        def _mse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+            d = y_true - y_pred
+            d = d[np.isfinite(d)]
+            return float(np.mean(d ** 2)) if len(d) else float("nan")
 
-        def fit_predict(x_tr, y_tr, x_te):
-            mean = x_tr.mean(axis=0, keepdims=True)
-            std = x_tr.std(axis=0, keepdims=True)
-            std = np.where(std == 0, 1.0, std)
-            x_tr_z = standardize(x_tr, mean, std)
-            x_te_z = standardize(x_te, mean, std)
-            x_tr_z = np.column_stack([np.ones(len(x_tr_z)), x_tr_z])
-            x_te_z = np.column_stack([np.ones(len(x_te_z)), x_te_z])
-            beta, *_ = np.linalg.lstsq(x_tr_z, y_tr, rcond=None)
-            return x_tr_z @ beta, x_te_z @ beta
-
-        def r2(y_true, y_pred):
+        def _r2(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+            mask = np.isfinite(y_true) & np.isfinite(y_pred)
+            y_true = y_true[mask]
+            y_pred = y_pred[mask]
+            if len(y_true) < 3:
+                return float("nan")
             ss_res = float(np.sum((y_true - y_pred) ** 2))
-            ss_tot = float(np.sum((y_true - y_true.mean()) ** 2))
-            if ss_tot == 0:
-                return 0.0
-            return 1.0 - ss_res / ss_tot
+            ss_tot = float(np.sum((y_true - float(np.mean(y_true))) ** 2))
+            return float(0.0) if ss_tot == 0 else float(1.0 - ss_res / ss_tot)
 
-        n = len(df_mv)
-        k = 5
-        fold_sizes = [(n + i) // k for i in range(k)]
-        idx = 0
-        base_scores = []
-        full_scores = []
-        base_in = []
-        full_in = []
-        for fs in fold_sizes:
-            te_idx = np.arange(idx, idx + fs)
-            tr_idx = np.concatenate([np.arange(0, idx), np.arange(idx + fs, n)])
-            idx += fs
+        y_mv = df_mv["Dependency"].to_numpy(dtype=float, copy=False)
+        x_base = df_mv[base_cols].to_numpy(dtype=float, copy=False)
+        x_full = df_mv[cols_full].to_numpy(dtype=float, copy=False)
 
-            y_tr, y_te = y_mv[tr_idx], y_mv[te_idx]
-            pred_tr, pred_te = fit_predict(x_base[tr_idx], y_tr, x_base[te_idx])
-            base_in.append(r2(y_tr, pred_tr))
-            base_scores.append(r2(y_te, pred_te))
+        lam = float(os.environ.get("DEPMAP_RIDGE_LAM", "1.0") or "1.0")
+        yhat_base = _ridge_loocv(y_mv, x_base, lam)
+        yhat_full = _ridge_loocv(y_mv, x_full, lam)
+        mse_base = _mse(y_mv, yhat_base)
+        mse_full = _mse(y_mv, yhat_full)
+        improvement = float(mse_base - mse_full)
+        r2_base = _r2(y_mv, yhat_base)
+        r2_full = _r2(y_mv, yhat_full)
 
-            pred_tr, pred_te = fit_predict(x_full[tr_idx], y_tr, x_full[te_idx])
-            full_in.append(r2(y_tr, pred_tr))
-            full_scores.append(r2(y_te, pred_te))
+        n_perm = int(os.environ.get("DEPMAP_PERM_N", "5000") or "5000")
+        rng = np.random.default_rng(int(random_state))
+        imp_null = []
+        for _ in range(n_perm):
+            y_perm = rng.permutation(y_mv)
+            yb = _ridge_loocv(y_perm, x_base, lam)
+            yf = _ridge_loocv(y_perm, x_full, lam)
+            imp_null.append(float(_mse(y_perm, yb) - _mse(y_perm, yf)))
+        imp_null = np.array(imp_null, dtype=float)
+        p_perm = float((np.sum(imp_null >= improvement) + 1.0) / (len(imp_null) + 1.0))
 
-        out["multivariate"] = {
+        out["incremental"] = {
             "n": int(n),
-            "cv5_r2_base_mean": float(np.mean(base_scores)),
-            "cv5_r2_full_mean": float(np.mean(full_scores)),
-            "cv5_r2_delta_mean": float(np.mean(full_scores) - np.mean(base_scores)),
-            "in_sample_r2_base_mean": float(np.mean(base_in)),
-            "in_sample_r2_full_mean": float(np.mean(full_in)),
+            "ridge_lam": lam,
+            "base_cols": base_cols,
+            "mse_base_loocv": mse_base,
+            "mse_full_loocv": mse_full,
+            "mse_improvement": improvement,
+            "r2_base_loocv": r2_base,
+            "r2_full_loocv": r2_full,
+            "r2_delta_loocv": float(r2_full - r2_base) if np.isfinite(r2_base) and np.isfinite(r2_full) else float("nan"),
+            "perm_n": int(n_perm),
+            "perm_p_improvement": p_perm,
+            "perm_null_improvement": imp_null.tolist(),
         }
+
+        y_resid = y_mv - yhat_base
+        x_dd = df_mv["Mean_Delta_D"].to_numpy(dtype=float, copy=False)
+        mask = np.isfinite(x_dd) & np.isfinite(y_resid)
+        x_dd = x_dd[mask]
+        y_resid = y_resid[mask]
+        n_resid = int(len(x_dd))
+        if n_resid >= 3:
+            pr, pp = stats.pearsonr(x_dd, y_resid)
+            sr, sp = stats.spearmanr(x_dd, y_resid)
+            rng2 = np.random.default_rng(int(random_state) + 1)
+            null = []
+            for _ in range(n_perm):
+                yr = rng2.permutation(y_resid)
+                null.append(float(stats.spearmanr(x_dd, yr).statistic))
+            null = np.asarray(null, dtype=float)
+            null = null[np.isfinite(null)]
+            p_abs = float((np.sum(np.abs(null) >= abs(float(sr))) + 1.0) / (len(null) + 1.0)) if len(null) else float("nan")
+            out["conditioned"] = {
+                "n": int(n_resid),
+                "endpoint": "dependency_residual",
+                "residualizer": "ridge_loocv",
+                "ridge_lam": lam,
+                "base_cols": base_cols,
+                "pearson_r": float(pr),
+                "pearson_p": float(pp),
+                "spearman_rho": float(sr),
+                "spearman_p": float(sp),
+                "perm_n": int(n_perm),
+                "perm_p_abs_spearman": p_abs,
+                "perm_null_spearman": null.tolist(),
+            }
+        else:
+            out["conditioned"] = {"n": int(n_resid), "status": "insufficient_rows"}
         return out
 
     def compute_correlation(self, results):
@@ -810,7 +1130,7 @@ class DepMapValidation:
         # Mutual Information
         mi_res = MutualInformationAnalyzer.compute_mutual_information(x.tolist(), y.tolist(), discrete_y=False)
         
-        return CorrelationResult({
+        out = CorrelationResult({
             "n": n,
             'rho': corr,
             'pval': pval,
@@ -819,6 +1139,12 @@ class DepMapValidation:
             'mi_bits': mi_res['MI_bits'],
             'mi_interpretation': mi_res['interpretation']
         })
+        if not isinstance(results, dict) and isinstance(results, pd.DataFrame):
+            try:
+                out["predictor_benchmark"] = self.compare_predictors(results)
+            except Exception:
+                pass
+        return out
 
     @staticmethod
     def save_scatter_plot(df: pd.DataFrame, out_path: str) -> str | None:
@@ -841,6 +1167,84 @@ class DepMapValidation:
         ax.set_xlabel("Mean ΔD (node removal)")
         ax.set_ylabel("DepMap essentiality (−gene effect)")
         ax.set_title(f"ΔD vs DepMap (n={len(x)})")
+        fig.tight_layout()
+        fig.savefig(out_path)
+        plt.close(fig)
+        return out_path
+
+    @staticmethod
+    def save_benchmark_plot(df: pd.DataFrame, stats_res: dict, out_path: str) -> str | None:
+        if plt is None:
+            return None
+        if df is None or len(df) == 0:
+            return None
+        bench = None
+        if isinstance(stats_res, dict):
+            bench = stats_res.get("predictor_benchmark", {}).get("incremental", {})
+        null = bench.get("perm_null_improvement") if isinstance(bench, dict) else None
+        obs = bench.get("mse_improvement") if isinstance(bench, dict) else None
+        if null is None or obs is None:
+            return None
+        null = np.asarray(null, dtype=float)
+        null = null[np.isfinite(null)]
+        if null.size == 0 or not np.isfinite(float(obs)):
+            return None
+        fig = plt.figure(figsize=(8, 3.6), dpi=200)
+        ax1 = fig.add_subplot(1, 2, 1)
+        x = df["Mean_Delta_D"].to_numpy(dtype=float, copy=False)
+        y = df["Dependency"].to_numpy(dtype=float, copy=False)
+        mask = ~(np.isnan(x) | np.isnan(y))
+        ax1.scatter(x[mask], y[mask], s=35, alpha=0.85)
+        ax1.set_xlabel("Mean ΔD (node removal)")
+        ax1.set_ylabel("DepMap dependency (−gene effect)")
+        ax1.set_title("Pilot scatter")
+
+        ax2 = fig.add_subplot(1, 2, 2)
+        ax2.hist(null, bins=40, color="#4C72B0", alpha=0.85, density=True)
+        ax2.axvline(float(obs), color="#C44E52", linewidth=2.0)
+        ax2.set_xlabel("LOOCV MSE improvement (base − full)")
+        ax2.set_ylabel("Density")
+        p = bench.get("perm_p_improvement", np.nan)
+        ax2.set_title(f"Permutation null (p={p:.3g})")
+        fig.tight_layout()
+        fig.savefig(out_path)
+        plt.close(fig)
+        return out_path
+
+    @staticmethod
+    def save_conditioned_plot(df: pd.DataFrame, stats_res: dict, out_path: str) -> str | None:
+        if plt is None:
+            return None
+        if df is None or len(df) == 0:
+            return None
+        bench = None
+        if isinstance(stats_res, dict):
+            bench = stats_res.get("predictor_benchmark", {}).get("conditioned", {})
+        null = bench.get("perm_null_spearman") if isinstance(bench, dict) else None
+        obs = bench.get("spearman_rho") if isinstance(bench, dict) else None
+        if null is None or obs is None:
+            return None
+        null = np.asarray(null, dtype=float)
+        null = null[np.isfinite(null)]
+        if null.size == 0 or not np.isfinite(float(obs)):
+            return None
+        fig = plt.figure(figsize=(8, 3.6), dpi=200)
+        ax1 = fig.add_subplot(1, 2, 1)
+        x = df["Mean_Delta_D"].to_numpy(dtype=float, copy=False)
+        y = df["Dependency"].to_numpy(dtype=float, copy=False)
+        mask = ~(np.isnan(x) | np.isnan(y))
+        ax1.scatter(x[mask], y[mask], s=35, alpha=0.85)
+        ax1.set_xlabel("Mean ΔD (node removal)")
+        ax1.set_ylabel("DepMap dependency (raw proxy)")
+        ax1.set_title("Raw endpoint (reference)")
+
+        ax2 = fig.add_subplot(1, 2, 2)
+        ax2.hist(np.abs(null), bins=40, color="#4C72B0", alpha=0.85, density=True)
+        ax2.axvline(abs(float(obs)), color="#C44E52", linewidth=2.0)
+        ax2.set_xlabel("|Spearman ρ| under null")
+        ax2.set_ylabel("Density")
+        p = bench.get("perm_p_abs_spearman", np.nan)
+        ax2.set_title(f"Conditioned endpoint (p={p:.3g})")
         fig.tight_layout()
         fig.savefig(out_path)
         plt.close(fig)
@@ -1034,6 +1438,16 @@ if __name__ == "__main__":
             except Exception:
                 n_nodes_used = 0
             stats_res = v.compute_correlation(cohort_results)
+            inc = {}
+            try:
+                inc = dict(stats_res.get("predictor_benchmark", {}).get("incremental", {}) or {})
+            except Exception:
+                inc = {}
+            cond = {}
+            try:
+                cond = dict(stats_res.get("predictor_benchmark", {}).get("conditioned", {}) or {})
+            except Exception:
+                cond = {}
             row = {
                 "Lineage": str(lin),
                 "N_DepMap_Models": int(len(keep_ids)) if keep_ids is not None else 0,
@@ -1044,16 +1458,51 @@ if __name__ == "__main__":
                 "Spearman_p": float(stats_res.get("spearman_pval", 1.0)),
                 "MI_bits": float(stats_res.get("mi_bits", 0.0)),
                 "MI_interpretation": str(stats_res.get("mi_interpretation", "")),
+                "MSE_improvement": float(inc.get("mse_improvement", float("nan"))),
+                "Perm_p_improvement": float(inc.get("perm_p_improvement", float("nan"))),
+                "LOOCV_R2_delta": float(inc.get("r2_delta_loocv", float("nan"))),
+                "Conditioned_n": int(cond.get("n", 0)) if isinstance(cond.get("n", None), (int, float)) else 0,
+                "Conditioned_spearman_rho": float(cond.get("spearman_rho", float("nan"))),
+                "Conditioned_perm_p_abs_spearman": float(cond.get("perm_p_abs_spearman", float("nan"))),
             }
             rows.append(row)
 
         out_csv = OUT_PREFIX + "__lineage_sweep_summary.csv"
         out_json = OUT_PREFIX + "__lineage_sweep_summary.json"
-        pd.DataFrame(rows).to_csv(out_csv, index=False)
+        df_out = pd.DataFrame(rows)
+        df_out.to_csv(out_csv, index=False)
         with open(out_json, "w") as f:
             json.dump({"rows": rows}, f, indent=4)
         print(f"Wrote {out_csv}")
         print(f"Wrote {out_json}")
+        try:
+            if plt is not None and len(df_out):
+                fig = plt.figure(figsize=(9.5, 3.5), dpi=200)
+                ax1 = fig.add_subplot(1, 2, 1)
+                ax2 = fig.add_subplot(1, 2, 2)
+
+                xs = np.arange(len(df_out))
+                ax1.bar(xs, df_out["Spearman_rho"].to_numpy(dtype=float, copy=False), color="#4C72B0", alpha=0.9)
+                ax1.axhline(0.0, color="gray", linestyle="--", linewidth=1.0)
+                ax1.set_xticks(xs)
+                ax1.set_xticklabels(df_out["Lineage"].astype(str).tolist(), rotation=45, ha="right")
+                ax1.set_ylabel("Spearman ρ (ΔD vs dependency)")
+                ax1.set_title("Lineage sweep: association")
+
+                ax2.bar(xs, df_out["Perm_p_improvement"].to_numpy(dtype=float, copy=False), color="#55A868", alpha=0.9)
+                ax2.axhline(0.05, color="gray", linestyle="--", linewidth=1.0)
+                ax2.set_xticks(xs)
+                ax2.set_xticklabels(df_out["Lineage"].astype(str).tolist(), rotation=45, ha="right")
+                ax2.set_ylabel("Permutation p (ΔD incremental)")
+                ax2.set_title("Lineage sweep: incremental value")
+
+                fig.tight_layout()
+                out_png = OUT_PREFIX + "__lineage_sweep.png"
+                fig.savefig(out_png)
+                plt.close(fig)
+                print(f"Wrote {out_png}")
+        except Exception:
+            pass
         sys.exit(0)
 
     validator = DepMapValidation(
@@ -1088,4 +1537,14 @@ if __name__ == "__main__":
     saved_plot = DepMapValidation.save_scatter_plot(cohort_results, plot_path)
     if saved_plot:
         print(f"Plot saved to {saved_plot}")
+
+    bench_path = OUT_PREFIX + "_benchmark.png"
+    saved_bench = DepMapValidation.save_benchmark_plot(cohort_results, dict(stats_res), bench_path)
+    if saved_bench:
+        print(f"Benchmark plot saved to {saved_bench}")
+
+    conditioned_path = OUT_PREFIX + "_conditioned.png"
+    saved_cond = DepMapValidation.save_conditioned_plot(cohort_results, dict(stats_res), conditioned_path)
+    if saved_cond:
+        print(f"Conditioned plot saved to {saved_cond}")
     

@@ -6,6 +6,7 @@ from typing import Dict, List, Any
 
 import numpy as np
 import requests
+import xml.etree.ElementTree as ET
 
 from integration.LogicParser import LogicParser
 
@@ -259,7 +260,6 @@ class GRNLoader:
                 "Cdc2_Cdc13": 1, "Ste9": 0, "Rum1": 0, "Slp1": 1, "Cdc2_Cdc13_active": 1, "Wee1_Mik1": 0, "Cdc25": 1, "PP": 1
             }
         }
-
         yeast_std = self._standardize_network("yeast_cell_cycle", yeast_def)
         models["yeast_cell_cycle"] = yeast_std
 
@@ -304,6 +304,105 @@ class GRNLoader:
         models["tcell_activation"] = tcell_std
 
         return models
+
+    def _parse_sbml_qual(self, sbml_path: Path) -> Dict[str, Any]:
+        ns = {
+            "sbml": "http://www.sbml.org/sbml/level3/version1/core",
+            "qual": "http://www.sbml.org/sbml/level3/version1/qual/version1",
+        }
+        root = ET.parse(sbml_path).getroot()
+        model_el = root.find("sbml:model", ns)
+        model_name = None
+        model_id = None
+        if model_el is not None:
+            model_name = model_el.attrib.get("name")
+            model_id = model_el.attrib.get("id")
+
+        species = root.findall(".//qual:qualitativeSpecies", ns)
+        id_to_name = {}
+        nodes = []
+        for sp in species:
+            sid = sp.attrib.get(f"{{{ns['qual']}}}id")
+            nm = sp.attrib.get(f"{{{ns['qual']}}}name")
+            if sid is None or nm is None:
+                continue
+            nm = str(nm).strip()
+            if not nm:
+                continue
+            id_to_name[str(sid)] = nm
+            nodes.append(nm)
+
+        edges: List[Dict[str, Any]] = []
+        transitions = root.findall(".//qual:transition", ns)
+        for tr in transitions:
+            inputs = tr.findall(".//qual:listOfInputs/qual:input", ns)
+            outputs = tr.findall(".//qual:listOfOutputs/qual:output", ns)
+            in_species = []
+            for inp in inputs:
+                ref = inp.attrib.get(f"{{{ns['qual']}}}qualitativeSpecies")
+                if not ref:
+                    continue
+                nm = id_to_name.get(str(ref))
+                if nm:
+                    sign = inp.attrib.get(f"{{{ns['qual']}}}sign")
+                    in_species.append((nm, sign))
+            out_species = []
+            for out in outputs:
+                ref = out.attrib.get(f"{{{ns['qual']}}}qualitativeSpecies")
+                if not ref:
+                    continue
+                nm = id_to_name.get(str(ref))
+                if nm:
+                    out_species.append(nm)
+
+            for src, sign in in_species:
+                for tgt in out_species:
+                    if src == tgt:
+                        continue
+                    etype = "regulation"
+                    if str(sign).lower() == "positive":
+                        etype = "activation"
+                    elif str(sign).lower() == "negative":
+                        etype = "repression"
+                    edges.append({"source": src, "target": tgt, "type": etype})
+
+        return {
+            "model_name": model_name or sbml_path.stem,
+            "model_id": model_id,
+            "nodes": nodes,
+            "edges": edges,
+        }
+
+    def build_cellcollective_sbml_cohort(
+        self,
+        sbml_dir: Path | None = None,
+        include_large: bool = True,
+    ) -> Dict[str, Dict[str, Any]]:
+        if sbml_dir is None:
+            sbml_dir = (Path(__file__).resolve().parent.parent / "external" / "ccapi" / "src" / "ccapi" / "data" / "models" / "boolean" / "sbml").resolve()
+        cohort: Dict[str, Dict[str, Any]] = {}
+        if not sbml_dir.exists():
+            return cohort
+
+        for sbml_path in sorted(sbml_dir.glob("*.sbml")):
+            parsed = self._parse_sbml_qual(sbml_path)
+            nodes = parsed["nodes"]
+            edges = parsed["edges"]
+            if not include_large and len(nodes) > 100:
+                continue
+            name = f"cc_sbml_{sbml_path.stem}".replace("-", "_")
+            std = self._standardize_network(
+                name,
+                {
+                    "nodes": nodes,
+                    "edges": edges,
+                    "reference": parsed.get("model_id"),
+                    "description": parsed.get("model_name"),
+                    "source": "CellCollective (SBML-qual; ccapi bundle)",
+                },
+            )
+            cohort[name] = std
+        return cohort
 
     def gate_histograms(self, models: Dict[str, Dict[str, Any]] | None = None) -> Dict[str, Any]:
         if models is None:
