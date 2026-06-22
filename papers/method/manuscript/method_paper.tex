@@ -1,0 +1,250 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+
+\title{Exact Gate Formulae for Ordered Exhaustive Repertoires in Boolean Networks}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a deterministic method for reconstructing the one-step behaviour of Boolean networks from short, exact formulae rather than exhaustive truth-table enumeration. The central object is the ordered exhaustive repertoire: all binary inputs arranged under an explicit ordering convention, together with closed-form index sets that identify where each gate outputs one. We show how these gate-level index sets can be composed into exact network-level predictions under synchronous dynamics, and we organise the method so that ordering changes are handled by an explicit bit-reversal map rather than by ad hoc rewrites. The resulting framework yields exact agreement with exhaustive baselines, supports network-aware composition across mixed gate families, and admits principled scaling through deterministic predictive evaluation and importance sampling. This manuscript is the first paper track of the repository's three-paper programme and focuses exclusively on the formal method and its validation.
+\end{abstract}
+
+\section{Introduction}
+Boolean networks are often analysed through exhaustive enumeration, direct truth-table lookup, or simulation-heavy workflows. These approaches are workable at small sizes but rapidly become opaque when one wants closed-form understanding, exact reconstruction, and scalable prediction from structure alone.
+
+The method developed in this repository starts from a different premise: ordered exhaustive repertoires contain regular algebraic structure. Once the ordering policy is made explicit, the rows where a gate outputs one can be described by short index-set formulae rather than by scanning every state one by one. These exact gate-level sets can then be composed into network-level outputs using the connectivity matrix and local gate assignments.
+
+The scientific aim of this paper is therefore precise. We do not present yet another empirical heuristic for Boolean networks. We present a deterministic, exact, ordering-aware method for:
+
+\begin{enumerate}[label=\arabic*.]
+\item deriving closed-form gate formulae over ordered exhaustive repertoires,
+\item proving that the method is stable under explicit ordering transforms,
+\item composing per-gate formulae into exact one-step network predictions, and
+\item validating exactness and scalability against exhaustive baselines and larger sampled regimes.
+\end{enumerate}
+
+This first draft is intentionally centred on the method itself. Historical tickets and phased plans remain part of the repository provenance, but they do not structure the argument here.
+
+\section{Core Contributions}
+The method paper currently supports the following claims.
+
+\begin{enumerate}[label=\textbf{C\arabic*.}]
+\item \textbf{Ordered repertoire formalism.} The exhaustive input space is treated as a structured object whose ordering is explicit and mathematically controlled.
+\item \textbf{Exact per-gate formulae.} Gate families such as AND, OR, XOR, NAND, NOR, XNOR, NOT, IMPLIES/NIMPLIES, threshold gates, and canalising gates admit closed-form descriptions of the rows where they output one.
+\item \textbf{Ordering-transform invariance.} MSB-first and LSB-first orderings are related by a bit-reversal map \(\varphi\), and index-set constructions are invariant modulo this transform.
+\item \textbf{Network composition.} Per-gate index sets compose into exact one-step network outputs under synchronous dynamics.
+\item \textbf{Exact empirical validation.} Existing validation artefacts in the repository show bitwise accuracy \(1.0\) for exact predictive methods against exhaustive baselines, together with scalable deterministic evaluation under importance sampling.
+\end{enumerate}
+
+\section{Setup and Notation}
+Let \(cm \in \{0,1\}^{n \times n}\) denote the connectivity matrix of a Boolean network, where \(cm_{ij}=1\) indicates an edge from node \(j\) to node \(i\). Let
+\[
+dynamic = (d_1,\dots,d_n)
+\]
+be the list of local gate labels, and let
+\[
+N_i = \{j : cm_{ij}=1\}
+\]
+be the connected inputs of node \(i\).
+
+Each node has a local map
+\[
+g_i : \{0,1\}^{|N_i|} \to \{0,1\},
+\]
+and the synchronous one-step network map is
+\[
+F(x) = \bigl(g_1(x_{N_1}),\dots,g_n(x_{N_n})\bigr), \qquad x \in \{0,1\}^n.
+\]
+
+The exhaustive input repertoire contains all \(2^n\) binary vectors. Two orderings are relevant throughout the project:
+
+\begin{itemize}
+\item \textbf{LSB-first ordering:} weights \(2^{i-1}\),
+\item \textbf{MSB-first ordering:} weights \(2^{n-i}\).
+\end{itemize}
+
+We make the relation between both orderings explicit through the bit-reversal involution
+\[
+\varphi(j)=1+\mathrm{FromDigits}\bigl(\mathrm{Reverse}(\mathrm{IntegerDigits}(j-1,2,n)),2\bigr).
+\]
+
+The role of \(\varphi\) is methodological rather than cosmetic. It ensures that exact formulae are not tied to one accidental encoding convention.
+
+\section{Ordered Exhaustive Repertoires}
+The method begins with a simple observation: under exhaustive enumeration, each input bit exhibits a structured periodicity. In the ordered repertoire, fixed-bit conditions generate contiguous bands, parity classes, complements, and threshold regions. These regularities are the raw material of the method.
+
+For a given node, the problem is not ``evaluate all rows''. The problem is ``identify the exact subset of row indices where the gate condition is satisfied''. Once stated this way, the behaviour of each gate family becomes an index-set problem.
+
+\subsection{Pattern-Level View}
+The repository's pattern documents establish a column-wise alphabet \(\{0,1,*\}\) over outputs and show that gate families admit regular symbolic descriptions over ordered repertoires. The main methodological value of this viewpoint is that it separates:
+
+\begin{itemize}
+\item the \emph{ordering structure} of the input space,
+\item the \emph{gate semantics} imposed on connected inputs, and
+\item the \emph{index geometry} of the output-one set.
+\end{itemize}
+
+This separation is what later makes exact composition possible.
+
+\section{Exact Gate Formulae}
+The per-gate derivations are the scientific core of the first paper. The current repository already contains dedicated derivation documents for the input-pattern formalism and for selected gate families, with the surrounding theory and validation distributed across the shared theory and experiment process documents.
+
+\subsection{Monotone Gates}
+For monotone families such as AND and OR, the one-set is described by explicit fixed-bit bands over the connected input indices \(I_c\).
+
+\begin{itemize}
+\item \textbf{AND:} the output is one exactly when all connected inputs are one, so the one-set is the intersection of the corresponding one-bands.
+\item \textbf{OR:} the output is one exactly when at least one connected input is one, so the one-set is the union of the corresponding one-bands.
+\item \textbf{NAND/NOR:} these follow by complement within the ordered universe.
+\end{itemize}
+
+The importance of these expressions is not only that they are short. It is that they are \emph{network-aware}: they depend on the connected inputs \(I_c\), not on a stand-alone truth table divorced from network structure.
+
+\subsection{Parity and Equivalence Gates}
+Parity families such as XOR and XNOR are governed by parity classes rather than contiguous bands. Their one-sets are therefore not threshold regions but exact parity partitions over the connected inputs.
+
+This family is methodologically important for two reasons:
+
+\begin{enumerate}[label=\alph*.]
+\item it shows that the framework is not restricted to monotone logic, and
+\item it makes visible the difference between naive band intuition and genuinely algebraic index structure.
+\end{enumerate}
+
+\subsection{Asymmetric, Threshold, and Canalising Gates}
+The method extends further to:
+
+\begin{itemize}
+\item \textbf{NOT}, interpreted as a designated zero-band;
+\item \textbf{IMPLIES/NIMPLIES}, where asymmetry must be preserved explicitly;
+\item \textbf{KOFN}-style threshold families, where one-sets become banded regions indexed by Hamming-weight constraints over \(I_c\);
+\item \textbf{canalising and nested-canalising cases}, where one-set geometry exhibits collapse under designated controlling values.
+\end{itemize}
+
+These cases matter because they demonstrate that the method is a general index-set framework rather than an isolated derivation for one or two classical gates.
+
+\section{Ordering Invariance and Set Algebra}
+The exact formulae are only scientifically useful if they are stable under explicit changes of ordering convention.
+
+\begin{theorem}[Ordering-Transform Invariance]
+Let \(J^{\mathrm{LSB}}\subseteq\{1,\dots,2^n\}\) be the index set for a gate family under LSB-first ordering, and let \(J^{\mathrm{MSB}}\) be the corresponding set under MSB-first ordering. Then
+\[
+J^{\mathrm{MSB}} = \varphi\bigl(J^{\mathrm{LSB}}\bigr),
+\]
+where \(\varphi\) is the bit-reversal involution defined above.
+\end{theorem}
+
+This theorem is one of the key stabilising principles of the method. It means that exactness is not lost when changing representation; one merely transports index sets through an explicit bijection.
+
+The second stabilising principle is closure. Unions, intersections, complements, parity partitions, threshold bands, and canalising collapse remain inside a controlled algebra of ordered index-set operations. This is what makes network composition and predictive evaluation mathematically tractable.
+
+\section{From Gate Formulae to Exact Network Prediction}
+Once each node \(i\) is assigned an exact one-set \(J_i\) determined by its gate label and connected inputs \(N_i\), one can reconstruct the full one-step output matrix of the network without brute-force truth-table enumeration at every stage.
+
+The method therefore has three conceptually distinct predictive paths:
+
+\begin{enumerate}[label=\arabic*.]
+\item \textbf{Exhaustive baseline:} generate all outputs directly from the full network map.
+\item \textbf{Library semantics:} evaluate each node via the same gate semantics catalogue, row by row.
+\item \textbf{Analytic index-set predictor:} compose closed-form gate-level one-sets into the full network output.
+\end{enumerate}
+
+The scientific claim of this paper rests on the third path. The exact formulae are not just descriptive summaries of the exhaustive output; they are themselves an exact predictive mechanism.
+
+\begin{theorem}[Canonical Exact Reconstruction]
+Under the explicit ordering convention and the network-aware connected-input sets \(N_i\), the analytic index-set predictor reconstructs the same one-step output matrix as the exhaustive baseline.
+\end{theorem}
+
+This theorem turns the method from a descriptive curiosity into a genuine alternative representation of Boolean network dynamics.
+
+\section{Validation Programme}
+The repository already contains a strong validation base for the method paper. The evidence is distributed across exact tests, formal analyses, and medium-scale experiments.
+
+\subsection{Gate-Level and Ordering Validation}
+Existing artefacts verify:
+
+\begin{itemize}
+\item truth-table correctness across covered gate families,
+\item ordering invariance under \(\varphi\),
+\item closure properties for union, intersection, and complement operations,
+\item exact formal analyses for AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES/NIMPLIES, threshold, and canalising constructions.
+\end{itemize}
+
+This layer is the methodological bedrock: if gate formulae or orderings failed here, the whole exact-prediction claim would collapse.
+
+\subsection{Medium-Scale Exact Reconstruction}
+The experimental validation programme shows exact reconstruction at medium network sizes. Existing results support the following summary:
+
+\begin{itemize}
+\item for medium-scale networks, exact predictive methods achieve bitwise accuracy \(1.0\) against exhaustive baselines;
+\item the exact predictor remains deterministic and reproducible;
+\item the method separates exact predictive paths from deliberately non-exact heuristic speed probes.
+\end{itemize}
+
+This distinction is crucial. The repository already documents that the heuristic path is pedagogical and contrastive only; the scientific claims rely on exact predictive methods.
+
+\subsection{Importance Sampling at Larger Sizes}
+For larger systems, exhaustive enumeration is no longer the operational comparison layer. Instead, the validation regime uses stratified importance sampling over Hamming-weight strata. The current evidence supports:
+
+\begin{itemize}
+\item equality between predictive and baseline outputs on sampled rows,
+\item accuracy \(1.0\) under the exact predictive regime,
+\item substantial runtime improvement relative to truth-table lookup at larger sizes.
+\end{itemize}
+
+This is not an approximation to the method. It is an approximation to the \emph{validation burden}. The method itself remains exact.
+
+\subsection{Subsystem Factorisation}
+The repository also contains evidence that structural decomposition can be exploited when the connectivity graph is block-separable. This matters for the paper because it extends the method from exact prediction to exact decomposition principles: when the graph splits, the complexity functional and reconstruction logic factorise accordingly.
+
+\section{Why the Method Matters}
+The contribution is not merely that one can reproduce Boolean outputs by another route. The contribution is that one can move from:
+
+\begin{itemize}
+\item exhaustive tables,
+\item opaque simulation traces,
+\item and local truth-table lookup
+\end{itemize}
+
+to a representation based on:
+
+\begin{itemize}
+\item explicit ordering policy,
+\item exact gate formulae,
+\item compositional index algebra,
+\item and deterministic predictive reconstruction.
+\end{itemize}
+
+This shift is scientifically valuable because it produces explanation, not only evaluation. It also creates a bridge between symbolic derivation, deterministic experimentation, and scalable network prediction.
+
+\section{Next Writing Frontier}
+This first manuscript draft already fixes the scientific spine of the method paper. The next writing pass should deepen four specific areas:
+
+\begin{enumerate}[label=\arabic*.]
+\item insert the strongest exact per-gate derivations directly into this manuscript, starting with AND, OR, XOR, threshold, and canalising cases;
+\item convert the current theorem statements from summary form into fully polished propositions with proofs or proof sketches;
+\item import the most informative validation tables from the existing artefacts under \texttt{results/tests/};
+\item sharpen the discussion against exhaustive enumeration, naive heuristics, and other combinatorial approaches.
+\end{enumerate}
+
+\section{Conclusion}
+The repository is now organised so that the method paper can start from a clean scientific base rather than from execution history. The method itself is already substantially present: ordered exhaustive repertoires, exact gate-level one-set formulae, explicit ordering-transform invariance, exact network composition, and deterministic validation against exhaustive baselines.
+
+The immediate objective of the next draft is therefore not to discover the method from scratch, but to convert an already validated body of theory and experiments into a professional manuscript whose narrative is led by definitions, theorems, exact formulae, and reproducible evidence.
+
+\end{document}
