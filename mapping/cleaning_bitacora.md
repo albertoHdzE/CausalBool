@@ -571,3 +571,28 @@ From commit `3f9bd13` back into the working tree:
 - The current decision boundary is now narrower and cleaner:
   - restored paper-support outputs look worth retaining
   - the historical `paper/results/tests/` subtree remains unresolved and should not be restored automatically
+
+## Historical Paper-Test Mirror Comparison
+
+### Scope
+
+- No moves.
+- No deletions.
+- Measure the historical `paper/results/tests/` subtree against the current root `results/tests/` tree before making any restore/archive decision.
+
+### Findings
+
+- Compared current `results/tests/` file paths against the historical `4ClaudeCode/claude-Nature/paper/results/tests/` tree from commit `3f9bd13`.
+- Current root `results/tests/` contains 235 files.
+- Historical paper-side `results/tests/` contained 114 files.
+- Intersection count is 114.
+- Historical paper-side unique file count is 0.
+- Current root `results/tests/` has 121 additional files not present in the historical paper-side mirror.
+
+### Cleaning consequence
+
+- The historical paper-side `results/tests/` tree is now demonstrated to be a strict subset of the current root `results/tests/` tree.
+- That removes the main argument for restoring it.
+- The cleaner policy is:
+  - retain the selectively restored Level 8 paper-support documents
+  - keep the duplicated historical paper-side test mirror absent

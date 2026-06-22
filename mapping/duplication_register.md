@@ -169,10 +169,12 @@ Interpretation:
 - This is not currently a verified duplicate-tree problem on disk.
 - It is a provenance-versus-materialization problem: the paper workspace still treats `paper/results/` as a logical output location, but the current checkout does not materialize that tree.
 - Several specific Level 8 artifacts are checksum-logged in provenance documents (`wetlab_readiness_pack.*`, `krb_route_decision.*`, `theory_to_computation_mapping.*`, `nature_readiness_assessment.md`, and `submission_pack/*`), yet none of them are present anywhere in the current checkout.
+- Historical comparison now shows that the old `paper/results/tests/` subtree was a strict subset of the current root `results/tests/` tree: 114 historical paper-side files matched on path against current `results/tests/`, with 0 paper-side uniques and 121 additional files now present only in root `results/tests/`.
 
 Cleanup rule:
 
 - Do not prune `results/tests/` based on a presumed paper-tree duplicate until the status of `paper/results/` is explicitly reconciled.
+- Preserve the restored paper-support documents, but keep the historical paper-side `tests/` mirror absent unless a paper-packaging reason emerges that is stronger than the current redundancy evidence.
 
 ## Medium-Risk Overlap Zones
 
