@@ -14,6 +14,26 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _paper_root() -> Path:
+    env = os.getenv("CAUSALBOOL_PAPER_ROOT")
+    if env:
+        return Path(env).expanduser().resolve()
+    repo = _repo_root()
+    candidates = [
+        repo / "workspaces" / "claude-nature" / "paper",
+        repo / "workspaces" / "level8-paper" / "paper",
+        repo / "4ClaudeCode" / "claude-Nature" / "paper",
+    ]
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return candidates[-1]
+
+
+def _paper_figures_dir() -> Path:
+    return _paper_root() / "figures"
+
+
 def _load_json(path: Path) -> dict:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
@@ -142,7 +162,7 @@ def _perm_p_diff_topk(score: np.ndarray, dep: np.ndarray, k: int, n_perm: int, s
 def main() -> None:
     patient_dir = Path(os.getenv("KRB_PATIENT_DIR", "data/cancer/patients")).resolve()
     base_path = Path(os.getenv("KRB_BASE_NETWORK", "data/bio/processed/egfr_signaling.json")).resolve()
-    out_prefix = Path(os.getenv("KRB_OUT_PREFIX", "4ClaudeCode/claude-Nature/paper/figures/krb_corruption_anchor")).resolve()
+    out_prefix = Path(os.getenv("KRB_OUT_PREFIX", str(_paper_figures_dir() / "krb_corruption_anchor"))).resolve()
     null_samples = int(os.getenv("KRB_NULL_SAMPLES", "80") or "80")
     perm_n = int(os.getenv("KRB_PERM_N", "5000") or "5000")
     depmap_gene_mean = Path(os.getenv("KRB_DEPMAP_GENE_MEAN", "data/DepMap/CRISPRGeneEffect.csv.gene_mean.csv")).resolve()

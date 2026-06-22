@@ -696,6 +696,11 @@ From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/` with 
 
 - Updated `4ClaudeCode/claude-Nature/paper/code/reproduce_all.py` to derive default `--figures-dir` and `--results-dir` from the script location rather than hardcoding `4ClaudeCode/claude-Nature/...`.
 - Updated `4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py` to default wetlab-pack outputs to a paper-local `results/` directory rather than hardcoding the full repo path.
+- Updated external scripts that previously defaulted to `4ClaudeCode/claude-Nature/paper/figures` to resolve the paper workspace via `CAUSALBOOL_PAPER_ROOT` (with safe fallbacks):
+  - `src/analysis/KRB_Corruption_Anchors.py`
+  - `src/analysis/Cancer_Corruption.py`
+  - `src/analysis/Phase_Transition_Bio_Overlay.py`
+  - `src/stats/Bayesian_Meta_Analysis.py`
 
 ### Added
 
@@ -705,6 +710,6 @@ From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/` with 
 
 - Yes, integration into a common workspace folder is desirable.
 - The safe path is staged:
-  - first abstract hard-coded references outside the workspace
+  - first abstract hard-coded references outside the workspace (now executed via `CAUSALBOOL_PAPER_ROOT`)
   - then move into `workspaces/...`
   - then add an explicit provenance migration note

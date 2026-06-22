@@ -28,8 +28,7 @@ The tree is referenced by code and documents using the literal path `4ClaudeCode
 
 Confirmed examples:
 
-- `src/analysis/KRB_Corruption_Anchors.py` defaults to output under `4ClaudeCode/claude-Nature/paper/figures/...`.
-- `src/analysis/Cancer_Corruption.py`, `src/analysis/Phase_Transition_Bio_Overlay.py`, and `src/stats/Bayesian_Meta_Analysis.py` reference the paper figures directory under that path.
+- `src/analysis/KRB_Corruption_Anchors.py`, `src/analysis/Cancer_Corruption.py`, `src/analysis/Phase_Transition_Bio_Overlay.py`, and `src/stats/Bayesian_Meta_Analysis.py` historically referenced the paper figures directory under the literal `4ClaudeCode/claude-Nature/...` path.
 - `4ClaudeCode/claude-Nature/paper/bitacora-lev8.md` contains many commands referencing the exact folder location.
 - Some paper-support artifacts include absolute file paths under `/Users/.../CausalBool/4ClaudeCode/claude-Nature/...`.
 
@@ -56,8 +55,18 @@ Stage 0 (done):
 
 Stage 1 (next):
 
-- centralize “paper workspace root” discovery for scripts outside `4ClaudeCode/` that currently hardcode `4ClaudeCode/claude-Nature/paper/figures`
-- update those scripts to use an environment variable (e.g., `CAUSALBOOL_PAPER_ROOT`) or a shared helper that resolves a default paper workspace path
+Stage 1 (executed):
+
+- centralize “paper workspace root” discovery for scripts outside `4ClaudeCode/` by using `CAUSALBOOL_PAPER_ROOT` as the primary selector
+- update external scripts so their defaults no longer depend on the literal `4ClaudeCode/claude-Nature/...` path:
+  - `src/analysis/KRB_Corruption_Anchors.py`
+  - `src/analysis/Cancer_Corruption.py`
+  - `src/analysis/Phase_Transition_Bio_Overlay.py`
+  - `src/stats/Bayesian_Meta_Analysis.py`
+
+Notes:
+
+- `CAUSALBOOL_PAPER_ROOT` can be pointed at the future `workspaces/.../paper` location without changing the scripts again.
 
 Stage 2:
 
