@@ -156,19 +156,22 @@ Cleanup rule:
 Directories:
 
 - `results/tests/*`
-- `4ClaudeCode/claude-Nature/paper/results/tests/*`
+- output paths referenced as `4ClaudeCode/claude-Nature/paper/results/tests/*`
 
 Evidence:
 
-- Both locations contain similar result structures such as `algo001`, `analysis_*`, `gates*`, `pattern*`, `arch*`, `mixed*`, `theory*`.
+- `results/tests/*` is present on disk and is heavily referenced by manuscript condensers such as `doc/finalpaper/together_full.tex`.
+- The current `4ClaudeCode/claude-Nature/paper/` tree does not contain an on-disk `results/` directory.
+- However, `paper/code/reproduce_all.py` still defaults to `4ClaudeCode/claude-Nature/paper/results`, and Level 8 provenance documents still log files under `paper/results/...`.
 
 Interpretation:
 
-- These may be copied snapshots, branch-specific exports, or paper-packaged test evidence.
+- This is not currently a verified duplicate-tree problem on disk.
+- It is a provenance-versus-materialization problem: the paper workspace still treats `paper/results/` as a logical output location, but the current checkout does not materialize that tree.
 
 Cleanup rule:
 
-- Do not delete one copy until checksum and provenance comparisons establish whether one is a frozen paper artifact or a stale duplicate.
+- Do not prune `results/tests/` based on a presumed paper-tree duplicate until the status of `paper/results/` is explicitly reconciled.
 
 ## Medium-Risk Overlap Zones
 
@@ -202,15 +205,24 @@ Directories:
 Evidence:
 
 - Both are Mathematica BDM-related workspaces.
-- `squares2Dsize1to4.m` appears in both places.
+- `squares2Dsize1to4.m` appears in both places and the two copies are exact duplicates.
+- `mat-bdm/` currently contains only a unique notebook plus that duplicated lookup table.
+- `mat-bdm/IntegratedInformationByAlgorithmicDynamics.nb` loads `squares2Dsize1to4.m` from its own directory, so the duplicate table is functionally tied to the notebook's current local execution pattern.
+- `mathematicabdm/` is the richer workspace, containing `BDMandNormalizedBDM.nb`, `StringNBDM.nb`, `D3.m`, `D4.m`, `D5.m`, `reducedD2.m`, and its own copy of `squares2Dsize1to4.m`.
+- `src/integration/NatureBDM.wl` points to `mathematicabdm/D5.m`.
+- Historical Python verification scripts reference both workspaces through stale absolute paths under `CausalBoolIntegration/`, which shows lineage overlap but not a safe modern canonical replacement path.
 
 Interpretation:
 
-- Likely historical duplication or migration-in-progress.
+- This is confirmed partial duplication, not just suspected overlap.
+- `mathematicabdm/` looks like the richer historical table workspace.
+- `mat-bdm/` looks like a thinner satellite workspace centered on a unique notebook.
+- The duplicate lookup table does not make `mat-bdm/` disposable by itself, because removing or moving it would break the notebook's local load pattern unless the notebook or execution wrapper is modernized.
 
 Cleanup rule:
 
-- Verify whether one directory is a subset, backup, or working clone of the other before touching either.
+- Do not remove or collapse either directory yet.
+- If future cleanup targets this zone, treat `mathematicabdm/` as the more anchored workspace and resolve the `mat-bdm/IntegratedInformationByAlgorithmicDynamics.nb` dependency first.
 
 ### 8. Older causal workspace vs packaged integration workspace
 

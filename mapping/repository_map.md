@@ -48,7 +48,7 @@ Research data workspace, not a pure source tree.
 Generated outputs from tests, experiments, and validation runs.
 
 - Contains mixed research outputs from Mathematica and Python.
-- Contains several test-result trees that overlap conceptually with `tests/` and `4ClaudeCode/claude-Nature/paper/results/`.
+- Contains several test-result trees that overlap conceptually with `tests/` and with output locations referenced from the Level 8 paper workspace.
 - Should be treated as evidence/artifact storage until regeneration paths are fully documented.
 
 ### `tests/`
@@ -105,6 +105,7 @@ Generated or exported figures from tests and self-checks.
 Repository-level archive area for low-risk historical material moved out of active roots.
 
 - `archive/root_scratch/`: former top-level debug, inspection, and exploratory scripts preserved for historical troubleshooting context.
+- `archive/root_wrappers/`: former top-level wrapper scripts preserved when they are stale or operationally weaker than the module entrypoints they wrap.
 - `archive/generated_web_bundles/`: former root-level generated Vite/Cell Collective bundles preserved as artifacts rather than active source.
 - `archive/analysis_drafts/`: superseded or incomplete analysis scripts moved out of active `src/` locations.
 
@@ -112,9 +113,32 @@ Repository-level archive area for low-risk historical material moved out of acti
 
 Mathematica BDM-related workspaces with notebooks and lookup tables. These look historically important and partially overlapping.
 
+- `mat-bdm/` currently contains:
+  - `IntegratedInformationByAlgorithmicDynamics.nb`
+  - `squares2Dsize1to4.m`
+- `mathematicabdm/` currently contains:
+  - `BDMandNormalizedBDM.nb`
+  - `StringNBDM.nb`
+  - `D3.m`
+  - `D4.m`
+  - `D5.m`
+  - `reducedD2.m`
+  - `squares2Dsize1to4.m`
+- The two copies of `squares2Dsize1to4.m` are exact duplicates.
+- `mat-bdm/IntegratedInformationByAlgorithmicDynamics.nb` is unique and loads `squares2Dsize1to4.m` locally from its own directory.
+- `src/integration/NatureBDM.wl` points directly to `mathematicabdm/D5.m`, which makes `mathematicabdm/` operationally more anchored to the current repo than `mat-bdm/`.
+- Some Python verification scripts reference these workspaces through stale absolute paths under `CausalBoolIntegration/`, which confirms historical usage but does not provide a safe modern relocation path.
+
+Interpretation:
+
+- `mathematicabdm/` is the richer table/notebook workspace.
+- `mat-bdm/` is thinner, but it is not empty redundancy because its unique notebook still depends on the colocated lookup table.
+- Folder-level collapse is not yet safe without either rewriting that notebook dependency or formalizing a BDM workspace policy.
+
 ### Top-level loose files
 
-- `process_data.py`, `run_process.py`, `run_scraper.py`, `report_dataset.py`: small orchestration wrappers.
+- `run_process.py`, `run_scraper.py`, `report_dataset.py`: small orchestration wrappers.
+- `process_data.py` is no longer kept at root; it was moved to `archive/root_wrappers/` after review showed it was an unreferenced stale wrapper that did not bootstrap `src/`.
 - Large generated JS bundles are no longer kept at root; they were moved to `archive/generated_web_bundles/`.
 
 ## Core Source Map
@@ -254,6 +278,8 @@ More consolidated manuscript workspace.
 - Has manuscript assembly scripts and section files.
 - Includes figure-generation scripts and compiled outputs.
 - Contains both source files and generated LaTeX byproducts in places.
+- `nature_draft.tex` remains the strongest current Nature-facing manuscript source.
+- `nature_final.tex` is not just a compiled byproduct companion; it is a distinct standalone manuscript branch with a different framing and result scale.
 
 ### `4ClaudeCode/claude-Nature/paper/`
 
@@ -263,12 +289,13 @@ Parallel paper-production workspace with operational code.
 - `paper/code/essentiality_analysis.py`: extended essentiality analysis.
 - `paper/code/reproduce_all.py`: orchestration wrapper around the pipeline.
 - `paper/figures/`: many generated figures and CSV/JSON companions.
-- `paper/results/`: manuscript support outputs, readiness packs, and duplicated test-result trees.
 - `bioPlanLev-8.md`, `bitacora-lev8.md`, and other paper files show this area is active governance plus execution, not merely notes.
+- `paper3_algorithmic_corruption.tex` is a real side-branch manuscript inside this active workspace, not an obviously disposable draft.
+- The current on-disk tree does not include `paper/results/`, but Level 8 code and provenance documents still reference that path as a logical output location.
 
 Interpretation:
 
-- This is a second serious code-and-results universe inside the repo.
+- This is a second serious code-and-reproducibility universe inside the repo.
 - It overlaps conceptually with `src/analysis/`, `results/`, and `doc/newIntPaper/`.
 
 ## Data and Artifact Map
@@ -300,10 +327,15 @@ This subtree has its own docs, tests, CI config, packaging files, and internal s
 
 ### Thin wrappers
 
-- `process_data.py`: calls `GRNLoader.process_raw_directory()`.
 - `run_process.py`: calls `BulkScraper.process_raw_files()`.
 - `run_scraper.py`: runs BioModels, GINsim, PyBoolNet scraping and then processing.
 - `report_dataset.py`: reports processed network inventory.
+
+Interpretation:
+
+- `run_scraper.py` remains the clearest intentional repository-root entrypoint because historical planning documents still reference it explicitly.
+- `run_process.py` remains plausible as a process-only convenience wrapper, even though it overlaps operationally with module entrypoints.
+- `report_dataset.py` is a standalone operator utility rather than a wrapper into the same code path.
 
 ### Scratch / debugging utilities
 

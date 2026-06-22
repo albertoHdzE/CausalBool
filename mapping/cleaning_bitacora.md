@@ -398,3 +398,101 @@ From `src/analysis/` to `archive/analysis_drafts/`:
 - The repository root is now materially cleaner and more interpretable.
 - The active `src/analysis/` tree no longer contains the abandoned `optimize_alpha_draft.py`.
 - The next cleanup pass can focus on manuscript side branches and historical mathematical workspaces rather than obvious artifact clutter.
+
+## Manuscript Side-Branch And BDM Forensic Review
+
+### Scope
+
+- No moves.
+- No deletions.
+- Re-evaluate the next ambiguity boundary before attempting another cleanup wave.
+
+### Manuscript findings
+
+- Re-read `doc/finalpaper/nature_final.tex` against the role of `nature_draft.tex`.
+- `nature_final.tex` is a distinct standalone manuscript branch, not just a stale compiled companion or naming variant.
+- Its framing centers on a larger corpus and an "Algorithmic Cost of Function" thesis, which is materially different from the current Level 8 Nature-facing branch tracked through `nature_draft.tex`.
+- Re-read `4ClaudeCode/claude-Nature/paper/paper3_algorithmic_corruption.tex`.
+- That file remains an active-looking paired-TCGA side manuscript inside the live Level 8 paper workspace.
+
+### BDM workspace findings
+
+- Re-reviewed `mat-bdm/` and `mathematicabdm/` file by file.
+- Confirmed that `mat-bdm/squares2Dsize1to4.m` and `mathematicabdm/squares2Dsize1to4.m` are exact duplicates.
+- Confirmed that `mat-bdm/IntegratedInformationByAlgorithmicDynamics.nb` is unique and currently loads `squares2Dsize1to4.m` locally from its own directory.
+- Confirmed that `mathematicabdm/` is the richer workspace, containing `BDMandNormalizedBDM.nb`, `StringNBDM.nb`, `D3.m`, `D4.m`, `D5.m`, `reducedD2.m`, and its own table copy.
+- Confirmed that `src/integration/NatureBDM.wl` points directly to `mathematicabdm/D5.m`.
+- Historical Python verification scripts still reference these BDM assets through stale absolute `CausalBoolIntegration/...` paths, which preserves lineage evidence but does not authorize relocation.
+
+### Cleaning consequence
+
+- There is still not enough evidence for a safe archive or delete action in either manuscript side branches or the BDM workspaces.
+- `paper3_algorithmic_corruption.tex` should now be treated as a hold item rather than an immediate cleanup candidate.
+- `mathematicabdm/` should now be treated as the more anchored BDM workspace.
+- `mat-bdm/` remains verify-first because its duplicate lookup table is entangled with a unique notebook execution path.
+- The next better cleanup frontier is likely the remaining top-level wrappers or overlapping result trees, not forced pruning in the manuscript or BDM zones.
+
+## Root Wrapper Archive Wave
+
+### Scope
+
+- Execute the first wrapper-specific cleanup action.
+- Preserve the wrapper by moving it to an archive location rather than deleting it.
+- Act only where the wrapper is both operationally weaker and unreferenced.
+
+### Pre-move review
+
+- Re-read `process_data.py`.
+- Confirmed it imports `integration.grn_data_pipeline` without bootstrapping `src/`, unlike the surviving root wrappers.
+- Confirmed repository-wide searches found no references to `process_data.py`.
+- Confirmed `src/integration/grn_data_pipeline.py` already provides the same processing entrypoint under its own `__main__` block.
+
+### Added
+
+- `archive/root_wrappers/README.md`
+
+### Moved
+
+From repository root to `archive/root_wrappers/`:
+
+- `process_data.py`
+
+### Rationale
+
+- The wrapper was weaker than the module it wrapped because it lacked the path bootstrap needed for normal root execution.
+- It did not carry unique workflow documentation or repository references.
+- Archiving preserves rollback and provenance while making the active root reflect the wrappers that still appear intentional.
+
+### Cleaning consequence
+
+- `run_process.py`, `run_scraper.py`, and `report_dataset.py` remain in place.
+- The wrapper review now has one executed action and a sharper baseline for evaluating the remaining root entrypoints.
+
+## Wrapper And Output-Path Reclassification Review
+
+### Scope
+
+- No moves.
+- No deletions.
+- Refine the remaining wrapper classifications and re-check the previously suspected paper-results overlap against the current checkout.
+
+### Wrapper findings
+
+- Re-reviewed `run_process.py`, `run_scraper.py`, and `report_dataset.py`.
+- `run_scraper.py` remains explicitly referenced by historical planning material, so it should currently be treated as an intentional root convenience launcher rather than stale clutter.
+- `run_process.py` remains ambiguous, but it still exposes a process-only rerun path that is not identical to the default `BulkScraper.py` execution path.
+- `report_dataset.py` is better interpreted as a small operator/reporting utility than as a redundant wrapper into the same ingestion code path.
+
+### Paper output-path findings
+
+- Re-checked the current `4ClaudeCode/claude-Nature/paper/` tree on disk.
+- Confirmed that the current checkout does not contain an on-disk `paper/results/` directory.
+- Confirmed that Level 8 code and provenance documents still reference `paper/results/...` as a logical output location.
+- Confirmed that the actual on-disk test-output tree currently under review is `results/tests/`.
+
+### Cleaning consequence
+
+- `run_scraper.py` should now be treated as a hold item.
+- `report_dataset.py` should now be treated as a hold item.
+- `run_process.py` remains verify-first rather than archive-ready.
+- The earlier "duplicate test-output trees" concern is now reframed: the current ambiguity is not a confirmed duplicate directory pair on disk, but a mismatch between provenance references and currently materialized paper outputs.

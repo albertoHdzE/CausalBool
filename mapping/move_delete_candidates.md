@@ -29,13 +29,13 @@ Each entry is evaluated against the current mapping, source-of-truth index, and 
 | --- | --- | --- | --- | --- | --- | --- |
 | `doc/finalpaper/final-draft.tex` | manuscript | historical manuscript branch | `archive-ready` | low-medium | preserve explicit provenance references before move | `bitacora-lev8.md` still references it as the previous manuscript comparison branch, so deletion would be wrong; archival isolation is appropriate later. |
 | `doc/finalpaper/final-draft.pdf` | manuscript | review-support historical output | `archive-ready` | low-medium | keep paired with `final-draft.tex` | Historical comparison artifact mentioned in review material and provenance context. |
-| `doc/finalpaper/nature_final.tex` | manuscript | alternate Nature manuscript branch | `verify-first` | medium | compare text role versus `nature_draft.tex`; check if any script or review loop still targets it | Appears manuscript-like and important, but current policy identifies `nature_draft.tex` as the strongest active source. |
+| `doc/finalpaper/nature_final.tex` | manuscript | alternate Nature manuscript branch | `verify-first` | medium | preserve as side branch unless an explicit manuscript-branch policy supersedes it | Distinct standalone manuscript centered on a larger-corpus "Algorithmic Cost of Function" framing; not the current Level 8 target, but not disposable clutter. |
 | `doc/finalpaper/nature_final.pdf` | manuscript | compiled companion of alternate Nature branch | `verify-first` | medium | resolve status of `nature_final.tex` first | The PDF cannot be classified until its source branch is resolved. |
 | `doc/finalpaper/supInfo.txt` | manuscript support | auxiliary supplementary text | `verify-first` | medium | determine whether it feeds any active supplementary manuscript workflow | Looks secondary, but may contain unique supplementary wording or assembly hints. |
 | `doc/finalpaper/together.tex` | manuscript synthesis | condenser | `hold` | high | none before extraction/indexing plan | Historical synthesis artifact, not a safe deletion or move candidate yet. |
 | `doc/finalpaper/together_full.tex` | manuscript synthesis | condenser | `hold` | high | none before extraction/indexing plan | Preserves cross-level integration and assembly logic not cleanly encoded elsewhere. |
 | `doc/finalpaper/together_full.pdf` | manuscript synthesis | review-support compiled condenser | `verify-first` | medium | decide whether condensers keep PDF companions as archival evidence | May be deletable later, but only after condenser retention policy is formalized. |
-| `4ClaudeCode/claude-Nature/paper/paper3_algorithmic_corruption.tex` | Level 8 paper tree | side-branch manuscript | `verify-first` | medium | choose explicit paper-branch policy for Level 8 manuscript variants | Important alternative manuscript branch, but not currently the strongest active source-of-truth. |
+| `4ClaudeCode/claude-Nature/paper/paper3_algorithmic_corruption.tex` | Level 8 paper tree | side-branch manuscript | `hold` | medium | none before explicit Level 8 paper-branch policy | Active-looking paired-TCGA manuscript inside the live Level 8 workspace; not the main source-of-truth, but also not a safe archive target now. |
 | `index.js` | root artifact | generated frontend bundle candidate | `archive-ready` | low-medium | check for repository references before moving | Large Vite-style bundle with no repository references found; preserved as artifact rather than active source. |
 | `cc_index.js` | root artifact | generated frontend bundle candidate | `archive-ready` | low-medium | same as `index.js` | Same bundle family and file size as `index.js`, with no repository references found. |
 | `debug_ccapi.py` | root scratch scripts | ad hoc diagnostic script | `archive-ready` | low-medium | skim for unique operational notes before moving | Likely non-production, but may preserve debugging knowledge worth retaining in an archive bucket. |
@@ -49,14 +49,14 @@ Each entry is evaluated against the current mapping, source-of-truth index, and 
 | `test_bdm_debug.m` | root scratch scripts | top-level Mathematica debug test | `archive-ready` | low-medium | skim for unique benchmark or failure context before moving | Appears debugging-oriented and separate from formal test harnesses. |
 | `test_bdm.json` | root scratch scripts | data fixture for BDM probe | `archive-ready` | low-medium | move together with `test_bdm.py` | Tiny fixture file paired with the standalone BDM probe. |
 | `test_ccapi_search.py` | root scratch scripts | exploratory/vendor diagnostic script | `archive-ready` | low-medium | confirm no documented workflow depends on it | Fits the exploratory test utility pattern. |
-| `process_data.py` | root utility scripts | thin wrapper entrypoint | `verify-first` | medium | decide whether top-level wrappers are desired project interface or clutter | Tiny wrapper around `GRNLoader`; may be intentionally convenient. |
-| `report_dataset.py` | root utility scripts | thin reporting utility | `verify-first` | low-medium | confirm whether users still run it manually | Small but potentially useful operator utility; not enough evidence for deletion. |
-| `run_process.py` | root utility scripts | thin runner script | `verify-first` | medium | inspect whether it duplicates another entrypoint exactly | Entry-point duplication is plausible, but not yet proven. |
-| `run_scraper.py` | root utility scripts | thin runner script | `verify-first` | medium | inspect whether it duplicates code under `src/integration/` or paper code | Could be a valid convenience launcher or stale wrapper. |
-| `mat-bdm/` | math workspace | historical computational workspace | `verify-first` | high | compare contents against `mathematicabdm/` and check for unique lookup tables/notebooks | Historical overlap is suspected but not yet measured well enough for action. |
-| `mathematicabdm/` | math workspace | historical computational workspace | `verify-first` | high | compare contents against `mat-bdm/` and check for unique lookup tables/notebooks | Same overlap concern as `mat-bdm/`. |
+| `process_data.py` | root utility scripts | thin wrapper entrypoint | `archive-ready` | low-medium | verify that module-level entrypoints already cover its behavior | Unreferenced stale wrapper that does not bootstrap `src/`; `src/integration/grn_data_pipeline.py` already exposes the same processing path more directly. |
+| `report_dataset.py` | root utility scripts | thin reporting utility | `hold` | low-medium | none before an explicit operator-interface simplification plan | Standalone inventory/report helper over processed JSONs; not a duplicate of the scraper/processor entrypoints. |
+| `run_process.py` | root utility scripts | thin runner script | `verify-first` | medium | decide whether process-only reruns should stay available as a root convenience interface | It overlaps with module entrypoints, but it still exposes a distinct process-only path not identical to `run_scraper.py` or the default `BulkScraper.py` run. |
+| `run_scraper.py` | root utility scripts | thin runner script | `hold` | medium | none before an explicit root-entrypoint consolidation policy | Historical planning documents still reference it explicitly, so it currently reads as an intentional convenience launcher rather than stale clutter. |
+| `mat-bdm/` | math workspace | thinner historical computational workspace with unique notebook | `verify-first` | high | resolve the local notebook dependency on `squares2Dsize1to4.m` before any deduplication or archival move | `squares2Dsize1to4.m` is an exact duplicate of the copy under `mathematicabdm/`, but `IntegratedInformationByAlgorithmicDynamics.nb` is unique and currently loads the local table. |
+| `mathematicabdm/` | math workspace | richer historical BDM table/notebook workspace | `hold` | high | none before an explicit BDM workspace policy is defined | Contains the broader D3/D4/D5 table set and is directly referenced by `src/integration/NatureBDM.wl`, so it is currently the more anchored workspace. |
 | `src/analysis/optimize_alpha_draft.py` | analysis code | incomplete draft | `archive-ready` | low-medium | compare line-by-line with `optimize_alpha.py` before moving | Comparison shows it stops at an unresolved data-shape question and is superseded by the working `optimize_alpha.py`. |
-| `results/tests/` vs `4ClaudeCode/claude-Nature/paper/results/tests/` | test outputs | overlapping provenance/output trees | `verify-first` | high | determine canonical source tests vs canonical outputs vs paper snapshots | Three-way provenance problem; not ready for pruning. |
+| `results/tests/` vs referenced `4ClaudeCode/claude-Nature/paper/results/tests/` | test outputs | root test-output tree versus paper-workspace logical output path | `verify-first` | high | reconcile whether `paper/results/` should exist on disk or remain a provenance-only referenced location | Current checkout contains `results/tests/`, but not an on-disk `paper/results/` tree; the ambiguity is now about missing materialization rather than confirmed duplicate directories. |
 
 ## Immediate Safe Zone
 
@@ -102,6 +102,10 @@ Archived from `src/analysis/` to `archive/analysis_drafts/`:
 
 - `optimize_alpha_draft.py`
 
+Archived from repository root to `archive/root_wrappers/`:
+
+- `process_data.py`
+
 ## Not Ready For Action
 
 The following remain protected for now:
@@ -116,8 +120,8 @@ The following remain protected for now:
 
 ## Recommended Next Cleanup Execution Order
 
-1. Resolve `nature_final.*` and `paper3_algorithmic_corruption.tex` as manuscript side branches.
-2. Review remaining top-level wrappers (`process_data.py`, `run_process.py`, `run_scraper.py`, `report_dataset.py`).
-3. Compare `mat-bdm/` against `mathematicabdm/`.
-4. Inspect overlapping test-output trees before any provenance pruning.
+1. Inspect the status of the paper workspace logical output path (`paper/results/`) before any provenance pruning in `results/tests/`.
+2. Revisit `run_process.py` only if root-entrypoint consolidation becomes an explicit cleanup goal.
+3. Return to manuscript branch policy once explicit retention criteria are chosen for side branches and compiled companions.
+4. Revisit `mat-bdm/` only if a concrete BDM deduplication plan can preserve the unique notebook execution path.
 5. Only after those checks, perform the next mixed document/code cleanup wave.
