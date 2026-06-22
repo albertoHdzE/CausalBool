@@ -105,6 +105,8 @@ Generated or exported figures from tests and self-checks.
 Repository-level archive area for low-risk historical material moved out of active roots.
 
 - `archive/root_scratch/`: former top-level debug, inspection, and exploratory scripts preserved for historical troubleshooting context.
+- `archive/generated_web_bundles/`: former root-level generated Vite/Cell Collective bundles preserved as artifacts rather than active source.
+- `archive/analysis_drafts/`: superseded or incomplete analysis scripts moved out of active `src/` locations.
 
 ### `mat-bdm/` and `mathematicabdm/`
 
@@ -113,8 +115,7 @@ Mathematica BDM-related workspaces with notebooks and lookup tables. These look 
 ### Top-level loose files
 
 - `process_data.py`, `run_process.py`, `run_scraper.py`, `report_dataset.py`: small orchestration wrappers.
-- `test_bdm.py`: remaining top-level diagnostic script still under review.
-- `index.js`, `cc_index.js`: very large built JavaScript artifacts, not core handwritten source.
+- Large generated JS bundles are no longer kept at root; they were moved to `archive/generated_web_bundles/`.
 
 ## Core Source Map
 
@@ -188,12 +189,12 @@ This directory contains manuscript- and study-facing analysis scripts.
 - `Phase_Transition_Bio_Overlay.py`: overlays real biological networks on synthetic phase-transition analysis.
 - `analyze_level7_full.py`: post-processing utility for level-7 fidelity results.
 - `optimize_alpha.py`: mature alpha sweep/optimization utility.
-- `optimize_alpha_draft.py`: obvious draft/incomplete variant.
 
 Interpretation:
 
 - This is active science code, but not all files are equally mature.
 - Several scripts are one-off campaign drivers rather than reusable libraries.
+- One previously obvious draft variant, `optimize_alpha_draft.py`, has been moved to `archive/analysis_drafts/` after comparison confirmed it was incomplete and superseded.
 
 ### 4. Experiment Campaign Runners: `src/experiments/`
 

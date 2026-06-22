@@ -1,6 +1,6 @@
 # Root Scratch Archive
 
-This directory stores former top-level scratch, debug, and exploratory scripts that were moved out of the repository root during surgical cleanup on the `clean` branch.
+This directory stores former top-level scratch, debug, exploratory, and local test scripts that were moved out of the repository root during surgical cleanup on the `clean` branch.
 
 These files were not deleted because they may still preserve useful troubleshooting context or historical workflow knowledge.
 

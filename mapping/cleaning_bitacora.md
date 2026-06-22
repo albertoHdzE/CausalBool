@@ -349,3 +349,52 @@ From repository root to `archive/root_scratch/`:
 - The repository root now better reflects active entrypoints and major artifacts.
 - `test_bdm.py` and `test_bdm.json` remain in place because their relationship to BDM validation is not yet resolved.
 - The next cleanup wave can focus on remaining verify-first items rather than broad root clutter.
+
+## Expanded Archive Wave
+
+### Scope
+
+- Execute a larger high-confidence cleanup batch across root artifacts and one superseded analysis draft.
+- Move files to archive rather than delete them.
+- Act only where comparison or reference checks make the risk low.
+
+### Pre-move review
+
+- Compared `src/analysis/optimize_alpha_draft.py` against `src/analysis/optimize_alpha.py`.
+- Confirmed the draft script stops at an unresolved CSV-shape question and ends with `pass`, while `optimize_alpha.py` is complete and produces the intended figures and AUC sweep.
+- Reviewed `test_bdm.py` and `test_bdm.json`; they form a tiny standalone BDM probe pair with no repository references.
+- Checked repository references for `index.js` and `cc_index.js`; none were found.
+- Measured `index.js` and `cc_index.js`; both are 9.9 MB and share the same Vite/Cell Collective bundle structure.
+
+### Added
+
+- `archive/generated_web_bundles/README.md`
+- `archive/analysis_drafts/README.md`
+
+### Moved
+
+From repository root to `archive/root_scratch/`:
+
+- `test_bdm.py`
+- `test_bdm.json`
+
+From repository root to `archive/generated_web_bundles/`:
+
+- `index.js`
+- `cc_index.js`
+
+From `src/analysis/` to `archive/analysis_drafts/`:
+
+- `optimize_alpha_draft.py`
+
+### Rationale
+
+- `test_bdm.py` and `test_bdm.json` are isolated local probes rather than part of the formal test harness.
+- `index.js` and `cc_index.js` are generated bundles, not authored project source, and no live repository references were found.
+- `optimize_alpha_draft.py` is clearly superseded by the working `optimize_alpha.py` implementation, but preserving the draft keeps rollback and historical inspection easy.
+
+### Cleaning consequence
+
+- The repository root is now materially cleaner and more interpretable.
+- The active `src/analysis/` tree no longer contains the abandoned `optimize_alpha_draft.py`.
+- The next cleanup pass can focus on manuscript side branches and historical mathematical workspaces rather than obvious artifact clutter.

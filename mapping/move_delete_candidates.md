@@ -36,8 +36,8 @@ Each entry is evaluated against the current mapping, source-of-truth index, and 
 | `doc/finalpaper/together_full.tex` | manuscript synthesis | condenser | `hold` | high | none before extraction/indexing plan | Preserves cross-level integration and assembly logic not cleanly encoded elsewhere. |
 | `doc/finalpaper/together_full.pdf` | manuscript synthesis | review-support compiled condenser | `verify-first` | medium | decide whether condensers keep PDF companions as archival evidence | May be deletable later, but only after condenser retention policy is formalized. |
 | `4ClaudeCode/claude-Nature/paper/paper3_algorithmic_corruption.tex` | Level 8 paper tree | side-branch manuscript | `verify-first` | medium | choose explicit paper-branch policy for Level 8 manuscript variants | Important alternative manuscript branch, but not currently the strongest active source-of-truth. |
-| `index.js` | root artifact | generated frontend bundle candidate | `verify-first` | medium | confirm no local static page, docs, or demo still depend on it | Looks like a built Vite bundle rather than handwritten project logic. |
-| `cc_index.js` | root artifact | generated frontend bundle candidate | `verify-first` | medium | same as `index.js`; compare whether one supersedes the other | Strongly suggests generated bundle duplication, but deletion still needs dependency confirmation. |
+| `index.js` | root artifact | generated frontend bundle candidate | `archive-ready` | low-medium | check for repository references before moving | Large Vite-style bundle with no repository references found; preserved as artifact rather than active source. |
+| `cc_index.js` | root artifact | generated frontend bundle candidate | `archive-ready` | low-medium | same as `index.js` | Same bundle family and file size as `index.js`, with no repository references found. |
 | `debug_ccapi.py` | root scratch scripts | ad hoc diagnostic script | `archive-ready` | low-medium | skim for unique operational notes before moving | Likely non-production, but may preserve debugging knowledge worth retaining in an archive bucket. |
 | `debug_sbml.py` | root scratch scripts | ad hoc diagnostic script | `archive-ready` | low-medium | skim for unique parser/format knowledge before moving | Fits scratch-tool pattern better than production code. |
 | `debug_lambda.m` | root scratch scripts | Mathematica debug script | `archive-ready` | low-medium | skim for unique symbolic or logic notes before moving | Strong scratch/debug signal from naming and location. |
@@ -45,9 +45,9 @@ Each entry is evaluated against the current mapping, source-of-truth index, and 
 | `explore_ccapi.py` | root scratch scripts | exploratory vendor wrapper script | `archive-ready` | low-medium | confirm no workflow docs still instruct its use | Appears exploratory rather than stable pipeline code. |
 | `inspect_ccapi.py` | root scratch scripts | exploratory vendor inspection script | `archive-ready` | low-medium | confirm no workflow docs still instruct its use | Better treated as archived troubleshooting support than active code. |
 | `inspect_ccapi_methods.py` | root scratch scripts | exploratory vendor inspection script | `archive-ready` | low-medium | confirm no workflow docs still instruct its use | Same exploratory pattern as other ccapi inspection helpers. |
-| `test_bdm.py` | root scratch scripts | top-level diagnostic test script | `verify-first` | medium | compare to any formal tests or notebook usage; check whether it is the only executable BDM probe | Test-like naming suggests low maturity, but BDM tooling is central enough that deletion cannot be assumed. |
+| `test_bdm.py` | root scratch scripts | top-level diagnostic test script | `archive-ready` | low-medium | check for repository references before moving | Small standalone BDM probe with no repository references found; preserved in archive with its data fixture. |
 | `test_bdm_debug.m` | root scratch scripts | top-level Mathematica debug test | `archive-ready` | low-medium | skim for unique benchmark or failure context before moving | Appears debugging-oriented and separate from formal test harnesses. |
-| `test_bdm.json` | root scratch scripts | data fixture for BDM probe | `verify-first` | medium | classify together with `test_bdm.py` | Likely tied to `test_bdm.py`; should be handled as a pair. |
+| `test_bdm.json` | root scratch scripts | data fixture for BDM probe | `archive-ready` | low-medium | move together with `test_bdm.py` | Tiny fixture file paired with the standalone BDM probe. |
 | `test_ccapi_search.py` | root scratch scripts | exploratory/vendor diagnostic script | `archive-ready` | low-medium | confirm no documented workflow depends on it | Fits the exploratory test utility pattern. |
 | `process_data.py` | root utility scripts | thin wrapper entrypoint | `verify-first` | medium | decide whether top-level wrappers are desired project interface or clutter | Tiny wrapper around `GRNLoader`; may be intentionally convenient. |
 | `report_dataset.py` | root utility scripts | thin reporting utility | `verify-first` | low-medium | confirm whether users still run it manually | Small but potentially useful operator utility; not enough evidence for deletion. |
@@ -55,7 +55,7 @@ Each entry is evaluated against the current mapping, source-of-truth index, and 
 | `run_scraper.py` | root utility scripts | thin runner script | `verify-first` | medium | inspect whether it duplicates code under `src/integration/` or paper code | Could be a valid convenience launcher or stale wrapper. |
 | `mat-bdm/` | math workspace | historical computational workspace | `verify-first` | high | compare contents against `mathematicabdm/` and check for unique lookup tables/notebooks | Historical overlap is suspected but not yet measured well enough for action. |
 | `mathematicabdm/` | math workspace | historical computational workspace | `verify-first` | high | compare contents against `mat-bdm/` and check for unique lookup tables/notebooks | Same overlap concern as `mat-bdm/`. |
-| `src/analysis/optimize_alpha_draft.py` | analysis code | incomplete draft | `verify-first` | medium | compare line-by-line with `optimize_alpha.py` and confirm no unique experiment branch survives only here | Strong candidate later, but deleting draft analysis code without comparison is still premature. |
+| `src/analysis/optimize_alpha_draft.py` | analysis code | incomplete draft | `archive-ready` | low-medium | compare line-by-line with `optimize_alpha.py` before moving | Comparison shows it stops at an unresolved data-shape question and is superseded by the working `optimize_alpha.py`. |
 | `results/tests/` vs `4ClaudeCode/claude-Nature/paper/results/tests/` | test outputs | overlapping provenance/output trees | `verify-first` | high | determine canonical source tests vs canonical outputs vs paper snapshots | Three-way provenance problem; not ready for pruning. |
 
 ## Immediate Safe Zone
@@ -86,6 +86,22 @@ Archived from repository root to `archive/root_scratch/`:
 
 These items remain historically preserved, but they no longer occupy the active repository root.
 
+The next two items in this safe zone have now also been executed on the `clean` branch.
+
+Archived from repository root to `archive/root_scratch/`:
+
+- `test_bdm.py`
+- `test_bdm.json`
+
+Archived from repository root to `archive/generated_web_bundles/`:
+
+- `index.js`
+- `cc_index.js`
+
+Archived from `src/analysis/` to `archive/analysis_drafts/`:
+
+- `optimize_alpha_draft.py`
+
 ## Not Ready For Action
 
 The following remain protected for now:
@@ -100,8 +116,8 @@ The following remain protected for now:
 
 ## Recommended Next Cleanup Execution Order
 
-1. Compare `optimize_alpha_draft.py` against `optimize_alpha.py`.
-2. Resolve `nature_final.*` and `paper3_algorithmic_corruption.tex` as manuscript side branches.
-3. Check whether `index.js` and `cc_index.js` are referenced by any live local page or demo.
-4. Review remaining top-level wrappers (`process_data.py`, `run_process.py`, `run_scraper.py`, `report_dataset.py`).
-5. Only after those checks, perform the next low-risk move/delete wave.
+1. Resolve `nature_final.*` and `paper3_algorithmic_corruption.tex` as manuscript side branches.
+2. Review remaining top-level wrappers (`process_data.py`, `run_process.py`, `run_scraper.py`, `report_dataset.py`).
+3. Compare `mat-bdm/` against `mathematicabdm/`.
+4. Inspect overlapping test-output trees before any provenance pruning.
+5. Only after those checks, perform the next mixed document/code cleanup wave.
