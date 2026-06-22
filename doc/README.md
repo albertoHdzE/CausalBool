@@ -5,15 +5,16 @@ This `doc/` tree is a mixed archive of thesis, paper-development, and manuscript
 ## Directory roles
 
 - `Tesis-UNAM/`: thesis source tree and thesis-era assets.
-- `causalBinpaper/`: older early-paper workspace.
+- `causalBinpaper/`: signpost to the promoted method-derivation workspace under `papers/method/derivations/`.
 - `newIntPaper/`: integration-era planning, phased process logs, and manuscript-development material.
 - `finalpaper/`: consolidated manuscript assembly area built from the `newIntPaper/` source stream.
 
 ## Source-of-truth guidance
 
+- Paper-oriented AI work should start from the root-level `papers/` directory.
 - Active Nature-level paper execution is primarily under `workspaces/claude-nature/paper/`.
 - `doc/finalpaper/` is best treated as a manuscript assembly and archive layer.
-- `doc/newIntPaper/` is best treated as a planning/process-history layer rather than a single final manuscript.
+- `doc/newIntPaper/` is best treated as a planning/process-history and theory-lineage layer rather than a single final manuscript.
 
 ## Cleaning policy
 

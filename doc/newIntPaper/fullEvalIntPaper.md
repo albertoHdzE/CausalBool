@@ -171,7 +171,7 @@ Articulate the work as a causal, axiomatic and computationally grounded measure 
 
 ## Pattern Formulae for Ordered Exhaustive Repertoires
 
-- Context: `doc/causalBinpaper/01_causalBool_inputs.tex` articulates pattern discovery for ordered exhaustive repertoires; `doc/causalBinpaper/02_cb_and.tex` applies the method to `AND` dynamics; `doc/causalBinpaper/exam.tex` sketches further generalisation.
+- Context: `papers/method/derivations/01_causalBool_inputs.tex` articulates pattern discovery for ordered exhaustive repertoires; `papers/method/derivations/02_cb_and.tex` applies the method to `AND` dynamics; `papers/method/derivations/exam.tex` sketches further generalisation.
 - Code support: pattern extraction functions already exist, e.g. `elementsInColumn` at `src/integration/Alpha.m:645` and `findPatternsInInputsPerAttTotal` at `src/integration/Alpha.m:662`, which compute column‑wise symbol patterns over inputs grouped by attractors, using the alphabet `{0, 1, *}` where `*` denotes mixed presence.
 - Feasibility across gate classes: 
   - Monotone gates (`AND`, `OR`, `NAND`, `NOR`) admit closed‑form pattern rules in terms of input presence and Hamming weight thresholds; ordered repertoires yield predictable column partitions.
@@ -187,12 +187,12 @@ Articulate the work as a causal, axiomatic and computationally grounded measure 
 ## Per‑Gate Pattern Programme
 
 - For each gate, follow a consistent workflow: exhaustive discovery on ordered repertoires → symbolic formula derivation → empirical validation → integration and compression interpretation.
-- Documentation: dedicate a LaTeX document per gate under `doc/causalBinpaper/02_cb_*.tex` with intuitive exposition, formal statements, and comparisons against repertoire outputs.
+- Documentation: dedicate a LaTeX document per gate under `papers/method/derivations/02_cb_*.tex` with intuitive exposition, formal statements, and comparisons against repertoire outputs.
 - Coverage: `AND`, `OR`, `XOR`, `NAND`, `NOR`, `XNOR`, `NOT`, `IMPLIES/NIMPLIES`, `k‑of‑n` thresholds, canalising/nested‑canalising.
 - Outcomes: closed‑form or piecewise formulae mapped to Hamming weights, parity, entailment regions, threshold bands, and canalising collapses; normalisation for cross‑gate comparisons.
 
 ## Mixed Dynamics Networks
 
 - Composition: combine per‑gate formulae across network connectivity to derive mixed dynamics behaviour; identify conditions for additive, synergistic, or canalising dominance in subsystems.
-- Intuitive narrative: use `doc/causalBinpaper/exam.tex` to explain composition mechanics and provide worked examples with figures.
+- Intuitive narrative: use `papers/method/derivations/exam.tex` to explain composition mechanics and provide worked examples with figures.
 - Validation: ensemble studies comparing analytic composition against generated repertoires; invariance and robustness checks.

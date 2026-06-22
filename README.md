@@ -25,6 +25,13 @@ A deterministic, physics‑inspired programme of algorithmic information theory 
 - Insight: PID, TE, and TC reveal complementary vs synergistic structure in canonical gates and motifs.
 - Ready to share: manuscript, figures, and summaries generated automatically from experiments.
 
+## Paper Programme
+- Canonical paper entrypoint: `papers/`
+- Shared scientific base for all paper tracks: `papers/common/`
+- First active writing target after cleanup: `papers/method/`
+- Nature-oriented track entrypoint: `papers/nature/`
+- Historical execution scaffolding remains preserved under `doc/newIntPaper/`, but it is no longer the preferred first interface for new paper creation.
+
 ## Validation References
 - Foundations, ordering invariance, index algebra, and acceptance policies: [docProcess.tex](doc/newIntPaper/docProcess.tex)
 - Medium‑scale exact reconstruction and performance profiling: [expProcess.tex](doc/newIntPaper/expProcess.tex)
@@ -42,7 +49,7 @@ A deterministic, physics‑inspired programme of algorithmic information theory 
 ## Results At A Glance
 - Canonical gates: AND, OR, XOR, NAND, NOR, XNOR, NOT, IMPLIES/NIMPLIES, KOFN (strict/non‑strict), CANALISING.
 - Information signatures: PID (unique/shared/synergy), Transfer Entropy, Total Correlation.
-- Artefacts: CSV/JSON summaries under `results/`, figures under `figures/`, compiled paper in `doc/newIntPaper/`.
+- Artefacts: CSV/JSON summaries under `results/`, figures under `figures/`, historical process/manuscript support under `doc/newIntPaper/`, and paper-track navigation under `papers/`.
 
 ## Gate Catalogue and Dispatch
 - `Integration`Gates`ApplyGate[gate, inputs, params]` supports AND, OR, XOR, NAND, NOR, XNOR, NOT, IMPLIES, NIMPLIES, MAJORITY, KOFN, CANALISING.
@@ -50,22 +57,27 @@ A deterministic, physics‑inspired programme of algorithmic information theory 
 - Index sets: `Integration`Gates`IndexSet[gate, arity, params]` and network‑aware `IndexSetNetwork[gate, n, Ic, params]` for connected inputs `Ic`.
 
 ## Documentation
+- Paper-track navigation: `papers/README.md`
+- Common scientific base: `papers/common/README.md`
 - Supplement: `doc/newIntPaper/docProcess.tex` compiles to `doc/newIntPaper/docProcess.pdf`.
 - Policies: testing and documentation enforced via `doc/newIntPaper/plan.md`.
 - Compile: `cd doc/newIntPaper && pdflatex -interaction=nonstopmode docProcess.tex`.
 
 ## Structure
+- `papers/` canonical paper-programme entry layer with common, method, and Nature tracks.
 - `src/Packages/Integration/` core packages: `Alpha.m`, `Gates.m`, `Experiments.m`, `SelfTest.m`.
 - `src/integration/` legacy notebooks/routines: `Alpha.m`, `Alpha.nb`, `newAlpha.nb`.
 - `tests/MUnit/` deterministic tests by section: `Analysis/`, `Gates/`, `Pattern/`, `Arch/`, `Mixed/`.
 - `results/` CSV/JSON outputs from experiments and tests; `figures/` plots.
-- `doc/newIntPaper/` manuscript support: `docProcess.tex`, `plan.md`, `documents.md`, `fullEvalIntPaper.md`.
+- `doc/newIntPaper/` theory/process lineage and historical execution scaffolding.
+- `doc/finalpaper/` manuscript assembly and Nature-adjacent writing history.
 - `experiments/` reproducible study scripts (e.g., mixed dynamics).
 
 ## Current Status (Highlights)
 - Analysis completed for canonical gates and thresholds; dispatch integrated.
 - Network‑aware index helpers provided (KOFN, IMPLIES/NIMPLIES, NOT, CANALISING).
 - Documentation compiled; artefacts exported for implemented tickets.
+- The repository is now organized so future paper writing starts from `papers/` rather than from historical ticket trees.
 
 ## Reproducibility
 - Deterministic tests and experiments; record seeds for any stochastic runs.

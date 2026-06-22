@@ -734,3 +734,36 @@ From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/` with 
 
 - External scripts should use `CAUSALBOOL_PAPER_ROOT=workspaces/claude-nature/paper`.
 - Historical provenance logs and paper-support artifacts still contain older absolute paths; they are preserved as historical records and should only be amended via an explicit migration note policy, not rewritten naively.
+
+## Paper Programme Entry-Layer Reorganization
+
+### Scope
+
+- Reorganize the repository so future AI-assisted paper work starts from one clean paper-programme layer rather than from historical execution scaffolding.
+- Promote the method-derivation workspace into a first-class paper track.
+- Preserve the old location as a signpost so older references remain intelligible.
+
+### Moved
+
+- `doc/causalBinpaper/` contents -> `papers/method/derivations/`
+
+### Added
+
+- `papers/README.md`
+- `papers/common/README.md`
+- `papers/method/README.md`
+- `papers/method/manuscript/README.md`
+- `papers/nature/README.md`
+- `doc/causalBinpaper/README.md`
+
+### Updated navigation
+
+- Root and documentation indexes were updated so `papers/` is now the canonical entrypoint for paper-oriented AI work.
+- Internal references that previously pointed at `doc/causalBinpaper/` were updated to `papers/method/derivations/`.
+- Old LaTeX build byproducts from the former method-derivation folder (`exam.aux`, `exam.log`, `exam.synctex.gz`) were allowed to drop during the move because they preserved no source content.
+
+### Rationale
+
+- Tickets and phased plans were useful execution scaffolding, but they are no longer the best first interface for new paper creation.
+- The repository now needs to support a three-paper programme built from a shared scientific base.
+- Promoting the method derivations into `papers/method/` makes the next immediate writing task legible without destroying historical provenance.

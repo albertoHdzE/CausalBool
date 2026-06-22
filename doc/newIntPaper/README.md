@@ -14,6 +14,7 @@
 - This directory preserves the evolution of the project narrative and validation programme.
 - It should not be treated as a single final paper target.
 - Files here may feed later manuscript assembly, but many are historical process artifacts rather than current submission files.
+- Method-specific formula derivations now live under `papers/method/derivations/` so the method paper can start from a cleaner paper-track layout.
 
 ## Cleaning note
 

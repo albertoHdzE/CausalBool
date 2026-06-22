@@ -1,6 +1,7 @@
 # Mathematica Project Architecture
 
 ## Structure
+- `papers/` - canonical paper-programme entry layer with common, method, and Nature tracks
 - `src/Packages/Integration/` — core packages for integration, gates, experiments
 - `src/Notebooks/` — interactive notebooks for development and experiments
 - `src/integration/` — legacy notebooks and scripts used by the thesis and paper
@@ -10,7 +11,7 @@
 - `results/` — CSV/JSON outputs from runs
 - `figures/` — plots and diagrams
 - `docs/` — supplementary documentation and tooling notes
-- `doc/newIntPaper/` — manuscript, planning and evaluation documents
+- `doc/newIntPaper/` — theory/process lineage, planning, and evaluation history
 
 ## Modules
 - Integration: repertoire generation, dynamic updates, subsystem analysis

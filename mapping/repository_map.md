@@ -64,9 +64,17 @@ Mixed testing workspace.
 Long-lived documentation and manuscript history.
 
 - `doc/Tesis-UNAM/`: thesis workspace with source, classes, figures, and compiled PDFs.
-- `doc/causalBinpaper/`: older paper workspace.
+- `doc/causalBinpaper/`: signpost only; the method derivations were promoted to `papers/method/derivations/`.
 - `doc/newIntPaper/`: major planning and manuscript-development area for the integration project.
 - `doc/finalpaper/`: another mature paper assembly area with figures and scripts.
+
+### `papers/`
+
+Canonical paper-programme entry layer.
+
+- `papers/common/` defines the shared scientific base that future paper writing should consult first.
+- `papers/method/` is the first active paper track after cleanup and contains the promoted gate/formula derivations plus a dedicated manuscript workspace.
+- `papers/nature/` is the clean paper-track entrypoint for the Nature programme, while operational reproducibility remains under `workspaces/claude-nature/`.
 
 Important protocol-lineage note:
 
