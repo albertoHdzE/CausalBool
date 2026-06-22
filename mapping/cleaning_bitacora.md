@@ -636,3 +636,44 @@ From repository root to `archive/root_build_artifacts/`:
 ### Cleaning consequence
 
 - The repository root now retains only one wrapper entrypoint, `run_scraper.py`, which is the one explicitly referenced in planning documents.
+
+## Historical Finalpaper Manuscript Archive Wave
+
+### Scope
+
+- Clean the top level of `doc/finalpaper/` by moving one historical manuscript branch and its supplementary companion into the manuscript archive.
+- Preserve historical review value and provenance.
+- Do not touch the active Nature-side branch files (`nature_draft.*`, `nature_final.*`) or the condenser branch (`together*`).
+
+### Pre-move review
+
+- Re-read `doc/finalpaper/final-draft.tex` and confirmed it is a full standalone manuscript branch.
+- Re-checked repository references and confirmed review/provenance material treats `final-draft.pdf` as the earlier manuscript used for comparison before the `nature_draft` branch.
+- Re-read `doc/finalpaper/supInfo.txt` and confirmed it is not plain notes; it is a full LaTeX supplementary document with its own title, figures, tables, and reproduction instructions.
+- Confirmed `doc/finalpaper/README.md` already defines the top level as the place for active sources, while historical branches belong in `archive/`.
+
+### Added
+
+- `doc/finalpaper/archive/historical_manuscripts/README.md`
+
+### Moved
+
+From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/`:
+
+- `final-draft.tex`
+- `final-draft.pdf`
+
+From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/` with extension normalization:
+
+- `supInfo.txt` -> `supInfo.tex`
+
+### Rationale
+
+- `final-draft.*` is still historically important, but it is no longer the active manuscript direction and should not crowd the active `finalpaper` root.
+- `supInfo.txt` belongs with that historical branch and was misleadingly named; archiving it as `supInfo.tex` makes its role legible without discarding anything.
+- This preserves comparison material used by later review loops while keeping active manuscript roots focused on current writing sources.
+
+### Cleaning consequence
+
+- `nature_final.pdf` remains unresolved because its status depends on the unresolved `nature_final.tex` side branch.
+- `together_full.pdf` also remains unresolved because the condenser PDF retention policy has not been tightened enough yet.

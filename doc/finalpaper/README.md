@@ -14,6 +14,7 @@
 - obsolete draft variants
 - AI-assisted exploratory drafts
 - prompt/review conversations tied to discarded manuscript directions
+- historical manuscript branches retained only for comparison, provenance, or lineage review
 
 ## Cleaning note
 

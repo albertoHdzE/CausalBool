@@ -5,6 +5,7 @@ This archive holds manuscript variants that are historically useful but should n
 ## Current contents
 
 - `ai_drafts/`: obsolete AI-assisted draft variants and review conversation material that informed wording experiments but are not active build targets.
+- `historical_manuscripts/`: historically meaningful manuscript branches and companions that remain useful for comparison and provenance but should not crowd the active `finalpaper/` root.
 
 ## Policy
 

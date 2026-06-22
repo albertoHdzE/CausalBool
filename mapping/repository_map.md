@@ -281,6 +281,8 @@ More consolidated manuscript workspace.
 - Contains both source files and generated LaTeX byproducts in places.
 - `nature_draft.tex` remains the strongest current Nature-facing manuscript source.
 - `nature_final.tex` is not just a compiled byproduct companion; it is a distinct standalone manuscript branch with a different framing and result scale.
+- `final-draft.tex` is no longer kept at the top level; it was moved to `doc/finalpaper/archive/historical_manuscripts/` as a historical predecessor branch.
+- `supInfo.txt` was also removed from the top level and archived there as `supInfo.tex` after confirming it is standalone LaTeX supplementary source rather than plain text notes.
 
 ### `4ClaudeCode/claude-Nature/paper/`
 
