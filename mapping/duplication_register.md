@@ -168,6 +168,7 @@ Interpretation:
 
 - This is not currently a verified duplicate-tree problem on disk.
 - It is a provenance-versus-materialization problem: the paper workspace still treats `paper/results/` as a logical output location, but the current checkout does not materialize that tree.
+- Several specific Level 8 artifacts are checksum-logged in provenance documents (`wetlab_readiness_pack.*`, `krb_route_decision.*`, `theory_to_computation_mapping.*`, `nature_readiness_assessment.md`, and `submission_pack/*`), yet none of them are present anywhere in the current checkout.
 
 Cleanup rule:
 

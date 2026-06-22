@@ -1,0 +1,48 @@
+{
+  "document_id": "KR-B-ROUTE-DECISION-LEV8",
+  "date": "2026-04-05",
+  "gate_alignment": [
+    "Gate B",
+    "Gate C"
+  ],
+  "decision": {
+    "primary_route": "Route 1 (curation-heavy paired logical models)",
+    "contingency_route": "Route 2 (TCGA tumor+normal expression -> inferred networks -> CCLE/DepMap anchoring)"
+  },
+  "success_definition": {
+    "primary_effect": "Paired cancer-normal ACI difference with 95% CI excluding 0",
+    "negative_control": "Mismatched/random pairing destroys effect direction",
+    "anchor": [
+      "DepMap dependency enrichment for high-ACI/high-ΔD genes in lineage-matched cell lines",
+      "Oncogene/tumor suppressor enrichment among algorithmic drivers"
+    ]
+  },
+  "failure_modes": [
+    {
+      "id": "FM1",
+      "description": "Small curated pair sample",
+      "mitigation": "Treat as pilot; expand curated pairs or narrow claim to case studies"
+    },
+    {
+      "id": "FM2",
+      "description": "Pairing ambiguity",
+      "mitigation": "Enforce explicit gene-set control and log drop reasons"
+    },
+    {
+      "id": "FM3",
+      "description": "Metric sensitivity to ordering/null choice",
+      "mitigation": "Run KR-B rows in massive test matrix and require stability within tolerances"
+    },
+    {
+      "id": "FM4",
+      "description": "External anchors fail",
+      "mitigation": "Demote KR-B to follow-up; redirect to Route 2 acquisition"
+    }
+  ],
+  "next_actions": [
+    "Freeze curated cancer/normal pair list as versioned inputs (manifest + checksums)",
+    "Recompute KR-B outputs under definition contract and add at least one negative control",
+    "Promote KR-B to Extended Data pillar only if success definition is met"
+  ]
+}
+

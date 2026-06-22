@@ -496,3 +496,78 @@ From repository root to `archive/root_wrappers/`:
 - `report_dataset.py` should now be treated as a hold item.
 - `run_process.py` remains verify-first rather than archive-ready.
 - The earlier "duplicate test-output trees" concern is now reframed: the current ambiguity is not a confirmed duplicate directory pair on disk, but a mismatch between provenance references and currently materialized paper outputs.
+
+## Missing Level 8 Output Check
+
+### Scope
+
+- No moves.
+- No deletions.
+- Verify whether the Level 8 `paper/results/` artifacts referenced by code and provenance still exist somewhere in the current checkout.
+
+### Findings
+
+- Re-checked `4ClaudeCode/claude-Nature/paper/code/reproduce_all.py`; it still defaults `--results-dir` to `4ClaudeCode/claude-Nature/paper/results`.
+- Re-searched the repository for specific Level 8 artifacts logged in provenance:
+  - `wetlab_readiness_pack.*`
+  - `krb_route_decision.*`
+  - `theory_to_computation_mapping.*`
+  - `nature_readiness_assessment.*`
+  - `submission_pack/*`
+- Confirmed that these artifacts are referenced in `bioPlanLev-8.md` and checksum-logged in `bitacora-lev8.md`.
+- Confirmed that none of those files are present anywhere in the current checkout.
+- Confirmed that `.gitignore` does not ignore `4ClaudeCode/claude-Nature/paper/results/`.
+
+### Cleaning consequence
+
+- This is not just an overlap question anymore.
+- The current repository state contains a documented logical output path with missing materialized artifacts.
+- Future cleanup in `results/tests/` should wait until the project decides whether those Level 8 outputs should be:
+  - recovered from history
+  - regenerated
+  - or explicitly treated as non-versioned outputs despite their provenance references
+
+## Selective Level 8 Output Recovery
+
+### Scope
+
+- Restore only a small, provenance-critical subset of `4ClaudeCode/claude-Nature/paper/results/`.
+- Do not restore the historical duplicated `paper/results/tests/` tree in this pass.
+- Reclassify the restored subset before any commit.
+
+### Recovery basis
+
+- Searched Git history for `4ClaudeCode/claude-Nature/paper/results/`.
+- Confirmed the tree existed in commit `3f9bd13` (`previous to cleaning`).
+- Confirmed that the missing Level 8 artifacts were genuinely versioned in that commit and not merely mentioned in prose.
+
+### Restored subset
+
+From commit `3f9bd13` back into the working tree:
+
+- `4ClaudeCode/claude-Nature/paper/results/wetlab_readiness_pack.md`
+- `4ClaudeCode/claude-Nature/paper/results/wetlab_readiness_pack.json`
+- `4ClaudeCode/claude-Nature/paper/results/krb_route_decision.md`
+- `4ClaudeCode/claude-Nature/paper/results/krb_route_decision.json`
+- `4ClaudeCode/claude-Nature/paper/results/theory_to_computation_mapping.md`
+- `4ClaudeCode/claude-Nature/paper/results/theory_to_computation_mapping.json`
+- `4ClaudeCode/claude-Nature/paper/results/nature_readiness_assessment.md`
+- `4ClaudeCode/claude-Nature/paper/results/submission_pack/cover_letter.md`
+- `4ClaudeCode/claude-Nature/paper/results/submission_pack/suggested_reviewers.md`
+
+### Review findings
+
+- These files are not generic generated clutter.
+- They encode:
+  - frozen route decisions
+  - theory-to-computation boundary clarifications
+  - collaborator-facing wet-lab packets
+  - submission-support text
+- They are explicitly referenced by `bioPlanLev-8.md` and checksum-logged in `bitacora-lev8.md`.
+- They should therefore be treated as protected paper-support artifacts rather than lumped together with the bulk duplicated `paper/results/tests/` tree.
+
+### Cleaning consequence
+
+- The current decision boundary is now narrower and cleaner:
+  - restored paper-support outputs look worth retaining
+  - the historical `paper/results/tests/` subtree remains unresolved and should not be restored automatically

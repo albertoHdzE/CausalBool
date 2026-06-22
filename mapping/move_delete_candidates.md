@@ -53,10 +53,11 @@ Each entry is evaluated against the current mapping, source-of-truth index, and 
 | `report_dataset.py` | root utility scripts | thin reporting utility | `hold` | low-medium | none before an explicit operator-interface simplification plan | Standalone inventory/report helper over processed JSONs; not a duplicate of the scraper/processor entrypoints. |
 | `run_process.py` | root utility scripts | thin runner script | `verify-first` | medium | decide whether process-only reruns should stay available as a root convenience interface | It overlaps with module entrypoints, but it still exposes a distinct process-only path not identical to `run_scraper.py` or the default `BulkScraper.py` run. |
 | `run_scraper.py` | root utility scripts | thin runner script | `hold` | medium | none before an explicit root-entrypoint consolidation policy | Historical planning documents still reference it explicitly, so it currently reads as an intentional convenience launcher rather than stale clutter. |
+| `4ClaudeCode/claude-Nature/paper/results/` | Level 8 paper outputs | mixed paper-support output tree | `verify-first` | high | separate restored paper-support artifacts from the bulk historical `tests/` subtree before any policy decision | A targeted subset of governance-support artifacts has now been restored from `3f9bd13`; they are provenance-bearing and should not be treated like disposable duplicated test outputs. |
 | `mat-bdm/` | math workspace | thinner historical computational workspace with unique notebook | `verify-first` | high | resolve the local notebook dependency on `squares2Dsize1to4.m` before any deduplication or archival move | `squares2Dsize1to4.m` is an exact duplicate of the copy under `mathematicabdm/`, but `IntegratedInformationByAlgorithmicDynamics.nb` is unique and currently loads the local table. |
 | `mathematicabdm/` | math workspace | richer historical BDM table/notebook workspace | `hold` | high | none before an explicit BDM workspace policy is defined | Contains the broader D3/D4/D5 table set and is directly referenced by `src/integration/NatureBDM.wl`, so it is currently the more anchored workspace. |
 | `src/analysis/optimize_alpha_draft.py` | analysis code | incomplete draft | `archive-ready` | low-medium | compare line-by-line with `optimize_alpha.py` before moving | Comparison shows it stops at an unresolved data-shape question and is superseded by the working `optimize_alpha.py`. |
-| `results/tests/` vs referenced `4ClaudeCode/claude-Nature/paper/results/tests/` | test outputs | root test-output tree versus paper-workspace logical output path | `verify-first` | high | reconcile whether `paper/results/` should exist on disk or remain a provenance-only referenced location | Current checkout contains `results/tests/`, but not an on-disk `paper/results/` tree; the ambiguity is now about missing materialization rather than confirmed duplicate directories. |
+| `results/tests/` vs `4ClaudeCode/claude-Nature/paper/results/tests/` | test outputs | root test-output tree versus historical paper-side duplicated test tree | `verify-first` | high | compare historical duplicate scope and decide whether the paper-side `tests/` subtree should stay absent, be restored selectively, or be archived elsewhere | The paper-side `results/` tree did exist in `3f9bd13`; only the governance-support subset has been restored so far, not the duplicated `tests/` bulk. |
 
 ## Immediate Safe Zone
 
@@ -120,7 +121,7 @@ The following remain protected for now:
 
 ## Recommended Next Cleanup Execution Order
 
-1. Inspect the status of the paper workspace logical output path (`paper/results/`) before any provenance pruning in `results/tests/`.
+1. Decide whether the historical paper-side `results/tests/` bulk should remain absent, be selectively restored, or be archived under a different policy than the restored paper-support documents.
 2. Revisit `run_process.py` only if root-entrypoint consolidation becomes an explicit cleanup goal.
 3. Return to manuscript branch policy once explicit retention criteria are chosen for side branches and compiled companions.
 4. Revisit `mat-bdm/` only if a concrete BDM deduplication plan can preserve the unique notebook execution path.
