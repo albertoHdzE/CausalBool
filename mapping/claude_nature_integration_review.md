@@ -6,7 +6,7 @@ This is a planning and risk-analysis artifact. It does not itself imply that a m
 
 ## Current role (source-of-truth)
 
-- `4ClaudeCode/claude-Nature/paper/` is the current active reproducibility workspace for the Level 8 Nature-facing programme.
+- `workspaces/claude-nature/paper/` is the current active reproducibility workspace for the Level 8 Nature-facing programme.
 - It contains executable pipelines, provenance documents, and locked figure/result packets.
 - Per policy, this tree must not be collapsed into `doc/finalpaper/`.
 
@@ -53,8 +53,6 @@ Stage 0 (done):
 - map the dependency surface and record known hard-coded references
 - start making the paper workspace self-relative where safe
 
-Stage 1 (next):
-
 Stage 1 (executed):
 
 - centralize “paper workspace root” discovery for scripts outside `4ClaudeCode/` by using `CAUSALBOOL_PAPER_ROOT` as the primary selector
@@ -74,6 +72,11 @@ Stage 2:
 - move `4ClaudeCode/claude-Nature/` into the chosen `workspaces/...` location
 - leave behind a minimal compatibility `4ClaudeCode/claude-Nature/README.md` pointing to the new location (no duplicate code), if needed for human navigation
 
+Stage 2 (executed):
+
+- the workspace has been moved to `workspaces/claude-nature/`
+- the old `4ClaudeCode/claude-Nature/` path is now a signpost directory only
+
 Stage 3:
 
 - update provenance documents in a controlled way:
@@ -83,5 +86,5 @@ Stage 3:
 
 ## Current recommendation
 
-- Yes: integrate into a common workspace folder, but only after Stage 1 (path abstraction) is complete.
-- No: do not perform a direct move today; it would degrade reproducibility and confuse provenance.
+- Integrated into a common workspace folder under `workspaces/claude-nature/`.
+- The remaining migration risk is provenance text: historical commands and absolute paths in Level 8 logs still mention the old location and should be handled by an explicit migration note rather than naive rewriting.

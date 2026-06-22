@@ -89,8 +89,8 @@ Short architecture/tooling documentation, smaller and cleaner than `doc/`.
 
 Parallel Nature-paper working area.
 
-- `4ClaudeCode/claude-Nature/paper/`: manuscript, figures, results, and executable paper code.
-- This is not just notes. It contains active code under `paper/code/` plus a large result and figure store.
+- `4ClaudeCode/claude-Nature/` is now a signpost only.
+- The active Level 8 paper workspace was moved to `workspaces/claude-nature/`.
 
 ### `experiments/`
 
@@ -284,7 +284,7 @@ More consolidated manuscript workspace.
 - `final-draft.tex` is no longer kept at the top level; it was moved to `doc/finalpaper/archive/historical_manuscripts/` as a historical predecessor branch.
 - `supInfo.txt` was also removed from the top level and archived there as `supInfo.tex` after confirming it is standalone LaTeX supplementary source rather than plain text notes.
 
-### `4ClaudeCode/claude-Nature/paper/`
+### `workspaces/claude-nature/paper/`
 
 Parallel paper-production workspace with operational code.
 
@@ -292,9 +292,9 @@ Parallel paper-production workspace with operational code.
 - `paper/code/essentiality_analysis.py`: extended essentiality analysis.
 - `paper/code/reproduce_all.py`: orchestration wrapper around the pipeline.
 - `paper/figures/`: many generated figures and CSV/JSON companions.
+- `paper/results/`: paper-support outputs (readiness packs, route decisions, submission pack); historical `paper/results/tests/` mirror is intentionally not present.
 - `bioPlanLev-8.md`, `bitacora-lev8.md`, and other paper files show this area is active governance plus execution, not merely notes.
 - `paper3_algorithmic_corruption.tex` is a real side-branch manuscript inside this active workspace, not an obviously disposable draft.
-- The current on-disk tree does not include `paper/results/`, but Level 8 code and provenance documents still reference that path as a logical output location.
 
 Interpretation:
 
@@ -386,7 +386,7 @@ Interpretation:
 - `tests/`
 - `doc/newIntPaper/`
 - `doc/finalpaper/`
-- `4ClaudeCode/claude-Nature/paper/`
+- `workspaces/claude-nature/paper/`
 
 ### Historical / transitional / likely messy
 
@@ -412,7 +412,7 @@ Interpretation:
 1. The repository is not one codebase but a layered research workspace.
 2. There are at least two strong code centers:
    - `src/`
-   - `4ClaudeCode/claude-Nature/paper/code/`
+   - `workspaces/claude-nature/paper/code/`
 3. Mathematica packaged code is not fully detached from legacy implementation files.
 4. Documentation, manuscript production, and executable analysis are spread across multiple parallel trees.
 5. Cleanup should be staged by boundary:

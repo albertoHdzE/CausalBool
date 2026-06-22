@@ -60,14 +60,14 @@ Cleanup rule:
 Files:
 
 - `src/analysis/*.py`
-- `4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py`
-- `4ClaudeCode/claude-Nature/paper/code/essentiality_analysis.py`
-- `4ClaudeCode/claude-Nature/paper/code/reproduce_all.py`
+- `workspaces/claude-nature/paper/code/analysis_pipeline.py`
+- `workspaces/claude-nature/paper/code/essentiality_analysis.py`
+- `workspaces/claude-nature/paper/code/reproduce_all.py`
 
 Evidence:
 
 - `src/analysis/` contains cancer, DepMap, phase-transition, and essentiality scripts.
-- `4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py` reimplements many figure-generation and benchmark tasks for the paper branch.
+- `workspaces/claude-nature/paper/code/analysis_pipeline.py` reimplements many figure-generation and benchmark tasks for the paper branch.
 - `essentiality_analysis.py` is another paper-facing analysis layer around essentiality.
 
 Interpretation:
@@ -79,8 +79,8 @@ Cleanup rule:
 
 - Before any deletion, decide whether the source of truth is:
   - reusable `src/analysis/` code
-  - paper-specific reproducibility code under `4ClaudeCode/`
-  - or a hybrid where `4ClaudeCode/` is a frozen reproducibility branch
+  - paper-specific reproducibility code under `workspaces/claude-nature/`
+  - or a hybrid where `workspaces/claude-nature/` is a frozen reproducibility branch
 
 ### 4. Planning/manuscript duplication across `doc/newIntPaper/`, `doc/finalpaper/`, and `4ClaudeCode/`
 
@@ -88,14 +88,14 @@ Directories:
 
 - `doc/newIntPaper/`
 - `doc/finalpaper/`
-- `4ClaudeCode/claude-Nature/paper/`
+- `workspaces/claude-nature/paper/`
 
 Evidence:
 
 - All three contain manuscript text, figures, planning/protocol material, and compiled outputs.
 - `doc/newIntPaper/` contains many phased plan documents.
 - `doc/finalpaper/` contains a more consolidated paper assembly.
-- `4ClaudeCode/claude-Nature/paper/` contains another mature manuscript branch with figures and result packs.
+- `workspaces/claude-nature/paper/` contains another mature manuscript branch with figures and result packs.
 
 Interpretation:
 
@@ -117,10 +117,10 @@ Files:
 - `doc/newIntPaper/expProcess.tex`
 - `doc/finalpaper/together.tex`
 - `doc/finalpaper/together_full.tex`
-- `4ClaudeCode/claude-Nature/protocol-level-8.md`
-- `4ClaudeCode/claude-Nature/paper/bioPlanLev-8.md`
-- `4ClaudeCode/claude-Nature/paper/bioProcessLev8.tex`
-- `4ClaudeCode/claude-Nature/paper/bitacora-lev8.md`
+- `workspaces/claude-nature/protocol-level-8.md`
+- `workspaces/claude-nature/paper/bioPlanLev-8.md`
+- `workspaces/claude-nature/paper/bioProcessLev8.tex`
+- `workspaces/claude-nature/paper/bitacora-lev8.md`
 
 Evidence:
 
@@ -151,24 +151,23 @@ Cleanup rule:
   - provenance log
 - Use `mapping/protocol_lineage_review.md` as the decision map before any move or deletion in these areas.
 
-### 5. Test result duplication across `results/` and `4ClaudeCode/claude-Nature/paper/results/`
+### 5. Test result duplication across `results/` and the Level 8 paper workspace
 
 Directories:
 
 - `results/tests/*`
-- output paths referenced as `4ClaudeCode/claude-Nature/paper/results/tests/*`
+- paper-side outputs under `workspaces/claude-nature/paper/results/*`
 
 Evidence:
 
 - `results/tests/*` is present on disk and is heavily referenced by manuscript condensers such as `doc/finalpaper/together_full.tex`.
-- The current `4ClaudeCode/claude-Nature/paper/` tree does not contain an on-disk `results/` directory.
-- However, `paper/code/reproduce_all.py` still defaults to `4ClaudeCode/claude-Nature/paper/results`, and Level 8 provenance documents still log files under `paper/results/...`.
+- The Level 8 paper workspace retains paper-support outputs under `workspaces/claude-nature/paper/results/`.
+- The historical duplicated paper-side `paper/results/tests/` subtree is intentionally absent.
 
 Interpretation:
 
-- This is not currently a verified duplicate-tree problem on disk.
-- It is a provenance-versus-materialization problem: the paper workspace still treats `paper/results/` as a logical output location, but the current checkout does not materialize that tree.
-- Several specific Level 8 artifacts are checksum-logged in provenance documents (`wetlab_readiness_pack.*`, `krb_route_decision.*`, `theory_to_computation_mapping.*`, `nature_readiness_assessment.md`, and `submission_pack/*`), yet none of them are present anywhere in the current checkout.
+- This is no longer a missing-materialization problem.
+- Paper-support artifacts have been restored and are now explicitly retained under `workspaces/claude-nature/paper/results/`.
 - Historical comparison now shows that the old `paper/results/tests/` subtree was a strict subset of the current root `results/tests/` tree: 114 historical paper-side files matched on path against current `results/tests/`, with 0 paper-side uniques and 121 additional files now present only in root `results/tests/`.
 
 Cleanup rule:
@@ -322,7 +321,7 @@ Cleanup rule:
 Locations:
 
 - `doc/**/*`
-- `4ClaudeCode/claude-Nature/paper/*`
+- `workspaces/claude-nature/paper/*`
 
 Evidence:
 
@@ -371,8 +370,8 @@ These are hypotheses, not deletion decisions.
 
 - `src/analysis/`
 - `src/experiments/`
-- `4ClaudeCode/claude-Nature/paper/code/`
-- `4ClaudeCode/claude-Nature/paper/results/`
+- `workspaces/claude-nature/paper/code/`
+- `workspaces/claude-nature/paper/results/`
 - `doc/newIntPaper/`
 - `doc/finalpaper/`
 
@@ -388,8 +387,8 @@ These are hypotheses, not deletion decisions.
 
 1. Trace file references into `src/integration/Alpha.m`.
 2. Compare `src/integration/grn_data_pipeline.py` and `doc/newIntPaper/towardsNature/grn_data_pipeline.py`.
-3. Decide whether paper-code in `4ClaudeCode/` is frozen reproducibility code or still active development code.
-4. Compare mirrored test-result directories under `results/` and `4ClaudeCode/`.
+3. Decide whether paper-code in `workspaces/claude-nature/` is frozen reproducibility code or still active development code.
+4. Compare test-result policies under `results/` versus the paper workspace (the historical paper-side test mirror is currently absent by design).
 5. Check whether `src/causal/` is still referenced.
 6. Compare `mat-bdm/` and `mathematicabdm/` contents before any pruning.
 7. Verify whether `index.js` and `cc_index.js` are both needed.

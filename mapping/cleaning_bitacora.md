@@ -236,7 +236,7 @@ Rationale:
 - `doc/finalpaper/nature_draft.tex` is the strongest current Nature-facing manuscript source.
 - `doc/finalpaper/final.tex` is canonical only for the section-based `finalpaper` manuscript branch.
 - `doc/finalpaper/together.tex` and `together_full.tex` are classified as condensers rather than canonical writing sources.
-- `4ClaudeCode/claude-Nature/paper/code/` is classified as the active Level 8 reproducibility code root.
+- `workspaces/claude-nature/paper/code/` is classified as the active Level 8 reproducibility code root (moved from `4ClaudeCode/claude-Nature/paper/code/`).
 
 ### Cleaning consequence
 
@@ -259,7 +259,7 @@ Rationale:
 
 - Active Nature-facing writing source: `doc/finalpaper/nature_draft.tex`
 - Active alternate writing branch: `doc/finalpaper/final.tex` plus `sections/*.tex`
-- Active reproducibility tree: `4ClaudeCode/claude-Nature/paper/`
+- Active reproducibility tree: `workspaces/claude-nature/paper/` (moved from `4ClaudeCode/claude-Nature/paper/`)
 - Historical synthesis tree: `doc/finalpaper/together.tex`, `together_full.tex`, and assembly scripts
 - Foundational lineage tree: `doc/newIntPaper/`
 - PDFs split conceptually into:
@@ -682,20 +682,20 @@ From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/` with 
 
 ### Scope
 
-- No directory moves for `4ClaudeCode/claude-Nature/`.
+- No directory moves during this review step (Stage 1); the Stage 2 move is recorded below.
 - Reduce future migration risk by making the Level 8 paper workspace more location-relative.
 - Record a staged integration plan so the case is not forgotten.
 
 ### Findings
 
-- `4ClaudeCode/claude-Nature/paper/` is still the active Level 8 reproducibility workspace and must remain coherent.
+- At the time of this review, `4ClaudeCode/claude-Nature/paper/` was the active Level 8 reproducibility workspace (now moved to `workspaces/claude-nature/paper/`) and had to remain coherent.
 - Multiple scripts and documents reference the literal `4ClaudeCode/claude-Nature/...` path (including defaults under `src/analysis/` and provenance commands in `bitacora-lev8.md`).
 - A direct move into a “common folder” today would likely break default output paths and degrade reproducibility.
 
 ### Executed (risk-reduction edits)
 
-- Updated `4ClaudeCode/claude-Nature/paper/code/reproduce_all.py` to derive default `--figures-dir` and `--results-dir` from the script location rather than hardcoding `4ClaudeCode/claude-Nature/...`.
-- Updated `4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py` to default wetlab-pack outputs to a paper-local `results/` directory rather than hardcoding the full repo path.
+- Updated the Level 8 workspace `paper/code/reproduce_all.py` to derive default `--figures-dir` and `--results-dir` from the script location rather than hardcoding `4ClaudeCode/claude-Nature/...`.
+- Updated the Level 8 workspace `paper/code/analysis_pipeline.py` to default wetlab-pack outputs to a paper-local `results/` directory rather than hardcoding the full repo path.
 - Updated external scripts that previously defaulted to `4ClaudeCode/claude-Nature/paper/figures` to resolve the paper workspace via `CAUSALBOOL_PAPER_ROOT` (with safe fallbacks):
   - `src/analysis/KRB_Corruption_Anchors.py`
   - `src/analysis/Cancer_Corruption.py`
@@ -713,3 +713,24 @@ From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/` with 
   - first abstract hard-coded references outside the workspace (now executed via `CAUSALBOOL_PAPER_ROOT`)
   - then move into `workspaces/...`
   - then add an explicit provenance migration note
+
+## Claude-Nature Workspace Move To `workspaces/`
+
+### Scope
+
+- Perform the staged move after path-abstraction was completed.
+- Preserve the old path as a signpost directory to keep historical notes intelligible.
+
+### Moved
+
+- `4ClaudeCode/claude-Nature/` -> `workspaces/claude-nature/`
+
+### Added
+
+- `workspaces/claude-nature/README.md`
+- `4ClaudeCode/claude-Nature/README.md`
+
+### Post-move guidance
+
+- External scripts should use `CAUSALBOOL_PAPER_ROOT=workspaces/claude-nature/paper`.
+- Historical provenance logs and paper-support artifacts still contain older absolute paths; they are preserved as historical records and should only be amended via an explicit migration note policy, not rewritten naively.

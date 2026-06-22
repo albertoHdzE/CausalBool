@@ -11,7 +11,7 @@ This `doc/` tree is a mixed archive of thesis, paper-development, and manuscript
 
 ## Source-of-truth guidance
 
-- Active Nature-level paper execution is primarily under `4ClaudeCode/claude-Nature/paper/`.
+- Active Nature-level paper execution is primarily under `workspaces/claude-nature/paper/`.
 - `doc/finalpaper/` is best treated as a manuscript assembly and archive layer.
 - `doc/newIntPaper/` is best treated as a planning/process-history layer rather than a single final manuscript.
 

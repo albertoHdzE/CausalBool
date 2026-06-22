@@ -36,15 +36,15 @@ Interpretation:
 
 The current active reproducibility tree should be treated as:
 
-- `4ClaudeCode/claude-Nature/paper/`
+- `workspaces/claude-nature/paper/`
 
 Especially:
 
-- `4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py`
-- `4ClaudeCode/claude-Nature/paper/code/reproduce_all.py`
-- `4ClaudeCode/claude-Nature/paper/bioPlanLev-8.md`
-- `4ClaudeCode/claude-Nature/paper/bioProcessLev8.tex`
-- `4ClaudeCode/claude-Nature/paper/bitacora-lev8.md`
+- `workspaces/claude-nature/paper/code/analysis_pipeline.py`
+- `workspaces/claude-nature/paper/code/reproduce_all.py`
+- `workspaces/claude-nature/paper/bioPlanLev-8.md`
+- `workspaces/claude-nature/paper/bioProcessLev8.tex`
+- `workspaces/claude-nature/paper/bitacora-lev8.md`
 
 Interpretation:
 
@@ -112,7 +112,7 @@ Allowed future actions:
 
 Directory:
 
-- `4ClaudeCode/claude-Nature/paper/`
+- `workspaces/claude-nature/paper/`
 
 Primary functions:
 
@@ -297,7 +297,7 @@ Reason:
 
 ### Keep as active reproducibility
 
-- `4ClaudeCode/claude-Nature/paper/`
+- `workspaces/claude-nature/paper/`
 
 ### Keep as historical synthesis
 

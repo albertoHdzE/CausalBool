@@ -56,14 +56,14 @@ There is also a baseline biological plan and process pair:
 
 ### 3. Level 8 lives in a different, more disciplined workspace
 
-Level 8 is primarily externalized into `4ClaudeCode/claude-Nature/` and `4ClaudeCode/claude-Nature/paper/`.
+Level 8 is primarily externalized into `workspaces/claude-nature/` and `workspaces/claude-nature/paper/`.
 
 Observed chain:
 
-- `4ClaudeCode/claude-Nature/protocol-level-8.md`
-- `4ClaudeCode/claude-Nature/paper/bioPlanLev-8.md`
-- `4ClaudeCode/claude-Nature/paper/bioProcessLev8.tex`
-- `4ClaudeCode/claude-Nature/paper/bitacora-lev8.md`
+- `workspaces/claude-nature/protocol-level-8.md`
+- `workspaces/claude-nature/paper/bioPlanLev-8.md`
+- `workspaces/claude-nature/paper/bioProcessLev8.tex`
+- `workspaces/claude-nature/paper/bitacora-lev8.md`
 
 This is the cleanest and most explicit protocol lineage found in the repository.
 
@@ -148,7 +148,7 @@ The closest Level 1 backbone appears to be distributed across:
 - `bioPlanLev-7.md`
   - semantic basin fidelity
 
-- `4ClaudeCode/claude-Nature/paper/bioPlanLev-8.md`
+- `workspaces/claude-nature/paper/bioPlanLev-8.md`
   - Nature-grade execution plan with gates, artifact discipline, and explicit bitacora contract
 
 ### D. Numbered process logs
@@ -168,7 +168,7 @@ The closest Level 1 backbone appears to be distributed across:
 - `bioProcessLev7.tex`
   - dedicated Level 7 log
 
-- `4ClaudeCode/claude-Nature/paper/bioProcessLev8.tex`
+- `workspaces/claude-nature/paper/bioProcessLev8.tex`
   - dedicated Level 8 log
 
 ### E. Protocol documents
@@ -182,7 +182,7 @@ The closest Level 1 backbone appears to be distributed across:
 - `doc/newIntPaper/towardsNature/protocols/protocol-level-3.md`
   - explicit protocol draft for Level 3-era framing
 
-- `4ClaudeCode/claude-Nature/protocol-level-8.md`
+- `workspaces/claude-nature/protocol-level-8.md`
   - explicit Level 8 submission strategy
 
 Notably absent:
@@ -194,7 +194,7 @@ Notably absent:
 
 ### F. Bitacora / provenance logs
 
-- `4ClaudeCode/claude-Nature/paper/bitacora-lev8.md`
+- `workspaces/claude-nature/paper/bitacora-lev8.md`
   - the only clearly formalized bitacora in the level lineage
   - includes commands, outputs, checksums, and interpretation
 

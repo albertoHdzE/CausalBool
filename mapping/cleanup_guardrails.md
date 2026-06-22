@@ -52,7 +52,7 @@ Protected directories:
 
 - `data/`
 - `results/`
-- `4ClaudeCode/claude-Nature/paper/results/`
+- `workspaces/claude-nature/paper/results/`
 
 Reason:
 
@@ -68,7 +68,7 @@ Protected directories:
 
 - `doc/newIntPaper/`
 - `doc/finalpaper/`
-- `4ClaudeCode/claude-Nature/paper/`
+- `workspaces/claude-nature/paper/`
 
 Reason:
 
@@ -87,8 +87,8 @@ Protected areas:
 
 - `doc/newIntPaper/`
 - `doc/finalpaper/`
-- `4ClaudeCode/claude-Nature/`
-- `4ClaudeCode/claude-Nature/paper/`
+- `workspaces/claude-nature/`
+- `workspaces/claude-nature/paper/`
 
 Reason:
 
@@ -251,7 +251,7 @@ These are safe conclusions from the mapping pass so far.
 
 - `src/Packages/Integration/` is important and should be preserved.
 - `src/integration/` contains both critical reusable modules and cleanup candidates.
-- `4ClaudeCode/claude-Nature/paper/` is operational, not merely archival text.
+- `workspaces/claude-nature/paper/` is operational, not merely archival text.
 - `src/external/ccapi/` must be handled as vendor code.
 - `index.js` and `cc_index.js` are likely build artifacts.
 - top-level debug scripts are likely scratch utilities.

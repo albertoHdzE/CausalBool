@@ -52,10 +52,10 @@ It exists to support later decisions with explicit classifications.
 | `L7-PROC-001-PDF` | `L7` | `generated-companion` | `compiled-companion` | `generated` | `keep-until-output-policy` | `doc/newIntPaper/bioProcessLev7.pdf` | Compiled companion of `bioProcessLev7.tex`. |
 | `L7-PROT-IMPLICIT-001` | `L7` | `implicit-gap-marker` | `implicit` | `absent` | `document-only` | `<no standalone file found>` | No standalone `protocol-level-7.md` was found. |
 | `TRANS-PROT-001` | `multi-level` | `protocol` | `transitional` | `secondary` | `archive-as-transitional` | `doc/newIntPaper/towardsNature/protocols/protocol.md` | Transitional protocol text tied to the foundational framework and the move toward Nature framing. |
-| `L8-PROT-001` | `L8` | `protocol` | `explicit` | `primary` | `keep-as-reference-model` | `4ClaudeCode/claude-Nature/protocol-level-8.md` | Most explicit protocol-stage document in the repository. |
-| `L8-PLAN-001` | `L8` | `plan` | `explicit` | `primary` | `keep-as-reference-model` | `4ClaudeCode/claude-Nature/paper/bioPlanLev-8.md` | Mature Nature-grade plan with gates and bitacora discipline. |
-| `L8-PROC-001` | `L8` | `process-log` | `explicit` | `primary` | `keep-as-reference-model` | `4ClaudeCode/claude-Nature/paper/bioProcessLev8.tex` | Dedicated Level 8 process log with artifact-aware execution framing. |
-| `L8-BIT-001` | `L8` | `provenance-log` | `explicit` | `primary` | `keep-as-reference-model` | `4ClaudeCode/claude-Nature/paper/bitacora-lev8.md` | Only clearly formalized bitacora in the numbered lineage. |
+| `L8-PROT-001` | `L8` | `protocol` | `explicit` | `primary` | `keep-as-reference-model` | `workspaces/claude-nature/protocol-level-8.md` | Most explicit protocol-stage document in the repository. |
+| `L8-PLAN-001` | `L8` | `plan` | `explicit` | `primary` | `keep-as-reference-model` | `workspaces/claude-nature/paper/bioPlanLev-8.md` | Mature Nature-grade plan with gates and bitacora discipline. |
+| `L8-PROC-001` | `L8` | `process-log` | `explicit` | `primary` | `keep-as-reference-model` | `workspaces/claude-nature/paper/bioProcessLev8.tex` | Dedicated Level 8 process log with artifact-aware execution framing. |
+| `L8-BIT-001` | `L8` | `provenance-log` | `explicit` | `primary` | `keep-as-reference-model` | `workspaces/claude-nature/paper/bitacora-lev8.md` | Only clearly formalized bitacora in the numbered lineage. |
 | `COND-MAN-001` | `multi-level` | `condenser` | `explicit` | `secondary` | `keep-until-extracted` | `doc/finalpaper/together.tex` | Manuscript assembly condenser summarizing multiple plans and process logs. |
 | `COND-MAN-002` | `multi-level` | `condenser` | `explicit` | `secondary` | `keep-until-extracted` | `doc/finalpaper/together_full.tex` | Larger lineage condenser with integrated cross-level narrative and historical references. |
 
