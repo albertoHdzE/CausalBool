@@ -2,19 +2,29 @@
 \usepackage[a4paper,margin=1in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{mathtools}
+\usepackage{amsmath,amssymb,amsthm,amsfonts,mathtools}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{enumitem}
 \usepackage{hyperref}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
 
-\title{Exact Gate Formulae for Ordered Exhaustive Repertoires in Boolean Networks}
+\newcommand{\U}{\mathcal{U}_n}
+\newcommand{\Ic}{I_c}
+\newcommand{\J}{\mathcal{J}}
+\newcommand{\Band}[2]{\mathcal{B}_{#1}^{#2}}
+\newcommand{\Parity}[2]{\mathcal{P}_{#1}^{#2}}
+\newcommand{\Weight}[2]{\mathcal{H}_{#1}^{#2}}
+\newcommand{\bits}{\{0,1\}}
+
+\title{Causal Index-Set Calculus for Boolean Networks:\\ Exact Gate Formulae, Ordering Invariance, and Deterministic Reconstruction}
 \author{}
 \date{\today}
 
@@ -22,229 +32,399 @@
 \maketitle
 
 \begin{abstract}
-We present a deterministic method for reconstructing the one-step behaviour of Boolean networks from short, exact formulae rather than exhaustive truth-table enumeration. The central object is the ordered exhaustive repertoire: all binary inputs arranged under an explicit ordering convention, together with closed-form index sets that identify where each gate outputs one. We show how these gate-level index sets can be composed into exact network-level predictions under synchronous dynamics, and we organise the method so that ordering changes are handled by an explicit bit-reversal map rather than by ad hoc rewrites. The resulting framework yields exact agreement with exhaustive baselines, supports network-aware composition across mixed gate families, and admits principled scaling through deterministic predictive evaluation and importance sampling. This manuscript is the first paper track of the repository's three-paper programme and focuses exclusively on the formal method and its validation.
+We develop a causality-first formalism for Boolean networks in which local rules are represented by exact index sets over ordered exhaustive repertoires. The basic object is not a sampled trajectory nor a statistical summary, but the set of input indices at which a gate is active under a declared ordering convention. This yields a deterministic calculus in which monotone, parity, implication, threshold, and canalising gates admit closed-form one-sets; MSB-first and LSB-first enumerations are related by an explicit bit-reversal involution; and mixed-gate network outputs are reconstructed exactly by column-wise composition of local index sets. The method provides a mathematically transparent alternative to brute-force repertoire enumeration and to purely probabilistic learning. Existing validation artefacts support exact equality to exhaustive baselines at medium sizes, exact sampled equality at larger sizes, and clear constant-factor gains for analytic prediction over gate-dispatch or truth-table lookup. The paper is written as a mathematical-computational contribution: biology motivates later applications, but the central results concern causal representation, exact reconstruction, and computational complexity.
 \end{abstract}
 
 \section{Introduction}
-Boolean networks are often analysed through exhaustive enumeration, direct truth-table lookup, or simulation-heavy workflows. These approaches are workable at small sizes but rapidly become opaque when one wants closed-form understanding, exact reconstruction, and scalable prediction from structure alone.
+The central difficulty in Boolean-network analysis is not lack of computational power; it is lack of causal compression. One can always enumerate a repertoire, print a truth table, or run a simulation. What remains elusive is a representation that is at once exact, compositional, and explanatory. For a high-level scientific treatment, this distinction matters: a method that merely reproduces outputs is weaker than a method that identifies the rule structure responsible for them.
 
-The method developed in this repository starts from a different premise: ordered exhaustive repertoires contain regular algebraic structure. Once the ordering policy is made explicit, the rows where a gate outputs one can be described by short index-set formulae rather than by scanning every state one by one. These exact gate-level sets can then be composed into network-level outputs using the connectivity matrix and local gate assignments.
+This paper advances the following thesis. Ordered exhaustive repertoires contain a non-trivial algebraic structure, and this structure can be exploited to replace brute-force enumeration by exact causal formulae. Once the ordering convention is fixed, the question ``what does this network do?'' can be recast as ``at which repertoire indices is each local rule active, and how do those index sets compose?'' The result is an index-set calculus for Boolean networks.
 
-The scientific aim of this paper is therefore precise. We do not present yet another empirical heuristic for Boolean networks. We present a deterministic, exact, ordering-aware method for:
+The perspective is causality-first in three senses. First, it is rule-first rather than correlation-first: the object of study is the generative logic of the system, not only its observed frequencies. Second, it is deterministic rather than statistical: the method aims at exact reconstruction under known dynamics, not at approximate inference under unknown mechanisms. Third, it is compositional: global behaviour is built from local causal rules rather than from opaque end-to-end approximations.
 
-\begin{enumerate}[label=\arabic*.]
-\item deriving closed-form gate formulae over ordered exhaustive repertoires,
-\item proving that the method is stable under explicit ordering transforms,
-\item composing per-gate formulae into exact one-step network predictions, and
-\item validating exactness and scalability against exhaustive baselines and larger sampled regimes.
-\end{enumerate}
+This places the work in dialogue with two important traditions without collapsing into either of them. The first is the tradition of simple rules generating rich behaviour, exemplified by Wolfram's programme on discrete systems. The second is the algorithmic-causality tradition associated with perturbation and generative explanation, developed in part by Zenil and collaborators. Our contribution is more specific: we derive a concrete analytic calculus for ordered Boolean repertoires, prove ordering-control results, and connect the formalism to exact network reconstruction and explicit complexity comparisons.
 
-This first draft is intentionally centred on the method itself. Historical tickets and phased plans remain part of the repository provenance, but they do not structure the argument here.
-
-\section{Core Contributions}
-The method paper currently supports the following claims.
-
+The paper makes six principal claims.
 \begin{enumerate}[label=\textbf{C\arabic*.}]
-\item \textbf{Ordered repertoire formalism.} The exhaustive input space is treated as a structured object whose ordering is explicit and mathematically controlled.
-\item \textbf{Exact per-gate formulae.} Gate families such as AND, OR, XOR, NAND, NOR, XNOR, NOT, IMPLIES/NIMPLIES, threshold gates, and canalising gates admit closed-form descriptions of the rows where they output one.
-\item \textbf{Ordering-transform invariance.} MSB-first and LSB-first orderings are related by a bit-reversal map \(\varphi\), and index-set constructions are invariant modulo this transform.
-\item \textbf{Network composition.} Per-gate index sets compose into exact one-step network outputs under synchronous dynamics.
-\item \textbf{Exact empirical validation.} Existing validation artefacts in the repository show bitwise accuracy \(1.0\) for exact predictive methods against exhaustive baselines, together with scalable deterministic evaluation under importance sampling.
+\item Ordered exhaustive repertoires can be treated as algebraic objects rather than as passive lookup tables.
+\item Canonical gate families admit exact, network-aware one-set formulae over those repertoires.
+\item Ordering changes are controlled by an explicit involution, so exactness is invariant under representation.
+\item Mixed-gate synchronous networks can be reconstructed exactly by composing local index sets.
+\item The method is mathematically richer than naive vectorised shortcuts and empirically exact where those shortcuts fail.
+\item Complexity improvements arise not by magic removal of the \(2^n\) state space, but by replacing brute-force gate evaluation with explicit causal formulae, by enabling exact query answering without full matrix materialisation, and by reducing the validation burden through principled sampling.
 \end{enumerate}
 
-\section{Setup and Notation}
-Let \(cm \in \{0,1\}^{n \times n}\) denote the connectivity matrix of a Boolean network, where \(cm_{ij}=1\) indicates an edge from node \(j\) to node \(i\). Let
+\section{Formal Setup}
+Let \(cm \in \bits^{n \times n}\) be the connectivity matrix of a Boolean network, where \(cm_{ij}=1\) means that node \(j\) feeds node \(i\). Let
 \[
-dynamic = (d_1,\dots,d_n)
+dynamic=(d_1,\dots,d_n)
 \]
 be the list of local gate labels, and let
 \[
-N_i = \{j : cm_{ij}=1\}
+N_i=\{j\in\{1,\dots,n\} : cm_{ij}=1\}
 \]
-be the connected inputs of node \(i\).
-
-Each node has a local map
+be the connected-input set of node \(i\). Each node has a local map
 \[
-g_i : \{0,1\}^{|N_i|} \to \{0,1\},
+g_i:\bits^{|N_i|}\to\bits,
 \]
-and the synchronous one-step network map is
+and the synchronous one-step network update is
 \[
-F(x) = \bigl(g_1(x_{N_1}),\dots,g_n(x_{N_n})\bigr), \qquad x \in \{0,1\}^n.
+F(x)=\bigl(g_1(x_{N_1}),\dots,g_n(x_{N_n})\bigr), \qquad x\in\bits^n.
 \]
 
-The exhaustive input repertoire contains all \(2^n\) binary vectors. Two orderings are relevant throughout the project:
+\begin{definition}[Ordered Exhaustive Repertoire]
+The ordered exhaustive repertoire of size \(n\) is the set \(\bits^n\) together with a declared enumeration of all \(2^n\) binary vectors. We write \(\U=\{1,\dots,2^n\}\) for the corresponding index universe.
+\end{definition}
 
+Two orderings are operationally relevant throughout the project.
 \begin{itemize}
-\item \textbf{LSB-first ordering:} weights \(2^{i-1}\),
-\item \textbf{MSB-first ordering:} weights \(2^{n-i}\).
+\item \textbf{LSB-first ordering:} the index \(j\) is associated with \(v(j)=\mathrm{Reverse}(\mathrm{IntegerDigits}(j-1,2,n))\), with weights \(2^{i-1}\).
+\item \textbf{MSB-first ordering:} the index \(j\) is associated with \(v(j)=\mathrm{IntegerDigits}(j-1,2,n)\), with weights \(2^{n-i}\).
 \end{itemize}
 
-We make the relation between both orderings explicit through the bit-reversal involution
+\begin{definition}[Bit-Reversal Involution]
+For \(j\in\U\), define
 \[
-\varphi(j)=1+\mathrm{FromDigits}\bigl(\mathrm{Reverse}(\mathrm{IntegerDigits}(j-1,2,n)),2\bigr).
+\varphi(j)=1+\mathrm{FromDigits}\Bigl(\mathrm{Reverse}\bigl(\mathrm{IntegerDigits}(j-1,2,n)\bigr),2\Bigr).
 \]
+Then \(\varphi:\U\to\U\) is an involution.
+\end{definition}
 
-The role of \(\varphi\) is methodological rather than cosmetic. It ensures that exact formulae are not tied to one accidental encoding convention.
+The involution \(\varphi\) is not a cosmetic convenience. It is the formal device that makes ordering control explicit. Without it, one risks confusing genuine mathematical differences with mere encoding differences.
 
-\section{Ordered Exhaustive Repertoires}
-The method begins with a simple observation: under exhaustive enumeration, each input bit exhibits a structured periodicity. In the ordered repertoire, fixed-bit conditions generate contiguous bands, parity classes, complements, and threshold regions. These regularities are the raw material of the method.
+\section{Causal Index Sets}
+The method begins with a structural observation: each coordinate of an ordered exhaustive repertoire forms periodic bands, and Boolean gates can be expressed as exact set operations on those bands.
 
-For a given node, the problem is not ``evaluate all rows''. The problem is ``identify the exact subset of row indices where the gate condition is satisfied''. Once stated this way, the behaviour of each gate family becomes an index-set problem.
+\begin{definition}[Bit Bands]
+For a node index \(i\in\{1,\dots,n\}\) and a bit value \(a\in\bits\), define
+\[
+\Band{i}{a}=\{j\in\U : v_i(j)=a\}.
+\]
+\end{definition}
 
-\subsection{Pattern-Level View}
-The repository's pattern documents establish a column-wise alphabet \(\{0,1,*\}\) over outputs and show that gate families admit regular symbolic descriptions over ordered repertoires. The main methodological value of this viewpoint is that it separates:
+\begin{definition}[Parity and Weight Classes]
+For a connected-input set \(\Ic\subseteq\{1,\dots,n\}\), define
+\[
+\Parity{\Ic}{1}=\Bigl\{j\in\U : \sum_{i\in\Ic} v_i(j)\equiv 1 \pmod 2 \Bigr\},
+\]
+\[
+\Parity{\Ic}{0}=\Bigl\{j\in\U : \sum_{i\in\Ic} v_i(j)\equiv 0 \pmod 2 \Bigr\},
+\]
+and for \(r\in\{0,\dots,|\Ic|\}\),
+\[
+\Weight{\Ic}{r}=\Bigl\{j\in\U : \sum_{i\in\Ic} v_i(j)=r \Bigr\}.
+\]
+\end{definition}
 
-\begin{itemize}
-\item the \emph{ordering structure} of the input space,
-\item the \emph{gate semantics} imposed on connected inputs, and
-\item the \emph{index geometry} of the output-one set.
-\end{itemize}
-
-This separation is what later makes exact composition possible.
+These three families already encode most of the method. Bands capture fixed-bit conditions, parity classes capture XOR-like structure, and Hamming-weight strata capture threshold logic. What remains is to show that standard gate families are simple set expressions built from them.
 
 \section{Exact Gate Formulae}
-The per-gate derivations are the scientific core of the first paper. The current repository already contains dedicated derivation documents for the input-pattern formalism and for selected gate families, with the surrounding theory and validation distributed across the shared theory and experiment process documents.
+The following proposition collects the exact one-set formulae for the gate families currently supported by the repository-level analysis series.
 
-\subsection{Monotone Gates}
-For monotone families such as AND and OR, the one-set is described by explicit fixed-bit bands over the connected input indices \(I_c\).
+\begin{proposition}[Gate-Family One-Sets]
+Let node \(k\) have connected-input set \(\Ic\). Under a fixed repertoire ordering, the set of indices at which node \(k\) outputs one is given as follows.
+\begin{center}
+\small
+\begin{tabular}{p{0.20\linewidth}p{0.67\linewidth}}
+\toprule
+\textbf{Gate family} & \textbf{Exact one-set formula} \\
+\midrule
+AND & \(\J_k^{\mathrm{AND}}=\bigcap_{i\in\Ic}\Band{i}{1}\) \\
+OR & \(\J_k^{\mathrm{OR}}=\bigcup_{i\in\Ic}\Band{i}{1}\) \\
+NAND & \(\J_k^{\mathrm{NAND}}=\U\setminus \J_k^{\mathrm{AND}}\) \\
+NOR & \(\J_k^{\mathrm{NOR}}=\bigcap_{i\in\Ic}\Band{i}{0}=\U\setminus \J_k^{\mathrm{OR}}\) \\
+XOR & \(\J_k^{\mathrm{XOR}}=\Parity{\Ic}{1}\) \\
+XNOR & \(\J_k^{\mathrm{XNOR}}=\Parity{\Ic}{0}\) \\
+NOT on input \(r\) & \(\J_k^{\mathrm{NOT}}=\Band{r}{0}\) \\
+IMPLIES on pair \((a,b)\) & \(\J_k^{\mathrm{IMP}}=\Band{a}{0}\cup\bigl(\Band{a}{1}\cap\Band{b}{1}\bigr)\), equivalently \(\U\setminus\bigl(\Band{a}{1}\cap\Band{b}{0}\bigr)\) \\
+NIMPLIES on pair \((a,b)\) & \(\J_k^{\mathrm{NIMP}}=\Band{a}{1}\cap\Band{b}{0}\) \\
+KOFN threshold & \(\J_k^{\mathrm{KOFN}}=\bigcup_{r=k}^{|\Ic|}\Weight{\Ic}{r}\) \\
+Strict-EXACT-\(k\) & \(\J_k^{=k}=\Weight{\Ic}{k}\) \\
+Canalising with trigger set \(C\) and fallback one-set \(\J_h\) & \(\J_k^{\mathrm{CAN}}=C\cup\bigl((\U\setminus C)\cap \J_h\bigr)\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{proposition}
 
-\begin{itemize}
-\item \textbf{AND:} the output is one exactly when all connected inputs are one, so the one-set is the intersection of the corresponding one-bands.
-\item \textbf{OR:} the output is one exactly when at least one connected input is one, so the one-set is the union of the corresponding one-bands.
-\item \textbf{NAND/NOR:} these follow by complement within the ordered universe.
-\end{itemize}
+\begin{proof}[Proof sketch]
+Each formula is a direct rewriting of the gate semantics in terms of bit conditions over the connected inputs. Monotone gates reduce to intersections and unions of one-bands; parity gates reduce to odd/even weight classes; threshold gates reduce to Hamming-weight strata; implication gates reduce to the single forbidden pattern \(a=1,b=0\); and canalising gates reduce to a collapse on the trigger set plus fallback behaviour on its complement.
+\end{proof}
 
-The importance of these expressions is not only that they are short. It is that they are \emph{network-aware}: they depend on the connected inputs \(I_c\), not on a stand-alone truth table divorced from network structure.
+\begin{remark}
+The decisive point is that these are \emph{network-aware} formulae. The local rule is not written abstractly over unnamed inputs; it is anchored to the actual connected-input set \(\Ic\) induced by the network topology.
+\end{remark}
 
-\subsection{Parity and Equivalence Gates}
-Parity families such as XOR and XNOR are governed by parity classes rather than contiguous bands. Their one-sets are therefore not threshold regions but exact parity partitions over the connected inputs.
+\subsection{Worked Micro-Examples}
+Two small examples already reveal the method's logic.
 
-This family is methodologically important for two reasons:
+\paragraph{AND on \(\Ic=\{2,3\}\) with \(n=3\).}
+Under LSB-first ordering, node \(2\) contributes the band \(\Band{2}{1}=\{3,4,7,8\}\) and node \(3\) contributes \(\Band{3}{1}=\{5,6,7,8\}\). Their intersection is
+\[
+\J^{\mathrm{AND}}=\{7,8\}\cap\{j\in\U : v_2(j)=v_3(j)=1\}.
+\]
+When the explicit ordering convention is enforced against the repertoire generator, the valid index set for the connected bits is the unique all-ones connected pattern. The important methodological lesson is not the accidental numeric value of the index but the need to fix the ordering and hold it fixed throughout derivation and validation.
 
-\begin{enumerate}[label=\alph*.]
-\item it shows that the framework is not restricted to monotone logic, and
-\item it makes visible the difference between naive band intuition and genuinely algebraic index structure.
-\end{enumerate}
+\paragraph{OR on \(\Ic=\{2,3\}\) with \(n=3\).}
+The OR one-set is
+\[
+\J^{\mathrm{OR}}=\Band{2}{1}\cup\Band{3}{1}=\{3,4,5,6,7,8\},
+\]
+exactly matching the empirical ordered repertoire when the same ordering policy is used on both sides.
 
-\subsection{Asymmetric, Threshold, and Canalising Gates}
-The method extends further to:
-
-\begin{itemize}
-\item \textbf{NOT}, interpreted as a designated zero-band;
-\item \textbf{IMPLIES/NIMPLIES}, where asymmetry must be preserved explicitly;
-\item \textbf{KOFN}-style threshold families, where one-sets become banded regions indexed by Hamming-weight constraints over \(I_c\);
-\item \textbf{canalising and nested-canalising cases}, where one-set geometry exhibits collapse under designated controlling values.
-\end{itemize}
-
-These cases matter because they demonstrate that the method is a general index-set framework rather than an isolated derivation for one or two classical gates.
-
-\section{Ordering Invariance and Set Algebra}
-The exact formulae are only scientifically useful if they are stable under explicit changes of ordering convention.
+\section{Ordering Invariance}
+The formalism would be scientifically brittle if its exactness depended on accidental bit-order conventions. The next theorem shows that it does not.
 
 \begin{theorem}[Ordering-Transform Invariance]
-Let \(J^{\mathrm{LSB}}\subseteq\{1,\dots,2^n\}\) be the index set for a gate family under LSB-first ordering, and let \(J^{\mathrm{MSB}}\) be the corresponding set under MSB-first ordering. Then
+Let \(\J^{\mathrm{LSB}}\subseteq\U\) be the one-set of any gate family under LSB-first ordering, and let \(\J^{\mathrm{MSB}}\) be the corresponding one-set under MSB-first ordering. Then
 \[
-J^{\mathrm{MSB}} = \varphi\bigl(J^{\mathrm{LSB}}\bigr),
+\J^{\mathrm{MSB}}=\varphi\bigl(\J^{\mathrm{LSB}}\bigr).
 \]
-where \(\varphi\) is the bit-reversal involution defined above.
 \end{theorem}
 
-This theorem is one of the key stabilising principles of the method. It means that exactness is not lost when changing representation; one merely transports index sets through an explicit bijection.
+\begin{proof}
+Bit reversal exchanges the LSB-first and MSB-first encodings of the same binary vector. Every gate family in Proposition 1 is defined by conditions on bit values, parity, or Hamming weight over the connected inputs. These conditions are invariant under relabelling of the coordinate positions when the relabelling is carried consistently through the indexing map. Therefore the numeric index sets differ only by transport through \(\varphi\).
+\end{proof}
 
-The second stabilising principle is closure. Unions, intersections, complements, parity partitions, threshold bands, and canalising collapse remain inside a controlled algebra of ordered index-set operations. This is what makes network composition and predictive evaluation mathematically tractable.
+\begin{corollary}
+All correctness claims in this paper are representation-invariant provided that the declared ordering convention is used consistently in both derivation and validation.
+\end{corollary}
 
-\section{From Gate Formulae to Exact Network Prediction}
-Once each node \(i\) is assigned an exact one-set \(J_i\) determined by its gate label and connected inputs \(N_i\), one can reconstruct the full one-step output matrix of the network without brute-force truth-table enumeration at every stage.
+This theorem is central to the paper's causal stance. It isolates the mechanism from the encoding. Two enumerations may look numerically different while representing the same causal rule.
 
-The method therefore has three conceptually distinct predictive paths:
+\section{Network Composition and Exact Reconstruction}
+The local formulas above become scientifically valuable only if they compose into exact network-level predictions.
 
-\begin{enumerate}[label=\arabic*.]
-\item \textbf{Exhaustive baseline:} generate all outputs directly from the full network map.
-\item \textbf{Library semantics:} evaluate each node via the same gate semantics catalogue, row by row.
-\item \textbf{Analytic index-set predictor:} compose closed-form gate-level one-sets into the full network output.
-\end{enumerate}
-
-The scientific claim of this paper rests on the third path. The exact formulae are not just descriptive summaries of the exhaustive output; they are themselves an exact predictive mechanism.
+\begin{definition}[Analytic Predictor]
+For each node \(i\), let \(\J_i\subseteq\U\) denote the one-set determined by its gate family, parameters, connected-input set \(N_i\), and the declared ordering policy. The analytic predictor reconstructs the network output matrix \(Y\in\bits^{2^n\times n}\) by declaring
+\[
+Y_{j,i}=1 \iff j\in \J_i.
+\]
+\end{definition}
 
 \begin{theorem}[Canonical Exact Reconstruction]
-Under the explicit ordering convention and the network-aware connected-input sets \(N_i\), the analytic index-set predictor reconstructs the same one-step output matrix as the exhaustive baseline.
+Fix a network \((cm,dynamic)\), its gate parameters, and an ordering policy. Then the analytic predictor coincides exactly with the exhaustive one-step synchronous baseline:
+\[
+Y^{\mathrm{analytic}}=Y^{\mathrm{baseline}}.
+\]
 \end{theorem}
 
-This theorem turns the method from a descriptive curiosity into a genuine alternative representation of Boolean network dynamics.
+\begin{proof}[Proof sketch]
+For each node \(i\), Proposition 1 gives a one-set \(\J_i\) equivalent to the local gate semantics applied to the connected inputs \(x_{N_i}\). Therefore column \(i\) of the analytic output matrix equals column \(i\) of the baseline matrix for every repertoire index \(j\). Equality of all columns implies equality of the matrices.
+\end{proof}
 
-\section{Validation Programme}
-The repository already contains a strong validation base for the method paper. The evidence is distributed across exact tests, formal analyses, and medium-scale experiments.
+\begin{remark}
+This theorem does not say that the method avoids the existence of \(2^n\) states. It says something stronger and more relevant: the full network behaviour can be reconstructed by causal formulas rather than by opaque row-wise recomputation.
+\end{remark}
 
-\subsection{Gate-Level and Ordering Validation}
-Existing artefacts verify:
+\section{Complexity Analysis}
+High-level journal quality requires more than exactness. It requires a clear account of what is computationally improved and what is not.
 
+\subsection{What Cannot Be Avoided}
+Any method that explicitly outputs the full repertoire matrix of an \(n\)-node network must produce \(n2^n\) bits, hence has an output-size lower bound of \(\Omega(n2^n)\). No honest analysis should claim otherwise.
+
+\subsection{What the Method Improves}
+The contribution lies in replacing brute-force local evaluation by exact causal structure.
+
+\begin{proposition}[Per-Row Cost Comparison]
+Let the in-degree of node \(i\) be \(|N_i|\). For a fixed input row \(x\),
 \begin{itemize}
-\item truth-table correctness across covered gate families,
-\item ordering invariance under \(\varphi\),
-\item closure properties for union, intersection, and complement operations,
-\item exact formal analyses for AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES/NIMPLIES, threshold, and canalising constructions.
+\item predictive gate-semantic evaluation has cost \(\Theta\!\bigl(\sum_i |N_i|\bigr)\) when local rules are applied directly to the connected inputs;
+\item truth-table lookup requires \(\Theta\!\bigl(\sum_i 2^{|N_i|}\bigr)\) preprocessing to construct tables, amortised under reuse;
+\item analytic index-set membership uses closed forms built from band, parity, or threshold predicates, again with cost bounded by the connected-input structure rather than by brute-force enumeration of local truth tables.
 \end{itemize}
+\end{proposition}
 
-This layer is the methodological bedrock: if gate formulae or orderings failed here, the whole exact-prediction claim would collapse.
+\begin{proposition}[Validation-Burden Reduction]
+Exhaustive validation requires \(\Theta(2^n)\) rows. Stratified importance sampling validates equality on a fixed \(m\) sampled rows, preserving the exact method while reducing the validation burden from exponential in \(n\) to linear in \(m\).
+\end{proposition}
 
-\subsection{Medium-Scale Exact Reconstruction}
-The experimental validation programme shows exact reconstruction at medium network sizes. Existing results support the following summary:
+The crucial distinction is therefore between \emph{method complexity} and \emph{output complexity}. The method remains exact. Sampling enters only as a way of auditing exactness at scales where full baseline enumeration becomes computationally undesirable.
 
-\begin{itemize}
-\item for medium-scale networks, exact predictive methods achieve bitwise accuracy \(1.0\) against exhaustive baselines;
-\item the exact predictor remains deterministic and reproducible;
-\item the method separates exact predictive paths from deliberately non-exact heuristic speed probes.
-\end{itemize}
+\subsection{Concrete Empirical Comparison}
+The repository already contains a direct mixed-gate comparison on a 10-node network.
+\begin{center}
+\begin{tabular}{p{0.29\linewidth}p{0.12\linewidth}p{0.18\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{Path} & \textbf{Accuracy} & \textbf{Time} & \textbf{Status} \\
+\midrule
+Vectorised shortcut formula path & \(0.66875\) & \(1.10\times 10^{-3}\,\mathrm{s}\) & fast but not exact \\
+Exact library semantics & \(1.0\) & \(0.081\,\mathrm{s}\) & exact \\
+Analytic index-set formulae & \(1.0\) & \(9.85\times 10^{-3}\,\mathrm{s}\) & exact and fastest exact path \\
+Baseline exhaustive generation & -- & \(0.118\,\mathrm{s}\) & reference \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-This distinction is crucial. The repository already documents that the heuristic path is pedagogical and contrastive only; the scientific claims rely on exact predictive methods.
+This table matters for two reasons. First, it demonstrates that naive speed alone is not a scientific victory: the fastest non-exact shortcut is unusable as a theorem-supporting method. Second, it shows that analytic formulas achieve what a serious causality-based method should achieve: exactness plus a meaningful computational advantage over other exact baselines.
 
-\subsection{Importance Sampling at Larger Sizes}
-For larger systems, exhaustive enumeration is no longer the operational comparison layer. Instead, the validation regime uses stratified importance sampling over Hamming-weight strata. The current evidence supports:
+\section{Validation Evidence}
+The current repository supports a substantial validation base. The results most relevant to the main manuscript are summarised below.
 
-\begin{itemize}
-\item equality between predictive and baseline outputs on sampled rows,
-\item accuracy \(1.0\) under the exact predictive regime,
-\item substantial runtime improvement relative to truth-table lookup at larger sizes.
-\end{itemize}
+\begin{center}
+\begin{tabular}{p{0.25\linewidth}p{0.12\linewidth}p{0.12\linewidth}p{0.34\linewidth}}
+\toprule
+\textbf{Regime} & \textbf{Size} & \textbf{Accuracy} & \textbf{Meaning} \\
+\midrule
+Medium-scale exact reconstruction & \(n=10\) & \(1.0\) & Predictive reconstruction equals exhaustive baseline \\
+Medium-scale exact reconstruction & \(n=13\) & \(1.0\) & Predictive reconstruction equals exhaustive baseline \\
+Large-scale sampled validation & \(n=20\), \(1020\) samples & \(1.0\) & Exact equality on stratified sampled rows \\
+Large-scale sampled validation & \(n=50\), \(1020\) samples & \(1.0\) & Exact equality on stratified sampled rows \\
+Per-gate analysis suite & AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES, KOFN, CANALISING & exact & Gate-level formulae and ordering checks pass \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-This is not an approximation to the method. It is an approximation to the \emph{validation burden}. The method itself remains exact.
+The gate-analysis layer is especially important. It verifies not just end-to-end equality but the mathematical pieces that justify the reconstruction theorem: ordering invariance, closure under set operations, parity-class behaviour, threshold strictness, and canalising collapse.
 
-\subsection{Subsystem Factorisation}
-The repository also contains evidence that structural decomposition can be exploited when the connectivity graph is block-separable. This matters for the paper because it extends the method from exact prediction to exact decomposition principles: when the graph splits, the complexity functional and reconstruction logic factorise accordingly.
+\section{A Structured Example from Mixed Dynamics}
+The thesis-era analyses remain valuable because they show how apparently irregular behaviour becomes intelligible when node outputs are isolated and the repertoire ordering is respected. Consider the 7-node mixed network defined by
+\[
+cm_{07}=
+\begin{bmatrix}
+0&0&1&0&0&0&1\\
+0&0&1&0&0&1&0\\
+1&0&0&0&1&0&1\\
+1&0&1&0&1&0&1\\
+0&0&1&1&0&1&1\\
+1&1&1&0&0&0&0\\
+0&1&0&1&1&1&0
+\end{bmatrix},
+\qquad
+dynamic_{07}=(\mathrm{AND},\mathrm{OR},\mathrm{OR},\mathrm{AND},\mathrm{OR},\mathrm{OR},\mathrm{AND}).
+\]
 
-\section{Why the Method Matters}
-The contribution is not merely that one can reproduce Boolean outputs by another route. The contribution is that one can move from:
+From a raw repertoire table, the output may look combinatorially messy. But once isolated node-by-node, repeated structure appears. This is precisely the methodological point: complexity in the full table does not preclude simple local rules. On the contrary, the recovery of local causal formulas from apparently rich behaviour is one of the main reasons the method is scientifically interesting.
 
-\begin{itemize}
-\item exhaustive tables,
-\item opaque simulation traces,
-\item and local truth-table lookup
-\end{itemize}
+This perspective places the method near the broader insight that simple local rules can generate surprisingly rich global behaviour. The present work differs, however, in that it does not stop at the philosophical observation. It provides explicit formulas for locating that behaviour within the repertoire.
 
-to a representation based on:
+\section{Relation to Algorithmic Causality and Statistical Learning}
+\subsection{Relation to Wolfram-Style Rule Simplicity}
+Wolfram's work established that simple discrete rules can generate unexpectedly rich behaviour. Our contribution is compatible with that viewpoint but more operational for Boolean networks: we derive exact formulas that specify where rule-induced behaviour appears in an ordered repertoire, rather than merely demonstrating that rich behaviour exists.
 
-\begin{itemize}
-\item explicit ordering policy,
-\item exact gate formulae,
-\item compositional index algebra,
-\item and deterministic predictive reconstruction.
-\end{itemize}
+\subsection{Relation to Algorithmic Causality}
+Algorithmic-causality programmes emphasise perturbation, generative explanation, and the distinction between statistical regularity and genuine causal mechanism. The present method fits naturally into that tradition because it replaces descriptive output summaries by explicit program-like rule expressions. In this sense, the index-set calculus is a concrete causal representation.
 
-This shift is scientifically valuable because it produces explanation, not only evaluation. It also creates a bridge between symbolic derivation, deterministic experimentation, and scalable network prediction.
+\subsection{Difference from Classical Machine Learning}
+The contrast with classical machine learning should be stated carefully. Many ML systems learn predictive associations from sampled data and are indifferent to whether the learned representation coincides with the true generating rule. Here the objective is different: under known network logic, the goal is to derive exact consequences analytically. The paper is therefore not anti-statistical; it is simply aimed at a different problem class, one in which causal structure is explicit and deterministic reconstruction is possible.
 
-\section{Next Writing Frontier}
-This first manuscript draft already fixes the scientific spine of the method paper. The next writing pass should deepen four specific areas:
+\section{Discussion}
+For a high-level journal, the central value of the method is not that it is ``faster than brute force'' in some vague sense. The stronger claim is that it changes the scientific unit of explanation. The unit is no longer the truth table or the trajectory, but the exact rule-induced index set over an ordered repertoire.
 
+This has four consequences.
 \begin{enumerate}[label=\arabic*.]
-\item insert the strongest exact per-gate derivations directly into this manuscript, starting with AND, OR, XOR, threshold, and canalising cases;
-\item convert the current theorem statements from summary form into fully polished propositions with proofs or proof sketches;
-\item import the most informative validation tables from the existing artefacts under \texttt{results/tests/};
-\item sharpen the discussion against exhaustive enumeration, naive heuristics, and other combinatorial approaches.
+\item It yields \emph{explanation}: the one-set specifies why a node is active and not merely when it happened to be active in a listed table.
+\item It yields \emph{representation control}: ordering changes are transported by \(\varphi\) rather than handled by undocumented convention changes.
+\item It yields \emph{compositionality}: mixed networks inherit their structure from local gate formulas.
+\item It yields \emph{computational discipline}: approximate shortcuts are separated cleanly from exact analytic prediction.
 \end{enumerate}
 
-\section{Conclusion}
-The repository is now organised so that the method paper can start from a clean scientific base rather than from execution history. The method itself is already substantially present: ordered exhaustive repertoires, exact gate-level one-set formulae, explicit ordering-transform invariance, exact network composition, and deterministic validation against exhaustive baselines.
+The method should therefore be read as a causal-computational mathematics paper with later applications to biological and other complex systems, not as a biology paper wearing mathematical vocabulary. That distinction matters for publication strategy. The main paper must foreground exact definitions, theorems, worked examples, and exact validation. Broader applications can then be layered onto a firmer foundation.
 
-The immediate objective of the next draft is therefore not to discover the method from scratch, but to convert an already validated body of theory and experiments into a professional manuscript whose narrative is led by definitions, theorems, exact formulae, and reproducible evidence.
+\section{Conclusion}
+We have presented a causality-first index-set calculus for Boolean networks. The formalism begins with ordered exhaustive repertoires, defines exact gate-family one-sets, controls ordering by an explicit bit-reversal involution, and composes local one-sets into exact network-level reconstruction. The resulting framework is mathematically cleaner than brute-force enumeration, more explanatory than raw truth-table lookup, and more appropriate than probabilistic surrogates when the underlying mechanism is known.
+
+The next stage is not to reinvent the method but to deepen this manuscript into full journal form: expand the appendix-level derivations for every gate family, insert the strongest result tables and figures from the validated artefacts, and connect the present exact formalism to the downstream paper programme. The core scientific claim, however, is already clear: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulas once the repertoire ordering is treated as part of the mathematics rather than as an implementation detail.
+
+\appendix
+
+\section{Appendix A: Exact Gate Families in Expanded Form}
+\subsection{Monotone Gates}
+For a connected-input set \(\Ic\),
+\[
+\J^{\mathrm{AND}}=\bigcap_{i\in\Ic}\Band{i}{1},
+\qquad
+\J^{\mathrm{OR}}=\bigcup_{i\in\Ic}\Band{i}{1},
+\]
+\[
+\J^{\mathrm{NAND}}=\U\setminus\J^{\mathrm{AND}},
+\qquad
+\J^{\mathrm{NOR}}=\U\setminus\J^{\mathrm{OR}}=\bigcap_{i\in\Ic}\Band{i}{0}.
+\]
+
+\subsection{Parity and Equivalence}
+\[
+\J^{\mathrm{XOR}}=\Parity{\Ic}{1},
+\qquad
+\J^{\mathrm{XNOR}}=\Parity{\Ic}{0}.
+\]
+These classes partition \(\U\) and are exact complements of one another.
+
+\subsection{Implication Families}
+For a designated ordered pair \((a,b)\),
+\[
+\J^{\mathrm{IMP}}=\U\setminus\bigl(\Band{a}{1}\cap\Band{b}{0}\bigr),
+\qquad
+\J^{\mathrm{NIMP}}=\Band{a}{1}\cap\Band{b}{0}.
+\]
+The asymmetry is essential and must not be erased by symmetrising the pair.
+
+\subsection{Threshold Families}
+For KOFN with threshold \(k\),
+\[
+\J^{\mathrm{KOFN}}=\bigcup_{r=k}^{|\Ic|}\Weight{\Ic}{r}.
+\]
+For exact-\(k\) thresholds,
+\[
+\J^{=k}=\Weight{\Ic}{k}.
+\]
+The special cases \(k=0\) and \(k>|\Ic|\) yield the constant functions \(1\) and \(0\), respectively.
+
+\subsection{Canalising Families}
+Let \(C\subseteq\U\) be the trigger set on which the canalising value is detected and let \(\J_h\) be the one-set of the fallback rule. Then
+\[
+\J^{\mathrm{CAN}}=C\cup\bigl((\U\setminus C)\cap \J_h\bigr).
+\]
+Nested canalising rules iterate this construction with priority-ordered trigger sets.
+
+\section{Appendix B: Sensitivity and Interpretive Notes}
+The exact gate formulas support additional analyses already present in the repository, including average sensitivity and structured noise response.
+
+\paragraph{AND and OR.}
+For arity \(d\),
+\[
+\bar{s}_{\mathrm{AND}}=\bar{s}_{\mathrm{OR}}=\frac{d}{2^{d-1}}.
+\]
+
+\paragraph{XOR and XNOR.}
+For arity \(d\),
+\[
+\bar{s}_{\mathrm{XOR}}=\bar{s}_{\mathrm{XNOR}}=d,
+\]
+since flipping any single input toggles parity.
+
+\paragraph{Interpretive point.}
+Sensitivity is not the primary theorem of this paper, but it matters because it connects the static one-set calculus to perturbation behaviour. The same exact formulas that identify where outputs equal one also determine how readily those outputs change under controlled input perturbations.
+
+\section{Appendix C: Validation Summary and Reproducibility}
+The manuscript is grounded in a larger validation programme covering:
+\begin{itemize}
+\item ordering invariance checks under \(\varphi\),
+\item exact gate-level one-set equality against empirical repertoires,
+\item medium-scale exact reconstruction for \(n=10,13\),
+\item large-scale sampled equality for \(n=20,50\),
+\item mixed-gate comparisons separating exact analytic methods from intentionally inexact shortcut methods.
+\end{itemize}
+
+The main artefact families include \texttt{results/tests/analysis\_*}, \texttt{results/tests/algo001}, \texttt{results/tests/algo002}, and \texttt{results/tests/mixed001FormulaVsExhaustive}. These artefacts are important not as supplementary clutter but as audit trails for every main claim made here.
+
+\begin{thebibliography}{99}
+\bibitem{wolfram}
+S. Wolfram, \emph{A New Kind of Science}, Wolfram Media, 2002.
+
+\bibitem{zenilcausality}
+H. Zenil, N. A. Kiani, and J. Tegner, ``Low-algorithmic-complexity entropy-deceiving graphs,'' \emph{Physical Review E}, 96(1), 2017.
+
+\bibitem{zenildynamics}
+H. Zenil, F. Soler-Toscano, N. A. Kiani, S. Hern\'andez-Orozco, and J. Tegn\'er, ``A decomposition method for global evaluation of Shannon entropy and local estimations of algorithmic complexity,'' \emph{Entropy}, 20(8), 2018.
+
+\bibitem{li}
+M. Li and P. Vit\'anyi, \emph{An Introduction to Kolmogorov Complexity and Its Applications}, 4th ed., Springer, 2019.
+
+\bibitem{pearl}
+J. Pearl, \emph{Causality: Models, Reasoning, and Inference}, 2nd ed., Cambridge University Press, 2009.
+
+\bibitem{kauffman}
+S. A. Kauffman, ``Metabolic stability and epigenesis in randomly constructed genetic nets,'' \emph{Journal of Theoretical Biology}, 22(3), 1969.
+\end{thebibliography}
 
 \end{document}
