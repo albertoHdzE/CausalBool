@@ -677,3 +677,34 @@ From `doc/finalpaper/` to `doc/finalpaper/archive/historical_manuscripts/` with 
 
 - `nature_final.pdf` remains unresolved because its status depends on the unresolved `nature_final.tex` side branch.
 - `together_full.pdf` also remains unresolved because the condenser PDF retention policy has not been tightened enough yet.
+
+## Claude-Nature Workspace Integration Review
+
+### Scope
+
+- No directory moves for `4ClaudeCode/claude-Nature/`.
+- Reduce future migration risk by making the Level 8 paper workspace more location-relative.
+- Record a staged integration plan so the case is not forgotten.
+
+### Findings
+
+- `4ClaudeCode/claude-Nature/paper/` is still the active Level 8 reproducibility workspace and must remain coherent.
+- Multiple scripts and documents reference the literal `4ClaudeCode/claude-Nature/...` path (including defaults under `src/analysis/` and provenance commands in `bitacora-lev8.md`).
+- A direct move into a “common folder” today would likely break default output paths and degrade reproducibility.
+
+### Executed (risk-reduction edits)
+
+- Updated `4ClaudeCode/claude-Nature/paper/code/reproduce_all.py` to derive default `--figures-dir` and `--results-dir` from the script location rather than hardcoding `4ClaudeCode/claude-Nature/...`.
+- Updated `4ClaudeCode/claude-Nature/paper/code/analysis_pipeline.py` to default wetlab-pack outputs to a paper-local `results/` directory rather than hardcoding the full repo path.
+
+### Added
+
+- `mapping/claude_nature_integration_review.md`
+
+### Next decision boundary
+
+- Yes, integration into a common workspace folder is desirable.
+- The safe path is staged:
+  - first abstract hard-coded references outside the workspace
+  - then move into `workspaces/...`
+  - then add an explicit provenance migration note

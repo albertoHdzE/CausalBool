@@ -102,6 +102,9 @@ def _repo_root() -> Path:
             return parent
     return _SCRIPT_PATH.parents[2]
 
+def _paper_results_dir() -> Path:
+    return _SCRIPT_PATH.parent.parent / "results"
+
 
 def _paper_figures_dir() -> Path:
     return _SCRIPT_PATH.parent.parent / "figures"
@@ -3060,7 +3063,7 @@ def run_human_designed_vs_evolved(output_dir: Optional[str] = None, n_pairs: int
 
 
 def run_wetlab_readiness_pack(output_dir: Optional[str] = None, top_k: int = 8) -> dict:
-    out_dir = Path(output_dir) if output_dir is not None else (_repo_root() / "4ClaudeCode" / "claude-Nature" / "paper" / "results")
+    out_dir = Path(output_dir) if output_dir is not None else _paper_results_dir()
     out_dir.mkdir(parents=True, exist_ok=True)
 
     repo_root = _repo_root()

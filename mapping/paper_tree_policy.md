@@ -125,6 +125,7 @@ Allowed future actions:
 - remove generated clutter only when reproducibility is confirmed
 - do not collapse this tree into `doc/finalpaper/`
 - do not treat code here as archival notes
+- do not relocate this workspace into a “common folder” until path-coupling has been reduced and a migration note is defined for provenance documents
 
 ### Tree C: Historical synthesis
 

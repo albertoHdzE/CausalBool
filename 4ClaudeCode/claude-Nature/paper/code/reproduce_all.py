@@ -9,6 +9,9 @@ from pathlib import Path
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
+def _paper_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
 
 def _run(cmd: list[str], cwd: Path) -> None:
     proc = subprocess.run(cmd, cwd=str(cwd))
@@ -17,16 +20,17 @@ def _run(cmd: list[str], cwd: Path) -> None:
 
 
 def main() -> None:
+    paper_root = _paper_root()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--figures-dir", type=str, default="4ClaudeCode/claude-Nature/paper/figures")
-    parser.add_argument("--results-dir", type=str, default="4ClaudeCode/claude-Nature/paper/results")
+    parser.add_argument("--figures-dir", type=str, default=str(paper_root / "figures"))
+    parser.add_argument("--results-dir", type=str, default=str(paper_root / "results"))
     parser.add_argument("--update-manifest", action="store_true")
     parser.add_argument("--verify-only", action="store_true")
     parser.add_argument("--skip-depmap", action="store_true")
     args = parser.parse_args()
 
     repo = _repo_root()
-    pipeline = repo / "4ClaudeCode" / "claude-Nature" / "paper" / "code" / "analysis_pipeline.py"
+    pipeline = paper_root / "code" / "analysis_pipeline.py"
     if not pipeline.exists():
         raise SystemExit(f"Missing analysis pipeline: {pipeline}")
 
