@@ -11,3 +11,5 @@ Policy:
 Current contents:
 
 - `process_data.py`: archived because it was an unreferenced root wrapper, lacked the `src/` bootstrap used by the other surviving root wrappers, and duplicated processing entrypoints already exposed by `src/integration/grn_data_pipeline.py`
+- `run_process.py`: archived because it was an unreferenced root wrapper around `BulkScraper.process_raw_files()`, and the same functionality is available via `src/integration/BulkScraper.py` and other module-level entrypoints
+- `report_dataset.py`: archived because it was an unreferenced operator utility and did not need to occupy the repository root

@@ -596,3 +596,43 @@ From commit `3f9bd13` back into the working tree:
 - The cleaner policy is:
   - retain the selectively restored Level 8 paper-support documents
   - keep the duplicated historical paper-side test mirror absent
+
+## Root Wrapper And Build-Artifact Archive Wave
+
+### Scope
+
+- Clean the repository root by removing two unreferenced wrapper scripts and a set of root-level build byproducts.
+- Preserve everything by moving into explicit archive buckets rather than deleting.
+
+### Pre-move review
+
+- Searched repository references for `run_process.py` and `report_dataset.py` and found none.
+- Confirmed `run_scraper.py` remains referenced in `doc/newIntPaper/bioPlanLev-3.md` and is therefore preserved at the repository root.
+
+### Added
+
+- `archive/root_build_artifacts/README.md`
+
+### Moved
+
+From repository root to `archive/root_wrappers/`:
+
+- `run_process.py`
+- `report_dataset.py`
+
+From repository root to `archive/root_build_artifacts/`:
+
+- `docProcess.aux`, `docProcess.log`, `docProcess.out`
+- `expProcess.aux`, `expProcess.log`, `expProcess.out`, `expProcess.toc`
+- `tests001.aux`, `tests001.log`, `tests001.out`, `tests001.pdf`
+- `tests002.aux`, `tests002.log`, `tests002.out`, `tests002.pdf`
+- `~$analysis.xlsx`
+
+### Rationale
+
+- The wrappers were not documented as an interface and were not referenced by the repository; preserving them in an archive keeps rollback possible without keeping root cluttered.
+- The build artifacts are regenerateable byproducts and accidental exports that should not occupy the active top-level namespace.
+
+### Cleaning consequence
+
+- The repository root now retains only one wrapper entrypoint, `run_scraper.py`, which is the one explicitly referenced in planning documents.

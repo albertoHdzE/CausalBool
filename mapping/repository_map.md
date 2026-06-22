@@ -106,6 +106,7 @@ Repository-level archive area for low-risk historical material moved out of acti
 
 - `archive/root_scratch/`: former top-level debug, inspection, and exploratory scripts preserved for historical troubleshooting context.
 - `archive/root_wrappers/`: former top-level wrapper scripts preserved when they are stale or operationally weaker than the module entrypoints they wrap.
+- `archive/root_build_artifacts/`: root-level build byproducts (e.g., LaTeX `.aux`/`.log`/`.out`/`.toc`, accidental PDFs, and Office temp files) moved out of the active top-level namespace.
 - `archive/generated_web_bundles/`: former root-level generated Vite/Cell Collective bundles preserved as artifacts rather than active source.
 - `archive/analysis_drafts/`: superseded or incomplete analysis scripts moved out of active `src/` locations.
 
@@ -137,7 +138,7 @@ Interpretation:
 
 ### Top-level loose files
 
-- `run_process.py`, `run_scraper.py`, `report_dataset.py`: small orchestration wrappers.
+- `run_scraper.py`: small orchestration wrapper.
 - `process_data.py` is no longer kept at root; it was moved to `archive/root_wrappers/` after review showed it was an unreferenced stale wrapper that did not bootstrap `src/`.
 - Large generated JS bundles are no longer kept at root; they were moved to `archive/generated_web_bundles/`.
 
