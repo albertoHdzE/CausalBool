@@ -5,8 +5,15 @@
 \usepackage{amsmath,amssymb,amsthm,amsfonts,mathtools}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{adjustbox}
 \usepackage{enumitem}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{longtable}
+\usepackage{tikz}
 \usepackage{hyperref}
+\usetikzlibrary{arrows.meta,positioning}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -23,6 +30,25 @@
 \newcommand{\Parity}[2]{\mathcal{P}_{#1}^{#2}}
 \newcommand{\Weight}[2]{\mathcal{H}_{#1}^{#2}}
 \newcommand{\bits}{\{0,1\}}
+\definecolor{listinggray}{rgb}{0.5, 0.5, 0.5}
+\definecolor{listinggrayer}{rgb}{0.95, 0.95, 0.95}
+\lstdefinestyle{MathematicaStyle}{
+    language=Mathematica,
+    breaklines=true,
+    breakatwhitespace=false,
+    breakindent=1em,
+    basicstyle=\ttfamily\scriptsize,
+    columns=flexible,
+    linewidth=0.9\linewidth,
+    frame=single,
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{listinggray},
+    backgroundcolor=\color{listinggrayer},
+    literate={+}{+}{1} {a}{a}{1} {b}{b}{1} {c}{c}{1} {d}{d}{1} {e}{e}{1} {f}{f}{1} {g}{g}{1} {h}{h}{1} {i}{i}{1} {j}{j}{1} {k}{k}{1} {l}{l}{1} {m}{m}{1} {n}{n}{1} {o}{o}{1} {p}{p}{1} {q}{q}{1} {r}{r}{1} {s}{s}{1} {t}{t}{1} {u}{u}{1} {v}{v}{1} {w}{w}{1} {x}{x}{1} {y}{y}{1} {z}{z}{1} {A}{A}{1} {B}{B}{1} {C}{C}{1} {D}{D}{1} {E}{E}{1} {F}{F}{1} {G}{G}{1} {H}{H}{1} {I}{I}{1} {J}{J}{1} {K}{K}{1} {L}{L}{1} {M}{M}{1} {N}{N}{1} {O}{O}{1} {P}{P}{1} {Q}{Q}{1} {R}{R}{1} {S}{S}{1} {T}{T}{1} {U}{U}{1} {V}{V}{1} {W}{W}{1} {X}{X}{1} {Y}{Y}{1} {Z}{Z}{1} {0}{0}{1} {1}{1}{1} {2}{2}{1} {3}{3}{1} {4}{4}{1} {5}{5}{1} {6}{6}{1} {7}{7}{1} {8}{8}{1} {9}{9}{1} {\}}{\}}{1},
+    xleftmargin=1em,
+    xrightmargin=1em
+}
 
 \title{Causal Index-Set Calculus for Boolean Networks:\\ Exact Gate Formulae, Ordering Invariance, and Deterministic Reconstruction}
 \author{}
@@ -42,7 +68,9 @@ This paper advances the following thesis. Ordered exhaustive repertoires contain
 
 The perspective is causality-first in three senses. First, it is rule-first rather than correlation-first: the object of study is the generative logic of the system, not only its observed frequencies. Second, it is deterministic rather than statistical: the method aims at exact reconstruction under known dynamics, not at approximate inference under unknown mechanisms. Third, it is compositional: global behaviour is built from local causal rules rather than from opaque end-to-end approximations.
 
-This places the work in dialogue with two important traditions without collapsing into either of them. The first is the tradition of simple rules generating rich behaviour, exemplified by Wolfram's programme on discrete systems. The second is the algorithmic-causality tradition associated with perturbation and generative explanation, developed in part by Zenil and collaborators. Our contribution is more specific: we derive a concrete analytic calculus for ordered Boolean repertoires, prove ordering-control results, and connect the formalism to exact network reconstruction and explicit complexity comparisons.
+This places the work in dialogue with two important traditions without collapsing into either of them. The first is the tradition of simple rules generating rich behaviour, exemplified by Wolfram's programme on discrete systems and its principle of computational equivalence. The second is the algorithmic-causality tradition associated with perturbation, reprogrammability, and generative explanation, developed in part by Zenil and collaborators. Works such as \emph{Causality, Information and Biological Computation} and \emph{Algorithmic Causal Deconvolution of Intertwined Programs and Networks by Generative Mechanism} are closely aligned with the present paper in spirit: they treat complex systems as computational objects and emphasise algorithmic probability, generative mechanisms, and causation over surface statistics. Likewise, \emph{An Algorithmic Information Calculus for Causal Discovery and Reprogramming Systems} provides an intervention-oriented calculus for discovering and steering hidden generating mechanisms from observations.
+
+The present contribution is both inspired by and distinct from that line of work. Zenil's framework is largely inferential and interventionist: it seeks to reconstruct likely generating mechanisms, often from partial, disordered, or indirect observations, by means of algorithmic perturbation analysis and model-oriented causal reasoning. Here the objective is different. We assume the local Boolean rules and network structure are given, and we derive exact mathematical expressions for the resulting behaviour over the full ordered repertoire. In that sense, the method is less a causal-discovery calculus than a causal-expression calculus. It remains connected to algorithmic probability and to the idea that simple rules can underwrite rich behaviour, but it is more law-like in the narrow physical sense: the target is a closed-form deterministic description of behaviour, not an approximate recovery of an unknown generator. This is precisely why the work is also close in spirit to Wolfram's emphasis on exact discrete rules, while differing from purely statistical or machine-learning approaches that learn predictive regularities without recovering the underlying analytic form.
 
 The paper makes six principal claims.
 \begin{enumerate}[label=\textbf{C\arabic*.}]
@@ -116,6 +144,25 @@ and for \(r\in\{0,\dots,|\Ic|\}\),
 \]
 \end{definition}
 
+\begin{definition}[Decimal Weights, Pivots, and Offsets]
+Let the ordering policy be fixed. Define the bit weight
+\[
+w(i)=
+\begin{cases}
+2^{i-1}, & \text{LSB-first},\\
+2^{n-i}, & \text{MSB-first}.
+\end{cases}
+\]
+For \(S\subseteq\{1,\dots,n\}\) and \(\eta\in\bits^{|S|}\), define the offset
+\[
+\Delta_S(\eta)=\sum_{t\in S}\eta_t\,w(t),
+\]
+and for a connected-input set \(\Ic\), define the AND pivot
+\[
+P(\Ic)=\sum_{i\in\Ic} w(i).
+\]
+\end{definition}
+
 These three families already encode most of the method. Bands capture fixed-bit conditions, parity classes capture XOR-like structure, and Hamming-weight strata capture threshold logic. What remains is to show that standard gate families are simple set expressions built from them.
 
 \section{Exact Gate Formulae}
@@ -140,7 +187,7 @@ IMPLIES on pair \((a,b)\) & \(\J_k^{\mathrm{IMP}}=\Band{a}{0}\cup\bigl(\Band{a}{
 NIMPLIES on pair \((a,b)\) & \(\J_k^{\mathrm{NIMP}}=\Band{a}{1}\cap\Band{b}{0}\) \\
 KOFN threshold & \(\J_k^{\mathrm{KOFN}}=\bigcup_{r=k}^{|\Ic|}\Weight{\Ic}{r}\) \\
 Strict-EXACT-\(k\) & \(\J_k^{=k}=\Weight{\Ic}{k}\) \\
-Canalising with trigger set \(C\) and fallback one-set \(\J_h\) & \(\J_k^{\mathrm{CAN}}=C\cup\bigl((\U\setminus C)\cap \J_h\bigr)\) \\
+Canalising with trigger set \(C\), trigger output \(o\), and fallback one-set \(\J_h\) & \(\J_k^{\mathrm{CAN}}=C\cup\bigl((\U\setminus C)\cap \J_h\bigr)\) if \(o=1\); \(\J_k^{\mathrm{CAN}}=(\U\setminus C)\cap \J_h\) if \(o=0\) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -154,22 +201,629 @@ Each formula is a direct rewriting of the gate semantics in terms of bit conditi
 The decisive point is that these are \emph{network-aware} formulae. The local rule is not written abstractly over unnamed inputs; it is anchored to the actual connected-input set \(\Ic\) induced by the network topology.
 \end{remark}
 
+\subsection{Expanded Gate Expressions}
+The compact one-set table is useful as a summary, but for the manuscript we also need the explicit derived expressions in the style of the standalone AND and OR derivation notes. The role of this subsection is to collect those formulas in one place.
+
+\paragraph{AND.}
+Let \(I_{nc}=\{1,\dots,n\}\setminus \Ic\). The connected bits are fixed to one, so the decimal contribution of the connected part is the pivot
+\[
+P(\Ic)=\sum_{i\in\Ic} w(i).
+\]
+The disconnected bits provide the free offset
+\[
+\Delta_{nc}(\eta)=\sum_{t\in I_{nc}} \eta_t\,w(t), \qquad \eta\in\bits^{|I_{nc}|}.
+\]
+Hence the one-set can be written as
+\[
+\J_k^{\mathrm{AND}}
+=
+\Bigl\{\,1+P(\Ic)+\Delta_{nc}(\eta)\ \Big|\ \eta\in\bits^{|I_{nc}|}\Bigr\},
+\]
+equivalently
+\[
+\J_k^{\mathrm{AND}}=\{j\in\U:\forall i\in\Ic,\ v_i(j)=1\}.
+\]
+
+\paragraph{OR.}
+For each connected input \(i\in\Ic\), define the one-band
+\[
+\mathcal{B}_i^{(1)}
+=
+\Bigl\{\,1+w(i)+\Delta_{\{1,\dots,n\}\setminus\{i\}}(\eta)\ \Big|\
+\eta\in\bits^{n-1}\Bigr\}.
+\]
+Then
+\[
+\J_k^{\mathrm{OR}}=\bigcup_{i\in\Ic}\mathcal{B}_i^{(1)}
+=
+\{j\in\U:\exists i\in\Ic,\ v_i(j)=1\}.
+\]
+
+\paragraph{NAND.}
+The zero-set of NAND is exactly the one-set of AND, so
+\[
+\mathcal{Z}_k^{\mathrm{NAND}}
+=
+\J_k^{\mathrm{AND}}
+=
+\Bigl\{\,1+P(\Ic)+\Delta_{nc}(\eta)\ \Big|\ \eta\in\bits^{|I_{nc}|}\Bigr\},
+\]
+and the one-set is its complement:
+\[
+\J_k^{\mathrm{NAND}}=\U\setminus \mathcal{Z}_k^{\mathrm{NAND}}.
+\]
+
+\paragraph{NOR.}
+For each \(i\in\Ic\), define the zero-band
+\[
+\mathcal{B}_i^{(0)}
+=
+\Bigl\{\,1+\Delta_{\{1,\dots,n\}\setminus\{i\}}(\eta)\ \Big|\
+\eta\in\bits^{n-1}\Bigr\},
+\]
+which enforces \(v_i=0\). Then
+\[
+\J_k^{\mathrm{NOR}}=\bigcap_{i\in\Ic}\mathcal{B}_i^{(0)}
+=
+\{j\in\U:\forall i\in\Ic,\ v_i(j)=0\}
+=
+\U\setminus\J_k^{\mathrm{OR}}.
+\]
+
+\paragraph{XOR and XNOR.}
+These families are controlled by the parity of the connected bits:
+\[
+\J_k^{\mathrm{XOR}}
+=
+\Bigl\{\,j\in\U\ \Big|\
+\sum_{i\in\Ic}v_i(j)\equiv 1\pmod 2
+\Bigr\},
+\]
+\[
+\J_k^{\mathrm{XNOR}}
+=
+\Bigl\{\,j\in\U\ \Big|\
+\sum_{i\in\Ic}v_i(j)\equiv 0\pmod 2
+\Bigr\}
+=
+\U\setminus\J_k^{\mathrm{XOR}}.
+\]
+No pivot-plus-offset decomposition is needed here because the relevant invariant is parity rather than a single threshold band.
+
+\paragraph{NOT.}
+For a designated input index \(r\), the NOT one-set is the zero-band of that input:
+\[
+\J_k^{\mathrm{NOT}}=\Band{r}{0}
+=
+\Bigl\{\,1+\Delta_{\{1,\dots,n\}\setminus\{r\}}(\eta)\ \Big|\
+\eta\in\bits^{n-1}\Bigr\}.
+\]
+
+\paragraph{IMPLIES and NIMPLIES.}
+For an ordered pair \((a,b)\), the forbidden asymmetric pattern is \(a=1,b=0\). Its index set is
+\[
+\mathcal{B}_{a=1,b=0}
+=
+\Bigl\{\,1+w(a)+\Delta_{\{1,\dots,n\}\setminus\{a,b\}}(\eta)\ \Big|\
+\eta\in\bits^{n-2}\Bigr\}.
+\]
+Therefore
+\[
+\J_k^{\mathrm{NIMP}}=\mathcal{B}_{a=1,b=0},
+\qquad
+\J_k^{\mathrm{IMP}}=\U\setminus\mathcal{B}_{a=1,b=0}.
+\]
+Equivalently,
+\[
+\J_k^{\mathrm{IMP}}=\{j\in\U:\neg v_a(j)\ \lor\ v_b(j)\},
+\qquad
+\J_k^{\mathrm{NIMP}}=\{j\in\U:v_a(j)=1,\ v_b(j)=0\}.
+\]
+
+\paragraph{KOFN threshold family.}
+For threshold \(k\),
+\[
+\J_k^{\mathrm{KOFN}}
+=
+\bigcup_{r=k}^{|\Ic|}\Weight{\Ic}{r}
+=
+\Bigl\{\,j\in\U\ \Big|\
+\sum_{i\in\Ic} v_i(j)\ge k
+\Bigr\}.
+\]
+For strict-exact thresholding,
+\[
+\J_k^{=k}=\Weight{\Ic}{k}
+=
+\Bigl\{\,j\in\U\ \Big|\
+\sum_{i\in\Ic} v_i(j)=k
+\Bigr\}.
+\]
+Thus threshold families are controlled by Hamming-weight layers rather than by parity or a single pivot.
+
+\paragraph{Canalising family.}
+Let the canalising input be \(c\), the canalising value be \(\nu\in\bits\), the trigger output be \(o\in\bits\), and the fallback one-set be \(\J_h\). Define the trigger set
+\[
+C_{c,\nu}=\{j\in\U:v_c(j)=\nu\}.
+\]
+Then the one-set is
+\[
+\J_k^{\mathrm{CAN}}
+=
+\begin{cases}
+C_{c,\nu}\cup\bigl((\U\setminus C_{c,\nu})\cap \J_h\bigr), & o=1,\\[4pt]
+(\U\setminus C_{c,\nu})\cap \J_h, & o=0.
+\end{cases}
+\]
+In the current implementation the fallback rule is OR on the remaining inputs, so \(\J_h\) is typically an OR-type union of one-bands outside the trigger case.
+
+\subsection{Dynamic Properties and Pattern Taxonomy}
+The exact one-set calculus is not only a static indexing device. It also recovers dynamic properties that were developed separately in the project documentation: monotonicity class, average sensitivity under the uniform exhaustive repertoire, and the coarse pattern symbol induced by a node's full output column.
+
+\begin{definition}[Column-Wise Pattern Symbol]
+Let \(Y\in\bits^{2^n\times n}\) be the output matrix over the ordered exhaustive repertoire. For node \(i\), define
+\[
+\pi_i=
+\begin{cases}
+0, & \text{if } \sum_{j=1}^{2^n} Y_{j,i}=0,\\
+1, & \text{if } \sum_{j=1}^{2^n} Y_{j,i}=2^n,\\
+*, & \text{otherwise.}
+\end{cases}
+\]
+\end{definition}
+
+This three-symbol alphabet captures a useful distinction that repeatedly appears in the repository validation suite. Some rules are structurally non-trivial but still constant over a declared repertoire because parameters collapse them to extreme cases; others remain genuinely varying and therefore receive the symbol \(*\).
+
+\begin{proposition}[Dynamic Summary of Canonical Gate Families]
+For a gate of arity \(d\) under the uniform exhaustive repertoire, the families in Table~\ref{tab:dynamic-pattern-summary} satisfy the listed monotonicity, average sensitivity, and pattern behaviour.
+\end{proposition}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{p{0.17\linewidth}p{0.18\linewidth}p{0.24\linewidth}p{0.28\linewidth}}
+\toprule
+\textbf{Family} & \textbf{Monotonicity} & \textbf{Average sensitivity} & \textbf{Pattern over exhaustive inputs} \\
+\midrule
+AND / OR & monotone increasing & \(\bar{s}=d/2^{d-1}\) & \(*\) except degenerate unary or fixed-input cases \\
+NAND / NOR & monotone decreasing & \(\bar{s}=d/2^{d-1}\) & \(*\) except degenerate unary or fixed-input cases \\
+XOR / XNOR & parity-based, non-monotone & \(\bar{s}=d\) & always \(*\) for non-empty connected-input sets \\
+NOT & anti-monotone & \(\bar{s}=1\) & \(*\) \\
+IMPLIES / NIMPLIES & asymmetric, mixed monotonicity in ordered pair & \(\bar{s}=1\) for the binary case & typically \(*\) \\
+KOFN & monotone increasing & \(\bar{s}=d\binom{d-1}{k-1}/2^{d-1}\) & \(1\) if \(k=0\), \(0\) if \(k>d\), otherwise \(*\) \\
+strict-KOFN & monotone increasing & \(\bar{s}=d\binom{d-1}{k}/2^{d-1}\) & \(1\) if \(k<0\), \(0\) if \(k\ge d\), otherwise \(*\) \\
+CANALISING & depends on fallback rule, but collapses on trigger band & reduced on trigger band; exact value depends on fallback & constant on trigger band; globally \(0\), \(1\), or \(*\) depending on fallback and trigger output \\
+\bottomrule
+\end{tabular}
+\caption{Dynamic properties associated with the exact gate families. The table condenses the material developed in the repository-level analysis series into manuscript form: monotonicity class, average sensitivity under the uniform exhaustive repertoire, and the resulting coarse pattern symbol \(\pi_i\).}
+\label{tab:dynamic-pattern-summary}
+\end{table}
+
+\begin{proof}[Proof sketch]
+The sensitivity formulas follow directly from counting the input rows at which a single-bit flip crosses the gate's decision boundary. For AND and OR this occurs only at the all-one or all-zero extremes and their one-bit neighbours, yielding \(d/2^{d-1}\); for XOR and XNOR every single-input flip changes parity, yielding \(d\); for NOT every flip changes the output, yielding \(1\); and for KOFN the boundary lies on the Hamming layer \(k-1\), giving the stated binomial count. The pattern outcomes follow from whether the rule can ever be constant on the full ordered repertoire: threshold extremes and some canalising parameter choices can collapse to \(0\) or \(1\), whereas the non-degenerate families remain variable and therefore produce \(*\).
+\end{proof}
+
+This summary is important for two reasons. First, it connects the present index-set calculus to perturbative behaviour rather than treating the one-set as a purely extensional object. Second, it explains why threshold extremes and canalising collapse play a special role in the validation programme: they are the principal mechanisms by which a formally non-trivial gate can still induce a constant output column.
+
 \subsection{Worked Micro-Examples}
-Two small examples already reveal the method's logic.
+The manuscript needs more than symbolic formulas: it needs to show how the formulas act as compressed rules over an exhaustive repertoire and how those rules are unfolded back into the exact output positions. To make this concrete, we first present one detailed deconvolution example and then a larger catalogue example containing one instance of each gate family.
 
-\paragraph{AND on \(\Ic=\{2,3\}\) with \(n=3\).}
-Under LSB-first ordering, node \(2\) contributes the band \(\Band{2}{1}=\{3,4,7,8\}\) and node \(3\) contributes \(\Band{3}{1}=\{5,6,7,8\}\). Their intersection is
-\[
-\J^{\mathrm{AND}}=\{7,8\}\cap\{j\in\U : v_2(j)=v_3(j)=1\}.
-\]
-When the explicit ordering convention is enforced against the repertoire generator, the valid index set for the connected bits is the unique all-ones connected pattern. The important methodological lesson is not the accidental numeric value of the index but the need to fix the ordering and hold it fixed throughout derivation and validation.
+\subsubsection{Detailed Deconvolution Example: AND}
+Fix LSB-first ordering and consider a node governed by AND on the connected-input set \(\Ic=\{2,4\}\) inside a network of size \(n=6\). The exhaustive input repertoire contains \(2^6=64\) rows.
 
-\paragraph{OR on \(\Ic=\{2,3\}\) with \(n=3\).}
-The OR one-set is
+The connected contribution is the pivot
 \[
-\J^{\mathrm{OR}}=\Band{2}{1}\cup\Band{3}{1}=\{3,4,5,6,7,8\},
+P(\Ic)=w(2)+w(4)=2+8=10,
 \]
-exactly matching the empirical ordered repertoire when the same ordering policy is used on both sides.
+while the disconnected inputs are \(I_{nc}=\{1,3,5,6\}\), so their offset family is
+\[
+\Omega(I_{nc})=\Bigl\{\Delta_{nc}(\eta)\mid \eta\in\bits^{4}\Bigr\}
+=
+\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}.
+\]
+Hence the AND one-set is represented by the short rule
+\[
+\J^{\mathrm{AND}}
+=
+\Bigl\{\,1+P(\Ic)+\delta \ \Big| \ \delta\in\Omega(I_{nc})\Bigr\}
+=
+\operatorname{Dec}\bigl(\{11\},\Omega(I_{nc})\bigr),
+\]
+where
+\[
+\operatorname{Dec}(L,S)=\{\ell+s:\ell\in L,\ s\in S\}
+\]
+is the paper's 1-based deconvolution analogue of the older \texttt{DecimalRepertoire + Sumandos} representation.
+
+After unfolding, we obtain
+\[
+\J^{\mathrm{AND}}=\{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\}.
+\]
+These are exactly the repertoire indices for which \(v_2=v_4=1\), with the remaining four bits free.
+
+\begin{center}
+\small
+\begin{tabular}{cccc}
+\toprule
+Free bits \((v_1,v_3,v_5,v_6)\) & Offset \(\delta\) & Index \(j=11+\delta\) & AND output \\
+\midrule
+\((0,0,0,0)\) & \(0\)  & \(11\) & \(1\) \\
+\((1,0,0,0)\) & \(1\)  & \(12\) & \(1\) \\
+\((0,1,0,0)\) & \(4\)  & \(15\) & \(1\) \\
+\((1,1,0,0)\) & \(5\)  & \(16\) & \(1\) \\
+\((0,0,1,0)\) & \(16\) & \(27\) & \(1\) \\
+\((1,0,1,0)\) & \(17\) & \(28\) & \(1\) \\
+\((0,1,1,0)\) & \(20\) & \(31\) & \(1\) \\
+\((1,1,1,0)\) & \(21\) & \(32\) & \(1\) \\
+\((0,0,0,1)\) & \(32\) & \(43\) & \(1\) \\
+\((1,0,0,1)\) & \(33\) & \(44\) & \(1\) \\
+\((0,1,0,1)\) & \(36\) & \(47\) & \(1\) \\
+\((1,1,0,1)\) & \(37\) & \(48\) & \(1\) \\
+\((0,0,1,1)\) & \(48\) & \(59\) & \(1\) \\
+\((1,0,1,1)\) & \(49\) & \(60\) & \(1\) \\
+\((0,1,1,1)\) & \(52\) & \(63\) & \(1\) \\
+\((1,1,1,1)\) & \(53\) & \(64\) & \(1\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This example shows the central idea of the paper. The exhaustive repertoire has \(64\) rows, but the rule itself is encoded by two short objects: one pivot location, \(\{11\}\), and one offset set, \(\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}\). Deconvolution unfolds the rule back into the exact index list without row-wise recomputation.
+
+\paragraph{Corroboration network, matrix, and dynamic.}
+To make the deconvolution fully auditable, we embed the detailed AND example in a concrete six-node synchronous network and accompany it with a real Mathematica script stored in the paper folder.
+\[
+cm^{(\mathrm{corr})}=
+\begin{bmatrix}
+1&0&0&0&0&0\\
+0&1&0&0&0&0\\
+0&0&1&0&0&0\\
+1&0&0&1&0&0\\
+0&1&0&1&0&0\\
+1&0&1&0&1&0
+\end{bmatrix},
+\qquad
+dynamic^{(\mathrm{corr})}=
+(\mathrm{OR},\mathrm{NOT},\mathrm{OR},\mathrm{IMPLIES},\mathrm{AND},\mathrm{XOR}).
+\]
+Node \(1\) preserves \(x_1\) through a single-input OR rule, node \(2\) applies NOT to \(x_2\), node \(3\) preserves \(x_3\), node \(4\) evaluates the implication \(x_1\Rightarrow x_4\), node \(5\) computes the non-trivial conjunction \(y_5=v_2\land v_4\), and node \(6\) applies XOR to the outputs of nodes \(1\), \(3\), and \(5\). Over the input repertoire this means
+\[
+y_6=x_1\oplus x_3\oplus (x_2\land x_4),
+\]
+so the same six-node example simultaneously supports a direct AND corroboration and a composed XOR corroboration. Therefore the analytic prediction
+\[
+\J_5^{\mathrm{AND}}=\{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\}
+\]
+and the composed XOR prediction
+\[
+\begin{aligned}
+\J_6^{\mathrm{XOR}}=\{&2,4,5,7,10,11,13,16,18,20,21,23,26,27,29,32,\\
+&34,36,37,39,42,43,45,48,50,52,53,55,58,59,61,64\}
+\end{aligned}
+\]
+should coincide exactly with the rows of the exhaustive table where the fifth and sixth output columns equal \(1\), respectively.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  scale=0.92,
+  transform shape,
+  gate/.style={circle, draw, minimum size=12mm, align=center, inner sep=1pt, fill=blue!5},
+  target/.style={circle, draw, minimum size=13mm, align=center, inner sep=1pt, fill=red!6},
+  >={Latex[length=2mm]}
+]
+\node[gate] (n1) at (90:2.7) {1\\[-1mm]\scriptsize OR};
+\node[gate] (n2) at (150:2.7) {2\\[-1mm]\scriptsize NOT};
+\node[gate] (n3) at (210:2.7) {3\\[-1mm]\scriptsize OR};
+\node[gate] (n4) at (30:2.7) {4\\[-1mm]\scriptsize IMP};
+\node[target] (n5) at (-30:2.7) {5\\[-1mm]\scriptsize AND};
+\node[target] (n6) at (-90:2.7) {6\\[-1mm]\scriptsize XOR};
+\draw[->] (n1) edge[loop above] ();
+\draw[->] (n2) edge[loop left] ();
+\draw[->] (n3) edge[loop left] ();
+\draw[->] (n4) edge[loop right] ();
+\draw[->, thick] (n1) to[bend left=12] (n4);
+\draw[->, thick] (n2) to[bend left=14] (n5);
+\draw[->, thick] (n4) to[bend left=12] (n5);
+\draw[->, thick] (n1) to[bend left=28] (n6);
+\draw[->, thick] (n3) to[bend right=12] (n6);
+\draw[->, thick] (n5) to[bend right=12] (n6);
+\end{tikzpicture}
+\caption{Six-node corroboration network in ring arrangement. The same small system contains five gate families: OR at nodes \(1\) and \(3\), NOT at node \(2\), IMPLIES at node \(4\), AND at node \(5\), and XOR at node \(6\). The geometry makes the compositional role of node \(5\) visually explicit: it is first corroborated as an AND target and then reused as an input to the XOR node.}
+\label{fig:corroboration-network}
+\end{figure}
+
+\small
+\textbf{Corroboration pipeline.}
+\[
+\begin{aligned}
+\{11\},\ \Omega(I_{nc})
+&=\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\},\\
+\operatorname{Dec}\bigl(\{11\},\Omega(I_{nc})\bigr)
+&=\J_5^{\mathrm{AND}},\\
+\J_5^{\mathrm{AND}}
+&=\{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\},\\
+\{2,4,5,7,10,11,13,16\},\ \{0,16,32,48\}
+&\leadsto \J_6^{\mathrm{XOR}},\\
+\operatorname{Dec}\bigl(\{2,4,5,7,10,11,13,16\},\{0,16,32,48\}\bigr)
+&=\J_6^{\mathrm{XOR}},\\
+\J_6^{\mathrm{XOR}}
+&=\{j\in\U : y_6(j)=1\}.
+\end{aligned}
+\]
+The shared exhaustive table and the two executed Mathematica listings
+highlight exactly these analytically predicted indices.
+\normalsize
+
+\begin{table}[p]
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{0.83}
+\tiny
+\begin{adjustbox}{max totalsize={\textwidth}{0.84\textheight},center}
+\begin{tabular}{@{}rcccc@{}}
+\toprule
+\(j\) & Input Vector \(x\) & Output Vector \(F(x)\) & \(y_5\) & \(y_6\)\\
+\midrule
+1 & \texttt{000000} & \texttt{010100} & 0 & 0 \\
+2 & \texttt{100000} & \texttt{110001} & 0 & \textbf{\textcolor{blue}{1}} \\
+3 & \texttt{010000} & \texttt{000100} & 0 & 0 \\
+4 & \texttt{110000} & \texttt{100001} & 0 & \textbf{\textcolor{blue}{1}} \\
+5 & \texttt{001000} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+6 & \texttt{101000} & \texttt{111000} & 0 & 0 \\
+7 & \texttt{011000} & \texttt{001101} & 0 & \textbf{\textcolor{blue}{1}} \\
+8 & \texttt{111000} & \texttt{101000} & 0 & 0 \\
+9 & \texttt{000100} & \texttt{010100} & 0 & 0 \\
+10 & \texttt{100100} & \texttt{110101} & 0 & \textbf{\textcolor{blue}{1}} \\
+11 & \texttt{010100} & \texttt{000111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+12 & \texttt{110100} & \texttt{100110} & \textbf{\textcolor{red}{1}} & 0 \\
+13 & \texttt{001100} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+14 & \texttt{101100} & \texttt{111100} & 0 & 0 \\
+15 & \texttt{011100} & \texttt{001110} & \textbf{\textcolor{red}{1}} & 0 \\
+16 & \texttt{111100} & \texttt{101111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+17 & \texttt{000010} & \texttt{010100} & 0 & 0 \\
+18 & \texttt{100010} & \texttt{110001} & 0 & \textbf{\textcolor{blue}{1}} \\
+19 & \texttt{010010} & \texttt{000100} & 0 & 0 \\
+20 & \texttt{110010} & \texttt{100001} & 0 & \textbf{\textcolor{blue}{1}} \\
+21 & \texttt{001010} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+22 & \texttt{101010} & \texttt{111000} & 0 & 0 \\
+23 & \texttt{011010} & \texttt{001101} & 0 & \textbf{\textcolor{blue}{1}} \\
+24 & \texttt{111010} & \texttt{101000} & 0 & 0 \\
+25 & \texttt{000110} & \texttt{010100} & 0 & 0 \\
+26 & \texttt{100110} & \texttt{110101} & 0 & \textbf{\textcolor{blue}{1}} \\
+27 & \texttt{010110} & \texttt{000111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+28 & \texttt{110110} & \texttt{100110} & \textbf{\textcolor{red}{1}} & 0 \\
+29 & \texttt{001110} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+30 & \texttt{101110} & \texttt{111100} & 0 & 0 \\
+31 & \texttt{011110} & \texttt{001110} & \textbf{\textcolor{red}{1}} & 0 \\
+32 & \texttt{111110} & \texttt{101111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+33 & \texttt{000001} & \texttt{010100} & 0 & 0 \\
+34 & \texttt{100001} & \texttt{110001} & 0 & \textbf{\textcolor{blue}{1}} \\
+35 & \texttt{010001} & \texttt{000100} & 0 & 0 \\
+36 & \texttt{110001} & \texttt{100001} & 0 & \textbf{\textcolor{blue}{1}} \\
+37 & \texttt{001001} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+38 & \texttt{101001} & \texttt{111000} & 0 & 0 \\
+39 & \texttt{011001} & \texttt{001101} & 0 & \textbf{\textcolor{blue}{1}} \\
+40 & \texttt{111001} & \texttt{101000} & 0 & 0 \\
+41 & \texttt{000101} & \texttt{010100} & 0 & 0 \\
+42 & \texttt{100101} & \texttt{110101} & 0 & \textbf{\textcolor{blue}{1}} \\
+43 & \texttt{010101} & \texttt{000111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+44 & \texttt{110101} & \texttt{100110} & \textbf{\textcolor{red}{1}} & 0 \\
+45 & \texttt{001101} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+46 & \texttt{101101} & \texttt{111100} & 0 & 0 \\
+47 & \texttt{011101} & \texttt{001110} & \textbf{\textcolor{red}{1}} & 0 \\
+48 & \texttt{111101} & \texttt{101111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+49 & \texttt{000011} & \texttt{010100} & 0 & 0 \\
+50 & \texttt{100011} & \texttt{110001} & 0 & \textbf{\textcolor{blue}{1}} \\
+51 & \texttt{010011} & \texttt{000100} & 0 & 0 \\
+52 & \texttt{110011} & \texttt{100001} & 0 & \textbf{\textcolor{blue}{1}} \\
+53 & \texttt{001011} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+54 & \texttt{101011} & \texttt{111000} & 0 & 0 \\
+55 & \texttt{011011} & \texttt{001101} & 0 & \textbf{\textcolor{blue}{1}} \\
+56 & \texttt{111011} & \texttt{101000} & 0 & 0 \\
+57 & \texttt{000111} & \texttt{010100} & 0 & 0 \\
+58 & \texttt{100111} & \texttt{110101} & 0 & \textbf{\textcolor{blue}{1}} \\
+59 & \texttt{010111} & \texttt{000111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+60 & \texttt{110111} & \texttt{100110} & \textbf{\textcolor{red}{1}} & 0 \\
+61 & \texttt{001111} & \texttt{011101} & 0 & \textbf{\textcolor{blue}{1}} \\
+62 & \texttt{101111} & \texttt{111100} & 0 & 0 \\
+63 & \texttt{011111} & \texttt{001110} & \textbf{\textcolor{red}{1}} & 0 \\
+64 & \texttt{111111} & \texttt{101111} & \textbf{\textcolor{red}{1}} & \textbf{\textcolor{blue}{1}} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Single-page exhaustive corroboration table for the six-node network under LSB-first ordering. Bold red entries in the \(y_5\) column mark the analytically predicted indices in \(\J_5^{\mathrm{AND}}\); bold blue entries in the \(y_6\) column mark the analytically predicted indices in \(\J_6^{\mathrm{XOR}}\). Rows containing both highlights are exactly the repertoire positions at which the composed XOR node is active while the intermediate AND node is also active.}
+\label{tab:corroboration-exhaustive}
+\end{table}
+
+\paragraph{Executable Mathematica corroboration for the AND node.}
+The paper-local script \path{papers/method/code/corroboration_6node/corroboration_6node.wl} was executed with the installed Wolfram kernel and produced the exact compressed representation, its unfolded index set, and the final Boolean verification against the exhaustive baseline. To keep the manuscript self-contained, we insert the executed session directly in the main document using the same visual language as the thesis-era corroboration tables.
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := cm06 = {{1, 0, 0, 0, 0, 0},
+              {0, 1, 0, 0, 0, 0},
+              {0, 0, 1, 0, 0, 0},
+              {1, 0, 0, 1, 0, 0},
+              {0, 1, 0, 1, 0, 0},
+              {1, 0, 1, 0, 1, 0}}
+In := dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"}
+
+(* Computing places in output repertoire where node 5 = 1 *)
+In := res061 = onPossibleBehaviour[{5}, {1}, dyn06, cm06]
+
+(* Summarized representation of analytic behaviour *)
+In := gp06 = givePlaces[res061["DecimalRepertoire"], res061["Sumandos"]]
+
+(* Compressed representation of analytic behaviour *)
+Out = <|"DecimalRepertoire" -> {11}, "Sumandos" -> {0, 1, 4, 5, 16, 17, 20, 21, 32, 33, 36, 37, 48, 49, 52, 53}|>
+
+(* Unfolded representation of analytic behaviour *)
+Out = {11, 12, 15, 16, 27, 28, 31, 32, 43, 44, 47, 48, 59, 60, 63, 64}
+
+(* Exact corroboration against exhaustive outputs of node 5 *)
+Out = True
+\end{lstlisting}
+\caption{Executed Mathematica corroboration for the six-node mixed-gate system. \textbf{Lines 1--7:} Definition of the adjacency matrix of the corroboration network. \textbf{Line 8:} Definition of the local dynamics \((\mathrm{OR},\mathrm{NOT},\mathrm{OR},\mathrm{IMPLIES},\mathrm{AND},\mathrm{XOR})\). \textbf{Lines 10--11:} Exact query asking for the positions in the ordered repertoire where node \(5\) outputs \(1\). \textbf{Lines 13--14:} Unfolding operator applied to the compressed pair \((\texttt{DecimalRepertoire},\texttt{Sumandos})\). \textbf{Line 17:} Compressed analytic representation of the AND behaviour. \textbf{Line 20:} Unfolded index set predicted by the analytic rule. \textbf{Line 23:} Exact corroboration against the exhaustive baseline.}
+\label{lst:corroboration-session-and}
+\end{table}
+
+\paragraph{Scientific correspondence of the three verification layers for AND.}
+The exhaustive table, the mathematical expression, and the Mathematica code are not three different claims about the system; they are three encodings of the same one-set. In the mathematical layer, the AND rule on connected inputs \(\{2,4\}\) is written as
+\[
+\J_5^{\mathrm{AND}}=\operatorname{Dec}\bigl(\{11\},\Omega(I_{nc})\bigr),
+\qquad
+\Omega(I_{nc})=\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}.
+\]
+In the code layer, that same object appears as
+\[
+\begin{aligned}
+\texttt{<|"DecimalRepertoire" -> \{11\},}\\
+\texttt{\quad "Sumandos" -> \{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}|>}
+\end{aligned}
+\]
+and \texttt{givePlaces} performs exactly the same deconvolution operation as \(\operatorname{Dec}\). In the exhaustive layer, the same set is displayed row by row as the highlighted indices
+\[
+\{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\},
+\]
+which are precisely the rows where the fifth output column equals \(1\). Thus the three layers correspond bijectively: the formula gives the causal law in closed form, the code operationalises the same law without changing its content, and Table~\ref{tab:corroboration-exhaustive} displays the fully unfolded repertoire consequences of that law. The final output \texttt{True} in Listing~\ref{lst:corroboration-session-and} is therefore scientifically important because it certifies identity, not mere similarity, between theoretical derivation, computational execution, and exhaustive enumeration.
+
+\subsubsection{Composed XOR Example on the Same Six-Node Network}
+The same network also supports a richer corroboration because node \(6\) composes a parity rule with the previously corroborated AND output. Since
+\[
+y_6=x_1\oplus x_3\oplus y_5=x_1\oplus x_3\oplus (x_2\land x_4),
+\]
+the one-set of node \(6\) can be treated as a composed XOR law over the original input repertoire. Holding the free coordinates \(x_5\) and \(x_6\) fixed at zero leaves a four-bit base problem whose satisfying locations are
+\[
+L_{\mathrm{XOR}}=\{2,4,5,7,10,11,13,16\}.
+\]
+Because \(x_5\) and \(x_6\) are free, the corresponding offset family is
+\[
+\Omega(\{5,6\})=\{0,16,32,48\}.
+\]
+Therefore the composed XOR one-set is
+\[
+\J_6^{\mathrm{XOR}}
+=
+\operatorname{Dec}\bigl(L_{\mathrm{XOR}},\Omega(\{5,6\})\bigr)
+=
+\operatorname{Dec}\bigl(\{2,4,5,7,10,11,13,16\},\{0,16,32,48\}\bigr),
+\]
+which unfolds to
+\[
+\begin{aligned}
+\J_6^{\mathrm{XOR}}=
+\{&2,4,5,7,10,11,13,16,18,20,21,23,26,27,29,32,\\
+&34,36,37,39,42,43,45,48,50,52,53,55,58,59,61,64\}.
+\end{aligned}
+\]
+Equivalently, this set can be read as the symmetric difference between odd parity on \(\{1,3\}\) and the already derived AND one-set \(\J_5^{\mathrm{AND}}\). The network therefore provides not only a direct gate corroboration but also an exact example of compositional causal reuse.
+
+\begin{table}[H]
+\begin{lstlisting}[style=MathematicaStyle]
+In := cm06 = {{1, 0, 0, 0, 0, 0},
+              {0, 1, 0, 0, 0, 0},
+              {0, 0, 1, 0, 0, 0},
+              {1, 0, 0, 1, 0, 0},
+              {0, 1, 0, 1, 0, 0},
+              {1, 0, 1, 0, 1, 0}}
+In := dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"}
+
+(* Computing places in output repertoire where node 6 = 1 *)
+In := res062 = xor06Representation[]
+
+(* Summarized representation of analytic behaviour *)
+In := gp06xor = givePlaces[res062["DecimalRepertoire"], res062["Sumandos"]]
+
+(* Compressed representation of analytic behaviour *)
+Out = <|"DecimalRepertoire" -> {2, 4, 5, 7, 10, 11, 13, 16}, "Sumandos" -> {0, 16, 32, 48}|>
+
+(* Unfolded representation of analytic behaviour *)
+Out = {2, 4, 5, 7, 10, 11, 13, 16, 18, 20, 21, 23, 26, 27, 29, 32, 34, 36, 37, 39, 42, 43, 45, 48, 50, 52, 53, 55, 58, 59, 61, 64}
+
+(* Exact corroboration against exhaustive outputs of node 6 *)
+Out = True
+\end{lstlisting}
+\caption{Executed Mathematica corroboration for the composed XOR behaviour of node \(6\). \textbf{Lines 1--8:} Definition of the same six-node network used for the AND corroboration. \textbf{Lines 10--11:} Exact query for the repertoire positions where the sixth output equals \(1\). \textbf{Lines 13--14:} Deconvolution of the compressed pair into explicit repertoire indices. \textbf{Line 17:} Compressed analytic representation of the composed XOR law. \textbf{Line 20:} Unfolded index set. \textbf{Line 23:} Equality check against the exhaustive baseline.}
+\label{lst:corroboration-session-xor}
+\end{table}
+
+\paragraph{Scientific correspondence of the three verification layers for XOR.}
+Here again the mathematical expression, the code, and the exhaustive table encode exactly the same object. In the mathematical layer, the causal rule is
+\[
+\J_6^{\mathrm{XOR}}=\operatorname{Dec}(L_{\mathrm{XOR}},\Omega(\{5,6\})).
+\]
+In the code layer, that same object appears as the pair
+\[
+\begin{aligned}
+\texttt{<|"DecimalRepertoire" -> \{2,4,5,7,10,11,13,16\},}\\
+\texttt{\quad "Sumandos" -> \{0,16,32,48\}|>}
+\end{aligned}
+\]
+whose unfolding is performed by the same \texttt{givePlaces} operator used in the AND case. In the exhaustive layer, Table~\ref{tab:corroboration-exhaustive} marks those same rows in blue in the \(y_6\) column. The significance of this second corroboration is scientific rather than cosmetic: it shows that the calculus does not only reproduce direct monotone gates, but also exactly tracks composed behaviour in which one analytically derived node becomes part of another node's rule. The final \texttt{True} in Listing~\ref{lst:corroboration-session-xor} therefore confirms compositional exactness, not only isolated gate exactness.
+
+\subsubsection{Mixed Catalogue Example with One Instance of Each Gate}
+To show that the same logic extends beyond a single gate, consider an illustrative \(n=11\) network whose nodes cover the whole gate catalogue derived in this paper:
+\[
+\begin{aligned}
+N_1&=\{2,4\} && \text{AND},\\
+N_2&=\{1,3,5\} && \text{OR},\\
+N_3&=\{2,6,7\} && \text{XOR},\\
+N_4&=\{1,8\} && \text{NAND},\\
+N_5&=\{3,9\} && \text{NOR},\\
+N_6&=\{2,4,10\} && \text{XNOR},\\
+N_7&=\{11\} && \text{NOT},\\
+N_8&=\{5,7\} && \text{IMPLIES},\\
+N_9&=\{6,8\} && \text{NIMPLIES},\\
+N_{10}&=\{1,3,5,9\} && \text{KOFN with }k=2,\\
+N_{11}&=\{2,4,6\} && \text{CANALISING with }(c,\nu,o)=(4,1,0).
+\end{aligned}
+\]
+For compact notation, let
+\[
+\Omega(S)=\{\Delta_S(\eta):\eta\in\bits^{|S|}\}.
+\]
+Then each node admits a compressed analytic rule of the same kind as the detailed AND example.
+
+\begin{center}
+\small
+\begin{tabular}{p{0.08\linewidth}p{0.15\linewidth}p{0.67\linewidth}}
+\toprule
+Node & Gate & Compressed rule to be deconvolved \\
+\midrule
+\(1\) & AND &
+\(\J_1=\{1+P(N_1)+\delta:\delta\in\Omega([11]\setminus N_1)\}\) \\
+\(2\) & OR &
+\(\J_2=\bigcup_{i\in N_2}\{1+w(i)+\delta:\delta\in\Omega([11]\setminus\{i\})\}\) \\
+\(3\) & XOR &
+\(\J_3=\{j\in\U:\sum_{i\in N_3}v_i(j)\equiv 1\!\!\!\pmod 2\}\) \\
+\(4\) & NAND &
+\(\J_4=\U\setminus\{1+P(N_4)+\delta:\delta\in\Omega([11]\setminus N_4)\}\) \\
+\(5\) & NOR &
+\(\J_5=\bigcap_{i\in N_5}\{1+\delta:\delta\in\Omega([11]\setminus\{i\})\}\) \\
+\(6\) & XNOR &
+\(\J_6=\{j\in\U:\sum_{i\in N_6}v_i(j)\equiv 0\!\!\!\pmod 2\}\) \\
+\(7\) & NOT &
+\(\J_7=\Band{11}{0}\) \\
+\(8\) & IMPLIES &
+\(\J_8=\U\setminus\{1+w(5)+\delta:\delta\in\Omega([11]\setminus\{5,7\})\}\) \\
+\(9\) & NIMPLIES &
+\(\J_9=\{1+w(6)+\delta:\delta\in\Omega([11]\setminus\{6,8\})\}\) \\
+\(10\) & KOFN &
+\(\J_{10}=\bigcup_{r=2}^{4}\Weight{N_{10}}{r}\) \\
+\(11\) & CANALISING &
+\(\J_{11}=([11]\setminus C_{4,1})\cap \bigl(\Band{2}{1}\cup\Band{6}{1}\bigr)\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The point of this mixed example is not to print all \(2^{11}=2048\) unfolded indices in the manuscript. The point is that each node, even inside a heterogeneous rule catalogue, is still controlled by a short exact expression. Deconvolution then unfolds those expressions into the full ordered output positions whenever an explicit index list is needed for validation, visualization, or whole-network reconstruction.
+
+\paragraph{How the deconvolution is read.}
+In the older thesis notation, one stores a compressed pair \((\texttt{DecimalRepertoire},\texttt{Sumandos})\) and unfolds it by pairwise addition. In the present 1-based notation, the same idea is represented by a pivot set \(L\) and an offset set \(S\), with
+\[
+\operatorname{Dec}(L,S)=\{\ell+s:\ell\in L,\ s\in S\}.
+\]
+For AND and NAND, \(L\) is usually a singleton pivot; for OR it is a union of one-bands; for parity gates the compact rule is a parity class rather than a pivot family; for KOFN it is a union of Hamming-weight layers; and for canalising rules it is a trigger/fallback decomposition. In every case the exhaustive behaviour is obtained by unfolding a short causal rule rather than by recomputing each row independently.
 
 \section{Ordering Invariance}
 The formalism would be scientifically brittle if its exactness depended on accidental bit-order conventions. The next theorem shows that it does not.
@@ -257,8 +911,46 @@ Baseline exhaustive generation & -- & \(0.118\,\mathrm{s}\) & reference \\
 
 This table matters for two reasons. First, it demonstrates that naive speed alone is not a scientific victory: the fastest non-exact shortcut is unusable as a theorem-supporting method. Second, it shows that analytic formulas achieve what a serious causality-based method should achieve: exactness plus a meaningful computational advantage over other exact baselines.
 
+\subsection{Mechanism Complexity Versus Dataset Complexity}
+The older process documentation also developed an important distinction that should appear explicitly in the main paper: the complexity of the \emph{mechanism description} is not the same object as the complexity of the \emph{materialised output dataset}. For the representative 10-node mixed network used in the exact formula-versus-exhaustive comparison, the repository records the structural formula count \(C_{\mathrm{formula}}\), the corresponding programme length proxy \(D_{\mathrm{formula}}\), and two dataset-level baselines obtained from Shannon coding and standard compression.
+
+\begin{center}
+\begin{tabular}{p{0.34\linewidth}p{0.18\linewidth}p{0.30\linewidth}}
+\toprule
+\textbf{Measure} & \textbf{Value} & \textbf{Interpretation} \\
+\midrule
+Formula components \(C_{\mathrm{formula}}\) & \(23\) & symbolic pieces needed by the exact analytic description \\
+Programme length proxy \(D_{\mathrm{formula}}\) & \(101.07\) bits & compact structural description of the mechanism \\
+ZIP-compressed output size & \(1600\) bits & statistical compression of the materialised output table \\
+Total Shannon content of outputs & \(10229.61\) bits & repertoire-scale data description under empirical output frequencies \\
+\(D_{\mathrm{formula}}/\mathrm{ZIP}\) & \(0.0632\) & formula remains an order of magnitude smaller than ordinary compressed output storage \\
+\(D_{\mathrm{formula}}/H_{\mathrm{total}}\) & \(9.88\times10^{-3}\) & mechanism description is far shorter than full repertoire-level coding \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These numbers sharpen the paper's causal claim. The exact formulae are not merely another way to print the same table: they constitute a much shorter generative description of that table. This comparison is inherently asymmetric and should be interpreted carefully. ZIP and Shannon quantify redundancy and distributional regularity in the realised outputs; \(D_{\mathrm{formula}}\) quantifies structural mechanism length. The scientific point is therefore not that one has found a better compressor for CSV files, but that the Boolean network admits a generative law whose description is dramatically shorter than enumerating or statistically encoding all realised states.
+
+The same documentation also reveals a useful caution about structural metrics. The programme proxy \(D\) is comparatively insensitive to rewiring operations that preserve broad local descriptors such as gate labels and degree patterns, because those operations may leave the description language nearly unchanged.
+
+Behavioural measures such as Shannon, ZIP, and optional BDM-style estimators respond instead to realised output structure. For high-rigor interpretation, these two levels should therefore be reported together: \(D\) measures mechanism simplicity, whereas dataset-level metrics measure the complexity of the behaviour generated by that mechanism.
+
 \section{Validation Evidence}
 The current repository supports a substantial validation base. The results most relevant to the main manuscript are summarised below.
+
+\subsection{Implementation-Consistency Layer}
+Before the analytic calculus can be used as evidence, the project must first establish that the deterministic implementations of repertoire generation and synchronous update are themselves coherent. The process documentation includes a dispatch-consistency campaign in which the repertoire pipeline and the one-step dynamic pipeline are compared on mixed-gate networks generated with fixed seeds. In the documented tests for \(n\in\{3,4\}\) and seeds \(41\) through \(50\), the reported discrepancy rate is zero across the full ordered repertoire. This layer is scientifically prior to the formula layer: if the reference implementations disagreed, then agreement between formulas and any one of them would be ambiguous. By contrast, the zero-discrepancy result ensures that the baseline being matched is semantically well-defined.
+
+\subsection{Phased Predictive Benchmarks}
+The repository evidence also records a progression from small pedagogical networks to a medium mixed-gate benchmark. In phase 1, two 3-node cases,
+\[
+(\mathrm{AND},\mathrm{OR},\mathrm{XOR})
+\qquad\text{and}\qquad
+(\mathrm{NAND},\mathrm{MAJORITY},\mathrm{OR}),
+\]
+both achieve accuracy \(1.0\). Their baseline times are \(2.94\times10^{-4}\,\mathrm{s}\) and \(2.57\times10^{-4}\,\mathrm{s}\), while their predictive times are \(3.55\times10^{-4}\,\mathrm{s}\) and \(3.45\times10^{-4}\,\mathrm{s}\), respectively.
+
+In phase 2, a 10-node mixed catalogue again achieves accuracy \(1.0\), with baseline time \(0.115983\,\mathrm{s}\) and predictive time \(0.176253\,\mathrm{s}\). These phase results matter because they show that exact predictive reconstruction is not restricted to one specially tuned showcase network. The method generalises across multiple mixed-gate compositions even before the faster closed-form analytic path is introduced.
 
 \begin{center}
 \begin{tabular}{p{0.25\linewidth}p{0.12\linewidth}p{0.12\linewidth}p{0.34\linewidth}}
@@ -370,9 +1062,14 @@ For exact-\(k\) thresholds,
 The special cases \(k=0\) and \(k>|\Ic|\) yield the constant functions \(1\) and \(0\), respectively.
 
 \subsection{Canalising Families}
-Let \(C\subseteq\U\) be the trigger set on which the canalising value is detected and let \(\J_h\) be the one-set of the fallback rule. Then
+Let \(C\subseteq\U\) be the trigger set on which the canalising value is detected, let \(o\in\bits\) be the canalised output, and let \(\J_h\) be the one-set of the fallback rule. Then
 \[
-\J^{\mathrm{CAN}}=C\cup\bigl((\U\setminus C)\cap \J_h\bigr).
+\J^{\mathrm{CAN}}
+=
+\begin{cases}
+C\cup\bigl((\U\setminus C)\cap \J_h\bigr), & o=1,\\[4pt]
+(\U\setminus C)\cap \J_h, & o=0.
+\end{cases}
 \]
 Nested canalising rules iterate this construction with priority-ordered trigger sets.
 
@@ -392,8 +1089,36 @@ For arity \(d\),
 \]
 since flipping any single input toggles parity.
 
+\paragraph{NOT and implication families.}
+For NOT,
+\[
+\bar{s}_{\mathrm{NOT}}=1.
+\]
+For the binary implication and non-implication gates,
+\[
+\bar{s}_{\mathrm{IMP}}=\bar{s}_{\mathrm{NIMP}}=1,
+\]
+because only one of the two coordinates changes the output on half of the repertoire, while both change it on the asymmetric boundary state.
+
+\paragraph{Threshold families.}
+For non-strict KOFN with arity \(d\) and threshold \(k\),
+\[
+\bar{s}_{\mathrm{KOFN}(d,k)}=\frac{d\binom{d-1}{k-1}}{2^{d-1}},
+\]
+with the conventions that the value is \(0\) when \(k=0\) or \(k>d\). For the strict threshold variant \(g(\mathbf{x})=\mathbf{1}\{\sum x_i>k\}\),
+\[
+\bar{s}_{\mathrm{strict\text{-}KOFN}(d,k)}=\frac{d\binom{d-1}{k}}{2^{d-1}}.
+\]
+These formulas make explicit that threshold sensitivity is concentrated on the Hamming layer where a single input flip crosses the decision boundary.
+
+\paragraph{Canalising families.}
+For canalising rules, average sensitivity depends on the trigger probability and on the fallback map. The trigger band itself reduces responsiveness because outputs are forced there; thus canalisation lowers sensitivity relative to the fallback rule whenever a positive-measure trigger band is present.
+
 \paragraph{Interpretive point.}
 Sensitivity is not the primary theorem of this paper, but it matters because it connects the static one-set calculus to perturbation behaviour. The same exact formulas that identify where outputs equal one also determine how readily those outputs change under controlled input perturbations.
+
+\paragraph{Structured noise.}
+The broader repository also implements deterministic flip-noise toggles for robustness experiments under fixed seeds. Those stochastic controls are useful for later perturbative studies, but they are not used to support the exactness claims of the present manuscript, which are exclusively deterministic.
 
 \section{Appendix C: Validation Summary and Reproducibility}
 The manuscript is grounded in a larger validation programme covering:
@@ -411,8 +1136,14 @@ The main artefact families include \texttt{results/tests/analysis\_*}, \texttt{r
 \bibitem{wolfram}
 S. Wolfram, \emph{A New Kind of Science}, Wolfram Media, 2002.
 
-\bibitem{zenilcausality}
-H. Zenil, N. A. Kiani, and J. Tegner, ``Low-algorithmic-complexity entropy-deceiving graphs,'' \emph{Physical Review E}, 96(1), 2017.
+\bibitem{zenilbio}
+H. Zenil, A. Schmidt, and J. Tegn\'er, ``Causality, Information and Biological Computation: An algorithmic software approach to life, disease and the immune system,'' arXiv:1508.06538, 2016.
+
+\bibitem{zenildeconv}
+H. Zenil, N. A. Kiani, A. A. Zea, and J. Tegn\'er, ``Algorithmic Causal Deconvolution of Intertwined Programs and Networks by Generative Mechanism,'' arXiv:1802.09904, 2018.
+
+\bibitem{zenilcalculus}
+H. Zenil, N. A. Kiani, F. Marabita, Y. Deng, S. Elias, A. Schmidt, G. Ball, and J. Tegn\'er, ``An Algorithmic Information Calculus for Causal Discovery and Reprogramming Systems,'' arXiv:1709.05429, 2018.
 
 \bibitem{zenildynamics}
 H. Zenil, F. Soler-Toscano, N. A. Kiani, S. Hern\'andez-Orozco, and J. Tegn\'er, ``A decomposition method for global evaluation of Shannon entropy and local estimations of algorithmic complexity,'' \emph{Entropy}, 20(8), 2018.

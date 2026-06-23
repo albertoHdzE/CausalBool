@@ -1,0 +1,17 @@
+In := cm06 = {{1, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 0, 0}, {0, 0, 1, 0, 0, 0}, {1, 0, 0, 1, 0, 0}, {0, 1, 0, 1, 0, 0}, {1, 0, 1, 0, 1, 0}}
+In := dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"}
+
+(* Computing places in output repertoire where node 6 = 1 *)
+In := res062 = xor06Representation[]
+
+(* Summarized representation of analytic behaviour *)
+In := gp06xor = givePlaces[res062["DecimalRepertoire"], res062["Sumandos"]]
+
+(* Compressed representation of analytic behaviour *)
+Out = <|"DecimalRepertoire" -> {2, 4, 5, 7, 10, 11, 13, 16}, "Sumandos" -> {0, 16, 32, 48}|>
+
+(* Unfolded representation of analytic behaviour *)
+Out = {2, 4, 5, 7, 10, 11, 13, 16, 18, 20, 21, 23, 26, 27, 29, 32, 34, 36, 37, 39, 42, 43, 45, 48, 50, 52, 53, 55, 58, 59, 61, 64}
+
+(* Exact corroboration against exhaustive outputs of node 6 *)
+Out = True
