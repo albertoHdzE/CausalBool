@@ -82,6 +82,9 @@ The paper makes six principal claims.
 \item Complexity improvements arise not by magic removal of the \(2^n\) state space, but by replacing brute-force gate evaluation with explicit causal formulae, by enabling exact query answering without full matrix materialisation, and by reducing the validation burden through principled sampling.
 \end{enumerate}
 
+\paragraph{Roadmap and evidential structure.}
+The paper is organised to mirror these claims. Sections 2 and 3 define the ordered-repertoire formalism and the basic index objects needed for exact reasoning. Section 4 derives the gate-family one-sets and their expanded forms, thereby establishing claims \textbf{C1} and \textbf{C2}. The worked examples and corroboration package then show how those formulas are unfolded into explicit repertoire locations. Sections 5 and 6 prove that the calculus is invariant under ordering changes and composes into exact network-level reconstruction, establishing claims \textbf{C3} and \textbf{C4}. Section 7 clarifies what is and is not improved computationally, while Section 8 assembles the validation ladder that supports claims \textbf{C5} and \textbf{C6}: implementation consistency, gate-level property tests, medium-scale exact equality, large-scale sampled audits, and perturbative robustness benchmarks. The appendices preserve the broader experimental programme without interrupting the theorem-to-evidence flow of the main argument.
+
 \section{Formal Setup}
 Let \(cm \in \bits^{n \times n}\) be the connectivity matrix of a Boolean network, where \(cm_{ij}=1\) means that node \(j\) feeds node \(i\). Let
 \[
@@ -168,7 +171,7 @@ These three families already encode most of the method. Bands capture fixed-bit 
 \section{Exact Gate Formulae}
 The following proposition collects the exact one-set formulae for the gate families currently supported by the repository-level analysis series.
 
-\begin{proposition}[Gate-Family One-Sets]
+\begin{proposition}[Gate-Family One-Sets]\label{prop:gate-family-one-sets}
 Let node \(k\) have connected-input set \(\Ic\). Under a fixed repertoire ordering, the set of indices at which node \(k\) outputs one is given as follows.
 \begin{center}
 \small
@@ -374,7 +377,7 @@ Let \(Y\in\bits^{2^n\times n}\) be the output matrix over the ordered exhaustive
 
 This three-symbol alphabet captures a useful distinction that repeatedly appears in the repository validation suite. Some rules are structurally non-trivial but still constant over a declared repertoire because parameters collapse them to extreme cases; others remain genuinely varying and therefore receive the symbol \(*\).
 
-\begin{proposition}[Dynamic Summary of Canonical Gate Families]
+\begin{proposition}[Dynamic Summary of Canonical Gate Families]\label{prop:dynamic-summary}
 For a gate of arity \(d\) under the uniform exhaustive repertoire, the families in Table~\ref{tab:dynamic-pattern-summary} satisfy the listed monotonicity, average sensitivity, and pattern behaviour.
 \end{proposition}
 
@@ -830,7 +833,7 @@ For AND and NAND, \(L\) is usually a singleton pivot; for OR it is a union of on
 \section{Ordering Invariance}
 The formalism would be scientifically brittle if its exactness depended on accidental bit-order conventions. The next theorem shows that it does not.
 
-\begin{theorem}[Ordering-Transform Invariance]
+\begin{theorem}[Ordering-Transform Invariance]\label{thm:ordering-invariance}
 Let \(\J^{\mathrm{LSB}}\subseteq\U\) be the one-set of any gate family under LSB-first ordering, and let \(\J^{\mathrm{MSB}}\) be the corresponding one-set under MSB-first ordering. Then
 \[
 \J^{\mathrm{MSB}}=\varphi\bigl(\J^{\mathrm{LSB}}\bigr).
@@ -838,10 +841,10 @@ Let \(\J^{\mathrm{LSB}}\subseteq\U\) be the one-set of any gate family under LSB
 \end{theorem}
 
 \begin{proof}
-Bit reversal exchanges the LSB-first and MSB-first encodings of the same binary vector. Every gate family in Proposition 1 is defined by conditions on bit values, parity, or Hamming weight over the connected inputs. These conditions are invariant under relabelling of the coordinate positions when the relabelling is carried consistently through the indexing map. Therefore the numeric index sets differ only by transport through \(\varphi\).
+Bit reversal exchanges the LSB-first and MSB-first encodings of the same binary vector. Every gate family in Proposition~\ref{prop:gate-family-one-sets} is defined by conditions on bit values, parity, or Hamming weight over the connected inputs. These conditions are invariant under relabelling of the coordinate positions when the relabelling is carried consistently through the indexing map. Therefore the numeric index sets differ only by transport through \(\varphi\).
 \end{proof}
 
-\begin{corollary}
+\begin{corollary}\label{cor:ordering-invariance}
 All correctness claims in this paper are representation-invariant provided that the declared ordering convention is used consistently in both derivation and validation.
 \end{corollary}
 
@@ -857,7 +860,7 @@ Y_{j,i}=1 \iff j\in \J_i.
 \]
 \end{definition}
 
-\begin{theorem}[Canonical Exact Reconstruction]
+\begin{theorem}[Canonical Exact Reconstruction]\label{thm:canonical-reconstruction}
 Fix a network \((cm,dynamic)\), its gate parameters, and an ordering policy. Then the analytic predictor coincides exactly with the exhaustive one-step synchronous baseline:
 \[
 Y^{\mathrm{analytic}}=Y^{\mathrm{baseline}}.
@@ -865,7 +868,7 @@ Y^{\mathrm{analytic}}=Y^{\mathrm{baseline}}.
 \end{theorem}
 
 \begin{proof}[Proof sketch]
-For each node \(i\), Proposition 1 gives a one-set \(\J_i\) equivalent to the local gate semantics applied to the connected inputs \(x_{N_i}\). Therefore column \(i\) of the analytic output matrix equals column \(i\) of the baseline matrix for every repertoire index \(j\). Equality of all columns implies equality of the matrices.
+For each node \(i\), Proposition~\ref{prop:gate-family-one-sets} gives a one-set \(\J_i\) equivalent to the local gate semantics applied to the connected inputs \(x_{N_i}\). Therefore column \(i\) of the analytic output matrix equals column \(i\) of the baseline matrix for every repertoire index \(j\). Equality of all columns implies equality of the matrices.
 \end{proof}
 
 \begin{remark}
@@ -881,7 +884,7 @@ Any method that explicitly outputs the full repertoire matrix of an \(n\)-node n
 \subsection{What the Method Improves}
 The contribution lies in replacing brute-force local evaluation by exact causal structure.
 
-\begin{proposition}[Per-Row Cost Comparison]
+\begin{proposition}[Per-Row Cost Comparison]\label{prop:per-row-cost}
 Let the in-degree of node \(i\) be \(|N_i|\). For a fixed input row \(x\),
 \begin{itemize}
 \item predictive gate-semantic evaluation has cost \(\Theta\!\bigl(\sum_i |N_i|\bigr)\) when local rules are applied directly to the connected inputs;
@@ -890,7 +893,7 @@ Let the in-degree of node \(i\) be \(|N_i|\). For a fixed input row \(x\),
 \end{itemize}
 \end{proposition}
 
-\begin{proposition}[Validation-Burden Reduction]
+\begin{proposition}[Validation-Burden Reduction]\label{prop:validation-burden}
 Exhaustive validation requires \(\Theta(2^n)\) rows. Stratified importance sampling validates equality on a fixed \(m\) sampled rows, preserving the exact method while reducing the validation burden from exponential in \(n\) to linear in \(m\).
 \end{proposition}
 
@@ -938,7 +941,7 @@ The same documentation also reveals a useful caution about structural metrics. T
 Behavioural measures such as Shannon, ZIP, and optional BDM-style estimators respond instead to realised output structure. For high-rigor interpretation, these two levels should therefore be reported together: \(D\) measures mechanism simplicity, whereas dataset-level metrics measure the complexity of the behaviour generated by that mechanism.
 
 \section{Validation Evidence}
-The current repository supports a substantial validation base. The results most relevant to the main manuscript are summarised below.
+The current repository supports a substantial validation base. The results most relevant to the main manuscript are summarised below. Their role is not merely confirmatory in a generic sense; each layer audits a distinct part of the mathematical argument. Implementation consistency stabilises the baseline semantics against which Theorem~\ref{thm:canonical-reconstruction} is tested. Gate-level property checks audit the algebra behind Proposition~\ref{prop:gate-family-one-sets} and Theorem~\ref{thm:ordering-invariance}. Medium-scale and large-scale studies then test the consequences of those formal results under increasingly demanding computational regimes.
 
 \subsection{Implementation-Consistency Layer}
 Before the analytic calculus can be used as evidence, the project must first establish that the deterministic implementations of repertoire generation and synchronous update are themselves coherent. The process documentation includes a dispatch-consistency campaign in which the repertoire pipeline and the one-step dynamic pipeline are compared on mixed-gate networks generated with fixed seeds. In the documented tests for \(n\in\{3,4\}\) and seeds \(41\) through \(50\), the reported discrepancy rate is zero across the full ordered repertoire. This layer is scientifically prior to the formula layer: if the reference implementations disagreed, then agreement between formulas and any one of them would be ambiguous. By contrast, the zero-discrepancy result ensures that the baseline being matched is semantically well-defined.
@@ -968,7 +971,7 @@ Per-gate analysis suite & AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES, KOFN, CAN
 \end{tabular}
 \end{center}
 
-The gate-analysis layer is especially important. It verifies not just end-to-end equality but the mathematical pieces that justify the reconstruction theorem: ordering invariance, closure under set operations, parity-class behaviour, threshold strictness, and canalising collapse.
+The gate-analysis layer is especially important. It verifies not just end-to-end equality but the mathematical pieces that justify Theorem~\ref{thm:canonical-reconstruction}: ordering invariance, closure under set operations, parity-class behaviour, threshold strictness, and canalising collapse. In other words, the validation is layered in the same order as the theory: first the algebra of the local one-sets, then the invariance principles, and only then the whole-network reconstruction claim.
 
 \subsection{Large-Scale Validation by Stratified Sampling}
 The experimental process also extends beyond the range at which exhaustive baseline generation is practical. For \(n\in\{20,50\}\), the repository uses deterministic stratified importance sampling over Hamming-weight layers
@@ -977,12 +980,12 @@ The experimental process also extends beyond the range at which exhaustive basel
 \]
 with fixed seeds and \(1020\) sampled rows per run. This design is not used to redefine the method as approximate. On the contrary, it is an audit layer for an exact deterministic predictor in regimes where full matrix materialisation would be computationally wasteful.
 
-The logic of the benchmark is straightforward. For each sampled input \(x\), one computes \(F(x)\) by direct gate semantics and compares it with the truth-table or dispatch baseline evaluated on the same row. Under the canonical reconstruction theorem, equality should hold identically; the role of sampling is to verify that the implemented pipeline behaves as the theorem predicts at larger scales. The reported accuracy is \(1.0\) for \(n=20\) and \(n=50\), across seeds \(301\) and \(302\), with predictive timing substantially below truth-table lookup under bounded in-degree. This is exactly the kind of evidence a high-rigor paper should report: theorem-driven expectations, then deterministic corroboration in the computational regime where exhaustive baselines cease to be the scientifically sensible default.
+The logic of the benchmark is straightforward. For each sampled input \(x\), one computes \(F(x)\) by direct gate semantics and compares it with the truth-table or dispatch baseline evaluated on the same row. Under Theorem~\ref{thm:canonical-reconstruction}, equality should hold identically; the role of sampling is to verify that the implemented pipeline behaves as the theorem predicts at larger scales. The reported accuracy is \(1.0\) for \(n=20\) and \(n=50\), across seeds \(301\) and \(302\), with predictive timing substantially below truth-table lookup under bounded in-degree. This is exactly the kind of evidence a high-rigor paper should report: theorem-driven expectations, then deterministic corroboration in the computational regime where exhaustive baselines cease to be the scientifically sensible default.
 
 \subsection{Property-Test Layer for the Calculus}
 The process archive also contains a suite of property tests that matters scientifically because it validates the algebra used by the analytic formulas, not merely their final outputs. The tested properties include the involution law \(\varphi\circ\varphi=\mathrm{id}\), universe-size consistency, band complements, De Morgan identities for the set algebra used in band and union constructions, ordering invariance for gate index sets, KOFN strictness, and relabelling invariance under bit permutations.
 
-These checks should not be treated as software trivia. They are small but conceptually important validations of the mathematical infrastructure. The involution test guarantees that MSB-first and LSB-first analyses are truly equivalent descriptions. The band-complement and De Morgan tests ensure that the set algebra underlying AND, OR, NAND, NOR, and canalising constructions behaves coherently. KOFN strictness confirms the threshold semantics needed for parameterised families. Relabelling invariance shows that the calculus respects consistent permutations of bit positions and connected-input labels, which is essential for any claim that the method captures causal structure rather than a fragile encoding convention.
+These checks should not be treated as software trivia. They are small but conceptually important validations of the mathematical infrastructure. The involution test guarantees the statement formalised in Theorem~\ref{thm:ordering-invariance}. The band-complement and De Morgan tests ensure that the set algebra underlying AND, OR, NAND, NOR, and canalising constructions behaves coherently. KOFN strictness confirms the threshold semantics needed for parameterised families. Relabelling invariance shows that the calculus respects consistent permutations of bit positions and connected-input labels, which is essential for any claim that the method captures causal structure rather than a fragile encoding convention.
 
 \subsection{Noise Benchmarks and Analytic Perturbation Curves}
 The experimental archive also contains a perturbative layer based on independent input bit flips. This layer is not part of the proof of exact reconstruction, but it is important because it shows that the same formalism supports analytic reasoning about robustness. Under a bit-flip probability \(q\), the archive reports network-level change fractions and gate-level response trends for \(n\in\{20,50\}\), using the same Hamming-stratified sampling logic employed in large-scale exactness checks.
@@ -1037,10 +1040,12 @@ This has four consequences.
 
 The method should therefore be read as a causal-computational mathematics paper with later applications to biological and other complex systems, not as a biology paper wearing mathematical vocabulary. That distinction matters for publication strategy. The main paper must foreground exact definitions, theorems, worked examples, and exact validation. Broader applications can then be layered onto a firmer foundation.
 
+Seen from the perspective of the paper's internal logic, the contribution is now tightly staged. Proposition~\ref{prop:gate-family-one-sets} establishes the local causal objects; Theorem~\ref{thm:ordering-invariance} removes encoding arbitrariness; Theorem~\ref{thm:canonical-reconstruction} lifts the local formulas to exact network predictions; Proposition~\ref{prop:per-row-cost} and Proposition~\ref{prop:validation-burden} clarify the computational consequences; and Section 8 aligns each validation layer with the corresponding formal claim. This structure matters because it distinguishes the manuscript from a collection of experiments. The experiments are evidential supports for a mathematical argument, not substitutes for one.
+
 \section{Conclusion}
 We have presented a causality-first index-set calculus for Boolean networks. The formalism begins with ordered exhaustive repertoires, defines exact gate-family one-sets, controls ordering by an explicit bit-reversal involution, and composes local one-sets into exact network-level reconstruction. The resulting framework is mathematically cleaner than brute-force enumeration, more explanatory than raw truth-table lookup, and more appropriate than probabilistic surrogates when the underlying mechanism is known.
 
-The next stage is not to reinvent the method but to deepen this manuscript into full journal form: expand the appendix-level derivations for every gate family, insert the strongest result tables and figures from the validated artefacts, and connect the present exact formalism to the downstream paper programme. The core scientific claim, however, is already clear: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulas once the repertoire ordering is treated as part of the mathematics rather than as an implementation detail.
+Just as importantly, the evidential architecture now matches the formal one. Local gate identities are supported by gate-level derivations and corroboration tables; ordering control is supported by invariance tests; exact reconstruction is supported by medium-scale exhaustive equality and large-scale sampled audits; and the complexity discussion is supported by both timing comparisons and mechanism-versus-dataset description-length analyses. The core scientific claim is therefore not only stated but triangulated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulas once the repertoire ordering is treated as part of the mathematics rather than as an implementation detail.
 
 \appendix
 
