@@ -504,8 +504,9 @@ should coincide exactly with the rows of the exhaustive table where the fifth an
 
 \begin{figure}[t]
 \centering
+\begin{adjustbox}{max width=\linewidth,center}
 \begin{tikzpicture}[
-  scale=0.92,
+  scale=0.84,
   transform shape,
   gate/.style={circle, draw, minimum size=12mm, align=center, inner sep=1pt, fill=blue!5},
   target/.style={circle, draw, minimum size=13mm, align=center, inner sep=1pt, fill=red!6},
@@ -528,6 +529,7 @@ should coincide exactly with the rows of the exhaustive table where the fifth an
 \draw[->, thick] (n3) to[bend right=12] (n6);
 \draw[->, thick] (n5) to[bend right=12] (n6);
 \end{tikzpicture}
+\end{adjustbox}
 \caption{Six-node corroboration network in ring arrangement. The same small system contains five gate families: OR at nodes \(1\) and \(3\), NOT at node \(2\), IMPLIES at node \(4\), AND at node \(5\), and XOR at node \(6\). The geometry makes the compositional role of node \(5\) visually explicit: it is first corroborated as an AND target and then reused as an input to the XOR node.}
 \label{fig:corroboration-network}
 \end{figure}
@@ -968,6 +970,29 @@ Per-gate analysis suite & AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES, KOFN, CAN
 
 The gate-analysis layer is especially important. It verifies not just end-to-end equality but the mathematical pieces that justify the reconstruction theorem: ordering invariance, closure under set operations, parity-class behaviour, threshold strictness, and canalising collapse.
 
+\subsection{Large-Scale Validation by Stratified Sampling}
+The experimental process also extends beyond the range at which exhaustive baseline generation is practical. For \(n\in\{20,50\}\), the repository uses deterministic stratified importance sampling over Hamming-weight layers
+\[
+\{0,1,\lfloor n/2\rfloor,n-1,n\},
+\]
+with fixed seeds and \(1020\) sampled rows per run. This design is not used to redefine the method as approximate. On the contrary, it is an audit layer for an exact deterministic predictor in regimes where full matrix materialisation would be computationally wasteful.
+
+The logic of the benchmark is straightforward. For each sampled input \(x\), one computes \(F(x)\) by direct gate semantics and compares it with the truth-table or dispatch baseline evaluated on the same row. Under the canonical reconstruction theorem, equality should hold identically; the role of sampling is to verify that the implemented pipeline behaves as the theorem predicts at larger scales. The reported accuracy is \(1.0\) for \(n=20\) and \(n=50\), across seeds \(301\) and \(302\), with predictive timing substantially below truth-table lookup under bounded in-degree. This is exactly the kind of evidence a high-rigor paper should report: theorem-driven expectations, then deterministic corroboration in the computational regime where exhaustive baselines cease to be the scientifically sensible default.
+
+\subsection{Property-Test Layer for the Calculus}
+The process archive also contains a suite of property tests that matters scientifically because it validates the algebra used by the analytic formulas, not merely their final outputs. The tested properties include the involution law \(\varphi\circ\varphi=\mathrm{id}\), universe-size consistency, band complements, De Morgan identities for the set algebra used in band and union constructions, ordering invariance for gate index sets, KOFN strictness, and relabelling invariance under bit permutations.
+
+These checks should not be treated as software trivia. They are small but conceptually important validations of the mathematical infrastructure. The involution test guarantees that MSB-first and LSB-first analyses are truly equivalent descriptions. The band-complement and De Morgan tests ensure that the set algebra underlying AND, OR, NAND, NOR, and canalising constructions behaves coherently. KOFN strictness confirms the threshold semantics needed for parameterised families. Relabelling invariance shows that the calculus respects consistent permutations of bit positions and connected-input labels, which is essential for any claim that the method captures causal structure rather than a fragile encoding convention.
+
+\subsection{Noise Benchmarks and Analytic Perturbation Curves}
+The experimental archive also contains a perturbative layer based on independent input bit flips. This layer is not part of the proof of exact reconstruction, but it is important because it shows that the same formalism supports analytic reasoning about robustness. Under a bit-flip probability \(q\), the archive reports network-level change fractions and gate-level response trends for \(n\in\{20,50\}\), using the same Hamming-stratified sampling logic employed in large-scale exactness checks.
+
+The most important analytic benchmark here is the parity case. For an XOR node of arity \(k\), the probability that the output flips under independent input noise is
+\[
+p_{\mathrm{flip}}^{\mathrm{XOR}}(q,k)=\frac{1-(1-2q)^k}{2},
+\]
+because the output changes exactly when the number of flipped relevant inputs is odd. This formula provides a clean perturbative prediction against which the empirical XOR curves can be compared. The observed qualitative pattern also matches the sensitivity calculations developed earlier in the manuscript: parity gates respond more strongly to random flips than monotone gates, monotone and majority-like structures are more robust at small \(q\), and bounded in-degree limits network-wide amplification. The scientific value of this layer is not that it replaces the exact theory, but that it shows the exact calculus interfaces naturally with controlled perturbation analysis.
+
 \section{A Structured Example from Mixed Dynamics}
 The thesis-era analyses remain valuable because they show how apparently irregular behaviour becomes intelligible when node outputs are isolated and the repertoire ordering is respected. Consider the 7-node mixed network defined by
 \[
@@ -1131,6 +1156,43 @@ The manuscript is grounded in a larger validation programme covering:
 \end{itemize}
 
 The main artefact families include \texttt{results/tests/analysis\_*}, \texttt{results/tests/algo001}, \texttt{results/tests/algo002}, and \texttt{results/tests/mixed001FormulaVsExhaustive}. These artefacts are important not as supplementary clutter but as audit trails for every main claim made here.
+
+\section{Appendix D: Extended Experimental Programme}
+The material integrated from \texttt{expProcess.tex} contains several additional strands that are scientifically useful but not all equally central to the main theorem sequence. We collect them here in manuscript form so that the record is preserved without disrupting the primary causal-calculus narrative.
+
+\subsection{Medium-Scale Exact Reconstruction Protocol}
+The medium-scale algorithmic validation series studies exact reconstruction for \(n\in\{10,13\}\) under deterministic mixed-gate dynamics. Connectivity matrices are generated with fixed seeds, diagonals are cleared, and gate labels are drawn from the supported catalogue, including monotone, parity, implication, threshold, and majority-like rules. The baseline path builds ordered repertoires directly, while the predictive path evaluates the declared node semantics over the same ordered inputs.
+
+The methodological point is subtle and important. At small and medium sizes, an exhaustive baseline can be competitive because dispatch-based implementations are heavily vectorised. This does not weaken the theory. It simply means that the practical advantage of causal formulas becomes more visible when one moves beyond the regime in which full truth-table materialisation is cheap. The archive reports exact equality to the exhaustive baseline for both \(n=10\) and \(n=13\), together with timing and memory snapshots, thereby anchoring the theorem-level exactness claims in explicit deterministic runs.
+
+\subsection{Subsystem Search and Exact Factorisation}
+The archive also develops a subsystem-search heuristic based on undirected connected components of the symmetrised adjacency. If the vertex set decomposes into disjoint blocks with no inter-block edges, then the compression functional factorises additively across blocks. In graph-theoretic language, block-diagonal structure implies
+\[
+\mathcal{C}(cm,dynamic)=\sum_k \mathcal{C}(cm[B_k,B_k],dynamic[B_k]).
+\]
+The heuristic therefore computes candidate blocks, measures the cut fraction \(\phi\), and compares whole-system complexity with the sum of block complexities.
+
+For connected random graphs the method correctly returns a single block. For constructed disconnected cases it recovers the exact decomposition and verifies zero complexity defect, \(\Delta\mathcal{C}=0\). This matters because it shows that the causal description length is not merely a node-wise quantity: it also respects true graph-theoretic independence. In future large-scale analyses, this kind of factorisation can serve as a principled pre-processing step before one attempts full causal description or perturbative analysis.
+
+\subsection{Performance Envelope of Exhaustive Repertoire Generation}
+The testing programme also measures the cost of direct repertoire generation as network size increases. For small sizes, timings are reported for \(n\in\{6,8,10,12,13\}\); for larger sizes, the archive switches to predictive sampling because exhaustive enumeration scales with \(2^n\) and quickly becomes impractical. This performance envelope reinforces an important methodological distinction already made in the main text: exhaustive generation remains the gold-standard baseline when feasible, but its role changes from routine computation to selective verification as \(n\) grows.
+
+The controlled arity measurements in the archive show the same pattern at the gate level. For small truth-table arities the timings are tiny and stable, but the trend still doubles with each added bit. These measurements are not included to dramatise speedups. Their scientific purpose is to document where the exhaustive path remains reasonable and where mechanism-first evaluation becomes the only disciplined way to preserve exactness without paying the full \(2^n\) materialisation cost.
+
+\subsection{Graph-Ensemble Stress Tests}
+The experimental programme further evaluates ensembles based on Erd\H{o}s--R\'enyi, scale-free, and small-world constructions. The point of these experiments is not to claim universal laws for all random graphs; it is to expose the causal-calculus workflow to structurally distinct regimes. Random sparse graphs probe low-clustering baselines, scale-free graphs probe hub-dominated influence patterns, and small-world graphs probe high local clustering with shortcut edges.
+
+This ensemble perspective strengthens the paper in a modest but real way. It shows that the method is not tied to one hand-designed topology. At the same time, the correct scientific interpretation is limited: the ensemble results characterise representative stress-test families for validation and sampling strategy design, not a complete statistical theory of Boolean-network universality classes.
+
+\subsection{Gate Mixture Sweeps and Bias Control}
+Another strand of the archive studies how convex mixtures of canonical gate families control output bias as a function of input bias \(p\). This is most transparent for binary gates, where many families induce simple quadratic response curves. AND yields \(p'=p^2\), OR yields \(p'=2p-p^2\), XOR yields \(p'=2p(1-p)\), and related families such as XNOR, NAND, and NOR supply symmetry-restoring or bias-inverting variants.
+
+These sweeps are useful because they turn the gate catalogue into a control basis. Monotone mixtures tune bias in one direction, parity components flatten or neutralise it near \(p=1/2\), and inverter-like families reverse the sign of the local slope. This does not alter the exact one-set theory, but it clarifies how the derived formulas can be used as design primitives rather than only as descriptive objects.
+
+\subsection{Update Regimes, Robustness, and Information Structure}
+The archive finally explores three related extensions: synchronous versus asynchronous update regimes, exact gate-level robustness under independent noise, and information-theoretic summaries such as PID-style synergy, transfer entropy, and total correlation for small canonical gates. These analyses should be interpreted as downstream consequences of the exact gate semantics, not as part of the proof of the causal calculus itself.
+
+Their value is nevertheless substantial. Update-regime comparisons show how the same local rules can lead to different convergence profiles under synchronous and asynchronous schedules. Exact noise calculations connect the gate catalogue to stability and influence. PID, transfer-entropy, and total-correlation summaries give a complementary language for discussing why parity-rich designs emphasise synergy and sensitivity, whereas monotone and threshold-like designs tend to trade some sensitivity for robustness and partial information localisation. In a journal version, these extensions can either remain in an appendix or seed a later companion paper focused on dynamics, robustness, and information flow rather than on the core index-set formalism.
 
 \begin{thebibliography}{99}
 \bibitem{wolfram}
