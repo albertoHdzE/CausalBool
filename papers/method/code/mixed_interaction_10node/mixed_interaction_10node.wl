@@ -176,8 +176,34 @@ enrichCase[case_Association] := Module[
   ]
 ];
 
+caseStats[result_Association] := Module[
+  {nodes, unionCoords, freeCoords, degreeSum, overlapMultiplicity},
+  nodes = result["SelectedNodes"];
+  unionCoords = Sort@DeleteDuplicates@Flatten[ics10[[nodes]]];
+  freeCoords = Complement[Range[n10], unionCoords];
+  degreeSum = Total[Length /@ ics10[[nodes]]];
+  overlapMultiplicity = degreeSum - Length[unionCoords];
+  Join[
+    result,
+    <|
+      "CoordinateUnion" -> unionCoords,
+      "FreeCoordinates" -> freeCoords,
+      "DegreeSum" -> degreeSum,
+      "UnionSize" -> Length[unionCoords],
+      "OverlapMultiplicity" -> overlapMultiplicity,
+      "ReductionFactor" -> 2^overlapMultiplicity,
+      "BaseIndicesZeroFree" -> Select[
+        result["AnalyticIndices"],
+        Function[idx, AllTrue[freeCoords, inputs10[[idx, #]] == 0 &]]
+      ]
+    |>
+  ]
+];
+
 fullResults = enrichCase /@ fullCases;
 subsystemResults = enrichCase /@ subsystemCases;
+fullResults = caseStats /@ fullResults;
+subsystemResults = caseStats /@ subsystemResults;
 allCaseResults = Join[fullResults, subsystemResults];
 
 If[!And @@ nodeVerification10 || !And @@ (Lookup[allCaseResults, "Verified"]),
@@ -277,6 +303,16 @@ sessionDisplay[result_Association] := <|
   "Verified" -> result["Verified"]
 |>;
 
+statsDisplay[result_Association] := <|
+  "Name" -> result["Name"],
+  "Union" -> result["CoordinateUnion"],
+  "Free" -> result["FreeCoordinates"],
+  "DegreeSum" -> result["DegreeSum"],
+  "UnionSize" -> result["UnionSize"],
+  "OverlapMultiplicity" -> result["OverlapMultiplicity"],
+  "ReductionFactor" -> result["ReductionFactor"]
+|>;
+
 sessionLines = {
   "In := cm10 = " <> ToString[InputForm[cm10]],
   "In := dyn10 = " <> ToString[InputForm[dyn10]],
@@ -288,6 +324,10 @@ sessionLines = {
   "(* Computing four full-output cases and two subsystem cases analytically *)",
   "In := fullResults10 = " <> ToString[InputForm[sessionDisplay /@ fullResults]],
   "In := subsystemResults10 = " <> ToString[InputForm[sessionDisplay /@ subsystemResults]],
+  "",
+  "(* Quantifying the overlap structure of each query *)",
+  "In := overlapStats10 = " <> ToString[InputForm[statsDisplay /@ allCaseResults]],
+  "In := baseS110 = " <> ToString[InputForm[<|"CoordinateUnion" -> subsystemResults[[1, "CoordinateUnion"]], "FreeCoordinates" -> subsystemResults[[1, "FreeCoordinates"]], "BaseIndices" -> subsystemResults[[1, "BaseIndicesZeroFree"]]|>]],
   "",
   "(* Verifying that every local analytic one-set matches the exhaustive baseline *)",
   "In := checks10 = " <> ToString[InputForm[nodeVerification10]],
