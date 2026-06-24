@@ -830,7 +830,7 @@ isplays the fully unfolded repertoire consequences of that law.
 
 
 \subsubsection{XOR case}
-The AND case above is the fully expanded pedagogical derivation. The XOR case can therefore be treated more briefly, because its role is different: it confirms that the same method also works for non-monotone gates. In the same six-node network,
+In this section XOR case is shown. using the same six-node network show in fig~\ref{fig:corroboration-network},
 \[
 y_6=x_1\oplus x_3\oplus (x_2\land x_4).
 \]
@@ -854,37 +854,47 @@ After deconvolution, this gives
 &34,36,37,39,42,43,45,48,50,52,53,55,58,59,61,64\}.
 \end{aligned}
 \]
-The point is not to repeat every intermediate step already shown for AND, but to show that the formalism does not depend on monotonicity. In Table~\ref{tab:corroboration-exhaustive}, the blue entries coincide exactly with this one-set, confirming that the same calculus also recovers parity-based behaviour.
+Then is shown that the formalism does not depend on monotonicity. 
+In Table~\ref{tab:corroboration-exhaustive}, 
+the blue entries coincide exactly with this one-set, confirming that the 
+same calculus also recovers parity-based behaviour.
 
 \subsubsection{Multiple Gates Interaction and Exact Reconstruction}
-The previous two cases are intentionally small. They are useful because they make the method readable. The real strength of the calculus, however, appears when several distinct gate families interact inside the same network and the queried output condition is no longer attached to one gate alone, but to the simultaneous satisfaction of several heterogeneous constraints.
+In this section the case of multiple interacting nodes of distinct families 
+is shown resulting in simultaneous satisfaction of several heterogeneous constraints.
 
-To make that point explicit, consider the 10-node benchmark already used in the repository-level exact-reconstruction archive. Its local input sets and exact one-set formulas are
-\[
-\begin{aligned}
-N_1&=\{2,3\}, &
-\J_1&=\Band{2}{1}\cap\Band{3}{1},\\
-N_2&=\{1,3\}, &
-\J_2&=\Band{1}{1}\cup\Band{3}{1},\\
-N_3&=\{4,5\}, &
-\J_3&=\Parity{\{4,5\}}{1},\\
-N_4&=\{2,3,5\}, &
-\J_4&=\Weight{\{2,3,5\}}{2}\cup\Weight{\{2,3,5\}}{3},\\
-N_5&=\{6\}, &
-\J_5&=\Band{6}{0},\\
-N_6&=\{5,7\}, &
-\J_6&=\Parity{\{5,7\}}{0},\\
-N_7&=\{6\}, &
-\J_7&=\Band{6}{0},\\
-N_8&=\{1,9\}, &
-\J_8&=\U\setminus\bigl(\Band{1}{1}\cap\Band{9}{0}\bigr),\\
-N_9&=\{2,10\}, &
-\J_9&=\Band{2}{1}\cap\Band{10}{0},\\
-N_{10}&=\{3,4,7,8\}, &
-\J_{10}&=\Weight{\{3,4,7,8\}}{3}\cup\Weight{\{3,4,7,8\}}{4}.
-\end{aligned}
-\]
-Here node \(4\) is a \(2\)-of-\(3\) threshold gate and node \(10\) is a strict majority gate on four inputs, exactly as implemented in the validation archive. The important point is that the network is not homogeneous: monotone, parity, negation, implication, and threshold mechanisms coexist in the same causal object.
+For this example, consider the 10-node case described in fig~\ref{fig:mixed10-ring}. 
+Its local input sets and exact one-set formulas are shown in table~\ref{tab:mixed10-node-formulas}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}ccp{0.55\linewidth}@{}}
+\toprule
+\textbf{Node \(i\)} & \textbf{Input set \(N_i\)} & \textbf{One-set formula \(\J_i\)} \\
+\midrule
+1 & \(\{2,3\}\) & \(\Band{2}{1}\cap\Band{3}{1}\) \\
+2 & \(\{1,3\}\) & \(\Band{1}{1}\cup\Band{3}{1}\) \\
+3 & \(\{4,5\}\) & \(\Parity{\{4,5\}}{1}\) \\
+4 & \(\{2,3,5\}\) & \(\Weight{\{2,3,5\}}{2}\cup\Weight{\{2,3,5\}}{3}\) \\
+5 & \(\{6\}\) & \(\Band{6}{0}\) \\
+6 & \(\{5,7\}\) & \(\Parity{\{5,7\}}{0}\) \\
+7 & \(\{6\}\) & \(\Band{6}{0}\) \\
+8 & \(\{1,9\}\) & \(\U\setminus\bigl(\Band{1}{1}\cap\Band{9}{0}\bigr)\) \\
+9 & \(\{2,10\}\) & \(\Band{2}{1}\cap\Band{10}{0}\) \\
+10 & \(\{3,4,7,8\}\) & \(\Weight{\{3,4,7,8\}}{3}\cup\Weight{\{3,4,7,8\}}{4}\) \\
+\bottomrule
+\end{tabular}
+\caption{Local input sets and analytic one-set formulas for all 10 nodes in the mixed benchmark network. Each row encodes the causal rule governing node \(i\) using the same predicate notation as the manuscript's core formalism.}
+\label{tab:mixed10-node-formulas}
+\end{table}
+
+
+Here node \(4\) is a \(2\)-of-\(3\) threshold gate and node \(10\) is a strict majority gate on four inputs. 
+Its important to point out that the network is not homogeneous: monotone, parity, negation, implication, 
+and threshold mechanisms coexist in the same causal object.
+
+
 
 \begin{figure}[t]
 \centering
@@ -926,7 +936,7 @@ Here node \(4\) is a \(2\)-of-\(3\) threshold gate and node \(10\) is a strict m
 \draw[->, thick] (n7) to[bend right=18] (n10);
 \draw[->, thick] (n8) to[bend right=10] (n10);
 \end{tikzpicture}
-\caption{Ring representation of the 10-node mixed benchmark. Highlighted nodes participate in the subsystem queries analysed below, while the full-pattern cases involve all ten outputs simultaneously.}
+\caption{10-node Network. With subsystems highlighted in colors.}
 \label{fig:mixed10-ring}
 \end{figure}
 
