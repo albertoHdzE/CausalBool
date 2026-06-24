@@ -2,11 +2,15 @@ In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0}, {1, 0, 1, 0, 0, 0, 0, 0, 0, 0}, {0
 In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
 In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
 
-(* Computing the mixed output condition {y4, y6, y7, y10} = {0, 1, 1, 1} *)
-In := selected10 = {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}
+In := fullCases10 = {<|"Name" -> "F1", "Kind" -> "Full", "Description" -> "All outputs active", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}|>, <|"Name" -> "F2", "Kind" -> "Full", "Description" -> "All active except y10", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}|>, <|"Name" -> "F3", "Kind" -> "Full", "Description" -> "All active except y9", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}|>, <|"Name" -> "F4", "Kind" -> "Full", "Description" -> "All active except y6", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 0, 1, 1, 1, 1}|>}
+In := subsystemCases10 = {<|"Name" -> "S1", "Kind" -> "Subsystem", "Description" -> "Threshold-XNOR-NOT-majority event", "SelectedNodes" -> {4, 6, 7, 10}, "SelectedPattern" -> {0, 1, 1, 1}|>, <|"Name" -> "S2", "Kind" -> "Subsystem", "Description" -> "Six-gate mixed interaction event", "SelectedNodes" -> {4, 6, 7, 8, 9, 10}, "SelectedPattern" -> {0, 1, 1, 1, 0, 1}|>}
+
+(* Computing four full-output cases and two subsystem cases analytically *)
+In := fullResults10 = {<|"Name" -> "F1", "Pattern" -> "1111111111", "Indices" -> {143, 215, 399, 400, 471, 472}, "Verified" -> True|>, <|"Name" -> "F2", "Pattern" -> "1111111110", "Indices" -> {15, 87, 271, 272, 343, 344}, "Verified" -> True|>, <|"Name" -> "F3", "Pattern" -> "1111111101", "Indices" -> {655, 727, 911, 912, 983, 984}, "Verified" -> True|>, <|"Name" -> "F4", "Pattern" -> "1111101111", "Indices" -> {79, 207, 335, 336, 463, 464}, "Verified" -> True|>}
+In := subsystemResults10 = {<|"Name" -> "S1", "Pattern" -> "0111", "Indices" -> {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}, "Verified" -> True|>, <|"Name" -> "S2", "Pattern" -> "011101", "Indices" -> {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}, "Verified" -> True|>}
 
 (* Verifying that every local analytic one-set matches the exhaustive baseline *)
 In := checks10 = {True, True, True, True, True, True, True, True, True, True}
 
-(* Exact corroboration for the selected mixed pattern *)
+(* Exact corroboration for all six mixed-query cases *)
 Out = True

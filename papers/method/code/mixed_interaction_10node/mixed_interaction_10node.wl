@@ -102,6 +102,11 @@ indexSetAnalytic[n_Integer, Ic_List, gate_String, params_Association : <||>] := 
   ]
 ];
 
+formatVector[vec_List] := StringJoin[ToString /@ vec];
+texSet[list_List] := "\\(\\{" <> StringRiffle[ToString /@ list, ", "] <> "\\}\\)";
+texVector[list_List] := "\\texttt{" <> formatVector[list] <> "}";
+texNodeSet[list_List] := texSet[list];
+
 ics10 = Table[Flatten@Position[cm10[[k]], 1], {k, 1, n10}];
 dispatch10 = Integration`Experiments`CreateRepertoiresDispatch[cm10, dyn10, params10];
 inputs10 = Normal@dispatch10["RepertoireInputs"];
@@ -122,94 +127,202 @@ nodeVerification10 = Table[
   {k, 1, n10}
 ];
 
-selectedNodes = {4, 6, 7, 10};
-selectedPattern = {0, 1, 1, 1};
-
 conditionSet[node_Integer, bit_Integer] := If[
   bit == 1,
   oneSets10[[node]],
   Complement[allIndices10, oneSets10[[node]]]
 ];
 
-selectedIndicesAnalytic = Sort@Fold[
+queryIndices[nodes_List, pattern_List] := Sort@Fold[
   Intersection,
   allIndices10,
-  MapThread[conditionSet, {selectedNodes, selectedPattern}]
+  MapThread[conditionSet, {nodes, pattern}]
 ];
 
-selectedIndicesBaseline = Flatten@Position[outputs10[[All, selectedNodes]], selectedPattern, 1];
-selectedVerifiedQ = Sort[selectedIndicesAnalytic] === Sort[selectedIndicesBaseline];
+queryBaseline[nodes_List, pattern_List] := Flatten@Position[outputs10[[All, nodes]], pattern, 1];
 
-If[!And @@ nodeVerification10 || !TrueQ[selectedVerifiedQ],
+fullCases = {
+  <|"Name" -> "F1", "Kind" -> "Full", "Description" -> "All outputs active", "SelectedNodes" -> Range[10], "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}|>,
+  <|"Name" -> "F2", "Kind" -> "Full", "Description" -> "All active except y10", "SelectedNodes" -> Range[10], "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}|>,
+  <|"Name" -> "F3", "Kind" -> "Full", "Description" -> "All active except y9", "SelectedNodes" -> Range[10], "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}|>,
+  <|"Name" -> "F4", "Kind" -> "Full", "Description" -> "All active except y6", "SelectedNodes" -> Range[10], "SelectedPattern" -> {1, 1, 1, 1, 1, 0, 1, 1, 1, 1}|>
+};
+
+subsystemCases = {
+  <|"Name" -> "S1", "Kind" -> "Subsystem", "Description" -> "Threshold-XNOR-NOT-majority event", "SelectedNodes" -> {4, 6, 7, 10}, "SelectedPattern" -> {0, 1, 1, 1}|>,
+  <|"Name" -> "S2", "Kind" -> "Subsystem", "Description" -> "Six-gate mixed interaction event", "SelectedNodes" -> {4, 6, 7, 8, 9, 10}, "SelectedPattern" -> {0, 1, 1, 1, 0, 1}|>
+};
+
+enrichCase[case_Association] := Module[
+  {nodes, pattern, analytic, baseline, verifiedQ, anchor, offsets},
+  nodes = case["SelectedNodes"];
+  pattern = case["SelectedPattern"];
+  analytic = queryIndices[nodes, pattern];
+  baseline = queryBaseline[nodes, pattern];
+  verifiedQ = Sort[analytic] === Sort[baseline];
+  anchor = First[analytic];
+  offsets = analytic - anchor;
+  Join[
+    case,
+    <|
+      "PatternString" -> formatVector[pattern],
+      "AnalyticIndices" -> analytic,
+      "BaselineIndices" -> baseline,
+      "Verified" -> verifiedQ,
+      "Count" -> Length[analytic],
+      "Anchor" -> anchor,
+      "Offsets" -> offsets
+    |>
+  ]
+];
+
+fullResults = enrichCase /@ fullCases;
+subsystemResults = enrichCase /@ subsystemCases;
+allCaseResults = Join[fullResults, subsystemResults];
+
+If[!And @@ nodeVerification10 || !And @@ (Lookup[allCaseResults, "Verified"]),
   Print["Verification failed for mixed_interaction_10node.wl"];
   Exit[1];
 ];
 
-formatVector[vec_List] := StringJoin[ToString /@ vec];
-
-selectedRowsTex = Table[
-  Module[{idx = i, inStr, outStr},
-    inStr = formatVector[inputs10[[i]]];
-    outStr = formatVector[outputs10[[i]]];
-    ToString[idx] <>
-      " & \\texttt{" <> inStr <> "}" <>
-      " & \\texttt{" <> outStr <> "}" <>
-      " & \\textbf{" <> ToString[outputs10[[i, 4]]] <> "}" <>
-      " & \\textbf{" <> ToString[outputs10[[i, 6]]] <> "}" <>
-      " & \\textbf{" <> ToString[outputs10[[i, 7]]] <> "}" <>
-      " & \\textbf{" <> ToString[outputs10[[i, 10]]] <> "} \\\\"
+fullSummaryRowsTex = Table[
+  Module[{case = fullResults[[k]]},
+    case["Name"] <> " & " <>
+      "\\texttt{" <> case["PatternString"] <> "} & " <>
+      ToString[case["Anchor"]] <> " & " <>
+      texSet[case["Offsets"]] <> " & " <>
+      texSet[case["AnalyticIndices"]] <> " & " <>
+      ToString[case["Count"]] <> " \\\\"
   ],
-  {i, selectedIndicesAnalytic}
+  {k, Length[fullResults]}
 ];
+
+subsystemSummaryRowsTex = Table[
+  Module[{case = subsystemResults[[k]]},
+    case["Name"] <> " & " <>
+      texNodeSet[case["SelectedNodes"]] <> " & " <>
+      "\\texttt{" <> case["PatternString"] <> "} & " <>
+      ToString[case["Anchor"]] <> " & " <>
+      texSet[case["Offsets"]] <> " & " <>
+      texSet[case["AnalyticIndices"]] <> " & " <>
+      ToString[case["Count"]] <> " \\\\"
+  ],
+  {k, Length[subsystemResults]}
+];
+
+fullRowsTex = Flatten@Table[
+  Module[{case = fullResults[[k]]},
+    Table[
+      case["Name"] <> " & " <>
+        ToString[i] <> " & " <>
+        texVector[inputs10[[i]]] <> " & " <>
+        texVector[outputs10[[i]]] <> " \\\\",
+      {i, case["AnalyticIndices"]}
+    ]
+  ],
+  {k, Length[fullResults]}
+];
+
+subsystemRowsTex = Flatten@Table[
+  Module[{case = subsystemResults[[k]], nodes = subsystemResults[[k, "SelectedNodes"]]},
+    Table[
+      case["Name"] <> " & " <>
+        "\\texttt{" <> formatVector[outputs10[[i, nodes]]] <> "} & " <>
+        ToString[i] <> " & " <>
+        texVector[inputs10[[i]]] <> " & " <>
+        texVector[outputs10[[i]]] <> " \\\\",
+      {i, case["AnalyticIndices"]}
+    ]
+  ],
+  {k, Length[subsystemResults]}
+];
+
+fullRowsCsv = Flatten@Table[
+  Module[{case = fullResults[[k]]},
+    Table[
+      {
+        case["Name"],
+        case["PatternString"],
+        i,
+        formatVector[inputs10[[i]]],
+        formatVector[outputs10[[i]]]
+      },
+      {i, case["AnalyticIndices"]}
+    ]
+  ],
+  {k, Length[fullResults]}
+];
+
+subsystemRowsCsv = Flatten@Table[
+  Module[{case = subsystemResults[[k]], nodes = subsystemResults[[k, "SelectedNodes"]]},
+    Table[
+      {
+        case["Name"],
+        formatVector[case["SelectedPattern"]],
+        i,
+        formatVector[inputs10[[i]]],
+        formatVector[outputs10[[i]]],
+        formatVector[outputs10[[i, nodes]]]
+      },
+      {i, case["AnalyticIndices"]}
+    ]
+  ],
+  {k, Length[subsystemResults]}
+];
+
+sessionDisplay[result_Association] := <|
+  "Name" -> result["Name"],
+  "Pattern" -> result["PatternString"],
+  "Indices" -> result["AnalyticIndices"],
+  "Verified" -> result["Verified"]
+|>;
 
 sessionLines = {
   "In := cm10 = " <> ToString[InputForm[cm10]],
   "In := dyn10 = " <> ToString[InputForm[dyn10]],
   "In := params10 = " <> ToString[InputForm[params10]],
   "",
-  "(* Computing the mixed output condition {y4, y6, y7, y10} = {0, 1, 1, 1} *)",
-  "In := selected10 = " <> ToString[InputForm[selectedIndicesAnalytic]],
+  "In := fullCases10 = " <> ToString[InputForm[fullCases]],
+  "In := subsystemCases10 = " <> ToString[InputForm[subsystemCases]],
+  "",
+  "(* Computing four full-output cases and two subsystem cases analytically *)",
+  "In := fullResults10 = " <> ToString[InputForm[sessionDisplay /@ fullResults]],
+  "In := subsystemResults10 = " <> ToString[InputForm[sessionDisplay /@ subsystemResults]],
   "",
   "(* Verifying that every local analytic one-set matches the exhaustive baseline *)",
   "In := checks10 = " <> ToString[InputForm[nodeVerification10]],
   "",
-  "(* Exact corroboration for the selected mixed pattern *)",
-  "Out = " <> ToString[InputForm[selectedVerifiedQ]]
+  "(* Exact corroboration for all six mixed-query cases *)",
+  "Out = " <> ToString[InputForm[And @@ Lookup[allCaseResults, "Verified"]]]
 };
 
 summary = <|
   "AdjacencyMatrix" -> cm10,
   "Dynamic" -> dyn10,
   "Parameters" -> KeyValueMap[ToString[#1] -> #2 &, params10],
-  "SelectedNodes" -> selectedNodes,
-  "SelectedPattern" -> selectedPattern,
   "NodeVerification" -> nodeVerification10,
-  "SelectedIndices" -> selectedIndicesAnalytic,
-  "SelectedCount" -> Length[selectedIndicesAnalytic],
-  "SelectedVerified" -> selectedVerifiedQ
+  "FullCases" -> (KeyDrop[#, {"BaselineIndices"}] & /@ fullResults),
+  "SubsystemCases" -> (KeyDrop[#, {"BaselineIndices"}] & /@ subsystemResults)
 |>;
 
-Export[FileNameJoin[{baseDir, "session_excerpt.txt"}], StringRiffle[sessionLines, "\n"], "Text"];
-Export[FileNameJoin[{baseDir, "selected_rows.tex"}], StringRiffle[selectedRowsTex, "\n"], "Text"];
-Export[FileNameJoin[{baseDir, "selected_indices.csv"}], List /@ selectedIndicesAnalytic, "CSV"];
-Export[FileNameJoin[{baseDir, "selected_rows.csv"}],
-  Prepend[
-    Table[
-      {
-        i,
-        formatVector[inputs10[[i]]],
-        formatVector[outputs10[[i]]],
-        outputs10[[i, 4]],
-        outputs10[[i, 6]],
-        outputs10[[i, 7]],
-        outputs10[[i, 10]]
-      },
-      {i, selectedIndicesAnalytic}
-    ],
-    {"Index", "InputVector", "OutputVector", "Y4", "Y6", "Y7", "Y10"}
-  ],
+exportText[file_, lines_List] := Export[file, StringRiffle[lines, "\n"] <> "\n", "Text"];
+
+exportText[FileNameJoin[{baseDir, "session_excerpt.txt"}], sessionLines];
+exportText[FileNameJoin[{baseDir, "full_case_summary_rows.tex"}], fullSummaryRowsTex];
+exportText[FileNameJoin[{baseDir, "subsystem_case_summary_rows.tex"}], subsystemSummaryRowsTex];
+exportText[FileNameJoin[{baseDir, "full_case_rows.tex"}], fullRowsTex];
+exportText[FileNameJoin[{baseDir, "subsystem_case_rows.tex"}], subsystemRowsTex];
+
+Export[FileNameJoin[{baseDir, "full_case_rows.csv"}],
+  Prepend[fullRowsCsv, {"Case", "TargetPattern", "Index", "InputVector", "OutputVector"}],
   "CSV"
 ];
+
+Export[FileNameJoin[{baseDir, "subsystem_case_rows.csv"}],
+  Prepend[subsystemRowsCsv, {"Case", "TargetProjection", "Index", "InputVector", "OutputVector", "Projection"}],
+  "CSV"
+];
+
 Export[FileNameJoin[{baseDir, "summary.json"}], Normal[summary], "JSON"];
 
 Print[StringRiffle[sessionLines, "\n"]];

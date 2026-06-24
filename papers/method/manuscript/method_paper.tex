@@ -857,7 +857,7 @@ After deconvolution, this gives
 The point is not to repeat every intermediate step already shown for AND, but to show that the formalism does not depend on monotonicity. In Table~\ref{tab:corroboration-exhaustive}, the blue entries coincide exactly with this one-set, confirming that the same calculus also recovers parity-based behaviour.
 
 \subsubsection{Multiple Gates Interaction and Exact Reconstruction}
-The previous two cases are intentionally small. They are useful because they make the method readable. The real strength of the calculus, however, appears when several distinct gate families interact inside the same network and the output condition of interest is no longer a single local gate but a simultaneous constraint across multiple nodes.
+The previous two cases are intentionally small. They are useful because they make the method readable. The real strength of the calculus, however, appears when several distinct gate families interact inside the same network and the queried output condition is no longer attached to one gate alone, but to the simultaneous satisfaction of several heterogeneous constraints.
 
 To make that point explicit, consider the 10-node benchmark already used in the repository-level exact-reconstruction archive. Its local input sets and exact one-set formulas are
 \[
@@ -886,6 +886,50 @@ N_{10}&=\{3,4,7,8\}, &
 \]
 Here node \(4\) is a \(2\)-of-\(3\) threshold gate and node \(10\) is a strict majority gate on four inputs, exactly as implemented in the validation archive. The important point is that the network is not homogeneous: monotone, parity, negation, implication, and threshold mechanisms coexist in the same causal object.
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  gate/.style={circle, draw, minimum size=11mm, align=center, inner sep=1pt, fill=blue!5},
+  focus/.style={circle, draw, minimum size=11mm, align=center, inner sep=1pt, fill=red!6},
+  >={Latex[length=2mm]}
+]
+\node[gate]  (n1)  at (90:4.0)   {1\\[-1mm]\scriptsize AND};
+\node[gate]  (n2)  at (54:4.0)   {2\\[-1mm]\scriptsize OR};
+\node[gate]  (n3)  at (18:4.0)   {3\\[-1mm]\scriptsize XOR};
+\node[focus] (n4)  at (-18:4.0)  {4\\[-1mm]\scriptsize 2OF3};
+\node[gate]  (n5)  at (-54:4.0)  {5\\[-1mm]\scriptsize NOR};
+\node[focus] (n6)  at (-90:4.0)  {6\\[-1mm]\scriptsize XNOR};
+\node[focus] (n7)  at (-126:4.0) {7\\[-1mm]\scriptsize NOT};
+\node[focus] (n8)  at (-162:4.0) {8\\[-1mm]\scriptsize IMP};
+\node[focus] (n9)  at (162:4.0)  {9\\[-1mm]\scriptsize NIMP};
+\node[focus] (n10) at (126:4.0)  {10\\[-1mm]\scriptsize MAJ};
+
+\draw[->, thick] (n2) to[bend left=10] (n1);
+\draw[->, thick] (n3) to[bend left=10] (n1);
+\draw[->, thick] (n1) to[bend left=10] (n2);
+\draw[->, thick] (n3) to[bend right=12] (n2);
+\draw[->, thick] (n4) to[bend left=12] (n3);
+\draw[->, thick] (n5) to[bend left=10] (n3);
+\draw[->, thick] (n2) to[bend right=12] (n4);
+\draw[->, thick] (n3) to[bend right=8] (n4);
+\draw[->, thick] (n5) to[bend left=16] (n4);
+\draw[->, thick] (n6) to[bend left=12] (n5);
+\draw[->, thick] (n5) to[bend right=10] (n6);
+\draw[->, thick] (n7) to[bend right=10] (n6);
+\draw[->, thick] (n6) to[bend right=10] (n7);
+\draw[->, thick] (n1) to[bend left=16] (n8);
+\draw[->, thick] (n9) to[bend left=10] (n8);
+\draw[->, thick] (n2) to[bend right=18] (n9);
+\draw[->, thick] (n10) to[bend right=10] (n9);
+\draw[->, thick] (n3) to[bend left=18] (n10);
+\draw[->, thick] (n4) to[bend left=10] (n10);
+\draw[->, thick] (n7) to[bend right=18] (n10);
+\draw[->, thick] (n8) to[bend right=10] (n10);
+\end{tikzpicture}
+\caption{Ring representation of the 10-node mixed benchmark. Highlighted nodes participate in the subsystem queries analysed below, while the full-pattern cases involve all ten outputs simultaneously.}
+\label{fig:mixed10-ring}
+\end{figure}
+
 \begin{definition}[Analytic Predictor]
 For each node \(i\), let \(\J_i\subseteq\U\) denote the one-set determined by its gate family, parameters, connected-input set \(N_i\), and the declared ordering policy. The analytic predictor reconstructs the network output matrix \(Y\in\bits^{2^n\times n}\) by declaring
 \[
@@ -906,90 +950,155 @@ For each node \(i\), Proposition~\ref{prop:gate-family-one-sets} gives a one-set
 
 The theorem is best read operationally. It does not claim that the \(2^n\) states disappear. It claims that the full behaviour of a heterogeneous network can be reconstructed from short local causal formulas without recomputing every row gate by gate.
 
-To show how mixed interaction works in practice, consider the output event
-\[
-(y_4,y_6,y_7,y_{10})=(0,1,1,1).
-\]
-This is already a genuinely mixed constraint. It combines a threshold zero-condition, a parity-even condition, a negation condition, and a strict-majority condition. In exact set form,
-\[
-\begin{aligned}
-\J_{\mathrm{mix}}
-&=(\U\setminus \J_4)\cap \J_6\cap \J_7\cap \J_{10}\\
-&=
-\bigl(\Weight{\{2,3,5\}}{0}\cup\Weight{\{2,3,5\}}{1}\bigr)
-\cap
-\Parity{\{5,7\}}{0}
-\cap
-\Band{6}{0}
-\cap
-\bigl(\Weight{\{3,4,7,8\}}{3}\cup\Weight{\{3,4,7,8\}}{4}\bigr).
-\end{aligned}
-\]
-The relevant fact is not only that four conditions are imposed simultaneously, but that they are imposed by different gate families over overlapping coordinates. Node \(4\) and node \(10\) both depend on \(x_3\); nodes \(6\) and \(10\) both depend on \(x_7\); nodes \(5\) and \(7\) both constrain the role of \(x_6\). The mixed event is therefore an intersection of heterogeneous causal rules, not a cosmetic concatenation of isolated gates.
+For the manuscript we analyse six exact queries on this benchmark. Four of them are full-output queries on all ten nodes. Two are subsystem queries on selected nodes only. This choice is deliberate. Some intuitive targets such as the all-zero output or one-hot outputs are not realised by the present network, so forcing them into the paper would be scientifically weaker than selecting the longest nonempty supported patterns that actually occur in the executed repertoire.
 
-In the present benchmark, that intersection unfolds to
+The four full-output cases are
 \[
 \begin{aligned}
-\J_{\mathrm{mix}}=
-\{&141,142,217,218,397,398,473,474,\\
-&653,654,729,730,909,910,985,986\}.
+\J_{\mathrm{F1}}&=\bigcap_{i=1}^{10}\J_i,\\
+\J_{\mathrm{F2}}&=\Bigl(\bigcap_{i=1}^{9}\J_i\Bigr)\cap(\U\setminus\J_{10}),\\
+\J_{\mathrm{F3}}&=\Bigl(\bigcap_{i\in\{1,\dots,8,10\}}\J_i\Bigr)\cap(\U\setminus\J_{9}),\\
+\J_{\mathrm{F4}}&=\Bigl(\bigcap_{i\in\{1,2,3,4,5,7,8,9,10\}}\J_i\Bigr)\cap(\U\setminus\J_{6}).
 \end{aligned}
 \]
-All sixteen rows satisfying the selected mixed condition are displayed in Table~\ref{tab:mixed10-selected-rows}. This is the appropriate scale for manuscript exposition: large enough to show real composition, small enough to print exhaustively, and rich enough to make clear that the exact calculus remains tractable even when several gate families act together.
+The two subsystem queries are
+\[
+\begin{aligned}
+\J_{\mathrm{S1}}
+&=(\U\setminus\J_4)\cap \J_6\cap \J_7\cap \J_{10},\\
+\J_{\mathrm{S2}}
+&=(\U\setminus\J_4)\cap \J_6\cap \J_7\cap \J_8\cap (\U\setminus\J_9)\cap \J_{10}.
+\end{aligned}
+\]
+Case \(\J_{\mathrm{S1}}\) already mixes threshold, parity, negation, and majority constraints. Case \(\J_{\mathrm{S2}}\) goes further by adding implication and the complement of a non-implication condition. In both cases the queried event is an exact intersection of heterogeneous causal laws over overlapping coordinates.
 
 \begin{table}[t]
 \centering
-\small
+\setlength{\tabcolsep}{3pt}
+\scriptsize
 \begin{adjustbox}{max width=\textwidth,center}
-\begin{tabular}{p{0.08\linewidth}p{0.18\linewidth}p{0.14\linewidth}p{0.50\linewidth}}
+\begin{tabular}{@{}lccccc@{}}
 \toprule
-Node & Inputs & Gate & Exact one-set used in the mixed event \\
+Case & Output Pattern & Anchor \(j_0\) & Offsets \(\Omega_q\) & Unfolded Indices \(\J_q\) & Rows\\
 \midrule
-\(4\) & \(\{2,3,5\}\) & KOFN \((k=2)\) &
-\(\U\setminus\J_4=\Weight{\{2,3,5\}}{0}\cup\Weight{\{2,3,5\}}{1}\) \\
-\(6\) & \(\{5,7\}\) & XNOR &
-\(\J_6=\Parity{\{5,7\}}{0}\) \\
-\(7\) & \(\{6\}\) & NOT &
-\(\J_7=\Band{6}{0}\) \\
-\(10\) & \(\{3,4,7,8\}\) & MAJORITY &
-\(\J_{10}=\Weight{\{3,4,7,8\}}{3}\cup\Weight{\{3,4,7,8\}}{4}\) \\
+F1 & \texttt{1111111111} & 143 & \(\{0,72,256,257,328,329\}\) & \(\{143,215,399,400,471,472\}\) & 6 \\
+F2 & \texttt{1111111110} & 15 & \(\{0,72,256,257,328,329\}\) & \(\{15,87,271,272,343,344\}\) & 6 \\
+F3 & \texttt{1111111101} & 655 & \(\{0,72,256,257,328,329\}\) & \(\{655,727,911,912,983,984\}\) & 6 \\
+F4 & \texttt{1111101111} & 79 & \(\{0,128,256,257,384,385\}\) & \(\{79,207,335,336,463,464\}\) & 6 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\caption{The four local constraints intersected in the selected 10-node mixed event. The event is not attached to one gate alone; it is the exact overlap of threshold, parity, negation, and strict-majority laws.}
-\label{tab:mixed10-summary}
+\caption{Analytic unfolding summary for the four full-output queries on the 10-node benchmark. Each case is defined by an exact global output pattern, an anchor index, and the offset family that unfolds to the full set of satisfying repertoire positions.}
+\label{tab:mixed10-full-summary}
+\end{table}
+
+\begin{table}[t]
+\centering
+\setlength{\tabcolsep}{3pt}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth,center}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Case & Queried Nodes & Projection & Anchor \(j_0\) & Offsets \(\Omega_q\) & Unfolded Indices \(\J_q\) & Rows\\
+\midrule
+S1 & \(\{4,6,7,10\}\) & \texttt{0111} & 141 & \(\{0,1,76,77,256,257,332,333,512,513,588,589,768,769,844,845\}\) & \(\{141,142,217,218,397,398,473,474,653,654,729,730,909,910,985,986\}\) & 16 \\
+S2 & \(\{4,6,7,8,9,10\}\) & \texttt{011101} & 141 & \(\{0,76,256,257,332,333,512,588,768,769,844,845\}\) & \(\{141,217,397,398,473,474,653,729,909,910,985,986\}\) & 12 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Analytic unfolding summary for the subsystem queries. The first case keeps four heterogeneous constraints, while the second keeps six. Relaxing the query from the full 10-bit output to a subsystem increases support, but the resulting indices are still obtained analytically rather than by exhaustive scanning.}
+\label{tab:mixed10-subsystem-summary}
+\end{table}
+
+\paragraph{What changes when multiple gates are queried.}
+In the single-gate AND example, the support has a simple rectangular structure: one pivot plus an offset family induced by fully free coordinates. In the 10-node mixed queries, that geometry is partially broken by overlapping heterogeneous constraints. Nevertheless the method still returns exact index sets in closed form because the query is computed as a set-theoretic intersection of local one-sets and their complements. The gain is structural: as more gate families are imposed simultaneously, the support becomes sharply selective without sacrificing exactness. In the present benchmark, the four full-output queries all reduce to only six satisfying rows, and three of them share the same offset family
+\[
+\Omega_{\mathrm{full}}=\{0,72,256,257,328,329\},
+\]
+showing that different global output patterns can inherit the same combinatorial skeleton even when their terminal constraints differ.
+
+\begin{table}[p]
+\centering
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{adjustbox}{max width=\textwidth,center}
+\begin{tabular}{@{}lrcc@{}}
+\toprule
+Case & \(j\) & Input Vector \(x\) & Output Vector \(F(x)\)\\
+\midrule
+F1 & 143 & \texttt{0111000100} & \texttt{1111111111} \\
+F1 & 215 & \texttt{0110101100} & \texttt{1111111111} \\
+F1 & 399 & \texttt{0111000110} & \texttt{1111111111} \\
+F1 & 400 & \texttt{1111000110} & \texttt{1111111111} \\
+F1 & 471 & \texttt{0110101110} & \texttt{1111111111} \\
+F1 & 472 & \texttt{1110101110} & \texttt{1111111111} \\
+F2 & 15 & \texttt{0111000000} & \texttt{1111111110} \\
+F2 & 87 & \texttt{0110101000} & \texttt{1111111110} \\
+F2 & 271 & \texttt{0111000010} & \texttt{1111111110} \\
+F2 & 272 & \texttt{1111000010} & \texttt{1111111110} \\
+F2 & 343 & \texttt{0110101010} & \texttt{1111111110} \\
+F2 & 344 & \texttt{1110101010} & \texttt{1111111110} \\
+F3 & 655 & \texttt{0111000101} & \texttt{1111111101} \\
+F3 & 727 & \texttt{0110101101} & \texttt{1111111101} \\
+F3 & 911 & \texttt{0111000111} & \texttt{1111111101} \\
+F3 & 912 & \texttt{1111000111} & \texttt{1111111101} \\
+F3 & 983 & \texttt{0110101111} & \texttt{1111111101} \\
+F3 & 984 & \texttt{1110101111} & \texttt{1111111101} \\
+F4 & 79 & \texttt{0111001000} & \texttt{1111101111} \\
+F4 & 207 & \texttt{0111001100} & \texttt{1111101111} \\
+F4 & 335 & \texttt{0111001010} & \texttt{1111101111} \\
+F4 & 336 & \texttt{1111001010} & \texttt{1111101111} \\
+F4 & 463 & \texttt{0111001110} & \texttt{1111101111} \\
+F4 & 464 & \texttt{1111001110} & \texttt{1111101111} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{All satisfying rows for the four full-output cases. The table is not exhaustive over the full \(2^{10}=1024\) repertoire; it contains only the rows analytically predicted to satisfy each selected full pattern.}
+\label{tab:mixed10-full-rows}
 \end{table}
 
 \begin{table}[p]
 \centering
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{4pt}
 \footnotesize
 \begin{adjustbox}{max width=\textwidth,center}
-\begin{tabular}{@{}rccrrrr@{}}
+\begin{tabular}{@{}lcrcc@{}}
 \toprule
-\(j\) & Input Vector \(x\) & Output Vector \(F(x)\) & \(y_4\) & \(y_6\) & \(y_7\) & \(y_{10}\)\\
+Case & Projection & \(j\) & Input Vector \(x\) & Output Vector \(F(x)\)\\
 \midrule
-141 & \texttt{0011000100} & \texttt{0110111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-142 & \texttt{1011000100} & \texttt{0110111001} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-217 & \texttt{0001101100} & \texttt{0000111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-218 & \texttt{1001101100} & \texttt{0100111001} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-397 & \texttt{0011000110} & \texttt{0110111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-398 & \texttt{1011000110} & \texttt{0110111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-473 & \texttt{0001101110} & \texttt{0000111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-474 & \texttt{1001101110} & \texttt{0100111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-653 & \texttt{0011000101} & \texttt{0110111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-654 & \texttt{1011000101} & \texttt{0110111001} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-729 & \texttt{0001101101} & \texttt{0000111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-730 & \texttt{1001101101} & \texttt{0100111001} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-909 & \texttt{0011000111} & \texttt{0110111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-910 & \texttt{1011000111} & \texttt{0110111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-985 & \texttt{0001101111} & \texttt{0000111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
-986 & \texttt{1001101111} & \texttt{0100111101} & \textbf{0} & \textbf{1} & \textbf{1} & \textbf{1} \\
+S1 & \texttt{0111} & 141 & \texttt{0011000100} & \texttt{0110111101} \\
+S1 & \texttt{0111} & 142 & \texttt{1011000100} & \texttt{0110111001} \\
+S1 & \texttt{0111} & 217 & \texttt{0001101100} & \texttt{0000111101} \\
+S1 & \texttt{0111} & 218 & \texttt{1001101100} & \texttt{0100111001} \\
+S1 & \texttt{0111} & 397 & \texttt{0011000110} & \texttt{0110111101} \\
+S1 & \texttt{0111} & 398 & \texttt{1011000110} & \texttt{0110111101} \\
+S1 & \texttt{0111} & 473 & \texttt{0001101110} & \texttt{0000111101} \\
+S1 & \texttt{0111} & 474 & \texttt{1001101110} & \texttt{0100111101} \\
+S1 & \texttt{0111} & 653 & \texttt{0011000101} & \texttt{0110111101} \\
+S1 & \texttt{0111} & 654 & \texttt{1011000101} & \texttt{0110111001} \\
+S1 & \texttt{0111} & 729 & \texttt{0001101101} & \texttt{0000111101} \\
+S1 & \texttt{0111} & 730 & \texttt{1001101101} & \texttt{0100111001} \\
+S1 & \texttt{0111} & 909 & \texttt{0011000111} & \texttt{0110111101} \\
+S1 & \texttt{0111} & 910 & \texttt{1011000111} & \texttt{0110111101} \\
+S1 & \texttt{0111} & 985 & \texttt{0001101111} & \texttt{0000111101} \\
+S1 & \texttt{0111} & 986 & \texttt{1001101111} & \texttt{0100111101} \\
+S2 & \texttt{011101} & 141 & \texttt{0011000100} & \texttt{0110111101} \\
+S2 & \texttt{011101} & 217 & \texttt{0001101100} & \texttt{0000111101} \\
+S2 & \texttt{011101} & 397 & \texttt{0011000110} & \texttt{0110111101} \\
+S2 & \texttt{011101} & 398 & \texttt{1011000110} & \texttt{0110111101} \\
+S2 & \texttt{011101} & 473 & \texttt{0001101110} & \texttt{0000111101} \\
+S2 & \texttt{011101} & 474 & \texttt{1001101110} & \texttt{0100111101} \\
+S2 & \texttt{011101} & 653 & \texttt{0011000101} & \texttt{0110111101} \\
+S2 & \texttt{011101} & 729 & \texttt{0001101101} & \texttt{0000111101} \\
+S2 & \texttt{011101} & 909 & \texttt{0011000111} & \texttt{0110111101} \\
+S2 & \texttt{011101} & 910 & \texttt{1011000111} & \texttt{0110111101} \\
+S2 & \texttt{011101} & 985 & \texttt{0001101111} & \texttt{0000111101} \\
+S2 & \texttt{011101} & 986 & \texttt{1001101111} & \texttt{0100111101} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\caption{All repertoire rows in the 10-node benchmark satisfying the mixed output condition \((y_4,y_6,y_7,y_{10})=(0,1,1,1)\). Unlike the six-node corroboration table, this table displays only the rows fulfilling the selected event. The important point is that every displayed row is predicted analytically before the exhaustive baseline is consulted.}
-\label{tab:mixed10-selected-rows}
+\caption{All satisfying rows for the subsystem queries. Here the projection column records the output pattern only on the selected nodes. The support enlarges from \(6\) to \(16\) or \(12\) rows because some global constraints are relaxed, but every row shown remains an exact analytic prediction corroborated against the exhaustive baseline.}
+\label{tab:mixed10-subsystem-rows}
 \end{table}
 
 \begin{table}[H]
@@ -1007,20 +1116,24 @@ In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
 In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
 In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
 
-(* Computing the mixed output condition {y4, y6, y7, y10} = {0, 1, 1, 1} *)
-In := selected10 = {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}
+In := fullCases10 = {<|"Name" -> "F1", "Kind" -> "Full", "Description" -> "All outputs active", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}|>, <|"Name" -> "F2", "Kind" -> "Full", "Description" -> "All active except y10", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}|>, <|"Name" -> "F3", "Kind" -> "Full", "Description" -> "All active except y9", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}|>, <|"Name" -> "F4", "Kind" -> "Full", "Description" -> "All active except y6", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 0, 1, 1, 1, 1}|>}
+In := subsystemCases10 = {<|"Name" -> "S1", "Kind" -> "Subsystem", "Description" -> "Threshold-XNOR-NOT-majority event", "SelectedNodes" -> {4, 6, 7, 10}, "SelectedPattern" -> {0, 1, 1, 1}|>, <|"Name" -> "S2", "Kind" -> "Subsystem", "Description" -> "Six-gate mixed interaction event", "SelectedNodes" -> {4, 6, 7, 8, 9, 10}, "SelectedPattern" -> {0, 1, 1, 1, 0, 1}|>}
+
+(* Computing four full-output cases and two subsystem cases analytically *)
+In := fullResults10 = {<|"Name" -> "F1", "Pattern" -> "1111111111", "Indices" -> {143, 215, 399, 400, 471, 472}, "Verified" -> True|>, <|"Name" -> "F2", "Pattern" -> "1111111110", "Indices" -> {15, 87, 271, 272, 343, 344}, "Verified" -> True|>, <|"Name" -> "F3", "Pattern" -> "1111111101", "Indices" -> {655, 727, 911, 912, 983, 984}, "Verified" -> True|>, <|"Name" -> "F4", "Pattern" -> "1111101111", "Indices" -> {79, 207, 335, 336, 463, 464}, "Verified" -> True|>}
+In := subsystemResults10 = {<|"Name" -> "S1", "Pattern" -> "0111", "Indices" -> {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}, "Verified" -> True|>, <|"Name" -> "S2", "Pattern" -> "011101", "Indices" -> {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}, "Verified" -> True|>}
 
 (* Verifying that every local analytic one-set matches the exhaustive baseline *)
 In := checks10 = {True, True, True, True, True, True, True, True, True, True}
 
-(* Exact corroboration for the selected mixed pattern *)
+(* Exact corroboration for all six mixed-query cases *)
 Out = True
 \end{lstlisting}
-\caption{Executed Mathematica corroboration for the 10-node mixed interaction example. The list \texttt{selected10} is not obtained by scanning the exhaustive outputs for the target pattern; it is obtained analytically from the intersection of the four local one-sets defining \(\J_{\mathrm{mix}}\), and only then corroborated against the exhaustive baseline.}
+\caption{Executed Mathematica corroboration for the six 10-node queries. The script defines four full-output cases and two subsystem cases, computes every satisfying index set analytically, and only afterwards corroborates those sets against the exhaustive baseline.}
 \label{lst:mixed10-session}
 \end{table}
 
-This is the point at which the paper changes scale. The AND case is intentionally slow and detailed because it teaches the mechanics. The XOR case confirms that the same machinery applies beyond monotone gates. The 10-node mixed case then shows the real power of the method: once local exact formulas are available, heterogeneous dynamics can be intersected and reconstructed without losing rigor. This is why the same benchmark is the natural basis for the following sections on computational cost and complexity.
+This is the point at which the paper changes scale. The AND case is intentionally slow and detailed because it teaches the mechanics. The XOR case confirms that the same machinery applies beyond monotone gates. The 10-node mixed benchmark then shows the real power of the method: once local exact formulas are available, highly selective global or subsystem queries can be answered by composing heterogeneous causal rules. This is the natural bridge to the following sections on practical cost and complexity.
 
 \section{Ordering Invariance}
 The formalism would be scientifically brittle if its exactness depended on accidental bit-order conventions. The next theorem shows that it does not.
