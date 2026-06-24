@@ -1,0 +1,33 @@
+In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0}, {1, 0, 1, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 1, 0, 0, 0, 0, 0}, {0, 1, 1, 0, 1, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0, 0, 0}, {0, 0, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0, 0, 0}, {1, 0, 0, 0, 0, 0, 0, 0, 1, 0}, {0, 1, 0, 0, 0, 0, 0, 0, 0, 1}, {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}}
+In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
+In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
+
+(* S1: Threshold-XNOR-NOT-majority event *)
+In := resS110 = mixedQueryRepresentation[{4, 6, 7, 10}, {0, 1, 1, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpS110 = givePlaces[resS110["DecimalRepertoire"], resS110["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {141, 217}, "Sumandos" -> {0, 1, 256, 257, 512, 513, 768, 769}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+
+(* S2: Six-gate mixed interaction event *)
+In := resS210 = mixedQueryRepresentation[{4, 6, 7, 8, 9, 10}, {0, 1, 1, 1, 0, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpS210 = givePlaces[resS210["DecimalRepertoire"], resS210["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True

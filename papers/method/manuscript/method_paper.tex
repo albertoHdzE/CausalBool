@@ -960,9 +960,17 @@ For each node \(i\), Proposition~\ref{prop:gate-family-one-sets} gives a one-set
 
 The theorem is best read operationally. It does not claim that the \(2^n\) states disappear. It claims that the full behaviour of a heterogeneous network can be reconstructed from short local causal formulas without recomputing every row gate by gate.
 
-The central point for mixed queries is that overlap is not a nuisance but a source of analytic compression. If several queried gates reuse some of the same input coordinates, then the final query does not depend on the sum of their local arities as if those gates were independent objects. It depends only on the union of the coordinates that actually appear across the queried mechanisms. That is the exact place where the distribution-of-information intuition from the thesis becomes mathematically precise: repeated coordinates are not recomputed as new information; they are shared constraints propagated through several local laws.
+The central point for mixed queries is that overlap is not a nuisance but a source of analytic compression. 
+If several queried gates reuse some of the same input coordinates, then the final query does not depend 
+on the sum of their local arities as if those gates were independent objects. It depends only on the 
+union of the coordinates that actually appear across the queried mechanisms due to overlap, 
+the distribution-of-information becomes mathematically precise: repeated 
+coordinates are not recomputed as new information; they are shared constraints propagated 
+through several local laws.
 
-For the manuscript we analyse six exact queries on this benchmark. Four of them are full-output queries on all ten nodes. Two are subsystem queries on selected nodes only. This choice is deliberate. Some intuitive targets such as the all-zero output or one-hot outputs are not realised by the present network, so forcing them into the paper would be scientifically weaker than selecting the longest nonempty supported patterns that actually occur in the executed repertoire.
+Here we analyze six cases based in the network described in Figure~\ref{fig:mixed10-ring}.
+Four of them are 
+full-output queries on all ten nodes. Two are subsystem queries on selected nodes only. 
 
 The four full-output cases are
 \[
@@ -982,7 +990,10 @@ The two subsystem queries are
 &=(\U\setminus\J_4)\cap \J_6\cap \J_7\cap \J_8\cap (\U\setminus\J_9)\cap \J_{10}.
 \end{aligned}
 \]
-Case \(\J_{\mathrm{S1}}\) already mixes threshold, parity, negation, and majority constraints. Case \(\J_{\mathrm{S2}}\) goes further by adding implication and the complement of a non-implication condition. In both cases the queried event is an exact intersection of heterogeneous causal laws over overlapping coordinates.
+Case \(\J_{\mathrm{S1}}\) mixes threshold, parity, negation, and majority constraints. 
+Case \(\J_{\mathrm{S2}}\) goes further by adding implication and the complement of a 
+non-implication condition. In both cases the queried event is an exact intersection 
+of heterogeneous causal laws over overlapping coordinates.
 
 \begin{definition}[Query Support Union]
 For a query \(q=(Q,\sigma)\), where \(Q\subseteq [n]\) is the set of queried nodes and \(\sigma\in\bits^{|Q|}\) is the target output pattern, define
@@ -1033,7 +1044,15 @@ R_q=2^{\mu_q}=2^{d_q-c_q}.
 Equality \(\mu_q=0\) occurs only when the queried input sets are pairwise disjoint. Every shared coordinate increases \(\mu_q\) through inclusion-exclusion and therefore enlarges the reduction factor.
 \end{corollary}
 
-This result is stronger than a qualitative statement about repeated patterns. It shows that overlap has an exact combinatorial value. The query does not pay once per gate for a shared coordinate; it pays once for the coordinate itself. In that sense the queried information is distributed hierarchically across the network: one coordinate can constrain several local mechanisms simultaneously. The present executed examples support this precise hierarchy-of-reuse claim. They do not yet justify a stronger claim of full mathematical fractality, so we restrict ourselves to the exact overlap statement proved above.
+This shows that overlap has an exact combinatorial value. The query does not pay once
+ per gate for a shared coordinate; it pays once for the coordinate itself. In
+ that sense the queried information is distributed hierarchically across the network: 
+ one coordinate can constrain several local mechanisms simultaneously. The present executed 
+ examples support this precise hierarchy-of-reuse claim. 
+ 
+% They do not yet justify a 
+% stronger claim of full mathematical fractality, so witse restricted to the exact
+% overlap statement proved above.
 
 \begin{figure}[t]
 \centering
@@ -1042,16 +1061,19 @@ This result is stronger than a qualitative statement about repeated patterns. It
   core/.style={circle, draw, minimum size=10mm, align=center, inner sep=1pt, fill=red!7},
   >={Latex[length=2mm]}
 ]
-\node[core] (q4) at (0,1.2) {4\\[-1mm]\scriptsize 2OF3};
-\node[core] (q6) at (2.2,1.2) {6\\[-1mm]\scriptsize XNOR};
-\node[core] (q7) at (4.4,1.2) {7\\[-1mm]\scriptsize NOT};
-\node[qnode] (q8) at (0,0) {8\\[-1mm]\scriptsize IMP};
-\node[qnode] (q9) at (2.2,0) {9\\[-1mm]\scriptsize NIMP};
-\node[core] (q10) at (4.4,0) {10\\[-1mm]\scriptsize MAJ};
-\draw[-, thick] (q4) -- node[above] {\scriptsize \(x_5\)} (q6);
-\draw[-, thick] (q4) -- node[sloped, above] {\scriptsize \(x_3\)} (q10);
-\draw[-, thick] (q6) -- node[above] {\scriptsize \(x_7\)} (q10);
-\draw[-, thick] (q4) -- node[below] {\scriptsize \(x_2\)} (q9);
+% Nodes arranged in a symmetric ring with radius 1.8cm
+\node[core]  (q4)  at (90:1.8)  {4\\[-1mm]\scriptsize 2OF3};    % Top (core/S1 node)
+\node[qnode] (q8)  at (150:1.8) {8\\[-1mm]\scriptsize IMP};   % Upper left (S2-only node)
+\node[qnode] (q9)  at (210:1.8) {9\\[-1mm]\scriptsize NIMP};  % Lower left (S2-only node)
+\node[core]  (q10) at (270:1.8) {10\\[-1mm]\scriptsize MAJ};  % Bottom (core/S1 node)
+\node[core]  (q7)  at (330:1.8) {7\\[-1mm]\scriptsize NOT};   % Lower right (core/S1 node)
+\node[core]  (q6)  at (30:1.8)  {6\\[-1mm]\scriptsize XNOR};  % Upper right (core/S1 node)
+
+% Draw edges with shared input coordinate labels
+\draw[-, thick] (q4) -- node[sloped, above, near end] {\scriptsize \(x_5\)} (q6);
+\draw[-, thick] (q4) -- node[sloped, below, near end] {\scriptsize \(x_2\)} (q9);
+\draw[-, thick] (q6) -- node[sloped, below, near end] {\scriptsize \(x_7\)} (q10);
+\draw[-, thick] (q4) -- node[sloped, below, near end] {\scriptsize \(x_3\)} (q10);
 \end{tikzpicture}
 \caption{Overlap graph for the mixed queries. Red nodes form the four-gate subsystem query \(S1\); adding nodes \(8\) and \(9\) gives \(S2\). Edge labels indicate the exact shared input coordinates. The graph makes the combinatorial source of the reduction factor explicit: coordinates \(x_2,x_3,x_5,x_7\) are reused across several queried mechanisms rather than treated independently.}
 \label{fig:mixed10-overlap}
@@ -1226,6 +1248,55 @@ S2 & \texttt{011101} & 986 & \texttt{1001101111} & \texttt{0100111101} \\
 \label{tab:mixed10-subsystem-rows}
 \end{table}
 
+\begin{table}[p]
+\begin{lstlisting}[style=MathematicaStyle]
+In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
+              {1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+              {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+              {0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
+              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+              {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
+              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+              {1, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+              {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+              {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}}
+In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
+In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
+
+(* F1: All outputs active *)
+In := resF110 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpF110 = givePlaces[resF110["DecimalRepertoire"], resF110["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {143, 215, 399, 400, 471, 472}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {143, 215, 399, 400, 471, 472}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+
+(* F2: All active except y10 *)
+In := resF210 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}]
+
+(* Unfolding the compressed representation *)
+In := gpF210 = givePlaces[resF210["DecimalRepertoire"], resF210["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {15, 87, 271, 272, 343, 344}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {15, 87, 271, 272, 343, 344}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+\end{lstlisting}
+\caption{Executed Mathematica corroboration for the first two full-output queries on the 10-node benchmark. Because these queries satisfy \(C_q=[10]\), the residual offset family collapses to \(\{0\}\), so the compressed representation is already a fully determined decimal base set.}
+\label{lst:mixed10-session-full-a}
+\end{table}
+
 \begin{table}[H]
 \begin{lstlisting}[style=MathematicaStyle]
 In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
@@ -1241,28 +1312,91 @@ In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
 In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
 In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
 
-In := fullCases10 = {<|"Name" -> "F1", "Kind" -> "Full", "Description" -> "All outputs active", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}|>, <|"Name" -> "F2", "Kind" -> "Full", "Description" -> "All active except y10", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}|>, <|"Name" -> "F3", "Kind" -> "Full", "Description" -> "All active except y9", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}|>, <|"Name" -> "F4", "Kind" -> "Full", "Description" -> "All active except y6", "SelectedNodes" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "SelectedPattern" -> {1, 1, 1, 1, 1, 0, 1, 1, 1, 1}|>}
-In := subsystemCases10 = {<|"Name" -> "S1", "Kind" -> "Subsystem", "Description" -> "Threshold-XNOR-NOT-majority event", "SelectedNodes" -> {4, 6, 7, 10}, "SelectedPattern" -> {0, 1, 1, 1}|>, <|"Name" -> "S2", "Kind" -> "Subsystem", "Description" -> "Six-gate mixed interaction event", "SelectedNodes" -> {4, 6, 7, 8, 9, 10}, "SelectedPattern" -> {0, 1, 1, 1, 0, 1}|>}
+(* F3: All active except y9 *)
+In := resF310 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}]
 
-(* Computing four full-output cases and two subsystem cases analytically *)
-In := fullResults10 = {<|"Name" -> "F1", "Pattern" -> "1111111111", "Indices" -> {143, 215, 399, 400, 471, 472}, "Verified" -> True|>, <|"Name" -> "F2", "Pattern" -> "1111111110", "Indices" -> {15, 87, 271, 272, 343, 344}, "Verified" -> True|>, <|"Name" -> "F3", "Pattern" -> "1111111101", "Indices" -> {655, 727, 911, 912, 983, 984}, "Verified" -> True|>, <|"Name" -> "F4", "Pattern" -> "1111101111", "Indices" -> {79, 207, 335, 336, 463, 464}, "Verified" -> True|>}
-In := subsystemResults10 = {<|"Name" -> "S1", "Pattern" -> "0111", "Indices" -> {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}, "Verified" -> True|>, <|"Name" -> "S2", "Pattern" -> "011101", "Indices" -> {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}, "Verified" -> True|>}
+(* Unfolding the compressed representation *)
+In := gpF310 = givePlaces[resF310["DecimalRepertoire"], resF310["Sumandos"]]
 
-(* Quantifying the overlap structure of each query *)
-In := overlapStats10 = {<|"Name" -> "F1", "Union" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "Free" -> {}, "DegreeSum" -> 21, "UnionSize" -> 10, "OverlapMultiplicity" -> 11, "ReductionFactor" -> 2048|>, <|"Name" -> "F2", "Union" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "Free" -> {}, "DegreeSum" -> 21, "UnionSize" -> 10, "OverlapMultiplicity" -> 11, "ReductionFactor" -> 2048|>, <|"Name" -> "F3", "Union" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "Free" -> {}, "DegreeSum" -> 21, "UnionSize" -> 10, "OverlapMultiplicity" -> 11, "ReductionFactor" -> 2048|>, <|"Name" -> "F4", "Union" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "Free" -> {}, "DegreeSum" -> 21, "UnionSize" -> 10, "OverlapMultiplicity" -> 11, "ReductionFactor" -> 2048|>, <|"Name" -> "S1", "Union" -> {2, 3, 4, 5, 6, 7, 8}, "Free" -> {1, 9, 10}, "DegreeSum" -> 10, "UnionSize" -> 7, "OverlapMultiplicity" -> 3, "ReductionFactor" -> 8|>, <|"Name" -> "S2", "Union" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "Free" -> {}, "DegreeSum" -> 14, "UnionSize" -> 10, "OverlapMultiplicity" -> 4, "ReductionFactor" -> 16|>}
-In := baseS110 = <|"CoordinateUnion" -> {2, 3, 4, 5, 6, 7, 8}, "FreeCoordinates" -> {1, 9, 10}, "BaseIndices" -> {141, 217}|>
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {655, 727, 911, 912, 983, 984}, "Sumandos" -> {0}|>
 
-(* Verifying that every local analytic one-set matches the exhaustive baseline *)
-In := checks10 = {True, True, True, True, True, True, True, True, True, True}
+(* Exact unfolded repertoire indices *)
+Out = {655, 727, 911, 912, 983, 984}
 
-(* Exact corroboration for all six mixed-query cases *)
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+
+(* F4: All active except y6 *)
+In := resF410 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 0, 1, 1, 1, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpF410 = givePlaces[resF410["DecimalRepertoire"], resF410["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {79, 207, 335, 336, 463, 464}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {79, 207, 335, 336, 463, 464}
+
+(* Exact corroboration against the exhaustive baseline *)
 Out = True
 \end{lstlisting}
-\caption{Executed Mathematica corroboration for the six 10-node queries. The script defines four full-output cases and two subsystem cases, computes every satisfying index set analytically, and only afterwards corroborates those sets against the exhaustive baseline.}
-\label{lst:mixed10-session}
+\caption{Executed Mathematica corroboration for the remaining two full-output queries on the 10-node benchmark. The same collapse to \(\texttt{Sumandos}\to\{0\}\) persists because the support union still saturates all ten coordinates.}
+\label{lst:mixed10-session-full-b}
 \end{table}
 
-This is the point at which the paper changes scale. The AND case is intentionally slow and detailed because it teaches the mechanics. The XOR case confirms that the same machinery applies beyond monotone gates. The 10-node mixed benchmark then shows the real power of the method: once local exact formulas are available, highly selective global or subsystem queries can be answered by composing heterogeneous causal rules. This is the natural bridge to the following sections on practical cost and complexity.
+\begin{table}[p]
+\begin{lstlisting}[style=MathematicaStyle]
+In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
+              {1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+              {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+              {0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
+              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+              {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
+              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+              {1, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+              {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+              {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}}
+In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
+In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
+
+(* S1: Threshold-XNOR-NOT-majority event *)
+In := resS110 = mixedQueryRepresentation[{4, 6, 7, 10}, {0, 1, 1, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpS110 = givePlaces[resS110["DecimalRepertoire"], resS110["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {141, 217}, "Sumandos" -> {0, 1, 256, 257, 512, 513, 768, 769}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+
+(* S2: Six-gate mixed interaction event *)
+In := resS210 = mixedQueryRepresentation[{4, 6, 7, 8, 9, 10}, {0, 1, 1, 1, 0, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpS210 = givePlaces[resS210["DecimalRepertoire"], resS210["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+\end{lstlisting}
+\caption{Executed Mathematica corroboration for the subsystem queries. The first case recovers a genuinely factorised pair, with two base indices and the eight offsets generated by the free coordinates \(\{1,9,10\}\); the second saturates all ten coordinates and therefore reduces again to \(\texttt{Sumandos}\to\{0\}\).}
+\label{lst:mixed10-session-subsystem}
+\end{table}
+
+These executed sessions are the computational counterpart of the analytic overlap treatment. In the full-output queries, the code returns \texttt{Sumandos -> \{0\}} because the support union already fills all ten coordinates, so no residual free offsets remain after intersection. In the \(S1\) query, by contrast, the same routine recovers exactly the factorisation proved in Proposition~\ref{prop:overlap-factorisation}: the code returns the base set \(\{141,217\}\), the free-coordinate offset family \(\{0,1,256,257,512,513,768,769\}\), and \texttt{givePlaces} unfolds them to the 16 indices in \(\J_{\mathrm{S1}}\). In \(S2\), the additional constraints saturate the coordinate union again, so the residual offset family collapses to \(\{0\}\). The final \texttt{Out = True} in every case is therefore not an auxiliary convenience: it is the exact statement that the code-generated unfolding coincides with the analytically derived query set and with the exhaustive dispatch baseline.
+
 
 \section{Ordering Invariance}
 The formalism would be scientifically brittle if its exactness depended on accidental bit-order conventions. The next theorem shows that it does not.

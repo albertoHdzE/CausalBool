@@ -3,6 +3,7 @@ projectRoot = Nest[DirectoryName, baseDir, 4];
 
 AppendTo[$Path, FileNameJoin[{projectRoot, "src", "Packages"}]];
 Needs["Integration`Experiments`"];
+Needs["Integration`Gates`"];
 
 cm10 = {
   {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
@@ -29,6 +30,14 @@ n10 = Length[dyn10];
 allIndices10 = Range[1, 2^n10];
 
 weights[n_Integer] := 2^Range[0, n - 1];
+
+allOffsets[n_Integer, connected_List] := Module[
+  {free = Complement[Range[n], connected], ws},
+  ws = weights[n][[free]];
+  If[Length[ws] == 0, {0}, Sort[(# . ws) & /@ Tuples[{0, 1}, Length[ws]]]]
+];
+
+givePlaces[locations_List, sumandos_List] := Sort@Flatten[Table[loc + sumandos, {loc, locations}]];
 
 indexSetAnalytic[n_Integer, Ic_List, gate_String, params_Association : <||>] := Module[
   {free, pow, d, indexFromPos, subsFree, k, strict, pair, a, b, ii},
@@ -141,6 +150,18 @@ queryIndices[nodes_List, pattern_List] := Sort@Fold[
 
 queryBaseline[nodes_List, pattern_List] := Flatten@Position[outputs10[[All, nodes]], pattern, 1];
 
+mixedQueryRepresentation[nodes_List, pattern_List] := Module[
+  {analytic, unionCoords, sumandos, baseIndices},
+  analytic = queryIndices[nodes, pattern];
+  unionCoords = Sort@DeleteDuplicates@Flatten[ics10[[nodes]]];
+  sumandos = allOffsets[n10, unionCoords];
+  baseIndices = Select[
+    analytic,
+    Function[idx, AllTrue[Complement[Range[n10], unionCoords], inputs10[[idx, #]] == 0 &]]
+  ];
+  <|"DecimalRepertoire" -> baseIndices, "Sumandos" -> sumandos|>
+];
+
 fullCases = {
   <|"Name" -> "F1", "Kind" -> "Full", "Description" -> "All outputs active", "SelectedNodes" -> Range[10], "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}|>,
   <|"Name" -> "F2", "Kind" -> "Full", "Description" -> "All active except y10", "SelectedNodes" -> Range[10], "SelectedPattern" -> {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}|>,
@@ -154,7 +175,7 @@ subsystemCases = {
 };
 
 enrichCase[case_Association] := Module[
-  {nodes, pattern, analytic, baseline, verifiedQ, anchor, offsets},
+  {nodes, pattern, analytic, baseline, verifiedQ, anchor, offsets, representation},
   nodes = case["SelectedNodes"];
   pattern = case["SelectedPattern"];
   analytic = queryIndices[nodes, pattern];
@@ -162,6 +183,7 @@ enrichCase[case_Association] := Module[
   verifiedQ = Sort[analytic] === Sort[baseline];
   anchor = First[analytic];
   offsets = analytic - anchor;
+  representation = mixedQueryRepresentation[nodes, pattern];
   Join[
     case,
     <|
@@ -171,7 +193,9 @@ enrichCase[case_Association] := Module[
       "Verified" -> verifiedQ,
       "Count" -> Length[analytic],
       "Anchor" -> anchor,
-      "Offsets" -> offsets
+      "Offsets" -> offsets,
+      "DecimalRepertoire" -> representation["DecimalRepertoire"],
+      "Sumandos" -> representation["Sumandos"]
     |>
   ]
 ];
@@ -205,6 +229,30 @@ subsystemResults = enrichCase /@ subsystemCases;
 fullResults = caseStats /@ fullResults;
 subsystemResults = caseStats /@ subsystemResults;
 allCaseResults = Join[fullResults, subsystemResults];
+
+resF110 = mixedQueryRepresentation[fullCases[[1, "SelectedNodes"]], fullCases[[1, "SelectedPattern"]]];
+gpF110 = givePlaces[resF110["DecimalRepertoire"], resF110["Sumandos"]];
+verifiedF110Q = Sort[gpF110] === Sort[fullResults[[1, "BaselineIndices"]]];
+
+resF210 = mixedQueryRepresentation[fullCases[[2, "SelectedNodes"]], fullCases[[2, "SelectedPattern"]]];
+gpF210 = givePlaces[resF210["DecimalRepertoire"], resF210["Sumandos"]];
+verifiedF210Q = Sort[gpF210] === Sort[fullResults[[2, "BaselineIndices"]]];
+
+resF310 = mixedQueryRepresentation[fullCases[[3, "SelectedNodes"]], fullCases[[3, "SelectedPattern"]]];
+gpF310 = givePlaces[resF310["DecimalRepertoire"], resF310["Sumandos"]];
+verifiedF310Q = Sort[gpF310] === Sort[fullResults[[3, "BaselineIndices"]]];
+
+resF410 = mixedQueryRepresentation[fullCases[[4, "SelectedNodes"]], fullCases[[4, "SelectedPattern"]]];
+gpF410 = givePlaces[resF410["DecimalRepertoire"], resF410["Sumandos"]];
+verifiedF410Q = Sort[gpF410] === Sort[fullResults[[4, "BaselineIndices"]]];
+
+resS110 = mixedQueryRepresentation[subsystemCases[[1, "SelectedNodes"]], subsystemCases[[1, "SelectedPattern"]]];
+gpS110 = givePlaces[resS110["DecimalRepertoire"], resS110["Sumandos"]];
+verifiedS110Q = Sort[gpS110] === Sort[subsystemResults[[1, "BaselineIndices"]]];
+
+resS210 = mixedQueryRepresentation[subsystemCases[[2, "SelectedNodes"]], subsystemCases[[2, "SelectedPattern"]]];
+gpS210 = givePlaces[resS210["DecimalRepertoire"], resS210["Sumandos"]];
+verifiedS210Q = Sort[gpS210] === Sort[subsystemResults[[2, "BaselineIndices"]]];
 
 If[!And @@ nodeVerification10 || !And @@ (Lookup[allCaseResults, "Verified"]),
   Print["Verification failed for mixed_interaction_10node.wl"];
@@ -299,6 +347,8 @@ subsystemRowsCsv = Flatten@Table[
 sessionDisplay[result_Association] := <|
   "Name" -> result["Name"],
   "Pattern" -> result["PatternString"],
+  "DecimalRepertoire" -> result["DecimalRepertoire"],
+  "Sumandos" -> result["Sumandos"],
   "Indices" -> result["AnalyticIndices"],
   "Verified" -> result["Verified"]
 |>;
@@ -313,28 +363,69 @@ statsDisplay[result_Association] := <|
   "ReductionFactor" -> result["ReductionFactor"]
 |>;
 
-sessionLines = {
+caseSessionLines[result_Association, resName_String, gpName_String, resValue_Association, gpValue_List, verifiedQ_] := {
+  "(* " <> result["Name"] <> ": " <> result["Description"] <> " *)",
+  "In := " <> resName <> " = mixedQueryRepresentation[" <>
+    ToString[InputForm[result["SelectedNodes"]]] <> ", " <>
+    ToString[InputForm[result["SelectedPattern"]]] <> "]",
+  "",
+  "(* Unfolding the compressed representation *)",
+  "In := " <> gpName <> " = givePlaces[" <> resName <> "[\"DecimalRepertoire\"], " <> resName <> "[\"Sumandos\"]]",
+  "",
+  "(* Compressed representation of the query *)",
+  "Out = " <> ToString[InputForm[resValue]],
+  "",
+  "(* Exact unfolded repertoire indices *)",
+  "Out = " <> ToString[InputForm[gpValue]],
+  "",
+  "(* Exact corroboration against the exhaustive baseline *)",
+  "Out = " <> ToString[InputForm[verifiedQ]]
+};
+
+sessionHeaderLines = {
   "In := cm10 = " <> ToString[InputForm[cm10]],
   "In := dyn10 = " <> ToString[InputForm[dyn10]],
   "In := params10 = " <> ToString[InputForm[params10]],
-  "",
-  "In := fullCases10 = " <> ToString[InputForm[fullCases]],
-  "In := subsystemCases10 = " <> ToString[InputForm[subsystemCases]],
-  "",
-  "(* Computing four full-output cases and two subsystem cases analytically *)",
-  "In := fullResults10 = " <> ToString[InputForm[sessionDisplay /@ fullResults]],
-  "In := subsystemResults10 = " <> ToString[InputForm[sessionDisplay /@ subsystemResults]],
-  "",
-  "(* Quantifying the overlap structure of each query *)",
-  "In := overlapStats10 = " <> ToString[InputForm[statsDisplay /@ allCaseResults]],
-  "In := baseS110 = " <> ToString[InputForm[<|"CoordinateUnion" -> subsystemResults[[1, "CoordinateUnion"]], "FreeCoordinates" -> subsystemResults[[1, "FreeCoordinates"]], "BaseIndices" -> subsystemResults[[1, "BaseIndicesZeroFree"]]|>]],
-  "",
-  "(* Verifying that every local analytic one-set matches the exhaustive baseline *)",
-  "In := checks10 = " <> ToString[InputForm[nodeVerification10]],
-  "",
-  "(* Exact corroboration for all six mixed-query cases *)",
-  "Out = " <> ToString[InputForm[And @@ Lookup[allCaseResults, "Verified"]]]
+  ""
 };
+
+sessionLinesFull = Join[
+  sessionHeaderLines,
+  Riffle[
+    {
+      caseSessionLines[fullResults[[1]], "resF110", "gpF110", resF110, gpF110, verifiedF110Q],
+      caseSessionLines[fullResults[[2]], "resF210", "gpF210", resF210, gpF210, verifiedF210Q],
+      caseSessionLines[fullResults[[3]], "resF310", "gpF310", resF310, gpF310, verifiedF310Q],
+      caseSessionLines[fullResults[[4]], "resF410", "gpF410", resF410, gpF410, verifiedF410Q]
+    },
+    {""}
+  ] // Flatten
+];
+
+sessionLinesSubsystem = Join[
+  sessionHeaderLines,
+  Riffle[
+    {
+      caseSessionLines[subsystemResults[[1]], "resS110", "gpS110", resS110, gpS110, verifiedS110Q],
+      caseSessionLines[subsystemResults[[2]], "resS210", "gpS210", resS210, gpS210, verifiedS210Q]
+    },
+    {""}
+  ] // Flatten
+];
+
+sessionLines = Join[
+  sessionHeaderLines,
+  {
+    "In := overlapStats10 = " <> ToString[InputForm[statsDisplay /@ allCaseResults]],
+    "In := baseS110 = " <> ToString[InputForm[<|"CoordinateUnion" -> subsystemResults[[1, "CoordinateUnion"]], "FreeCoordinates" -> subsystemResults[[1, "FreeCoordinates"]], "BaseIndices" -> subsystemResults[[1, "BaseIndicesZeroFree"]]|>]],
+    "",
+    "(* Verifying that every local analytic one-set matches the exhaustive baseline *)",
+    "In := checks10 = " <> ToString[InputForm[nodeVerification10]],
+    "",
+    "(* Exact corroboration for all six mixed-query cases *)",
+    "Out = " <> ToString[InputForm[And @@ Lookup[allCaseResults, "Verified"]]]
+  }
+];
 
 summary = <|
   "AdjacencyMatrix" -> cm10,
@@ -348,6 +439,8 @@ summary = <|
 exportText[file_, lines_List] := Export[file, StringRiffle[lines, "\n"] <> "\n", "Text"];
 
 exportText[FileNameJoin[{baseDir, "session_excerpt.txt"}], sessionLines];
+exportText[FileNameJoin[{baseDir, "session_excerpt_full.txt"}], sessionLinesFull];
+exportText[FileNameJoin[{baseDir, "session_excerpt_subsystem.txt"}], sessionLinesSubsystem];
 exportText[FileNameJoin[{baseDir, "full_case_summary_rows.tex"}], fullSummaryRowsTex];
 exportText[FileNameJoin[{baseDir, "subsystem_case_summary_rows.tex"}], subsystemSummaryRowsTex];
 exportText[FileNameJoin[{baseDir, "full_case_rows.tex"}], fullRowsTex];
@@ -365,4 +458,4 @@ Export[FileNameJoin[{baseDir, "subsystem_case_rows.csv"}],
 
 Export[FileNameJoin[{baseDir, "summary.json"}], Normal[summary], "JSON"];
 
-Print[StringRiffle[sessionLines, "\n"]];
+Print[StringRiffle[Join[sessionLinesFull, {""}, sessionLinesSubsystem, {""}, sessionLines], "\n"]];
