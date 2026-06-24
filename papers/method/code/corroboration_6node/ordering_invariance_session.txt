@@ -1,0 +1,29 @@
+In := phi06[j_] := 1 + FromDigits[Reverse[IntegerDigits[j - 1, 2, 6]], 2]
+In := andLSB06 = {11, 12, 15, 16, 27, 28, 31, 32, 43, 44, 47, 48, 59, 60, 63, 64}
+In := andPhi06 = Sort[phi06 /@ andLSB06]
+In := andMSB06 = {21, 22, 23, 24, 29, 30, 31, 32, 53, 54, 55, 56, 61, 62, 63, 64}
+
+(* Transported AND one-set under MSB ordering *)
+Out = {21, 22, 23, 24, 29, 30, 31, 32, 53, 54, 55, 56, 61, 62, 63, 64}
+
+(* Direct MSB exhaustive baseline for node 5 *)
+Out = {21, 22, 23, 24, 29, 30, 31, 32, 53, 54, 55, 56, 61, 62, 63, 64}
+
+(* Exact invariance check for AND *)
+Out = True
+
+In := xorLSB06 = {2, 4, 5, 7, 10, 11, 13, 16, 18, 20, 21, 23, 26, 27, 29, 32, 34, 36, 37, 39, 42, 43, 45, 48, 50, 52, 53, 55, 58, 59, 61, 64}
+In := xorPhi06 = Sort[phi06 /@ xorLSB06]
+In := xorMSB06 = {9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 33, 34, 35, 36, 37, 38, 39, 40, 49, 50, 51, 52, 61, 62, 63, 64}
+
+(* Transported XOR one-set under MSB ordering *)
+Out = {9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 33, 34, 35, 36, 37, 38, 39, 40, 49, 50, 51, 52, 61, 62, 63, 64}
+
+(* Direct MSB exhaustive baseline for node 6 *)
+Out = {9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 33, 34, 35, 36, 37, 38, 39, 40, 49, 50, 51, 52, 61, 62, 63, 64}
+
+(* Exact invariance check for XOR *)
+Out = True
+
+(* Involution check: phi(phi(j)) = j for all j in U *)
+Out = True
