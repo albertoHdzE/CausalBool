@@ -1712,12 +1712,12 @@ but equally necessary question: \emph{in what computational regime does exact ca
 become operationally indispensable?}
 
 Answering it requires first being precise about which representational objects are being compared,
-because exact causal evaluation and naive exhaustive materialization do not produce the same object.
+because exact causal evaluation and naive exhaustive materialisation do not produce the same object.
 
 \subsection{Representational Distinction and Lower Bounds}
 
 \begin{definition}[Exhaustive Materialization]\label{def:exhaustive-mat}
-\emph{Naive exhaustive materialization} for an \(n\)-node Boolean network is the explicit
+\emph{Naive exhaustive materialisation} for an \(n\)-node Boolean network is the explicit
 construction of the full output matrix \(Y\in\{0,1\}^{2^n\times n}\) by enumerating every input
 row and evaluating every output node. Its defining property is that the complete object is made
 explicit in memory.
@@ -1732,7 +1732,7 @@ set decomposes as (support-level satisfying assignments) \(\times\,\{0,1\}^{n-|C
 \end{definition}
 
 Both objects answer the same causal question. The difference is representational: naive
-materialization answers by enumerating all \(2^n\) input rows; exact causal evaluation answers by
+materialisation answers by enumerating all \(2^n\) input rows; exact causal evaluation answers by
 identifying the satisfying structure over the query support and factoring out the free coordinates
 analytically.
 
@@ -1752,7 +1752,7 @@ Let \(q\) be a mixed query on \(Q\subseteq[n]\) with support union \(C_q\) and o
 \(\mu_q\). The exact compressed causal evaluation identifies the satisfying set by enumerating at
 most \(2^{|C_q|}\) support-level assignments. The remaining \(n-|C_q|\) free coordinates contribute
 a multiplicative factor \(2^{n-|C_q|}\) to the full solution count but require no evaluation. The
-reduction in enumeration cost relative to materializing all \(2^n\) global rows is
+reduction in enumeration cost relative to materialising all \(2^n\) global rows is
 \(2^{n-|C_q|}\).
 \end{proposition}
 
@@ -1768,7 +1768,7 @@ and enumerating the first factor costs at most \(2^{|C_q|}\) evaluations.
 \begin{corollary}[Tractability Beyond the Exhaustive Regime]\label{cor:tractability}
 If \(|C_q|\) remains bounded or grows sublinearly in \(n\)---as occurs in networks with bounded
 in-degree and bounded query scope---then exact causal evaluation remains feasible at ambient sizes
-where naive exhaustive materialization is physically or temporally impractical.
+where naive exhaustive materialisation is physically or temporally impractical.
 \end{corollary}
 
 The method does not defeat Proposition~\ref{prop:materialization-lb}; it sidesteps it by computing
@@ -1877,7 +1877,7 @@ the cost is governed by \(|C_q|\) rather than by the ambient dimension \(n\).}
 time and memory are observed measurements. Naive storage lower bound is \(n\,2^n/8\) bytes
 (Proposition~\ref{prop:materialization-lb}); naive time lower bound extrapolates at
 \(10^9\) rows per second and is a theoretical lower bound, not an empirical measurement for any
-specific machine. At \(n=30\) naive materialization is demanding but feasible; by \(n=60\) it
+specific machine. At \(n=30\) naive materialisation is demanding but feasible; by \(n=60\) it
 requires multi-decade machine time at any realistic throughput. The exact causal method remains
 stable across the full range because its cost is governed by the bounded support-union size, not
 by the ambient dimension \(n\).}
@@ -1892,7 +1892,7 @@ sub-millisecond to low-millisecond range. The naive lower bounds, by contrast, f
 \(2^n\) scaling. At \(n=60\) they cross the exabyte storage threshold; at \(n=80\) they require
 more than \(3\times10^7\) years at idealised throughput; at \(n=200\) the required storage exceeds
 any physically realised medium by many orders of magnitude. These figures mark the regime in which
-exhaustive materialization ceases to be a meaningful reference class, and exact causal
+exhaustive materialisation ceases to be a meaningful reference class, and exact causal
 representation becomes the only disciplined path to exactness.
 
 \subsection{Four Computational Paths at \texorpdfstring{\(n=10\)}{n=10}}\label{sec:four-paths}
