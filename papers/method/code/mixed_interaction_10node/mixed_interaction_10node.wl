@@ -1,9 +1,5 @@
 baseDir = DirectoryName[$InputFileName];
-projectRoot = Nest[DirectoryName, baseDir, 4];
-
-AppendTo[$Path, FileNameJoin[{projectRoot, "src", "Packages"}]];
-Needs["Integration`Experiments`"];
-Needs["Integration`Gates`"];
+Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
 
 cm10 = {
   {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
@@ -117,7 +113,7 @@ texVector[list_List] := "\\texttt{" <> formatVector[list] <> "}";
 texNodeSet[list_List] := texSet[list];
 
 ics10 = Table[Flatten@Position[cm10[[k]], 1], {k, 1, n10}];
-dispatch10 = Integration`Experiments`CreateRepertoiresDispatch[cm10, dyn10, params10];
+dispatch10 = CreateRepertoiresDispatch[cm10, dyn10, params10];
 inputs10 = Normal@dispatch10["RepertoireInputs"];
 outputs10 = Normal@dispatch10["RepertoireOutputs"];
 

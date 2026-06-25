@@ -1,8 +1,5 @@
 baseDir = DirectoryName[$InputFileName];
-projectRoot = Nest[DirectoryName, baseDir, 4];
-
-AppendTo[$Path, FileNameJoin[{projectRoot, "src", "Packages"}]];
-Needs["Integration`Gates`"];
+Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
 
 cm10 = {
   {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
@@ -39,11 +36,11 @@ nextState10[state_List] := Module[{inputs, gate, p},
     p = Lookup[params10, i, <||>];
     Which[
       gate === "IMPLIES" || gate === "NIMPLIES",
-        Integration`Gates`ApplyGate[gate, {state[[p["pair"][[1]]]], state[[p["pair"][[2]]]]}, p],
+        ApplyGate[gate, {state[[p["pair"][[1]]]], state[[p["pair"][[2]]]]}, p],
       gate === "NOT",
-        Integration`Gates`ApplyGate[gate, {First[inputs]}, p],
+        ApplyGate[gate, {First[inputs]}, p],
       True,
-        Integration`Gates`ApplyGate[gate, inputs, p]
+        ApplyGate[gate, inputs, p]
     ],
     {i, 1, n10}
   ]
