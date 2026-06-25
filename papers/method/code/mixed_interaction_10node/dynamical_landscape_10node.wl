@@ -68,7 +68,7 @@ findCyclesFunctional[nextIdx_List] := Module[
       current = nextIdx[[current]];
     ];
     If[KeyExistsQ[pos, current],
-      cycle = path[[pos[current]] ;;];
+      cycle = Drop[path, pos[current] - 1];
       AppendTo[cycles, cycle];
     ];
     Scan[(status[[#]] = 1) &, path];
@@ -272,14 +272,14 @@ sessionLines = {
   "Out = " <> ToString[InputForm[Length[imageStates10]]],
   "",
   "(* Genuine recurrent attractors of the 10-node transition graph *)",
-  "In := attractors10 = " <> ToString[InputForm[cycleSummary10[[All, \"StateStrings\"]]]],
-  "Out = " <> ToString[InputForm[<|\"Periods\" -> cycleSummary10[[All, \"Period\"]], \"Basins\" -> cycleSummary10[[All, \"BasinSize\"]]|>]],
+  "In := attractors10 = " <> ToString[InputForm[cycleSummary10[[All, "StateStrings"]]]],
+  "Out = " <> ToString[InputForm[<|"Periods" -> cycleSummary10[[All, "Period"]], "Basins" -> cycleSummary10[[All, "BasinSize"]]|>]],
   "",
   "(* Dynamical status of the four full-output cases *)",
-  "In := fullStatus10 = " <> ToString[InputForm[Table[<|\"Name\" -> c[\"Name\"], \"Reachable\" -> c[\"ReachableQ\"], \"Recurrent\" -> c[\"RecurrentQ\"], \"CycleID\" -> c[\"CycleID\"], \"TransientLength\" -> c[\"TransientLength\"]|>, {c, fullCaseStatus10}]]],
+  "In := fullStatus10 = " <> ToString[InputForm[Table[<|"Name" -> c["Name"], "Reachable" -> c["ReachableQ"], "Recurrent" -> c["RecurrentQ"], "CycleID" -> c["CycleID"], "TransientLength" -> c["TransientLength"]|>, {c, fullCaseStatus10}]]],
   "",
   "(* Dynamical status of the subsystem families *)",
-  "In := subsystemStatus10 = " <> ToString[InputForm[Table[<|\"Name\" -> c[\"Name\"], \"Rows\" -> c[\"RowCount\"], \"DistinctOutputs\" -> c[\"DistinctOutputStrings\"], \"RecurrentOutputs\" -> c[\"RecurrentOutputStrings\"], \"CycleIDs\" -> c[\"CycleIDs\"]|>, {c, subsystemCaseStatus10}]]],
+  "In := subsystemStatus10 = " <> ToString[InputForm[Table[<|"Name" -> c["Name"], "Rows" -> c["RowCount"], "DistinctOutputs" -> c["DistinctOutputStrings"], "RecurrentOutputs" -> c["RecurrentOutputStrings"], "CycleIDs" -> c["CycleIDs"]|>, {c, subsystemCaseStatus10}]]],
   "",
   "Out = True"
 };

@@ -22,7 +22,13 @@ run_wl() {
     name="$(basename "$script")"
     echo "    [wl]  $name"
     if command -v "$WOLFRAM" &>/dev/null || [[ -x "$WOLFRAM" ]]; then
-        "$WOLFRAM" -file "$script"
+        # Pass HOME explicitly so the kernel can locate its licence file.
+        # Use -script for WolframKernel; -file for wolframscript.
+        if [[ "$WOLFRAM" == *"WolframKernel"* ]]; then
+            HOME="${HOME:-$( cd ~ && pwd )}" "$WOLFRAM" -script "$script"
+        else
+            HOME="${HOME:-$( cd ~ && pwd )}" "$WOLFRAM" -file "$script"
+        fi
     else
         echo "    SKIP: Wolfram command not found ('$WOLFRAM'). Set WOLFRAM env var to proceed."
     fi

@@ -52,27 +52,56 @@ packages). Simply clone and run.
 bash run_all.sh
 ```
 
-Override the Wolfram executable if needed:
+The script auto-detects your Wolfram executable. Override if needed:
 
 ```bash
+# macOS — Mathematica installed via standard installer
 WOLFRAM=/Applications/Wolfram.app/Contents/MacOS/WolframKernel bash run_all.sh
+
+# If wolframscript is on your PATH
 WOLFRAM=wolframscript bash run_all.sh
+
+# Use a different Python interpreter
+PYTHON=python3.11 bash run_all.sh
 ```
+
+> **macOS note**: if the Wolfram kernel prints `No valid password found`, prefix
+> the command with `HOME=/Users/<your-username>` so the kernel can locate its
+> licence file:
+> ```bash
+> HOME=/Users/alberto WOLFRAM=/Applications/Wolfram.app/Contents/MacOS/WolframKernel bash run_all.sh
+> ```
 
 ### Individual experiments
 
+#### Mathematica (`.wl`) scripts
+
+The confirmed working invocation on macOS is:
+
 ```bash
-# ── Experiment 1: 6-node corroboration ──────────────────────────────────────
-wolframscript -file corroboration_6node/corroboration_6node.wl
-wolframscript -file corroboration_6node/ordering_invariance_6node.wl
+KERNEL=/Applications/Wolfram.app/Contents/MacOS/WolframKernel
+
+# Experiment 1 — 6-node corroboration
+HOME=$HOME "$KERNEL" -script corroboration_6node/corroboration_6node.wl
+HOME=$HOME "$KERNEL" -script corroboration_6node/ordering_invariance_6node.wl
+
+# Experiment 2 — 10-node mixed interaction
+HOME=$HOME "$KERNEL" -script mixed_interaction_10node/mixed_interaction_10node.wl
+HOME=$HOME "$KERNEL" -script mixed_interaction_10node/dynamical_landscape_10node.wl
+```
+
+All paths must be absolute or relative to the repository root directory.
+
+#### Python (`.py`) scripts
+
+```bash
+# Experiment 1
 python3 corroboration_6node/ordering_invariance_6node.py
 
-# ── Experiment 2: 10-node mixed interaction ──────────────────────────────────
-wolframscript -file mixed_interaction_10node/mixed_interaction_10node.wl
-wolframscript -file mixed_interaction_10node/dynamical_landscape_10node.wl
+# Experiment 2
 python3 mixed_interaction_10node/dynamical_landscape_10node.py
 
-# ── Experiment 3: Scalability resource envelope ──────────────────────────────
+# Experiment 3
 python3 scalability_resource_envelope/scalability_resource_envelope.py
 ```
 
