@@ -494,8 +494,18 @@ CANALISING & depends on fallback rule, but collapses on trigger band & reduced o
 \label{tab:dynamic-pattern-summary}
 \end{table}
 
-\begin{proof}[Proof sketch]
-The sensitivity formulas follow directly from counting the input rows at which a single-bit flip crosses the gate's decision boundary. For AND and OR this occurs only at the all-one or all-zero extremes and their one-bit neighbours, yielding \(d/2^{d-1}\); for XOR and XNOR every single-input flip changes parity, yielding \(d\); for NOT every flip changes the output, yielding \(1\); and for KOFN the boundary lies on the Hamming layer \(k-1\), giving the stated binomial count. The pattern outcomes follow from whether the rule can ever be constant on the full ordered repertoire: threshold extremes and some canalising parameter choices can collapse to \(0\) or \(1\), whereas the non-degenerate families remain variable and therefore produce \(*\).
+\begin{proof}
+Average sensitivity \(\bar{s}\) counts, for each input position, the fraction of input vectors on which flipping that position changes the output, then sums over all positions.
+
+\emph{AND/OR.} For AND of arity \(d\), flipping input \(i\) changes the output only when all other inputs equal one. There are \(2^{d-1}\) total assignments to the remaining inputs, and exactly one of them (all ones) is sensitive. Summing over all \(d\) inputs gives \(\bar{s}=d/2^{d-1}\). By De Morgan duality, OR has the same average sensitivity.
+
+\emph{XOR/XNOR.} Flipping any single input toggles the parity of the sum. Therefore every input is sensitive on every input vector, giving \(\bar{s}=d\).
+
+\emph{NOT.} The single input is always sensitive: \(\bar{s}=1\).
+
+\emph{KOFN.} Flipping input \(i\) changes the output if and only if the remaining \(d-1\) inputs have Hamming weight exactly \(k-1\), so that the flip crosses the threshold. The number of such assignments is \(\binom{d-1}{k-1}\), giving sensitivity \(\binom{d-1}{k-1}/2^{d-1}\) per input and \(\bar{s}=d\binom{d-1}{k-1}/2^{d-1}\) in total.
+
+\emph{Pattern symbols.} The output column is constant (\(\pi=0\) or \(\pi=1\)) if and only if the gate evaluates to the same value on every input vector. For AND this occurs only vacuously (\(|\Ic|=0\)); for KOFN it occurs when \(k=0\) (always one) or \(k>d\) (always zero). Non-degenerate parameterisations produce at least one input giving output zero and at least one giving output one, hence \(\pi=*\).
 \end{proof}
 
 This summary is important for two reasons. First, it connects the present index-set calculus to perturbative behaviour rather than treating the one-set as a purely extensional object. Second, it explains why threshold extremes and canalising collapse play a special role in the validation programme: they are the principal mechanisms by which a formally non-trivial gate can still induce a constant output column.
