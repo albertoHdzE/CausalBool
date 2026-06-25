@@ -53,67 +53,28 @@
 
 \title{Causal Index-Set Calculus for Boolean Networks and Deterministic Reconstruction}
 \author{Alberto Hernández-Espinosa}
-\date{\today}
+\date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This research introduce a causality-first formalism for Boolean networks using compression to small rules.
-This can be considered a specific instance of algorithmic probability for finding the causal structure of a Boolean network. 
-The basic object is not a sampled trajectory nor a statistical summary, but the set of rules that reconstructs
-the behaviour of a complex network.  This yields a deterministic calculus in which monotone, parity, implication, threshold, 
-and canalising gates admit closed-form one-sets; MSB-first and LSB-first enumerations are related by an 
-explicit bit-reversal involution; and mixed-gate network outputs are reconstructed exactly by column-wise 
-composition of local index sets. The method provides a mathematically transparent alternative to brute-force 
-repertoire enumeration and to purely probabilistic learning. Existing validation artefacts support exact 
-equality to exhaustive baselines at medium sizes, exact sampled equality at larger sizes, and clear 
-constant-factor gains for analytic prediction over gate-dispatch or truth-table lookup.
+We introduce a causality-first index-set calculus for Boolean networks in which the basic
+object is not a sampled trajectory or a statistical summary, but the exact set of rules that
+reconstructs network behaviour from local gate semantics over ordered exhaustive repertoires.
+The calculus yields closed-form one-sets for monotone, parity, implication, threshold, and
+canalising gate families; relates MSB-first and LSB-first enumerations by an explicit
+bit-reversal involution; and reconstructs mixed-gate network outputs exactly by column-wise
+composition of local index sets. Overlap among queried gate supports is exploited analytically
+to compress the effective evaluation space from \(2^{d_q}\) to \(2^{\mu_q}\), where \(\mu_q\)
+counts repeated coordinates. Deterministic benchmarks confirm exact equality to exhaustive
+baselines at medium sizes (\(n\leq 13\)), exact sampled equality at larger sizes
+(\(n\in\{20,50\}\)), and sub-millisecond analytic evaluation at \(n=200\) under bounded
+in-degree. The method provides a mathematically transparent alternative to brute-force
+repertoire enumeration and to purely probabilistic surrogates when the generating mechanism
+is known.
 \end{abstract}
 
-\begin{comment}
-\section{Introduction}
-The central difficulty in Boolean-network analysis is not lack of computational power; it is lack of causal compression. 
-One can always enumerate a repertoire, print a truth table, or run a simulation. What remains elusive is a representation 
-that is at once exact, compositional, and explanatory. For a high-level scientific treatment, this distinction matters: 
-a method that merely reproduces outputs is weaker than a method that identifies the rule structure responsible for them.
-
-This paper advances the following thesis. Ordered exhaustive repertoires contain a non-trivial algebraic structure, 
-and this structure can be exploited to replace brute-force enumeration by exact causal formulae. Once the ordering 
-convention is fixed, the question ``what does this network do?'' can be recast as ``at which repertoire indices is 
-each local rule active, and how do those index sets compose?'' The result is an index-set calculus for Boolean networks.
-
-The perspective is causality-first in three senses. First, it is rule-first rather than correlation-first: 
-the object of study is the generative logic of the system, not only its observed frequencies. Second, it is 
-deterministic rather than statistical: the method aims at exact reconstruction under known dynamics, 
-not at approximate inference under unknown mechanisms. Third, it is compositional: global behaviour 
-is built from local causal rules rather than from opaque end-to-end approximations.
-
-This places the work in dialogue with two important traditions without collapsing into either of them. 
-The first is the tradition of simple rules generating rich behaviour, exemplified by Wolfram's programme 
-on discrete systems and its principle of computational equivalence. The second is the algorithmic-causality 
-tradition associated with perturbation, reprogrammability, and generative explanation, developed in part by 
-Zenil and collaborators in previous work such as \cite{zenilcalculus} and \cite{zenildeconv}
-that whie are closely aligned with the present paper in spirit: they treat complex systems as computational objects 
-and emphasise algorithmic probability, generative mechanisms, and causation over surface statistics. 
-Likewise, \emph{An Algorithmic Information Calculus for Causal Discovery and Reprogramming Systems} 
-provides an intervention-oriented calculus for discovering and steering hidden generating mechanisms 
-from observations.
-
-The present contribution is both inspired by and distinct from that line of work. Zenil's framework 
-is largely inferential and interventionist: it seeks to reconstruct likely generating mechanisms, 
-often from partial, disordered, or indirect observations, by means of algorithmic perturbation 
-analysis and model-oriented causal reasoning. Here the objective is different. We assume the 
-local Boolean rules and network structure are given, and we derive exact mathematical 
-expressions for the resulting behaviour over the full ordered repertoire. In that sense, 
-the method is less a causal-discovery calculus than a causal-expression calculus. It 
-remains connected to algorithmic probability and to the idea that simple rules can underwrite
- rich behaviour, but it is more law-like in the narrow physical sense: the target is a 
- closed-form deterministic description of behaviour, not an approximate recovery of an
-  unknown generator. This is precisely why the work is also close in spirit to Wolfram's 
-  emphasis on exact discrete rules, while differing from purely statistical or machine-learning 
-  approaches that learn predictive regularities without recovering the underlying analytic form.
-\end{comment}
 \section{Introduction}
 Since classical mechanics, physics and the natural sciences have
 treated causal structure, the identification of generative laws behind observed phenomena, as the
@@ -124,18 +85,16 @@ approximately, conditional on those assumptions holding. Judea Pearl's causal ca
 within statistics itself, showing that interventionist causal claims require machinery beyond
 observational correlation \cite{pearl2009causality}.
 
-In the other hand, algorithmic probability is rooted in the foundational work of Solomonoff,
-Kolmogorov, and Chaitin \cite{solomonoff1964formal,kolmogorov1965three,chaitin1966length}, and developed
- as algorithmic information dynamics
-\cite{zenilcalculus,zenildeconv} close aligned with the principle of
-Computational Equivalence (PCE) \cite{wolfram2002new} that claims that short generative rules, in principle, 
-are responsible for the full complexity observed in natural and
-computational systems. While PCE is a thesis about the world, 
-algorithmic-causality framework is an inferential and interventionist calculus for recovering such rules
-from observations \cite{zenilcalculus}, the present work aims at a concrete
-materialisation of the same underlying idea: it uses Boolean networks as an explicit artefact in which
-small local rules are shown, deterministically and in closed form, to generate the full complexity of the
-network's behaviour.
+On the other hand, algorithmic probability, rooted in the foundational work of Solomonoff,
+Kolmogorov, and Chaitin \cite{solomonoff1964formal,kolmogorov1965three,chaitin1966length}, and
+developed as algorithmic information dynamics \cite{zenilcalculus,zenildeconv}, is closely aligned
+with the Principle of Computational Equivalence (PCE) \cite{wolfram2002new}, which holds that short
+generative rules are, in principle, responsible for the full complexity observed in natural and
+computational systems. While PCE is a thesis about the world, the algorithmic-causality framework
+is an inferential and interventionist calculus for recovering such rules from observations
+\cite{zenilcalculus}. The present work aims at a concrete materialisation of the same underlying
+idea: it uses Boolean networks as an explicit artefact in which small local rules are shown,
+deterministically and in closed form, to generate the full complexity of the network's behaviour.
 
 The central difficulty in Boolean-network analysis is therefore not lack of computational power; it is
 lack of causal compression. One can always enumerate a repertoire, print a truth table, or run a
@@ -145,7 +104,7 @@ reproduces outputs is weaker than a method that identifies the rule structure re
 
 This paper advances the following thesis. Ordered exhaustive repertoires contain a non-trivial algebraic
 structure, and this structure can be exploited to replace brute-force enumeration by exact causal formulae.
-Once the ordering convention is fixed, the question ``what does this network can do?'' can be recast as ``at
+Once the ordering convention is fixed, the question ``what can this network do?'' can be recast as ``at
 which conditions is each local rule active, and how do those conditions compose?'' The result is an
 index-set calculus for Boolean networks.
 
@@ -157,16 +116,15 @@ inference under unknown mechanisms, departing from the assumption-laden regime o
 learning. Third, it is compositional: global behaviour is built from local causal rules rather than from
 opaque end-to-end approximations.
 
-This perspective merges simple rules that generate full and accurately the behaviour of a complex system, exemplified by 
-PCE \cite{wolfram2002new} and the methods of algorithmic-causality associated with perturbation, 
-reprogrammability, and generative
-explanation, developed in \cite{zenilcalculus} and \cite{zenildeconv}, when a complex systems 
-is treated as computational objects emphasizing
-algorithmic probability, generative mechanisms, and causation over surface statistics 
-\cite{zenilcalculus} providing an intervention-oriented calculus for discovering and steering hidden
-generating mechanisms from observations.
+This perspective connects two traditions. The first is PCE \cite{wolfram2002new}, which
+demonstrates that simple discrete rules generate the full complexity observed in natural and
+computational systems. The second is the algorithmic-causality programme
+\cite{zenilcalculus,zenildeconv}, which treats complex systems as computational objects and
+provides an intervention-oriented calculus for discovering and steering hidden generating
+mechanisms from observations, emphasising algorithmic probability, generative mechanisms, and
+causation over surface statistics.
 
-While this contribution is inspired by \cite{zenilcalculus,zenildeconv}, here the objective is slightly different. We
+While the present contribution is inspired by both traditions, its objective is distinct. We
 assume the local Boolean rules and network structure are given, and we derive exact mathematical
 expressions for the resulting behaviour over the full ordered repertoire. In that sense, the method is less
 a causal-discovery calculus than a causal-expression calculus. It remains connected to algorithmic
@@ -188,11 +146,8 @@ The paper makes six principal claims.
 \item Complexity improvements arise not by magic removal of the \(2^n\) state space, but by replacing brute-force gate evaluation with explicit causal formulae, by enabling exact query answering without full matrix materialisation, and by reducing the validation burden through principled sampling.
 \end{enumerate}
 
-\begin{comment}
-\paragraph{Roadmap and evidential structure.}
-The paper is organised to mirror these claims. Sections 2 and 3 define the ordered-repertoire formalism and the basic index objects needed for exact reasoning. Section 4 derives the gate-family one-sets and their expanded forms, thereby establishing claims \textbf{C1} and \textbf{C2}. The worked examples and corroboration package then show how those formulas are unfolded into explicit repertoire locations. Sections 5 and 6 prove that the calculus is invariant under ordering changes and composes into exact network-level reconstruction, establishing claims \textbf{C3} and \textbf{C4}. Section 7 clarifies what is and is not improved computationally, while Section 8 assembles the validation ladder that supports claims \textbf{C5} and \textbf{C6}: implementation consistency, gate-level property tests, medium-scale exact equality, large-scale sampled audits, and perturbative robustness benchmarks. The appendices preserve the broader experimental programme without interrupting the theorem-to-evidence flow of the main argument.
-\end{comment}
-
+\paragraph{Structure of the paper.}
+Sections~2 and~3 define the ordered-repertoire formalism and the basic index objects needed for exact reasoning. Section~4 derives the gate-family one-sets and their expanded forms, establishing claims \textbf{C1} and \textbf{C2}, and presents worked examples including a detailed AND deconvolution, a composed XOR case, and a 10-node mixed-gate benchmark with overlap analysis and dynamical enrichment. Section~5 proves ordering invariance (\textbf{C3}), and Section~6 characterises the scalability and resource envelope of exact causal evaluation (\textbf{C6}). Section~\ref{sec:validation} assembles the validation programme that supports claims \textbf{C4} and \textbf{C5}. The appendices collect exact gate expansions, sensitivity formulae, the validation artefact index, and an extended experimental programme.
 
 \section{Formal Setup}
 Let \(cm \in \bits^{n \times n}\) be the connectivity matrix of a Boolean network, where \(cm_{ij}=1\) means that node \(j\) feeds node \(i\). Let
@@ -280,7 +235,7 @@ parity classes capture XOR-like structure, and Hamming-weight strata capture thr
 Following sections show that standard gate families are simple set expressions built from them.
 
 \section{Exact Gate Formulae}
-The following proposition collects the exact one-set formulae for the gate families currently supported by the repository-level analysis series.
+The following proposition collects the exact one-set formulae for the gate families supported by the calculus.
 
 \begin{proposition}[Gate-Family One-Sets]\label{prop:gate-family-one-sets}
 Let node \(k\) have connected-input set \(\Ic\). Under a fixed repertoire ordering, the set of indices at which node \(k\) outputs one is given as follows.
@@ -453,7 +408,7 @@ For strict-exact thresholding,
 \sum_{i\in\Ic} v_i(j)=k
 \Bigr\}.
 \]
-Thus threshold families are controlled by Hamming-weight layers rather than by parity or a single pivot.
+Thus threshold families are controlled by Hamming-weight layers rather than by parity or a single pivot. The MAJORITY gate is the special case \(k=\lceil|\Ic|/2\rceil\), so its one-set is the union of weight layers at or above the strict majority threshold.
 
 \paragraph{Canalising family.}
 Let the canalising input be \(c\), the canalising value be \(\nu\in\bits\), the trigger output be \(o\in\bits\), and the fallback one-set be \(\J_h\). Define the trigger set
@@ -487,7 +442,7 @@ Let \(Y\in\bits^{2^n\times n}\) be the output matrix over the ordered exhaustive
 \]
 \end{definition}
 
-This three-symbol alphabet captures a useful distinction that repeatedly appears in the repository validation suite. Some rules are structurally non-trivial but still constant over a declared repertoire because parameters collapse them to extreme cases; others remain genuinely varying and therefore receive the symbol \(*\).
+This three-symbol alphabet captures a useful distinction that repeatedly appears in the validation programme. Some rules are structurally non-trivial but still constant over a declared repertoire because parameters collapse them to extreme cases; others remain genuinely varying and therefore receive the symbol \(*\).
 
 \begin{proposition}[Dynamic Summary of Canonical Gate Families]\label{prop:dynamic-summary}
 For a gate of arity \(d\) under the uniform exhaustive repertoire, the families in Table~\ref{tab:dynamic-pattern-summary} satisfy the listed monotonicity, average sensitivity, and pattern behaviour.
@@ -510,7 +465,7 @@ strict-KOFN & monotone increasing & \(\bar{s}=d\binom{d-1}{k}/2^{d-1}\) & \(1\) 
 CANALISING & depends on fallback rule, but collapses on trigger band & reduced on trigger band; exact value depends on fallback & constant on trigger band; globally \(0\), \(1\), or \(*\) depending on fallback and trigger output \\
 \bottomrule
 \end{tabular}
-\caption{Dynamic properties associated with the exact gate families. The table condenses the material developed in the repository-level analysis series into manuscript form: monotonicity class, average sensitivity under the uniform exhaustive repertoire, and the resulting coarse pattern symbol \(\pi_i\).}
+\caption{Dynamic properties associated with the exact gate families. Dynamic properties of the exact gate families: monotonicity class, average sensitivity under the uniform exhaustive repertoire, and the resulting coarse pattern symbol \(\pi_i\).}
 \label{tab:dynamic-pattern-summary}
 \end{table}
 
@@ -521,7 +476,7 @@ The sensitivity formulas follow directly from counting the input rows at which a
 This summary is important for two reasons. First, it connects the present index-set calculus to perturbative behaviour rather than treating the one-set as a purely extensional object. Second, it explains why threshold extremes and canalising collapse play a special role in the validation programme: they are the principal mechanisms by which a formally non-trivial gate can still induce a constant output column.
 
 \subsection{Detailed example}
-This section present one detailed deconvolution example and then a larger catalogue example containing one instance of each gate family.
+This section presents one detailed deconvolution example and then a larger catalogue example containing one instance of each gate family.
 
 \subsubsection{AND case}
 Fix LSB-first ordering and consider a node governed by AND on the connected-input set \(\Ic=\{2,4\}\) 
@@ -586,9 +541,9 @@ Free bits \((v_1,v_3,v_5,v_6)\) & Offset \(\delta\) & Index \(j=11+\delta\) & AN
 This example shows one central idea of the paper. The exhaustive repertoire has \(64\) rows, but the rule itself is encoded by two short objects: one pivot location, \(\{11\}\), and one offset set, \(\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}\). Deconvolution unfolds the rule back into the exact index list without row-wise recomputation.
 
 \paragraph{Deconvolution explained.}
-To explain implications on deconvolution process here we focus on node 6 as gate AND shown in 
-figures~\ref{fig:corroboration-matrices} and~\ref{fig:corroboration-network}, 
-using a real Mathematica script.
+We illustrate the deconvolution process on node~5 (AND gate) from the network in
+Figures~\ref{fig:corroboration-matrices} and~\ref{fig:corroboration-network},
+using an executed Mathematica script.
 
 
 \begin{figure}[t]
@@ -661,7 +616,7 @@ should coincide exactly with the rows of the exhaustive table~\ref{tab:corrobora
 \draw[->, thick] (n5) to[bend right=12] (n6);
 \end{tikzpicture}
 \end{adjustbox}
-\caption{Six-node network containing five gate families}
+\caption{Six-node corroboration network. Nodes~1--4 (blue) provide inputs; nodes~5 and~6 (red) are the targets of the AND and XOR corroboration, respectively. Edge directions follow the connectivity matrix \(cm^{(\mathrm{corr})}\) in Figure~\ref{fig:corroboration-matrices}.}
 \label{fig:corroboration-network}
 \end{figure}
 
@@ -830,7 +785,7 @@ isplays the fully unfolded repertoire consequences of that law.
 
 
 \subsubsection{XOR case}
-In this section XOR case is shown. using the same six-node network show in fig~\ref{fig:corroboration-network},
+The XOR case uses the same six-node network shown in Figure~\ref{fig:corroboration-network}.
 \[
 y_6=x_1\oplus x_3\oplus (x_2\land x_4).
 \]
@@ -854,14 +809,14 @@ After deconvolution, this gives
 &34,36,37,39,42,43,45,48,50,52,53,55,58,59,61,64\}.
 \end{aligned}
 \]
-Then is shown that the formalism does not depend on monotonicity. 
-In Table~\ref{tab:corroboration-exhaustive}, 
-the blue entries coincide exactly with this one-set, confirming that the 
-same calculus also recovers parity-based behaviour.
+This confirms that the formalism does not depend on monotonicity.
+In Table~\ref{tab:corroboration-exhaustive},
+the blue entries coincide exactly with this one-set, showing that the
+same calculus recovers parity-based behaviour as well.
 
 \subsubsection{Multiple Gates Interaction and Exact Reconstruction}
-In this section the case of multiple interacting nodes of distinct families 
-is shown resulting in simultaneous satisfaction of several heterogeneous constraints.
+We now consider the case of multiple interacting nodes of distinct families,
+resulting in simultaneous satisfaction of several heterogeneous constraints.
 
 For this example, consider the 10-node case described in fig~\ref{fig:mixed10-ring}. 
 Its local input sets and exact one-set formulas are shown in table~\ref{tab:mixed10-node-formulas}.
@@ -891,7 +846,7 @@ Its local input sets and exact one-set formulas are shown in table~\ref{tab:mixe
 
 
 Here node \(4\) is a \(2\)-of-\(3\) threshold gate and node \(10\) is a strict majority gate on four inputs. 
-Its important to point out that the network is not homogeneous: monotone, parity, negation, implication, 
+It is important to note that the network is not homogeneous: monotone, parity, negation, implication, 
 and threshold mechanisms coexist in the same causal object.
 
 
@@ -936,7 +891,7 @@ and threshold mechanisms coexist in the same causal object.
 \draw[->, thick] (n7) to[bend right=18] (n10);
 \draw[->, thick] (n8) to[bend right=10] (n10);
 \end{tikzpicture}
-\caption{10-node Network. With subsystems highlighted in colors.}
+\caption{Ten-node mixed-gate benchmark network. Blue nodes use monotone or parity gates; red nodes use threshold, negation, implication, or majority gates. The heterogeneous gate mixture is the basis for the overlap and dynamical analyses that follow.}
 \label{fig:mixed10-ring}
 \end{figure}
 
@@ -1319,18 +1274,7 @@ representation is already a fully determined decimal base set.}
 
 \begin{table}[H]
 \begin{lstlisting}[style=MathematicaStyle]
-In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-              {1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-              {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
-              {0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
-              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-              {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
-              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-              {1, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-              {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-              {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}}
-In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
-In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
+(* Network definition as in Listing 2 above *)
 
 (* F3: All active except y9 *)
 In := resF310 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}]
@@ -1370,18 +1314,7 @@ ersists because the support union still saturates all ten coordinates.}
 
 \begin{table}[p]
 \begin{lstlisting}[style=MathematicaStyle]
-In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-              {1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-              {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
-              {0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
-              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-              {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
-              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-              {1, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-              {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-              {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}}
-In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
-In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
+(* Network definition as in Listing 2 above *)
 
 (* S1: Threshold-XNOR-NOT-majority event *)
 In := resS110 = mixedQueryRepresentation[{4, 6, 7, 10}, {0, 1, 1, 1}]
@@ -2151,6 +2084,8 @@ This has four consequences.
 
 \item \emph{Computational discipline.} Approximate shortcuts are separated cleanly from exact analytic prediction. The method distinguishes three regimes: exact analytic evaluation (sub-millisecond per row, cost governed by \(|C_q|\) under Proposition~\ref{prop:support-locality}), exact exhaustive materialisation (exponential in \(n\), feasible for small networks), and stratified-sampled audit (linear in the sample size, used for large-scale corroboration without replacing the exact layer). Conflating these three regimes would obscure what the method actually achieves. Keeping them separate, as Propositions~\ref{prop:per-row-cost} and~\ref{prop:validation-burden} do, ensures that claims about efficiency are tied to exact formal statements rather than to informal comparisons.
 \end{enumerate}
+
+Two limitations should be stated explicitly. First, the computational advantage depends on bounded support size: when the query support \(|C_q|\) approaches the ambient dimension \(n\), the analytic path converges to the cost of exhaustive materialisation. The method is therefore most powerful for networks with bounded in-degree and localised query scope. Second, the present formalism treats synchronous one-step update; asynchronous or stochastic schedules are discussed in Appendix~D but are not yet integrated into the core calculus.
 
 The method should therefore be read as a causal-computational mathematics paper with later applications to biological and other complex systems, not as a biology paper wearing mathematical vocabulary. That distinction matters for publication strategy. The main paper foregrounds exact definitions, theorems, worked examples, and exact validation. Broader applications can then be layered onto a firmer foundation.
 
