@@ -63,6 +63,10 @@ echo "--- Experiment 3: Scalability resource envelope ---"
 run_py "$ROOT/scalability_resource_envelope/scalability_resource_envelope.py"
 
 echo ""
+echo "--- Experiment 4: Complexity analysis ---"
+run_py "$ROOT/complexity_analysis/complexity_analysis.py"
+
+echo ""
 echo "================================================================="
 echo "  All experiments completed."
 echo "================================================================="
