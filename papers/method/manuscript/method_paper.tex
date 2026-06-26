@@ -14,6 +14,7 @@
 \usepackage{tikz}
 \usepackage{hyperref}
 \usepackage{comment}
+\usepackage[ruled,lined,linesnumbered]{algorithm2e}
 \usetikzlibrary{arrows.meta,positioning}
 
 \newtheorem{theorem}{Theorem}
@@ -151,7 +152,7 @@ analytic form \cite{pearl2009causality}.
 
 In what follows, we show that ordered exhaustive repertoires admit an algebraic structure that supports exact, network-aware one-set formulae for all canonical gate families; that ordering changes are controlled by an explicit involution, rendering exactness invariant under representation; and that mixed-gate synchronous networks can be reconstructed exactly by composing local index sets. The resulting complexity improvements arise not by removing the \(2^n\) state space but by replacing brute-force gate evaluation with explicit causal formulae, enabling exact query answering without full matrix materialisation, and reducing the validation burden through principled sampling.
 
-Sections~2 and~3 define the ordered-repertoire formalism and the index objects needed for exact reasoning. Section~4 derives the gate-family one-sets and their expanded forms, and presents worked examples including a detailed AND deconvolution, a composed XOR case, and a 10-node mixed-gate benchmark with overlap analysis and dynamical enrichment. Section~5 proves ordering invariance, and Section~6 characterises the scalability and resource envelope of exact causal evaluation. Section~\ref{sec:validation} assembles the validation programme. The appendices collect exact gate expansions, sensitivity formulae, the validation artefact index, and an extended experimental programme.
+Sections~2 and~3 define the ordered-repertoire formalism and the index objects needed for exact reasoning. Section~4 derives the gate-family one-sets and their expanded forms, and presents worked examples including a detailed AND deconvolution, a composed XOR case, and a 10-node mixed-gate benchmark with overlap analysis and dynamical enrichment. Section~5 proves ordering invariance, and Section~6 characterises the scalability and resource envelope of exact causal evaluation together with a validation summary. The appendices collect exact gate expansions, sensitivity formulae, the validation artefact index, and an extended experimental programme. All computational experiments are reproducible via the companion code repository (see Appendix~C for details).
 
 \section{Formal Setup}
 Let \(cm \in \bits^{n \times n}\) be the connectivity matrix of a Boolean network, where \(cm_{ij}=1\) means that node \(j\) feeds node \(i\). Let
@@ -596,7 +597,7 @@ This example shows one central idea of the paper. The exhaustive repertoire has 
 \paragraph{Deconvolution explained.}
 We illustrate the deconvolution process on node~5 (AND gate) from the network in
 Figures~\ref{fig:corroboration-matrices} and~\ref{fig:corroboration-network},
-using the computational implementation described below.
+following Algorithm~\ref{alg:deconvolution}.
 
 
 \begin{figure}[t]
@@ -694,8 +695,7 @@ should coincide exactly with the rows of the exhaustive table~\ref{tab:corrobora
 
 \normalsize
 
-The shared exhaustive table~\ref{tab:corroboration-exhaustive} and the computational corroboration in
-Table~\ref{lst:corroboration-session-and} confirm exactly these analytically predicted indices.
+The shared exhaustive table~\ref{tab:corroboration-exhaustive} and Algorithm~\ref{alg:deconvolution} confirm exactly these analytically predicted indices.
 
 \begin{table}[p]
 \centering
@@ -780,27 +780,19 @@ Table~\ref{lst:corroboration-session-and} confirm exactly these analytically pre
 
 
 
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{p{0.28\linewidth}p{0.62\linewidth}}
-\toprule
-\textbf{Step} & \textbf{Result} \\
-\midrule
-Compressed representation &
-  Base set \(L=\{11\}\); offsets \(\Omega=\{0,1,4,5,16,17,\) \(20,21,32,33,36,37,48,49,52,53\}\) \\
-Deconvolution &
-  \(\operatorname{Dec}(L,\Omega)=\{11,12,15,16,27,28,\) \(31,32,43,44,47,48,59,60,63,64\}\) \\
-Exhaustive corroboration &
-  \(\J_5^{\mathrm{AND}}=\{j\in\U : y_5(j)=1\}\) --- exact equality confirmed \\
-\bottomrule
-\end{tabular}
-\caption{Computational corroboration for node~5 (AND) in the six-node network. The analytic compressed representation is deconvolved and compared against the exhaustive baseline; exact equality holds on all 64 repertoire rows. Full computational scripts are available in the companion repository.}
-\label{lst:corroboration-session-and}
-\end{table}
+\begin{algorithm}[H]
+\caption{Exact one-set deconvolution}\label{alg:deconvolution}
+\KwIn{Connected-input set $\Ic$, network size $n$, ordering policy}
+\KwOut{Exact one-set $\J$}
+Compute pivot $P(\Ic) = \sum_{i \in \Ic} w(i)$\;
+Compute free set $I_{nc} = \{1,\dots,n\} \setminus \Ic$\;
+Enumerate offset family $\Omega(I_{nc}) = \{\Delta_{nc}(\eta) : \eta \in \{0,1\}^{|I_{nc}|}\}$\;
+Compute base set $L = \{1 + P(\Ic)\}$\;
+\Return{$\J = \operatorname{Dec}(L, \Omega(I_{nc}))$}
+\end{algorithm}
 
 
-The analytic formula, the computational implementation, and the exhaustive table are three encodings of the same one-set. The formula
+The analytic formula and the exhaustive table are two encodings of the same one-set. The formula
 \[
 \J_5^{\mathrm{AND}}=\operatorname{Dec}\bigl(\{11\},\Omega(I_{nc})\bigr),
 \qquad
@@ -810,7 +802,7 @@ gives the causal law in closed form. Deconvolution unfolds it to the explicit in
 \[
 \{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\},
 \]
-which are precisely the rows of Table~\ref{tab:corroboration-exhaustive} where the fifth output column equals~\(1\). The computational implementation (available in the companion repository) operationalises this same deconvolution and confirms exact equality against the exhaustive baseline.
+which are precisely the rows of Table~\ref{tab:corroboration-exhaustive} where the fifth output column equals~\(1\).
 
 
 \subsubsection{XOR case}
@@ -1249,51 +1241,21 @@ In the single-gate AND example, the support has a simple rectangular structure: 
 showing that different global output patterns can inherit the same combinatorial skeleton even when their terminal constraints differ. What appears in the full repertoire as dispersed behaviour is therefore explained analytically as overlap-aware reuse of shared coordinates and repeated offset blocks.
 
 
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{@{}llcl@{}}
-\toprule
-\textbf{Query} & \textbf{Base set \(L\)} & \textbf{Offsets \(\Omega\)} & \textbf{Corroboration} \\
-\midrule
-F1: \(\sigma=1^{10}\) & \(\{143,215,399,400,471,472\}\) & \(\{0\}\) & exact \\
-F2: \(\sigma=1^9 0\) & \(\{15,87,271,272,343,344\}\) & \(\{0\}\) & exact \\
-F3: \(\sigma=1^8 01\) & \(\{655,727,911,912,983,984\}\) & \(\{0\}\) & exact \\
-F4: \(\sigma=1^5 01^4\) & \(\{79,207,335,336,463,464\}\) & \(\{0\}\) & exact \\
-\bottomrule
-\end{tabular}
-\caption{Computational corroboration for the four full-output queries on the 10-node benchmark.
-Because these queries satisfy \(C_q=[10]\),
-the offset family collapses to \(\{0\}\) and the base set is already fully determined.
-Each row was verified against the exhaustive baseline by exact equality on all 1024 repertoire rows.}
-\label{lst:mixed10-session-full-a}
-\label{lst:mixed10-session-full-b}
-\end{table}
+\begin{algorithm}[H]
+\caption{Mixed-query evaluation}\label{alg:mixed-query}
+\KwIn{Queried nodes $Q$, target pattern $\sigma$, connectivity $cm$, dynamics $dyn$}
+\KwOut{Exact satisfying index set $\J_q$}
+\For{each $i \in Q$}{Compute local one-set $\J_i$ via Proposition~\ref{prop:gate-family-one-sets}\;}
+Compute support union $C_q = \bigcup_{i \in Q} N_i$\;
+Compute free coordinates $F_q = [n] \setminus C_q$\;
+Enumerate support-level assignments on $C_q$\;
+Filter by intersection/complement conditions from $\sigma$\;
+Compute base set $L_q^{(0)}$ from satisfying assignments with $F_q = \mathbf{0}$\;
+Compute offset family $\Omega(F_q)$\;
+\Return{$\J_q = \operatorname{Dec}(L_q^{(0)}, \Omega(F_q))$}
+\end{algorithm}
 
-\begin{table}[H]
-\centering
-\small
-\begin{adjustbox}{max width=\textwidth,center}
-\begin{tabular}{@{}lp{0.22\linewidth}p{0.38\linewidth}c@{}}
-\toprule
-\textbf{Query} & \textbf{Base set \(L\)} & \textbf{Offsets \(\Omega\)} & \textbf{Corroboration} \\
-\midrule
-S1: nodes \(\{4,6,7,10\}\) &
-  \(\{141,217\}\) &
-  \(\{0,1,256,257,512,513,768,769\}\) &
-  exact \\[2pt]
-S2: nodes \(\{4,6,7,8,9,10\}\) &
-  12 indices (see Table~\ref{tab:mixed10-subsystem-rows}) &
-  \(\{0\}\) &
-  exact \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\caption{Computational corroboration for the subsystem queries. Query \(S1\) recovers a genuinely factorised pair (two base indices, eight offsets from free coordinates \(\{1,9,10\}\)); query \(S2\) saturates all ten coordinates and the offset family collapses to \(\{0\}\). Both are verified by exact equality against the exhaustive baseline. Full computational scripts are available in the companion repository.}
-\label{lst:mixed10-session-subsystem}
-\end{table}
-
-These computational results are the counterpart of the analytic overlap treatment.
+These results are the counterpart of the analytic overlap treatment.
 In the full-output queries, the offset family is \(\{0\}\) because
 the support union fills all ten coordinates, leaving no free offsets
 after intersection. In the \(S1\) query, by contrast, the
@@ -1304,8 +1266,7 @@ unfolds them to the 16 indices in \(\J_{\mathrm{S1}}\). In \(S2\), the
 additional constraints saturate the coordinate union again, so the
 offset family collapses to \(\{0\}\). In every case, exact equality
 against the exhaustive dispatch baseline has been confirmed on all 1024
-repertoire rows (Tables~\ref{lst:mixed10-session-full-a}
-and~\ref{lst:mixed10-session-subsystem}).
+repertoire rows.
 
 
 \subsubsection{Dynamical Landscape of the Same 10-Node Network}
@@ -1602,7 +1563,7 @@ Involution &
   \(\varphi(\varphi(j))=j\) for all \(j\in\{1,\dots,64\}\) & exact \\
 \bottomrule
 \end{tabular}
-\caption{Exact corroboration of ordering transport on the six-node benchmark. The LSB one-sets established in the AND and XOR examples are transported by \(\varphi\) and compared against direct MSB exhaustive baselines. The involution law \(\varphi\circ\varphi=\mathrm{id}\) is verified on the full universe \(\U=\{1,\dots,64\}\). Computational scripts are available in the companion repository.}
+\caption{Exact corroboration of ordering transport on the six-node benchmark. The LSB one-sets established in the AND and XOR examples are transported by \(\varphi\) and compared against direct MSB exhaustive baselines. The involution law \(\varphi\circ\varphi=\mathrm{id}\) is verified on the full universe \(\U=\{1,\dots,64\}\).}
 \label{lst:ordering-invariance-session}
 \end{table}
 
@@ -1610,10 +1571,9 @@ All correctness claims in this paper are therefore representation-invariant prov
 
 \section{Scalability and Resource Envelope of Exact Causal Evaluation}\label{sec:scalability}
 Correctness of the index-set calculus has been established through gate-family derivations, the
-detailed AND and XOR cases, the exact ten-node mixed-network analysis, the overlap-compression
-treatment, and the validation evidence in the following section. This section addresses the 
-question: \emph{in what computational regime does exact causal representation
-become operationally indispensable?}
+detailed AND and XOR cases, the exact ten-node mixed-network analysis, and the overlap-compression
+treatment. This section addresses the question: \emph{in what computational regime does exact causal
+representation become operationally indispensable?}
 
 Answering it requires first being precise about which representational objects are being compared,
 because exact causal evaluation and naive exhaustive materialisation do not produce the same object.
@@ -1846,6 +1806,43 @@ network. At \(n=10\), differences between exact paths are modest because full tr
 materialisation is still inexpensive; the regime where the structural distinction becomes decisive
 is the one probed in Tables~\ref{tab:exact-method} and~\ref{tab:synthesis}.
 
+\subsection{Validation Summary}
+
+Exact reconstruction has been verified at $n=10$ and $n=13$ by exhaustive comparison against the baseline repertoire, and at $n=20$ and $n=50$ by stratified importance sampling over Hamming-weight layers (1020 rows, seeds 301 and 302), with accuracy $1.0$ in all cases. The XOR flip probability $p_{\mathrm{flip}}(q,k) = (1-(1-2q)^k)/2$ provides an independent perturbative check. Table~\ref{tab:validation-map} summarises the mapping from formal claims to validation evidence.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{0.27\linewidth}p{0.20\linewidth}p{0.27\linewidth}p{0.12\linewidth}}
+\toprule
+\textbf{Formal claim} & \textbf{Validation layer} & \textbf{Evidence} & \textbf{Scale} \\
+\midrule
+Prop.~\ref{prop:gate-family-one-sets}: gate one-set exactness &
+Gate algebra; property tests &
+Per-gate corroboration; involution, band, De Morgan checks &
+\(|\Ic|\leq 6\) \\[3pt]
+Thm.~\ref{thm:ordering-invariance}: \(\varphi\) transports one-sets &
+Six-node ordering check &
+Table~\ref{tab:ordering-invariance-summary} &
+\(n=6\) \\[3pt]
+Thm.~\ref{thm:canonical-reconstruction}: network exactness &
+Dispatch consistency; phased benchmarks &
+Zero discrepancy at \(n\leq 4\); accuracy \(1.0\) at \(n\leq 13\) &
+\(n\leq 13\) \\[3pt]
+Prop.~\ref{prop:support-locality}: cost governed by \(|C_q|\) &
+Resource-envelope benchmark &
+Tables~\ref{tab:exact-method} and~\ref{tab:synthesis} &
+\(n\leq 200\) \\[3pt]
+Prop.~\ref{prop:validation-burden}: sampling reduces validation cost &
+Stratified sampled audit &
+Accuracy \(1.0\); seeds 301, 302 &
+\(n\in\{20,50\}\) \\
+\bottomrule
+\end{tabular}
+\caption{Mapping from formal claims to validation layers, following the theorem sequence of the manuscript.}
+\label{tab:validation-map}
+\end{table}
+
 \subsection{Mechanism Description Versus Dataset Complexity}
 
 A related but conceptually distinct comparison concerns description length rather than runtime. The
@@ -1890,126 +1887,10 @@ rigorous interpretation, these two levels should therefore be reported together:
 mechanism simplicity, while dataset metrics measure the complexity of the behaviour generated by
 that mechanism.
 
-\section{Validation Evidence}\label{sec:validation}
-The validation programme is organised so that each layer audits a distinct formal claim,
-progressing from local gate algebra to network-level reconstruction. The mapping between
-formal claims and validation layers is summarised in Table~\ref{tab:validation-map}.
+\section{Related Work}
+The index-set calculus draws on two intellectual traditions. Wolfram's programme on discrete systems~\cite{wolfram2002new} established that simple local rules generate rich global behaviour; the present contribution makes this concrete by deriving exact closed-form expressions that specify \emph{where} each rule is active within the ordered repertoire. The algorithmic-causality programme~\cite{zenilcalculus,zenildeconv} developed principled tools for causal discovery from observations; the present work addresses a complementary problem, deriving exact consequences of a \emph{known} mechanism rather than inferring an unknown one. In applications where the Boolean-network model is given, the index-set calculus applies directly; where the model must be inferred, the two approaches are natural complements.
 
-\begin{table}[h]
-\centering
-\small
-\begin{tabular}{p{0.27\linewidth}p{0.20\linewidth}p{0.27\linewidth}p{0.12\linewidth}}
-\toprule
-\textbf{Formal claim} & \textbf{Validation layer} & \textbf{Evidence} & \textbf{Scale} \\
-\midrule
-Prop.~\ref{prop:gate-family-one-sets}: gate one-set exactness &
-Gate algebra; property tests &
-Per-gate corroboration; involution, band, De Morgan checks &
-\(|\Ic|\leq 6\) \\[3pt]
-Thm.~\ref{thm:ordering-invariance}: \(\varphi\) transports one-sets &
-Six-node ordering check &
-Table~\ref{tab:ordering-invariance-summary} &
-\(n=6\) \\[3pt]
-Thm.~\ref{thm:canonical-reconstruction}: network exactness &
-Dispatch consistency; phased benchmarks &
-Zero discrepancy at \(n\leq 4\); accuracy \(1.0\) at \(n\leq 13\) &
-\(n\leq 13\) \\[3pt]
-Prop.~\ref{prop:support-locality}: cost governed by \(|C_q|\) &
-Resource-envelope benchmark &
-Tables~\ref{tab:exact-method} and~\ref{tab:synthesis} &
-\(n\leq 200\) \\[3pt]
-Prop.~\ref{prop:validation-burden}: sampling reduces validation cost &
-Stratified sampled audit &
-Accuracy \(1.0\); seeds 301, 302 &
-\(n\in\{20,50\}\) \\
-\bottomrule
-\end{tabular}
-\caption{Mapping from formal claims to validation layers, following the theorem sequence of the manuscript.}
-\label{tab:validation-map}
-\end{table}
-
-\subsection{Implementation-Consistency Layer}
-Before the analytic calculus can function as evidence, the deterministic implementations of
-repertoire generation and synchronous update must first be shown to be coherent with one another.
-A dispatch-consistency campaign compares the repertoire pipeline and the one-step dynamic pipeline
-on mixed-gate networks generated with fixed seeds. In the documented tests for \(n\in\{3,4\}\)
-and seeds \(41\) through \(50\), the discrepancy rate is zero across the full ordered repertoire.
-This layer is scientifically prior to the formula layer: if the reference implementations
-disagreed, then agreement between formulas and any one of them would be ambiguous. The
-zero-discrepancy result ensures that the baseline being matched is semantically well-defined.
-
-\subsection{Phased Predictive Benchmarks}
-Validation progresses from small pedagogical networks to a medium mixed-gate benchmark. In phase 1, two 3-node cases,
-\[
-(\mathrm{AND},\mathrm{OR},\mathrm{XOR})
-\qquad\text{and}\qquad
-(\mathrm{NAND},\mathrm{MAJORITY},\mathrm{OR}),
-\]
-both achieve accuracy \(1.0\). Their baseline times are \(2.94\times10^{-4}\,\mathrm{s}\) and \(2.57\times10^{-4}\,\mathrm{s}\), while their predictive times are \(3.55\times10^{-4}\,\mathrm{s}\) and \(3.45\times10^{-4}\,\mathrm{s}\), respectively.
-
-In phase 2, a 10-node mixed catalogue again achieves accuracy \(1.0\), with baseline time \(0.115983\,\mathrm{s}\) and predictive time \(0.176253\,\mathrm{s}\). These phase results matter because they show that exact predictive reconstruction is not restricted to one specially tuned showcase network. The method generalises across multiple mixed-gate compositions even before the faster closed-form analytic path is introduced.
-
-\begin{center}
-\begin{tabular}{p{0.25\linewidth}p{0.12\linewidth}p{0.12\linewidth}p{0.34\linewidth}}
-\toprule
-\textbf{Regime} & \textbf{Size} & \textbf{Accuracy} & \textbf{Meaning} \\
-\midrule
-Medium-scale exact reconstruction & \(n=10\) & \(1.0\) & Predictive reconstruction equals exhaustive baseline \\
-Medium-scale exact reconstruction & \(n=13\) & \(1.0\) & Predictive reconstruction equals exhaustive baseline \\
-Large-scale sampled validation & \(n=20\), \(1020\) samples & \(1.0\) & Exact equality on stratified sampled rows \\
-Large-scale sampled validation & \(n=50\), \(1020\) samples & \(1.0\) & Exact equality on stratified sampled rows \\
-Per-gate analysis suite & AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES, KOFN, CANALISING & exact & Gate-level formulae and ordering checks pass \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-The gate-analysis layer is especially important. It verifies not just end-to-end equality but the mathematical pieces that justify Theorem~\ref{thm:canonical-reconstruction}: ordering invariance, closure under set operations, parity-class behaviour, threshold strictness, and canalising collapse. In other words, the validation is layered in the same order as the theory: first the algebra of the local one-sets, then the invariance principles, and only then the whole-network reconstruction claim.
-
-\subsection{Large-Scale Validation by Stratified Sampling}
-Validation extends beyond the range at which exhaustive baseline generation is practical. For \(n\in\{20,50\}\), we use deterministic stratified importance sampling over Hamming-weight layers
-\[
-\{0,1,\lfloor n/2\rfloor,n-1,n\},
-\]
-with fixed seeds and \(1020\) sampled rows per run. This design is not used to redefine the method as approximate. On the contrary, it is an audit layer for an exact deterministic predictor in regimes where full matrix materialisation would be computationally wasteful.
-
-For each sampled input \(x\), one computes \(F(x)\) by direct gate semantics and compares it with the truth-table or dispatch baseline evaluated on the same row. Under Theorem~\ref{thm:canonical-reconstruction}, equality should hold identically; the role of sampling is to verify that the implemented pipeline behaves as the theorem predicts at larger scales. The reported accuracy is \(1.0\) for \(n=20\) and \(n=50\), across seeds \(301\) and \(302\), with predictive timing substantially below truth-table lookup under bounded in-degree. This is exactly the kind of evidence a high-rigor paper should report: theorem-driven expectations, then deterministic corroboration in the computational regime where exhaustive baselines cease to be the scientifically sensible default.
-
-\subsection{Property-Test Layer for the Calculus}
-A dedicated suite of property tests validates the algebra underlying the analytic formulas, not merely their final outputs. The tested properties include the involution law \(\varphi\circ\varphi=\mathrm{id}\), universe-size consistency, band complements, De Morgan identities for the set algebra used in band and union constructions, ordering invariance for gate index sets, KOFN strictness, and relabelling invariance under bit permutations.
-
-These checks should not be treated as software trivia. They are small but conceptually important validations of the mathematical infrastructure. The involution test guarantees the statement formalised in Theorem~\ref{thm:ordering-invariance}. The band-complement and De Morgan tests ensure that the set algebra underlying AND, OR, NAND, NOR, and canalising constructions behaves coherently. KOFN strictness confirms the threshold semantics needed for parameterised families. Relabelling invariance shows that the calculus respects consistent permutations of bit positions and connected-input labels, which is essential for any claim that the method captures causal structure rather than a fragile encoding convention.
-
-\subsection{Noise Benchmarks and Analytic Perturbation Curves}
-A perturbative layer based on independent input bit flips extends the validation to controlled noise regimes. This layer is not part of the proof of exact reconstruction, but it demonstrates that the same formalism supports analytic reasoning about robustness. Under a bit-flip probability \(q\), network-level change fractions and gate-level response trends are recorded for \(n\in\{20,50\}\), using the same Hamming-stratified sampling logic employed in large-scale exactness checks.
-
-The most important analytic benchmark here is the parity case. For an XOR node of arity \(k\), the probability that the output flips under independent input noise is
-\[
-p_{\mathrm{flip}}^{\mathrm{XOR}}(q,k)=\frac{1-(1-2q)^k}{2},
-\]
-because the output changes exactly when the number of flipped relevant inputs is odd. This formula provides a clean perturbative prediction against which the empirical XOR curves can be compared. The observed qualitative pattern also matches the sensitivity calculations developed earlier in the manuscript: parity gates respond more strongly to random flips than monotone gates, monotone and majority-like structures are more robust at small \(q\), and bounded in-degree limits network-wide amplification. The scientific value of this layer is not that it replaces the exact theory, but that it shows the exact calculus interfaces naturally with controlled perturbation analysis.
-
-
-\section{Relation to Algorithmic Causality and Statistical Learning}
-\subsection{Relation to Wolfram-Style Rule Simplicity}
-Wolfram's programme on discrete systems established that simple local rules can generate unexpectedly rich global behaviour, and proposed computational equivalence as a unifying principle for understanding that richness~\cite{wolfram2002new}. The present contribution is aligned in spirit with that viewpoint but is more operational in its aim. Where Wolfram's programme demonstrates that rich behaviour exists and classifies systems by observed output complexity, the index-set calculus derives exact formulas that specify \emph{where} rule-induced behaviour appears within an ordered exhaustive repertoire. The shift is from classification of outputs to analytic specification of causal origins.
-
-Concretely, knowing that a Boolean network generates complex patterns is a qualitative observation. Knowing the precise index set on which each local rule is active, and how those sets compose under network dynamics, is a quantitative causal statement. The two perspectives are complementary. Wolfram-style complexity studies ask what kind of behaviour emerges; the index-set calculus asks which rows of the ordered repertoire realise it and why. For the purpose of exact reconstruction, the latter question is primary.
-
-This work also shares the principle that complexity in the full output table does not preclude simple local rules. On the contrary, the recoverability of short exact formulas from apparently rich mixed-gate repertoires is one of the method's principal justifications: complexity at the global level coexists with parsimony at the local causal level. The index-set calculus makes this coexistence explicit and quantitative.
-
-\subsection{Relation to Algorithmic Causality}
-Algorithmic-causality programmes, developed in work such as~\cite{zenilcalculus} and~\cite{zenildeconv}, emphasise perturbation, generative explanation, and the distinction between statistical regularity and genuine causal mechanism. That tradition treats complex systems as computational objects, assigns probability to putative generating mechanisms via algorithmic probability, and uses intervention logic to distinguish cause from correlation. The present method is aligned in spirit: it too treats the Boolean network as a computational object whose behaviour is to be explained by an explicit generative rule rather than summarised statistically.
-
-The methodological distinction is equally important. Algorithmic-causality approaches of the Zenil type are primarily concerned with causal \emph{discovery}: given observed outputs, or given responses to perturbations, infer the unknown generative mechanism. The present paper addresses a complementary problem class. The network logic is \emph{known} by assumption; the task is to derive the exact consequences of that known mechanism over the ordered repertoire, analytically and without sampling. This is not discovery under uncertainty; it is derivation under certainty.
-
-As a result, the two frameworks are best understood as occupying different points in the causal-analysis pipeline. Algorithmic-causality methods provide principled tools for the upstream inference step, when the mechanism is unknown. The index-set calculus provides the downstream analytical step, once the mechanism is in hand. In applications where the Boolean-network model is given---as is the case for curated signalling or genetic regulatory networks---the present calculus applies directly. In applications where the model itself must be inferred, the two approaches are natural complements.
-
-\subsection{Difference from Classical Machine Learning}
-The contrast with classical machine learning should be stated carefully, because the differences are structural rather than merely quantitative. Many machine-learning systems learn predictive associations from sampled data and are evaluated on held-out prediction accuracy. They are designed to generalise from finite observations to unseen inputs, and they are indifferent, by design, to whether the learned representation coincides with the true generating rule. Accuracy on a test set is the primary criterion; causal transparency is not.
-
-Here the objective is categorically different. The network logic is given; the task is to derive its consequences analytically. There is no training set, no held-out data, and no generalisation in the statistical-learning sense. The method is exact by construction under Theorem~\ref{thm:canonical-reconstruction}: for any input in the ordered repertoire, the formula predicts the output with zero error, not because a model was fitted to examples of that output, but because the formula was derived from the rule that generates it.
-
-This distinction matters for scientific interpretation. A machine-learning model that achieves high accuracy on a Boolean-network prediction task may or may not have recovered anything about the underlying causal logic. The index-set calculus, by contrast, provides a representation whose correctness is certified by the gate semantics themselves. The paper is therefore not anti-statistical. It is aimed at a different problem class, one in which causal structure is explicit, deterministic reconstruction is possible, and the appropriate standard of evidence is exact equality rather than approximate generalisation.
+The calculus also differs structurally from statistical machine learning, which learns predictive associations from sampled data. Here the network logic is given and the task is exact analytic derivation, not approximate generalisation. The appropriate standard of evidence is exact equality (Theorem~\ref{thm:canonical-reconstruction}), not held-out prediction accuracy.
 
 \section{Discussion}
 The central value of the method is not that it is ``faster than brute force'' in some vague sense. The stronger claim is that it changes the scientific unit of explanation. The unit is no longer the truth table or the trajectory, but the exact rule-induced index set over an ordered repertoire. This shift is not cosmetic: it determines what kind of question the method can answer and what kind of evidence it is competent to provide.
@@ -2027,20 +1908,6 @@ This has four consequences.
 
 Two limitations should be stated explicitly. First, the computational advantage depends on bounded support size: when the query support \(|C_q|\) approaches the ambient dimension \(n\), the analytic path converges to the cost of exhaustive materialisation. The method is therefore most powerful for networks with bounded in-degree and localised query scope. Second, the present formalism treats synchronous one-step update; asynchronous or stochastic schedules are discussed in Appendix~D but are not yet integrated into the core calculus.
 
-Seen from the perspective of the paper's internal logic, 
-the contribution is tightly staged. Proposition~\ref{prop:gate-family-one-sets} 
-establishes the local causal objects; Theorem~\ref{thm:ordering-invariance} 
-removes encoding arbitrariness; Theorem~\ref{thm:canonical-reconstruction}
- lifts the local formulas to exact network predictions; 
- Proposition~\ref{prop:materialization-lb} and 
- Proposition~\ref{prop:support-locality} characterise the cost of
-  materialisation and the efficiency of the analytic path;
-   Proposition~\ref{prop:per-row-cost} and Proposition~\ref{prop:validation-burden} 
-   clarify per-row evaluation and sampling-based audit costs; and 
-   Section~\ref{sec:validation} aligns each validation 
-   layer with the corresponding formal claim. 
-   
-
 \section{Conclusion}
 We have presented a causality-first index-set calculus for Boolean networks. The framework rests on five pillars.
 
@@ -2054,7 +1921,7 @@ We have presented a causality-first index-set calculus for Boolean networks. The
 
 \emph{Scalability.} The analytic evaluation cost is governed by the support size \(|C_q|\) rather than by the total network size \(n\), as established by Proposition~\ref{prop:support-locality} and confirmed by the resource-envelope benchmark across \(n\in\{30,60,80,200\}\). Median analytic times remain sub-millisecond throughout that range, and the description-length comparison (\(D_{\mathrm{formula}}=101.07\) bits against \(H_{\mathrm{total}}=10229.61\) bits) quantifies the two-orders-of-magnitude compression that the causal formulas achieve over the full realised output.
 
-The validation programme mirrors this formal structure. Local gate identities are supported by gate-level derivations and corroboration tables; ordering control is supported by invariance tests on six-node benchmarks; exact reconstruction is supported by exhaustive equality at \(n\leq 13\) and by stratified-sampled audits at \(n\in\{20,50\}\); and the scalability characterisation is supported by the resource-envelope benchmarks reported in Section~\ref{sec:scalability}. The core scientific claim is therefore not only stated but triangulated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulas, and the cost of that reconstruction is governed by local support size rather than global repertoire size.
+Exact reconstruction has been verified by exhaustive comparison at $n\leq 13$ and by stratified-sampled audits at $n\in\{20,50\}$; the scalability characterisation is confirmed by resource-envelope benchmarks at $n\leq 200$ (Section~\ref{sec:scalability}). The core scientific claim is therefore not only stated but corroborated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulae, and the cost of that reconstruction is governed by local support size rather than global repertoire size.
 
 \appendix
 
@@ -2160,7 +2027,7 @@ Sensitivity is not the primary theorem of this paper, but it matters because it 
 Deterministic flip-noise toggles for robustness experiments under fixed seeds are implemented in the companion code. Those stochastic controls are useful for later perturbative studies, but they are not used to support the exactness claims of the present manuscript, which are exclusively deterministic.
 
 \section{Appendix C: Validation Artefact Index}
-Table~\ref{tab:validation-map} in Section~\ref{sec:validation} maps each formal claim to its validation layer. This appendix catalogues the corresponding reproducibility artefacts.
+Table~\ref{tab:validation-map} in Section~\ref{sec:scalability} maps each formal claim to its validation layer. This appendix catalogues the corresponding reproducibility artefacts.
 
 \begin{center}
 \small
@@ -2231,7 +2098,7 @@ These sweeps turn the gate catalogue into a control basis. Monotone mixtures tun
 \subsection{Update Regimes, Robustness, and Information Structure}
 Three related extensions characterise downstream properties of the exact gate semantics: synchronous versus asynchronous update regimes, gate-level robustness under independent noise, and information-theoretic summaries such as PID-style synergy, transfer entropy, and total correlation for small canonical gates. These analyses should be read as consequences of the exact semantics, not as part of the proof of the causal calculus itself.
 
-Update-regime comparisons show how the same local rules lead to different convergence profiles under synchronous and asynchronous schedules. Exact noise calculations connect the gate catalogue to stability and influence, extending the perturbative layer described in Section~\ref{sec:validation}. PID, transfer-entropy, and total-correlation summaries provide a complementary language for discussing why parity-rich designs emphasise synergy and sensitivity, whereas monotone and threshold-like designs tend to trade sensitivity for robustness and partial information localisation. These extensions can seed a later companion paper focused on dynamics, robustness, and information flow.
+Update-regime comparisons show how the same local rules lead to different convergence profiles under synchronous and asynchronous schedules. Exact noise calculations connect the gate catalogue to stability and influence, extending the perturbative layer described in Section~\ref{sec:scalability}. PID, transfer-entropy, and total-correlation summaries provide a complementary language for discussing why parity-rich designs emphasise synergy and sensitivity, whereas monotone and threshold-like designs tend to trade sensitivity for robustness and partial information localisation. These extensions can seed a later companion paper focused on dynamics, robustness, and information flow.
 
 \bibliographystyle{plain}
 \bibliography{references}
