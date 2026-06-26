@@ -108,6 +108,19 @@ Once the ordering convention is fixed, the question ``what can this network do?'
 which conditions is each local rule active, and how do those conditions compose?'' The result is an
 index-set calculus for Boolean networks.
 
+A terminological clarification is needed at the outset. The word ``causal'' is used in this paper
+in the \emph{mechanistic} or \emph{generative} sense: the Boolean network is the causal mechanism,
+and the index-set formula reconstructs the exact input--output map of that mechanism. This usage
+follows the tradition of mechanistic explanation in philosophy of science
+\cite{machamer2000thinking,woodward2003making} and of generative modelling in algorithmic
+information theory \cite{zenilcalculus}, rather than the interventionist \emph{do}-calculus of
+Pearl \cite{pearl2009causality}. The present calculus does not perform causal discovery from
+observational data, nor does it reason about interventions or confounders. It derives the exact
+consequences of a \emph{known} generative rule. Where Pearl's framework asks ``what would happen
+if we intervened on variable \(X\)?'', the present framework asks ``at which repertoire positions
+does the known rule for node \(i\) produce output one, and how do these positions compose across
+the network?''
+
 The perspective is causality-first in three senses. First, it is rule-first rather than correlation-first:
 the object of study is the generative logic of the system, not only its observed frequencies, the same
 distinction that separates physical law from statistical regression. Second, it is deterministic rather
@@ -136,18 +149,9 @@ or machine-learning approaches that learn predictive regularities without recove
 analytic form \cite{pearl2009causality}.
 
 
-The paper makes six principal claims.
-\begin{enumerate}[label=\textbf{C\arabic*.}]
-\item Ordered exhaustive repertoires can be treated as algebraic objects rather than as passive lookup tables.
-\item Canonical gate families admit exact, network-aware one-set formulae over those repertoires.
-\item Ordering changes are controlled by an explicit involution, so exactness is invariant under representation.
-\item Mixed-gate synchronous networks can be reconstructed exactly by composing local index sets.
-\item The method is mathematically richer than naive vectorised shortcuts and empirically exact where those shortcuts fail.
-\item Complexity improvements arise not by magic removal of the \(2^n\) state space, but by replacing brute-force gate evaluation with explicit causal formulae, by enabling exact query answering without full matrix materialisation, and by reducing the validation burden through principled sampling.
-\end{enumerate}
+In what follows, we show that ordered exhaustive repertoires admit an algebraic structure that supports exact, network-aware one-set formulae for all canonical gate families; that ordering changes are controlled by an explicit involution, rendering exactness invariant under representation; and that mixed-gate synchronous networks can be reconstructed exactly by composing local index sets. The resulting complexity improvements arise not by removing the \(2^n\) state space but by replacing brute-force gate evaluation with explicit causal formulae, enabling exact query answering without full matrix materialisation, and reducing the validation burden through principled sampling.
 
-\paragraph{Structure of the paper.}
-Sections~2 and~3 define the ordered-repertoire formalism and the basic index objects needed for exact reasoning. Section~4 derives the gate-family one-sets and their expanded forms, establishing claims \textbf{C1} and \textbf{C2}, and presents worked examples including a detailed AND deconvolution, a composed XOR case, and a 10-node mixed-gate benchmark with overlap analysis and dynamical enrichment. Section~5 proves ordering invariance (\textbf{C3}), and Section~6 characterises the scalability and resource envelope of exact causal evaluation (\textbf{C6}). Section~\ref{sec:validation} assembles the validation programme that supports claims \textbf{C4} and \textbf{C5}. The appendices collect exact gate expansions, sensitivity formulae, the validation artefact index, and an extended experimental programme.
+Sections~2 and~3 define the ordered-repertoire formalism and the index objects needed for exact reasoning. Section~4 derives the gate-family one-sets and their expanded forms, and presents worked examples including a detailed AND deconvolution, a composed XOR case, and a 10-node mixed-gate benchmark with overlap analysis and dynamical enrichment. Section~5 proves ordering invariance, and Section~6 characterises the scalability and resource envelope of exact causal evaluation. Section~\ref{sec:validation} assembles the validation programme. The appendices collect exact gate expansions, sensitivity formulae, the validation artefact index, and an extended experimental programme.
 
 \section{Formal Setup}
 Let \(cm \in \bits^{n \times n}\) be the connectivity matrix of a Boolean network, where \(cm_{ij}=1\) means that node \(j\) feeds node \(i\). Let
@@ -244,6 +248,19 @@ When \(L\) is a base set of pivot locations and \(S\) is the offset family gener
 free coordinates, \(\operatorname{Dec}(L,S)\) recovers the exact one-set without row-wise
 gate evaluation.
 \end{definition}
+
+\begin{remark}[Terminology: Deconvolution versus Minkowski Sum]
+The set-addition form \(\{\ell+s:\ell\in L,\,s\in S\}\) resembles the Minkowski sum of two
+point sets in \(\mathbb{Z}\). The term \emph{deconvolution} is used here advisedly, because the
+operation reverses the combinatorial convolution that produces a composite repertoire index from
+independent subsystem contributions: the base set \(L\) encodes the constrained (connected)
+coordinates, the offset set \(S\) encodes the free (disconnected) coordinates, and
+\(\operatorname{Dec}\) reconstructs the full index set from these two factors. In signal-processing
+terms, the composite index is the ``convolved'' signal and \(\operatorname{Dec}\) recovers the
+constituent structure. The distinction from a generic Minkowski sum is that the two factors here
+have a definite causal interpretation (constrained versus free coordinates) rather than being
+arbitrary point sets in a metric space.
+\end{remark}
 
 \section{Exact Gate Formulae}
 The following proposition collects the exact one-set formulae for the gate families supported by the calculus.
@@ -491,7 +508,7 @@ strict-KOFN & monotone increasing & \(\bar{s}=d\binom{d-1}{k}/2^{d-1}\) & \(1\) 
 CANALISING & depends on fallback rule, but collapses on trigger band & reduced on trigger band; exact value depends on fallback & constant on trigger band; globally \(0\), \(1\), or \(*\) depending on fallback and trigger output \\
 \bottomrule
 \end{tabular}
-\caption{Dynamic properties associated with the exact gate families. Dynamic properties of the exact gate families: monotonicity class, average sensitivity under the uniform exhaustive repertoire, and the resulting coarse pattern symbol \(\pi_i\).}
+\caption{Dynamic properties of the exact gate families: monotonicity class, average sensitivity under the uniform exhaustive repertoire, and the resulting coarse pattern symbol \(\pi_i\).}
 \label{tab:dynamic-pattern-summary}
 \end{table}
 
@@ -579,7 +596,7 @@ This example shows one central idea of the paper. The exhaustive repertoire has 
 \paragraph{Deconvolution explained.}
 We illustrate the deconvolution process on node~5 (AND gate) from the network in
 Figures~\ref{fig:corroboration-matrices} and~\ref{fig:corroboration-network},
-using an executed Mathematica script.
+using the computational implementation described below.
 
 
 \begin{figure}[t]
@@ -677,8 +694,8 @@ should coincide exactly with the rows of the exhaustive table~\ref{tab:corrobora
 
 \normalsize
 
-The shared exhaustive table~\ref{tab:corroboration-exhaustive} and the executed Mathematica 
-listing~\ref{lst:corroboration-session-and} highlight exactly these analytically predicted indices.
+The shared exhaustive table~\ref{tab:corroboration-exhaustive} and the computational corroboration in
+Table~\ref{lst:corroboration-session-and} confirm exactly these analytically predicted indices.
 
 \begin{table}[p]
 \centering
@@ -764,62 +781,36 @@ listing~\ref{lst:corroboration-session-and} highlight exactly these analytically
 
 
 \begin{table}[H]
-\begin{lstlisting}[style=MathematicaStyle]
-In := cm06 = {{1, 0, 0, 0, 0, 0},
-              {0, 1, 0, 0, 0, 0},
-              {0, 0, 1, 0, 0, 0},
-              {1, 0, 0, 1, 0, 0},
-              {0, 1, 0, 1, 0, 0},
-              {1, 0, 1, 0, 1, 0}}
-In := dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"}
-
-(* Computing places in output repertoire where node 5 = 1 *)
-In := res061 = onPossibleBehaviour[{5}, {1}, dyn06, cm06]
-
-(* Summarized representation of analytic behaviour *)
-In := gp06 = givePlaces[res061["DecimalRepertoire"], res061["Sumandos"]]
-
-(* Compressed representation of analytic behaviour *)
-Out = <|"DecimalRepertoire" -> {11}, "Sumandos" -> {0, 1, 4, 5, 16, 17, 20, 21, 32, 33, 36, 37, 48, 49, 52, 53}|>
-
-(* Unfolded representation of analytic behaviour *)
-Out = {11, 12, 15, 16, 27, 28, 31, 32, 43, 44, 47, 48, 59, 60, 63, 64}
-
-(* Exact corroboration against exhaustive outputs of node 5 *)
-Out = True
-\end{lstlisting}
-\caption{Executed Mathematica corroboration for the six-node mixed-gate system. \textbf{Lines 1--7:} 
-Definition of the adjacency matrix of the corroboration network. 
-\textbf{Line 7:} Definition of the local dynamics \((\mathrm{OR},\mathrm{NOT},\mathrm{OR},\mathrm{IMPLIES},\mathrm{AND},\mathrm{XOR})\). 
-\textbf{Line 10:} Exact query asking for the positions in the ordered repertoire where node \(5\) outputs \(1\). 
-\textbf{Line 13:} Unfolding operator applied to the compressed pair \((\texttt{DecimalRepertoire},\texttt{Sumandos})\). 
-\textbf{Line 16:} Compressed analytic representation of the AND behaviour. 
-\textbf{Line 19:} Unfolded index set predicted by the analytic rule. \textbf{Line 23:} Exact corroboration against the exhaustive baseline.}
+\centering
+\small
+\begin{tabular}{p{0.28\linewidth}p{0.62\linewidth}}
+\toprule
+\textbf{Step} & \textbf{Result} \\
+\midrule
+Compressed representation &
+  Base set \(L=\{11\}\); offsets \(\Omega=\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}\) \\
+Deconvolution &
+  \(\operatorname{Dec}(L,\Omega)=\{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\}\) \\
+Exhaustive corroboration &
+  \(\J_5^{\mathrm{AND}}=\{j\in\U : y_5(j)=1\}\) --- exact equality confirmed \\
+\bottomrule
+\end{tabular}
+\caption{Computational corroboration for node~5 (AND) in the six-node network. The analytic compressed representation is deconvolved and compared against the exhaustive baseline; exact equality holds on all 64 repertoire rows. Full computational scripts are available in the companion repository.}
 \label{lst:corroboration-session-and}
 \end{table}
 
 
-The exhaustive table, the mathematical expression, and the Mathematica code are not three different claims about the system; they are three encodings of the same one-set. In the mathematical layer, the AND rule on connected inputs \(\{2,4\}\) is written as
+The analytic formula, the computational implementation, and the exhaustive table are three encodings of the same one-set. The formula
 \[
 \J_5^{\mathrm{AND}}=\operatorname{Dec}\bigl(\{11\},\Omega(I_{nc})\bigr),
 \qquad
-\Omega(I_{nc})=\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}.
+\Omega(I_{nc})=\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\},
 \]
-In the code layer, that same object appears as
-\[
-\begin{aligned}
-\texttt{<|"DecimalRepertoire" -> \{11\},}\\
-\texttt{\quad "Sumandos" -> \{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}|>}
-\end{aligned}
-\]
-and \texttt{givePlaces} performs exactly the same deconvolution operation as \(\operatorname{Dec}\). In the exhaustive layer, the same set is displayed row by row as the highlighted indices
+gives the causal law in closed form. Deconvolution unfolds it to the explicit index list
 \[
 \{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\},
 \]
-which are precisely the rows where the fifth output column equals \(1\). Thus the three layers correspond 
-bijectively: the formula gives the causal law in closed form, the code operationalises the 
-same law without changing its content, and Table~\ref{tab:corroboration-exhaustive} d
-isplays the fully unfolded repertoire consequences of that law.
+which are precisely the rows of Table~\ref{tab:corroboration-exhaustive} where the fifth output column equals~\(1\). The computational implementation (available in the companion repository) operationalises this same deconvolution and confirms exact equality against the exhaustive baseline.
 
 
 \subsubsection{XOR case}
@@ -1258,151 +1249,61 @@ In the single-gate AND example, the support has a simple rectangular structure: 
 showing that different global output patterns can inherit the same combinatorial skeleton even when their terminal constraints differ. What appears in the full repertoire as dispersed behaviour is therefore explained analytically as overlap-aware reuse of shared coordinates and repeated offset blocks.
 
 
-\begin{table}[p]
-\begin{lstlisting}[style=MathematicaStyle]
-In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-              {1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-              {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
-              {0, 1, 1, 0, 1, 0, 0, 0, 0, 0},
-              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-              {0, 0, 0, 0, 1, 0, 1, 0, 0, 0},
-              {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-              {1, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-              {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-              {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}}
-In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
-In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
-
-(* F1: All outputs active *)
-In := resF110 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}]
-
-(* Unfolding the compressed representation *)
-In := gpF110 = givePlaces[resF110["DecimalRepertoire"], resF110["Sumandos"]]
-
-(* Compressed representation of the query *)
-Out = <|"DecimalRepertoire" -> {143, 215, 399, 400, 471, 472}, "Sumandos" -> {0}|>
-
-(* Exact unfolded repertoire indices *)
-Out = {143, 215, 399, 400, 471, 472}
-
-(* Exact corroboration against the exhaustive baseline *)
-Out = True
-
-(* F2: All active except y10 *)
-In := resF210 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}]
-
-(* Unfolding the compressed representation *)
-In := gpF210 = givePlaces[resF210["DecimalRepertoire"], resF210["Sumandos"]]
-
-(* Compressed representation of the query *)
-Out = <|"DecimalRepertoire" -> {15, 87, 271, 272, 343, 344}, "Sumandos" -> {0}|>
-
-(* Exact unfolded repertoire indices *)
-Out = {15, 87, 271, 272, 343, 344}
-
-(* Exact corroboration against the exhaustive baseline *)
-Out = True
-\end{lstlisting}
-\caption{Mathematica script for execution of examples of queries over 10-node 
-benchmark. Because these queries satisfy \(C_q=[10]\), 
-the residual offset family collapses to \(\{0\}\), so the compressed 
-representation is already a fully determined decimal base set.}
-\label{lst:mixed10-session-full-a}
-\end{table}
-
 \begin{table}[H]
-\begin{lstlisting}[style=MathematicaStyle]
-(* Network definition as in Listing 2 above *)
-
-(* F3: All active except y9 *)
-In := resF310 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}]
-
-(* Unfolding the compressed representation *)
-In := gpF310 = givePlaces[resF310["DecimalRepertoire"], resF310["Sumandos"]]
-
-(* Compressed representation of the query *)
-Out = <|"DecimalRepertoire" -> {655, 727, 911, 912, 983, 984}, "Sumandos" -> {0}|>
-
-(* Exact unfolded repertoire indices *)
-Out = {655, 727, 911, 912, 983, 984}
-
-(* Exact corroboration against the exhaustive baseline *)
-Out = True
-
-(* F4: All active except y6 *)
-In := resF410 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 0, 1, 1, 1, 1}]
-
-(* Unfolding the compressed representation *)
-In := gpF410 = givePlaces[resF410["DecimalRepertoire"], resF410["Sumandos"]]
-
-(* Compressed representation of the query *)
-Out = <|"DecimalRepertoire" -> {79, 207, 335, 336, 463, 464}, "Sumandos" -> {0}|>
-
-(* Exact unfolded repertoire indices *)
-Out = {79, 207, 335, 336, 463, 464}
-
-(* Exact corroboration against the exhaustive baseline *)
-Out = True
-\end{lstlisting}
-\caption{Mathematica script for execution of examples of queries over subsets of 
-10-node benchmark. The same collapse to \(\texttt{Sumandos}\to\{0\}\) p
-ersists because the support union still saturates all ten coordinates.}
+\centering
+\small
+\begin{tabular}{@{}llcl@{}}
+\toprule
+\textbf{Query} & \textbf{Base set \(L\)} & \textbf{Offsets \(\Omega\)} & \textbf{Corroboration} \\
+\midrule
+F1: \(\sigma=1^{10}\) & \(\{143,215,399,400,471,472\}\) & \(\{0\}\) & exact \\
+F2: \(\sigma=1^9 0\) & \(\{15,87,271,272,343,344\}\) & \(\{0\}\) & exact \\
+F3: \(\sigma=1^8 01\) & \(\{655,727,911,912,983,984\}\) & \(\{0\}\) & exact \\
+F4: \(\sigma=1^5 01^4\) & \(\{79,207,335,336,463,464\}\) & \(\{0\}\) & exact \\
+\bottomrule
+\end{tabular}
+\caption{Computational corroboration for the four full-output queries on the 10-node benchmark.
+Because these queries satisfy \(C_q=[10]\),
+the offset family collapses to \(\{0\}\) and the base set is already fully determined.
+Each row was verified against the exhaustive baseline by exact equality on all 1024 repertoire rows.}
+\label{lst:mixed10-session-full-a}
 \label{lst:mixed10-session-full-b}
 \end{table}
 
-\begin{table}[p]
-\begin{lstlisting}[style=MathematicaStyle]
-(* Network definition as in Listing 2 above *)
-
-(* S1: Threshold-XNOR-NOT-majority event *)
-In := resS110 = mixedQueryRepresentation[{4, 6, 7, 10}, {0, 1, 1, 1}]
-
-(* Unfolding the compressed representation *)
-In := gpS110 = givePlaces[resS110["DecimalRepertoire"], resS110["Sumandos"]]
-
-(* Compressed representation of the query *)
-Out = <|"DecimalRepertoire" -> {141, 217}, "Sumandos" -> {0, 1, 256, 257, 512, 513, 768, 769}|>
-
-(* Exact unfolded repertoire indices *)
-Out = {141, 142, 217, 218, 397, 398, 473, 474, 653, 654, 729, 730, 909, 910, 985, 986}
-
-(* Exact corroboration against the exhaustive baseline *)
-Out = True
-
-(* S2: Six-gate mixed interaction event *)
-In := resS210 = mixedQueryRepresentation[{4, 6, 7, 8, 9, 10}, {0, 1, 1, 1, 0, 1}]
-
-(* Unfolding the compressed representation *)
-In := gpS210 = givePlaces[resS210["DecimalRepertoire"], resS210["Sumandos"]]
-
-(* Compressed representation of the query *)
-Out = <|"DecimalRepertoire" -> {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}, "Sumandos" -> {0}|>
-
-(* Exact unfolded repertoire indices *)
-Out = {141, 217, 397, 398, 473, 474, 653, 729, 909, 910, 985, 986}
-
-(* Exact corroboration against the exhaustive baseline *)
-Out = True
-\end{lstlisting}
-\caption{Executed Mathematica corroboration for the subsystem queries. The first case recovers a genuinely factorised pair, with two base indices and the eight offsets generated by the free coordinates \(\{1,9,10\}\); the second saturates all ten coordinates and therefore reduces again to \(\texttt{Sumandos}\to\{0\}\).}
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lp{0.18\linewidth}p{0.35\linewidth}l@{}}
+\toprule
+\textbf{Query} & \textbf{Base set \(L\)} & \textbf{Offsets \(\Omega\)} & \textbf{Corroboration} \\
+\midrule
+S1: nodes \(\{4,6,7,10\}\) &
+  \(\{141,217\}\) &
+  \(\{0,1,256,257,512,513,768,769\}\) &
+  exact \\
+S2: nodes \(\{4,6,7,8,9,10\}\) &
+  \(\{141,217,397,398,\) \newline \(473,474,653,729,\) \newline \(909,910,985,986\}\) &
+  \(\{0\}\) &
+  exact \\
+\bottomrule
+\end{tabular}
+\caption{Computational corroboration for the subsystem queries. Query \(S1\) recovers a genuinely factorised pair (two base indices, eight offsets from free coordinates \(\{1,9,10\}\)); query \(S2\) saturates all ten coordinates and the offset family collapses to \(\{0\}\). Both are verified by exact equality against the exhaustive baseline. Full computational scripts are available in the companion repository.}
 \label{lst:mixed10-session-subsystem}
 \end{table}
 
-These executed sessions are the computational counterpart of the analytic overlap treatment. 
-In the full-output queries, the code returns \texttt{Sumandos -> \{0\}} because 
-the support union already fills all ten coordinates, so no residual free 
-offsets remain after intersection. In the \(S1\) query, by contrast, the 
-same routine recovers exactly the factorisation proved in 
-Proposition~\ref{prop:overlap-factorisation}: the code returns the base 
-set \(\{141,217\}\), the free-coordinate offset family 
-\(\{0,1,256,257,512,513,768,769\}\), and \texttt{givePlaces} 
-unfolds them to the 16 indices in \(\J_{\mathrm{S1}}\). In \(S2\), the 
-additional constraints saturate the coordinate union again, so the 
-residual offset family collapses to \(\{0\}\). The final \texttt{Out = True}
- in every case is therefore not an auxiliary convenience: it is the exact 
- statement that the code-generated unfolding coincides with the analytically 
- derived query set and with the exhaustive dispatch baseline (see Table~\ref{lst:mixed10-session-full-a}
- and Table~\ref{lst:mixed10-session-full-b}).
+These computational results are the counterpart of the analytic overlap treatment.
+In the full-output queries, the offset family is \(\{0\}\) because
+the support union fills all ten coordinates, leaving no free offsets
+after intersection. In the \(S1\) query, by contrast, the
+factorisation proved in Proposition~\ref{prop:overlap-factorisation} manifests directly:
+the base set is \(\{141,217\}\), the free-coordinate offset family
+is \(\{0,1,256,257,512,513,768,769\}\), and deconvolution
+unfolds them to the 16 indices in \(\J_{\mathrm{S1}}\). In \(S2\), the
+additional constraints saturate the coordinate union again, so the
+offset family collapses to \(\{0\}\). In every case, exact equality
+against the exhaustive dispatch baseline has been confirmed on all 1024
+repertoire rows (Tables~\ref{lst:mixed10-session-full-a}
+and~\ref{lst:mixed10-session-subsystem}).
 
 
 \subsubsection{Dynamical Landscape of the Same 10-Node Network}
@@ -1582,9 +1483,7 @@ predictable order: many analytically describable transient configurations exist,
 strong causal restrictions and by a compact attractor skeleton rather than by unrestricted disorder.
 
 \section{Ordering Invariance}
-In this section is shown that the exactness does not depended on accidental 
-bit-order conventions. The next theorem makes the transport mechanism 
-explicit and shows that local causal sets are invariant up to the involution \(\varphi\).
+The exactness of the calculus must not depend on accidental bit-order conventions. The following theorem makes the transport mechanism explicit and shows that local causal sets are invariant up to the involution \(\varphi\).
 
 \begin{theorem}[Ordering-Transform Invariance]\label{thm:ordering-invariance}
 Let
@@ -1685,39 +1584,25 @@ is transported by \(\varphi\) to
 \]
 which is exactly the direct MSB baseline for the same node. Listing~\ref{lst:ordering-invariance-session} shows the same transport check for both node \(5\) (AND) and node \(6\) (XOR), together with an explicit involution verification over all \(64\) indices of the six-node universe.
 
-\begin{table}[p]
-\begin{lstlisting}[style=MathematicaStyle]
-In := phi06[j_] := 1 + FromDigits[Reverse[IntegerDigits[j - 1, 2, 6]], 2]
-In := andLSB06 = {11, 12, 15, 16, 27, 28, 31, 32, 43, 44, 47, 48, 59, 60, 63, 64}
-In := andPhi06 = Sort[phi06 /@ andLSB06]
-In := andMSB06 = {21, 22, 23, 24, 29, 30, 31, 32, 53, 54, 55, 56, 61, 62, 63, 64}
-
-(* Transported AND one-set under MSB ordering *)
-Out = {21, 22, 23, 24, 29, 30, 31, 32, 53, 54, 55, 56, 61, 62, 63, 64}
-
-(* Direct MSB exhaustive baseline for node 5 *)
-Out = {21, 22, 23, 24, 29, 30, 31, 32, 53, 54, 55, 56, 61, 62, 63, 64}
-
-(* Exact invariance check for AND *)
-Out = True
-
-In := xorLSB06 = {2, 4, 5, 7, 10, 11, 13, 16, 18, 20, 21, 23, 26, 27, 29, 32, 34, 36, 37, 39, 42, 43, 45, 48, 50, 52, 53, 55, 58, 59, 61, 64}
-In := xorPhi06 = Sort[phi06 /@ xorLSB06]
-In := xorMSB06 = {9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 33, 34, 35, 36, 37, 38, 39, 40, 49, 50, 51, 52, 61, 62, 63, 64}
-
-(* Transported XOR one-set under MSB ordering *)
-Out = {9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 33, 34, 35, 36, 37, 38, 39, 40, 49, 50, 51, 52, 61, 62, 63, 64}
-
-(* Direct MSB exhaustive baseline for node 6 *)
-Out = {9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 33, 34, 35, 36, 37, 38, 39, 40, 49, 50, 51, 52, 61, 62, 63, 64}
-
-(* Exact invariance check for XOR *)
-Out = True
-
-(* Involution check: phi(phi(j)) = j for all j in U *)
-Out = True
-\end{lstlisting}
-\caption{Reduced exact corroboration of ordering transport on the six-node benchmark. The listing reuses the LSB one-sets established in the AND and XOR examples, transports them by \(\varphi\), and compares them against direct MSB exhaustive baselines. The final line verifies the involution law \(\varphi\circ\varphi=\mathrm{id}\) on the full universe \(\U=\{1,\dots,64\}\).}
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}lp{0.55\linewidth}c@{}}
+\toprule
+\textbf{Check} & \textbf{Description} & \textbf{Result} \\
+\midrule
+AND transport &
+  \(\varphi(\J_5^{\mathrm{LSB}})=\{21,22,23,24,29,30,31,32,53,54,55,56,61,62,63,64\}=\J_5^{\mathrm{MSB}}\) &
+  exact \\
+XOR transport &
+  \(\varphi(\J_6^{\mathrm{LSB}})=\J_6^{\mathrm{MSB}}\) (32 indices) &
+  exact \\
+Involution &
+  \(\varphi(\varphi(j))=j\) for all \(j\in\{1,\dots,64\}\) &
+  exact \\
+\bottomrule
+\end{tabular}
+\caption{Exact corroboration of ordering transport on the six-node benchmark. The LSB one-sets established in the AND and XOR examples are transported by \(\varphi\) and compared against direct MSB exhaustive baselines. The involution law \(\varphi\circ\varphi=\mathrm{id}\) is verified on the full universe \(\U=\{1,\dots,64\}\). Computational scripts are available in the companion repository.}
 \label{lst:ordering-invariance-session}
 \end{table}
 
@@ -1792,6 +1677,23 @@ where naive exhaustive materialisation is physically or temporally impractical.
 
 The method does not defeat Proposition~\ref{prop:materialization-lb}; it sidesteps it by computing
 a different---but equally exact---object. This is the central representational shift.
+
+\begin{remark}[Relation to Binary Decision Diagrams]
+Reduced Ordered Binary Decision Diagrams (ROBDDs)~\cite{bryant1986graph} achieve procedural
+compression of Boolean functions by sharing common sub-expressions in a directed acyclic graph.
+In some application domains---notably circuit verification and model checking---BDDs are the
+standard tool for symbolic evaluation, and they have been applied to Boolean network analysis in
+systems biology~\cite{velizcuba2014reduction}. The index-set calculus differs from BDDs in kind
+rather than in degree. A BDD is an algorithmic data structure: it answers membership queries
+efficiently but does not expose the mathematical reason for the answer. The index-set calculus
+produces closed-form set-theoretic expressions---band intersections, parity classes,
+Hamming-weight strata---that are human-readable and mathematically interpretable. Both approaches
+exploit shared sub-expressions and variable dependencies (the ``overlapping supports'' of
+Corollary~\ref{cor:shared-input-reduction}); the difference is that BDDs encode this sharing as
+graph edges, whereas the present calculus encodes it as algebraic structure. The two are therefore
+complementary: BDDs for efficient procedural evaluation, index-set formulae for analytical
+insight into the causal architecture.
+\end{remark}
 
 \subsection{Local Evaluation Cost and Validation Burden}
 
@@ -1989,10 +1891,9 @@ mechanism simplicity, while dataset metrics measure the complexity of the behavi
 that mechanism.
 
 \section{Validation Evidence}\label{sec:validation}
-The formal structure of this paper follows a definite order: local causal objects are defined,
-compositionality is proved, ordering invariance is secured, scalability is characterised. The
-validation programme mirrors that order. Each layer below audits a distinct formal claim; the
-mapping is explicit in Table~\ref{tab:validation-map}.
+The validation programme is organised so that each layer audits a distinct formal claim,
+progressing from local gate algebra to network-level reconstruction. The mapping between
+formal claims and validation layers is summarised in Table~\ref{tab:validation-map}.
 
 \begin{table}[h]
 \centering
@@ -2023,8 +1924,7 @@ Accuracy \(1.0\); seeds 301, 302 &
 \(n\in\{20,50\}\) \\
 \bottomrule
 \end{tabular}
-\caption{Evidential architecture: each validation layer maps to a specific formal claim, following
-the theorem sequence of the manuscript.}
+\caption{Mapping from formal claims to validation layers, following the theorem sequence of the manuscript.}
 \label{tab:validation-map}
 \end{table}
 
@@ -2066,13 +1966,13 @@ Per-gate analysis suite & AND, OR, XOR, XNOR, NAND, NOR, NOT, IMPLIES, KOFN, CAN
 The gate-analysis layer is especially important. It verifies not just end-to-end equality but the mathematical pieces that justify Theorem~\ref{thm:canonical-reconstruction}: ordering invariance, closure under set operations, parity-class behaviour, threshold strictness, and canalising collapse. In other words, the validation is layered in the same order as the theory: first the algebra of the local one-sets, then the invariance principles, and only then the whole-network reconstruction claim.
 
 \subsection{Large-Scale Validation by Stratified Sampling}
-Validation extends beyond the range at which exhaustive baseline generation is practical. For \(n\in\{20,50\}\), the repository uses deterministic stratified importance sampling over Hamming-weight layers
+Validation extends beyond the range at which exhaustive baseline generation is practical. For \(n\in\{20,50\}\), we use deterministic stratified importance sampling over Hamming-weight layers
 \[
 \{0,1,\lfloor n/2\rfloor,n-1,n\},
 \]
 with fixed seeds and \(1020\) sampled rows per run. This design is not used to redefine the method as approximate. On the contrary, it is an audit layer for an exact deterministic predictor in regimes where full matrix materialisation would be computationally wasteful.
 
-The logic of the benchmark is straightforward. For each sampled input \(x\), one computes \(F(x)\) by direct gate semantics and compares it with the truth-table or dispatch baseline evaluated on the same row. Under Theorem~\ref{thm:canonical-reconstruction}, equality should hold identically; the role of sampling is to verify that the implemented pipeline behaves as the theorem predicts at larger scales. The reported accuracy is \(1.0\) for \(n=20\) and \(n=50\), across seeds \(301\) and \(302\), with predictive timing substantially below truth-table lookup under bounded in-degree. This is exactly the kind of evidence a high-rigor paper should report: theorem-driven expectations, then deterministic corroboration in the computational regime where exhaustive baselines cease to be the scientifically sensible default.
+For each sampled input \(x\), one computes \(F(x)\) by direct gate semantics and compares it with the truth-table or dispatch baseline evaluated on the same row. Under Theorem~\ref{thm:canonical-reconstruction}, equality should hold identically; the role of sampling is to verify that the implemented pipeline behaves as the theorem predicts at larger scales. The reported accuracy is \(1.0\) for \(n=20\) and \(n=50\), across seeds \(301\) and \(302\), with predictive timing substantially below truth-table lookup under bounded in-degree. This is exactly the kind of evidence a high-rigor paper should report: theorem-driven expectations, then deterministic corroboration in the computational regime where exhaustive baselines cease to be the scientifically sensible default.
 
 \subsection{Property-Test Layer for the Calculus}
 A dedicated suite of property tests validates the algebra underlying the analytic formulas, not merely their final outputs. The tested properties include the involution law \(\varphi\circ\varphi=\mathrm{id}\), universe-size consistency, band complements, De Morgan identities for the set algebra used in band and union constructions, ordering invariance for gate index sets, KOFN strictness, and relabelling invariance under bit permutations.
@@ -2154,7 +2054,7 @@ We have presented a causality-first index-set calculus for Boolean networks. The
 
 \emph{Scalability.} The analytic evaluation cost is governed by the support size \(|C_q|\) rather than by the total network size \(n\), as established by Proposition~\ref{prop:support-locality} and confirmed by the resource-envelope benchmark across \(n\in\{30,60,80,200\}\). Median analytic times remain sub-millisecond throughout that range, and the description-length comparison (\(D_{\mathrm{formula}}=101.07\) bits against \(H_{\mathrm{total}}=10229.61\) bits) quantifies the two-orders-of-magnitude compression that the causal formulas achieve over the full realised output.
 
-The evidential architecture mirrors the formal one. Local gate identities are supported by gate-level derivations and corroboration tables; ordering control is supported by invariance tests across six-node benchmarks; exact reconstruction is supported by exhaustive equality at \(n\leq 13\) and by stratified-sampled audits at \(n\in\{20,50\}\); and the scalability characterisation is supported by the resource-envelope benchmarks reported in Section~\ref{sec:scalability}. The core scientific claim is therefore not only stated but triangulated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulas, and the cost of that reconstruction is governed by local support size rather than global repertoire size.
+The validation programme mirrors this formal structure. Local gate identities are supported by gate-level derivations and corroboration tables; ordering control is supported by invariance tests on six-node benchmarks; exact reconstruction is supported by exhaustive equality at \(n\leq 13\) and by stratified-sampled audits at \(n\in\{20,50\}\); and the scalability characterisation is supported by the resource-envelope benchmarks reported in Section~\ref{sec:scalability}. The core scientific claim is therefore not only stated but triangulated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulas, and the cost of that reconstruction is governed by local support size rather than global repertoire size.
 
 \appendix
 
@@ -2213,7 +2113,7 @@ C\cup\bigl((\U\setminus C)\cap \J_h\bigr), & o=1,\\[4pt]
 Nested canalising rules iterate this construction with priority-ordered trigger sets.
 
 \section{Appendix B: Sensitivity and Interpretive Notes}
-The exact gate formulas support additional analyses already present in the repository, including average sensitivity and structured noise response.
+The exact gate formulas support additional analyses, including average sensitivity and structured noise response.
 
 \paragraph{AND and OR.}
 For arity \(d\),
@@ -2257,41 +2157,41 @@ For canalising rules, average sensitivity depends on the trigger probability and
 Sensitivity is not the primary theorem of this paper, but it matters because it connects the static one-set calculus to perturbation behaviour. The same exact formulas that identify where outputs equal one also determine how readily those outputs change under controlled input perturbations.
 
 \paragraph{Structured noise.}
-The broader repository also implements deterministic flip-noise toggles for robustness experiments under fixed seeds. Those stochastic controls are useful for later perturbative studies, but they are not used to support the exactness claims of the present manuscript, which are exclusively deterministic.
+Deterministic flip-noise toggles for robustness experiments under fixed seeds are implemented in the companion code. Those stochastic controls are useful for later perturbative studies, but they are not used to support the exactness claims of the present manuscript, which are exclusively deterministic.
 
 \section{Appendix C: Validation Artefact Index}
-Table~\ref{tab:validation-map} in Section~\ref{sec:validation} maps each formal claim to its validation layer. This appendix catalogues the corresponding reproducibility artefacts in the same order, so that each entry in the table can be traced to specific executed assets.
+Table~\ref{tab:validation-map} in Section~\ref{sec:validation} maps each formal claim to its validation layer. This appendix catalogues the corresponding reproducibility artefacts.
 
 \begin{center}
 \small
 \begin{tabular}{p{0.22\linewidth}p{0.30\linewidth}p{0.38\linewidth}}
 \toprule
-\textbf{Validation layer} & \textbf{Executed asset} & \textbf{Role} \\
+\textbf{Validation layer} & \textbf{Experiment} & \textbf{Role} \\
 \midrule
 Gate algebra and property tests &
-\texttt{code/corroboration\_6node/} session excerpts and corroboration tables &
+Six-node corroboration (Wolfram and Python scripts) &
 Per-gate one-set equality; involution, band, De Morgan, and relabelling checks across all twelve gate families \\[4pt]
 
 Six-node ordering check &
-\texttt{corroboration\_6node.wl} executed session; Table~\ref{tab:ordering-invariance-summary} &
+Ordering invariance scripts; Table~\ref{tab:ordering-invariance-summary} &
 Exact match of index sets under \(\varphi\) for LSB-first and MSB-first enumerations at \(n=6\) \\[4pt]
 
 Dispatch consistency and phased benchmarks &
-\texttt{mixed\_interaction\_10node.wl} session excerpts; Tables~\ref{tab:exact-method} and~\ref{tab:synthesis} &
+Ten-node mixed interaction experiment; Tables~\ref{tab:exact-method} and~\ref{tab:synthesis} &
 Zero discrepancy across full ordered repertoire at \(n\leq 4\); accuracy~\(1.0\) at \(n=10\) and \(n=13\) for all six mixed-gate query patterns \\[4pt]
 
 Resource-envelope benchmark &
-\texttt{scalability\_resource\_envelope/} scripts and summary tables &
+Scalability resource envelope experiment &
 Median analytic time sub-millisecond for \(n\in\{30,60,80,200\}\); support-governed cost confirmed against Proposition~\ref{prop:support-locality} \\[4pt]
 
 Stratified sampled audit &
-Large-scale benchmark scripts with seeds~301 and~302 &
+Large-scale benchmark with seeds~301 and~302 &
 Accuracy~\(1.0\) on \(1020\) stratified rows at \(n=20\) and \(n=50\); confirms Theorem~\ref{thm:canonical-reconstruction} beyond exhaustive-baseline range \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-All executed assets listed above are paper-local: they reside under \texttt{papers/method/code/} and can be re-run independently of the broader repository. Each asset was designed to be deterministic, seed-controlled where stochastic elements appear, and directly linked to the formal claim it audits. No result in the main text depends on informal inspection or non-reproduced computation.
+All experiments are deterministic, seed-controlled where stochastic elements appear, and directly linked to the formal claim each audits. Complete computational scripts are available in the companion repository. No result in the main text depends on informal inspection or non-reproduced computation.
 
 \section{Appendix D: Extended Experimental Programme}
 Several experimental strands extend the core validation beyond the layers listed in Table~\ref{tab:validation-map}. These strands are downstream consequences of the exact gate semantics and are included here as direct scientific records.
