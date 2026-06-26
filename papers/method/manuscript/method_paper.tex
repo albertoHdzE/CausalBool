@@ -788,9 +788,9 @@ Table~\ref{lst:corroboration-session-and} confirm exactly these analytically pre
 \textbf{Step} & \textbf{Result} \\
 \midrule
 Compressed representation &
-  Base set \(L=\{11\}\); offsets \(\Omega=\{0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53\}\) \\
+  Base set \(L=\{11\}\); offsets \(\Omega=\{0,1,4,5,16,17,\) \(20,21,32,33,36,37,48,49,52,53\}\) \\
 Deconvolution &
-  \(\operatorname{Dec}(L,\Omega)=\{11,12,15,16,27,28,31,32,43,44,47,48,59,60,63,64\}\) \\
+  \(\operatorname{Dec}(L,\Omega)=\{11,12,15,16,27,28,\) \(31,32,43,44,47,48,59,60,63,64\}\) \\
 Exhaustive corroboration &
   \(\J_5^{\mathrm{AND}}=\{j\in\U : y_5(j)=1\}\) --- exact equality confirmed \\
 \bottomrule
@@ -1273,20 +1273,22 @@ Each row was verified against the exhaustive baseline by exact equality on all 1
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{@{}lp{0.18\linewidth}p{0.35\linewidth}l@{}}
+\begin{adjustbox}{max width=\textwidth,center}
+\begin{tabular}{@{}lp{0.22\linewidth}p{0.38\linewidth}c@{}}
 \toprule
 \textbf{Query} & \textbf{Base set \(L\)} & \textbf{Offsets \(\Omega\)} & \textbf{Corroboration} \\
 \midrule
 S1: nodes \(\{4,6,7,10\}\) &
   \(\{141,217\}\) &
   \(\{0,1,256,257,512,513,768,769\}\) &
-  exact \\
+  exact \\[2pt]
 S2: nodes \(\{4,6,7,8,9,10\}\) &
-  \(\{141,217,397,398,\) \newline \(473,474,653,729,\) \newline \(909,910,985,986\}\) &
+  12 indices (see Table~\ref{tab:mixed10-subsystem-rows}) &
   \(\{0\}\) &
   exact \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \caption{Computational corroboration for the subsystem queries. Query \(S1\) recovers a genuinely factorised pair (two base indices, eight offsets from free coordinates \(\{1,9,10\}\)); query \(S2\) saturates all ten coordinates and the offset family collapses to \(\{0\}\). Both are verified by exact equality against the exhaustive baseline. Full computational scripts are available in the companion repository.}
 \label{lst:mixed10-session-subsystem}
 \end{table}
@@ -1587,19 +1589,17 @@ which is exactly the direct MSB baseline for the same node. Listing~\ref{lst:ord
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{@{}lp{0.55\linewidth}c@{}}
+\begin{tabular}{@{}lp{0.52\linewidth}c@{}}
 \toprule
 \textbf{Check} & \textbf{Description} & \textbf{Result} \\
 \midrule
 AND transport &
-  \(\varphi(\J_5^{\mathrm{LSB}})=\{21,22,23,24,29,30,31,32,53,54,55,56,61,62,63,64\}=\J_5^{\mathrm{MSB}}\) &
-  exact \\
+  \(\varphi(\J_5^{\mathrm{LSB}})=\J_5^{\mathrm{MSB}}\) (16 indices:
+  \(\{21,22,23,24,29,30,\) \(31,32,53,54,55,56,61,62,63,64\}\)) & exact \\[2pt]
 XOR transport &
-  \(\varphi(\J_6^{\mathrm{LSB}})=\J_6^{\mathrm{MSB}}\) (32 indices) &
-  exact \\
+  \(\varphi(\J_6^{\mathrm{LSB}})=\J_6^{\mathrm{MSB}}\) (32 indices) & exact \\
 Involution &
-  \(\varphi(\varphi(j))=j\) for all \(j\in\{1,\dots,64\}\) &
-  exact \\
+  \(\varphi(\varphi(j))=j\) for all \(j\in\{1,\dots,64\}\) & exact \\
 \bottomrule
 \end{tabular}
 \caption{Exact corroboration of ordering transport on the six-node benchmark. The LSB one-sets established in the AND and XOR examples are transported by \(\varphi\) and compared against direct MSB exhaustive baselines. The involution law \(\varphi\circ\varphi=\mathrm{id}\) is verified on the full universe \(\U=\{1,\dots,64\}\). Computational scripts are available in the companion repository.}
