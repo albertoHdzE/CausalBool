@@ -296,7 +296,8 @@ The decisive point is that these are \emph{network-aware} formulae. The local ru
 \end{remark}
 
 \subsection{Expanded Gate Expressions}
-This section introduces the explicit derived expressions in the style of the standalone AND and OR derivation notes.
+This section introduces the explicit derived expressions 
+for each of the supported gates for the calculation.
 
 \paragraph{AND.}
 Let \(I_{nc}=\{1,\dots,n\}\setminus \Ic\). The connected bits are fixed to one, so the decimal contribution of the connected part is the pivot
@@ -508,10 +509,14 @@ Average sensitivity \(\bar{s}\) counts, for each input position, the fraction of
 \emph{Pattern symbols.} The output column is constant (\(\pi=0\) or \(\pi=1\)) if and only if the gate evaluates to the same value on every input vector. For AND this occurs only vacuously (\(|\Ic|=0\)); for KOFN it occurs when \(k=0\) (always one) or \(k>d\) (always zero). Non-degenerate parameterisations produce at least one input giving output zero and at least one giving output one, hence \(\pi=*\).
 \end{proof}
 
-This summary is important for two reasons. First, it connects the present index-set calculus to perturbative behaviour rather than treating the one-set as a purely extensional object. Second, it explains why threshold extremes and canalising collapse play a special role in the validation programme: they are the principal mechanisms by which a formally non-trivial gate can still induce a constant output column.
+This formalism connects the present index-set calculus to perturbative 
+behaviour rather than treating the one-set as a purely extensional object. 
+Also, is used to explain why threshold extremes and canalising collapse 
+play a special role in the validation programme: they are the principal 
+mechanisms by which a formally non-trivial gate can still induce a constant output column.
 
 \subsection{Detailed example}
-This section presents one detailed deconvolution example and then a larger catalogue example containing one instance of each gate family.
+This section presents detailed deconvolution examples and then a larger catalogue example containing one instance of each gate family.
 
 \subsubsection{AND case}
 Fix LSB-first ordering and consider a node governed by AND on the connected-input set \(\Ic=\{2,4\}\) 
@@ -669,9 +674,11 @@ should coincide exactly with the rows of the exhaustive table~\ref{tab:corrobora
 &=\{j\in\U : y_6(j)=1\}.
 \end{aligned}
 \]
+
+\normalsize
+
 The shared exhaustive table~\ref{tab:corroboration-exhaustive} and the executed Mathematica 
 listing~\ref{lst:corroboration-session-and} highlight exactly these analytically predicted indices.
-\normalsize
 
 \begin{table}[p]
 \centering
@@ -750,7 +757,7 @@ listing~\ref{lst:corroboration-session-and} highlight exactly these analytically
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\caption{Single-page exhaustive corroboration table for the six-node network under LSB-first ordering. Bold red entries in the \(y_5\) column mark the analytically predicted indices in \(\J_5^{\mathrm{AND}}\); bold blue entries in the \(y_6\) column mark the analytically predicted indices in \(\J_6^{\mathrm{XOR}}\). Rows containing both highlights are exactly the repertoire positions at which the composed XOR node is active while the intermediate AND node is also active.}
+\caption{Exhaustive corroboration table for the six-node network under LSB-first ordering. Bold red entries in the \(y_5\) column mark the analytically predicted indices in \(\J_5^{\mathrm{AND}}\); bold blue entries in the \(y_6\) column mark the analytically predicted indices in \(\J_6^{\mathrm{XOR}}\). Rows containing both highlights are exactly the repertoire positions at which the composed XOR node is active while the intermediate AND node is also active.}
 \label{tab:corroboration-exhaustive}
 \end{table}
 
@@ -871,13 +878,14 @@ Its local input sets and exact one-set formulas are shown in table~\ref{tab:mixe
 10 & \(\{3,4,7,8\}\) & \(\Weight{\{3,4,7,8\}}{3}\cup\Weight{\{3,4,7,8\}}{4}\) \\
 \bottomrule
 \end{tabular}
-\caption{Local input sets and analytic one-set formulas for all 10 nodes in the mixed benchmark network. Each row encodes the causal rule governing node \(i\) using the same predicate notation as the manuscript's core formalism.}
+\caption{Local input sets and analytic one-set formulas for all 10 nodes 
+in the mixed benchmark network.}
 \label{tab:mixed10-node-formulas}
 \end{table}
 
 
 Here node \(4\) is a \(2\)-of-\(3\) threshold gate and node \(10\) is a strict majority gate on four inputs. 
-It is important to note that the network is not homogeneous: monotone, parity, negation, implication, 
+Notice that the network is not homogeneous: monotone, parity, negation, implication, 
 and threshold mechanisms coexist in the same causal object.
 
 
@@ -1045,8 +1053,7 @@ Equality \(\mu_q=0\) occurs only when the queried input sets are pairwise disjoi
 This shows that overlap has an exact combinatorial value. The query does not pay once
  per gate for a shared coordinate; it pays once for the coordinate itself. In
  that sense the queried information is distributed hierarchically across the network: 
- one coordinate can constrain several local mechanisms simultaneously. The present executed 
- examples for this section support this precise hierarchy-of-reuse claim. 
+ one coordinate can constrain several local mechanisms simultaneously. 
  
 % They do not yet justify a 
 % stronger claim of full mathematical fractality, so witse restricted to the exact
@@ -1568,14 +1575,16 @@ S2 & \texttt{0110111101} & 759 & \texttt{1111010101} & no & \(A_3\) & 1 \\
 
 Taken together, Figure~\ref{fig:mixed10-dynamical-schematic} and Tables~\ref{tab:mixed10-attractor-summary}--\ref{tab:mixed10-dynamics-samples}
 show how the exact repertoire analysis and the broader dynamics fit together. The earlier tables establish
-which rows realise the selected mixed constraints exactly. The present dynamical enrichment shows that
+which rows realise the selected mixed constraints exactly. This dynamic shows that
 those exact events sit inside a much smaller admissible image, and that this image funnels into a very
 small recurrent core. In that precise sense, the same network exhibits both combinatorial richness and
 predictable order: many analytically describable transient configurations exist, but they are organised by
 strong causal restrictions and by a compact attractor skeleton rather than by unrestricted disorder.
 
 \section{Ordering Invariance}
-The formalism would be scientifically brittle if its exactness depended on accidental bit-order conventions. The next theorem makes the transport mechanism explicit and shows that local causal sets are invariant up to the involution \(\varphi\).
+In this section is shown that the exactness does not depended on accidental 
+bit-order conventions. The next theorem makes the transport mechanism 
+explicit and shows that local causal sets are invariant up to the involution \(\varphi\).
 
 \begin{theorem}[Ordering-Transform Invariance]\label{thm:ordering-invariance}
 Let
@@ -1645,7 +1654,7 @@ be any exact mixed query under LSB-first ordering, and let \(\J_q^{\mathrm{MSB}}
 By Theorem~\ref{thm:ordering-invariance}, every local one-set transports by \(\varphi\). Since \(\varphi:\U\to\U\) is a bijection, it transports complements and intersections as well, and therefore every finite Boolean combination of local one-sets.
 \end{proof}
 
-This theorem is central to the paper's causal stance. It isolates the mechanism from the encoding. Two enumerations may look numerically different while representing the same causal rule. The point is not merely abstract: the already executed six-node AND and XOR examples provide a compact exact corroboration of the transport law on both a monotone gate and a parity gate.
+This theorem is central to the causal stance. It isolates the mechanism from the encoding. Two enumerations may look numerically different while representing the same causal rule. The point is not merely abstract: the already executed six-node AND and XOR examples provide a compact exact corroboration of the transport law on both a monotone gate and a parity gate.
 
 \begin{table}[t]
 \centering
@@ -1717,8 +1726,8 @@ All correctness claims in this paper are therefore representation-invariant prov
 \section{Scalability and Resource Envelope of Exact Causal Evaluation}\label{sec:scalability}
 Correctness of the index-set calculus has been established through gate-family derivations, the
 detailed AND and XOR cases, the exact ten-node mixed-network analysis, the overlap-compression
-treatment, and the validation evidence in the following section. This section addresses a distinct
-but equally necessary question: \emph{in what computational regime does exact causal representation
+treatment, and the validation evidence in the following section. This section addresses the 
+question: \emph{in what computational regime does exact causal representation
 become operationally indispensable?}
 
 Answering it requires first being precise about which representational objects are being compared,
@@ -2103,7 +2112,7 @@ Here the objective is categorically different. The network logic is given; the t
 This distinction matters for scientific interpretation. A machine-learning model that achieves high accuracy on a Boolean-network prediction task may or may not have recovered anything about the underlying causal logic. The index-set calculus, by contrast, provides a representation whose correctness is certified by the gate semantics themselves. The paper is therefore not anti-statistical. It is aimed at a different problem class, one in which causal structure is explicit, deterministic reconstruction is possible, and the appropriate standard of evidence is exact equality rather than approximate generalisation.
 
 \section{Discussion}
-For a high-level journal, the central value of the method is not that it is ``faster than brute force'' in some vague sense. The stronger claim is that it changes the scientific unit of explanation. The unit is no longer the truth table or the trajectory, but the exact rule-induced index set over an ordered repertoire. This shift is not cosmetic: it determines what kind of question the method can answer and what kind of evidence it is competent to provide.
+The central value of the method is not that it is ``faster than brute force'' in some vague sense. The stronger claim is that it changes the scientific unit of explanation. The unit is no longer the truth table or the trajectory, but the exact rule-induced index set over an ordered repertoire. This shift is not cosmetic: it determines what kind of question the method can answer and what kind of evidence it is competent to provide.
 
 This has four consequences.
 \begin{enumerate}[label=\arabic*.]
@@ -2118,9 +2127,19 @@ This has four consequences.
 
 Two limitations should be stated explicitly. First, the computational advantage depends on bounded support size: when the query support \(|C_q|\) approaches the ambient dimension \(n\), the analytic path converges to the cost of exhaustive materialisation. The method is therefore most powerful for networks with bounded in-degree and localised query scope. Second, the present formalism treats synchronous one-step update; asynchronous or stochastic schedules are discussed in Appendix~D but are not yet integrated into the core calculus.
 
-The method should therefore be read as a causal-computational mathematics paper with later applications to biological and other complex systems, not as a biology paper wearing mathematical vocabulary. That distinction matters for publication strategy. The main paper foregrounds exact definitions, theorems, worked examples, and exact validation. Broader applications can then be layered onto a firmer foundation.
-
-Seen from the perspective of the paper's internal logic, the contribution is tightly staged. Proposition~\ref{prop:gate-family-one-sets} establishes the local causal objects; Theorem~\ref{thm:ordering-invariance} removes encoding arbitrariness; Theorem~\ref{thm:canonical-reconstruction} lifts the local formulas to exact network predictions; Proposition~\ref{prop:materialization-lb} and Proposition~\ref{prop:support-locality} characterise the cost of materialisation and the efficiency of the analytic path; Proposition~\ref{prop:per-row-cost} and Proposition~\ref{prop:validation-burden} clarify per-row evaluation and sampling-based audit costs; and Section~\ref{sec:validation} aligns each validation layer with the corresponding formal claim. This structure matters because it distinguishes the manuscript from a collection of experiments. The experiments are evidential supports for a mathematical argument, not substitutes for one.
+Seen from the perspective of the paper's internal logic, 
+the contribution is tightly staged. Proposition~\ref{prop:gate-family-one-sets} 
+establishes the local causal objects; Theorem~\ref{thm:ordering-invariance} 
+removes encoding arbitrariness; Theorem~\ref{thm:canonical-reconstruction}
+ lifts the local formulas to exact network predictions; 
+ Proposition~\ref{prop:materialization-lb} and 
+ Proposition~\ref{prop:support-locality} characterise the cost of
+  materialisation and the efficiency of the analytic path;
+   Proposition~\ref{prop:per-row-cost} and Proposition~\ref{prop:validation-burden} 
+   clarify per-row evaluation and sampling-based audit costs; and 
+   Section~\ref{sec:validation} aligns each validation 
+   layer with the corresponding formal claim. 
+   
 
 \section{Conclusion}
 We have presented a causality-first index-set calculus for Boolean networks. The framework rests on five pillars.
