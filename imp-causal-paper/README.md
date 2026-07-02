@@ -53,6 +53,7 @@ The `th17-prepare` pipeline now also materializes branch-specific cohort artifac
 - `wu_sgk1_pathogenicity_cohort`
 - `yosef_th17_network_design`
 - `yosef_th17_network_evidence`
+- `yosef_th17_network_regulator_summary`
 
 These cohort directories provide combined `sample_metadata.csv`, per-series `series_metadata.csv`, and `summary.json` files so downstream network reconstruction can select a biologically coherent arm by construction rather than by ad hoc filtering.
 
@@ -79,6 +80,15 @@ The Yosef evidence artifact is the next layer above the design table. It materia
 - `exact_48h_gpl8321_design.csv` and `exact_48h_gpl8321_expression_matrix.tsv.gz`: the exact `48.0 hr` GPL8321 subset (`4` samples)
 
 This evidence layer still preserves RNA-seq and microarray modality boundaries. It is designed for downstream ranking and stability analyses, not for cross-platform matrix fusion.
+
+The Yosef regulator-summary artifact is the current highest preprocessing layer before explicit ranking logic. It materializes:
+- `rnaseq_target_summary.csv`: one row per targeted perturbation with self-response values and whole-transcriptome effect summaries
+- `gpl8321_late_time_contrast_manifest.csv`: `26` same-series, same-time late-time contrast definitions derived from observed metadata only
+- `gpl8321_late_time_contrast_matrix.tsv.gz`: the corresponding `22690 x 26` probe-level GPL8321 contrast matrix
+- `gpl8321_late_time_contrast_summary.csv`: per-contrast probe-level extrema and aggregate effect sizes
+- `candidate_regulator_evidence.csv`: a modality-aware candidate table for the `12` targeted perturbation regulators plus the paper-highlighted `48 hr` candidates `STAT6`, `TCFEB`, and `TRIM24`
+
+At this stage, all three highlighted `48 hr` paper candidates are directly observable in the RNA-seq perturbation matrix, while GPL8321 support remains probe-level only because a faithful platform annotation map has not yet been recovered locally.
 
 Each plot directory also contains a `plot_manifest.json` file stating the exact correspondence boundary with the original paper figures. This is intentional: the implementation reproduces the paper's core algorithms and generates faithful reduced analogues of key visualizations, but it does not claim that every saved plot is pixel-identical to the published panels.
 

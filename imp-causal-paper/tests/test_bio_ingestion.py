@@ -105,10 +105,11 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "yosef_th17_network_cohort",
         "yosef_th17_network_design",
         "yosef_th17_network_evidence",
+        "yosef_th17_network_regulator_summary",
     }.issubset(set(summary["dataset_order"]))
     assert summary["study_arm_dataset_counts"] == {
         "wu_sgk1_pathogenicity": 3,
-        "yosef_th17_network": 8,
+        "yosef_th17_network": 9,
     }
 
     gse43969_summary = json.loads((output_dir / "GSE43969_series" / "summary.json").read_text())
@@ -262,6 +263,58 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         index_col=0,
     )
     assert exact_48h_microarray.shape == (22690, 4)
+
+    regulator_summary = json.loads((output_dir / "yosef_th17_network_regulator_summary" / "summary.json").read_text())
+    assert regulator_summary["study_arm"] == "yosef_th17_network"
+    assert regulator_summary["rnaseq_target_summary_count"] == 12
+    assert regulator_summary["target_self_observed_count"] == 11
+    assert regulator_summary["late_time_gpl8321_contrast_count"] == 26
+    assert regulator_summary["late_time_gpl8321_contrast_family_counts"] == {
+        "gse43955_il23_effect": 4,
+        "gse43955_treatment_vs_th0": 5,
+        "gse43969_il23_effect_il23r_ko": 4,
+        "gse43969_il23_effect_wt": 4,
+        "gse43969_wt_vs_il23rko_tgfb_il6": 5,
+        "gse43969_wt_vs_il23rko_tgfb_il6_il23": 4,
+    }
+    assert regulator_summary["candidate_regulator_count"] == 15
+    assert regulator_summary["paper_finalnet_negative_candidates"] == ["STAT6", "TCFEB", "TRIM24"]
+    assert regulator_summary["paper_finalnet_negative_candidates_observed_in_rnaseq"] == ["STAT6", "TCFEB", "TRIM24"]
+    assert regulator_summary["candidate_regulators_without_rnaseq_gene_match"] == ["POU2F1A"]
+
+    rnaseq_target_summary = pd.read_csv(
+        output_dir / "yosef_th17_network_regulator_summary" / "rnaseq_target_summary.csv"
+    )
+    assert rnaseq_target_summary.shape[0] == 12
+    assert int(rnaseq_target_summary["target_gene_observed"].sum()) == 11
+    assert rnaseq_target_summary.loc[
+        rnaseq_target_summary["perturbation_target"] == "TSC22D3", "self_log2_fold_change"
+    ].iloc[0] > 2.0
+
+    contrast_manifest = pd.read_csv(
+        output_dir / "yosef_th17_network_regulator_summary" / "gpl8321_late_time_contrast_manifest.csv"
+    )
+    assert contrast_manifest.shape[0] == 26
+    assert set(contrast_manifest["series_id"]) == {"GSE43955", "GSE43969"}
+
+    contrast_matrix = pd.read_csv(
+        output_dir / "yosef_th17_network_regulator_summary" / "gpl8321_late_time_contrast_matrix.tsv.gz",
+        sep="\t",
+        index_col=0,
+    )
+    assert contrast_matrix.shape == (22690, 26)
+
+    candidate_evidence = pd.read_csv(
+        output_dir / "yosef_th17_network_regulator_summary" / "candidate_regulator_evidence.csv"
+    )
+    assert candidate_evidence.shape[0] == 15
+    stat6_row = candidate_evidence.loc[candidate_evidence["regulator"] == "STAT6"].iloc[0]
+    assert bool(stat6_row["is_paper_finalnet_negative_48h_candidate"]) is True
+    assert bool(stat6_row["rnaseq_gene_observed"]) is True
+    assert bool(stat6_row["is_rnaseq_perturbation_target"]) is False
+    pou2f1a_row = candidate_evidence.loc[candidate_evidence["regulator"] == "POU2F1A"].iloc[0]
+    assert bool(pou2f1a_row["is_rnaseq_perturbation_target"]) is True
+    assert bool(pou2f1a_row["rnaseq_gene_observed"]) is False
 
     wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
     assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"

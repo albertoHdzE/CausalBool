@@ -496,6 +496,38 @@ Confirmed Yosef-only regulator-evidence artifact:
       - `GSE43955 = 2`
       - `GSE43969 = 2`
 
+Confirmed Yosef-only regulator-summary artifact:
+
+- `yosef_th17_network_regulator_summary`:
+  - RNA-seq perturbation target summaries:
+    - `rnaseq_target_summary.csv` = `12` rows
+    - `11` targets have direct self-observation values
+    - `1` target remains unmatched as an exact RNA-seq gene symbol:
+      - `POU2F1A`
+  - late-time GPL8321 contrasts:
+    - `gpl8321_late_time_contrast_manifest.csv` = `26` contrasts
+    - `gpl8321_late_time_contrast_matrix.tsv.gz` = `22690 x 26`
+    - contrast-family counts:
+      - `gse43955_treatment_vs_th0 = 5`
+      - `gse43955_il23_effect = 4`
+      - `gse43969_wt_vs_il23rko_tgfb_il6 = 5`
+      - `gse43969_wt_vs_il23rko_tgfb_il6_il23 = 4`
+      - `gse43969_il23_effect_wt = 4`
+      - `gse43969_il23_effect_il23r_ko = 4`
+    - all contrasts are same-series and same-time only; no cross-series or cross-platform averaging is performed
+  - candidate regulator table:
+    - `candidate_regulator_evidence.csv` = `15` regulators
+    - includes the `12` targeted perturbation regulators plus the paper-highlighted final-network `48 hr` candidates:
+      - `STAT6`
+      - `TCFEB`
+      - `TRIM24`
+    - all three highlighted final-network candidates are present as exact gene symbols in the recovered RNA-seq perturbation matrix
+    - GPL8321 support for candidate regulators remains explicitly probe-level only until a faithful platform annotation map is recovered
+  - notable observed self-response examples from the RNA-seq target summaries:
+    - `TSC22D3` self log2 fold change = `+2.098233548840968`
+    - `EGR2` self log2 fold change = `-1.1717290230229254`
+    - `PROCR` self log2 fold change = `-1.135054628704145`
+
 Scientific significance:
 
 - the project now has deterministic, script-generated local assets for the `Th17` microarray matrices, the sequencing-only GEO metadata series, the 48 h perturbation RNA-seq table bundle, and the cross-series raw-bundle manifests;

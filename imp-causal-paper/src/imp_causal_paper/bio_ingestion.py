@@ -604,6 +604,11 @@ def _safe_log2_fold_change(sample: pd.Series, baseline: pd.Series) -> pd.Series:
     return np.log2(sample.astype(float) + 1.0) - np.log2(baseline.astype(float) + 1.0)
 
 
+def _sanitize_label(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9]+", "_", value)
+    return cleaned.strip("_")
+
+
 def prepare_yosef_th17_network_design(
     datasets: list[GeoSeriesMatrix],
     output_dir: Path,
@@ -835,6 +840,238 @@ def prepare_yosef_th17_network_evidence(processed_dir: Path, output_dir: Path) -
     return summary
 
 
+def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) -> dict:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    evidence_dir = processed_dir / "yosef_th17_network_evidence"
+
+    target_design = pd.read_csv(evidence_dir / "perturbation_target_design.csv")
+    target_expression = _load_matrix(evidence_dir / "perturbation_target_expression_matrix.tsv.gz")
+    delta_matrix = _load_matrix(evidence_dir / "perturbation_target_delta_matrix.tsv.gz")
+    log2_fc_matrix = _load_matrix(evidence_dir / "perturbation_target_log2_fc_matrix.tsv.gz")
+    control_reference = pd.read_csv(evidence_dir / "perturbation_control_reference.csv").set_index("gene_symbol")
+    self_response = pd.read_csv(evidence_dir / "perturbation_self_response.csv").set_index("perturbation_target")
+
+    rnaseq_target_records: list[dict[str, object]] = []
+    for row in target_design.to_dict(orient="records"):
+        sample_id = str(row["sample_id"])
+        target = str(row["perturbation_target"])
+        sample_log2_fc = log2_fc_matrix[sample_id]
+        max_positive_gene = str(sample_log2_fc.idxmax())
+        max_negative_gene = str(sample_log2_fc.idxmin())
+        max_abs_gene = str(sample_log2_fc.abs().idxmax())
+        self_row = self_response.loc[target]
+        rnaseq_target_records.append(
+            {
+                "sample_id": sample_id,
+                "perturbation_target": target,
+                "matched_gene_symbol": self_row["matched_gene_symbol"] if pd.notna(self_row["matched_gene_symbol"]) else None,
+                "target_gene_observed": bool(self_row["target_gene_observed"]),
+                "self_target_expression": self_row["target_expression"],
+                "self_control_mean_expression": self_row["control_mean_expression"],
+                "self_delta_expression": self_row["delta_expression"],
+                "self_log2_fold_change": self_row["log2_fold_change"],
+                "mean_abs_log2_fc_all_genes": float(sample_log2_fc.abs().mean()),
+                "median_abs_log2_fc_all_genes": float(sample_log2_fc.abs().median()),
+                "max_positive_gene_symbol": max_positive_gene,
+                "max_positive_log2_fc": float(sample_log2_fc.loc[max_positive_gene]),
+                "max_negative_gene_symbol": max_negative_gene,
+                "max_negative_log2_fc": float(sample_log2_fc.loc[max_negative_gene]),
+                "max_abs_gene_symbol": max_abs_gene,
+                "max_abs_log2_fc": float(sample_log2_fc.loc[max_abs_gene]),
+            }
+        )
+    rnaseq_target_summary = pd.DataFrame.from_records(rnaseq_target_records).sort_values("perturbation_target")
+    rnaseq_target_summary.to_csv(output_dir / "rnaseq_target_summary.csv", index=False)
+
+    late_time_design = pd.read_csv(evidence_dir / "late_time_gpl8321_design.csv")
+    late_time_expression = _load_matrix(evidence_dir / "late_time_gpl8321_expression_matrix.tsv.gz")
+
+    contrast_specs: list[dict[str, object]] = []
+    for time_hr in [48.0, 50.0, 52.0, 60.0, 72.0]:
+        contrast_specs.append(
+            {
+                "contrast_family": "gse43955_treatment_vs_th0",
+                "series_id": "GSE43955",
+                "time_hr": time_hr,
+                "lhs_treatment": "TGFb+IL6",
+                "rhs_treatment": "Th0",
+                "lhs_genotype": "not_reported",
+                "rhs_genotype": "not_reported",
+            }
+        )
+    for time_hr in [50.0, 52.0, 60.0, 72.0]:
+        contrast_specs.append(
+            {
+                "contrast_family": "gse43955_il23_effect",
+                "series_id": "GSE43955",
+                "time_hr": time_hr,
+                "lhs_treatment": "TGFb+IL6+IL23",
+                "rhs_treatment": "TGFb+IL6",
+                "lhs_genotype": "not_reported",
+                "rhs_genotype": "not_reported",
+            }
+        )
+    for time_hr in [48.0, 49.0, 54.0, 65.0, 72.0]:
+        contrast_specs.append(
+            {
+                "contrast_family": "gse43969_wt_vs_il23rko_tgfb_il6",
+                "series_id": "GSE43969",
+                "time_hr": time_hr,
+                "lhs_treatment": "TGFb+IL6",
+                "rhs_treatment": "TGFb+IL6",
+                "lhs_genotype": "WT",
+                "rhs_genotype": "IL23R_KO",
+            }
+        )
+    for time_hr in [49.0, 54.0, 65.0, 72.0]:
+        contrast_specs.append(
+            {
+                "contrast_family": "gse43969_wt_vs_il23rko_tgfb_il6_il23",
+                "series_id": "GSE43969",
+                "time_hr": time_hr,
+                "lhs_treatment": "TGFb+IL6+IL23",
+                "rhs_treatment": "TGFb+IL6+IL23",
+                "lhs_genotype": "WT",
+                "rhs_genotype": "IL23R_KO",
+            }
+        )
+    for genotype in ["WT", "IL23R_KO"]:
+        for time_hr in [49.0, 54.0, 65.0, 72.0]:
+            contrast_specs.append(
+                {
+                    "contrast_family": f"gse43969_il23_effect_{genotype.lower()}",
+                    "series_id": "GSE43969",
+                    "time_hr": time_hr,
+                    "lhs_treatment": "TGFb+IL6+IL23",
+                    "rhs_treatment": "TGFb+IL6",
+                    "lhs_genotype": genotype,
+                    "rhs_genotype": genotype,
+                }
+            )
+
+    contrast_records: list[dict[str, object]] = []
+    contrast_series: list[pd.Series] = []
+    contrast_summary_records: list[dict[str, object]] = []
+    for spec in contrast_specs:
+        lhs = late_time_design.loc[
+            (late_time_design["series_id"] == spec["series_id"])
+            & (late_time_design["time_hr"] == spec["time_hr"])
+            & (late_time_design["treatment_standardized"] == spec["lhs_treatment"])
+            & (late_time_design["genotype_standardized"] == spec["lhs_genotype"])
+        ].copy()
+        rhs = late_time_design.loc[
+            (late_time_design["series_id"] == spec["series_id"])
+            & (late_time_design["time_hr"] == spec["time_hr"])
+            & (late_time_design["treatment_standardized"] == spec["rhs_treatment"])
+            & (late_time_design["genotype_standardized"] == spec["rhs_genotype"])
+        ].copy()
+        if lhs.empty or rhs.empty:
+            raise ValueError(f"Missing samples for contrast specification: {spec}")
+
+        label = _sanitize_label(
+            f"{spec['contrast_family']}__{spec['series_id']}__{spec['time_hr']}h__{spec['lhs_treatment']}__{spec['lhs_genotype']}__vs__{spec['rhs_treatment']}__{spec['rhs_genotype']}"
+        )
+        lhs_mean = late_time_expression.loc[:, lhs["sample_id"].astype(str).tolist()].mean(axis=1)
+        rhs_mean = late_time_expression.loc[:, rhs["sample_id"].astype(str).tolist()].mean(axis=1)
+        delta = lhs_mean - rhs_mean
+        delta.name = label
+        contrast_series.append(delta)
+        contrast_records.append(
+            {
+                "contrast_label": label,
+                "contrast_family": spec["contrast_family"],
+                "series_id": spec["series_id"],
+                "time_hr": float(spec["time_hr"]),
+                "lhs_treatment": spec["lhs_treatment"],
+                "rhs_treatment": spec["rhs_treatment"],
+                "lhs_genotype": spec["lhs_genotype"],
+                "rhs_genotype": spec["rhs_genotype"],
+                "lhs_sample_count": int(lhs.shape[0]),
+                "rhs_sample_count": int(rhs.shape[0]),
+                "lhs_sample_ids": "|".join(lhs["sample_id"].astype(str).tolist()),
+                "rhs_sample_ids": "|".join(rhs["sample_id"].astype(str).tolist()),
+            }
+        )
+        contrast_summary_records.append(
+            {
+                "contrast_label": label,
+                "contrast_family": spec["contrast_family"],
+                "series_id": spec["series_id"],
+                "time_hr": float(spec["time_hr"]),
+                "mean_abs_delta": float(delta.abs().mean()),
+                "median_abs_delta": float(delta.abs().median()),
+                "max_positive_probe_id": str(delta.idxmax()),
+                "max_positive_delta": float(delta.max()),
+                "max_negative_probe_id": str(delta.idxmin()),
+                "max_negative_delta": float(delta.min()),
+                "max_abs_probe_id": str(delta.abs().idxmax()),
+                "max_abs_delta": float(delta.loc[delta.abs().idxmax()]),
+            }
+        )
+
+    contrast_manifest = pd.DataFrame.from_records(contrast_records).sort_values(["series_id", "contrast_family", "time_hr"])
+    contrast_manifest.to_csv(output_dir / "gpl8321_late_time_contrast_manifest.csv", index=False)
+    contrast_summary = pd.DataFrame.from_records(contrast_summary_records).sort_values(["series_id", "contrast_family", "time_hr"])
+    contrast_summary.to_csv(output_dir / "gpl8321_late_time_contrast_summary.csv", index=False)
+    contrast_matrix = pd.concat(contrast_series, axis=1)
+    contrast_matrix.to_csv(output_dir / "gpl8321_late_time_contrast_matrix.tsv.gz", sep="\t", compression="gzip")
+
+    candidate_regulators = sorted(
+        set(rnaseq_target_summary["perturbation_target"].astype(str).tolist()) | {"STAT6", "TCFEB", "TRIM24"}
+    )
+    upper_gene_symbols = {str(symbol).upper(): str(symbol) for symbol in target_expression.index}
+    paper_highlighted = {"STAT6", "TCFEB", "TRIM24"}
+    targeted = set(rnaseq_target_summary["perturbation_target"].astype(str).tolist())
+    candidate_records: list[dict[str, object]] = []
+    for regulator in candidate_regulators:
+        matched_gene_symbol = upper_gene_symbols.get(regulator)
+        target_row = rnaseq_target_summary.loc[rnaseq_target_summary["perturbation_target"] == regulator]
+        gene_observed = matched_gene_symbol is not None
+        candidate_records.append(
+            {
+                "regulator": regulator,
+                "is_rnaseq_perturbation_target": regulator in targeted,
+                "is_paper_finalnet_negative_48h_candidate": regulator in paper_highlighted,
+                "matched_rnaseq_gene_symbol": matched_gene_symbol,
+                "rnaseq_gene_observed": gene_observed,
+                "rnaseq_self_target_observed": bool(target_row["target_gene_observed"].iloc[0]) if not target_row.empty else False,
+                "rnaseq_self_log2_fold_change": float(target_row["self_log2_fold_change"].iloc[0]) if not target_row.empty and pd.notna(target_row["self_log2_fold_change"].iloc[0]) else None,
+                "rnaseq_self_delta_expression": float(target_row["self_delta_expression"].iloc[0]) if not target_row.empty and pd.notna(target_row["self_delta_expression"].iloc[0]) else None,
+                "rnaseq_control_mean_expression": float(control_reference.loc[matched_gene_symbol, "control_mean_expression"]) if gene_observed else None,
+                "rnaseq_mean_abs_log2_fc_across_targets": float(log2_fc_matrix.loc[matched_gene_symbol].abs().mean()) if gene_observed else None,
+                "rnaseq_max_abs_log2_fc_across_targets": float(log2_fc_matrix.loc[matched_gene_symbol].abs().max()) if gene_observed else None,
+                "microarray_probe_mapping_available": False,
+                "direct_gpl8321_gene_level_support_available": False,
+                "evidence_note": (
+                    "GPL8321 late-time contrasts are currently probe-level only; faithful gene-level mapping requires recovered platform annotation."
+                ),
+            }
+        )
+    candidate_evidence = pd.DataFrame.from_records(candidate_records).sort_values("regulator")
+    candidate_evidence.to_csv(output_dir / "candidate_regulator_evidence.csv", index=False)
+
+    summary = {
+        "study_arm": "yosef_th17_network",
+        "rnaseq_target_summary_count": int(rnaseq_target_summary.shape[0]),
+        "target_self_observed_count": int(rnaseq_target_summary["target_gene_observed"].sum()),
+        "late_time_gpl8321_contrast_count": int(contrast_manifest.shape[0]),
+        "late_time_gpl8321_contrast_family_counts": contrast_manifest["contrast_family"].value_counts().sort_index().astype(int).to_dict(),
+        "candidate_regulator_count": int(candidate_evidence.shape[0]),
+        "paper_finalnet_negative_candidates": sorted(paper_highlighted),
+        "paper_finalnet_negative_candidates_observed_in_rnaseq": sorted(
+            candidate_evidence.loc[
+                candidate_evidence["is_paper_finalnet_negative_48h_candidate"] & candidate_evidence["rnaseq_gene_observed"],
+                "regulator",
+            ].astype(str).tolist()
+        ),
+        "candidate_regulators_without_rnaseq_gene_match": sorted(
+            candidate_evidence.loc[~candidate_evidence["rnaseq_gene_observed"], "regulator"].astype(str).tolist()
+        ),
+    }
+    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+    return summary
+
+
 def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None = None) -> dict[str, dict]:
     output_dir.mkdir(parents=True, exist_ok=True)
     payload: dict[str, dict] = {}
@@ -878,6 +1115,10 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
     payload["yosef_th17_network_evidence"] = prepare_yosef_th17_network_evidence(
         output_dir,
         output_dir / "yosef_th17_network_evidence",
+    )
+    payload["yosef_th17_network_regulator_summary"] = prepare_yosef_th17_regulator_summary(
+        output_dir,
+        output_dir / "yosef_th17_network_regulator_summary",
     )
 
     combined = {
