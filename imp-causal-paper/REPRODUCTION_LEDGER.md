@@ -402,6 +402,53 @@ Confirmed branch-specific cohort artifacts:
     - `GSE43956_series`
     - `GSE43957_series`
 
+Confirmed Yosef-only network design artifact:
+
+- `yosef_th17_network_design`:
+  - included series:
+    - `GSE43948`
+    - `GSE43949`
+    - `GSE43955`
+    - `GSE43969`
+  - `112` samples total
+  - assay-modality counts:
+    - `rna_seq = 32`
+    - `chip_seq = 2`
+    - `microarray = 78`
+  - experimental-axis counts:
+    - `perturbation_screen = 32`
+    - `chip_binding = 2`
+    - `time_course = 58`
+    - `genotype_time_course = 20`
+  - derived subpanels:
+    - `perturbation_screen_design.csv` = `32` samples
+    - `chip_binding_design.csv` = `2` samples
+    - `dynamic_timecourse_design.csv` = `78` samples
+    - `exact_48h_expression_design.csv` = `36` samples
+  - exact `48.0 hr` expression-bearing series contribution:
+    - `GSE43948` = `32`
+    - `GSE43955` = `2`
+    - `GSE43969` = `2`
+  - genotype standardization:
+    - `IL23R_KO = 10`
+    - `WT = 10`
+    - `not_reported = 92`
+  - perturbation-screen target counts:
+    - `NT = 20`
+    - each targeted perturbation recovered once:
+      - `EGR2`
+      - `ETV6`
+      - `FAS`
+      - `IKZF4`
+      - `IRF8`
+      - `MINA`
+      - `POU2F1A`
+      - `PROCR`
+      - `SMARCA4`
+      - `SP4`
+      - `TSC22D3`
+      - `ZEB1`
+
 Scientific significance:
 
 - the project now has deterministic, script-generated local assets for the `Th17` microarray matrices, the sequencing-only GEO metadata series, the 48 h perturbation RNA-seq table bundle, and the cross-series raw-bundle manifests;

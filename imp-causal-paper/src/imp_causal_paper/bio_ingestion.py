@@ -25,31 +25,43 @@ TH17_SERIES_CONTEXT: dict[str, dict[str, str]] = {
         "study_arm": "yosef_th17_network",
         "source_publication": "Yosef et al. 2013",
         "biological_program": "dynamic_th17_network_reconstruction",
+        "assay_modality": "rna_seq",
+        "experimental_axis": "perturbation_screen",
     },
     "GSE43949": {
         "study_arm": "yosef_th17_network",
         "source_publication": "Yosef et al. 2013",
         "biological_program": "dynamic_th17_network_reconstruction",
+        "assay_modality": "chip_seq",
+        "experimental_axis": "chip_binding",
     },
     "GSE43955": {
         "study_arm": "yosef_th17_network",
         "source_publication": "Yosef et al. 2013",
         "biological_program": "dynamic_th17_network_reconstruction",
+        "assay_modality": "microarray",
+        "experimental_axis": "time_course",
     },
     "GSE43969": {
         "study_arm": "yosef_th17_network",
         "source_publication": "Yosef et al. 2013",
         "biological_program": "dynamic_th17_network_reconstruction",
+        "assay_modality": "microarray",
+        "experimental_axis": "genotype_time_course",
     },
     "GSE43956": {
         "study_arm": "wu_sgk1_pathogenicity",
         "source_publication": "Wu et al. 2013",
         "biological_program": "sgk1_il23_pathogenicity",
+        "assay_modality": "microarray",
+        "experimental_axis": "sgk1_pathogenicity",
     },
     "GSE43957": {
         "study_arm": "wu_sgk1_pathogenicity",
         "source_publication": "Wu et al. 2013",
         "biological_program": "sgk1_salt_pathogenicity",
+        "assay_modality": "microarray",
+        "experimental_axis": "salt_pathogenicity",
     },
 }
 
@@ -544,6 +556,146 @@ def prepare_th17_study_arm_cohorts(
     return payload
 
 
+def _standardize_cell_type(value: object) -> str | None:
+    if value is None or pd.isna(value):
+        return None
+    raw = str(value).strip()
+    if raw in {"Th17", "Th17 cells"}:
+        return "Th17"
+    return raw
+
+
+def _standardize_treatment(series_id: str, value: object) -> str | None:
+    if value is None or pd.isna(value):
+        return None
+    raw = str(value).strip()
+    mapping = {
+        "Tgfb+Il6": "TGFb+IL6",
+        "Tgfb+Il6+Il23": "TGFb+IL6+IL23",
+        "Tgfb+IL6": "TGFb+IL6",
+        "Tgfb+IL6+IL23": "TGFb+IL6+IL23",
+        "Th0": "Th0",
+    }
+    if series_id == "GSE43948":
+        return "non_targeting_control" if "non-targeting control" in raw.lower() else "targeted_knockdown"
+    return mapping.get(raw, raw)
+
+
+def _standardize_genotype(value: object) -> str:
+    if value is None or pd.isna(value) or str(value).strip() == "":
+        return "not_reported"
+    raw = str(value).strip()
+    mapping = {
+        "WT": "WT",
+        "IL23R knockout": "IL23R_KO",
+    }
+    return mapping.get(raw, raw)
+
+
+def prepare_yosef_th17_network_design(
+    datasets: list[GeoSeriesMatrix],
+    output_dir: Path,
+) -> dict:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    yosef_datasets = [dataset for dataset in datasets if dataset.metadata.get("study_arm", pd.Series(dtype=str)).eq("yosef_th17_network").any()]
+    if not yosef_datasets:
+        raise ValueError("No Yosef Th17 datasets are available for design-table generation.")
+
+    rnaseq_path = output_dir.parent / "GSE43948_rnaseq" / "sample_metadata.csv"
+    rnaseq_metadata = pd.read_csv(rnaseq_path) if rnaseq_path.exists() else pd.DataFrame()
+    rnaseq_lookup = (
+        rnaseq_metadata.set_index("sample_id")[
+            ["source_filename", "time_hr", "perturbation_target_raw", "perturbation_target", "is_non_targeting_control"]
+        ].to_dict(orient="index")
+        if not rnaseq_metadata.empty
+        else {}
+    )
+
+    records: list[dict[str, object]] = []
+    for dataset in sorted(yosef_datasets, key=lambda item: item.series_id):
+        context = _series_context(dataset.series_id)
+        expression_artifact = (
+            "GSE43948_rnaseq"
+            if dataset.series_id == "GSE43948" and rnaseq_path.exists()
+            else (f"{dataset.series_id}_series" if dataset.expression is not None else None)
+        )
+        for row in dataset.metadata.to_dict(orient="records"):
+            sample_id = str(row["sample_id"])
+            rnaseq_row = rnaseq_lookup.get(sample_id, {})
+            time_hr = rnaseq_row.get("time_hr", row.get("time_hr"))
+            exact_48h = bool(pd.notna(time_hr) and float(time_hr) == 48.0)
+            perturbation_target = rnaseq_row.get("perturbation_target")
+            is_non_targeting_control = rnaseq_row.get("is_non_targeting_control")
+            records.append(
+                {
+                    "sample_id": sample_id,
+                    "series_id": dataset.series_id,
+                    "study_arm": context.get("study_arm"),
+                    "source_publication": context.get("source_publication"),
+                    "biological_program": context.get("biological_program"),
+                    "assay_modality": context.get("assay_modality"),
+                    "experimental_axis": context.get("experimental_axis"),
+                    "metadata_artifact": f"{dataset.series_id}_series",
+                    "expression_artifact": expression_artifact,
+                    "has_expression_artifact": expression_artifact is not None,
+                    "title": row.get("title"),
+                    "cell_type_raw": row.get("cell_type"),
+                    "cell_type_standardized": _standardize_cell_type(row.get("cell_type")),
+                    "treatment_raw": row.get("treatment"),
+                    "treatment_standardized": _standardize_treatment(dataset.series_id, row.get("treatment")),
+                    "genotype_raw": row.get("genotype"),
+                    "genotype_standardized": _standardize_genotype(row.get("genotype")),
+                    "time_hr": float(time_hr) if pd.notna(time_hr) else None,
+                    "is_exact_48h": exact_48h,
+                    "perturbation_target": perturbation_target,
+                    "is_non_targeting_control": bool(is_non_targeting_control) if pd.notna(is_non_targeting_control) else None,
+                    "chip_antibody": row.get("chip_antibody"),
+                    "in_regulator_ranking_panel": dataset.series_id == "GSE43948" and expression_artifact is not None,
+                    "in_chip_binding_panel": dataset.series_id == "GSE43949",
+                    "in_dynamic_timecourse_panel": dataset.series_id in {"GSE43955", "GSE43969"} and expression_artifact is not None,
+                    "in_exact_48h_expression_panel": exact_48h and expression_artifact is not None,
+                }
+            )
+
+    design = pd.DataFrame.from_records(records).sort_values(["series_id", "sample_id"]).reset_index(drop=True)
+    design.to_csv(output_dir / "sample_design.csv", index=False)
+
+    perturbation_screen = design.loc[design["in_regulator_ranking_panel"]].copy()
+    perturbation_screen.to_csv(output_dir / "perturbation_screen_design.csv", index=False)
+
+    chip_binding = design.loc[design["in_chip_binding_panel"]].copy()
+    chip_binding.to_csv(output_dir / "chip_binding_design.csv", index=False)
+
+    dynamic_timecourse = design.loc[design["in_dynamic_timecourse_panel"]].copy()
+    dynamic_timecourse.to_csv(output_dir / "dynamic_timecourse_design.csv", index=False)
+
+    exact_48h_expression = design.loc[design["in_exact_48h_expression_panel"]].copy()
+    exact_48h_expression.to_csv(output_dir / "exact_48h_expression_design.csv", index=False)
+
+    summary = {
+        "study_arm": "yosef_th17_network",
+        "sample_count": int(design.shape[0]),
+        "series_ids": sorted(design["series_id"].astype(str).unique().tolist()),
+        "assay_modality_counts": design["assay_modality"].value_counts().sort_index().astype(int).to_dict(),
+        "experimental_axis_counts": design["experimental_axis"].value_counts().sort_index().astype(int).to_dict(),
+        "expression_artifact_counts": design.loc[design["expression_artifact"].notna(), "expression_artifact"]
+        .value_counts()
+        .sort_index()
+        .astype(int)
+        .to_dict(),
+        "perturbation_screen_sample_count": int(perturbation_screen.shape[0]),
+        "chip_binding_sample_count": int(chip_binding.shape[0]),
+        "dynamic_timecourse_sample_count": int(dynamic_timecourse.shape[0]),
+        "exact_48h_expression_sample_count": int(exact_48h_expression.shape[0]),
+        "exact_48h_expression_series_counts": exact_48h_expression["series_id"].value_counts().sort_index().astype(int).to_dict(),
+        "perturbation_target_counts": perturbation_screen["perturbation_target"].fillna("UNSPECIFIED").value_counts().sort_index().astype(int).to_dict(),
+        "genotype_standardized_counts": design["genotype_standardized"].value_counts().sort_index().astype(int).to_dict(),
+        "treatment_standardized_counts": design["treatment_standardized"].fillna("UNSPECIFIED").value_counts().sort_index().astype(int).to_dict(),
+    }
+    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+    return summary
+
+
 def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None = None) -> dict[str, dict]:
     output_dir.mkdir(parents=True, exist_ok=True)
     payload: dict[str, dict] = {}
@@ -580,6 +732,10 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
             payload["GSE43948_rnaseq"] = prepare_th17_perturbation_rnaseq(supp_dir, output_dir / "GSE43948_rnaseq")
 
     payload.update(prepare_th17_study_arm_cohorts(annotated_datasets, output_dir, supp_dir))
+    payload["yosef_th17_network_design"] = prepare_yosef_th17_network_design(
+        annotated_datasets,
+        output_dir / "yosef_th17_network_design",
+    )
 
     combined = {
         "datasets": payload,

@@ -51,8 +51,18 @@ Processed `Th17` outputs are written under `data/processed/th17`, with separate 
 The `th17-prepare` pipeline now also materializes branch-specific cohort artifacts under `data/processed/th17`:
 - `yosef_th17_network_cohort`
 - `wu_sgk1_pathogenicity_cohort`
+- `yosef_th17_network_design`
 
 These cohort directories provide combined `sample_metadata.csv`, per-series `series_metadata.csv`, and `summary.json` files so downstream network reconstruction can select a biologically coherent arm by construction rather than by ad hoc filtering.
+
+The Yosef-specific design artifact is the current network-ready preprocessing boundary. It materializes:
+- `sample_design.csv`: unified Yosef-only sample table across `GSE43948`, `GSE43949`, `GSE43955`, and `GSE43969`
+- `perturbation_screen_design.csv`: the `32` recovered `GSE43948` RNA-seq perturbation samples
+- `chip_binding_design.csv`: the `2` `GSE43949` ChIP-seq tracks
+- `dynamic_timecourse_design.csv`: the `78` expression-bearing time-course samples from `GSE43955` and `GSE43969`
+- `exact_48h_expression_design.csv`: the exact `48.0 hr` expression-bearing subset (`36` samples total)
+
+This artifact standardizes assay modality, experimental axis, treatment, genotype, cell type, and perturbation status without collapsing unresolved biological distinctions that are absent from GEO metadata.
 
 Each plot directory also contains a `plot_manifest.json` file stating the exact correspondence boundary with the original paper figures. This is intentional: the implementation reproduces the paper's core algorithms and generates faithful reduced analogues of key visualizations, but it does not claim that every saved plot is pixel-identical to the published panels.
 

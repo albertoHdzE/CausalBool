@@ -103,10 +103,11 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "GSE43969_series",
         "wu_sgk1_pathogenicity_cohort",
         "yosef_th17_network_cohort",
+        "yosef_th17_network_design",
     }.issubset(set(summary["dataset_order"]))
     assert summary["study_arm_dataset_counts"] == {
         "wu_sgk1_pathogenicity": 3,
-        "yosef_th17_network": 6,
+        "yosef_th17_network": 7,
     }
 
     gse43969_summary = json.loads((output_dir / "GSE43969_series" / "summary.json").read_text())
@@ -132,6 +133,52 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
     yosef_cohort_metadata = pd.read_csv(output_dir / "yosef_th17_network_cohort" / "sample_metadata.csv")
     assert set(yosef_cohort_metadata["study_arm"]) == {"yosef_th17_network"}
     assert set(yosef_cohort_metadata["series_id"]) == {"GSE43948", "GSE43949", "GSE43955", "GSE43969"}
+
+    yosef_design_summary = json.loads((output_dir / "yosef_th17_network_design" / "summary.json").read_text())
+    assert yosef_design_summary["study_arm"] == "yosef_th17_network"
+    assert yosef_design_summary["sample_count"] == 112
+    assert yosef_design_summary["series_ids"] == ["GSE43948", "GSE43949", "GSE43955", "GSE43969"]
+    assert yosef_design_summary["assay_modality_counts"] == {
+        "chip_seq": 2,
+        "microarray": 78,
+        "rna_seq": 32,
+    }
+    assert yosef_design_summary["experimental_axis_counts"] == {
+        "chip_binding": 2,
+        "genotype_time_course": 20,
+        "perturbation_screen": 32,
+        "time_course": 58,
+    }
+    assert yosef_design_summary["expression_artifact_counts"] == {
+        "GSE43948_rnaseq": 32,
+        "GSE43955_series": 58,
+        "GSE43969_series": 20,
+    }
+    assert yosef_design_summary["perturbation_screen_sample_count"] == 32
+    assert yosef_design_summary["chip_binding_sample_count"] == 2
+    assert yosef_design_summary["dynamic_timecourse_sample_count"] == 78
+    assert yosef_design_summary["exact_48h_expression_sample_count"] == 36
+    assert yosef_design_summary["exact_48h_expression_series_counts"] == {
+        "GSE43948": 32,
+        "GSE43955": 2,
+        "GSE43969": 2,
+    }
+    assert yosef_design_summary["genotype_standardized_counts"] == {
+        "IL23R_KO": 10,
+        "WT": 10,
+        "not_reported": 92,
+    }
+    assert yosef_design_summary["perturbation_target_counts"]["NT"] == 20
+    assert yosef_design_summary["perturbation_target_counts"]["TSC22D3"] == 1
+
+    yosef_design = pd.read_csv(output_dir / "yosef_th17_network_design" / "sample_design.csv")
+    assert set(yosef_design["study_arm"]) == {"yosef_th17_network"}
+    assert set(yosef_design["cell_type_standardized"].dropna()) == {"Th17"}
+    assert set(yosef_design["series_id"]) == {"GSE43948", "GSE43949", "GSE43955", "GSE43969"}
+    gse43948_design = yosef_design.loc[yosef_design["series_id"] == "GSE43948"]
+    assert set(gse43948_design["expression_artifact"]) == {"GSE43948_rnaseq"}
+    assert gse43948_design["in_regulator_ranking_panel"].all()
+    assert int(gse43948_design["is_non_targeting_control"].sum()) == 20
 
     wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
     assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"
