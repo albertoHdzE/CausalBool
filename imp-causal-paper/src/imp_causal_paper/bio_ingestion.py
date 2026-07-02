@@ -592,6 +592,10 @@ def _standardize_genotype(value: object) -> str:
     return mapping.get(raw, raw)
 
 
+def _load_expression_matrix(artifact_dir: Path) -> pd.DataFrame:
+    return pd.read_csv(artifact_dir / "expression_matrix.tsv.gz", sep="\t", index_col=0)
+
+
 def prepare_yosef_th17_network_design(
     datasets: list[GeoSeriesMatrix],
     output_dir: Path,
@@ -672,6 +676,39 @@ def prepare_yosef_th17_network_design(
     exact_48h_expression = design.loc[design["in_exact_48h_expression_panel"]].copy()
     exact_48h_expression.to_csv(output_dir / "exact_48h_expression_design.csv", index=False)
 
+    perturbation_expression = _load_expression_matrix(output_dir.parent / "GSE43948_rnaseq")
+    perturbation_columns = perturbation_screen["sample_id"].tolist()
+    perturbation_expression.loc[:, perturbation_columns].to_csv(
+        output_dir / "perturbation_screen_expression_matrix.tsv.gz",
+        sep="\t",
+        compression="gzip",
+    )
+    pd.read_csv(output_dir.parent / "GSE43948_rnaseq" / "feature_metadata.csv").to_csv(
+        output_dir / "perturbation_screen_feature_metadata.csv",
+        index=False,
+    )
+
+    gse43955_expression = _load_expression_matrix(output_dir.parent / "GSE43955_series")
+    gse43969_expression = _load_expression_matrix(output_dir.parent / "GSE43969_series")
+    if gse43955_expression.index.tolist() != gse43969_expression.index.tolist():
+        raise ValueError("GSE43955 and GSE43969 do not share the same feature ordering, so a combined dynamic panel cannot be formed safely.")
+    dynamic_columns = dynamic_timecourse["sample_id"].tolist()
+    dynamic_expression = pd.concat([gse43955_expression, gse43969_expression], axis=1).loc[:, dynamic_columns]
+    dynamic_expression.to_csv(
+        output_dir / "dynamic_timecourse_expression_matrix.tsv.gz",
+        sep="\t",
+        compression="gzip",
+    )
+    pd.read_csv(output_dir.parent / "GSE43955_series" / "feature_metadata.csv").to_csv(
+        output_dir / "dynamic_timecourse_feature_metadata.csv",
+        index=False,
+    )
+
+    exact_48h_expression_manifest = exact_48h_expression[
+        ["sample_id", "series_id", "expression_artifact", "assay_modality", "experimental_axis", "time_hr"]
+    ].copy()
+    exact_48h_expression_manifest.to_csv(output_dir / "exact_48h_expression_manifest.csv", index=False)
+
     summary = {
         "study_arm": "yosef_th17_network",
         "sample_count": int(design.shape[0]),
@@ -688,6 +725,9 @@ def prepare_yosef_th17_network_design(
         "dynamic_timecourse_sample_count": int(dynamic_timecourse.shape[0]),
         "exact_48h_expression_sample_count": int(exact_48h_expression.shape[0]),
         "exact_48h_expression_series_counts": exact_48h_expression["series_id"].value_counts().sort_index().astype(int).to_dict(),
+        "exact_48h_expression_artifact_counts": exact_48h_expression["expression_artifact"].value_counts().sort_index().astype(int).to_dict(),
+        "perturbation_screen_feature_count": int(perturbation_expression.shape[0]),
+        "dynamic_timecourse_feature_count": int(dynamic_expression.shape[0]),
         "perturbation_target_counts": perturbation_screen["perturbation_target"].fillna("UNSPECIFIED").value_counts().sort_index().astype(int).to_dict(),
         "genotype_standardized_counts": design["genotype_standardized"].value_counts().sort_index().astype(int).to_dict(),
         "treatment_standardized_counts": design["treatment_standardized"].fillna("UNSPECIFIED").value_counts().sort_index().astype(int).to_dict(),

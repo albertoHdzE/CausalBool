@@ -163,6 +163,13 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "GSE43955": 2,
         "GSE43969": 2,
     }
+    assert yosef_design_summary["exact_48h_expression_artifact_counts"] == {
+        "GSE43948_rnaseq": 32,
+        "GSE43955_series": 2,
+        "GSE43969_series": 2,
+    }
+    assert yosef_design_summary["perturbation_screen_feature_count"] == 27723
+    assert yosef_design_summary["dynamic_timecourse_feature_count"] == 22690
     assert yosef_design_summary["genotype_standardized_counts"] == {
         "IL23R_KO": 10,
         "WT": 10,
@@ -179,6 +186,29 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
     assert set(gse43948_design["expression_artifact"]) == {"GSE43948_rnaseq"}
     assert gse43948_design["in_regulator_ranking_panel"].all()
     assert int(gse43948_design["is_non_targeting_control"].sum()) == 20
+
+    perturbation_matrix = pd.read_csv(
+        output_dir / "yosef_th17_network_design" / "perturbation_screen_expression_matrix.tsv.gz",
+        sep="\t",
+        index_col=0,
+    )
+    assert perturbation_matrix.shape == (27723, 32)
+
+    dynamic_matrix = pd.read_csv(
+        output_dir / "yosef_th17_network_design" / "dynamic_timecourse_expression_matrix.tsv.gz",
+        sep="\t",
+        index_col=0,
+    )
+    assert dynamic_matrix.shape == (22690, 78)
+
+    exact_48h_manifest = pd.read_csv(output_dir / "yosef_th17_network_design" / "exact_48h_expression_manifest.csv")
+    assert exact_48h_manifest.shape[0] == 36
+    assert exact_48h_manifest["time_hr"].eq(48.0).all()
+    assert exact_48h_manifest["expression_artifact"].value_counts().sort_index().to_dict() == {
+        "GSE43948_rnaseq": 32,
+        "GSE43955_series": 2,
+        "GSE43969_series": 2,
+    }
 
     wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
     assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"

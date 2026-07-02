@@ -425,10 +425,18 @@ Confirmed Yosef-only network design artifact:
     - `chip_binding_design.csv` = `2` samples
     - `dynamic_timecourse_design.csv` = `78` samples
     - `exact_48h_expression_design.csv` = `36` samples
+  - derived expression bundles:
+    - `perturbation_screen_expression_matrix.tsv.gz` = `27723 x 32`
+    - `dynamic_timecourse_expression_matrix.tsv.gz` = `22690 x 78`
+    - `exact_48h_expression_manifest.csv` keeps the exact `48.0 hr` subset modality-aware rather than forcing a mixed-platform merged matrix
   - exact `48.0 hr` expression-bearing series contribution:
     - `GSE43948` = `32`
     - `GSE43955` = `2`
     - `GSE43969` = `2`
+  - exact `48.0 hr` expression-bearing artifact contribution:
+    - `GSE43948_rnaseq` = `32`
+    - `GSE43955_series` = `2`
+    - `GSE43969_series` = `2`
   - genotype standardization:
     - `IL23R_KO = 10`
     - `WT = 10`

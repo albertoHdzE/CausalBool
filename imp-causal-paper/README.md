@@ -58,9 +58,12 @@ These cohort directories provide combined `sample_metadata.csv`, per-series `ser
 The Yosef-specific design artifact is the current network-ready preprocessing boundary. It materializes:
 - `sample_design.csv`: unified Yosef-only sample table across `GSE43948`, `GSE43949`, `GSE43955`, and `GSE43969`
 - `perturbation_screen_design.csv`: the `32` recovered `GSE43948` RNA-seq perturbation samples
+- `perturbation_screen_expression_matrix.tsv.gz`: the aligned `27723 x 32` RNA-seq perturbation matrix
 - `chip_binding_design.csv`: the `2` `GSE43949` ChIP-seq tracks
 - `dynamic_timecourse_design.csv`: the `78` expression-bearing time-course samples from `GSE43955` and `GSE43969`
+- `dynamic_timecourse_expression_matrix.tsv.gz`: the aligned `22690 x 78` GPL8321 microarray matrix
 - `exact_48h_expression_design.csv`: the exact `48.0 hr` expression-bearing subset (`36` samples total)
+- `exact_48h_expression_manifest.csv`: a modality-aware manifest for the exact `48.0 hr` subset, kept unmerged across RNA-seq and microarray panels
 
 This artifact standardizes assay modality, experimental axis, treatment, genotype, cell type, and perturbation status without collapsing unresolved biological distinctions that are absent from GEO metadata.
 
