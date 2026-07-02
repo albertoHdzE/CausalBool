@@ -48,6 +48,12 @@ Outputs are written under `results/`.
 Plots are written under the root-level `plots/` folder, split by experiment (`plots/graphs`, `plots/ca`, `plots/boolean`).
 Processed `Th17` outputs are written under `data/processed/th17`, with separate directories for series metadata, expression matrices, RNA-seq supplementary tables, and bundle manifests. The recovered Wu subseries raw archives (`GSE43956_RAW.tar`, `GSE43957_RAW.tar`) are now also summarized into deterministic tar-member manifests so that raw CEL provenance is tracked at the series level rather than only through the `GSE43970` SuperSeries bundle. Series-level outputs now carry explicit arm-aware provenance fields such as `study_arm`, `source_publication`, and `biological_program`, and bundle manifests expose `resolved_study_arm_counts` so downstream preprocessing can enforce the Yosef/Wu separation mechanically rather than by convention.
 
+The `th17-prepare` pipeline now also materializes branch-specific cohort artifacts under `data/processed/th17`:
+- `yosef_th17_network_cohort`
+- `wu_sgk1_pathogenicity_cohort`
+
+These cohort directories provide combined `sample_metadata.csv`, per-series `series_metadata.csv`, and `summary.json` files so downstream network reconstruction can select a biologically coherent arm by construction rather than by ad hoc filtering.
+
 Each plot directory also contains a `plot_manifest.json` file stating the exact correspondence boundary with the original paper figures. This is intentional: the implementation reproduces the paper's core algorithms and generates faithful reduced analogues of key visualizations, but it does not claim that every saved plot is pixel-identical to the published panels.
 
 ## Tests

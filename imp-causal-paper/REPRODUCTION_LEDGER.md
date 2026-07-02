@@ -378,6 +378,30 @@ Confirmed supplementary-bundle manifests:
     - `GSE43957_bundle_manifest` -> `wu_sgk1_pathogenicity = 4`
     - `GSE43970_bundle_manifest` -> `wu_sgk1_pathogenicity = 8`, `yosef_th17_network = 112`
 
+Confirmed branch-specific cohort artifacts:
+
+- `yosef_th17_network_cohort`:
+  - included series:
+    - `GSE43948`
+    - `GSE43949`
+    - `GSE43955`
+    - `GSE43969`
+  - `112` samples total
+  - expression artifacts:
+    - `GSE43948_rnaseq`
+    - `GSE43955_series`
+    - `GSE43969_series`
+  - metadata-only series:
+    - `GSE43949`
+- `wu_sgk1_pathogenicity_cohort`:
+  - included series:
+    - `GSE43956`
+    - `GSE43957`
+  - `8` samples total
+  - expression artifacts:
+    - `GSE43956_series`
+    - `GSE43957_series`
+
 Scientific significance:
 
 - the project now has deterministic, script-generated local assets for the `Th17` microarray matrices, the sequencing-only GEO metadata series, the 48 h perturbation RNA-seq table bundle, and the cross-series raw-bundle manifests;

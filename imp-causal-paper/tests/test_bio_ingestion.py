@@ -101,10 +101,12 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "GSE43956_series",
         "GSE43957_series",
         "GSE43969_series",
+        "wu_sgk1_pathogenicity_cohort",
+        "yosef_th17_network_cohort",
     }.issubset(set(summary["dataset_order"]))
     assert summary["study_arm_dataset_counts"] == {
-        "wu_sgk1_pathogenicity": 2,
-        "yosef_th17_network": 5,
+        "wu_sgk1_pathogenicity": 3,
+        "yosef_th17_network": 6,
     }
 
     gse43969_summary = json.loads((output_dir / "GSE43969_series" / "summary.json").read_text())
@@ -118,6 +120,26 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
     assert {"Tgfb+IL6", "Tgfb+IL6+IL23"}.issubset(set(metadata["treatment"]))
     assert metadata["time_hr"].tolist()[:3] == [24.0, 48.0, 49.0]
     assert set(metadata["study_arm"]) == {"yosef_th17_network"}
+
+    yosef_cohort_summary = json.loads((output_dir / "yosef_th17_network_cohort" / "summary.json").read_text())
+    assert yosef_cohort_summary["study_arm"] == "yosef_th17_network"
+    assert yosef_cohort_summary["series_ids"] == ["GSE43948", "GSE43949", "GSE43955", "GSE43969"]
+    assert yosef_cohort_summary["series_count"] == 4
+    assert yosef_cohort_summary["sample_count"] == 112
+    assert yosef_cohort_summary["expression_artifacts"] == ["GSE43948_rnaseq", "GSE43955_series", "GSE43969_series"]
+    assert yosef_cohort_summary["metadata_only_series"] == ["GSE43949"]
+
+    yosef_cohort_metadata = pd.read_csv(output_dir / "yosef_th17_network_cohort" / "sample_metadata.csv")
+    assert set(yosef_cohort_metadata["study_arm"]) == {"yosef_th17_network"}
+    assert set(yosef_cohort_metadata["series_id"]) == {"GSE43948", "GSE43949", "GSE43955", "GSE43969"}
+
+    wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
+    assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"
+    assert wu_cohort_summary["series_ids"] == ["GSE43956", "GSE43957"]
+    assert wu_cohort_summary["series_count"] == 2
+    assert wu_cohort_summary["sample_count"] == 8
+    assert wu_cohort_summary["expression_artifacts"] == ["GSE43956_series", "GSE43957_series"]
+    assert wu_cohort_summary["metadata_only_series"] == []
 
     gse43949_summary = json.loads((output_dir / "GSE43949_series" / "summary.json").read_text())
     assert gse43949_summary["sample_count"] == 2

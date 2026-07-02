@@ -477,13 +477,82 @@ def prepare_th17_perturbation_rnaseq(supp_dir: Path, output_dir: Path) -> dict:
     return summary
 
 
+def _expression_artifact_for_series(series_id: str, dataset: GeoSeriesMatrix, supp_dir: Path | None) -> str | None:
+    if series_id == "GSE43948" and supp_dir is not None and (supp_dir / "GSE43948_RAW.tar").exists():
+        return "GSE43948_rnaseq"
+    if dataset.expression is not None:
+        return f"{series_id}_series"
+    return None
+
+
+def prepare_th17_study_arm_cohorts(
+    datasets: list[GeoSeriesMatrix],
+    output_dir: Path,
+    supp_dir: Path | None = None,
+) -> dict[str, dict]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    payload: dict[str, dict] = {}
+
+    study_arms = sorted({dataset.metadata["study_arm"].iloc[0] for dataset in datasets if "study_arm" in dataset.metadata.columns})
+    for study_arm in study_arms:
+        arm_datasets = [dataset for dataset in datasets if dataset.metadata["study_arm"].iloc[0] == study_arm]
+        if not arm_datasets:
+            continue
+
+        cohort_dir = output_dir / f"{study_arm}_cohort"
+        cohort_dir.mkdir(parents=True, exist_ok=True)
+
+        sample_frames: list[pd.DataFrame] = []
+        series_records: list[dict[str, object]] = []
+        for dataset in arm_datasets:
+            metadata = dataset.metadata.copy()
+            metadata.insert(1, "series_id", dataset.series_id)
+            sample_frames.append(metadata)
+            series_records.append(
+                {
+                    "series_id": dataset.series_id,
+                    "study_arm": study_arm,
+                    "source_publication": _series_context(dataset.series_id).get("source_publication"),
+                    "biological_program": _series_context(dataset.series_id).get("biological_program"),
+                    "sample_count": int(metadata.shape[0]),
+                    "has_series_expression_matrix": dataset.expression is not None,
+                    "expression_artifact": _expression_artifact_for_series(dataset.series_id, dataset, supp_dir),
+                }
+            )
+
+        sample_metadata = pd.concat(sample_frames, ignore_index=True, sort=False)
+        sample_metadata.to_csv(cohort_dir / "sample_metadata.csv", index=False)
+
+        series_metadata = pd.DataFrame.from_records(series_records).sort_values("series_id")
+        series_metadata.to_csv(cohort_dir / "series_metadata.csv", index=False)
+
+        summary = {
+            "study_arm": study_arm,
+            "source_publications": sorted(series_metadata["source_publication"].dropna().astype(str).unique().tolist()),
+            "biological_programs": sorted(series_metadata["biological_program"].dropna().astype(str).unique().tolist()),
+            "series_ids": series_metadata["series_id"].tolist(),
+            "series_count": int(series_metadata.shape[0]),
+            "sample_count": int(sample_metadata.shape[0]),
+            "expression_artifacts": sorted(series_metadata["expression_artifact"].dropna().astype(str).unique().tolist()),
+            "metadata_only_series": sorted(
+                series_metadata.loc[series_metadata["expression_artifact"].isna(), "series_id"].astype(str).tolist()
+            ),
+        }
+        (cohort_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+        payload[f"{study_arm}_cohort"] = summary
+
+    return payload
+
+
 def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None = None) -> dict[str, dict]:
     output_dir.mkdir(parents=True, exist_ok=True)
     payload: dict[str, dict] = {}
     sample_to_series = _build_sample_to_series_map(raw_dir)
+    annotated_datasets: list[GeoSeriesMatrix] = []
 
     for path in sorted(raw_dir.glob("GSE*_series_matrix.txt.gz")):
         dataset = _annotate_dataset_context(parse_geo_series_matrix(path))
+        annotated_datasets.append(dataset)
         payload[f"{dataset.series_id}_series"] = _write_dataset_payload(dataset, output_dir / f"{dataset.series_id}_series")
 
     if supp_dir is not None:
@@ -509,6 +578,8 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
 
         if (supp_dir / "GSE43948_RAW.tar").exists():
             payload["GSE43948_rnaseq"] = prepare_th17_perturbation_rnaseq(supp_dir, output_dir / "GSE43948_rnaseq")
+
+    payload.update(prepare_th17_study_arm_cohorts(annotated_datasets, output_dir, supp_dir))
 
     combined = {
         "datasets": payload,
