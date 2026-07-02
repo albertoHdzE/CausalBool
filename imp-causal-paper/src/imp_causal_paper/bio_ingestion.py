@@ -596,6 +596,14 @@ def _load_expression_matrix(artifact_dir: Path) -> pd.DataFrame:
     return pd.read_csv(artifact_dir / "expression_matrix.tsv.gz", sep="\t", index_col=0)
 
 
+def _load_matrix(path: Path) -> pd.DataFrame:
+    return pd.read_csv(path, sep="\t", index_col=0)
+
+
+def _safe_log2_fold_change(sample: pd.Series, baseline: pd.Series) -> pd.Series:
+    return np.log2(sample.astype(float) + 1.0) - np.log2(baseline.astype(float) + 1.0)
+
+
 def prepare_yosef_th17_network_design(
     datasets: list[GeoSeriesMatrix],
     output_dir: Path,
@@ -736,6 +744,97 @@ def prepare_yosef_th17_network_design(
     return summary
 
 
+def prepare_yosef_th17_network_evidence(processed_dir: Path, output_dir: Path) -> dict:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    design_dir = processed_dir / "yosef_th17_network_design"
+    design = pd.read_csv(design_dir / "sample_design.csv")
+
+    perturbation_design = pd.read_csv(design_dir / "perturbation_screen_design.csv")
+    perturbation_expression = _load_matrix(design_dir / "perturbation_screen_expression_matrix.tsv.gz")
+    control_samples = perturbation_design.loc[perturbation_design["is_non_targeting_control"], "sample_id"].astype(str).tolist()
+    target_design = perturbation_design.loc[~perturbation_design["is_non_targeting_control"]].copy()
+    target_samples = target_design["sample_id"].astype(str).tolist()
+
+    control_expression = perturbation_expression.loc[:, control_samples]
+    control_mean = control_expression.mean(axis=1)
+    control_std = control_expression.std(axis=1, ddof=1)
+    target_expression = perturbation_expression.loc[:, target_samples]
+    delta_matrix = target_expression.sub(control_mean, axis=0)
+    log2_fc_matrix = target_expression.apply(lambda column: _safe_log2_fold_change(column, control_mean), axis=0)
+
+    control_reference = pd.DataFrame(
+        {
+            "gene_symbol": perturbation_expression.index.astype(str),
+            "control_mean_expression": control_mean.values,
+            "control_std_expression": control_std.values,
+        }
+    )
+    control_reference.to_csv(output_dir / "perturbation_control_reference.csv", index=False)
+    target_design.to_csv(output_dir / "perturbation_target_design.csv", index=False)
+    target_expression.to_csv(output_dir / "perturbation_target_expression_matrix.tsv.gz", sep="\t", compression="gzip")
+    delta_matrix.to_csv(output_dir / "perturbation_target_delta_matrix.tsv.gz", sep="\t", compression="gzip")
+    log2_fc_matrix.to_csv(output_dir / "perturbation_target_log2_fc_matrix.tsv.gz", sep="\t", compression="gzip")
+
+    upper_gene_symbols = {str(symbol).upper(): str(symbol) for symbol in perturbation_expression.index}
+    self_response_records: list[dict[str, object]] = []
+    for row in target_design.to_dict(orient="records"):
+        target = str(row["perturbation_target"])
+        gene_symbol = upper_gene_symbols.get(target)
+        self_response_records.append(
+            {
+                "sample_id": row["sample_id"],
+                "perturbation_target": target,
+                "matched_gene_symbol": gene_symbol,
+                "target_gene_observed": gene_symbol is not None,
+                "target_expression": float(target_expression.loc[gene_symbol, row["sample_id"]]) if gene_symbol is not None else None,
+                "control_mean_expression": float(control_mean.loc[gene_symbol]) if gene_symbol is not None else None,
+                "delta_expression": float(delta_matrix.loc[gene_symbol, row["sample_id"]]) if gene_symbol is not None else None,
+                "log2_fold_change": float(log2_fc_matrix.loc[gene_symbol, row["sample_id"]]) if gene_symbol is not None else None,
+            }
+        )
+    self_response = pd.DataFrame.from_records(self_response_records)
+    self_response.to_csv(output_dir / "perturbation_self_response.csv", index=False)
+
+    dynamic_design = pd.read_csv(design_dir / "dynamic_timecourse_design.csv")
+    dynamic_expression = _load_matrix(design_dir / "dynamic_timecourse_expression_matrix.tsv.gz")
+    late_time_design = dynamic_design.loc[dynamic_design["time_hr"] >= 48.0].copy()
+    late_time_design.to_csv(output_dir / "late_time_gpl8321_design.csv", index=False)
+    late_time_columns = late_time_design["sample_id"].astype(str).tolist()
+    dynamic_expression.loc[:, late_time_columns].to_csv(
+        output_dir / "late_time_gpl8321_expression_matrix.tsv.gz",
+        sep="\t",
+        compression="gzip",
+    )
+
+    exact_48h_microarray = dynamic_design.loc[dynamic_design["time_hr"] == 48.0].copy()
+    exact_48h_microarray.to_csv(output_dir / "exact_48h_gpl8321_design.csv", index=False)
+    exact_48h_microarray_columns = exact_48h_microarray["sample_id"].astype(str).tolist()
+    dynamic_expression.loc[:, exact_48h_microarray_columns].to_csv(
+        output_dir / "exact_48h_gpl8321_expression_matrix.tsv.gz",
+        sep="\t",
+        compression="gzip",
+    )
+
+    summary = {
+        "study_arm": "yosef_th17_network",
+        "perturbation_gene_count": int(perturbation_expression.shape[0]),
+        "perturbation_control_sample_count": len(control_samples),
+        "perturbation_target_sample_count": len(target_samples),
+        "perturbation_target_count": int(target_design["perturbation_target"].nunique()),
+        "target_self_observed_count": int(self_response["target_gene_observed"].sum()),
+        "target_self_missing": sorted(
+            self_response.loc[~self_response["target_gene_observed"], "perturbation_target"].astype(str).unique().tolist()
+        ),
+        "late_time_gpl8321_sample_count": int(late_time_design.shape[0]),
+        "late_time_gpl8321_series_counts": late_time_design["series_id"].value_counts().sort_index().astype(int).to_dict(),
+        "late_time_gpl8321_time_counts": late_time_design["time_hr"].value_counts().sort_index().astype(int).to_dict(),
+        "exact_48h_gpl8321_sample_count": int(exact_48h_microarray.shape[0]),
+        "exact_48h_gpl8321_series_counts": exact_48h_microarray["series_id"].value_counts().sort_index().astype(int).to_dict(),
+    }
+    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+    return summary
+
+
 def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None = None) -> dict[str, dict]:
     output_dir.mkdir(parents=True, exist_ok=True)
     payload: dict[str, dict] = {}
@@ -775,6 +874,10 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
     payload["yosef_th17_network_design"] = prepare_yosef_th17_network_design(
         annotated_datasets,
         output_dir / "yosef_th17_network_design",
+    )
+    payload["yosef_th17_network_evidence"] = prepare_yosef_th17_network_evidence(
+        output_dir,
+        output_dir / "yosef_th17_network_evidence",
     )
 
     combined = {

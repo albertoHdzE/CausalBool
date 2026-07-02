@@ -457,6 +457,45 @@ Confirmed Yosef-only network design artifact:
       - `TSC22D3`
       - `ZEB1`
 
+Confirmed Yosef-only regulator-evidence artifact:
+
+- `yosef_th17_network_evidence`:
+  - perturbation-screen reference:
+    - `20` non-targeting controls
+    - `12` targeted perturbation samples
+    - `27723` RNA-seq genes
+  - derived RNA-seq evidence tables:
+    - `perturbation_control_reference.csv`
+    - `perturbation_target_design.csv`
+    - `perturbation_target_expression_matrix.tsv.gz` = `27723 x 12`
+    - `perturbation_target_delta_matrix.tsv.gz` = `27723 x 12`
+    - `perturbation_target_log2_fc_matrix.tsv.gz` = `27723 x 12`
+  - direct target self-observation status:
+    - `11` targeted regulators are present as exact gene symbols in the recovered RNA-seq matrix
+    - `1` targeted regulator is not present as an exact gene symbol:
+      - `POU2F1A`
+  - late-time GPL8321 microarray evidence:
+    - `late_time_gpl8321_design.csv` = `38` samples
+    - `late_time_gpl8321_expression_matrix.tsv.gz` = `22690 x 38`
+    - series composition:
+      - `GSE43955 = 20`
+      - `GSE43969 = 18`
+    - time composition:
+      - `48.0 = 4`
+      - `49.0 = 4`
+      - `50.0 = 3`
+      - `52.0 = 6`
+      - `54.0 = 4`
+      - `60.0 = 6`
+      - `65.0 = 4`
+      - `72.0 = 7`
+  - exact `48.0 hr` GPL8321 subset:
+    - `exact_48h_gpl8321_design.csv` = `4` samples
+    - `exact_48h_gpl8321_expression_matrix.tsv.gz` = `22690 x 4`
+    - series composition:
+      - `GSE43955 = 2`
+      - `GSE43969 = 2`
+
 Scientific significance:
 
 - the project now has deterministic, script-generated local assets for the `Th17` microarray matrices, the sequencing-only GEO metadata series, the 48 h perturbation RNA-seq table bundle, and the cross-series raw-bundle manifests;

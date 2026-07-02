@@ -104,10 +104,11 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "wu_sgk1_pathogenicity_cohort",
         "yosef_th17_network_cohort",
         "yosef_th17_network_design",
+        "yosef_th17_network_evidence",
     }.issubset(set(summary["dataset_order"]))
     assert summary["study_arm_dataset_counts"] == {
         "wu_sgk1_pathogenicity": 3,
-        "yosef_th17_network": 7,
+        "yosef_th17_network": 8,
     }
 
     gse43969_summary = json.loads((output_dir / "GSE43969_series" / "summary.json").read_text())
@@ -209,6 +210,58 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "GSE43955_series": 2,
         "GSE43969_series": 2,
     }
+
+    yosef_evidence_summary = json.loads((output_dir / "yosef_th17_network_evidence" / "summary.json").read_text())
+    assert yosef_evidence_summary["study_arm"] == "yosef_th17_network"
+    assert yosef_evidence_summary["perturbation_gene_count"] == 27723
+    assert yosef_evidence_summary["perturbation_control_sample_count"] == 20
+    assert yosef_evidence_summary["perturbation_target_sample_count"] == 12
+    assert yosef_evidence_summary["perturbation_target_count"] == 12
+    assert yosef_evidence_summary["target_self_observed_count"] == 11
+    assert yosef_evidence_summary["target_self_missing"] == ["POU2F1A"]
+    assert yosef_evidence_summary["late_time_gpl8321_sample_count"] == 38
+    assert yosef_evidence_summary["late_time_gpl8321_series_counts"] == {
+        "GSE43955": 20,
+        "GSE43969": 18,
+    }
+    assert yosef_evidence_summary["exact_48h_gpl8321_sample_count"] == 4
+    assert yosef_evidence_summary["exact_48h_gpl8321_series_counts"] == {
+        "GSE43955": 2,
+        "GSE43969": 2,
+    }
+
+    perturbation_delta = pd.read_csv(
+        output_dir / "yosef_th17_network_evidence" / "perturbation_target_delta_matrix.tsv.gz",
+        sep="\t",
+        index_col=0,
+    )
+    assert perturbation_delta.shape == (27723, 12)
+
+    perturbation_log2_fc = pd.read_csv(
+        output_dir / "yosef_th17_network_evidence" / "perturbation_target_log2_fc_matrix.tsv.gz",
+        sep="\t",
+        index_col=0,
+    )
+    assert perturbation_log2_fc.shape == (27723, 12)
+
+    self_response = pd.read_csv(output_dir / "yosef_th17_network_evidence" / "perturbation_self_response.csv")
+    assert self_response.shape[0] == 12
+    assert int(self_response["target_gene_observed"].sum()) == 11
+    assert self_response.loc[~self_response["target_gene_observed"], "perturbation_target"].tolist() == ["POU2F1A"]
+
+    late_time_microarray = pd.read_csv(
+        output_dir / "yosef_th17_network_evidence" / "late_time_gpl8321_expression_matrix.tsv.gz",
+        sep="\t",
+        index_col=0,
+    )
+    assert late_time_microarray.shape == (22690, 38)
+
+    exact_48h_microarray = pd.read_csv(
+        output_dir / "yosef_th17_network_evidence" / "exact_48h_gpl8321_expression_matrix.tsv.gz",
+        sep="\t",
+        index_col=0,
+    )
+    assert exact_48h_microarray.shape == (22690, 4)
 
     wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
     assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"
