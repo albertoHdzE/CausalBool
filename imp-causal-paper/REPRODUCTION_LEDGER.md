@@ -522,11 +522,35 @@ Confirmed Yosef-only regulator-summary artifact:
       - `TCFEB`
       - `TRIM24`
     - all three highlighted final-network candidates are present as exact gene symbols in the recovered RNA-seq perturbation matrix
-    - GPL8321 support for candidate regulators remains explicitly probe-level only until a faithful platform annotation map is recovered
+    - GPL8321 candidate support is now grounded in the recovered GEO platform export rather than inferred from probe IDs alone
+    - exact GPL8321 support now holds for:
+      - `STAT6`
+      - `TRIM24`
+    - platform-alias GPL8321 support now holds for:
+      - `TCFEB` via `Gene Symbol = Tfeb` and `GEN = Tcfeb`
+    - still unresolved at the platform-alias level:
+      - `POU2F1A`
   - notable observed self-response examples from the RNA-seq target summaries:
     - `TSC22D3` self log2 fold change = `+2.098233548840968`
     - `EGR2` self log2 fold change = `-1.1717290230229254`
     - `PROCR` self log2 fold change = `-1.135054628704145`
+
+Confirmed GPL8321 platform-annotation artifact:
+
+- `GPL8321_annotation`:
+  - raw source:
+    - GEO full text export `GPL8321_full.txt`
+  - processed table:
+    - `probe_annotation.csv` = `22690` probes
+  - annotation coverage:
+    - probes with non-empty gene symbol = `22191`
+    - probes with non-empty Entrez Gene ID = `22160`
+    - unique gene symbols = `13662`
+    - annotation date = `Oct 6, 2014`
+  - mapping policy:
+    - accept exact probe-to-gene support when GPL8321 declares the candidate in `Gene Symbol`
+    - accept alias support only when GPL8321 itself declares it in `GEN=` or `UG_GENE=`
+    - do not infer unsupported aliases from external heuristics at this stage
 
 Scientific significance:
 

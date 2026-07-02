@@ -54,6 +54,7 @@ The `th17-prepare` pipeline now also materializes branch-specific cohort artifac
 - `yosef_th17_network_design`
 - `yosef_th17_network_evidence`
 - `yosef_th17_network_regulator_summary`
+- `GPL8321_annotation`
 
 These cohort directories provide combined `sample_metadata.csv`, per-series `series_metadata.csv`, and `summary.json` files so downstream network reconstruction can select a biologically coherent arm by construction rather than by ad hoc filtering.
 
@@ -88,7 +89,13 @@ The Yosef regulator-summary artifact is the current highest preprocessing layer 
 - `gpl8321_late_time_contrast_summary.csv`: per-contrast probe-level extrema and aggregate effect sizes
 - `candidate_regulator_evidence.csv`: a modality-aware candidate table for the `12` targeted perturbation regulators plus the paper-highlighted `48 hr` candidates `STAT6`, `TCFEB`, and `TRIM24`
 
-At this stage, all three highlighted `48 hr` paper candidates are directly observable in the RNA-seq perturbation matrix, while GPL8321 support remains probe-level only because a faithful platform annotation map has not yet been recovered locally.
+The `GPL8321_annotation` artifact is now recovered directly from the GEO platform full text export (`GPL8321_full.txt`) and provides the authoritative probe table used for microarray mapping. This allows candidate-level GPL8321 support to move beyond pure probe-space bookkeeping:
+- `STAT6` has exact GPL8321 probe support
+- `TRIM24` has exact GPL8321 probe support
+- `TCFEB` is recovered through the platform-declared alias path `Gene Symbol = Tfeb`, `GEN = Tcfeb`
+- `POU2F1A` remains unresolved because the platform supports `Pou2f1`, but does not declare `POU2F1A` as an exact platform alias
+
+The mapping remains conservative: microarray support is accepted only when the GPL8321 row itself declares the exact symbol or a platform-native alias.
 
 Each plot directory also contains a `plot_manifest.json` file stating the exact correspondence boundary with the original paper figures. This is intentional: the implementation reproduces the paper's core algorithms and generates faithful reduced analogues of key visualizations, but it does not claim that every saved plot is pixel-identical to the published panels.
 

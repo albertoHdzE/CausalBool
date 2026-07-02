@@ -101,6 +101,7 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "GSE43956_series",
         "GSE43957_series",
         "GSE43969_series",
+        "GPL8321_annotation",
         "wu_sgk1_pathogenicity_cohort",
         "yosef_th17_network_cohort",
         "yosef_th17_network_design",
@@ -111,6 +112,12 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "wu_sgk1_pathogenicity": 3,
         "yosef_th17_network": 9,
     }
+
+    gpl8321_summary = json.loads((output_dir / "GPL8321_annotation" / "summary.json").read_text())
+    assert gpl8321_summary["platform_id"] == "GPL8321"
+    assert gpl8321_summary["probe_count"] == 22690
+    assert gpl8321_summary["platform_file"] == "GPL8321_full.txt"
+    assert gpl8321_summary["annotation_date_values"] == ["Oct 6, 2014"]
 
     gse43969_summary = json.loads((output_dir / "GSE43969_series" / "summary.json").read_text())
     assert gse43969_summary["sample_count"] == 20
@@ -280,6 +287,27 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
     assert regulator_summary["candidate_regulator_count"] == 15
     assert regulator_summary["paper_finalnet_negative_candidates"] == ["STAT6", "TCFEB", "TRIM24"]
     assert regulator_summary["paper_finalnet_negative_candidates_observed_in_rnaseq"] == ["STAT6", "TCFEB", "TRIM24"]
+    assert regulator_summary["paper_finalnet_negative_candidates_with_exact_gpl8321_probe_support"] == [
+        "STAT6",
+        "TCFEB",
+        "TRIM24",
+    ]
+    assert sorted(regulator_summary["candidate_regulators_with_exact_gpl8321_probe_support"]) == [
+        "EGR2",
+        "ETV6",
+        "FAS",
+        "IKZF4",
+        "IRF8",
+        "MINA",
+        "PROCR",
+        "SMARCA4",
+        "SP4",
+        "STAT6",
+        "TCFEB",
+        "TRIM24",
+        "TSC22D3",
+        "ZEB1",
+    ]
     assert regulator_summary["candidate_regulators_without_rnaseq_gene_match"] == ["POU2F1A"]
 
     rnaseq_target_summary = pd.read_csv(
@@ -312,9 +340,15 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
     assert bool(stat6_row["is_paper_finalnet_negative_48h_candidate"]) is True
     assert bool(stat6_row["rnaseq_gene_observed"]) is True
     assert bool(stat6_row["is_rnaseq_perturbation_target"]) is False
+    assert int(stat6_row["gpl8321_exact_symbol_probe_count"]) == 2
+    assert bool(stat6_row["microarray_probe_mapping_available"]) is True
+    tcfeb_row = candidate_evidence.loc[candidate_evidence["regulator"] == "TCFEB"].iloc[0]
+    assert int(tcfeb_row["gpl8321_exact_symbol_probe_count"]) == 1
+    assert bool(tcfeb_row["microarray_probe_mapping_available"]) is True
     pou2f1a_row = candidate_evidence.loc[candidate_evidence["regulator"] == "POU2F1A"].iloc[0]
     assert bool(pou2f1a_row["is_rnaseq_perturbation_target"]) is True
     assert bool(pou2f1a_row["rnaseq_gene_observed"]) is False
+    assert int(pou2f1a_row["gpl8321_exact_symbol_probe_count"]) == 0
 
     wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
     assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"

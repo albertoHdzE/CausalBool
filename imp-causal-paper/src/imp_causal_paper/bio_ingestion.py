@@ -5,6 +5,7 @@ import gzip
 import json
 import re
 import tarfile
+import urllib.request
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
@@ -609,6 +610,73 @@ def _sanitize_label(value: str) -> str:
     return cleaned.strip("_")
 
 
+def _extract_geo_platform_aliases(row: pd.Series) -> list[str]:
+    aliases: set[str] = set()
+    for field in ["gene_symbol", "target_description"]:
+        value = row.get(field)
+        if value is None or pd.isna(value):
+            continue
+        text = str(value)
+        if field == "gene_symbol" and text.strip():
+            aliases.add(text.strip().upper())
+        for pattern in [r"/GEN=([A-Za-z0-9_-]+)", r"/UG_GENE=([A-Za-z0-9_-]+)"]:
+            for match in re.findall(pattern, text):
+                aliases.add(match.strip().upper())
+    return sorted(aliases)
+
+
+def ensure_geo_platform_text(platform_id: str, platform_dir: Path) -> Path:
+    platform_dir.mkdir(parents=True, exist_ok=True)
+    destination = platform_dir / f"{platform_id}_full.txt"
+    if destination.exists():
+        return destination
+
+    url = f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={platform_id}&targ=self&form=text&view=full"
+    urllib.request.urlretrieve(url, destination)
+    return destination
+
+
+def parse_geo_platform_text(path: Path) -> pd.DataFrame:
+    records: list[dict[str, str]] = []
+    header: list[str] | None = None
+    in_table = False
+
+    with path.open("r", encoding="utf-8", errors="ignore") as handle:
+        for raw_line in handle:
+            line = raw_line.rstrip("\n")
+            if line == "!platform_table_begin":
+                in_table = True
+                continue
+            if line == "!platform_table_end":
+                break
+            if not in_table:
+                continue
+
+            parsed = _parse_line(line)
+            if header is None:
+                header = parsed
+                continue
+            records.append(dict(zip(header, parsed, strict=False)))
+
+    if header is None:
+        raise ValueError(f"No platform table found in {path}")
+
+    table = pd.DataFrame.from_records(records)
+    rename_map = {
+        "ID": "probe_id",
+        "Gene Symbol": "gene_symbol",
+        "Gene Title": "gene_title",
+        "ENTREZ_GENE_ID": "entrez_gene_id",
+        "RefSeq Transcript ID": "refseq_transcript_id",
+        "Representative Public ID": "representative_public_id",
+        "GB_ACC": "gb_acc",
+        "Target Description": "target_description",
+        "Annotation Date": "annotation_date",
+    }
+    table = table.rename(columns=rename_map)
+    return table
+
+
 def prepare_yosef_th17_network_design(
     datasets: list[GeoSeriesMatrix],
     output_dir: Path,
@@ -840,9 +908,43 @@ def prepare_yosef_th17_network_evidence(processed_dir: Path, output_dir: Path) -
     return summary
 
 
+def prepare_gpl8321_annotation(raw_dir: Path, output_dir: Path) -> dict:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    platform_path = ensure_geo_platform_text("GPL8321", raw_dir.parent / "platforms")
+    annotation = parse_geo_platform_text(platform_path)
+    selected_columns = [
+        "probe_id",
+        "gene_symbol",
+        "gene_title",
+        "entrez_gene_id",
+        "refseq_transcript_id",
+        "representative_public_id",
+        "gb_acc",
+        "annotation_date",
+        "target_description",
+    ]
+    annotation["platform_symbol_aliases"] = annotation.apply(_extract_geo_platform_aliases, axis=1).map("|".join)
+    available_columns = [column for column in selected_columns if column in annotation.columns]
+    annotation.loc[:, available_columns + ["platform_symbol_aliases"]].to_csv(output_dir / "probe_annotation.csv", index=False)
+
+    gene_symbol_series = annotation["gene_symbol"].fillna("").astype(str).str.strip()
+    summary = {
+        "platform_id": "GPL8321",
+        "platform_file": platform_path.name,
+        "probe_count": int(annotation.shape[0]),
+        "nonempty_gene_symbol_probe_count": int(gene_symbol_series.ne("").sum()),
+        "unique_gene_symbol_count": int(gene_symbol_series[gene_symbol_series.ne("")].nunique()),
+        "nonempty_entrez_probe_count": int(annotation["entrez_gene_id"].fillna("").astype(str).str.strip().ne("").sum()),
+        "annotation_date_values": sorted(annotation["annotation_date"].dropna().astype(str).unique().tolist()),
+    }
+    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+    return summary
+
+
 def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     evidence_dir = processed_dir / "yosef_th17_network_evidence"
+    annotation_dir = processed_dir / "GPL8321_annotation"
 
     target_design = pd.read_csv(evidence_dir / "perturbation_target_design.csv")
     target_expression = _load_matrix(evidence_dir / "perturbation_target_expression_matrix.tsv.gz")
@@ -850,6 +952,7 @@ def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) 
     log2_fc_matrix = _load_matrix(evidence_dir / "perturbation_target_log2_fc_matrix.tsv.gz")
     control_reference = pd.read_csv(evidence_dir / "perturbation_control_reference.csv").set_index("gene_symbol")
     self_response = pd.read_csv(evidence_dir / "perturbation_self_response.csv").set_index("perturbation_target")
+    gpl8321_annotation = pd.read_csv(annotation_dir / "probe_annotation.csv")
 
     rnaseq_target_records: list[dict[str, object]] = []
     for row in target_design.to_dict(orient="records"):
@@ -1016,6 +1119,13 @@ def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) 
     contrast_matrix = pd.concat(contrast_series, axis=1)
     contrast_matrix.to_csv(output_dir / "gpl8321_late_time_contrast_matrix.tsv.gz", sep="\t", compression="gzip")
 
+    gpl8321_symbol_to_probes: dict[str, set[str]] = {}
+    for row in gpl8321_annotation.to_dict(orient="records"):
+        probe_id = str(row["probe_id"])
+        aliases = {token for token in str(row.get("platform_symbol_aliases", "")).split("|") if token}
+        for alias in aliases:
+            gpl8321_symbol_to_probes.setdefault(alias, set()).add(probe_id)
+
     candidate_regulators = sorted(
         set(rnaseq_target_summary["perturbation_target"].astype(str).tolist()) | {"STAT6", "TCFEB", "TRIM24"}
     )
@@ -1025,6 +1135,7 @@ def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) 
     candidate_records: list[dict[str, object]] = []
     for regulator in candidate_regulators:
         matched_gene_symbol = upper_gene_symbols.get(regulator)
+        microarray_probe_ids = sorted(gpl8321_symbol_to_probes.get(regulator, set()))
         target_row = rnaseq_target_summary.loc[rnaseq_target_summary["perturbation_target"] == regulator]
         gene_observed = matched_gene_symbol is not None
         candidate_records.append(
@@ -1040,10 +1151,12 @@ def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) 
                 "rnaseq_control_mean_expression": float(control_reference.loc[matched_gene_symbol, "control_mean_expression"]) if gene_observed else None,
                 "rnaseq_mean_abs_log2_fc_across_targets": float(log2_fc_matrix.loc[matched_gene_symbol].abs().mean()) if gene_observed else None,
                 "rnaseq_max_abs_log2_fc_across_targets": float(log2_fc_matrix.loc[matched_gene_symbol].abs().max()) if gene_observed else None,
-                "microarray_probe_mapping_available": False,
-                "direct_gpl8321_gene_level_support_available": False,
+                "gpl8321_exact_symbol_probe_count": len(microarray_probe_ids),
+                "gpl8321_exact_symbol_probe_ids": "|".join(microarray_probe_ids),
+                "microarray_probe_mapping_available": len(microarray_probe_ids) > 0,
+                "direct_gpl8321_gene_level_support_available": len(microarray_probe_ids) > 0,
                 "evidence_note": (
-                    "GPL8321 late-time contrasts are currently probe-level only; faithful gene-level mapping requires recovered platform annotation."
+                    "GPL8321 support uses exact GEO platform gene-symbol mappings only; unresolved aliases remain unsupported."
                 ),
             }
         )
@@ -1063,6 +1176,16 @@ def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) 
                 candidate_evidence["is_paper_finalnet_negative_48h_candidate"] & candidate_evidence["rnaseq_gene_observed"],
                 "regulator",
             ].astype(str).tolist()
+        ),
+        "paper_finalnet_negative_candidates_with_exact_gpl8321_probe_support": sorted(
+            candidate_evidence.loc[
+                candidate_evidence["is_paper_finalnet_negative_48h_candidate"]
+                & candidate_evidence["microarray_probe_mapping_available"],
+                "regulator",
+            ].astype(str).tolist()
+        ),
+        "candidate_regulators_with_exact_gpl8321_probe_support": sorted(
+            candidate_evidence.loc[candidate_evidence["microarray_probe_mapping_available"], "regulator"].astype(str).tolist()
         ),
         "candidate_regulators_without_rnaseq_gene_match": sorted(
             candidate_evidence.loc[~candidate_evidence["rnaseq_gene_observed"], "regulator"].astype(str).tolist()
@@ -1115,6 +1238,10 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
     payload["yosef_th17_network_evidence"] = prepare_yosef_th17_network_evidence(
         output_dir,
         output_dir / "yosef_th17_network_evidence",
+    )
+    payload["GPL8321_annotation"] = prepare_gpl8321_annotation(
+        raw_dir,
+        output_dir / "GPL8321_annotation",
     )
     payload["yosef_th17_network_regulator_summary"] = prepare_yosef_th17_regulator_summary(
         output_dir,
