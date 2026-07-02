@@ -54,6 +54,7 @@ The `th17-prepare` pipeline now also materializes branch-specific cohort artifac
 - `yosef_th17_network_design`
 - `yosef_th17_network_evidence`
 - `yosef_th17_network_regulator_summary`
+- `yosef_th17_network_ranking_input`
 - `GPL8321_annotation`
 
 These cohort directories provide combined `sample_metadata.csv`, per-series `series_metadata.csv`, and `summary.json` files so downstream network reconstruction can select a biologically coherent arm by construction rather than by ad hoc filtering.
@@ -96,6 +97,23 @@ The `GPL8321_annotation` artifact is now recovered directly from the GEO platfor
 - `POU2F1A` remains unresolved because the platform supports `Pou2f1`, but does not declare `POU2F1A` as an exact platform alias
 
 The mapping remains conservative: microarray support is accepted only when the GPL8321 row itself declares the exact symbol or a platform-native alias.
+
+The Yosef ranking-input artifact is the current paper-facing preprocessing boundary. It materializes:
+- `terminal_proxy_manifest.csv`: the full `26`-contrast late-time GPL8321 panel, with each contrast labeled as either `strict_exact_48h` or `broad_late_time`
+- `strict_exact_48h_proxy_manifest.csv`: the strict terminal proxy subset with exactly `2` admissible `48.0 hr` contrasts
+- `candidate_probe_feature_table.csv`: `27` regulator-probe rows with late-time and exact-`48.0 hr` effect summaries
+- `candidate_ranking_input.csv`: `15` regulator rows combining RNA-seq perturbation features with candidate-specific GPL8321 late-time and exact-`48.0 hr` summaries
+
+This artifact formalizes two distinct terminal-state notions that should not be conflated:
+- strict terminal proxy: only the exact `48.0 hr` GPL8321 contrasts (`GSE43955` treatment-vs-`Th0`, `GSE43969` `WT`-vs-`IL23R_KO` under `TGFb+IL6`)
+- broad late-time proxy: the full admissible `>=48 hr` same-series, same-time GPL8321 contrast panel
+
+For the paper-highlighted `48 hr` candidates:
+- `STAT6` best strict exact-`48.0 hr` probe: `1426353_at`
+- `TCFEB` best strict exact-`48.0 hr` probe: `1422566_at`
+- `TRIM24` best strict exact-`48.0 hr` probe: `1427258_at`
+
+These are ranking inputs, not final paper-equivalent rankings. They expose defensible candidate features while keeping the gap between preprocessing and exact reconstruction explicit.
 
 Each plot directory also contains a `plot_manifest.json` file stating the exact correspondence boundary with the original paper figures. This is intentional: the implementation reproduces the paper's core algorithms and generates faithful reduced analogues of key visualizations, but it does not claim that every saved plot is pixel-identical to the published panels.
 

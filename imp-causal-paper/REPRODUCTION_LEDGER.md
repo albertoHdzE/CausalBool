@@ -552,6 +552,51 @@ Confirmed GPL8321 platform-annotation artifact:
     - accept alias support only when GPL8321 itself declares it in `GEN=` or `UG_GENE=`
     - do not infer unsupported aliases from external heuristics at this stage
 
+Confirmed Yosef-only ranking-input artifact:
+
+- `yosef_th17_network_ranking_input`:
+  - terminal proxy manifests:
+    - `terminal_proxy_manifest.csv` = `26` late-time GPL8321 contrasts
+    - `strict_exact_48h_proxy_manifest.csv` = `2` exact `48.0 hr` contrasts
+    - strict exact `48.0 hr` contrast families:
+      - `gse43955_treatment_vs_th0`
+      - `gse43969_wt_vs_il23rko_tgfb_il6`
+  - candidate-specific probe features:
+    - `candidate_probe_feature_table.csv` = `27` regulator-probe rows
+    - `14` regulators have strict exact `48.0 hr` GPL8321 support
+    - `14` regulators have broader late-time GPL8321 support
+    - `1` regulator remains unsupported in GPL8321 candidate mapping:
+      - `POU2F1A`
+  - candidate-level ranking inputs:
+    - `candidate_ranking_input.csv` = `15` regulators
+    - combines:
+      - RNA-seq perturbation-screen features
+      - best-probe late-time GPL8321 summaries
+      - best-probe exact `48.0 hr` GPL8321 summaries
+      - within-candidate-set descending ranks for each evidence axis
+  - paper-highlighted final-network `48 hr` candidates:
+    - `STAT6`
+      - best exact `48.0 hr` probe: `1426353_at`
+      - top exact `48.0 hr` contrast:
+        - `gse43955_treatment_vs_th0_GSE43955_48_0h_TGFb_IL6_not_reported_vs_Th0_not_reported`
+      - best exact `48.0 hr` absolute delta: `229.63157420000005`
+    - `TCFEB`
+      - best exact `48.0 hr` probe: `1422566_at`
+      - top exact `48.0 hr` contrast:
+        - `gse43969_wt_vs_il23rko_tgfb_il6_GSE43969_48_0h_TGFb_IL6_WT_vs_TGFb_IL6_IL23R_KO`
+      - best exact `48.0 hr` absolute delta: `14.426170999999997`
+    - `TRIM24`
+      - best exact `48.0 hr` probe: `1427258_at`
+      - top exact `48.0 hr` contrast:
+        - `gse43955_treatment_vs_th0_GSE43955_48_0h_TGFb_IL6_not_reported_vs_Th0_not_reported`
+      - best exact `48.0 hr` absolute delta: `131.8793104`
+
+Scientific boundary:
+
+- strict terminal support is defined only by exact `48.0 hr` contrasts; later `49-72 hr` contrasts are retained separately as broader late-time evidence
+- these artifacts provide paper-facing regulator features, but they do not yet constitute an exact reconstruction of the paper’s final ranking procedure
+- further work is still required to translate these features into a paper-faithful ranking or `FinalNet` reconstruction protocol
+
 Scientific significance:
 
 - the project now has deterministic, script-generated local assets for the `Th17` microarray matrices, the sequencing-only GEO metadata series, the 48 h perturbation RNA-seq table bundle, and the cross-series raw-bundle manifests;

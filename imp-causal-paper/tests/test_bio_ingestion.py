@@ -107,10 +107,11 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "yosef_th17_network_design",
         "yosef_th17_network_evidence",
         "yosef_th17_network_regulator_summary",
+        "yosef_th17_network_ranking_input",
     }.issubset(set(summary["dataset_order"]))
     assert summary["study_arm_dataset_counts"] == {
         "wu_sgk1_pathogenicity": 3,
-        "yosef_th17_network": 9,
+        "yosef_th17_network": 10,
     }
 
     gpl8321_summary = json.loads((output_dir / "GPL8321_annotation" / "summary.json").read_text())
@@ -349,6 +350,73 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
     assert bool(pou2f1a_row["is_rnaseq_perturbation_target"]) is True
     assert bool(pou2f1a_row["rnaseq_gene_observed"]) is False
     assert int(pou2f1a_row["gpl8321_exact_symbol_probe_count"]) == 0
+
+    ranking_input_summary = json.loads((output_dir / "yosef_th17_network_ranking_input" / "summary.json").read_text())
+    assert ranking_input_summary["study_arm"] == "yosef_th17_network"
+    assert ranking_input_summary["candidate_count"] == 15
+    assert ranking_input_summary["candidate_probe_feature_row_count"] == 27
+    assert ranking_input_summary["strict_exact_48h_proxy_contrast_count"] == 2
+    assert ranking_input_summary["strict_exact_48h_proxy_contrast_families"] == [
+        "gse43955_treatment_vs_th0",
+        "gse43969_wt_vs_il23rko_tgfb_il6",
+    ]
+    assert ranking_input_summary["broad_late_time_proxy_contrast_count"] == 26
+    assert ranking_input_summary["candidate_count_with_strict_exact_48h_support"] == 14
+    assert ranking_input_summary["candidate_count_with_broad_late_time_support"] == 14
+    assert ranking_input_summary["paper_finalnet_negative_candidates"] == ["STAT6", "TCFEB", "TRIM24"]
+    assert ranking_input_summary["paper_finalnet_negative_candidates_with_strict_exact_48h_support"] == [
+        "STAT6",
+        "TCFEB",
+        "TRIM24",
+    ]
+    assert ranking_input_summary["paper_finalnet_negative_candidates_best_exact_48h_probe"] == {
+        "STAT6": "1426353_at",
+        "TCFEB": "1422566_at",
+        "TRIM24": "1427258_at",
+    }
+    assert ranking_input_summary["paper_finalnet_negative_candidates_top_exact_48h_contrast_label"] == {
+        "STAT6": "gse43955_treatment_vs_th0_GSE43955_48_0h_TGFb_IL6_not_reported_vs_Th0_not_reported",
+        "TCFEB": "gse43969_wt_vs_il23rko_tgfb_il6_GSE43969_48_0h_TGFb_IL6_WT_vs_TGFb_IL6_IL23R_KO",
+        "TRIM24": "gse43955_treatment_vs_th0_GSE43955_48_0h_TGFb_IL6_not_reported_vs_Th0_not_reported",
+    }
+
+    terminal_proxy_manifest = pd.read_csv(
+        output_dir / "yosef_th17_network_ranking_input" / "terminal_proxy_manifest.csv"
+    )
+    assert terminal_proxy_manifest.shape[0] == 26
+    assert terminal_proxy_manifest["proxy_scope"].value_counts().sort_index().to_dict() == {
+        "broad_late_time": 24,
+        "strict_exact_48h": 2,
+    }
+
+    candidate_probe_features = pd.read_csv(
+        output_dir / "yosef_th17_network_ranking_input" / "candidate_probe_feature_table.csv"
+    )
+    assert candidate_probe_features.shape[0] == 27
+    stat6_probe = candidate_probe_features.loc[candidate_probe_features["probe_id"] == "1426353_at"].iloc[0]
+    assert stat6_probe["regulator"] == "STAT6"
+    assert stat6_probe["top_exact_48h_contrast_family"] == "gse43955_treatment_vs_th0"
+    assert stat6_probe["max_abs_delta_exact_48h"] == pytest.approx(229.63157420000005)
+    trim24_probe = candidate_probe_features.loc[candidate_probe_features["probe_id"] == "1427258_at"].iloc[0]
+    assert trim24_probe["regulator"] == "TRIM24"
+    assert trim24_probe["max_abs_delta_exact_48h"] == pytest.approx(131.8793104)
+
+    ranking_input = pd.read_csv(
+        output_dir / "yosef_th17_network_ranking_input" / "candidate_ranking_input.csv"
+    )
+    assert ranking_input.shape[0] == 15
+    stat6_rank_row = ranking_input.loc[ranking_input["regulator"] == "STAT6"].iloc[0]
+    assert bool(stat6_rank_row["strict_exact_48h_proxy_available"]) is True
+    assert stat6_rank_row["gpl8321_best_probe_exact_48h"] == "1426353_at"
+    assert stat6_rank_row["gpl8321_best_probe_top_exact_48h_contrast_family"] == "gse43955_treatment_vs_th0"
+    assert stat6_rank_row["gpl8321_best_probe_max_abs_delta_exact_48h"] == pytest.approx(229.63157420000005)
+    assert stat6_rank_row["evidence_dimension_count"] == 3
+    tcfeb_rank_row = ranking_input.loc[ranking_input["regulator"] == "TCFEB"].iloc[0]
+    assert tcfeb_rank_row["gpl8321_best_probe_exact_48h"] == "1422566_at"
+    assert tcfeb_rank_row["gpl8321_best_probe_top_exact_48h_contrast_family"] == "gse43969_wt_vs_il23rko_tgfb_il6"
+    pou2f1a_rank_row = ranking_input.loc[ranking_input["regulator"] == "POU2F1A"].iloc[0]
+    assert bool(pou2f1a_rank_row["strict_exact_48h_proxy_available"]) is False
+    assert pou2f1a_rank_row["evidence_dimension_count"] == 0
 
     wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
     assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"

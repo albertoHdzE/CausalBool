@@ -1195,6 +1195,206 @@ def prepare_yosef_th17_regulator_summary(processed_dir: Path, output_dir: Path) 
     return summary
 
 
+def prepare_yosef_th17_ranking_input(processed_dir: Path, output_dir: Path) -> dict:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    regulator_dir = processed_dir / "yosef_th17_network_regulator_summary"
+
+    candidate_evidence = pd.read_csv(regulator_dir / "candidate_regulator_evidence.csv")
+    contrast_manifest = pd.read_csv(regulator_dir / "gpl8321_late_time_contrast_manifest.csv")
+    contrast_matrix = _load_matrix(regulator_dir / "gpl8321_late_time_contrast_matrix.tsv.gz")
+
+    terminal_proxy_manifest = contrast_manifest.copy()
+    terminal_proxy_manifest["proxy_scope"] = np.where(
+        terminal_proxy_manifest["time_hr"] == 48.0,
+        "strict_exact_48h",
+        "broad_late_time",
+    )
+    terminal_proxy_manifest.to_csv(output_dir / "terminal_proxy_manifest.csv", index=False)
+
+    exact_48h_manifest = terminal_proxy_manifest.loc[terminal_proxy_manifest["proxy_scope"] == "strict_exact_48h"].copy()
+    exact_48h_manifest.to_csv(output_dir / "strict_exact_48h_proxy_manifest.csv", index=False)
+    exact_48h_labels = exact_48h_manifest["contrast_label"].astype(str).tolist()
+
+    probe_feature_records: list[dict[str, object]] = []
+    ranking_records: list[dict[str, object]] = []
+
+    for row in candidate_evidence.to_dict(orient="records"):
+        regulator = str(row["regulator"])
+        probe_ids = [probe for probe in str(row["gpl8321_exact_symbol_probe_ids"]).split("|") if probe and probe != "nan"]
+        regulator_probe_features: list[dict[str, object]] = []
+
+        for probe_id in probe_ids:
+            values = contrast_matrix.loc[probe_id]
+            late_top_label = str(values.abs().idxmax())
+            late_top_meta = contrast_manifest.loc[contrast_manifest["contrast_label"] == late_top_label].iloc[0]
+            exact_48h_values = values.loc[exact_48h_labels] if exact_48h_labels else pd.Series(dtype=float)
+            exact_48h_top_label = str(exact_48h_values.abs().idxmax()) if not exact_48h_values.empty else None
+            exact_48h_top_meta = (
+                exact_48h_manifest.loc[exact_48h_manifest["contrast_label"] == exact_48h_top_label].iloc[0]
+                if exact_48h_top_label is not None
+                else None
+            )
+
+            record = {
+                "regulator": regulator,
+                "probe_id": probe_id,
+                "mean_abs_delta_all_late": float(values.abs().mean()),
+                "max_abs_delta_all_late": float(values.abs().max()),
+                "top_late_contrast_label": late_top_label,
+                "top_late_signed_delta": float(values.loc[late_top_label]),
+                "top_late_abs_delta": float(abs(values.loc[late_top_label])),
+                "top_late_contrast_family": str(late_top_meta["contrast_family"]),
+                "top_late_time_hr": float(late_top_meta["time_hr"]),
+                "mean_abs_delta_exact_48h": float(exact_48h_values.abs().mean()) if not exact_48h_values.empty else None,
+                "max_abs_delta_exact_48h": float(exact_48h_values.abs().max()) if not exact_48h_values.empty else None,
+                "top_exact_48h_contrast_label": exact_48h_top_label,
+                "top_exact_48h_signed_delta": (
+                    float(exact_48h_values.loc[exact_48h_top_label]) if exact_48h_top_label is not None else None
+                ),
+                "top_exact_48h_abs_delta": (
+                    float(abs(exact_48h_values.loc[exact_48h_top_label])) if exact_48h_top_label is not None else None
+                ),
+                "top_exact_48h_contrast_family": (
+                    str(exact_48h_top_meta["contrast_family"]) if exact_48h_top_meta is not None else None
+                ),
+                "top_exact_48h_time_hr": float(exact_48h_top_meta["time_hr"]) if exact_48h_top_meta is not None else None,
+            }
+            regulator_probe_features.append(record)
+            probe_feature_records.append(record)
+
+        if regulator_probe_features:
+            regulator_probe_frame = pd.DataFrame.from_records(regulator_probe_features)
+            best_probe_all_late = regulator_probe_frame.sort_values(
+                ["max_abs_delta_all_late", "mean_abs_delta_all_late"],
+                ascending=False,
+            ).iloc[0]
+            best_probe_exact_48h = regulator_probe_frame.sort_values(
+                ["max_abs_delta_exact_48h", "mean_abs_delta_exact_48h"],
+                ascending=False,
+                na_position="last",
+            ).iloc[0]
+            ranking_records.append(
+                {
+                    **row,
+                    "strict_exact_48h_proxy_available": True,
+                    "broad_late_time_proxy_available": True,
+                    "gpl8321_probe_feature_count": int(regulator_probe_frame.shape[0]),
+                    "gpl8321_mean_abs_delta_all_late_across_probes": float(
+                        regulator_probe_frame["mean_abs_delta_all_late"].mean()
+                    ),
+                    "gpl8321_max_abs_delta_all_late_across_probes": float(
+                        regulator_probe_frame["max_abs_delta_all_late"].max()
+                    ),
+                    "gpl8321_best_probe_all_late": str(best_probe_all_late["probe_id"]),
+                    "gpl8321_best_probe_mean_abs_delta_all_late": float(best_probe_all_late["mean_abs_delta_all_late"]),
+                    "gpl8321_best_probe_max_abs_delta_all_late": float(best_probe_all_late["max_abs_delta_all_late"]),
+                    "gpl8321_best_probe_top_late_contrast_label": str(best_probe_all_late["top_late_contrast_label"]),
+                    "gpl8321_best_probe_top_late_contrast_family": str(best_probe_all_late["top_late_contrast_family"]),
+                    "gpl8321_best_probe_top_late_time_hr": float(best_probe_all_late["top_late_time_hr"]),
+                    "gpl8321_best_probe_top_late_signed_delta": float(best_probe_all_late["top_late_signed_delta"]),
+                    "gpl8321_mean_abs_delta_exact_48h_across_probes": float(
+                        regulator_probe_frame["mean_abs_delta_exact_48h"].mean()
+                    ),
+                    "gpl8321_max_abs_delta_exact_48h_across_probes": float(
+                        regulator_probe_frame["max_abs_delta_exact_48h"].max()
+                    ),
+                    "gpl8321_best_probe_exact_48h": str(best_probe_exact_48h["probe_id"]),
+                    "gpl8321_best_probe_mean_abs_delta_exact_48h": float(best_probe_exact_48h["mean_abs_delta_exact_48h"]),
+                    "gpl8321_best_probe_max_abs_delta_exact_48h": float(best_probe_exact_48h["max_abs_delta_exact_48h"]),
+                    "gpl8321_best_probe_top_exact_48h_contrast_label": str(
+                        best_probe_exact_48h["top_exact_48h_contrast_label"]
+                    ),
+                    "gpl8321_best_probe_top_exact_48h_contrast_family": str(
+                        best_probe_exact_48h["top_exact_48h_contrast_family"]
+                    ),
+                    "gpl8321_best_probe_top_exact_48h_time_hr": float(best_probe_exact_48h["top_exact_48h_time_hr"]),
+                    "gpl8321_best_probe_top_exact_48h_signed_delta": float(
+                        best_probe_exact_48h["top_exact_48h_signed_delta"]
+                    ),
+                }
+            )
+        else:
+            ranking_records.append(
+                {
+                    **row,
+                    "strict_exact_48h_proxy_available": False,
+                    "broad_late_time_proxy_available": False,
+                    "gpl8321_probe_feature_count": 0,
+                    "gpl8321_mean_abs_delta_all_late_across_probes": None,
+                    "gpl8321_max_abs_delta_all_late_across_probes": None,
+                    "gpl8321_best_probe_all_late": None,
+                    "gpl8321_best_probe_mean_abs_delta_all_late": None,
+                    "gpl8321_best_probe_max_abs_delta_all_late": None,
+                    "gpl8321_best_probe_top_late_contrast_label": None,
+                    "gpl8321_best_probe_top_late_contrast_family": None,
+                    "gpl8321_best_probe_top_late_time_hr": None,
+                    "gpl8321_best_probe_top_late_signed_delta": None,
+                    "gpl8321_mean_abs_delta_exact_48h_across_probes": None,
+                    "gpl8321_max_abs_delta_exact_48h_across_probes": None,
+                    "gpl8321_best_probe_exact_48h": None,
+                    "gpl8321_best_probe_mean_abs_delta_exact_48h": None,
+                    "gpl8321_best_probe_max_abs_delta_exact_48h": None,
+                    "gpl8321_best_probe_top_exact_48h_contrast_label": None,
+                    "gpl8321_best_probe_top_exact_48h_contrast_family": None,
+                    "gpl8321_best_probe_top_exact_48h_time_hr": None,
+                    "gpl8321_best_probe_top_exact_48h_signed_delta": None,
+                }
+            )
+
+    probe_feature_table = pd.DataFrame.from_records(probe_feature_records).sort_values(["regulator", "probe_id"])
+    probe_feature_table.to_csv(output_dir / "candidate_probe_feature_table.csv", index=False)
+
+    ranking_input = pd.DataFrame.from_records(ranking_records).sort_values("regulator")
+    for column in [
+        "rnaseq_max_abs_log2_fc_across_targets",
+        "gpl8321_best_probe_max_abs_delta_all_late",
+        "gpl8321_best_probe_max_abs_delta_exact_48h",
+    ]:
+        ranking_input[f"{column}_rank_desc"] = ranking_input[column].rank(method="min", ascending=False)
+
+    ranking_input["evidence_dimension_count"] = (
+        ranking_input[
+            [
+                "rnaseq_max_abs_log2_fc_across_targets",
+                "gpl8321_best_probe_max_abs_delta_all_late",
+                "gpl8321_best_probe_max_abs_delta_exact_48h",
+            ]
+        ]
+        .notna()
+        .sum(axis=1)
+        .astype(int)
+    )
+    ranking_input.to_csv(output_dir / "candidate_ranking_input.csv", index=False)
+
+    paper_candidates = ranking_input.loc[ranking_input["is_paper_finalnet_negative_48h_candidate"]].copy()
+    summary = {
+        "study_arm": "yosef_th17_network",
+        "candidate_count": int(ranking_input.shape[0]),
+        "candidate_probe_feature_row_count": int(probe_feature_table.shape[0]),
+        "strict_exact_48h_proxy_contrast_count": int(exact_48h_manifest.shape[0]),
+        "strict_exact_48h_proxy_contrast_families": sorted(
+            exact_48h_manifest["contrast_family"].astype(str).unique().tolist()
+        ),
+        "broad_late_time_proxy_contrast_count": int(terminal_proxy_manifest.shape[0]),
+        "candidate_count_with_strict_exact_48h_support": int(ranking_input["strict_exact_48h_proxy_available"].sum()),
+        "candidate_count_with_broad_late_time_support": int(ranking_input["broad_late_time_proxy_available"].sum()),
+        "paper_finalnet_negative_candidates": sorted(paper_candidates["regulator"].astype(str).tolist()),
+        "paper_finalnet_negative_candidates_with_strict_exact_48h_support": sorted(
+            paper_candidates.loc[paper_candidates["strict_exact_48h_proxy_available"], "regulator"].astype(str).tolist()
+        ),
+        "paper_finalnet_negative_candidates_best_exact_48h_probe": {
+            str(row["regulator"]): str(row["gpl8321_best_probe_exact_48h"])
+            for row in paper_candidates.to_dict(orient="records")
+        },
+        "paper_finalnet_negative_candidates_top_exact_48h_contrast_label": {
+            str(row["regulator"]): str(row["gpl8321_best_probe_top_exact_48h_contrast_label"])
+            for row in paper_candidates.to_dict(orient="records")
+        },
+    }
+    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+    return summary
+
+
 def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None = None) -> dict[str, dict]:
     output_dir.mkdir(parents=True, exist_ok=True)
     payload: dict[str, dict] = {}
@@ -1246,6 +1446,10 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
     payload["yosef_th17_network_regulator_summary"] = prepare_yosef_th17_regulator_summary(
         output_dir,
         output_dir / "yosef_th17_network_regulator_summary",
+    )
+    payload["yosef_th17_network_ranking_input"] = prepare_yosef_th17_ranking_input(
+        output_dir,
+        output_dir / "yosef_th17_network_ranking_input",
     )
 
     combined = {
