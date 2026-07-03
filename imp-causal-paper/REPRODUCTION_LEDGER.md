@@ -820,6 +820,31 @@ Scripts:
 - `scripts/run_ecoli_perturbation.py` — run BDM node perturbation on the parsed network
 - Entry point: `./run.sh ecoli [C|CS|all]`
 
+#### BDM perturbation results (RegulonDB 14.5, Confirmed only, 2026-07-03)
+
+Outputs: `data/processed/ecoli/ecoli_confC_node_spectra.csv`, `ecoli_confC_node_signature.csv`, `ecoli_confC_perturbation_summary.json`
+
+| Metric | Value |
+|--------|-------|
+| Nodes | 949 |
+| Edges | 1148 |
+| Base complexity | 2637.73 bits |
+| Positive (delta > log2(949)) | 122 |
+| Neutral | 38 |
+| Negative (delta < −log2(949)) | 789 |
+| Relative reprogrammability | 0.2437 |
+| Elapsed | 185.8 s |
+
+Top positive nodes (removing reduces complexity — global regulatory hubs): ArgR, CRP, MarA, Ada, AlaS, MarR, AllR, AraC, ArgP, AcrR.
+
+Top negative nodes (removing increases complexity — structurally embedded): crr, csgD, crp, TorR, CsrA.
+
+Biological interpretation: positive nodes are predominantly TFs with many targets (removing them collapses ordered regulatory structure). Negative nodes are predominantly target genes or embedded members of dense motifs. The pattern is consistent with the Zenil paper's claim that global regulators are causal information carriers.
+
+Validation limitation: no mmc2–mmc7 equivalents exist for E. coli, so sign-agreement cross-validation is not possible. Results are consistent with the paper's biological narrative but cannot be directly compared numerically given the version gap (14.5 vs ~9.x).
+
+Node ordering: alphabetical. Ordering sensitivity for E. coli has not been investigated (no ground truth to compare against).
+
 Interpretive target from the Zenil paper:
 
 - use an experimentally validated `E. coli` TF network

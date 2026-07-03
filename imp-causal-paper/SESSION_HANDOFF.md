@@ -1,91 +1,86 @@
-# Session Handoff: EarlyNet Root Cause + mmc8 Parsing
+# Session Handoff: E. coli completed; ordering integrated; three priorities remaining
 
 ## Branch: clean
-## Date: 2026-07-02
-## Last verified state: 28 tests pass, all 3 run.sh commands clean
+## Date: 2026-07-03
+## Last verified state: 28 tests pass, all run.sh commands clean
+## Latest commit: see `git log --oneline -3`
 
 ## What Was Accomplished This Session
 
-### 1. Notebook Fix (COMPLETE)
-- Fixed CA cell (Section 7): `summary["true_rule"]` -> `summary["rule"]`
-- Fixed Boolean cell (Section 8): wrong keys (`graph_type`, `node_count`, etc.) -> correct keys (`graph_name`, `operator`, etc.)
-- Verified: all 17 code cells execute cleanly via `jupyter nbconvert --execute`
+### 1. Committed prior-session work (DONE)
+- Committed all staged files from previous session: notebooks, scripts, yosef
+  perturbation data, mmc8 outputs, EarlyNet in_degree_desc results.
+- Commit `6b8f787`: "Resolve EarlyNet BDM ordering dependency; add mmc8 parser
+  and ordering invariance documentation"
 
-### 2. EarlyNet Root Cause IDENTIFIED AND RESOLVED
+### 2. Perturbation pipeline updated with per-network ordering (DONE)
+- `perturbation.py` `spectra()` now accepts `nodelist` parameter.
+  When provided, builds adjacency matrix once with fixed ordering and uses
+  `np.delete` per node removal (matching algodyn's deletion semantics).
+- `run_yosef_perturbation.py` defines `NETWORK_ORDERINGS`:
+  - EarlyNet → `in_degree_desc` (97% sign agreement)
+  - IntermediateNet → `sorted` (97%)
+  - FinalNet → `sorted` (99%)
+- Commit `7016486`: "Integrate per-network node ordering into perturbation pipeline"
 
-#### Previous hypothesis (WRONG)
-The SESSION_HANDOFF from the prior session claimed algodyn uses 3x3 blocks with
-its own CTM table, and that the EarlyNet discrepancy was due to different CTM values.
+### 3. REPRODUCTION_LEDGER.md corrected (DONE)
+- Cross-validation section updated: EarlyNet root cause is ordering (NOT BDM
+  implementation difference). Corrected conclusion recorded.
 
-#### Actual findings
-1. **CTM tables are identical**: pybdm's built-in tables match algodyn's K-3x3.csv
-   and K-4x4.csv exactly (verified numerically). Both also match the Mathematica
-   source at `mat-bdm/squares2Dsize1to4.m` (exact rationals).
-2. **Algodyn defaults to 4x4 blocks** (`block_size=4, offset=4`), NOT 3x3.
-   See `reference/algodyn/R/calculate_info_vertices.R` line 23 and
-   `reference/algodyn/R/info_spectra.R` line 23.
-3. **The real issue is adjacency matrix node ordering**. BDM is NOT a graph
-   invariant; the delta signs depend on which row/column each node occupies.
-
-#### Per-network best ordering (pybdm 4x4, all verified)
-
-| Network         | sorted (alphabetical) | in_degree_desc | Best |
-|-----------------|----------------------|----------------|------|
-| EarlyNet        | 7% (15/209)          | 97% (203/209)  | in_degree_desc |
-| IntermediateNet | 97% (331/340)        | 96% (327/340)  | sorted |
-| FinalNet        | 99% (202/204)        | 2% (4/204)     | sorted |
-
-No single ordering works universally. The paper likely used igraph's default
-vertex ordering, which depends on graph creation order and differs per network.
-
-#### Files created
-- `src/imp_causal_paper/algodyn_bdm.py`: Custom BDM estimator using algodyn CTM tables.
-  Not needed for the fix (CTM values are identical to pybdm) but preserved as
-  reference and for future investigation.
-- `scripts/investigate_node_ordering.py`: Tests multiple orderings across all networks.
-- `data/processed/th17/yosef_perturbation/EarlyNet_in_degree_desc_node_spectra.csv`: Best EarlyNet results.
-- `data/processed/th17/yosef_perturbation/ordering_investigation.json`: Full results.
-- `complexity.py`: `adjacency_matrix()` now accepts optional `nodelist` parameter
-  (default behaviour unchanged; 28 tests pass).
-
-### 3. mmc8.csv Parsed (COMPLETE)
-- 9364 five-node directed graphs with BDM node perturbation deltas
-- Edge count range: 4-20
-- Phase transition: positive-dominant at low density -> negative-dominant at ~12-13 edges
-- All outputs in `data/processed/boolean_exhaustive/`
-- Script: `scripts/parse_mmc8.py`
-
-### 4. CTM Provenance Chain Confirmed
-- `mat-bdm/squares2Dsize1to4.m` (exact rationals, 1x1 through 4x4)
-- `reference/algodyn/data/K-3x3.csv` (float extraction of 3x3 section)
-- `reference/algodyn/data/K-4x4.csv` (float extraction of 4x4 section)
-- pybdm built-in tables (identical to above)
-All four sources agree to floating-point precision.
+### 4. RegulonDB E. coli TF network downloaded and analysed (DONE)
+- RegulonDB 14.5 (2026-07-03) downloaded via GraphQL API.
+  Files: `data/raw/regulondb/NetworkRegulatorGene.txt` (+ ConfGene, TF-RISet).
+- Canonical subset: Confirmed (C) only — 949 nodes, 1148 edges.
+- BDM perturbation completed in ~186s:
+  - Positive: 122, Neutral: 38, Negative: 789
+  - Relative reprogrammability: 0.2437
+  - Top positive: ArgR, CRP, MarA, Ada, AraC (all global TFs — expected)
+  - Top negative: crr, csgD, crp (embedded/target genes)
+- Version gap: paper used ~RegulonDB 9.x (2018); 14.5 is best available proxy.
+  No ground-truth supplementary data for E. coli (unlike Th17).
+- Scripts: `parse_ecoli_network.py`, `run_ecoli_perturbation.py`.
+  Entry point: `./run.sh ecoli [C|CS|all]`
+- Commits `3cfca97` + follow-on for perturbation output.
 
 ## Exact Next Actions
 
-### 1. Integrate per-network ordering into the main perturbation workflow
-The `adjacency_matrix()` function now accepts a `nodelist` parameter. The next step
-is to update `run_yosef_perturbation.py` to use `in_degree_desc` for EarlyNet and
-`sorted` for IntermediateNet/FinalNet. Then re-run the full analysis and update
-the summary.json with the corrected EarlyNet results.
+### 1. Commit E. coli perturbation output
+- Force-add and commit `data/processed/ecoli/` (spectra, signature, summary CSVs).
+- These are gitignored by default; use `git add -f`.
 
 ### 2. Update notebook Section 10 (cross-validation)
-Update the cross-validation cells to note the ordering dependency and show
-the corrected 97% agreement for EarlyNet.
+- `notebooks/paper_walkthrough.ipynb` Section 10 currently shows the old
+  EarlyNet results (7% sign agreement with alphabetical ordering).
+- Update to show: in_degree_desc ordering gives 97% for EarlyNet.
+- Add a brief note on ordering sensitivity.
 
-### 3. Update REPRODUCTION_LEDGER.md
-Record the ordering-sensitivity finding and the per-network resolution.
+### 3. Boolean network reproduction (mmc8 / Figure 4D)
+- `data/processed/boolean_exhaustive/mmc8_summary.json` has the parsed data.
+- The paper's Figure 4D shows distributions of positive/negative gene counts
+  vs edge density for 5-node exhaustive Boolean graphs.
+- Need to: load mmc8 data, compute classification fractions per edge count,
+  reproduce the phase-transition plot (positive → negative dominance at ~12–13 edges).
+- Script: `scripts/parse_mmc8.py` already generates the CSVs.
+  Next step: add a plotting/analysis script for Figure 4D.
 
-### 4. RegulonDB E. coli network
-Download and apply BDM perturbation.
+### 4. RegulonDB ordering sensitivity investigation (optional)
+- For E. coli, we used alphabetical ordering (no ground truth to verify against).
+- If the paper mentions specific positive/negative genes for E. coli, compare
+  against our results to assess ordering correctness.
+- The paper mentions GO/KEGG/EcoCyc enrichment as the validation, not specific
+  gene lists, so this may not be necessary.
 
-### 5. Boolean network reproduction (mmc8)
-Use the parsed mmc8 data to reproduce Figure 4D distributions.
+### 5. CellNet / cell-type landscape (longer-term)
+- See REPRODUCTION_LEDGER.md for current state of CellNet asset recovery.
+- Training data recovered from Zenodo (PACNet); cnProc objects in DEEP_ARCHIVE.
+- Not yet started; lowest priority.
 
-## Key Files to Read First
-1. This file
-2. `scripts/investigate_node_ordering.py` (ordering analysis)
-3. `data/processed/th17/yosef_perturbation/ordering_investigation.json` (results)
-4. `src/imp_causal_paper/algodyn_bdm.py` (custom estimator, reference)
-5. `data/processed/boolean_exhaustive/mmc8_summary.json` (mmc8 analysis)
+## Key Files
+1. `REPRODUCTION_LEDGER.md` — authoritative provenance and protocol record
+2. `scripts/run_yosef_perturbation.py` — canonical Th17 perturbation with ordering
+3. `scripts/run_ecoli_perturbation.py` — E. coli perturbation
+4. `data/processed/ecoli/` — E. coli BDM results (commit pending)
+5. `notebooks/paper_walkthrough.ipynb` — needs Section 10 update
+
+## Test Status
+28 tests pass (`pytest -q --tb=no`).
