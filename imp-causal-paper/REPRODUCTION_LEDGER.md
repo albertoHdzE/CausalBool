@@ -925,21 +925,22 @@ Scripts:
 
 Outputs: `data/processed/cellnet/cellnet_complexity_summary.csv`, per-cell-type `_node_spectra.csv`
 
-Full perturbation computed for 9 cell types (≤600 nodes):
+Full perturbation computed for 10 cell types (≤1000 nodes):
 
 | Cell type | Nodes | Edges | C(G) bits | Pr(G) |
 |-----------|-------|-------|-----------|-------|
 | lung | 450 | 6165 | 13542 | 0.348 |
-| intestine_colon | 430 | 10480 | 25315 | 0.120 |
+| hspc | 411 | 5448 | 14993 | 0.274 |
 | kidney | 358 | 3051 | 7570 | 0.237 |
+| fibroblast | 432 | 4681 | 10959 | 0.211 |
 | heart | 395 | 3894 | 9526 | 0.203 |
 | endothelial_cell | 536 | 6124 | 14675 | 0.170 |
-| hspc | 411 | 5448 | 14993 | 0.274 |
+| esc | 988 | 29311 | 62003 | 0.148 |
+| intestine_colon | 430 | 10480 | 25315 | 0.120 |
 | b_cell | 559 | 8582 | 18421 | 0.060 |
 | t_cell | 448 | 4555 | 13638 | 0.040 |
-| fibroblast | 432 | 4681 | 10959 | 0.211 |
 
-Large networks (base complexity only, perturbation deferred): neuron (2974 nodes), liver (1583), esc (988), monocyte_macrophage (3756), skeletal_muscle (4836).
+Large networks (base complexity only, perturbation deferred): neuron (2974 nodes), liver (1583), monocyte_macrophage (3756), skeletal_muscle (4836).
 
 Biological validation: hspc (stem/progenitor) Pr=0.274 > terminally differentiated immune cells (b_cell 0.060, t_cell 0.040) — consistent with the Waddington landscape expectation that stem cells are more reprogrammable. This matches the Zenil paper's central claim for the CellNet landscape panel.
 
@@ -947,7 +948,7 @@ Remaining gap: the paper reports 16 cell lines; 14 are available here. The two m
 
 Implication:
 
-- the reproduction path for the cell-type landscape now has 9/14 cell types with full C(G) + Pr(G) values.
+- the reproduction path for the cell-type landscape now has 10/14 cell types with full C(G) + Pr(G) values.
 - the 5 large networks require either extended compute time (estimated 30–90 min each) or further subsampling.
 - to obtain the missing 2–4 cell types from the original CellNet 2014 training, contact the Cahan lab (pcahan1@jhmi.edu).
 
@@ -1082,7 +1083,7 @@ The following work can now begin with actual assets already in hand:
 These are still unresolved:
 
 - exact RegulonDB version used in the Zenil paper (~9.x, 2018 — static exports not archived; RegulonDB 14.5 used as best available proxy)
-- exact CellNet GRN object set for 16 human cell types: 9 cell types have full C(G)+Pr(G), 5 large networks deferred; missing 2 cell types (possibly fibroblast/kidney variants from original CellNet 2014) require Cahan lab contact
+- exact CellNet GRN object set for 16 human cell types: 10 cell types have full C(G)+Pr(G), 4 large networks deferred (neuron/liver/monocyte_macrophage/skeletal_muscle); missing 2 cell types from original CellNet 2014 may require Cahan lab contact
 - exact supplementary benchmark graph list for MILS validation (9 networks from "pioneering studies" — list not named in the paper)
 - exact exhaustive Boolean-network enumeration protocol beyond what is stated textually
 

@@ -44,29 +44,21 @@ stale Jupyter output cells (from wrong Python env) are cosmetic only.
 | Th17 Yosef BDM perturbation (EarlyNet/IntermediateNet/FinalNet) | ✅ 97/97/99% sign agreement |
 | E. coli RegulonDB BDM perturbation | ✅ 949 nodes, C subset, 122 pos / 789 neg |
 | Boolean exhaustive mmc8 / Figure 4D | ✅ Phase-transition reproduced |
-| CellNet Waddington landscape | ⚠️ 9/14 cell types fully computed |
+| CellNet Waddington landscape | ⚠️ 10/14 cell types fully computed |
 | DREAM5 / MILS gold standard | ✅ CLOSED — not required |
 
 ---
 
 ## Remaining Work
 
-### Priority 1 — CellNet large networks (5 remaining cell types)
-The 5 large networks were skipped at node_limit=600:
-- neuron (2974 nodes) — estimated ~3 hours
+### Priority 1 — CellNet large networks (4 remaining cell types)
+esc (988 nodes, Pr=0.148) has been computed. Remaining deferred networks:
+- liver (1583 nodes)
+- neuron (2974 nodes)
 - monocyte_macrophage (3756 nodes)
 - skeletal_muscle (4836 nodes)
-- liver (1583 nodes)
-- esc (988 nodes — closest to feasible, ~30 min)
 
-Option A: Run `esc` first (988 nodes, ~30 min):
-```bash
-source .venv/bin/activate
-python scripts/run_cellnet_complexity.py --node-limit 1000
-```
-This adds esc + possibly liver.
-
-Option B: Run overnight with high limit:
+Run overnight with high limit:
 ```bash
 source .venv/bin/activate
 python scripts/run_cellnet_complexity.py --node-limit 5000
