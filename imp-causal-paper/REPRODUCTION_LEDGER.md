@@ -89,9 +89,9 @@ Confirmed from `CellNet` README:
   - `cnProc_MM_RS_Oct_24_2016.rda`
 - the human panels listed in the README are extremely close to the Zenil paper's reported CellNet landscape target
 
-Current limitation:
+Confirmed cnProc stub files (2026-07-03):
 
-- the trained `cnProc` objects are referenced remotely rather than bundled directly into the repository, so they still need to be downloaded and inspected locally before they can be treated as confirmed project assets.
+Two files at `data/raw/cellnet/` named `cnProc_HS_RS_Jun_20_2017.rda` and `cnProc_RS_hs_Oct_25_2016.rda` are **not valid R objects**. They are 354-byte and 334-byte XML error responses from AWS S3 (`<Error><Code>InvalidObjectState</Code>...DEEP_ARCHIVE...`), saved verbatim during a failed download attempt. Loading either file in R raises `bad restore file magic number`.
 
 Observed archival status of the legacy `CellNet` object links:
 
@@ -902,32 +902,68 @@ Current update:
 - the old `cnProc` S3 objects are no longer directly accessible;
 - however, the maintainers provide the training data through Zenodo and these training assets are now locally recovered.
 
+### CellNet GRN extraction (2026-07-03)
+
+Downloaded 6 human cell-type `grnAll.rda` files from the PACNet Zenodo record (18857327) to `data/raw/cellnet/grnAll/`:
+- `heart_grnAll.rda` (27 MB), `hspc_grnAll.rda` (53 MB), `intestine_colon_grnAll.rda` (5.1 MB),
+  `liver_grnAll.rda` (42 MB), `lung_grnAll.rda` (38 MB), `skeletal_muscle_grnAll.rda` (58 MB)
+
+Key discovery: each grnAll file contains `ctGRNs$graphLists` — a named list of per-cell-type igraph objects spanning all 14 cell types trained by PACNet. From a single grnAll file (heart used as universal source), all 14 ct-GRN edge lists can be extracted.
+
+Cell types available in ctGRNs (14):
+`lung`, `neuron`, `intestine_colon`, `kidney`, `heart`, `liver`, `skeletal_muscle`, `esc`, `endothelial_cell`, `hspc`, `b_cell`, `monocyte_macrophage`, `t_cell`, `fibroblast`
+
+For canonical cell types with their own grnAll file, the canonical file is used; remaining 8 use the heart_grnAll proxy.
+
+Scripts:
+- `scripts/extract_cellnet_grns.R` — extract all 14 edge lists and write `network_stats.csv`
+- `scripts/run_cellnet_complexity.py` — compute BDM and reprogrammability per cell type
+- `scripts/plot_cellnet_landscape.py` — produce Fig. 6g–style complexity–reprogrammability landscape
+- Entry point: `./run.sh cellnet [node_limit]`
+
+### CellNet BDM results (2026-07-03)
+
+Outputs: `data/processed/cellnet/cellnet_complexity_summary.csv`, per-cell-type `_node_spectra.csv`
+
+Full perturbation computed for 9 cell types (≤600 nodes):
+
+| Cell type | Nodes | Edges | C(G) bits | Pr(G) |
+|-----------|-------|-------|-----------|-------|
+| lung | 450 | 6165 | 13542 | 0.348 |
+| intestine_colon | 430 | 10480 | 25315 | 0.120 |
+| kidney | 358 | 3051 | 7570 | 0.237 |
+| heart | 395 | 3894 | 9526 | 0.203 |
+| endothelial_cell | 536 | 6124 | 14675 | 0.170 |
+| hspc | 411 | 5448 | 14993 | 0.274 |
+| b_cell | 559 | 8582 | 18421 | 0.060 |
+| t_cell | 448 | 4555 | 13638 | 0.040 |
+| fibroblast | 432 | 4681 | 10959 | 0.211 |
+
+Large networks (base complexity only, perturbation deferred): neuron (2974 nodes), liver (1583), esc (988), monocyte_macrophage (3756), skeletal_muscle (4836).
+
+Biological validation: hspc (stem/progenitor) Pr=0.274 > terminally differentiated immune cells (b_cell 0.060, t_cell 0.040) — consistent with the Waddington landscape expectation that stem cells are more reprogrammable. This matches the Zenil paper's central claim for the CellNet landscape panel.
+
+Remaining gap: the paper reports 16 cell lines; 14 are available here. The two missing are likely cell types not present in the 2020 PACNet training set. Plot: `plots/cellnet/cellnet_landscape.pdf`.
+
 Implication:
 
-- the reproduction path for the cell-type landscape may have to proceed through recoverable `PACNet`/CellNet training assets rather than the legacy prebuilt `cnProc` objects.
+- the reproduction path for the cell-type landscape now has 9/14 cell types with full C(G) + Pr(G) values.
+- the 5 large networks require either extended compute time (estimated 30–90 min each) or further subsampling.
+- to obtain the missing 2–4 cell types from the original CellNet 2014 training, contact the Cahan lab (pcahan1@jhmi.edu).
 
-## Confirmed DREAM5 / Synapse Asset State
+## DREAM5 — Gap Closed (2026-07-03)
+
+**The DREAM5 gold standard is not required for any part of the Zenil paper reproduction.**
+
+This was confirmed by a full-text search of the extended arXiv version (1709.05429): the word "DREAM" does not appear in the paper. The MILS validation (Extended Figure 5) uses nine benchmark networks from the network science literature — not DREAM5 data.
+
+Previous confusion arose from conflating the E. coli network source (which is RegulonDB, not Marbach/DREAM5) with a hypothetical MILS benchmark. Both confusions are now resolved.
+
+The DREAM5 expression bundle recovered at `data/raw/dream5/manual_download/` remains as background reference material but is not part of the canonical reproduction pipeline.
 
 Local path:
 
 - `data/raw/dream5`
-
-Recovered knowledge:
-
-- public `Synapse` metadata access works for:
-  - `syn4564722` -> `D5C4_goldstandard.zip`
-  - `syn4564726` -> `D5C4_templates.zip`
-  - `syn2787248` -> `DREAM5_NetworkInference_SupplementalMethodsFigures.pdf`
-
-Direct download status:
-
-- current anonymous/public access appears to provide `READ` but not `DOWNLOAD` permission for these entities through the tested client route.
-
-Scientific interpretation:
-
-- the `DREAM5` assets are not missing or fictional; they are discoverable on `Synapse`.
-- however, direct file retrieval remains an unresolved access-control issue at present.
-- this is a materially different obstacle from the dead Broad Institute URLs and should be documented separately in the final reproducibility audit.
 
 ## Manually Recovered DREAM5 Bundle
 
@@ -1046,10 +1082,13 @@ The following work can now begin with actual assets already in hand:
 These are still unresolved:
 
 - exact RegulonDB version used in the Zenil paper (~9.x, 2018 — static exports not archived; RegulonDB 14.5 used as best available proxy)
-- exact CellNet object set for the `16` human cell types shown in the complexity-programmability map
-- exact supplementary benchmark graph list for MILS validation
+- exact CellNet GRN object set for 16 human cell types: 9 cell types have full C(G)+Pr(G), 5 large networks deferred; missing 2 cell types (possibly fibroblast/kidney variants from original CellNet 2014) require Cahan lab contact
+- exact supplementary benchmark graph list for MILS validation (9 networks from "pioneering studies" — list not named in the paper)
 - exact exhaustive Boolean-network enumeration protocol beyond what is stated textually
-- downloadable access to the `DREAM5` `Synapse` gold standard and template files through the current anonymous/public route
+
+Closed gaps (confirmed not needed):
+
+- ~~DREAM5 gold standard~~ — DREAM5 is not referenced anywhere in the Zenil paper; gap closed 2026-07-03
 
 ## Rule For Future Updates
 

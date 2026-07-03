@@ -94,6 +94,16 @@ case "$STEP" in
     "$PYTHON_BIN" "$ROOT_DIR/scripts/run_ecoli_perturbation.py" --confidence "$CONFIDENCE"
     echo "[run.sh] E. coli BDM perturbation step completed successfully"
     ;;
+  cellnet)
+    echo "[run.sh] starting CellNet Waddington landscape step"
+    ensure_deps
+    echo "[run.sh] step 1: extract GRN edge lists from grnAll RDA files (requires Rscript + igraph)"
+    Rscript "$ROOT_DIR/scripts/extract_cellnet_grns.R" "$ROOT_DIR"
+    echo "[run.sh] step 2: compute BDM complexity and reprogrammability"
+    NODE_LIMIT="${2:-1000}"
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/run_cellnet_complexity.py" --node-limit "$NODE_LIMIT"
+    echo "[run.sh] CellNet Waddington landscape step completed successfully"
+    ;;
   all)
     echo "[run.sh] starting full experiment suite"
     ensure_deps
@@ -114,6 +124,7 @@ Steps:
   th17           Parse public Th17 array and perturbation RNA-seq assets into processed tables
   yosef-perturb  Run BDM node perturbation on EarlyNet/IntermediateNet/FinalNet (per-network ordering)
   ecoli [C|CS|all]  Run BDM node perturbation on RegulonDB E. coli TF->gene network
+  cellnet [N]    Extract CellNet GRNs and compute BDM landscape (node-limit N, default 1000)
   all            Run every experiment and write outputs under results/
 EOF
     ;;

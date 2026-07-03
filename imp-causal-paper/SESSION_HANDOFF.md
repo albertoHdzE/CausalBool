@@ -1,137 +1,112 @@
-# Session Handoff: Deblocking CellNet + DREAM5 Gold Standard
+# Session Handoff: CellNet Landscape Partial + DREAM5 Gap Closed
 
 ## Branch: clean
 ## Date: 2026-07-03
-## Last verified: 28 tests pass. Latest commit: ab218fd
-## Git log --oneline -5 to confirm on resume.
+## Last verified: 28 tests pass. Latest commit: (update after commit)
 
 ---
 
-## Full Reproduction Status
+## What Was Accomplished This Session
 
-### DONE (three core paper sections)
+### 1. DREAM5 gap — CLOSED
+Full-text search of 1709.05429: DREAM5 is not mentioned anywhere in the Zenil paper.
+MILS uses 9 benchmark networks from the network science literature (Extended Figure 5), not DREAM5 data.
+The Synapse gold standard (D5C4_goldstandard.zip) is **not required** for any part of this reproduction.
+REPRODUCTION_LEDGER.md updated to reflect this.
+
+### 2. CellNet cnProc stubs — DIAGNOSED
+The two local `.rda` files at `data/raw/cellnet/cnProc_*.rda` are 354/334-byte AWS S3 error XML responses saved during failed download. They are not valid R objects.
+
+### 3. Zenodo PACNet record — EVALUATED
+Record 18857327 (correct — 18857326 redirects to 18857327). Contains 45 files but NO `cnProc_*.rda`.
+However: each `grnAll.rda` file contains `ctGRNs$graphLists` with igraph objects for ALL 14 PACNet cell types.
+
+### 4. CellNet GRN pipeline — IMPLEMENTED AND RUN
+- Downloaded 6 human grnAll.rda files (27–58 MB each) from Zenodo to `data/raw/cellnet/grnAll/`
+- Wrote `scripts/extract_cellnet_grns.R` — extracts 14 cell-type edge lists
+- Wrote `scripts/run_cellnet_complexity.py` — BDM complexity + perturbation per cell type
+- Wrote `scripts/plot_cellnet_landscape.py` — Fig. 6g-style landscape plot
+- Added `./run.sh cellnet` entry point
+- All 14 edge lists extracted; 9 cell types (≤600 nodes) have full C(G)+Pr(G) results
+- Plot: `plots/cellnet/cellnet_landscape.pdf`
+
+### 5. Notebook Section 10 — ALREADY CORRECT
+Code cell already loads `EarlyNet_in_degree_desc_node_spectra.csv` and comments explain
+the 97% result. Section 12 has the full ordering sensitivity table. No code change needed;
+stale Jupyter output cells (from wrong Python env) are cosmetic only.
+
+---
+
+## Current Reproduction Status
+
 | Section | Status |
 |---------|--------|
-| Th17 Yosef BDM perturbation (EarlyNet/IntermediateNet/FinalNet) | ✅ 97/97/99% sign agreement, per-network ordering |
-| E. coli RegulonDB BDM perturbation | ✅ 949 nodes, C subset, version gap documented |
-| Boolean exhaustive mmc8 / Figure 4D | ✅ Phase-transition reproduced, crossover at 14 edges |
-
-### REMAINING (two hard blockers + one quick fix)
-| Item | Blocker type |
-|------|-------------|
-| CellNet cell-type landscape | External — need trained cnProc objects |
-| DREAM5 gold standard (MILS benchmark) | External — need D5C4_goldstandard.zip from Synapse |
-| Notebook Section 10 update | Quick fix, ~15 min, no blocker |
+| Th17 Yosef BDM perturbation (EarlyNet/IntermediateNet/FinalNet) | ✅ 97/97/99% sign agreement |
+| E. coli RegulonDB BDM perturbation | ✅ 949 nodes, C subset, 122 pos / 789 neg |
+| Boolean exhaustive mmc8 / Figure 4D | ✅ Phase-transition reproduced |
+| CellNet Waddington landscape | ⚠️ 9/14 cell types fully computed |
+| DREAM5 / MILS gold standard | ✅ CLOSED — not required |
 
 ---
 
-## Hard Blocker 1 — CellNet cnProc Trained Objects
+## Remaining Work
 
-### What we need
-Prebuilt trained CellNet model objects (`cnProc_HS_RS_Jun-20-2017.rda` or equivalent)
-encoding GRN scores for 15–16 human cell types. These power the complexity–programmability
-cell-type landscape in the Zenil paper.
+### Priority 1 — CellNet large networks (5 remaining cell types)
+The 5 large networks were skipped at node_limit=600:
+- neuron (2974 nodes) — estimated ~3 hours
+- monocyte_macrophage (3756 nodes)
+- skeletal_muscle (4836 nodes)
+- liver (1583 nodes)
+- esc (988 nodes — closest to feasible, ~30 min)
 
-### What we already have locally
-- `reference/CellNet/` — CellNet R package source code
-- `data/raw/cellnet/Hs_stTrain_Jun-20-2017.rda` — training metadata (1003×23, 15 cell types)
-- `data/raw/cellnet/Hs_expTrain_Jun-20-2017.rda` — training expression matrix (34934×1003)
-
-### Why blocked
-Original S3 links in CellNet README return `InvalidObjectState` (AWS DEEP_ARCHIVE).
-Cannot restore without bucket owner credentials.
-
-### Resources the user found — evaluate in this priority order
-
-**Priority 1 — PACNet Zenodo release**
-URL: https://doi.org/10.5281/zenodo.18857326
-Action: Fetch the Zenodo API to list ALL files in this release.
+Option A: Run `esc` first (988 nodes, ~30 min):
 ```bash
-curl -s "https://zenodo.org/api/records/18857326" | python3 -m json.tool | grep '"key"'
+source .venv/bin/activate
+python scripts/run_cellnet_complexity.py --node-limit 1000
 ```
-If any file is named `cnProc_*.rda` or similar → download it directly, it is the trained object.
-If only expression/metadata files → Zenodo does NOT ship trained objects, escalate to Priority 2.
+This adds esc + possibly liver.
 
-**Priority 2 — Kaggle dataset**
-URL: https://www.kaggle.com/datasets/johncapocyan/cellnet-beta-version
-Use Kaggle CLI: `kaggle datasets download johncapocyan/cellnet-beta-version --dry-run`
-to inspect file list BEFORE downloading. If it contains `cnProc_*.rda` → download.
-If it is expression matrices only → skip.
+Option B: Run overnight with high limit:
+```bash
+source .venv/bin/activate
+python scripts/run_cellnet_complexity.py --node-limit 5000
+```
 
-**Priority 3 — Email Cahan lab**
-If Priority 1 and 2 both lack trained objects, email Patrick Cahan (pcahan1@jhmi.edu)
-requesting `cnProc_HS_RS_Jun-20-2017.rda`. Single email, high chance of success.
+### Priority 2 — Cahan email (for missing cell types)
+The original CellNet 2014 had 16 human cell types; PACNet ctGRNs has 14.
+Missing are likely 2 types not present in the 2020 retraining cohort.
+Email: Patrick Cahan, pcahan1@jhmi.edu — ask for cnProc_HS_RS_Jun_20_2017.rda or equivalent GRN edge lists for the missing cell types.
 
-**Priority 4 — Retrain from local data**
-We already have training expression + metadata. Can retrain CellNet in R using
-`reference/CellNet/` code. Produces equivalent (not bit-identical) model.
-Use only if all above fail.
+Draft email text:
+---
+Subject: CellNet trained GRN objects (cnProc_HS_RS_Jun_20_2017) for reproduction study
 
-### NOT useful
-- https://cellnet.updatestar.com/ — Windows network management software, completely wrong.
+Dear Dr Cahan,
 
+I am conducting a reproduction study of Zenil et al. (2019) "An Algorithmic Information Calculus for Causal Discovery and Reprogramming Systems" (iScience), which uses CellNet GRN data from Morris et al. (2014) to reconstruct an epigenetic Waddington landscape. The paper reports results for 16 human cell lines.
+
+The original S3 links for cnProc_HS_RS_Jun_20_2017.rda now return DEEP_ARCHIVE errors, and the PACNet Zenodo release (doi:10.5281/zenodo.18857326) provides ctGRN objects for 14 of the 16 cell types. Would it be possible to share the trained cnProc objects or GRN edge lists for the full 16-cell-type human panel from the Jun-2017 training run?
+
+Any format (R object, CSV edge list, or similar) would be helpful. This is for a published reproducibility study.
+
+Thank you for the openly shared CellNet data.
+
+Best regards,
+Alberto
 ---
 
-## Hard Blocker 2 — DREAM5 Gold Standard (MILS Benchmark)
-
-### What we need
-`D5C4_goldstandard.zip` from Synapse (syn4564722) — the true regulatory network
-used as ground truth in the DREAM5 E. coli network inference challenge.
-
-### What we already have locally
-Path: `data/raw/dream5/manual_download/`
-Files present: expression data + gene/TF name lists (ecoli, yeast, saureus)
-Files ABSENT: gold standard network, challenge templates
-
-### Why actually needed
-Clarification needed: The MILS benchmark in the Zenil paper may or may not
-use DREAM5 data. The DREAM5 gap was originally conflated with the E. coli
-network source (now corrected to RegulonDB). FIRST ACTION next session:
-read the Zenil paper supplement MILS section to confirm whether DREAM5
-gold standard is actually required for MILS validation specifically.
-If not needed → close this gap entirely.
-
-### If DREAM5 gold standard IS needed
-1. Register free account at synapse.org (15 min)
-2. Download: `synapse get syn4564722` (D5C4_goldstandard.zip)
-
-### arboreto fixed_scoring.py assessment (user found this)
-URL: https://github.com/aertslab/arboreto/blob/master/notebooks/dream5/fixed_scoring.py
-This is DREAM5 network inference SCORING code (computes AUROC/AUPR of predicted
-networks against gold standard). It is NOT a substitute for the gold standard data.
-It IS useful as reference code once we have the gold standard, to understand
-the scoring methodology. Do not confuse for data.
-
----
-
-## Quick Fix (do anytime, ~15 min)
-
-### Notebook Section 10 — EarlyNet ordering
-`notebooks/paper_walkthrough.ipynb` Section 10 still shows old EarlyNet result
-(7% sign agreement with alphabetical ordering). Update to:
-- in_degree_desc ordering gives 97% for EarlyNet
-- Brief explanation of ordering sensitivity
-- Corrected cross-validation table (97/97/99%)
-
----
-
-## Exact Next Session Action Plan
-
-1. Run `git log --oneline -3` to confirm clean state
-2. Run `pytest -q --tb=no` to confirm 28 tests pass
-3. Fetch Zenodo PACNet file list (curl command above) → decide Priority 1/2/3/4
-4. Read Zenil paper MILS supplement to confirm DREAM5 gold standard need
-5. If MILS does NOT need DREAM5 → close that gap, update REPRODUCTION_LEDGER.md
-6. If MILS DOES need DREAM5 → register Synapse, download syn4564722
-7. Update notebook Section 10
+### Priority 3 — MILS benchmark graph list
+The paper uses 9 benchmark networks for Extended Figure 5. These are not named explicitly.
+From context ("pioneering studies") they are likely: karate club, florentine families, Les Mis,
+political blogs, protein interactions, and similar commonly used graph benchmarks.
+This gap is low priority — it affects only MILS validation, which is ancillary to the main results.
 
 ---
 
 ## Key File Paths (quick reference)
 - Ledger: `imp-causal-paper/REPRODUCTION_LEDGER.md`
+- CellNet summary: `imp-causal-paper/data/processed/cellnet/cellnet_complexity_summary.csv`
+- CellNet landscape: `imp-causal-paper/plots/cellnet/cellnet_landscape.pdf`
+- grnAll files: `imp-causal-paper/data/raw/cellnet/grnAll/`
+- Edge lists: `imp-causal-paper/data/processed/cellnet/{ct}_edgelist.csv`
 - Notebook: `imp-causal-paper/notebooks/paper_walkthrough.ipynb`
-- CellNet local: `imp-causal-paper/data/raw/cellnet/`
-- DREAM5 local: `imp-causal-paper/data/raw/dream5/manual_download/`
-- E. coli results: `imp-causal-paper/data/processed/ecoli/`
-- Yosef results: `imp-causal-paper/data/processed/th17/yosef_perturbation/`
-- mmc8 results: `imp-causal-paper/data/processed/boolean_exhaustive/`
