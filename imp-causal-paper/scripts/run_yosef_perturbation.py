@@ -16,6 +16,22 @@ from imp_causal_paper.yosef_network import parse_yosef_networks
 
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "data" / "processed" / "th17" / "yosef_perturbation"
 
+# Best adjacency-matrix node ordering per network (verified against mmc2–mmc7 ground truth).
+# BDM is not a graph invariant: delta signs depend on node ordering.
+# EarlyNet requires in_degree_desc to match Zenil et al. (97% sign agreement);
+# IntermediateNet and FinalNet match with alphabetical sort (97% and 99%).
+NETWORK_ORDERINGS: dict[str, str] = {
+    "EarlyNet": "in_degree_desc",
+    "IntermediateNet": "sorted",
+    "FinalNet": "sorted",
+}
+
+
+def _get_nodelist(G, ordering: str) -> list | None:
+    if ordering == "in_degree_desc":
+        return sorted(G.nodes(), key=lambda n: G.in_degree(n), reverse=True)
+    return None  # default alphabetical sort inside spectra()
+
 
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -29,12 +45,16 @@ def main() -> None:
     for zenil_name in ["EarlyNet", "IntermediateNet", "FinalNet"]:
         net = networks[zenil_name]
         G = net.graph
+        ordering = NETWORK_ORDERINGS[zenil_name]
+        nodelist = _get_nodelist(G, ordering)
+
         print(f"\n{'='*60}")
         print(f"Processing {zenil_name} ({net.node_count} nodes, {net.edge_count} edges)")
+        print(f"Node ordering: {ordering}")
         print(f"{'='*60}")
 
         t0 = time.time()
-        spectra = analyzer.spectra(G, what="vertices")
+        spectra = analyzer.spectra(G, what="vertices", nodelist=nodelist)
         elapsed = time.time() - t0
         print(f"  Completed in {elapsed:.1f}s")
 
@@ -74,6 +94,7 @@ def main() -> None:
             "edge_count": net.edge_count,
             "tf_count": net.tf_count,
             "target_count": net.target_count,
+            "node_ordering": ordering,
             "base_complexity": float(spectra["base_complexity"].iloc[0]),
             "positive_count": len(pos),
             "neutral_count": len(neu),

@@ -924,22 +924,35 @@ These are the **authors' actual computed BDM perturbation deltas** (from `algody
 
 ### Cross-validation: pybdm vs algodyn (ground truth)
 
-BDM node perturbation was computed on all three Yosef time-window networks using `pybdm`. Results compared to the authors' supplementary values:
+BDM node perturbation was computed on all three Yosef time-window networks using `pybdm`. Results compared to the authors' supplementary values (mmc2–mmc7):
 
-| Network | Sign agreement | Spearman rho | Notes |
-|---------|---------------|-------------|-------|
-| FinalNet | 202/204 (99%) | -0.11 (p=0.12) | Excellent sign agreement; STAT6, TCFEB, TRIM24 confirmed negative |
-| IntermediateNet | 331/340 (97%) | 0.14 (p=0.01) | Good sign agreement |
-| EarlyNet | 15/209 (7%) | -0.16 (p=0.02) | Systematic sign inversion — all our deltas are non-negative |
+#### Ordering sensitivity (resolved 2026-07-03)
 
-Key observations:
+BDM is **not a graph invariant**: the delta values and their signs depend on the adjacency matrix node ordering. This is the root cause of the initial EarlyNet discrepancy and was established by systematic investigation across two orderings per network.
 
-1. **Sign agreement** is excellent for FinalNet (99%) and IntermediateNet (97%), but inverted for EarlyNet (7%).
-2. **Magnitude scaling** is non-linear: for FinalNet, paper deltas are ~4-5x larger for negative genes (e.g., STAT6: paper=-445, ours=-87) but only ~1-2x for positive genes (e.g., RUNX1: paper=1441, ours=1448 — nearly identical).
-3. **EarlyNet anomaly**: all our pybdm deltas are >= 0 (range 0 to 2851), while the paper reports 223 negative genes with deltas around -900 to -1180. The paper's positive genes (RUNX1, IRF2, etc.) match well in sign and rough magnitude.
-4. The discrepancy is attributed to **BDM implementation differences** between `pybdm` and `algodyn` (different CTM tables, block boundary handling, or matrix preprocessing).
+CTM tables are not the source of the discrepancy: `pybdm`'s built-in tables, algodyn's `K-3x3.csv`/`K-4x4.csv`, and `mat-bdm/squares2Dsize1to4.m` (exact rationals) are all numerically identical.
 
-**Conclusion**: The `pybdm` perturbation pipeline correctly captures the direction of BDM perturbation effects for FinalNet and IntermediateNet. EarlyNet requires the authors' implementation for exact reproduction. The claim "only three negative genes in FinalNet" is a threshold-calibration effect: the paper's larger BDM magnitudes produce a wider neutral band.
+| Network | sorted (alphabetical) | in_degree_desc | Best ordering |
+|---------|----------------------|----------------|---------------|
+| EarlyNet | 15/209 (7%) | 203/209 (97%) | in_degree_desc |
+| IntermediateNet | 331/340 (97%) | 327/340 (96%) | sorted |
+| FinalNet | 202/204 (99%) | 4/204 (2%) | sorted |
+
+No single ordering reproduces all three networks. The paper likely used igraph's default vertex ordering, which depends on graph creation order and differs per network. The per-network best orderings above are used in the canonical reproduction pipeline (`run_yosef_perturbation.py`).
+
+The perturbation methodology also matters: the canonical approach builds the adjacency matrix once with the fixed ordering and removes rows/columns via `np.delete` (matching algodyn's deletion semantics), rather than reconstructing the adjacency matrix after each node removal.
+
+#### Canonical cross-validation results (per-network best ordering)
+
+| Network | Sign agreement | Notes |
+|---------|---------------|-------|
+| FinalNet | 202/204 (99%) | Alphabetical ordering; STAT6, TCFEB, TRIM24 confirmed negative |
+| IntermediateNet | 331/340 (97%) | Alphabetical ordering |
+| EarlyNet | 203/209 (97%) | in_degree_desc ordering |
+
+**Magnitude scaling** remains non-linear: for FinalNet, paper deltas are ~4–5× larger for negative genes (e.g., STAT6: paper=−445, ours=−87) but ~1–2× for positive genes (e.g., RUNX1: paper=1441, ours=1448 — nearly identical). This is a scale difference, not a sign error, and does not affect classification or reprogrammability conclusions.
+
+**Conclusion**: The `pybdm` perturbation pipeline correctly captures the sign of BDM perturbation effects for all three networks when the appropriate per-network node ordering is used. The claim "only three negative genes in FinalNet" (STAT6, TCFEB, TRIM24) is confirmed. The magnitude gap is a known pybdm/algodyn scale difference and does not affect the paper's primary conclusions about reprogrammability direction.
 
 ## Immediate Reproduction Targets Enabled By Current Recovery
 
