@@ -13,7 +13,14 @@ from .complexity import BDMComplexityEstimator
 from .marpa import MARPABuilder
 from .mils import MILSReducer
 from .perturbation import GraphPerturbationAnalyzer
-from .reprogrammability import absolute_reprogrammability, combined_reprogrammability, relative_reprogrammability
+from .reprogrammability import (
+    absolute_reprogrammability,
+    absolute_reprogrammability_trapezoid_proxy,
+    combined_reprogrammability,
+    combined_reprogrammability_trapezoid_proxy,
+    relative_reprogrammability,
+    relative_reprogrammability_algodyn_reference,
+)
 
 
 def ensure_dir(path: Path) -> None:
@@ -69,8 +76,17 @@ def run_graph_experiments(output_dir: Path, plot_dir: Path | None = None) -> dic
     payload = {
         "graph_name": "complete_graph_6",
         "relative_reprogrammability": relative_reprogrammability(signature),
+        "relative_reprogrammability_definition_status": "exact_to_paper_supplement",
+        "relative_reprogrammability_algodyn_reference_variant": relative_reprogrammability_algodyn_reference(signature),
+        "relative_reprogrammability_reference_discrepancy_status": "local_algodyn_reference_disagrees_with_paper",
         "absolute_reprogrammability": absolute_reprogrammability(signature),
+        "absolute_reprogrammability_definition_status": "unresolved_no_operational_definition_recovered",
+        "absolute_reprogrammability_trapezoid_proxy": absolute_reprogrammability_trapezoid_proxy(signature),
+        "absolute_reprogrammability_proxy_status": "noncanonical_proxy_for_audit_only",
         "combined_reprogrammability": combined_reprogrammability(signature),
+        "combined_reprogrammability_definition_status": "unresolved_inherits_absolute_reprogrammability_gap",
+        "combined_reprogrammability_trapezoid_proxy": combined_reprogrammability_trapezoid_proxy(signature),
+        "combined_reprogrammability_proxy_status": "noncanonical_proxy_for_audit_only",
         "mils_removed_edges": [list(edge) for edge in mils_result.removed_edges],
         "marpa_added_edges": [list(edge) for edge in marpa_result.added_edges],
     }

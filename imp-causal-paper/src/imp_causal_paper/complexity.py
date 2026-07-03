@@ -45,10 +45,14 @@ class BDMComplexityEstimator:
             raise ComplexityError(f"BDM wrapper only supports binary data, received symbols {unique!r}.")
 
 
-def adjacency_matrix(graph: nx.Graph | nx.DiGraph) -> np.ndarray:
+def adjacency_matrix(
+    graph: nx.Graph | nx.DiGraph,
+    nodelist: list | None = None,
+) -> np.ndarray:
     if graph.number_of_nodes() == 0:
         return np.zeros((1, 1), dtype=int)
-    nodelist = list(sorted(graph.nodes()))
+    if nodelist is None:
+        nodelist = list(sorted(graph.nodes()))
     matrix = nx.to_numpy_array(graph, nodelist=nodelist, dtype=int)
     return matrix.astype(int)
 

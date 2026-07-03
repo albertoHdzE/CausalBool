@@ -65,6 +65,11 @@ class GraphPerturbationAnalyzer:
             drop=True
         )
 
+    def inforank(self, graph: nx.Graph | nx.DiGraph, what: ElementType = "edges") -> pd.DataFrame:
+        signature = self.signature(graph, what=what).copy()
+        signature["inforank"] = signature["delta"].rank(method="min", ascending=False)
+        return signature
+
 
 def classify_delta(delta: float, threshold: float) -> str:
     if delta < -threshold:

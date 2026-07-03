@@ -55,6 +55,7 @@ The `th17-prepare` pipeline now also materializes branch-specific cohort artifac
 - `yosef_th17_network_evidence`
 - `yosef_th17_network_regulator_summary`
 - `yosef_th17_network_ranking_input`
+- `yosef_th17_network_prioritization`
 - `GPL8321_annotation`
 
 These cohort directories provide combined `sample_metadata.csv`, per-series `series_metadata.csv`, and `summary.json` files so downstream network reconstruction can select a biologically coherent arm by construction rather than by ad hoc filtering.
@@ -114,6 +115,24 @@ For the paper-highlighted `48 hr` candidates:
 - `TRIM24` best strict exact-`48.0 hr` probe: `1427258_at`
 
 These are ranking inputs, not final paper-equivalent rankings. They expose defensible candidate features while keeping the gap between preprocessing and exact reconstruction explicit.
+
+The Yosef prioritization artifact is the current paper-facing comparison layer above those inputs. It materializes:
+- `candidate_priority_table.csv`: the `15`-candidate table augmented with conservative multi-view consensus scores
+- `strict_exact_48h_consensus.csv`, `broad_late_time_consensus.csv`, and `three_axis_consensus.csv`: sorted candidate orderings for three evidence-combination regimes
+- `strict_exact_48h_consensus_pareto_front.csv`, `broad_late_time_consensus_pareto_front.csv`, and `three_axis_consensus_pareto_front.csv`: non-dominated candidate sets under each regime
+- `paper_finalnet_claim_audit.csv`: explicit ranks and frontier membership for the paper-highlighted `48 hr` candidates `STAT6`, `TCFEB`, and `TRIM24`
+
+This artifact is deliberately conservative:
+- it does not claim to reconstruct the paper's hidden `FinalNet` ranking procedure
+- it exposes where simple evidence aggregation recovers the paper-highlighted candidates and where it does not
+- on the current recovered inputs, only `STAT6` reaches the strict exact-`48.0 hr` top-5 consensus, while only `TCFEB` remains on all three Pareto fronts
+
+Definition-fidelity status is now tracked explicitly in `definition_fidelity.json`:
+- `info_spectra`, `info_signature`, and `inforank` are currently treated as exact to the recovered local `algodyn` reference
+- `relative_reprogrammability` is now implemented according to the recovered paper supplement: `MAD(sigma) / max(|sigma|)`
+- the recovered local `algodyn` code disagrees on this point by using `MAD(sigma) / max(sigma)`, and is retained only as an audit variant
+- upstream `algodyn` git history contains only stub placeholders for absolute and total reprogrammability, then removes them; no operational author-adjacent implementation of `S` has yet been recovered
+- `absolute_reprogrammability` and `combined_reprogrammability` are therefore exposed canonically as unresolved, while the former trapezoid-area and Euclidean formulas are preserved only as explicitly labeled proxy audit variants
 
 Each plot directory also contains a `plot_manifest.json` file stating the exact correspondence boundary with the original paper figures. This is intentional: the implementation reproduces the paper's core algorithms and generates faithful reduced analogues of key visualizations, but it does not claim that every saved plot is pixel-identical to the published panels.
 

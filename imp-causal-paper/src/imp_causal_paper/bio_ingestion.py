@@ -1395,6 +1395,142 @@ def prepare_yosef_th17_ranking_input(processed_dir: Path, output_dir: Path) -> d
     return summary
 
 
+def prepare_yosef_th17_prioritization(processed_dir: Path, output_dir: Path) -> dict:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    ranking_dir = processed_dir / "yosef_th17_network_ranking_input"
+    priority = pd.read_csv(ranking_dir / "candidate_ranking_input.csv")
+
+    view_specs = {
+        "strict_exact_48h_consensus": {
+            "rank_columns": [
+                "rnaseq_max_abs_log2_fc_across_targets_rank_desc",
+                "gpl8321_best_probe_max_abs_delta_exact_48h_rank_desc",
+            ],
+            "value_columns": [
+                "rnaseq_max_abs_log2_fc_across_targets",
+                "gpl8321_best_probe_max_abs_delta_exact_48h",
+            ],
+        },
+        "broad_late_time_consensus": {
+            "rank_columns": [
+                "rnaseq_max_abs_log2_fc_across_targets_rank_desc",
+                "gpl8321_best_probe_max_abs_delta_all_late_rank_desc",
+            ],
+            "value_columns": [
+                "rnaseq_max_abs_log2_fc_across_targets",
+                "gpl8321_best_probe_max_abs_delta_all_late",
+            ],
+        },
+        "three_axis_consensus": {
+            "rank_columns": [
+                "rnaseq_max_abs_log2_fc_across_targets_rank_desc",
+                "gpl8321_best_probe_max_abs_delta_all_late_rank_desc",
+                "gpl8321_best_probe_max_abs_delta_exact_48h_rank_desc",
+            ],
+            "value_columns": [
+                "rnaseq_max_abs_log2_fc_across_targets",
+                "gpl8321_best_probe_max_abs_delta_all_late",
+                "gpl8321_best_probe_max_abs_delta_exact_48h",
+            ],
+        },
+    }
+
+    view_outputs: dict[str, dict[str, object]] = {}
+    for view_name, spec in view_specs.items():
+        available_col = f"{view_name}_available"
+        rank_sum_col = f"{view_name}_rank_sum"
+        rank_col = f"{view_name}_rank"
+        pareto_col = f"{view_name}_pareto_front"
+        top5_col = f"{view_name}_top5"
+
+        priority[available_col] = priority[spec["rank_columns"]].notna().all(axis=1)
+        priority[rank_sum_col] = np.where(priority[available_col], priority[spec["rank_columns"]].sum(axis=1), np.nan)
+        priority[rank_col] = priority[rank_sum_col].rank(method="min", ascending=True)
+        priority[top5_col] = priority[rank_col].le(5).fillna(False)
+        priority[pareto_col] = False
+
+        available_rows = priority.loc[priority[available_col]].copy()
+        metric_frame = available_rows.loc[:, spec["value_columns"]].astype(float)
+        pareto_members: list[bool] = []
+        for idx, row in metric_frame.iterrows():
+            dominated = False
+            for other_idx, other in metric_frame.iterrows():
+                if idx == other_idx:
+                    continue
+                if bool((other >= row).all()) and bool((other > row).any()):
+                    dominated = True
+                    break
+            pareto_members.append(not dominated)
+        priority.loc[available_rows.index, pareto_col] = pareto_members
+
+        ranking_view = priority.loc[priority[available_col]].copy()
+        ranking_view = ranking_view.sort_values([rank_sum_col, "regulator"])
+        ranking_view.to_csv(output_dir / f"{view_name}.csv", index=False)
+
+        pareto_view = priority.loc[priority[pareto_col]].copy()
+        pareto_view = pareto_view.sort_values(spec["value_columns"], ascending=[False] * len(spec["value_columns"]))
+        pareto_view.to_csv(output_dir / f"{view_name}_pareto_front.csv", index=False)
+
+        view_outputs[view_name] = {
+            "available_col": available_col,
+            "rank_sum_col": rank_sum_col,
+            "rank_col": rank_col,
+            "pareto_col": pareto_col,
+            "top5_col": top5_col,
+            "top5_regulators": ranking_view.head(5)["regulator"].astype(str).tolist(),
+            "pareto_front_regulators": pareto_view["regulator"].astype(str).tolist(),
+        }
+
+    priority.to_csv(output_dir / "candidate_priority_table.csv", index=False)
+
+    paper_candidates = priority.loc[priority["is_paper_finalnet_negative_48h_candidate"]].copy()
+    paper_audit = paper_candidates.loc[
+        :,
+        [
+            "regulator",
+            "rnaseq_max_abs_log2_fc_across_targets",
+            "rnaseq_max_abs_log2_fc_across_targets_rank_desc",
+            "gpl8321_best_probe_max_abs_delta_all_late",
+            "gpl8321_best_probe_max_abs_delta_all_late_rank_desc",
+            "gpl8321_best_probe_max_abs_delta_exact_48h",
+            "gpl8321_best_probe_max_abs_delta_exact_48h_rank_desc",
+        ],
+    ].copy()
+    for view_name, metadata in view_outputs.items():
+        paper_audit[metadata["rank_sum_col"]] = paper_candidates[metadata["rank_sum_col"]].tolist()
+        paper_audit[metadata["rank_col"]] = paper_candidates[metadata["rank_col"]].tolist()
+        paper_audit[metadata["top5_col"]] = paper_candidates[metadata["top5_col"]].tolist()
+        paper_audit[metadata["pareto_col"]] = paper_candidates[metadata["pareto_col"]].tolist()
+    paper_audit.to_csv(output_dir / "paper_finalnet_claim_audit.csv", index=False)
+
+    summary = {
+        "study_arm": "yosef_th17_network",
+        "candidate_count": int(priority.shape[0]),
+        "paper_finalnet_negative_candidate_count": int(paper_candidates.shape[0]),
+        "paper_finalnet_negative_candidates": sorted(paper_candidates["regulator"].astype(str).tolist()),
+    }
+    for view_name, metadata in view_outputs.items():
+        view_rank_col = str(metadata["rank_col"])
+        view_pareto_col = str(metadata["pareto_col"])
+        view_top5_col = str(metadata["top5_col"])
+        available_col = str(metadata["available_col"])
+        summary[f"{view_name}_candidate_count"] = int(priority[available_col].sum())
+        summary[f"{view_name}_top5_regulators"] = metadata["top5_regulators"]
+        summary[f"{view_name}_pareto_front_regulators"] = metadata["pareto_front_regulators"]
+        summary[f"paper_finalnet_negative_candidates_{view_name}_rank"] = {
+            str(row["regulator"]): int(row[view_rank_col]) if pd.notna(row[view_rank_col]) else None
+            for row in paper_candidates.to_dict(orient="records")
+        }
+        summary[f"paper_finalnet_negative_candidates_{view_name}_top5"] = sorted(
+            paper_candidates.loc[paper_candidates[view_top5_col], "regulator"].astype(str).tolist()
+        )
+        summary[f"paper_finalnet_negative_candidates_{view_name}_pareto_front"] = sorted(
+            paper_candidates.loc[paper_candidates[view_pareto_col], "regulator"].astype(str).tolist()
+        )
+    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+    return summary
+
+
 def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None = None) -> dict[str, dict]:
     output_dir.mkdir(parents=True, exist_ok=True)
     payload: dict[str, dict] = {}
@@ -1450,6 +1586,10 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
     payload["yosef_th17_network_ranking_input"] = prepare_yosef_th17_ranking_input(
         output_dir,
         output_dir / "yosef_th17_network_ranking_input",
+    )
+    payload["yosef_th17_network_prioritization"] = prepare_yosef_th17_prioritization(
+        output_dir,
+        output_dir / "yosef_th17_network_prioritization",
     )
 
     combined = {

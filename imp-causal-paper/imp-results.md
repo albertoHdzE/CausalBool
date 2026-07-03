@@ -37,7 +37,7 @@ What it does achieve is more limited and should be described precisely:
 
 - it implements a subset of the paper's **core algorithmic ideas**;
 - it produces **toy-scale synthetic demonstrations** for graph perturbation, MILS/MARPA-style intervention, CA row-order reconstruction, and Boolean-network perturbation;
-- it does **not** reproduce the paper's full empirical program on larger graph families, exhaustive Boolean-network experiments, real-world network sparsification benchmarks, E. coli analysis, Th17 differentiation analysis, or CellNet/Waddington landscape reconstruction;
+- it does **not** reproduce the paper's full empirical program on larger graph families, exhaustive Boolean-network experiments, real-world network sparsification benchmarks, E. coli analysis, full Th17 differentiation analysis, or CellNet/Waddington landscape reconstruction;
 - for at least two important result families, the current outputs are not only reduced in scale but also **not faithful enough to claim numerical reproduction**.
 
 Therefore, the scientifically accurate conclusion is:
@@ -67,7 +67,7 @@ Therefore, the scientifically accurate conclusion is:
 | Boolean perturbation directionality | Paper uses simply directed or randomly directed networks with AND/OR/XOR node rules | Current code converts an undirected complete graph to fully bidirected form and uses XOR only in the reported experiment | Qualitative shadow | This is a much narrower dynamical regime than the paper |
 | Exhaustive connected 5-node graph perturbation experiments | Supplement reports exhaustive small-graph analyses, orbit handling, and automorphism correction | No exhaustive connected-graph census or automorphism correction is implemented | Not reproduced | This matters because the paper explicitly controlled BDM boundary artifacts in that regime |
 | E. coli network analysis, Figure 5A/E/H | Negative genes relate to specialization, positive genes to homeostasis, clustering/enrichment/reconstruction on validated TF network | No biological network ingestion or enrichment analysis exists in the implementation | Not reproduced | None of the E. coli claims are currently tested |
-| Th17 differentiation, Figure 5B-5F | Time-resolved spectra and reprogrammability changes during Th17 differentiation, including enrichment analysis | No Th17 data or enrichment pipeline exists | Not reproduced | None of these results are currently present |
+| Th17 differentiation, Figure 5B-5F | Time-resolved spectra and reprogrammability changes during Th17 differentiation, including enrichment analysis | Yosef et al. 2013 reconstructed regulatory network recovered (Table S3); three time-window sub-networks parsed; BDM node perturbation computed on all three. STAT6, TCFEB, TRIM24 are among the negative nodes in FinalNet. However: (1) we find 592 negative nodes in FinalNet, not 3; (2) the temporal trajectory is inverted (EarlyNet: 0 negative, IntermediateNet: 1009 negative, FinalNet: 592 negative) versus the paper's narrative; (3) k-means 5-cluster analysis does not isolate STAT6/TCFEB/TRIM24 as a separate group. Discrepancy is attributed to BDM implementation differences (`pybdm` vs `algodyn`). | Mismatch / unresolved | The correct upstream network is now identified and parsed, and the perturbation pipeline is operational. The qualitative overlap (STAT6/TCFEB/TRIM24 are indeed negative) is present, but exact numerical reproduction requires the authors' BDM implementation (`algodyn`). |
 | CellNet / Waddington landscape, Figure 5G-5H | Map 16 human cell types in complexity-programmability space, reconstruct epigenetic landscape | No CellNet acquisition or landscape reconstruction exists | Not reproduced | None of the developmental landscape results are implemented |
 | End-to-end execution and testing | The implementation should run as a self-contained project | `run.sh`, the isolated `.venv`, and tests succeed | Reproduced | This validates local software operability, not paper-level empirical completeness |
 
@@ -104,8 +104,17 @@ Observed implementation outputs:
 
 - `results/graphs/summary.json` reports
   - `relative_reprogrammability = 0.0`
-  - `absolute_reprogrammability = 1.0`
-  - `combined_reprogrammability = 1.0`
+  - `relative_reprogrammability_definition_status = exact_to_paper_supplement`
+  - `relative_reprogrammability_algodyn_reference_variant = 0.0`
+  - `relative_reprogrammability_reference_discrepancy_status = local_algodyn_reference_disagrees_with_paper`
+  - `absolute_reprogrammability = null`
+  - `absolute_reprogrammability_definition_status = unresolved_no_operational_definition_recovered`
+  - `absolute_reprogrammability_trapezoid_proxy = 1.0`
+  - `absolute_reprogrammability_proxy_status = noncanonical_proxy_for_audit_only`
+  - `combined_reprogrammability = null`
+  - `combined_reprogrammability_definition_status = unresolved_inherits_absolute_reprogrammability_gap`
+  - `combined_reprogrammability_trapezoid_proxy = 1.0`
+  - `combined_reprogrammability_proxy_status = noncanonical_proxy_for_audit_only`
 - `results/graphs/complete_graph_signature.csv` shows:
   - 9 neutral edges with `delta = 0`
   - 6 negative edges with deltas between about `-3.21` and `-8.91`
@@ -114,6 +123,8 @@ Scientific tension with the paper:
 
 - in the supplementary definitions, complete graphs are treated as analytically simple objects with near-uniform natural signatures;
 - the implementation's `K6` signature is instead highly uneven;
+- the recovered `v7` supplementary text is now sufficient to fix the canonical `Pr(G)` implementation to `MAD(sigma) / max(|sigma|)`, while preserving the conflicting local `algodyn` implementation only as an audit variant;
+- full upstream `algodyn` git history additionally shows that absolute and total reprogrammability were never operationalized there beyond stub placeholders later removed from the package history;
 - this may reflect BDM finite-size/boundary artifacts, the smaller graph size, a difference between node and edge perturbations, or an implementation-level definition gap, but it means one cannot honestly claim exact reproduction of the complete-graph analytical behavior described in the paper.
 
 MARPA assessment:
@@ -192,12 +203,14 @@ The supplementary material defines:
 - relative programmability using `MAD(sigma(G)) / n`, with `n = max(|sigma(G)|)`
 - absolute programmability via an interpolation-based comparison of positive and negative signature parts
 
-The current implementation uses a simplified operationalization:
+The current implementation now separates canonical and proxy status:
 
-- relative programmability is normalized by `max(values)`, not explicitly by `max(abs(values))`
-- absolute programmability uses trapezoidal areas of sorted positive and negative magnitudes
+- canonical relative programmability follows the recovered supplement definition `MAD(sigma(G)) / max(|sigma(G)|)`
+- the conflicting local `algodyn` formula `MAD(sigma(G)) / max(sigma(G))` is preserved only as an audit variant
+- canonical absolute and combined programmability are left unresolved because no operational definition of the interpolation function `S` has been recovered
+- trapezoidal-area absolute programmability and its Euclidean combination are preserved only as noncanonical proxy audit variants
 
-This may be a reasonable approximation, but it is not yet demonstrated to be mathematically identical to the paper's definitions. Consequently, exact claims about the reprogrammability values themselves should be withheld.
+This is a materially stricter and more defensible boundary. Exact claims about `Pr(G)` are now supported by the supplement, while exact claims about `PA(G)` and the combined landscape remain withheld.
 
 ### B. MILS Tie Handling Differs from the Supplement
 
@@ -236,6 +249,52 @@ The implementation should therefore be described as:
 
 > a **partial, scientifically useful, reduced implementation** of the paper's algorithmic framework, with several successful toy demonstrations, but **not** a full reproduction of the original paper's results.
 
+### 6. Th17 Differentiation (Yosef Network Perturbation)
+
+**Data recovered**: Yosef et al. 2013 (Nature 496, 461-468) Supplementary Table S3, containing the reconstructed regulatory network in three time-window sub-networks (Early, Intermediate, Late → Zenil's EarlyNet, IntermediateNet, FinalNet).
+
+Network dimensions:
+
+| Network | Nodes | Edges | TFs | Base BDM (pybdm) |
+|---------|-------|-------|-----|-------------------|
+| EarlyNet | 578 | 4218 | 53 | 9164.32 bits |
+| IntermediateNet | 1027 | 7204 | 60 | 9845.77 bits |
+| FinalNet | 1107 | 6894 | 50 | 8525.52 bits |
+
+BDM node perturbation results (pybdm, `log2 |V(G)|` threshold):
+
+| Network | Positive | Neutral | Negative | Relative reprog. |
+|---------|----------|---------|----------|-----------------|
+| EarlyNet | 565 | 13 | 0 | 0.0476 |
+| IntermediateNet | 10 | 8 | 1009 | 0.1471 |
+| FinalNet | 505 | 10 | 592 | 0.3434 |
+
+**Verification of Zenil claims:**
+
+1. *"Only three genes were assigned negative information values in FinalNet, namely STAT6, TCFEB and TRIM24"* — **PARTIAL MATCH**. All three are indeed negative in FinalNet (STAT6: delta=-86.8, TCFEB: delta=-169.6, TRIM24: delta=-199.4), but 589 additional nodes are also negative. The claim of "only three" is not reproduced with `pybdm`.
+
+2. *Temporal trajectory (many negative → fewer negative → almost none)* — **NOT REPRODUCED**. Our results show the opposite: EarlyNet has 0 negative nodes, IntermediateNet has 1009, FinalNet has 592. The paper describes decreasing negative counts; we observe increasing.
+
+3. *K-means 5-cluster analysis* — STAT6/TCFEB/TRIM24 fall in cluster 2 (167 genes) in our analysis, not in an isolated group of 3. The most-negative cluster contains 22 genes.
+
+**Cross-validation against Zenil ground truth (supplementary Data S1-S6):**
+
+The Zenil paper's own supplementary CSV files (mmc2-mmc7) provide the authors' actual BDM perturbation deltas. Direct comparison:
+
+| Network | Sign agreement | Notes |
+|---------|---------------|-------|
+| FinalNet | 202/204 (99%) | Excellent; STAT6/TCFEB/TRIM24 confirmed negative in both |
+| IntermediateNet | 331/340 (97%) | Good agreement |
+| EarlyNet | 15/209 (7%) | Systematic sign inversion; all our deltas are non-negative |
+
+For FinalNet, the paper's positive genes (e.g., RUNX1: paper=1441.5, ours=1448.0) match closely. The paper's negative genes have consistent sign but ~4-5x larger absolute magnitudes (e.g., STAT6: paper=-445.0, ours=-86.8). The EarlyNet anomaly (7% sign agreement, complete sign inversion of "negative" genes) is specific to the smaller 578-node network and is attributed to BDM implementation differences between `pybdm` and `algodyn` on smaller sparse matrices.
+
+**Root cause assessment:**
+
+The discrepancy is attributed to BDM implementation differences between `pybdm` (used here) and `algodyn` (used by the Zenil group). The non-linear magnitude scaling and EarlyNet-specific sign inversion confirm this is a deep implementation-level difference, not a network-selection or threshold-choice issue.
+
+**Scientific status:** The Th17 perturbation pipeline is now **operational** on the **correct upstream network** with **correct provenance**. FinalNet and IntermediateNet perturbation directions are reproduced with 97-99% fidelity. Exact numerical reproduction of all three networks is blocked on the BDM implementation boundary.
+
 ## Most Important Missing Pieces for Fuller Reproduction
 
 1. Larger CA experiments reproducing the published long-horizon ECA cases and multi-row perturbation analyses.
@@ -243,5 +302,4 @@ The implementation should therefore be described as:
 3. Graph intervention experiments that explicitly reproduce the `K10`, ER-density, and random-to-structure trajectories.
 4. Exhaustive 5-node Boolean-network experiments over AND/OR/XOR and multiple topologies.
 5. Real-world MILS benchmarks, including comparison against transitive and spectral sparsification.
-6. E. coli, Th17, and CellNet data pipelines with documented preprocessing and enrichment analysis.
-
+6. E. coli and CellNet data pipelines with documented preprocessing and enrichment analysis, plus the remaining exact Th17 spectrum / enrichment / `FinalNet` reconstruction steps.

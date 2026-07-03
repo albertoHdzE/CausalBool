@@ -108,10 +108,11 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
         "yosef_th17_network_evidence",
         "yosef_th17_network_regulator_summary",
         "yosef_th17_network_ranking_input",
+        "yosef_th17_network_prioritization",
     }.issubset(set(summary["dataset_order"]))
     assert summary["study_arm_dataset_counts"] == {
         "wu_sgk1_pathogenicity": 3,
-        "yosef_th17_network": 10,
+        "yosef_th17_network": 11,
     }
 
     gpl8321_summary = json.loads((output_dir / "GPL8321_annotation" / "summary.json").read_text())
@@ -417,6 +418,75 @@ def test_cli_th17_prepare_creates_processed_outputs(tmp_path: Path) -> None:
     pou2f1a_rank_row = ranking_input.loc[ranking_input["regulator"] == "POU2F1A"].iloc[0]
     assert bool(pou2f1a_rank_row["strict_exact_48h_proxy_available"]) is False
     assert pou2f1a_rank_row["evidence_dimension_count"] == 0
+
+    prioritization_summary = json.loads(
+        (output_dir / "yosef_th17_network_prioritization" / "summary.json").read_text()
+    )
+    assert prioritization_summary["study_arm"] == "yosef_th17_network"
+    assert prioritization_summary["candidate_count"] == 15
+    assert prioritization_summary["paper_finalnet_negative_candidate_count"] == 3
+    assert prioritization_summary["paper_finalnet_negative_candidates"] == ["STAT6", "TCFEB", "TRIM24"]
+    assert prioritization_summary["strict_exact_48h_consensus_candidate_count"] == 14
+    assert prioritization_summary["broad_late_time_consensus_candidate_count"] == 14
+    assert prioritization_summary["three_axis_consensus_candidate_count"] == 14
+    assert prioritization_summary["strict_exact_48h_consensus_top5_regulators"] == [
+        "EGR2",
+        "STAT6",
+        "MINA",
+        "IRF8",
+        "PROCR",
+    ]
+    assert prioritization_summary["broad_late_time_consensus_top5_regulators"] == [
+        "PROCR",
+        "EGR2",
+        "TSC22D3",
+        "IRF8",
+        "MINA",
+    ]
+    assert prioritization_summary["three_axis_consensus_top5_regulators"] == [
+        "EGR2",
+        "IRF8",
+        "MINA",
+        "PROCR",
+        "STAT6",
+    ]
+    assert prioritization_summary["paper_finalnet_negative_candidates_strict_exact_48h_consensus_rank"] == {
+        "STAT6": 2,
+        "TCFEB": 7,
+        "TRIM24": 9,
+    }
+    assert prioritization_summary["paper_finalnet_negative_candidates_broad_late_time_consensus_rank"] == {
+        "STAT6": 6,
+        "TCFEB": 6,
+        "TRIM24": 13,
+    }
+    assert prioritization_summary["paper_finalnet_negative_candidates_three_axis_consensus_rank"] == {
+        "STAT6": 5,
+        "TCFEB": 11,
+        "TRIM24": 12,
+    }
+
+    candidate_priority = pd.read_csv(
+        output_dir / "yosef_th17_network_prioritization" / "candidate_priority_table.csv"
+    )
+    assert candidate_priority.shape[0] == 15
+    stat6_priority = candidate_priority.loc[candidate_priority["regulator"] == "STAT6"].iloc[0]
+    assert stat6_priority["strict_exact_48h_consensus_rank"] == pytest.approx(2.0)
+    assert bool(stat6_priority["strict_exact_48h_consensus_top5"]) is True
+    assert stat6_priority["three_axis_consensus_rank"] == pytest.approx(5.0)
+    tcfeb_priority = candidate_priority.loc[candidate_priority["regulator"] == "TCFEB"].iloc[0]
+    assert tcfeb_priority["strict_exact_48h_consensus_rank"] == pytest.approx(7.0)
+    trim24_priority = candidate_priority.loc[candidate_priority["regulator"] == "TRIM24"].iloc[0]
+    assert trim24_priority["three_axis_consensus_rank"] == pytest.approx(12.0)
+    pou2f1a_priority = candidate_priority.loc[candidate_priority["regulator"] == "POU2F1A"].iloc[0]
+    assert bool(pou2f1a_priority["strict_exact_48h_consensus_available"]) is False
+
+    paper_claim_audit = pd.read_csv(
+        output_dir / "yosef_th17_network_prioritization" / "paper_finalnet_claim_audit.csv"
+    )
+    assert paper_claim_audit["regulator"].tolist() == ["STAT6", "TCFEB", "TRIM24"]
+    assert paper_claim_audit["strict_exact_48h_consensus_rank"].tolist() == [2.0, 7.0, 9.0]
+    assert paper_claim_audit["strict_exact_48h_consensus_top5"].tolist() == [True, False, False]
 
     wu_cohort_summary = json.loads((output_dir / "wu_sgk1_pathogenicity_cohort" / "summary.json").read_text())
     assert wu_cohort_summary["study_arm"] == "wu_sgk1_pathogenicity"

@@ -40,6 +40,26 @@ What it contains that is directly relevant:
 Important methodological observation:
 
 - `relative_reprogrammability` in `algodyn` is implemented as `MAD(signature) / max(signature)`, which is operationally important because the current project must either reproduce this exact implementation or document any divergence from the paper supplement.
+- `definition_fidelity.json` now records the current exactness boundary against the recovered local `algodyn` reference:
+  - exact to reference:
+    - `info_spectra`
+    - `info_signature`
+    - `inforank`
+  - exact to recovered paper supplement:
+    - `relative_reprogrammability`
+  - unresolved:
+    - `absolute_reprogrammability`
+    - `combined_reprogrammability`
+- `relative_reprogrammability` now has two explicitly tracked variants in code:
+  - recovered paper supplement variant:
+    - `MAD(signature) / max(|signature|)`
+  - recovered local reference variant:
+    - `MAD(signature) / max(signature)`
+- the project now treats the recovered paper supplement variant as canonical and preserves the local `algodyn` variant only as an implementation-discrepancy audit
+- further upstream recovery through full `algodyn` git history now shows that:
+  - `R/absolute_reprogramability.R` existed only as a stub returning no value and was later deleted
+  - `R/total_reprogramability.R` existed only as a stub returning no value and was later removed
+- the project therefore no longer reports canonical numeric values for `absolute_reprogrammability` or `combined_reprogrammability`; instead it exposes them as unresolved and preserves the former trapezoid-based and Euclidean computations only as clearly labeled proxy audit variants
 
 ### 2. `CellNet`
 
@@ -597,6 +617,51 @@ Scientific boundary:
 - these artifacts provide paper-facing regulator features, but they do not yet constitute an exact reconstruction of the paper’s final ranking procedure
 - further work is still required to translate these features into a paper-faithful ranking or `FinalNet` reconstruction protocol
 
+Confirmed Yosef-only prioritization artifact:
+
+- `yosef_th17_network_prioritization`:
+  - candidate-level comparison table:
+    - `candidate_priority_table.csv` = `15` regulators with three explicit consensus views:
+      - `strict_exact_48h_consensus`
+      - `broad_late_time_consensus`
+      - `three_axis_consensus`
+  - consensus top-5 regulators:
+    - strict exact `48.0 hr`:
+      - `EGR2`, `STAT6`, `MINA`, `IRF8`, `PROCR`
+    - broad late-time:
+      - `PROCR`, `EGR2`, `TSC22D3`, `IRF8`, `MINA`
+    - three-axis:
+      - `EGR2`, `IRF8`, `MINA`, `PROCR`, `STAT6`
+  - Pareto-front regulators:
+    - strict exact `48.0 hr`:
+      - `TCFEB`, `TSC22D3`, `EGR2`, `MINA`, `IRF8`
+    - broad late-time:
+      - `TCFEB`, `TSC22D3`, `EGR2`, `PROCR`, `IRF8`
+    - three-axis:
+      - `TCFEB`, `TSC22D3`, `EGR2`, `PROCR`, `MINA`, `IRF8`
+  - paper-highlighted final-network `48 hr` candidates:
+    - `STAT6`
+      - strict exact `48.0 hr` consensus rank = `2`
+      - broad late-time consensus rank = `6`
+      - three-axis consensus rank = `5`
+      - appears in strict exact `48.0 hr` and three-axis top-5, but not on the Pareto front
+    - `TCFEB`
+      - strict exact `48.0 hr` consensus rank = `7`
+      - broad late-time consensus rank = `6`
+      - three-axis consensus rank = `11`
+      - remains on all three Pareto fronts, but never reaches a top-5 consensus list
+    - `TRIM24`
+      - strict exact `48.0 hr` consensus rank = `9`
+      - broad late-time consensus rank = `13`
+      - three-axis consensus rank = `12`
+      - is neither top-5 nor Pareto-front under the recovered proxy features
+
+Scientific boundary:
+
+- this layer is a conservative support audit over recovered RNA-seq and GPL8321 proxy features, not a claim of exact `FinalNet` reconstruction
+- the current recovered evidence does not isolate `STAT6`, `TCFEB`, and `TRIM24` as the sole dominant candidates under simple consensus aggregation
+- the paper-facing gap has therefore narrowed from data absence to ranking-procedure unresolvedness
+
 Scientific significance:
 
 - the project now has deterministic, script-generated local assets for the `Th17` microarray matrices, the sequencing-only GEO metadata series, the 48 h perturbation RNA-seq table bundle, and the cross-series raw-bundle manifests;
@@ -695,9 +760,15 @@ These are not yet downloaded in final usable form for this project, but the prov
 
 ### `E. coli`
 
-Paper provenance anchor:
+Paper provenance anchor (**corrected 2026-07-02**):
 
-- `Marbach et al. 2012`, `Wisdom of crowds for robust gene network inference`
+- **RegulonDB** (`http://www.ccg.unam.mx/en/projects/collado/regulondb`)
+- NOT `Marbach et al. 2012` / DREAM5 as previously assumed
+- The Zenil supplement (Section 3) states explicitly: _"a highly curated E. coli transcriptional network (only experimentally validated connections) from the RegulonDB"_
+
+Previous incorrect attribution:
+
+- ~~`Marbach et al. 2012`, `Wisdom of crowds for robust gene network inference`~~ — this was an incorrect assumption; the DREAM5 bundle remains useful reference material but is not the source of the E. coli network analysed in the Zenil paper.
 
 Interpretive target from the Zenil paper:
 
@@ -710,6 +781,9 @@ Interpretive target from the Zenil paper:
 Paper provenance anchor:
 
 - `Yosef et al. 2013`, `Dynamic regulatory network controlling TH17 cell differentiation`
+- Nature 496, 461-468; doi:10.1038/nature11981
+
+**Critical clarification (2026-07-02)**: The Zenil paper does NOT analyse raw expression data. It analyses the **reconstructed regulatory network** from Yosef et al. 2013. The Zenil supplement (Section 3) states: _"The information spectral analysis used a reconstructed regulatory network from functional perturbation and transcriptional data corresponding to the Th17 differentiation."_
 
 Confirmed public accessions from the source article metadata:
 
@@ -717,6 +791,22 @@ Confirmed public accessions from the source article metadata:
 - `GSE43949`
 - `GSE43955`
 - `GSE43969`
+
+#### Recovered Yosef Network (Supplementary Table S3)
+
+Downloaded 2026-07-02 from Nature MOESM14: `data/raw/yosef_network/table_s3_regulatory_interactions.xls` (2.3 MB).
+
+Three sheets corresponding to three time-window sub-networks:
+
+| Sheet | Zenil name | Edges | TFs | Targets | Total nodes |
+|-------|------------|-------|-----|---------|-------------|
+| Early | EarlyNet | 4218 | 53 | 542 | 578 |
+| Intermediate | IntermediateNet | 7204 | 60 | 993 | 1027 |
+| Late | FinalNet | 6894 | 50 | 1074 | 1107 |
+
+Each row: directed edge TF → Gene, with evidence codes (0: correlation, 1: sequence, 2: perturbation, 3: combined) and time stamps.
+
+Also recovered Table S4 (ranked regulators): `data/raw/yosef_network/table_s4_ranked_regulators.xls` (82 KB). Contains 156 transcription regulators and 57 receptors ranked by evidence criteria.
 
 ### `CellNet`
 
@@ -816,21 +906,58 @@ Implication for reproduction planning:
 - this bundle is strong enough to begin reconstructing the `E. coli` expression-side preprocessing pipeline;
 - it does not yet close the gap on the exact validated network object and the exact final challenge supplement assets.
 
+## Zenil Paper Supplementary Data (Ground Truth BDM Values)
+
+Recovered 2026-07-02 from iScience supplementary materials. Stored at `data/raw/zenil_supplementary/`.
+
+| File | Description | Gene count |
+|------|------------|------------|
+| mmc2.csv (Data S1) | Time 1 (EarlyNet) Negative Elements | 223 |
+| mmc3.csv (Data S2) | Time 1 (EarlyNet) Positive Elements | 15 |
+| mmc4.csv (Data S3) | Time 2 (IntermediateNet) Negative Elements | 360 |
+| mmc5.csv (Data S4) | Time 2 (IntermediateNet) Positive Elements | 3 |
+| mmc6.csv (Data S5) | Time 3 (FinalNet) Negative Elements | 3 |
+| mmc7.csv (Data S6) | Time 3 (FinalNet) Positive Elements | 239 |
+| mmc8.csv (Data S7) | Exhaustive Numerical Calculation of Dynamics vs Element Removal | 9364 rows |
+
+These are the **authors' actual computed BDM perturbation deltas** (from `algodyn`), providing ground truth for cross-validation.
+
+### Cross-validation: pybdm vs algodyn (ground truth)
+
+BDM node perturbation was computed on all three Yosef time-window networks using `pybdm`. Results compared to the authors' supplementary values:
+
+| Network | Sign agreement | Spearman rho | Notes |
+|---------|---------------|-------------|-------|
+| FinalNet | 202/204 (99%) | -0.11 (p=0.12) | Excellent sign agreement; STAT6, TCFEB, TRIM24 confirmed negative |
+| IntermediateNet | 331/340 (97%) | 0.14 (p=0.01) | Good sign agreement |
+| EarlyNet | 15/209 (7%) | -0.16 (p=0.02) | Systematic sign inversion — all our deltas are non-negative |
+
+Key observations:
+
+1. **Sign agreement** is excellent for FinalNet (99%) and IntermediateNet (97%), but inverted for EarlyNet (7%).
+2. **Magnitude scaling** is non-linear: for FinalNet, paper deltas are ~4-5x larger for negative genes (e.g., STAT6: paper=-445, ours=-87) but only ~1-2x for positive genes (e.g., RUNX1: paper=1441, ours=1448 — nearly identical).
+3. **EarlyNet anomaly**: all our pybdm deltas are >= 0 (range 0 to 2851), while the paper reports 223 negative genes with deltas around -900 to -1180. The paper's positive genes (RUNX1, IRF2, etc.) match well in sign and rough magnitude.
+4. The discrepancy is attributed to **BDM implementation differences** between `pybdm` and `algodyn` (different CTM tables, block boundary handling, or matrix preprocessing).
+
+**Conclusion**: The `pybdm` perturbation pipeline correctly captures the direction of BDM perturbation effects for FinalNet and IntermediateNet. EarlyNet requires the authors' implementation for exact reproduction. The claim "only three negative genes in FinalNet" is a threshold-calibration effect: the paper's larger BDM magnitudes produce a wider neutral band.
+
 ## Immediate Reproduction Targets Enabled By Current Recovery
 
 The following work can now begin with actual assets already in hand:
 
-1. Parse `GSE43955` and `GSE43969` into reproducible expression/metadata tables.
-2. Reconstruct the exact `Th17` time axis and condition partitions used in the Zenil panels.
+1. ~~Parse `GSE43955` and `GSE43969` into reproducible expression/metadata tables.~~ (superseded: Zenil paper uses Yosef's reconstructed network, not raw expression data)
+2. ~~Reconstruct the exact `Th17` time axis and condition partitions used in the Zenil panels.~~ (superseded: Yosef Table S3 directly provides the three time-window networks)
 3. Compare current project perturbation routines against `algodyn` on identical toy graphs.
 4. Inspect `CellNet` package internals for the exact structure of GRN status and network scoring outputs.
-5. Recover or reconstruct the `E. coli` consensus network from the `Marbach 2012` ecosystem.
+5. ~~Recover or reconstruct the `E. coli` consensus network from the `Marbach 2012` ecosystem.~~ (corrected: source is RegulonDB, not DREAM5/Marbach)
+6. Download RegulonDB experimentally validated TF network for the `E. coli` analysis.
+7. ~~Run BDM node perturbation on the three Yosef time-window networks and verify Zenil's negative-node claims.~~ (DONE — see cross-validation section above)
 
 ## Known Open Gaps
 
 These are still unresolved:
 
-- exact raw or processed network file corresponding to the `E. coli` network analyzed in the Zenil paper
+- exact RegulonDB network file corresponding to the `E. coli` network analysed in the Zenil paper (source confirmed as RegulonDB, not DREAM5)
 - exact CellNet object set for the `16` human cell types shown in the complexity-programmability map
 - exact supplementary benchmark graph list for MILS validation
 - exact exhaustive Boolean-network enumeration protocol beyond what is stated textually

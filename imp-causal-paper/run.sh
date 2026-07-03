@@ -11,43 +11,80 @@ ensure_venv() {
   if [[ ! -x "$PYTHON_BIN" ]]; then
     echo "[run.sh] creating Python 3.11 virtual environment"
     PYENV_VERSION=3.11.10 pyenv exec python -m venv "$VENV_DIR"
+    echo "[run.sh] virtual environment created successfully"
+  else
+    echo "[run.sh] using existing virtual environment at $VENV_DIR"
   fi
 }
 
 ensure_deps() {
   ensure_venv
+  
+  echo "[run.sh] upgrading pip and setuptools"
   "$PIP_BIN" install --upgrade pip 'setuptools<81'
+  
+  echo "[run.sh] installing dependencies from requirements.txt"
   "$PIP_BIN" install -r "$ROOT_DIR/requirements.txt"
+  
+  echo "[run.sh] installing project in editable mode"
   "$PIP_BIN" install -e "$ROOT_DIR"
+  
+  echo "[run.sh] installing IPython kernel for Jupyter"
+  "$PYTHON_BIN" -m ipykernel install \
+    --prefix "$VENV_DIR" \
+    --name "imp-causal-paper" \
+    --display-name "Python (.venv imp-causal-paper)" \
+    >/dev/null
+  echo "[run.sh] dependencies and environment setup complete"
 }
 
 case "$STEP" in
   setup)
+    echo "[run.sh] starting setup step"
     ensure_deps
+    echo "[run.sh] setup step completed successfully"
     ;;
   test)
+    echo "[run.sh] starting test step"
     ensure_deps
+    echo "[run.sh] running pytest test suite"
     "$PYTHON_BIN" -m pytest
+    echo "[run.sh] test step completed successfully"
     ;;
   graphs)
+    echo "[run.sh] starting graphs experiment step"
     ensure_deps
+    echo "[run.sh] running graph perturbation, MILS, MARPA, and reprogrammability experiments"
     "$PYTHON_BIN" -m imp_causal_paper.cli graphs --output-dir "$ROOT_DIR/results/graphs" --plots-dir "$ROOT_DIR/plots/graphs"
+    echo "[run.sh] graphs experiment step completed successfully"
     ;;
   ca)
+    echo "[run.sh] starting cellular automaton experiment step"
     ensure_deps
+    echo "[run.sh] running cellular automaton reconstruction experiment"
     "$PYTHON_BIN" -m imp_causal_paper.cli ca --output-dir "$ROOT_DIR/results/ca" --plots-dir "$ROOT_DIR/plots/ca"
+    echo "[run.sh] cellular automaton experiment step completed successfully"
     ;;
   boolean)
+    echo "[run.sh] starting Boolean network experiment step"
     ensure_deps
+    echo "[run.sh] running Boolean-network perturbation experiments"
     "$PYTHON_BIN" -m imp_causal_paper.cli boolean --output-dir "$ROOT_DIR/results/boolean" --plots-dir "$ROOT_DIR/plots/boolean"
+    echo "[run.sh] Boolean network experiment step completed successfully"
     ;;
   th17)
+    echo "[run.sh] starting Th17 data processing step"
     ensure_deps
+    echo "[run.sh] parsing public Th17 array and perturbation RNA-seq assets"
     "$PYTHON_BIN" -m imp_causal_paper.cli th17-prepare --raw-dir "$ROOT_DIR/data/raw/th17_geo" --supp-dir "$ROOT_DIR/data/raw/th17_geo_supp" --output-dir "$ROOT_DIR/data/processed/th17"
+    echo "[run.sh] Th17 data processing step completed successfully"
     ;;
   all)
+    echo "[run.sh] starting full experiment suite"
     ensure_deps
+    echo "[run.sh] running all experiments"
     "$PYTHON_BIN" -m imp_causal_paper.cli all --output-dir "$ROOT_DIR/results" --plots-dir "$ROOT_DIR/plots"
+    echo "[run.sh] all experiments completed successfully"
     ;;
   help|--help|-h)
     cat <<'EOF'
