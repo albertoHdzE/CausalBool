@@ -79,6 +79,21 @@ case "$STEP" in
     "$PYTHON_BIN" -m imp_causal_paper.cli th17-prepare --raw-dir "$ROOT_DIR/data/raw/th17_geo" --supp-dir "$ROOT_DIR/data/raw/th17_geo_supp" --output-dir "$ROOT_DIR/data/processed/th17"
     echo "[run.sh] Th17 data processing step completed successfully"
     ;;
+  yosef-perturb)
+    echo "[run.sh] starting Yosef Th17 BDM perturbation step"
+    ensure_deps
+    echo "[run.sh] running BDM node perturbation on EarlyNet/IntermediateNet/FinalNet with per-network ordering"
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/run_yosef_perturbation.py"
+    echo "[run.sh] Yosef Th17 BDM perturbation step completed successfully"
+    ;;
+  ecoli)
+    echo "[run.sh] starting E. coli BDM perturbation step"
+    ensure_deps
+    echo "[run.sh] parsing RegulonDB network and running BDM node perturbation"
+    CONFIDENCE="${2:-C}"
+    "$PYTHON_BIN" "$ROOT_DIR/scripts/run_ecoli_perturbation.py" --confidence "$CONFIDENCE"
+    echo "[run.sh] E. coli BDM perturbation step completed successfully"
+    ;;
   all)
     echo "[run.sh] starting full experiment suite"
     ensure_deps
@@ -96,8 +111,10 @@ Steps:
   graphs   Run graph perturbation, MILS, MARPA, and reprogrammability experiments
   ca       Run the cellular automaton reconstruction experiment
   boolean  Run Boolean-network perturbation experiments
-  th17     Parse public Th17 array and perturbation RNA-seq assets into processed tables
-  all      Run every experiment and write outputs under results/
+  th17           Parse public Th17 array and perturbation RNA-seq assets into processed tables
+  yosef-perturb  Run BDM node perturbation on EarlyNet/IntermediateNet/FinalNet (per-network ordering)
+  ecoli [C|CS|all]  Run BDM node perturbation on RegulonDB E. coli TF->gene network
+  all            Run every experiment and write outputs under results/
 EOF
     ;;
   *)

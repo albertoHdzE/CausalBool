@@ -770,6 +770,56 @@ Previous incorrect attribution:
 
 - ~~`Marbach et al. 2012`, `Wisdom of crowds for robust gene network inference`~~ — this was an incorrect assumption; the DREAM5 bundle remains useful reference material but is not the source of the E. coli network analysed in the Zenil paper.
 
+#### Downloaded RegulonDB asset (2026-07-03)
+
+Local path:
+
+- `data/raw/regulondb/`
+
+Files:
+
+- `NetworkRegulatorGene.txt` — TF→gene regulatory network, all confidence levels
+- `NetworkRegulatorConfGene.txt` — TF→gene interactions with conformation information
+- `TF-RISet.txt` — Regulatory Interaction Set (TF-specific)
+- `network_summary.json` — per-subset statistics
+
+Source:
+
+- RegulonDB version 14.5, downloaded via GraphQL API at `https://regulondb.ccg.unam.mx/graphql`
+- Date: 2026-07-03
+
+Version provenance gap:
+
+- The Zenil paper used RegulonDB ~9.x (circa 2018). Static exports of older versions are not publicly archived. Version 14.5 is used here; the E. coli network has grown since 2018, so sizes will differ.
+
+Confidence level distribution in `NetworkRegulatorGene.txt`:
+
+| Confidence | Meaning | Edge count |
+|------------|---------|------------|
+| C | Confirmed — strongest experimental evidence | 1148 |
+| S | Strong — strong experimental evidence | 3138 |
+| W | Weak | 2997 |
+| ? | Unknown | 68 |
+
+Network size by confidence filter:
+
+| Filter | Edges | Total nodes |
+|--------|-------|-------------|
+| C (Confirmed only) | 1148 | 949 |
+| CS (Confirmed + Strong) | 4286 | 2440 |
+| All | 7351 | 3112 |
+
+Canonical confidence choice:
+
+- `C` (Confirmed only) is the best match for "only experimentally validated connections" and is used in the canonical reproduction pipeline.
+- BDM perturbation run on `C` subset: `data/processed/ecoli/` (see below).
+
+Scripts:
+
+- `scripts/parse_ecoli_network.py` — parse `NetworkRegulatorGene.txt` into NetworkX graph at any confidence level
+- `scripts/run_ecoli_perturbation.py` — run BDM node perturbation on the parsed network
+- Entry point: `./run.sh ecoli [C|CS|all]`
+
 Interpretive target from the Zenil paper:
 
 - use an experimentally validated `E. coli` TF network
@@ -963,14 +1013,14 @@ The following work can now begin with actual assets already in hand:
 3. Compare current project perturbation routines against `algodyn` on identical toy graphs.
 4. Inspect `CellNet` package internals for the exact structure of GRN status and network scoring outputs.
 5. ~~Recover or reconstruct the `E. coli` consensus network from the `Marbach 2012` ecosystem.~~ (corrected: source is RegulonDB, not DREAM5/Marbach)
-6. Download RegulonDB experimentally validated TF network for the `E. coli` analysis.
+6. ~~Download RegulonDB experimentally validated TF network for the `E. coli` analysis.~~ (DONE — RegulonDB 14.5 downloaded 2026-07-03; see E. coli section above)
 7. ~~Run BDM node perturbation on the three Yosef time-window networks and verify Zenil's negative-node claims.~~ (DONE — see cross-validation section above)
 
 ## Known Open Gaps
 
 These are still unresolved:
 
-- exact RegulonDB network file corresponding to the `E. coli` network analysed in the Zenil paper (source confirmed as RegulonDB, not DREAM5)
+- exact RegulonDB version used in the Zenil paper (~9.x, 2018 — static exports not archived; RegulonDB 14.5 used as best available proxy)
 - exact CellNet object set for the `16` human cell types shown in the complexity-programmability map
 - exact supplementary benchmark graph list for MILS validation
 - exact exhaustive Boolean-network enumeration protocol beyond what is stated textually
