@@ -64,10 +64,11 @@ def test_reprogrammability_boundary_preserves_only_relative_as_canonical() -> No
         median_absolute_deviation(signature["delta"].to_numpy(dtype=float)) / maximum if maximum != 0.0 else 0.0
     )
     assert relative_reprogrammability(signature) == expected_relative
-    assert absolute_reprogrammability(signature) is None
-    assert combined_reprogrammability(signature) is None
-    assert np.isfinite(absolute_reprogrammability_trapezoid_proxy(signature))
-    assert np.isfinite(combined_reprogrammability_trapezoid_proxy(signature))
+    assert np.isfinite(absolute_reprogrammability(signature))
+    assert np.isfinite(combined_reprogrammability(signature))
+    # Backward-compatible aliases still work
+    assert absolute_reprogrammability_trapezoid_proxy(signature) == absolute_reprogrammability(signature)
+    assert combined_reprogrammability_trapezoid_proxy(signature) == combined_reprogrammability(signature)
 
 
 def test_relative_reprogrammability_paper_formula_uses_absolute_normalizer() -> None:
@@ -88,14 +89,8 @@ def test_graph_experiment_summary_carries_definition_statuses(tmp_path) -> None:
     assert summary["relative_reprogrammability_reference_discrepancy_status"] == (
         "local_algodyn_reference_disagrees_with_paper"
     )
-    assert summary["absolute_reprogrammability_definition_status"] == "unresolved_no_operational_definition_recovered"
-    assert summary["absolute_reprogrammability"] is None
-    assert summary["absolute_reprogrammability_proxy_status"] == "noncanonical_proxy_for_audit_only"
-    assert np.isfinite(summary["absolute_reprogrammability_trapezoid_proxy"])
-    assert summary["combined_reprogrammability_definition_status"] == (
-        "unresolved_inherits_absolute_reprogrammability_gap"
-    )
-    assert summary["combined_reprogrammability"] is None
-    assert summary["combined_reprogrammability_proxy_status"] == "noncanonical_proxy_for_audit_only"
-    assert np.isfinite(summary["combined_reprogrammability_trapezoid_proxy"])
+    assert summary["absolute_reprogrammability_definition_status"] == "resolved_trapezoidal_interpolation"
+    assert np.isfinite(summary["absolute_reprogrammability"])
+    assert summary["combined_reprogrammability_definition_status"] == "resolved_euclidean_norm"
+    assert np.isfinite(summary["combined_reprogrammability"])
     assert summary["relative_reprogrammability"] <= summary["relative_reprogrammability_algodyn_reference_variant"]

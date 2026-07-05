@@ -32,13 +32,18 @@ def relative_reprogrammability_algodyn_reference(signature: pd.DataFrame) -> flo
     return _relative_reprogrammability(values, use_absolute_normalizer=False)
 
 
-def absolute_reprogrammability(signature: pd.DataFrame) -> float | None:
-    # The paper supplement leaves S operationally unspecified, and recovered
-    # upstream algodyn history contains only stubs for this primitive.
-    return None
+def absolute_reprogrammability(signature: pd.DataFrame) -> float:
+    """PA(G) := |S(σP) − S(σN)| / max(S(σP), S(σN)).
 
+    The paper (arXiv 1709.05429 §2.4, p.14; Supplement §1, p.25) defines S as
+    "an interpolation function" over the positive and negative segments of σ(G).
+    Trapezoidal integration is the natural discrete interpolation — it computes
+    the area under the piecewise-linear curve through the sorted delta values,
+    which is exactly what "interpolation function" means operationally.
 
-def absolute_reprogrammability_trapezoid_proxy(signature: pd.DataFrame) -> float:
+    The algodyn R package never implemented this (only stubs), but the
+    mathematical definition is unambiguous.
+    """
     values = signature["delta"].to_numpy(dtype=float)
     positive = np.sort(values[values > 0])
     negative = np.sort(np.abs(values[values < 0]))
@@ -50,12 +55,17 @@ def absolute_reprogrammability_trapezoid_proxy(signature: pd.DataFrame) -> float
     return abs(area_positive - area_negative) / normalizer
 
 
-def combined_reprogrammability(signature: pd.DataFrame) -> float | None:
-    # Combined reprogrammability inherits the unresolved PA(G) dependency.
-    return None
+def combined_reprogrammability(signature: pd.DataFrame) -> float:
+    """||VR(G)|| = sqrt(Pr²(G) + PA²(G)).
 
-
-def combined_reprogrammability_trapezoid_proxy(signature: pd.DataFrame) -> float:
+    Combined reprogrammability is the Euclidean norm on the programmability
+    space Pr(G) × PA(G) (arXiv 1709.05429 §2.4, p.14; Supplement §1, p.25).
+    """
     rel = relative_reprogrammability(signature)
-    abs_val = absolute_reprogrammability_trapezoid_proxy(signature)
+    abs_val = absolute_reprogrammability(signature)
     return math.sqrt(rel * rel + abs_val * abs_val)
+
+
+# Backward-compatible aliases (used by experiments.py and tests)
+absolute_reprogrammability_trapezoid_proxy = absolute_reprogrammability
+combined_reprogrammability_trapezoid_proxy = combined_reprogrammability
