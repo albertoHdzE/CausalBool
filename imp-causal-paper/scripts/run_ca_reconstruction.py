@@ -76,7 +76,7 @@ def plot_panel(panel, rules, estimator):
         axes[row, col_base].set_ylabel("original", fontsize=8)
         axes[row, col_base].set_xticks([]); axes[row, col_base].set_yticks([])
 
-        label = "reconstructed" if panel == "A" else "time order inferred"
+        label = "reconstructed" if panel == "A" else "δBDM ranking"
         axes[row, col_base + 1].imshow(result.ordered_rows, cmap=BW, interpolation="nearest", aspect="auto")
         axes[row, col_base + 1].set_title(f"\u03c1 = {rho:.3f}  p = {p:.2g}", fontsize=8)
         axes[row, col_base + 1].set_ylabel(label, fontsize=8)
@@ -86,7 +86,7 @@ def plot_panel(panel, rules, estimator):
 
     title = ("Fig 3A: Min-BDM Reconstruction (9 rows, brute-force 9!)"
              if panel == "A" else
-             "Fig 3B: Rule Inference + Forward Chaining (21 rows)")
+             "Fig 3B: Row-Perturbation Ranking (21 rows)")
     fig.suptitle(title, fontsize=14, y=1.01)
     plt.tight_layout()
     for ext in ("pdf", "png"):
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     print("=== Panel A: Brute-force min-BDM (9 rows) ===")
     plot_panel("A", RULES, estimator)
 
-    print("\n=== Panel B: Rule inference + chaining (21 rows) ===")
+    print("\n=== Panel B: Row-perturbation ranking (21 rows) ===")
     plot_panel("B", RULES, estimator)
 
     print("\nDone.")

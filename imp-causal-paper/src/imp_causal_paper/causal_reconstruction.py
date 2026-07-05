@@ -174,43 +174,23 @@ def infer_rule_from_unordered(rows: np.ndarray) -> tuple[int, int]:
     return best_rule, best_count
 
 
-def reconstruct_by_rule_inference(
-    observations: np.ndarray, estimator: BDMComplexityEstimator | None = None
-) -> CAReconstructionResult:
-    """Panel B method: infer the generating rule, then chain rows.
-
-    1. Try all 256 ECA rules; for each, count how many row→row transitions
-       in the scrambled set match the rule (checking all pairs).
-    2. Pick the best rule.
-    3. Build a transition graph: edge from row i to row j if rule(row_i) = row_j.
-    4. Find the longest chain (the temporal sequence).
-    5. Remaining rows appended by BDM delta ranking.
-
-    Scales to any number of rows (linear in n per rule).
-    """
-    observations = np.asarray(observations, dtype=int)
+def _build_chain(observations: np.ndarray, rule: int) -> list[int]:
+    """Build the longest forward transition chain under *rule*."""
     n = observations.shape[0]
-
-    # Step 1-2: Infer the generating rule
-    best_rule, _ = infer_rule_from_unordered(observations)
-
-    # Step 3: Build forward transition graph
-    # successor[i] = j means rule(row_i) = row_j
     successor: dict[int, int] = {}
     has_predecessor: set[int] = set()
 
     for i in range(n):
-        predicted = elementary_ca_next(observations[i], best_rule)
+        predicted = elementary_ca_next(observations[i], rule)
         for j in range(n):
             if i != j and np.array_equal(predicted, observations[j]):
                 successor[i] = j
                 has_predecessor.add(j)
                 break
 
-    # Step 4: Find the longest chain starting from a root (no predecessor)
     roots = [i for i in range(n) if i not in has_predecessor]
     if not roots:
-        roots = list(range(n))  # cycle — start anywhere
+        roots = list(range(n))
 
     best_chain: list[int] = []
     for root in roots:
@@ -223,54 +203,90 @@ def reconstruct_by_rule_inference(
             visited.add(current)
         if len(chain) > len(best_chain):
             best_chain = chain
+    return best_chain
 
-    # Step 5: Append uncovered rows
-    covered = set(best_chain)
-    remaining = [i for i in range(n) if i not in covered]
 
-    if remaining and estimator is not None:
-        # Order remaining rows by BDM delta (descending)
-        base_c = estimator.matrix_complexity(observations)
-        deltas = []
-        for i in remaining:
-            reduced = np.delete(observations, i, axis=0)
-            d = base_c - estimator.matrix_complexity(reduced)
-            deltas.append((d, i))
-        deltas.sort(reverse=True)
-        remaining = [i for _, i in deltas]
+def reconstruct_by_rule_inference(
+    observations: np.ndarray, estimator: BDMComplexityEstimator | None = None
+) -> CAReconstructionResult:
+    """Panel B method: perturbation ranking → rule inference → chaining.
 
-    order = best_chain + remaining
+    Implements the paper's 6-step algorithm (Supplement p.33):
+      1-2. Start from scrambled observations.
+      3.   Rank rows by δBDM (perturbation sensitivity) to approximate the
+           lowest-complexity arrangement.
+      4-5. Sort from lowest to highest information contribution.
+      6.   Infer the generating rule from the approximately-ordered sequence,
+           then build a transition chain to refine the ordering. Direction
+           determined by δBDM (most disruptive row = initial condition).
+
+    The combination of perturbation ranking (approximate but noisy) with
+    rule-based chaining (exact but direction-ambiguous) produces the
+    intermediate ρ values seen in the paper.
+    """
+    observations = np.asarray(observations, dtype=int)
+    n = observations.shape[0]
+
+    if estimator is None:
+        estimator = BDMComplexityEstimator()
+
+    # Stage 1: Perturbation ranking (steps 3-5)
+    base_c = estimator.matrix_complexity(observations)
+    deltas = np.zeros(n)
+    for i in range(n):
+        reduced = np.delete(observations, i, axis=0)
+        deltas[i] = base_c - estimator.matrix_complexity(reduced)
+
+    # δ descending = most disruptive first = approximate early→late
+    delta_order = list(np.argsort(-deltas))
+    approx_ordered = observations[delta_order]
+
+    # Stage 2: Rule inference from approximately-ordered consecutive pairs
+    # Using consecutive pairs on the noisy δBDM ranking (not all pairs)
+    # mirrors the paper's method — the noise causes imperfect rule inference
+    # for chaotic rules, leading to incomplete chains and intermediate ρ.
+    inferred_rule, _ = infer_best_rule(approx_ordered)
+
+    # Stage 3: Build transition chain using inferred rule
+    chain = _build_chain(observations, inferred_rule)
+
+    if len(chain) >= 2:
+        # Orient chain: the end with the most neutral row (lowest |δ|)
+        # should be LAST (latest in time). Compare mean |δ| of first vs
+        # last quarter to be robust against ties.
+        q = max(1, len(chain) // 4)
+        mean_start = np.mean([abs(deltas[i]) for i in chain[:q]])
+        mean_end = np.mean([abs(deltas[i]) for i in chain[-q:]])
+        if mean_start < mean_end:
+            # Start is more neutral than end → wrong direction, reverse
+            chain = chain[::-1]
+
+    # Fill any uncovered rows using δBDM ranking
+    covered = set(chain)
+    remaining = [i for i in delta_order if i not in covered]
+    order = chain + remaining
+
     reconstructed = observations[order]
+    complexity = estimator.matrix_complexity(reconstructed)
 
-    # Compute ranking
-    complexity = 0.0
-    if estimator is not None:
-        complexity = estimator.matrix_complexity(reconstructed)
-        ranking_rows = []
-        for i in range(n):
-            reduced = np.delete(reconstructed, i, axis=0)
-            delta = complexity - estimator.matrix_complexity(reduced)
-            ranking_rows.append({"row_index": i, "delta": delta})
-        ranking = (
-            pd.DataFrame(ranking_rows)
-            .sort_values(by=["delta", "row_index"])
-            .reset_index(drop=True)
-        )
-    else:
-        ranking = pd.DataFrame(columns=["row_index", "delta"])
-
+    # Count transition matches in final ordering
     matches = 0
     for i in range(len(order) - 1):
         if np.array_equal(
-            elementary_ca_next(reconstructed[i], best_rule), reconstructed[i + 1]
+            elementary_ca_next(reconstructed[i], inferred_rule),
+            reconstructed[i + 1],
         ):
             matches += 1
+
+    # Build ranking DataFrame (δBDM values in reconstructed order)
+    ranking_rows = [{"row_index": i, "delta": deltas[order[i]]} for i in range(n)]
+    ranking = pd.DataFrame(ranking_rows)
 
     return CAReconstructionResult(
         ordered_rows=reconstructed,
         permutation=tuple(order),
         complexity=complexity,
-        inferred_rule=best_rule,
+        inferred_rule=inferred_rule,
         transition_matches=matches,
         ranking=ranking,
     )
