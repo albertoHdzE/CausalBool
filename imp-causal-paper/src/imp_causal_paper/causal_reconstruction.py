@@ -251,14 +251,12 @@ def reconstruct_by_rule_inference(
     chain = _build_chain(observations, inferred_rule)
 
     if len(chain) >= 2:
-        # Orient chain: the end with the most neutral row (lowest |δ|)
-        # should be LAST (latest in time). Compare mean |δ| of first vs
-        # last quarter to be robust against ties.
-        q = max(1, len(chain) // 4)
-        mean_start = np.mean([abs(deltas[i]) for i in chain[:q]])
-        mean_end = np.mean([abs(deltas[i]) for i in chain[-q:]])
-        if mean_start < mean_end:
-            # Start is more neutral than end → wrong direction, reverse
+        # Orient chain by row density: the initial condition (single seed)
+        # has the fewest black cells. The chain endpoint with lower row sum
+        # is the start (earliest in time).
+        sum_first = int(np.sum(observations[chain[0]]))
+        sum_last = int(np.sum(observations[chain[-1]]))
+        if sum_first > sum_last:
             chain = chain[::-1]
 
     # Fill any uncovered rows using δBDM ranking
