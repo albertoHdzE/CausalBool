@@ -174,6 +174,28 @@ def test_regulatory_special_cases_named_classically():
     assert can_nor.gate == "NOR"
 
 
+def test_regulatory_dnf_identification_and_reproduction():
+    from causalbool import truth_table
+    # (a AND b) OR (a AND NOT c): a genuine two-clause regulatory function.
+    def f(a, b, c):
+        return int((a and b) or (a and not c))
+    reduced = [f((y >> 0) & 1, (y >> 1) & 1, (y >> 2) & 1) for y in range(8)]
+    matches, canonical = identify_gate(reduced)
+    assert canonical.gate == "REGULATORY_DNF"
+    assert truth_table("REGULATORY_DNF", 3, canonical.params) == reduced
+    # every clause is a real compression: fewer clauses than on-set minterms
+    assert len(canonical.params["clauses"]) < sum(reduced)
+
+
+def test_regulatory_dnf_does_not_override_named_gates():
+    from causalbool import truth_table
+    # XOR has many minterms but a canonical name; DNF must not win.
+    _, can = identify_gate(truth_table("XOR", 3))
+    assert can.gate == "XOR"
+    _, can2 = identify_gate(truth_table("MAJORITY", 3))
+    assert can2.gate == "MAJORITY"
+
+
 def test_biological_networks_exact_recovery():
     import os
     from bnet import parse_bnet

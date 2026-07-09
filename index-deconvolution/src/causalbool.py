@@ -101,6 +101,26 @@ def apply_gate(gate: str, inputs: list[int], params: dict | None = None) -> int:
             if b != want:
                 return 0
         return 1
+    if gate == "REGULATORY_DNF":
+        # Disjunction of regulatory clauses.  The node fires iff any clause is
+        # satisfied; a clause requires its activators to be 1 and its inhibitors
+        # to be 0 (variables in neither are don't-care).  The one-set is the
+        # union of the clauses' pivot-shifted cosets.  Represents any regulatory
+        # function as a compact activation logic.
+        for clause in p["clauses"]:
+            ok = True
+            for j in clause["activators"]:
+                if inputs[j] != 1:
+                    ok = False
+                    break
+            if ok:
+                for j in clause["inhibitors"]:
+                    if inputs[j] != 0:
+                        ok = False
+                        break
+            if ok:
+                return 1
+        return 0
     if gate == "CANALISING":
         # myCanalising: if inputs[ci] == v then out else OR[inputs]
         ci = p.get("canalisingIndex", 0)

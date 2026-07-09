@@ -36,6 +36,11 @@ ApplyGateExt[gate_, inputs_, params_] := Which[
   gate === "REGULATORY",
     If[AllTrue[Range[0, Length[inputs] - 1],
        inputs[[# + 1]] == If[MemberQ[params["activators"], #], 1, 0] &], 1, 0],
+  gate === "REGULATORY_DNF",
+    If[AnyTrue[params["clauses"],
+       Function[cl,
+        AllTrue[cl["activators"], inputs[[# + 1]] == 1 &] &&
+         AllTrue[cl["inhibitors"], inputs[[# + 1]] == 0 &]]], 1, 0],
   True, ApplyGate[gate, inputs, params]];
 
 (* --- network forward dynamics that understand LUT gates --- *)

@@ -101,7 +101,67 @@ def reduce_column(column: list[int], n: int, essential: list[int]) -> list[int]:
 _CANONICAL_PRIORITY = (
     "AND", "OR", "NAND", "NOR", "XOR", "XNOR",
     "NOT", "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "REGULATORY", "CANALISING",
+    "REGULATORY_DNF",
 )
+
+
+def minimal_dnf(reduced: list[int]) -> list[dict]:
+    """Cover the on-set of a reduced truth table by regulatory clauses.
+
+    Uses Quine-McCluskey to find the prime implicants and a greedy set cover to
+    choose a compact subset.  Each returned clause is a dict with ``activators``
+    (variables required to be 1) and ``inhibitors`` (required to be 0); variables
+    in neither are don't-care.  The union of the clauses' cosets equals the
+    on-set exactly.
+    """
+    m = (len(reduced)).bit_length() - 1
+    minterms = [y for y, v in enumerate(reduced) if v == 1]
+    if not minterms:
+        return []
+
+    full_mask = (1 << m) - 1
+    terms = {(y, full_mask) for y in minterms}  # (fixed bits, fixed mask)
+    primes: set[tuple[int, int]] = set()
+    while terms:
+        merged: set[tuple[int, int]] = set()
+        used: set[tuple[int, int]] = set()
+        tlist = list(terms)
+        for i in range(len(tlist)):
+            for j in range(i + 1, len(tlist)):
+                b1, mask1 = tlist[i]
+                b2, mask2 = tlist[j]
+                if mask1 != mask2:
+                    continue
+                diff = b1 ^ b2
+                if diff and (diff & (diff - 1)) == 0 and (diff & mask1):
+                    newmask = mask1 & ~diff
+                    merged.add((b1 & newmask, newmask))
+                    used.add(tlist[i])
+                    used.add(tlist[j])
+        for t in terms:
+            if t not in used:
+                primes.add(t)
+        terms = merged
+
+    def covers(prime: tuple[int, int], mt: int) -> bool:
+        b, mask = prime
+        return (mt & mask) == b
+
+    prime_list = list(primes)
+    uncovered = set(minterms)
+    chosen: list[tuple[int, int]] = []
+    while uncovered:
+        best = max(prime_list,
+                   key=lambda p: sum(1 for mt in uncovered if covers(p, mt)))
+        chosen.append(best)
+        uncovered = {mt for mt in uncovered if not covers(best, mt)}
+
+    clauses = []
+    for b, mask in chosen:
+        activators = [j for j in range(m) if (mask >> j) & 1 and (b >> j) & 1]
+        inhibitors = [j for j in range(m) if (mask >> j) & 1 and not ((b >> j) & 1)]
+        clauses.append({"activators": activators, "inhibitors": inhibitors})
+    return clauses
 
 
 @dataclass
@@ -166,6 +226,16 @@ def identify_gate(reduced: list[int]) -> tuple[list[GateMatch], GateMatch]:
         ystar = reduced.index(1)
         activators = [j for j in range(m) if (ystar >> j) & 1]
         matches.append(GateMatch("REGULATORY", {"activators": activators, "arity": m}))
+
+    # Regulatory disjunctive normal form: any regulatory function as a compact
+    # union of activator/inhibitor clauses (a union of pivot-shifted cosets).
+    # Named only when it genuinely compresses the on-set and the arity is small
+    # enough for the cover to be meaningful; otherwise the look-up table stands.
+    if 1 < sum(reduced) < len(reduced) and m <= 12:
+        clauses = minimal_dnf(reduced)
+        params = {"clauses": clauses, "arity": m}
+        if truth_table("REGULATORY_DNF", m, params) == reduced and len(clauses) < sum(reduced):
+            matches.append(GateMatch("REGULATORY_DNF", params))
 
     if not matches:
         # No canonical gate reproduces this function.  Report as a raw truth
