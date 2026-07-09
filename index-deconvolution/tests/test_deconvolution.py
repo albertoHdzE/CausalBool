@@ -95,6 +95,35 @@ def test_single_input_ambiguity_class():
 # End-to-end exact recovery over many random networks
 # ---------------------------------------------------------------------------
 
+def test_verify_forward_is_independent_and_exact():
+    # The recovered network must reproduce the repertoire through the forward
+    # model alone (no reports, no stored columns): a non-circular check.
+    from deconvolution import verify_forward
+    for seed in range(50):
+        net = random_network(n=8, seed=3000 + seed, gate_pool="all")
+        rep = repertoire(net)
+        rnet, _ = deconvolve(rep)
+        assert verify_forward(rep, rnet)["exact"], seed
+
+
+def test_random_data_is_not_compressed():
+    # Falsifiability: a fit-anything method would give small rules for random
+    # functions.  Ours does not; random 6-input functions need many DNF clauses.
+    import random
+    from deconvolution import minimal_dnf
+    from causalbool import truth_table
+    rng = random.Random(1)
+    counts = []
+    for _ in range(50):
+        tt = [rng.randint(0, 1) for _ in range(64)]
+        if sum(tt) in (0, 64):
+            continue
+        counts.append(len(minimal_dnf(tt)))
+    avg = sum(counts) / len(counts)
+    assert avg > 8, avg                                   # random needs many clauses
+    assert len(minimal_dnf(truth_table("AND", 6))) == 1   # structure needs one
+
+
 def test_exact_recovery_random_symmetric():
     for seed in range(30):
         net = random_network(n=7, seed=seed, gate_pool="symmetric")

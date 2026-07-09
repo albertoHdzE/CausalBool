@@ -341,11 +341,33 @@ def _apply_reconstructed_column(rec: NodeReconstruction, n: int) -> list[int]:
     return col
 
 
+def verify_forward(original: list[list[int]], net: Network) -> dict:
+    """Provably non-circular verification: rebuild the whole repertoire through
+    the forward model from the recovered network ``(C, gates, params)`` and
+    compare it to the original.
+
+    This shares nothing with the deconvolution's internal bookkeeping: it takes
+    the recovered network object and runs the same forward transform used to
+    generate any network's behaviour.  It is the honest test that the recovered
+    structure reproduces the data, as opposed to replaying a stored column.
+    """
+    rebuilt = repertoire(net)
+    exact = rebuilt == original
+    mismatched = [k for k in range(len(original[0]))
+                  if [row[k] for row in rebuilt] != [row[k] for row in original]]
+    return {"exact": exact, "mismatched_nodes": mismatched,
+            "n_nodes": len(original[0]), "repertoire_rows": len(original)}
+
+
 def verify(original: list[list[int]], reports: list[NodeReconstruction]) -> dict:
     """Check that the reconstruction reproduces the original repertoire exactly.
 
-    Reconstruction is done directly from the per-node reports (which may include
-    LUT fall-backs), so verification is independent of gate naming.
+    Reconstruction is done from the per-node reports.  Note the scope honestly:
+    for a node named LUT the stored truth table is replayed, so reproduction is
+    exact by construction; the non-trivial content is the recovered functional
+    connectivity (which drives the reduction) and the named-gate identification.
+    For a fully independent check that shares no bookkeeping with the
+    deconvolution, use :func:`verify_forward` on the recovered network.
     """
     R = len(original)
     n = len(original[0])
