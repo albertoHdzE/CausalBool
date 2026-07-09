@@ -191,6 +191,31 @@ def test_biological_networks_exact_recovery():
         assert verify(rep, reports)["exact"], fname
 
 
+def test_finance_analyser_detects_determinism():
+    import random
+    from finance import analyse
+    from ca_deconvolution import evolve_eca
+    # Real deterministic system: rule-110 CA trajectory must read as exact.
+    rng = random.Random(110)
+    rows = evolve_eca(110, [rng.randint(0, 1) for _ in range(9)], 400)
+    res = analyse(rows, max_k=3)
+    assert res["mean_contradiction_rate"] == 0.0
+    assert res["exact_nodes"] == res["n_nodes"]
+    assert res["mean_best_accuracy"] >= 0.999
+
+
+def test_finance_analyser_flags_randomness():
+    import random
+    from finance import analyse
+    rng = random.Random(0)
+    rows = [[rng.randint(0, 1) for _ in range(9)] for _ in range(400)]
+    res = analyse(rows, max_k=2)
+    # An independent random sequence admits no exact small-support law and
+    # contradicts itself on recurring patterns.
+    assert res["exact_nodes"] == 0
+    assert res["mean_contradiction_rate"] > 0.2
+
+
 def test_connectivity_recovered_exactly():
     # The connected set of each node must be recovered exactly (non-degenerate).
     net = random_network(n=8, seed=7, gate_pool="symmetric")

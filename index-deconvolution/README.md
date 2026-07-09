@@ -38,14 +38,20 @@ See `bitacora/` for the full scientific logbook:
       deconvolution.py       the deconvolution method (essential vars, gate id, verify)
       network_generator.py   seeded generator of consistent test networks
       ca_deconvolution.py    cellular-automaton to network deconvolution
-      Deconvolution.wl       Wolfram port of the deconvolution
+      bnet.py                PyBoolNet .bnet parser for biological networks
+      finance.py             binarisation and determinism analysis of price series
+      Deconvolution.wl       Wolfram port of the deconvolution (with REGULATORY gate)
       CADeconvolution.wl     Wolfram port of the CA deconvolution
     experiments/
       exp01_pivots_sumandos.py   verifies the pivots/sumandos factorisation
       exp02_exact_recovery.py    main result: exact recovery over a batch
       exp03_ca_to_network.py     cellular automaton to network, exact global map
+      exp04_biological.py        real gene-regulatory networks, exact recovery
+      exp05_financial.py         binarised markets vs a deterministic control
       DemoLibrary.wl, build_notebook.wl, full_pipeline_demo.nb
       CADemoLibrary.wl, build_ca_notebook.wl, ca_to_network_demo.nb
+      BioDemoLibrary.wl, build_bio_notebook.wl, biological_deconvolution_demo.nb
+    finance/data/                real daily price series (Yahoo v8 chart JSON)
     tests/
       test_deconvolution.py      unit and end-to-end tests (network and CA)
     crosscheck/
@@ -108,7 +114,14 @@ Regenerate and verify (paths via environment variables), for example:
   repertoires identical.
 - Cellular automaton to network: exact global-map recovery on 12 / 12 rules,
   agreeing between the Python and Wolfram implementations.
-- Both demonstration notebooks verified headless: 0 messages, all checks pass.
+- Biological networks: exact recovery on 8 / 8 PyBoolNet models; the new
+  REGULATORY (activator/inhibitor) gate names the mixed conjunctions of real
+  regulatory logic. Python and Wolfram agree.
+- Financial data: binarised daily markets admit no deterministic Boolean network
+  (contradiction rate 0.66, 0 / 9 instruments exact), while the identical
+  analyser recovers a deterministic control exactly (contradiction 0, 9 / 9).
+- Three demonstration notebooks verified headless: 0 messages, all checks pass.
+- Unit tests: 16 / 16.
 
 ## Conventions
 
