@@ -1,13 +1,11 @@
 (* build_bio_notebook.wl
-
-   Generate biological_deconvolution_demo.nb.  Output path via CB_NB_OUT.
-*)
+   Generate biological_deconvolution_demo.nb.  Output path via CB_NB_OUT. *)
 
 outPath = Environment["CB_NB_OUT"];
 
 setupCode = StringRiffle[{
   "(* Load the forward method, the deconvolution and its extensions, and the",
-  "   biological demonstration library, relative to this notebook. *)",
+  "   biological demonstration and detail libraries. *)",
   "nbDir = NotebookDirectory[];",
   "idDir = ParentDirectory[nbDir];",
   "root  = ParentDirectory[idDir];",
@@ -15,15 +13,48 @@ setupCode = StringRiffle[{
   "Get[FileNameJoin[{idDir, \"src\", \"Deconvolution.wl\"}]];",
   "Get[FileNameJoin[{idDir, \"src\", \"CADeconvolution.wl\"}]];",
   "Get[FileNameJoin[{nbDir, \"BioDemoLibrary.wl\"}]];",
+  "Get[FileNameJoin[{nbDir, \"CADetailLibrary.wl\"}]];",
+  "Get[FileNameJoin[{nbDir, \"BioDetailLibrary.wl\"}]];",
   "biocasesPath = FileNameJoin[{idDir, \"crosscheck\", \"bio_cases.json\"}];"
   }, "\n"];
 
 codeRun = StringRiffle[{
   "(* Deconvolve each biological network from its output repertoire alone and",
-  "   confirm the recovered network reproduces the repertoire exactly.  The",
-  "   REGULATORY column counts the activator/inhibitor conjunctions named by the",
-  "   new gate. *)",
+  "   confirm the recovered network reproduces the repertoire exactly. *)",
   "bioPass = RunBioDemo[biocasesPath];"
+  }, "\n"];
+
+codeNetwork = StringRiffle[{
+  "(* Take the fission yeast cell cycle and show the recovered model in full:",
+  "   a connectivity matrix and a gate per node. *)",
+  "cases = Import[biocasesPath, \"RawJSON\"];",
+  "yeast = cases[[1]];",
+  "decY = DeconvolveRepertoire[yeast[\"repertoire\"], yeast[\"n\"]];",
+  "Print[\"model: \", yeast[\"label\"], \"   nodes: \", yeast[\"n\"]];",
+  "Print[\"recovered gates: \", decY[\"gates\"]];",
+  "CBNetworkTable[decY]"
+  }, "\n"];
+
+codeRule = StringRiffle[{
+  "(* The activator/inhibitor node, in index-set pivot/sumandos form. *)",
+  "regNode = FirstPosition[decY[\"gates\"], \"REGULATORY\"][[1]];",
+  "Print[\"regulatory (activator/inhibitor) node index: \", regNode];",
+  "CBPrintRule[decY, regNode];"
+  }, "\n"];
+
+codeCompare = StringRiffle[{
+  "(* Original versus reconstructed repertoire, with the difference. *)",
+  "cmpY = CBCompareRepertoire[decY, yeast[\"repertoire\"]];",
+  "Print[\"repertoire reproduced exactly: \", cmpY[\"match\"]];",
+  "Row[{cmpY[\"original\"], cmpY[\"reconstructed\"], cmpY[\"difference\"]}]"
+  }, "\n"];
+
+codeOneSet = StringRiffle[{
+  "(* Locate the node's one-set: the input states in which it fires. *)",
+  "idxY = CBOneSetIndices[yeast[\"repertoire\"], regNode];",
+  "Print[\"node \", regNode, \" fires in \", Length[idxY], \" of \", 2^yeast[\"n\"], \" input states\"];",
+  "Print[\"first firing input indices (1-based): \", Take[idxY, UpTo[12]]];",
+  "CBHighlightNodeOneSet[yeast[\"repertoire\"], regNode]"
   }, "\n"];
 
 introText = StringJoin[
@@ -31,32 +62,57 @@ introText = StringJoin[
   "its perturbation analysis to biological networks but reconstructs only ",
   "cellular automata, never the biological networks themselves. Here the ",
   "index-set deconvolution recovers real gene-regulatory Boolean networks ",
-  "exactly from their output repertoire. The models are the fission yeast cell ",
-  "cycle, the IRMA synthetic yeast circuit, the WNT5A melanoma network, myeloid ",
-  "differentiation and apoptosis, taken from the PyBoolNet collection."];
+  "exactly from their output repertoire, shows the recovered model in full (its ",
+  "connectivity matrix, its gates, and each node's index-set rule), and compares ",
+  "the original repertoire with the reconstructed one."];
 
 gateText = StringJoin[
   "Real regulatory logic is dominated by conjunctions: a gene is expressed when ",
-  "its activators are present and its repressors are absent. The single-repressor ",
-  "case is the named gate NIMPLIES and the all-repressor case is NOR, but the ",
-  "mixed multi-input case has no classical name. We add the REGULATORY gate for ",
-  "it, defined as the product of the activator literals and the negated inhibitor ",
-  "literals, out = (product over activators of v) times (product over inhibitors ",
-  "of (1 - v)). Its index-set signature is a reduced truth table with a single 1, ",
-  "whose position encodes the activator and inhibitor split. It generalises AND ",
-  "(all activators) and NOR (all inhibitors) and names the mixed conjunctions ",
-  "that pervade the models below."];
+  "its activators are present and its repressors absent. The single-repressor ",
+  "case is NIMPLIES and the all-repressor case is NOR; the mixed case is the ",
+  "REGULATORY gate, and unions of clauses are the regulatory disjunctive normal ",
+  "form. Each is a union of pivot-shifted cosets in the index set."];
+
+netText = StringJoin[
+  "The recovered model is defined exactly like the forward model: a connectivity ",
+  "matrix and one gate per node. The table lists each node's gate, its inputs, ",
+  "the size of its one-set, and the number of clauses in its index-set rule."];
+
+ruleText = StringJoin[
+  "The activator/inhibitor node is shown as its index-set rule: a pivot (the ",
+  "decimal value of the activator inputs) and the free inputs (the sumandos) over ",
+  "which it ranges."];
+
+compareText = StringJoin[
+  "The reconstructed network reproduces the output repertoire exactly; the ",
+  "difference panel is entirely white."];
+
+oneSetText = StringJoin[
+  "Finally we locate the node's one-set, the set of input states in which it ",
+  "fires, and highlight that node's column across the repertoire."];
 
 cells = {
   Cell["Deconvolving Biological Networks", "Title"],
-  Cell["Recovering gene-regulatory Boolean networks from their behaviour", "Subtitle"],
+  Cell["Recovering, describing and verifying gene-regulatory networks", "Subtitle"],
   Cell[introText, "Text"],
-  Cell["The regulatory (activator/inhibitor) gate", "Section"],
+  Cell["The regulatory gate family", "Section"],
   Cell[gateText, "Text"],
   Cell["Setup", "Section"],
   Cell[setupCode, "Input"],
-  Cell["Deconvolve the biological networks", "Section"],
-  Cell[codeRun, "Input"]
+  Cell["Deconvolve all the biological networks", "Section"],
+  Cell[codeRun, "Input"],
+  Cell["The recovered network (connectivity and gates)", "Section"],
+  Cell[netText, "Text"],
+  Cell[codeNetwork, "Input"],
+  Cell["An index-set rule (pivots and sumandos)", "Section"],
+  Cell[ruleText, "Text"],
+  Cell[codeRule, "Input"],
+  Cell["Original versus reconstructed repertoire", "Section"],
+  Cell[compareText, "Text"],
+  Cell[codeCompare, "Input"],
+  Cell["Locating a node's one-set", "Section"],
+  Cell[oneSetText, "Text"],
+  Cell[codeOneSet, "Input"]
 };
 
 Export[outPath, Notebook[cells], "NB"];
