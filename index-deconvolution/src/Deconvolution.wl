@@ -19,7 +19,31 @@
 (* Core gate family supported by CausalBoolCore.wl (excludes CANALISING). *)
 CBCoreAnyArity = {"AND", "OR", "XOR", "NAND", "NOR", "XNOR", "MAJORITY"};
 CBCanonicalPriority = {"AND", "OR", "NAND", "NOR", "XOR", "XNOR", "NOT",
-   "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "REGULATORY"};
+   "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "REGULATORY", "REGULATORY_DNF"};
+
+(* Minimal DNF cover of a reduced truth table, as activator/inhibitor clauses
+   (0-based positions within the support), via Wolfram's exact minimiser.
+   Built with an explicit LSB-first minterm convention to avoid any ambiguity. *)
+CBRegulatoryDNFClauses[reduced_, m_] := Module[
+  {vars, minterms, expr, dnf, terms, clauses},
+  vars = Table[Symbol["cbx" <> ToString[j]], {j, 1, m}];
+  minterms = Flatten[Position[reduced, 1]] - 1;
+  If[minterms === {}, Return[{}]];
+  expr = Or @@ (Function[y,
+       And @@ Table[
+         If[BitAnd[y, 2^(j - 1)] > 0, vars[[j]], Not[vars[[j]]]], {j, 1, m}]] /@ minterms);
+  dnf = BooleanConvert[BooleanMinimize[expr], "DNF"];
+  terms = If[Head[dnf] === Or, List @@ dnf, {dnf}];
+  clauses = Map[Function[term,
+     Module[{lits, acts = {}, inhs = {}, lit},
+      lits = If[Head[term] === And, List @@ term, {term}];
+      Do[
+       If[Head[lit] === Not,
+        AppendTo[inhs, Position[vars, lit[[1]]][[1, 1]] - 1],
+        AppendTo[acts, Position[vars, lit][[1, 1]] - 1]],
+       {lit, lits}];
+      <|"activators" -> Sort[acts], "inhibitors" -> Sort[inhs]|>]], terms];
+  clauses];
 
 (* --- essential variables (pivots vs sumandos) ---
    Sorted 1-based node positions on which an output column of length 2^n depends. *)
@@ -81,6 +105,20 @@ IdentifyGate[reduced_List] := Module[
    Module[{ystar = Position[reduced, 1][[1, 1]] - 1, activators},
     activators = Select[Range[0, m - 1], BitAnd[ystar, 2^#] > 0 &];
     AppendTo[matches, {"REGULATORY", <|"activators" -> activators, "arity" -> m|>}]]];
+  (* Regulatory disjunctive normal form: minimal DNF cover of the on-set,
+     expressed as a union of activator/inhibitor clauses (pivot-shifted cosets).
+     Named only when it genuinely compresses and the arity is small. *)
+  If[1 < Total[reduced] < Length[reduced] && m <= 12,
+   Module[{clauses, params, tt},
+    clauses = CBRegulatoryDNFClauses[reduced, m];
+    params = <|"clauses" -> clauses, "arity" -> m|>;
+    tt = Table[
+      If[AnyTrue[clauses, Function[cl,
+          AllTrue[cl["activators"], (Reverse[IntegerDigits[y, 2, m]])[[# + 1]] == 1 &] &&
+           AllTrue[cl["inhibitors"], (Reverse[IntegerDigits[y, 2, m]])[[# + 1]] == 0 &]]],
+       1, 0], {y, 0, 2^m - 1}];
+    If[tt === reduced && Length[clauses] < Total[reduced],
+     AppendTo[matches, {"REGULATORY_DNF", params}]]]];
   If[matches === {},
    Return[{{{"LUT", <|"table" -> reduced|>}}, {"LUT", <|"table" -> reduced|>}}]];
   priority[mm_] := {Position[CBCanonicalPriority, mm[[1]]][[1, 1]],
