@@ -1,0 +1,132 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      5731,        123]
+NotebookOptionsPosition[      4346,         99]
+NotebookOutlinePosition[      4668,        113]
+CellTagsIndexPosition[      4625,        110]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["Index-Set Deconvolution: Full Pipeline Demonstration", "Title",ExpressionUUID->"b901f96c-597d-47c2-ab10-ad31d8f934e3"],
+
+Cell["\<\
+From naive exhaustive dynamics to a compressed causal model and back\
+\>", "Subtitle",ExpressionUUID->"67a1e19b-2b45-453e-aa7c-444c9bab7879"],
+
+Cell["\<\
+This notebook runs the complete index-set pipeline on two ten-node Boolean \
+networks. For each network it (1) computes the full dynamics the naive way by \
+exhaustive enumeration of all 2^10 inputs, (2) reduces that behaviour to the \
+compact causal index-set model and confirms the model regenerates the full \
+behaviour exactly, and (3) hides the original network and recovers it from \
+the output repertoire alone by deconvolution, verifying that the recovered \
+network reproduces the repertoire byte for byte. The naive exhaustive \
+calculation is thus shown to be replaceable by the causal method, and the \
+causal method is shown to be invertible.\
+\>", "Text",ExpressionUUID->"97308444-0ed5-4211-85a2-14824ededc41"],
+
+Cell["Setup", "Section",ExpressionUUID->"27a75791-bfc6-4a0b-b6f1-8d57d1c024a3"],
+
+Cell["\<\
+(* Locate the project files relative to this notebook, then load the
+   forward method (CausalBoolCore.wl), the inverse method (Deconvolution.wl)
+   and the demonstration library. *)
+nbDir = NotebookDirectory[];
+idDir = ParentDirectory[nbDir];
+root  = ParentDirectory[idDir];
+Get[FileNameJoin[{root, \"papers\", \"method\", \"code\", \"lib\", \
+\"CausalBoolCore.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"Deconvolution.wl\"}]];
+Get[FileNameJoin[{nbDir, \"DemoLibrary.wl\"}]];\
+\>", "Input",ExpressionUUID->"a3a0de75-73e4-4a25-8b3b-49d98fa966a8"],
+
+Cell["Example A - AND / OR structured network", "Section",ExpressionUUID->"d3bfae84-7d90-46eb-865b-d926b8221d4a"],
+
+Cell["\<\
+Example A uses AND and OR gates only, so the closed-form pivot-and-sumandos \
+index sets of the derivations apply: the one-set of each node is constructed \
+directly, without scanning all inputs.\
+\>", "Text",ExpressionUUID->"f5815481-4425-46fe-be83-8d79e3bda398"],
+
+Cell["\<\
+(* Stage 1: build the network and compute its full behaviour the naive way. \
+*)
+netA = ExampleNetworkA[];
+repA = NaiveRepertoire[netA];
+(* Stage 2: replace the exhaustive repertoire by the compact causal model. *)
+IndexReductionReport[netA, repA];
+(* Stage 3: hide the original and recover it from the repertoire alone. *)
+resultA = DeconvolutionReport[netA, repA];\
+\>", "Input",ExpressionUUID->"f1abf4a8-1c3a-452e-8d3b-13afbd9ca763"],
+
+Cell["Example B - mixed gate family", "Section",ExpressionUUID->"f57a33bf-18cf-48f5-9fda-f3972d35550b"],
+
+Cell["\<\
+Example B spans the core gate family (XOR, NAND, MAJORITY, KOFN, NOT, \
+IMPLIES, NOR, XNOR, OR, AND). The deconvolution recovers the functional \
+connectivity and a gate whose function matches the original on every node.\
+\>", "Text",ExpressionUUID->"d81d957c-5db2-4c6f-ac21-ff33fba29494"],
+
+Cell["\<\
+netB = ExampleNetworkB[];
+repB = NaiveRepertoire[netB];
+IndexReductionReport[netB, repB];
+resultB = DeconvolutionReport[netB, repB];\
+\>", "Input",ExpressionUUID->"a8fcabd0-ab42-4980-a6f0-d5703d4d7d76"],
+
+Cell["Interpretation", "Section",ExpressionUUID->"2a29a08b-19f8-4bf1-be63-f685aa03d10c"],
+
+Cell["\<\
+In both examples the recovered network reproduces the output repertoire \
+exactly and the functional connectivity matches the original. Gate naming may \
+differ where several canonical gates realise the same Boolean function (for \
+instance a single-input NAND, NOR, XNOR and NOT all compute logical \
+negation); every such choice reproduces the behaviour. This is the index-set \
+analogue of the algorithmic-information deconvolution of cellular automata, \
+but exact rather than approximate.\
+\>", "Text",ExpressionUUID->"195b0784-0f28-4993-a3e8-a76db21523d0"]
+},
+FrontEndVersion->"14.2 for Mac OS X ARM (64-bit) (December 26, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"8a97f98f-66ed-4edb-8490-0654a8bddb4e"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 124, 0, 70, "Title",ExpressionUUID->"b901f96c-597d-47c2-ab10-ad31d8f934e3"],
+Cell[681, 22, 151, 2, 70, "Subtitle",ExpressionUUID->"67a1e19b-2b45-453e-aa7c-444c9bab7879"],
+Cell[835, 26, 734, 10, 70, "Text",ExpressionUUID->"97308444-0ed5-4211-85a2-14824ededc41"],
+Cell[1572, 38, 79, 0, 70, "Section",ExpressionUUID->"27a75791-bfc6-4a0b-b6f1-8d57d1c024a3"],
+Cell[1654, 40, 557, 11, 70, "Input",ExpressionUUID->"a3a0de75-73e4-4a25-8b3b-49d98fa966a8"],
+Cell[2214, 53, 113, 0, 70, "Section",ExpressionUUID->"d3bfae84-7d90-46eb-865b-d926b8221d4a"],
+Cell[2330, 55, 274, 4, 70, "Text",ExpressionUUID->"f5815481-4425-46fe-be83-8d79e3bda398"],
+Cell[2607, 61, 446, 9, 70, "Input",ExpressionUUID->"f1abf4a8-1c3a-452e-8d3b-13afbd9ca763"],
+Cell[3056, 72, 103, 0, 70, "Section",ExpressionUUID->"f57a33bf-18cf-48f5-9fda-f3972d35550b"],
+Cell[3162, 74, 299, 4, 70, "Text",ExpressionUUID->"d81d957c-5db2-4c6f-ac21-ff33fba29494"],
+Cell[3464, 80, 212, 5, 70, "Input",ExpressionUUID->"a8fcabd0-ab42-4980-a6f0-d5703d4d7d76"],
+Cell[3679, 87, 88, 0, 70, "Section",ExpressionUUID->"2a29a08b-19f8-4bf1-be63-f685aa03d10c"],
+Cell[3770, 89, 572, 8, 70, "Text",ExpressionUUID->"195b0784-0f28-4993-a3e8-a76db21523d0"]
+}
+]
+*)
+
+(* End of internal cache information *)
