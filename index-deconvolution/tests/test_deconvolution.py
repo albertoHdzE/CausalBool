@@ -238,6 +238,28 @@ def test_finance_analyser_flags_randomness():
     assert res["mean_contradiction_rate"] > 0.2
 
 
+def test_reprogramming_measures():
+    from causalbool import Network
+    from reprogramming import image_size, num_attractors, knockout, spectrum
+    n = 4
+    # Identity network: each node copies itself. A bijection: image is all states,
+    # every state is a fixed point.
+    C = [[1 if i == k else 0 for i in range(n)] for k in range(n)]
+    ident = Network(n=n, C=C, gates=["LUT"] * n,
+                    params=[{"table": [0, 1]} for _ in range(n)])
+    assert image_size(ident) == 2 ** n
+    assert num_attractors(ident) == 2 ** n
+    # Constant network: everything collapses to one state, one attractor.
+    const = Network(n=n, C=[[0] * n for _ in range(n)], gates=["FALSE"] * n,
+                    params=[{} for _ in range(n)])
+    assert image_size(const) == 1
+    assert num_attractors(const) == 1
+    # Knockout fixes a node to a constant.
+    ko = knockout(ident, 0)
+    assert ko.gates[0] == "FALSE"
+    assert len(spectrum(ident, image_size)) == n
+
+
 def test_connectivity_recovered_exactly():
     # The connected set of each node must be recovered exactly (non-degenerate).
     net = random_network(n=8, seed=7, gate_pool="symmetric")
