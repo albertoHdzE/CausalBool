@@ -137,6 +137,106 @@ def base_rate(states: list[list[int]], node: int) -> float:
     return max(ones, total - ones) / total
 
 
+def daily_returns(matrix: list[list[float]]) -> list[list[float]]:
+    """Simple daily returns; row t is the return from day t to day t+1."""
+    return [[(matrix[t][j] - matrix[t - 1][j]) / matrix[t - 1][j]
+             for j in range(len(matrix[t]))]
+            for t in range(1, len(matrix))]
+
+
+def sign_states(returns: list[list[float]]) -> list[list[int]]:
+    """Binary up/down states from returns."""
+    return [[1 if r > 0 else 0 for r in row] for row in returns]
+
+
+def event_states(returns: list[list[float]], quantile: float = 0.70
+                 ) -> tuple[list[int], list[list[int]]]:
+    """Restrict to disruptive market days and binarise by sign there.
+
+    A day is disruptive if its cross-sectional mean absolute return is above the
+    given quantile of all days.  Returns (event_day_indices, sign_states_on_events)
+    in chronological order, implementing the idea of keeping the key datapoints
+    and discarding the quiet moves between them.
+    """
+    vol = [sum(abs(r) for r in row) / len(row) for row in returns]
+    order = sorted(vol)
+    thr = order[int(quantile * len(order))]
+    idx = [t for t in range(len(returns)) if vol[t] >= thr]
+    states = [[1 if returns[t][j] > 0 else 0 for j in range(len(returns[t]))]
+              for t in idx]
+    return idx, states
+
+
+def fit_predictor(states: list[list[int]], node: int, n_nodes: int, max_k: int
+                  ) -> tuple[tuple[int, ...], dict[int, int]]:
+    """Best small-support lag-1 predictor: support plus conditional-majority map."""
+    _, support = best_support_accuracy(states, node, n_nodes, max_k)
+    counts: dict[int, list[int]] = {}
+    for t in range(len(states) - 1):
+        p = _pattern(states[t], support)
+        counts.setdefault(p, [0, 0])[states[t + 1][node]] += 1
+    func = {p: (1 if c1 >= c0 else 0) for p, (c0, c1) in counts.items()}
+    return support, func
+
+
+def directional_path(returns: list[list[float]], states: list[list[int]],
+                     node: int, support: tuple[int, ...], func: dict[int, int]
+                     ) -> dict:
+    """Compare a real cumulative-return path with a model-directed one.
+
+    The model predicts the sign of each next move from the previous state; the
+    directed path keeps the real magnitude but the predicted sign, isolating
+    directional skill.  Returns the two paths and directional statistics.
+    """
+    real_cum = [0.0]
+    pred_cum = [0.0]
+    correct = 0
+    total = 0
+    for t in range(len(states) - 1):
+        real_r = returns[t + 1][node]
+        p = _pattern(states[t], support)
+        pred_sign = 1 if func.get(p, 1) == 1 else -1
+        real_cum.append(real_cum[-1] + real_r)
+        pred_cum.append(pred_cum[-1] + pred_sign * abs(real_r))
+        if (pred_sign > 0) == (real_r > 0):
+            correct += 1
+        total += 1
+    return {
+        "real_cum": real_cum, "pred_cum": pred_cum,
+        "directional_accuracy": correct / total if total else 0.0,
+        "n_steps": total,
+    }
+
+
+def evaluate_out_of_sample(train: list[list[int]], test: list[list[int]],
+                           returns_test: list[list[float]], node: int,
+                           n_nodes: int, max_k: int) -> dict:
+    """Fit the directional model on ``train`` and evaluate it on ``test``.
+
+    Returns the out-of-sample directional accuracy and the real and model-directed
+    cumulative paths on the test period.  Out-of-sample evaluation removes the
+    look-ahead bias that inflates in-sample fit, and is the honest test of
+    whether the market carries exploitable deterministic structure.
+    """
+    support, func = fit_predictor(train, node, n_nodes, max_k)
+    real_cum = [0.0]
+    pred_cum = [0.0]
+    correct = 0
+    total = 0
+    for t in range(len(test) - 1):
+        p = _pattern(test[t], support)
+        pred_sign = 1 if func.get(p, 1) == 1 else -1
+        rr = returns_test[t + 1][node]
+        real_cum.append(real_cum[-1] + rr)
+        pred_cum.append(pred_cum[-1] + pred_sign * abs(rr))
+        if (pred_sign > 0) == (test[t + 1][node] > 0):
+            correct += 1
+        total += 1
+    return {"support": list(support),
+            "oos_accuracy": correct / total if total else 0.0,
+            "real_cum": real_cum, "pred_cum": pred_cum, "n_steps": total}
+
+
 def analyse(states: list[list[int]], max_k: int = 2) -> dict:
     """Determinism summary for a binary state sequence."""
     n = len(states[0])
