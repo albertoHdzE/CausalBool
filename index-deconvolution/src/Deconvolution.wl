@@ -19,7 +19,7 @@
 (* Core gate family supported by CausalBoolCore.wl (excludes CANALISING). *)
 CBCoreAnyArity = {"AND", "OR", "XOR", "NAND", "NOR", "XNOR", "MAJORITY"};
 CBCanonicalPriority = {"AND", "OR", "NAND", "NOR", "XOR", "XNOR", "NOT",
-   "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN"};
+   "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "REGULATORY"};
 
 (* --- essential variables (pivots vs sumandos) ---
    Sorted 1-based node positions on which an output column of length 2^n depends. *)
@@ -75,6 +75,12 @@ IdentifyGate[reduced_List] := Module[
    Return[{{canonical}, canonical}]];
   matches = Select[CBCandidateGates[m],
     GateTruthTable[#[[1]], m, #[[2]]] === reduced &];
+  (* Regulatory (activator/inhibitor) clause: a single 1 in the reduced table,
+     whose position encodes activators (bit 1) and inhibitors (bit 0). *)
+  If[Total[reduced] == 1,
+   Module[{ystar = Position[reduced, 1][[1, 1]] - 1, activators},
+    activators = Select[Range[0, m - 1], BitAnd[ystar, 2^#] > 0 &];
+    AppendTo[matches, {"REGULATORY", <|"activators" -> activators, "arity" -> m|>}]]];
   If[matches === {},
    Return[{{{"LUT", <|"table" -> reduced|>}}, {"LUT", <|"table" -> reduced|>}}]];
   priority[mm_] := {Position[CBCanonicalPriority, mm[[1]]][[1, 1]],
@@ -103,7 +109,7 @@ DeconvolveRepertoire[rep_List, n_Integer] := Module[
      "reduced" -> reduced, "numMatches" -> Length[matches],
      "canonical" -> canonical|>,
    {k, 1, n}];
-  <|"C" -> cm, "gates" -> gates, "params" -> params, "reports" -> reports|>];
+  <|"n" -> n, "C" -> cm, "gates" -> gates, "params" -> params, "reports" -> reports|>];
 
 (* --- verification: replay recovered network, compare byte for byte --- *)
 VerifyReconstruction[originalRep_List, recovered_Association] := Module[

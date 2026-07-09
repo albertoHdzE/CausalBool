@@ -1,0 +1,106 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      4585,         97]
+NotebookOptionsPosition[      3567,         77]
+NotebookOutlinePosition[      3889,         91]
+CellTagsIndexPosition[      3846,         88]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["Deconvolving Biological Networks", "Title",ExpressionUUID->"df0514c6-cdbf-495b-acdd-95d54f76a17a"],
+
+Cell["\<\
+Recovering gene-regulatory Boolean networks from their behaviour\
+\>", "Subtitle",ExpressionUUID->"95281b2b-6704-417b-bca5-2ee3d89d4996"],
+
+Cell["\<\
+The algorithmic-information causal calculus of Zenil and colleagues applies \
+its perturbation analysis to biological networks but reconstructs only \
+cellular automata, never the biological networks themselves. Here the \
+index-set deconvolution recovers real gene-regulatory Boolean networks \
+exactly from their output repertoire. The models are the fission yeast cell \
+cycle, the IRMA synthetic yeast circuit, the WNT5A melanoma network, myeloid \
+differentiation and apoptosis, taken from the PyBoolNet collection.\
+\>", "Text",ExpressionUUID->"3d1c0d6e-d64f-4acb-9441-6ab435bfc43c"],
+
+Cell["The regulatory (activator/inhibitor) gate", "Section",ExpressionUUID->"6d4a71fb-7cc6-43cf-a939-c61d0bda5ef0"],
+
+Cell["\<\
+Real regulatory logic is dominated by conjunctions: a gene is expressed when \
+its activators are present and its repressors are absent. The \
+single-repressor case is the named gate NIMPLIES and the all-repressor case \
+is NOR, but the mixed multi-input case has no classical name. We add the \
+REGULATORY gate for it, defined as the product of the activator literals and \
+the negated inhibitor literals, out = (product over activators of v) times \
+(product over inhibitors of (1 - v)). Its index-set signature is a reduced \
+truth table with a single 1, whose position encodes the activator and \
+inhibitor split. It generalises AND (all activators) and NOR (all inhibitors) \
+and names the mixed conjunctions that pervade the models below.\
+\>", "Text",ExpressionUUID->"65c1bc43-eb42-4358-a0fe-7de4428e9491"],
+
+Cell["Setup", "Section",ExpressionUUID->"5b0aa0cf-a5c8-401c-93de-5c962be640b7"],
+
+Cell["\<\
+(* Load the forward method, the deconvolution and its extensions, and the
+   biological demonstration library, relative to this notebook. *)
+nbDir = NotebookDirectory[];
+idDir = ParentDirectory[nbDir];
+root  = ParentDirectory[idDir];
+Get[FileNameJoin[{root, \"papers\", \"method\", \"code\", \"lib\", \
+\"CausalBoolCore.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"Deconvolution.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"CADeconvolution.wl\"}]];
+Get[FileNameJoin[{nbDir, \"BioDemoLibrary.wl\"}]];
+biocasesPath = FileNameJoin[{idDir, \"crosscheck\", \"bio_cases.json\"}];\
+\>", "Input",ExpressionUUID->"395ec5e6-b934-4927-a98a-513f093a3348"],
+
+Cell["Deconvolve the biological networks", "Section",ExpressionUUID->"e1a81fbf-9415-4940-9aae-1ffddd749bdd"],
+
+Cell["\<\
+(* Deconvolve each biological network from its output repertoire alone and
+   confirm the recovered network reproduces the repertoire exactly.  The
+   REGULATORY column counts the activator/inhibitor conjunctions named by the
+   new gate. *)
+bioPass = RunBioDemo[biocasesPath];\
+\>", "Input",ExpressionUUID->"be14f9b5-ad69-458b-9e6e-2e03d94b3ca9"]
+},
+FrontEndVersion->"14.2 for Mac OS X ARM (64-bit) (December 26, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"fdf6f78d-5630-49f5-b499-067109ec007b"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 104, 0, 70, "Title",ExpressionUUID->"df0514c6-cdbf-495b-acdd-95d54f76a17a"],
+Cell[661, 22, 147, 2, 70, "Subtitle",ExpressionUUID->"95281b2b-6704-417b-bca5-2ee3d89d4996"],
+Cell[811, 26, 599, 8, 70, "Text",ExpressionUUID->"3d1c0d6e-d64f-4acb-9441-6ab435bfc43c"],
+Cell[1413, 36, 115, 0, 70, "Section",ExpressionUUID->"6d4a71fb-7cc6-43cf-a939-c61d0bda5ef0"],
+Cell[1531, 38, 823, 11, 70, "Text",ExpressionUUID->"65c1bc43-eb42-4358-a0fe-7de4428e9491"],
+Cell[2357, 51, 79, 0, 70, "Section",ExpressionUUID->"5b0aa0cf-a5c8-401c-93de-5c962be640b7"],
+Cell[2439, 53, 653, 12, 70, "Input",ExpressionUUID->"395ec5e6-b934-4927-a98a-513f093a3348"],
+Cell[3095, 67, 108, 0, 70, "Section",ExpressionUUID->"e1a81fbf-9415-4940-9aae-1ffddd749bdd"],
+Cell[3206, 69, 357, 6, 70, "Input",ExpressionUUID->"be14f9b5-ad69-458b-9e6e-2e03d94b3ca9"]
+}
+]
+*)
+
+(* End of internal cache information *)

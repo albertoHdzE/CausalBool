@@ -100,7 +100,7 @@ def reduce_column(column: list[int], n: int, essential: list[int]) -> list[int]:
 # representative reported as canonical; the full match list records ambiguity.
 _CANONICAL_PRIORITY = (
     "AND", "OR", "NAND", "NOR", "XOR", "XNOR",
-    "NOT", "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "CANALISING",
+    "NOT", "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "REGULATORY", "CANALISING",
 )
 
 
@@ -157,6 +157,16 @@ def identify_gate(reduced: list[int]) -> tuple[list[GateMatch], GateMatch]:
 
     matches = [c for c in _candidate_gates(m)
                if truth_table(c.gate, m, c.params) == reduced]
+
+    # Regulatory (activator/inhibitor) clause: the reduced truth table has a
+    # single 1, whose position encodes which inputs are activators (bit 1) and
+    # which are inhibitors (bit 0).  This names the mixed AND-NOT functions that
+    # pervade gene-regulatory logic and have no other canonical name.
+    if sum(reduced) == 1:
+        ystar = reduced.index(1)
+        activators = [j for j in range(m) if (ystar >> j) & 1]
+        matches.append(GateMatch("REGULATORY", {"activators": activators, "arity": m}))
+
     if not matches:
         # No canonical gate reproduces this function.  Report as a raw truth
         # table so the caller can still reconstruct via an explicit LUT.

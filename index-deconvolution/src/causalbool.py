@@ -89,6 +89,18 @@ def apply_gate(gate: str, inputs: list[int], params: dict | None = None) -> int:
     if gate == "KOFN":
         k = p.get("k", 1)
         return 1 if inputs.count(1) >= k else 0
+    if gate == "REGULATORY":
+        # Activator/inhibitor conjunction (AND-NOT).  The node fires iff every
+        # activator input is 1 and every inhibitor input is 0.  ``activators``
+        # lists the 0-based positions of the activators within the connected
+        # sub-vector; all other connected inputs are inhibitors.  Generalises
+        # AND (all activators) and NOR (all inhibitors).
+        activators = p["activators"]
+        for j, b in enumerate(inputs):
+            want = 1 if j in activators else 0
+            if b != want:
+                return 0
+        return 1
     if gate == "CANALISING":
         # myCanalising: if inputs[ci] == v then out else OR[inputs]
         ci = p.get("canalisingIndex", 0)

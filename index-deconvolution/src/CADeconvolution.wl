@@ -26,10 +26,17 @@ EvolveECA[rule_, initial_, steps_] := Module[{w = Length[initial], rows, cur, nx
 CBKeyOf[state_, support_] :=
   Sum[If[state[[support[[j]]]] == 1, 2^(j - 1), 0], {j, 1, Length[support]}];
 
-(* --- gate application extended with explicit look-up tables --- *)
-ApplyGateExt[gate_, inputs_, params_] := If[gate === "LUT",
-  params["table"][[ Sum[If[inputs[[j]] == 1, 2^(j - 1), 0], {j, 1, Length[inputs]}] + 1 ]],
-  ApplyGate[gate, inputs, params]];
+(* --- gate application extended with look-up tables, regulatory clauses and
+       the constant gates that the deconvolution can emit --- *)
+ApplyGateExt[gate_, inputs_, params_] := Which[
+  gate === "TRUE", 1,
+  gate === "FALSE", 0,
+  gate === "LUT",
+    params["table"][[ Sum[If[inputs[[j]] == 1, 2^(j - 1), 0], {j, 1, Length[inputs]}] + 1 ]],
+  gate === "REGULATORY",
+    If[AllTrue[Range[0, Length[inputs] - 1],
+       inputs[[# + 1]] == If[MemberQ[params["activators"], #], 1, 0] &], 1, 0],
+  True, ApplyGate[gate, inputs, params]];
 
 (* --- network forward dynamics that understand LUT gates --- *)
 CBStep[net_, state_] := Table[

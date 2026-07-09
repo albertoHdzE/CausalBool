@@ -149,6 +149,48 @@ def test_ca_named_gate_identities():
     assert len(reports[6].support) == 2
 
 
+def test_regulatory_gate_identity_and_forward():
+    from causalbool import truth_table, apply_gate
+    # a AND NOT b AND c over three inputs: single satisfying assignment a=1,b=0,c=1.
+    tt = truth_table("REGULATORY", 3, {"activators": [0, 2]})
+    assert sum(tt) == 1
+    assert tt[0b101] == 1  # a=1 (bit0), b=0 (bit1), c=1 (bit2)
+    matches, canonical = identify_gate(tt)
+    assert canonical.gate == "REGULATORY"
+    assert canonical.params["activators"] == [0, 2]
+    # forward application matches the definition
+    assert apply_gate("REGULATORY", [1, 0, 1], {"activators": [0, 2]}) == 1
+    assert apply_gate("REGULATORY", [1, 1, 1], {"activators": [0, 2]}) == 0
+
+
+def test_regulatory_special_cases_named_classically():
+    from causalbool import truth_table
+    # all activators -> AND wins by priority; all inhibitors -> NOR wins.
+    tt_and = truth_table("REGULATORY", 3, {"activators": [0, 1, 2]})
+    _, can_and = identify_gate(tt_and)
+    assert can_and.gate == "AND"
+    tt_nor = truth_table("REGULATORY", 3, {"activators": []})
+    _, can_nor = identify_gate(tt_nor)
+    assert can_nor.gate == "NOR"
+
+
+def test_biological_networks_exact_recovery():
+    import os
+    from bnet import parse_bnet
+    from causalbool import repertoire
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    bnet_dir = os.path.join(root, "data", "bio", "raw")
+    for fname in ("pyboolnet_davidich_yeast.bnet", "pyboolnet_irma.bnet",
+                  "pyboolnet_xiao_wnt5a.bnet"):
+        path = os.path.join(bnet_dir, fname)
+        if not os.path.exists(path):
+            continue
+        net, _ = parse_bnet(path)
+        rep = repertoire(net)
+        _, reports = deconvolve(rep)
+        assert verify(rep, reports)["exact"], fname
+
+
 def test_connectivity_recovered_exactly():
     # The connected set of each node must be recovered exactly (non-degenerate).
     net = random_network(n=8, seed=7, gate_pool="symmetric")
