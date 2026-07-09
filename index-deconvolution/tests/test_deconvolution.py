@@ -113,6 +113,42 @@ def test_exact_recovery_random_full():
         assert result["exact"], (seed, result)
 
 
+def test_ca_deconvolution_exact_global_map():
+    import random
+    from ca_deconvolution import evolve_eca, deconvolve_ca, verify_ca
+    # Named-gate rules and a chaotic rule; all must recover the exact global map.
+    for rule in (254, 90, 232, 150, 30, 110):
+        rng = random.Random(rule)
+        diagrams = [
+            evolve_eca(rule, [rng.randint(0, 1) for _ in range(12)], 10)
+            for _ in range(80)
+        ]
+        net, reports = deconvolve_ca(diagrams, max_radius=3)
+        vr = verify_ca(diagrams, net, rule=rule)
+        assert vr["trajectory_exact"], rule
+        assert vr["global_map_exact"], rule
+
+
+def test_ca_named_gate_identities():
+    import random
+    from ca_deconvolution import evolve_eca, deconvolve_ca
+    expected = {254: "OR", 90: "XOR", 232: "MAJORITY", 150: "XOR"}
+    for rule, gate in expected.items():
+        rng = random.Random(rule)
+        diagrams = [
+            evolve_eca(rule, [rng.randint(0, 1) for _ in range(12)], 10)
+            for _ in range(80)
+        ]
+        _, reports = deconvolve_ca(diagrams, max_radius=3)
+        interior = reports[6]
+        assert interior.canonical.gate == gate, (rule, interior.canonical.gate)
+    # Rule 90 drops the irrelevant centre cell.
+    rng = random.Random(90)
+    diagrams = [evolve_eca(90, [rng.randint(0, 1) for _ in range(12)], 10) for _ in range(80)]
+    _, reports = deconvolve_ca(diagrams, max_radius=3)
+    assert len(reports[6].support) == 2
+
+
 def test_connectivity_recovered_exactly():
     # The connected set of each node must be recovered exactly (non-degenerate).
     net = random_network(n=8, seed=7, gate_pool="symmetric")

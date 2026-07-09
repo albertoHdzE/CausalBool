@@ -1,0 +1,123 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      5341,        114]
+NotebookOptionsPosition[      4141,         92]
+NotebookOutlinePosition[      4463,        106]
+CellTagsIndexPosition[      4420,        103]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["Cellular Automaton to Network by Deconvolution", "Title",ExpressionUUID->"33ffdb7f-8e34-4075-9afa-2bae8e28f058"],
+
+Cell["\<\
+Recovering the generating network from an observed space-time diagram\
+\>", "Subtitle",ExpressionUUID->"10df4ea3-c419-4d1c-a8f8-fc1669ac2253"],
+
+Cell["\<\
+An elementary cellular automaton is a synchronous Boolean network: each cell \
+is a node connected to its neighbourhood, and the rule is the shared local \
+gate. A space-time diagram, however, gives only a trajectory, in which each \
+row is the input to the next, not the exhaustive input repertoire. This \
+notebook recovers the network from such observations. For each rule it pools \
+observations from several initial conditions until every local neighbourhood \
+has been seen, deconvolves each cell into its minimal functional support and \
+local gate, and verifies that the recovered network reproduces the exact \
+global map of the automaton over all states, not merely the observed rows.\
+\>", "Text",ExpressionUUID->"9ff2f38d-97da-49ac-9ae0-18d59e479307"],
+
+Cell["Setup", "Section",ExpressionUUID->"2c2ece56-988e-41aa-81d9-1a449630bc90"],
+
+Cell["\<\
+(* Load the forward method, the deconvolution, the cellular-automaton
+   deconvolution and the demonstration library, relative to this notebook. *)
+nbDir = NotebookDirectory[];
+idDir = ParentDirectory[nbDir];
+root  = ParentDirectory[idDir];
+Get[FileNameJoin[{root, \"papers\", \"method\", \"code\", \"lib\", \
+\"CausalBoolCore.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"Deconvolution.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"CADeconvolution.wl\"}]];
+Get[FileNameJoin[{nbDir, \"CADemoLibrary.wl\"}]];\
+\>", "Input",ExpressionUUID->"1e90836d-ce4f-4477-ace3-9737037a062e"],
+
+Cell["Walkthrough: rule 90", "Section",ExpressionUUID->"890d5e9b-b90f-49d7-9f95-638cf67ae44e"],
+
+Cell["\<\
+Rule 90 is the clearest case: its next value is the exclusive-or of the two \
+outer cells, so the deconvolution drops the irrelevant centre and names the \
+gate XOR over a support of size two.\
+\>", "Text",ExpressionUUID->"5b3b8fe3-aa21-471d-bae4-443a3bf09c9b"],
+
+Cell["\<\
+(* Walkthrough for rule 90.  Observe the automaton from 80 random initial
+   conditions, deconvolve to a network, and read off the recovered local
+   rule.  Rule 90 depends only on the two outer cells, so the centre is
+   dropped and the gate is XOR. *)
+diagrams90 = CAMakeEnsemble[90, 12, 10, 80, 1];
+dec90 = DeconvolveCA[diagrams90, 3];
+ver90 = VerifyCA[diagrams90, dec90, 90];
+Print[\"recovered interior gate     : \", dec90[\"reports\"][[6]][\"canonical\
+\"][[1]]];
+Print[\"recovered interior support  : \", \
+dec90[\"reports\"][[6]][\"support\"]];
+Print[\"global map exact            : \", ver90[\"global_map_exact\"]];\
+\>", "Input",ExpressionUUID->"cca093c6-7bd1-4234-99c5-0296444e31c3"],
+
+Cell["All example rules", "Section",ExpressionUUID->"c32d9d58-94a9-4fbf-8ade-ca6f369e23c3"],
+
+Cell["\<\
+Across the example rules the recovered networks realise the exact global map. \
+Rule 254 is recovered as OR over the three cells, rule 232 as MAJORITY, rule \
+150 as three-input XOR, and the rules with no canonical name (30 and 110) as \
+explicit look-up tables. In every case the reconstructed network is the \
+automaton, expressed in the CausalBool formalism.\
+\>", "Text",ExpressionUUID->"7533d6e4-6a94-4d1d-a26c-ff401dda2313"],
+
+Cell["\<\
+(* Recover every example rule and confirm the network realises the exact
+   global map of the automaton, not merely the observed trajectory. *)
+allPass = RunCADemo[];\
+\>", "Input",ExpressionUUID->"116f06e5-a319-4951-84ee-175672e12bf7"]
+},
+FrontEndVersion->"14.2 for Mac OS X ARM (64-bit) (December 26, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"1931f53a-3732-4501-b2f5-f1ae1b48412c"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 118, 0, 70, "Title",ExpressionUUID->"33ffdb7f-8e34-4075-9afa-2bae8e28f058"],
+Cell[675, 22, 152, 2, 70, "Subtitle",ExpressionUUID->"10df4ea3-c419-4d1c-a8f8-fc1669ac2253"],
+Cell[830, 26, 773, 10, 70, "Text",ExpressionUUID->"9ff2f38d-97da-49ac-9ae0-18d59e479307"],
+Cell[1606, 38, 79, 0, 70, "Section",ExpressionUUID->"2c2ece56-988e-41aa-81d9-1a449630bc90"],
+Cell[1688, 40, 585, 11, 70, "Input",ExpressionUUID->"1e90836d-ce4f-4477-ace3-9737037a062e"],
+Cell[2276, 53, 94, 0, 70, "Section",ExpressionUUID->"890d5e9b-b90f-49d7-9f95-638cf67ae44e"],
+Cell[2373, 55, 271, 4, 70, "Text",ExpressionUUID->"5b3b8fe3-aa21-471d-bae4-443a3bf09c9b"],
+Cell[2647, 61, 704, 13, 70, "Input",ExpressionUUID->"cca093c6-7bd1-4234-99c5-0296444e31c3"],
+Cell[3354, 76, 91, 0, 70, "Section",ExpressionUUID->"c32d9d58-94a9-4fbf-8ade-ca6f369e23c3"],
+Cell[3448, 78, 440, 6, 70, "Text",ExpressionUUID->"7533d6e4-6a94-4d1d-a26c-ff401dda2313"],
+Cell[3891, 86, 246, 4, 70, "Input",ExpressionUUID->"116f06e5-a319-4951-84ee-175672e12bf7"]
+}
+]
+*)
+
+(* End of internal cache information *)

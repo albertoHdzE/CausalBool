@@ -37,16 +37,25 @@ See `bitacora/` for the full scientific logbook:
       causalbool.py          forward model and gate semantics (matches CausalBoolCore.wl)
       deconvolution.py       the deconvolution method (essential vars, gate id, verify)
       network_generator.py   seeded generator of consistent test networks
+      ca_deconvolution.py    cellular-automaton to network deconvolution
+      Deconvolution.wl       Wolfram port of the deconvolution
+      CADeconvolution.wl     Wolfram port of the CA deconvolution
     experiments/
       exp01_pivots_sumandos.py   verifies the pivots/sumandos factorisation
       exp02_exact_recovery.py    main result: exact recovery over a batch
+      exp03_ca_to_network.py     cellular automaton to network, exact global map
+      DemoLibrary.wl, build_notebook.wl, full_pipeline_demo.nb
+      CADemoLibrary.wl, build_ca_notebook.wl, ca_to_network_demo.nb
     tests/
-      test_deconvolution.py      unit and end-to-end tests
+      test_deconvolution.py      unit and end-to-end tests (network and CA)
     crosscheck/
       generate_crosscheck_cases.py   emits networks + Python repertoires as JSON
       wolfram_equivalence.wl         recomputes them with the Wolfram reference
+      verify_wl_pipeline.wl          headless check of the network notebook code
+      verify_notebook.wl             evaluates the network notebook's input cells
+      verify_ca_notebook.wl          evaluates the CA notebook's input cells
     results/                     JSON outputs of the experiments
-    bitacora/                    scientific logbook
+    bitacora/                    scientific logbook (00-04)
 
 ## How to run
 
@@ -71,9 +80,24 @@ Wolfram equivalence cross-check (proves the Python forward model equals
       CB_OUT="$ROOT/index-deconvolution/crosscheck/wolfram_result.json" \
       /Applications/Wolfram.app/Contents/MacOS/WolframKernel -script crosscheck/wolfram_equivalence.wl
 
+## Two Wolfram notebooks
+
+- `experiments/full_pipeline_demo.nb`: two ten-node networks taken from naive
+  exhaustive dynamics, through the compact index-set model, back to the original
+  by deconvolution.
+- `experiments/ca_to_network_demo.nb`: recovering the generating network of an
+  elementary cellular automaton from its observed space-time evolution.
+
+Regenerate and verify (paths via environment variables), for example:
+
+    ROOT="$(git rev-parse --show-toplevel)"
+    HOME="$HOME" CB_NB="$ROOT/index-deconvolution/experiments/ca_to_network_demo.nb" \
+      CB_EXPDIR="$ROOT/index-deconvolution/experiments/" \
+      /Applications/Wolfram.app/Contents/MacOS/WolframKernel -script crosscheck/verify_ca_notebook.wl
+
 ## Current status (2026-07-09)
 
-- Unit tests: 9 / 9 pass.
+- Unit tests: 11 / 11 pass (network and cellular-automaton cases).
 - Exact repertoire reproduction: 200 / 200 networks (sizes 7 to 10, full 12-gate
   family).
 - Pivots/sumandos: disconnected nodes never sensitive across 1700 nodes (100%).
@@ -82,6 +106,9 @@ Wolfram equivalence cross-check (proves the Python forward model equals
   input; the deconvolution correctly recovers the smaller functional set).
 - Python forward model proven equivalent to the Wolfram reference: 45 / 45
   repertoires identical.
+- Cellular automaton to network: exact global-map recovery on 12 / 12 rules,
+  agreeing between the Python and Wolfram implementations.
+- Both demonstration notebooks verified headless: 0 messages, all checks pass.
 
 ## Conventions
 

@@ -52,6 +52,17 @@ def apply_gate(gate: str, inputs: list[int], params: dict | None = None) -> int:
         return 1
     if gate == "FALSE":
         return 0
+    if gate == "LUT":
+        # Explicit look-up table over the connected inputs, LSB-first in the
+        # ascending order of the connected node indices.  Used for Boolean
+        # functions with no name in the canonical family (for example most
+        # elementary cellular-automaton rules).
+        table = p["table"]
+        y = 0
+        for j, b in enumerate(inputs):
+            if b:
+                y |= (1 << j)
+        return table[y]
     if gate == "AND":
         return 1 if inputs.count(0) == 0 else 0
     if gate == "OR":
@@ -160,6 +171,28 @@ def node_output_column(net: Network, k: int) -> list[int]:
         sub = [v[i] for i in ic]
         col.append(apply_gate(net.gates[k], sub, net.params[k]))
     return col
+
+
+def step(net: Network, state: list[int]) -> list[int]:
+    """One synchronous update: next state of every node given the current state."""
+    out = []
+    for k in range(net.n):
+        ic = net.connected_inputs(k)
+        sub = [state[i] for i in ic]
+        out.append(apply_gate(net.gates[k], sub, net.params[k]))
+    return out
+
+
+def evolve_network(net: Network, initial: list[int], steps: int) -> list[list[int]]:
+    """Trajectory of the network: ``steps`` rows starting from ``initial``.
+
+    Row 0 is ``initial``; row t+1 is :func:`step` applied to row t.  This is the
+    network analogue of a cellular-automaton space-time diagram.
+    """
+    rows = [list(initial)]
+    for _ in range(steps - 1):
+        rows.append(step(net, rows[-1]))
+    return rows
 
 
 def repertoire(net: Network) -> list[list[int]]:
