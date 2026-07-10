@@ -95,6 +95,33 @@ def test_single_input_ambiguity_class():
 # End-to-end exact recovery over many random networks
 # ---------------------------------------------------------------------------
 
+def test_or_never_confused_with_and_over_exhaustive_data():
+    from causalbool import truth_table
+    # OR equals AND only at arity 1 (both are the identity); for arity >= 2 they
+    # have different truth tables and cannot be confused over exhaustive inputs.
+    assert truth_table("OR", 1) == truth_table("AND", 1)
+    for m in (2, 3, 4):
+        assert truth_table("OR", m) != truth_table("AND", m)
+
+
+def test_reachable_state_correlation_can_hide_inputs():
+    # Counterexample: node1 and node2 both copy node0, so they are always equal
+    # in reachable states; OR(node1,node2) is then indistinguishable from
+    # AND(node1,node2).  Exhaustive deconvolution still recovers OR of {1,2}.
+    from causalbool import Network, repertoire, step, input_vector
+    n = 4
+    C = [[0] * n for _ in range(n)]
+    C[0][0] = 1; C[1][0] = 1; C[2][0] = 1; C[3][1] = 1; C[3][2] = 1
+    net = Network(n=n, C=C, gates=["NOT", "LUT", "LUT", "OR"],
+                  params=[{}, {"table": [0, 1]}, {"table": [0, 1]}, {}])
+    _, reports = deconvolve(repertoire(net))
+    assert set(reports[3].connected_inputs) == {1, 2}
+    assert reports[3].canonical.gate == "OR"
+    # reachable states: node1 == node2 always -> the inputs are confounded
+    reachable = {tuple(step(net, input_vector(x, n))) for x in range(2 ** n)}
+    assert all(s[1] == s[2] for s in reachable)
+
+
 def test_verify_forward_is_independent_and_exact():
     # The recovered network must reproduce the repertoire through the forward
     # model alone (no reports, no stored columns): a non-circular check.
