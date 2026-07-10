@@ -15,7 +15,8 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-from binarise import binarisations, sign_bit, top_magnitude_bit
+from binarise import (binarisations, sign_bit, top_magnitude_bit,
+                      relative_difference, trend_contamination)
 from unit_survival import survival_report, lag1_autocorr, longest_run_of_ones
 from occurrence_arithmetic import (behaviour_table, transition_probs, gaps,
                                    description_length_gain, hurst_aggregated_variance,
@@ -57,6 +58,35 @@ def test_top_magnitude_and_sign_lengths():
     vals = [float(x) for x in range(20)]
     assert len(top_magnitude_bit(vals)) == 19
     assert len(sign_bit(vals)) == 19
+
+
+def test_relative_difference_is_scale_free():
+    vals = [1.0, 2.0, 4.0, 8.0]        # multiplicative
+    r = relative_difference(vals)
+    assert all(abs(x - 1.0) < 1e-9 for x in r)  # each step doubles: +100%
+    # invariant to multiplicative rescaling of the whole sequence
+    r2 = relative_difference([100 * v for v in vals])
+    assert all(abs(a - b) < 1e-12 for a, b in zip(r, r2))
+
+
+def test_trend_contamination_flags_exponential_growth():
+    # an exponential ramp: additive |diff| grows with level, so the additive
+    # magnitude unit is a step function -> large contamination.  A stationary
+    # multiplicative series -> near zero.
+    ramp = [1.02 ** t for t in range(400)]
+    assert trend_contamination(ramp) > 0.3
+    import random as _r
+    rng = _r.Random(0)
+    stat = [1.0]
+    for _ in range(400):
+        stat.append(stat[-1] * (1 + 0.02 * (rng.random() - 0.5)))
+    assert abs(trend_contamination(stat)) < 0.2
+    # the scale-free unit removes the ramp contamination
+    a = top_magnitude_bit(ramp)                 # additive: almost all late ones
+    b = top_magnitude_bit(ramp, scale_free=True)  # relative: balanced
+    h = len(a) // 2
+    assert sum(a[h:]) / h > 0.9
+    assert 0.3 < sum(b[h:]) / h < 0.7
 
 
 # --- process-column algebra ------------------------------------------------

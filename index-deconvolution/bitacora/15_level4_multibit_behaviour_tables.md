@@ -122,10 +122,50 @@ range and the two-state compression) and richer binarisations (finer magnitude
 bands, Gray coding) to see whether the self-similar column sharpens into a
 stronger compression, not only a stronger forecast.
 
+## Multi-decade data, and a trap caught (exp15, exp16)
+
+The roadmap asked for longer series. Passing explicit unix `period1`/`period2`
+timestamps with `interval=1d` to the Yahoo v8 endpoint returns full daily history
+(the `range=max` shortcut had silently downsampled to monthly). Twelve instruments
+of 8,685 to 11,719 daily points each (indices and long-lived names, 1980s to 2026)
+are stored under `finance/data_long/`.
+
+A trap surfaced immediately and is worth recording. On a 46-year series the
+additive first difference |x[t] - x[t-1]| inherits the price level: as the level
+grows over an order of magnitude the "large move" unit becomes a step function,
+27 % ones in the first half and 73 % in the second. The naive run reported Hurst
+0.95 and a +0.44 forecast edge -- both artefacts of that trend, not volatility
+clustering. The fix is the scale-free relative difference (x[t] - x[t-1]) / x[t-1],
+the canonical scale-invariant analogue of the first difference; a contamination
+guard (`trend_contamination`, the second-half-minus-first-half fraction of large
+additive steps) is computed and reported so the trap cannot recur silently. It
+reads +0.40 on average, and correctly reads only +0.07 on the Nikkei, which did
+not trend up over the period.
+
+With the scale-free unit the two roadmap predictions are confirmed honestly:
+
+- self-similarity sharpens with the wider scale range: mean Hurst 0.803 (vs 0.665
+  on the 3-year data), all twelve in 0.77 to 0.85;
+- compression now beats the model cost decisively: the two-state rule compresses
+  every one of the twelve series (absolute gain positive 12/12) and beats its own
+  shuffle 12/12 by +78 bits on average, exactly as predicted -- the per-symbol
+  saving accumulates over about 11,000 symbols while the model cost grows only as
+  log N;
+- the forecast survives at length: the volatility unit beats its shuffle on all
+  twelve series, mean edge +0.126; the sign unit gives -0.001 (nothing).
+
+Finer magnitude resolution (exp16): Gray-coding the step size into three bands and
+testing each, the clustering is present at every resolution but decays inward --
+band 0 (coarsest) mean autocorr z +10.2 and Hurst 0.803, band 1 z +2.9 / 0.670,
+band 2 z +1.2 / 0.591. Resolution beyond the top bit adds diminishing but real
+structure; the self-similarity holds across the amplitude axis as well as time,
+and the coarsest volatility unit remains the right primary object.
+
 ## Verification
 
 `python level4/exp12_multibit.py` reports the unit survival table and the
-controls; `python level4/exp13_forecast.py` the forecast; `python
-level4/exp14_pivot_distribution.py` the pivot distribution. Tests:
-`python -m pytest level4/ level3/ level2/ tests/ -q` is 41 / 41 (11 new Level 4
-tests plus the existing 30). Levels 1 to 3 are untouched.
+controls; `exp13_forecast.py` the forecast; `exp14_pivot_distribution.py` the
+pivot distribution; `exp15_longdata.py` the multi-decade re-test with the
+contamination guard; `exp16_bands.py` the resolution study. Tests:
+`python -m pytest level4/ level3/ level2/ tests/ -q` is 43 / 43. Levels 1 to 3
+are untouched.

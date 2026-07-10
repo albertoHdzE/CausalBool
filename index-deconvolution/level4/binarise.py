@@ -39,9 +39,76 @@ def _rank_bits(values: list[float], nbits: int) -> list[list[int]]:
     return cols  # cols[b] is bit column b (b=0 is the most significant)
 
 
+def _gray_bits(values: list[float], nbits: int) -> list[list[int]]:
+    """Rank code in reflected Gray code: successive magnitude bands differ in one
+    bit, so each bit column is a cleaner band-membership unit than in plain binary
+    (where a small change can flip several bits at a band boundary)."""
+    n = len(values)
+    order = sorted(range(n), key=lambda i: values[i])
+    gray = [0] * n
+    for r, i in enumerate(order):
+        v = min(2 ** nbits - 1, int((r / n) * (2 ** nbits)))
+        gray[i] = v ^ (v >> 1)
+    return [[(gray[i] >> (nbits - 1 - b)) & 1 for i in range(n)] for b in range(nbits)]
+
+
+def magnitude_bands(values: list[float], nbits: int = 3, scale_free: bool = True,
+                    gray: bool = True) -> list[list[int]]:
+    """Bit columns of the step-size magnitude at several resolutions (Gray by
+    default).  Column 0 is the coarsest (above/below median); deeper columns
+    resolve finer bands within each half."""
+    d = relative_difference(values) if scale_free else first_difference(values)
+    mag = [abs(x) for x in d]
+    return _gray_bits(mag, nbits) if gray else _rank_bits(mag, nbits)
+
+
 def first_difference(values: list[float]) -> list[float]:
-    """Neutral detrending: x[t] - x[t-1].  Length shrinks by one."""
+    """Neutral detrending: x[t] - x[t-1].  Length shrinks by one.
+
+    Invariant to an affine rescaling x -> a x + b of the whole sequence, but NOT
+    to multiplicative growth within the sequence: if the values drift over orders
+    of magnitude, the additive difference inherits that drift.  For such a sequence
+    use ``relative_difference`` instead, and see ``trend_contamination``.
+    """
     return [values[t] - values[t - 1] for t in range(1, len(values))]
+
+
+def relative_difference(values: list[float]) -> list[float]:
+    """Scale-free difference (x[t] - x[t-1]) / x[t-1] for a positive sequence.
+
+    This is the canonical scale-invariant analogue of the first difference: it is
+    invariant to any multiplicative rescaling, so it does not inherit a secular
+    growth of the values.  It is defined only where the previous value is non-zero;
+    a zero divisor contributes a zero difference.  Nothing here is domain-specific
+    -- it is simply the right neutral operation for a multiplicative sequence, the
+    way the plain first difference is right for an additive one.
+    """
+    out = []
+    for t in range(1, len(values)):
+        prev = values[t - 1]
+        out.append((values[t] - prev) / prev if prev != 0 else 0.0)
+    return out
+
+
+def trend_contamination(values: list[float]) -> float:
+    """Guard against a magnitude unit that merely tracks the level (a trend).
+
+    Returns the difference between the fraction of large additive steps in the
+    second half of the sequence and in the first half.  For a stationary
+    magnitude process this is near zero; a value near +/-0.5 means the "large
+    move" unit is really a step function following the level, and the additive
+    difference must be replaced by the relative one.
+    """
+    d = [abs(x) for x in first_difference(values)]
+    if not d:
+        return 0.0
+    import statistics as _st
+    m = _st.median(d)
+    bits = [1 if x > m else 0 for x in d]
+    h = len(bits) // 2
+    if h == 0:
+        return 0.0
+    return sum(bits[h:]) / (len(bits) - h) - sum(bits[:h]) / h
 
 
 def binarisations(values: list[float], nbits: int = 3) -> dict[str, list[list[int]]]:
@@ -67,13 +134,17 @@ def binarisations(values: list[float], nbits: int = 3) -> dict[str, list[list[in
     return out
 
 
-def top_magnitude_bit(values: list[float]) -> list[int]:
-    """The single most significant magnitude bit of the first difference.
+def top_magnitude_bit(values: list[float], scale_free: bool = False) -> list[int]:
+    """The single most significant magnitude bit of the step size.
 
     1 where the step size is above its own median, 0 otherwise.  This is the
     coarsest volatility unit and the one whose occurrence set is studied in detail.
+    With ``scale_free`` the relative difference is used, so the unit does not
+    inherit a multiplicative trend in the values; use it for sequences that grow
+    over orders of magnitude (see ``trend_contamination``).
     """
-    return binarisations(values, nbits=1)["diff_mag"][0]
+    d = relative_difference(values) if scale_free else first_difference(values)
+    return _rank_bits([abs(x) for x in d], nbits=1)[0]
 
 
 def sign_bit(values: list[float]) -> list[int]:
