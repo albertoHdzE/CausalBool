@@ -46,3 +46,17 @@ def test_lz76_orders_structure_below_randomness():
 
 def test_run_length_encoding_basic():
     assert run_length_encoding([0, 0, 0, 1, 0]) == [(0, 3), (1, 1), (0, 1)]
+
+
+def test_local_complexity_profile_detects_clustered_structure():
+    # A series with a calm (low-complexity) half and a random (high-complexity)
+    # half has a dispersed window profile; a uniform-random series does not.
+    import random
+    from exp11_pivot_distribution import window_profile
+    import statistics
+    rng = random.Random(2)
+    clustered = [0, 1] * 200 + [rng.randint(0, 1) for _ in range(400)]
+    uniform = [rng.randint(0, 1) for _ in range(800)]
+    disp_clustered = statistics.pstdev(window_profile(clustered, 30))
+    disp_uniform = statistics.pstdev(window_profile(uniform, 30))
+    assert disp_clustered > disp_uniform
