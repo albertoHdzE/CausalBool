@@ -94,6 +94,63 @@ variable, so AND, OR, KOFN(1) and MAJORITY all match there). This non-uniqueness
 is a property of the canonical family, not a deficiency of the method, and it
 is reported explicitly as the equivalence class.
 
+## Complexity, and the data wall
+
+Two questions are often confused: how expensive is the *test*, and how expensive
+is *obtaining the data the test consumes*. They have opposite characters, and the
+whole practical story of the method lives in that gap.
+
+### The test is linear in the number of nodes, not combinatorial
+
+Finding a node's inputs does **not** search over the subsets of candidate inputs.
+Essentiality is decided one bit at a time and independently: bit `i` is a wire if
+and only if some input `x` satisfies `O_k[x] != O_k[x XOR 2^i]`, and this verdict
+does not depend on the status of any other bit. So a node with `n` candidate inputs
+costs `n` perturbation tests, not `2^n` subset trials. Across all `n` nodes the
+whole deconvolution is `O(n^2 · 2^n)` — polynomial in `n` for a fixed repertoire,
+and empirically a few milliseconds at `n = 8, 10, 12` (bitacora 10). There is no
+combinatorial explosion in the *inference*; the essential set assembles bit by bit.
+
+### The wall is the repertoire itself
+
+The cheap linear test presupposes the **exhaustive** repertoire: every one of the
+`2^n` states present as a row, so that the perturbed partner `x XOR 2^i` is
+guaranteed to exist and is found by arithmetic, never by search. That presupposition
+is the true exponential cost. For `n` beyond roughly 20 to 25 the `2^n`-row
+repertoire cannot be built, stored, or even enumerated (bitacora 05 leaves the
+`n = 35` models to the trajectory route for exactly this reason). The bottleneck is
+never the flip test; it is possessing the data the flip test needs.
+
+### Two responses to the wall
+
+The programme meets the wall twice, with opposite philosophies, and they explain
+why the cellular-automaton and biological cases stay exact while the financial case
+does not.
+
+1. **Locality (cellular automata, bitacora 04).** A cell can only be wired to a
+   bounded neighbourhood, so the candidate set is capped at `2r + 1` inputs a priori
+   rather than all `w` cells, and the exhaustive `2^w` repertoire is replaced by
+   pooled *observed* trajectories, gathered until every local neighbourhood pattern
+   has been witnessed. Exactness survives because locality bounds the candidate set
+   and sampling reaches every local pattern; the decisive check is global-map
+   equality on the small width, not mere trajectory replay.
+
+2. **Small-`k` combinatorial fit (financial data, bitacora 06).** With no locality
+   and states that essentially never recur, the exact partner-row trick cannot run
+   at all — there is no `x XOR 2^i` to compare against. What remains is a genuinely
+   combinatorial search over candidate supports of size at most `k` (`C(n, k)`
+   trials, capped at `k <= 2`), each scored by its best deterministic fit against
+   the base rate and by its contradiction rate. Here the exponential character
+   deliberately reappears, bounded by hand, and the method is approximate rather
+   than exact. This is why the market result is honest but negative: no small
+   deterministic support beats the base rate out of sample.
+
+The single sentence: the inference is linear, but it is only exact where the data
+are either exhaustive (small networks), or made effectively exhaustive by a
+structural assumption such as locality (cellular automata); where neither holds
+(markets), one falls back to a bounded, approximate combinatorial search, and
+exactness is lost.
+
 ## Relationship to basins of attraction
 
 The index-set method also enumerates the image of the repertoire (the set of
