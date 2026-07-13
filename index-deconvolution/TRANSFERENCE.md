@@ -440,3 +440,27 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   (method-of-moments matching the Fano curve), or move to intraday data where the fine
   timescales are populated and the criticality question (n→1) can be re-opened.
 - Reproduce the last result: `python level11/exp32_multiscale_and_fourier.py`.
+
+---
+
+## STATE AT HANDBACK (Level 12 — symbolic action dynamics, 2026-07-13)
+
+- HEAD: the Level 12 commit. 101 tests pass (95 + 6 new in `level12/`).
+- Confirmed state (bitacora 24), testing the user's "actions-not-direction" idea:
+  - **The 'what' is 0 bits, the 'when' is ~1 bit.** Action-type order (buy/sell/buy/sell)
+    is forced alternation → conditional entropy 0.0000 bits; the coarse timing symbol
+    carries 0.9924 bits. The user's thesis (order is in the when, not the what) confirmed
+    exactly and quantitatively.
+  - **Two clocks turn out to be one (honest null on asymmetry).** Split the pivot clock
+    into the BUY clock (troughs) and SELL clock (peaks): both have n=0.572, both forecast
+    OOS +0.09 over shuffle 12/12 — statistically indistinguishable (branching equal to
+    6dp; different loglik, so grid quantisation not a bug). The DC construction is
+    symmetric under sign-flip, so no entry/exit asymmetry exists to exploit. One
+    symmetric opportunity clock, seen twice.
+  - **'Half the game' costed:** a predictable clock is risk control, NOT half the money —
+    profit is direction × timing (multiplicative), and the direction factor is dead.
+- Most promising open door: unchanged — a **clustering-targeted multi-scale kernel** or
+  **intraday data** (b23). The symbolic/schema route (Holland wildcards on the timing
+  symbols) is unlikely to beat the Hawkes persistence given b16/b20, but a full
+  ε-machine reconstruction of the timing-symbol sequence remains formally open (door #3).
+- Reproduce the last result: `python level12/exp33_action_symbols.py`.
