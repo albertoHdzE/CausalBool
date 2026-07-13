@@ -382,3 +382,30 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   Second: **open door #3, value-axis symbolic dynamics** (the prefix/ε-machine idea),
   genuinely under-explored.
 - Reproduce the last result: `python level10/exp30_oracle_clock.py`.
+
+---
+
+## STATE AT HANDBACK (Level 10 adversarial audit + 100 stocks, 2026-07-13)
+
+- HEAD: the Level 10 audit commit (this finding). 87 tests pass.
+- Confirmed state, told straight after a hostile audit (bitacora 22):
+  - The bitacora-21 "theorem" (perfect trades = pivots at θ=c) is a **geometric
+    identity**, not a market fact — containment ~1.0 on stocks, GBM AND noise/sine
+    alike. My b21 framing ("the headline", "closes the flagship") was overselling;
+    corrected. Its only worth is interpretive (cost = reversal scale).
+  - The DP is provably optimal (200/200 vs brute force). The OOS forecast has **no
+    look-ahead leak** (causal pivots score the same) but is therefore **b20 relabelled,
+    no new info**.
+  - Scaled to **100 freshly-downloaded stocks** (`finance/data_100/`, slimmed+committed):
+    the one real market claim — the clock self-excites — **survives**, weaker than the
+    12 survivors: n=0.613 vs shuffle 0.014, self-exciting **99/100**, Fano 0.494. OOS
+    forecast positive **94/100** (p=2e-21). GBM control reads null. n(c) hump survives
+    qualitatively (interior peak 88/100) but soft at the extremes (fine scale
+    instrument-limited by the 250-day Hawkes decay grid).
+  - Didactic notebook `notebooks/09_oracle_perfect_trader.ipynb` (9 plots, executed
+    from a foreign cwd, reads committed slimmed panel + results JSON).
+- Most promising open door: **open door #2, the multi-scale / power-law Hawkes kernel**
+  — it should lift the OOS/Fano and de-artefact the fine-scale end of n(c), and re-open
+  the criticality question. Everything points there now.
+- Reproduce the last result: `python level10/exp31_stress_100.py` (needs
+  `finance/data_100/`, already committed; or re-fetch with `level10/download_100.py`).
