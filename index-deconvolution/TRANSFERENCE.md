@@ -464,3 +464,28 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   symbols) is unlikely to beat the Hawkes persistence given b16/b20, but a full
   ε-machine reconstruction of the timing-symbol sequence remains formally open (door #3).
 - Reproduce the last result: `python level12/exp33_action_symbols.py`.
+
+---
+
+## STATE AT HANDBACK (Level 13 — spacetime deconvolution, 2026-07-13)
+
+- HEAD: the Level 13 commit. 107 tests pass (101 + 6 new in `level13/`).
+- Confirmed state (bitacora 25), testing the user's "rotate the plot → scale-free
+  (price×time) grid → deconvolve it as a CA/network repertoire" idea:
+  - **Coarse-graining fixes the b12 obstruction (real methodological gain):** scale-free
+    log-level symbolisation makes market configurations recur — recurrence 0.785→1.000 as
+    bins coarsen. The deconvolution is WELL-POSED for the first time (b12 died because raw
+    prices never recur).
+  - **Control triad, persistence-controlled (raw lift is a trivial-persistence trap → use
+    lift-EXCESS over shuffle):** logistic-map control lift-excess +0.418 (instrument
+    detects a rule); MARKET lift-excess −0.004 (6/12), contradiction 0.921 = its shuffle
+    0.908; GBM null. So the market has NO deterministic rule beyond its marginal, even in
+    this scale-free 2-D representation. The "network" the deconvolution returns for a
+    market is degenerate; the logistic control's is a real rule.
+  - This is the most rigorous form yet of "is a market a cellular automaton" — now
+    well-posed — and the answer is no. Order is in the clustering of WHEN (the clock), not
+    in a Boolean law over values, at any resolution reached.
+- Most promising open door: unchanged — clustering-targeted multi-scale kernel or
+  intraday data (b23); the value-axis ε-machine (door #3) is now well-posed to attempt
+  but expected null on determinism (may still have compressible *statistical* structure).
+- Reproduce the last result: `python level13/exp34_spacetime_deconvolution.py`.
