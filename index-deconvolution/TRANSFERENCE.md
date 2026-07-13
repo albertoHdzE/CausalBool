@@ -409,3 +409,34 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   the criticality question. Everything points there now.
 - Reproduce the last result: `python level10/exp31_stress_100.py` (needs
   `finance/data_100/`, already committed; or re-fetch with `level10/download_100.py`).
+
+---
+
+## STATE AT HANDBACK (Level 11 — Fourier + multi-scale Hawkes, 2026-07-13)
+
+- HEAD: the Level 11 commit. 95 tests pass (87 + 8 new in `level11/`).
+- Confirmed state (bitacora 23), two follow-ups, each vs controls:
+  - **Fourier (confirmation, not discovery):** spectral exponent of daily returns
+    +0.072 (white; control white noise -0.001), of |returns| -0.320 and of the pivot
+    activity clock -0.541 (red; control random walk -1.812). Values are spectrally
+    white, the clock is red 1/f — the same split the pivots found, re-derived in a
+    second language. No discrete periodic line → nothing new to trade. Fourier
+    corroborates, does not rescue.
+  - **Multi-scale / power-law Hawkes (HONEST NEGATIVE):** naive power-law kernel (sum
+    of exponentials, 3 free numbers), fit by plain ML, does WORSE than the single
+    exponential — it slides to gamma≈0, n≈0.11 (near-Poisson) and regenerates Fano
+    -0.003 vs single-exp 0.355 vs real 0.512; OOS +0.001 vs single +0.059. Root cause
+    (verified, not a bug — reduces exactly to level9 at K=1): the Hawkes likelihood is
+    LOCAL, the Fano clustering is GLOBAL; enriching the kernel lets the optimiser walk
+    away from the clustering. Open door #2's naive form is closed; the honest next step
+    is a clustering-targeted objective (method-of-moments / Fano-matching) or finer
+    (intraday) sampling, NOT a fancier kernel fit by likelihood.
+  - Notebook `notebooks/09_oracle_perfect_trader.ipynb` extended: survivorship-weakness
+    explanation (0.69→0.61, softening-not-collapsing is the credential), the Fourier
+    split, and the multi-scale negative — 12 plots, executed from a foreign cwd.
+  - **Trading verdict, restated for the user:** NOT a winning return strategy (direction
+    unforecastable); only a risk tool (b19 ceiling: Sharpe 0.70→0.73, drawdown/tail cut).
+- Most promising open door: a **clustering-targeted fit** of a multi-scale kernel
+  (method-of-moments matching the Fano curve), or move to intraday data where the fine
+  timescales are populated and the criticality question (n→1) can be re-opened.
+- Reproduce the last result: `python level11/exp32_multiscale_and_fourier.py`.

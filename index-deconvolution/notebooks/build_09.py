@@ -12,21 +12,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # extra path + data locations this notebook needs on top of the shared bootstrap
 EXTRA = r'''
 # Level 10 lives above the shared bootstrap's reach: add level9/level10 and the panels.
-for _sub in ["level9", "level10"]:
+for _sub in ["level9", "level10", "level11"]:
     _p = os.path.join(ROOT, _sub)
     if _p not in sys.path:
         sys.path.insert(0, _p)
 import json
 DATA_100 = os.path.join(ROOT, "finance", "data_100")   # 100 stocks (run level10/download_100.py)
-RESULTS  = os.path.join(ROOT, "results", "exp31_stress_100.json")
 from finance import load_yahoo_close
 
 def load_stock(ticker):
     px = load_yahoo_close(os.path.join(DATA_100, ticker + ".json"))
     return [px[d] for d in sorted(px)]
 
-with open(RESULTS) as _f:
-    R100 = json.load(_f)        # precomputed 100-stock audit (fast to plot)
+def _load(name):
+    with open(os.path.join(ROOT, "results", name)) as _f:
+        return json.load(_f)
+
+R100 = _load("exp31_stress_100.json")   # the 100-stock adversarial audit
+R12  = _load("exp30_oracle_clock.json") # the 12 "famous few" long survivors
+RX   = _load("exp32_multiscale_fourier.json")  # Fourier + multi-scale Hawkes
 print("panel :", len(R100["rows"]), "stocks audited;  demo stock loads live below.")
 '''.strip()
 
@@ -239,6 +243,50 @@ print(f"mean n = {se['mean_branching']:.3f} vs shuffle {se['mean_branching_null'
 """),
 
 md(r"""
+### Why is the signal *weaker* on 100 stocks than on the famous few? (survivorship)
+
+Here is the most important honesty check in this whole notebook, and it is easy to
+miss. On the twelve long-lived "blue-chip" series we first studied, the clustering was
+**n ≈ 0.69**. On the broad panel of 100 it is **n ≈ 0.61** — real, but *weaker*. Why?
+
+**In simple terms.** The famous twelve are *survivors*: giant indices and companies
+that stayed important for 30+ years. Survivors have long, dramatic, crisis-laden
+histories — exactly the kind that clusters most. The 100 are a fairer mix: younger,
+smaller, messier names. When you stop cherry-picking the legends, the effect cools off
+a little. That is expected.
+
+**In strong terms — and this is the point.** A *fake* effect (a survivorship artefact,
+or a multiple-testing fluke) would **collapse** when you leave the flattering sample.
+This one does not collapse — it merely **softens**, from 0.69 to 0.61, and still fires
+on **99 of 100** brand-new stocks. An effect that survives the removal of its most
+favourable sample, and holds on almost every out-of-sample name, is *trustworthy*
+precisely *because* it got a little weaker. The drop is not a wound; it is the
+credential. Below: the two distributions side by side.
+"""),
+code(r"""
+b12 = [r["branching_ratio"] for r in R12["behaviour_table"]["rows"]]      # 12 survivors
+b100 = [r["branching_ratio"] for r in R100["rows"]]                       # 100 panel
+m12, m100 = np.mean(b12), np.mean(b100)
+
+fig, ax = plt.subplots(figsize=(9, 3.8))
+ax.hist(b100, bins=20, color=OK, alpha=0.75, density=True, label=f"100 stocks (mean {m100:.2f})")
+ax.hist(b12, bins=8, color=HL, alpha=0.55, density=True, label=f"12 'famous' survivors (mean {m12:.2f})")
+ax.axvline(m100, color=OK, lw=2); ax.axvline(m12, color=HL, lw=2)
+ax.axvline(0.0, color="#888", lw=1, ls=":")
+ax.annotate("survivors\ncluster more", xy=(m12, 1.0), xytext=(m12+0.05, 2.2),
+            color=HL, fontsize=9, ha="left",
+            arrowprops=dict(arrowstyle="->", color=HL))
+ax.set_xlabel("clustering (branching ratio n)"); ax.set_ylabel("density")
+ax.set_title("The clustering softens on the broad panel (0.69 -> 0.61) but does NOT collapse")
+ax.legend(); plt.tight_layout(); plt.show()
+print(f"survivors:  n = {m12:.3f}   (12 hand-inherited long-lived series)")
+print(f"broad 100:  n = {m100:.3f}   (fresh, diverse; self-exciting on "
+      f"{R100['self_excitation']['n_self_exciting']}/100)")
+print("A survivorship *artefact* would have collapsed to the shuffle (~0.01). It did not.")
+print("Softening-but-surviving is the honest, and stronger, conclusion.")
+"""),
+
+md(r"""
 ## Step 5 · Does the clock forecast? (a little, honestly)
 
 The honest, tradable question is **not** "will the price rise?" (impossible) but
@@ -269,6 +317,67 @@ plt.tight_layout(); plt.show()
 print(f"perfect-trader (future) gain {oo['mean_oos_oracle']:+.4f}  ==  "
       f"causal-pivot gain {oo['mean_oos_pivot']:+.4f}  -> no look-ahead cheat, no new info.")
 print(f"GBM control clock branching = {R100['gbm_control']['branching']:.3f}  -> reads ~null (sane).")
+"""),
+
+md(r"""
+## Step 5b · The Fourier question — does splitting into waves isolate the signal?
+
+A natural idea: the **Fourier transform** breaks any wiggly line into a sum of pure
+sine waves of different speeds, and shows how much "energy" sits at each speed (the
+*power spectrum*). Could it separate the market's noise from its structure, or reveal a
+hidden rhythm to trade?
+
+We test it on three signals and read one number, the **spectral slope**: `0` means
+*white* (flat — pure noise, no structure), *negative* means *red* (energy piled at slow
+speeds — long memory). Two controls anchor the scale: random noise (slope ~0) and a
+random walk (slope ~-2).
+"""),
+code(r"""
+from spectral import periodogram, loglog_slope
+from controls import log_returns
+r = log_returns(price)
+fr, pr = periodogram(r)                       # returns spectrum
+fv, pv = periodogram([abs(x) for x in r])     # volatility (|returns|) spectrum
+sr = loglog_slope(fr, pr)["slope"]; sv = loglog_slope(fv, pv)["slope"]
+
+fig, ax = plt.subplots(figsize=(9, 3.8))
+ax.loglog(fr, pr, color="#bbb", lw=0.8, label=f"returns  (slope {sr:+.2f}, ~white)")
+ax.loglog(fv, pv, color=OK,     lw=0.9, label=f"volatility |returns|  (slope {sv:+.2f}, red)")
+ax.set_xlabel("frequency (cycles/day)"); ax.set_ylabel("power")
+ax.set_title(f"{TICKER}: the PRICE MOVES are flat noise; the VOLATILITY has long memory")
+ax.legend(); plt.tight_layout(); plt.show()
+
+fo = RX["fourier"]
+print("Averaged over the long panel (spectral slope; 0 = noise, negative = memory):")
+print(f"  daily returns    : {fo['returns_slope']:+.3f}   (control white noise {fo['control_white_slope']:+.3f})")
+print(f"  |returns| (vol)  : {fo['abs_returns_slope']:+.3f}")
+print(f"  the pivot clock  : {fo['activity_slope']:+.3f}   (control random walk {fo['control_walk_slope']:+.3f})")
+print("VERDICT: Fourier CONFIRMS the same split -- values are noise, the clock is structured --")
+print("but there is NO spike at any single frequency: no hidden rhythm, nothing new to trade.")
+"""),
+
+md(r"""
+### And a failed experiment, reported anyway — the multi-scale clock
+
+We tried to *improve* the burst model with a fancier, self-similar ("power-law")
+version that mixes many timescales instead of one. It **did not help** — fit by the
+plain rule of best likelihood, it slid toward a near-random setting and reproduced
+*less* clustering than the simple one-timescale model, not more. We keep the negative:
+the simple three-number clock stays the better generator at this daily resolution.
+"""),
+code(r"""
+ms = RX["multiscale"]
+labels = ["real\nclock", "simple\nHawkes", "power-law\nHawkes"]
+vals = [ms["mean_real_fano"], ms["mean_single_fano"], ms["mean_multi_fano"]]
+fig, ax = plt.subplots(figsize=(6.5, 3.4))
+ax.bar(labels, vals, color=[INK, OK, HL])
+ax.set_ylabel("clustering regenerated\n(Fano exponent)")
+ax.set_title("The 'fancier' multi-scale kernel makes clustering WORSE (honest negative)")
+for i, v in enumerate(vals):
+    ax.text(i, v + 0.01, f"{v:.2f}", ha="center", fontweight="bold")
+plt.tight_layout(); plt.show()
+print(f"out-of-sample: simple {ms['mean_single_oos']:+.3f} vs power-law "
+      f"{ms['mean_multi_oos']:+.3f} nats/event -> simple wins. Negative kept.")
 """),
 
 md(r"""
@@ -333,9 +442,14 @@ plt.tight_layout(); plt.show()
 md(r"""
 ## What to take away
 
+* **Can this win at trading? No — not for returns.** Nothing here predicts whether a
+  price will rise or fall (that is impossible, proven elsewhere in the project). The
+  only thing the clock forecasts is *when* turbulence arrives, which helps *manage
+  risk* (smaller drawdowns), not *make* money. A risk tool, not a money machine.
 * The neat "perfect trader = pivots" rule is **real but not a discovery about
-  markets** — it is geometry, true of any line. Its worth is only *interpretive*: it
-  lets us call the turning-point clock the *perfect-opportunity* clock.
+  markets** — it is geometry, true of any line, even a sine wave. Its worth is only
+  *interpretive*: it lets us call the turning-point clock the *perfect-opportunity*
+  clock.
 * The genuine market signal is small and about **timing, never direction**: turning
   points **cluster in bursts**, that clustering beats a shuffle on essentially all
   100 stocks, and it forecasts the *next* turn a little out of sample — but this is
@@ -344,8 +458,9 @@ md(r"""
   geometry? is the optimiser buggy? is the forecast a look-ahead cheat?) and reported
   exactly what each attack showed. What is left is modest, honest, and holds at scale.
 
-*Reproduce:* `python level10/download_100.py` then `python level10/exp31_stress_100.py`
-regenerate the panel and the JSON this notebook reads; `python notebooks/build_09.py`
+*Reproduce:* `python level10/download_100.py`, then `python level10/exp30_oracle_clock.py`,
+`python level10/exp31_stress_100.py` and `python level11/exp32_multiscale_and_fourier.py`
+regenerate the panel and the JSON files this notebook reads; `python notebooks/build_09.py`
 rebuilds the notebook itself.
 """),
 ]
