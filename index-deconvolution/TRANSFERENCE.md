@@ -357,3 +357,28 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
 - Most promising open door: **§6, the oracle / perfect-trader behaviour table** — and
   the theorem that the perfect trades are pivots at θ=transaction-cost.
 - Reproduce the last result: `python level9/exp29_hawkes_clock.py`.
+
+---
+
+## STATE AT HANDBACK (Level 10, 2026-07-13)
+
+- HEAD: Level 10 commit (this finding). Working tree otherwise as before (the user's
+  own edits to `src/deconvolution.py` and `notebooks/00_*.ipynb` — leave them).
+- Confirmed state: 87 tests pass (78 + 9 new in `level10/`). The flagship (§6) is
+  **closed, and the theorem lands exactly**: the in-hindsight optimal trades under a
+  per-round-trip cost c ARE the directional-change pivots at threshold θ = c —
+  exact containment DC(θ=c) ⊆ oracle (guaranteed by the confirmation geometry
+  H/L ≥ 1+θ = 1+c = the profitability threshold; proved, verified 11/12 exact, the
+  12th a measure-zero break-even tie), the oracle a 0.4% superset (the greedy-vs-global
+  residual). The oracle clock is the Level 9 self-exciting fractal (n=0.685, Fano 0.51,
+  OOS +0.055 nats/event 12/12) — reported honestly as confirmation of b20, not a new
+  forecast. GBM control reads null. NEW object: transaction cost is a renormalisation
+  scale; n(c) is non-monotone, a hump peaking at percent-level costs (0.40→0.685→0.48).
+- Most promising open door: **open door #2 — the multi-scale / power-law Hawkes kernel**
+  (`level9/hawkes.py`). The single-exponential kernel under-reproduces the clustering
+  (Fano 0.41 sim vs 0.49 real, b20) and the n(c) hump/fine-scale softening in b21 is
+  partly instrument-limited by the 250-day decay-grid ceiling. A sum-of-exponentials or
+  power-law kernel should close both and re-open the criticality question at fine c.
+  Second: **open door #3, value-axis symbolic dynamics** (the prefix/ε-machine idea),
+  genuinely under-explored.
+- Reproduce the last result: `python level10/exp30_oracle_clock.py`.
