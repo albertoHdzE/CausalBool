@@ -516,3 +516,28 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   shuffle. This is `level15/` — the "first two separate equations, then fuse" the user
   described. (Prior: cross-terms will mostly encode the trivial alternation; test honestly.)
 - Reproduce the last result: `python level14/exp36_behaviour_formulae.py`.
+
+---
+
+## STATE AT HANDBACK (Level 15 — blind play, timing works / money does not, 2026-07-13)
+
+- HEAD: the Level 15 commit. 122 tests pass (115 + 7 new in `level15/`).
+- Confirmed state (bitacora 27), playing the buy/sell formulae blindly OOS before fusion:
+  - **TIMING works (weak, real, sector-broad):** fit on first 70% of time, forecast "turn
+    within 10 days" on held-out 30% via causal Hawkes intensity. Panel mean ROC-AUC
+    0.554/0.555 (buy/sell) vs shuffle 0.500, excess +0.055, beats shuffle 83–84/100.
+    Roughly calibrated. Positive AUC-excess across ~all 11 sectors (not a one-sector
+    artefact — the user's rigour ask). Honest variance: ~1 in 6 stocks show no edge (KO
+    AUC 0.50); detail stock CVS chosen at the panel mean, full spread shown.
+  - **MONEY does not:** blind causal trading play median 0.08× of buy&hold, beats buy&hold
+    only 11/100 (free) / 3/100 (after 0.1% cost); look-ahead oracle ~2e18× (cheats). The
+    b8/b19 ceiling shown as two equity curves. Timing skill ≠ trading skill.
+  - Notebook `notebooks/11_blind_play.ipynb` (ROC, reliability, walk-forward, equity
+    curves, panel AUC-excess, per-sector bar, money histogram; 7 plots; foreign-cwd run).
+- GREEN LIGHT (the user's condition met): timing works, so fusion is licensed — but ONLY
+  as a better TIMING model, never money. **NEXT = level16: the fusion equation = a
+  mutually-exciting BIVARIATE Hawkes** (λ_buy, λ_sell with 2×2 cross-excitation A_bs,A_sb).
+  Test: does coupling forecast the next turn's timing better than the two univariate
+  formulae apart, OOS vs shuffle? (Prior: cross-terms largely encode the alternation;
+  measure honestly.)
+- Reproduce the last result: `python level15/exp37_blind_play.py`.
