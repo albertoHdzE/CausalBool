@@ -60,3 +60,31 @@ def test_risk_timing_runs_and_derisks():
     out = risk_timing_backtest(rets, lam, t_start=700)
     assert "sharpe_timed" in out and "sharpe_bh" in out
     assert len(out["equity_timed"]) == len(out["equity_bh"])
+
+
+def test_predicted_events_respects_refractory_and_count():
+    from predict import predicted_events
+    lam = [0.0] * 100
+    for t in (55, 56, 70, 90):
+        lam[t] = 1.0
+    pe = predicted_events(lam, t_start=50, refractory=5, n_expected=3)
+    assert len(pe) == 3
+    for i in range(len(pe)):
+        for j in range(i + 1, len(pe)):
+            assert abs(pe[i] - pe[j]) >= 5
+
+
+def test_match_events_precision_recall():
+    from predict import match_events
+    m = match_events([10, 20, 30], [11, 100, 200], tol=2)
+    assert m["matched"] == 1               # 10~11 only
+    assert abs(m["precision"] - 1 / 3) < 1e-9
+    assert abs(m["recall"] - 1 / 3) < 1e-9
+
+
+def test_trade_sim_buy_low_sell_high_profits():
+    from predict import trade_sim
+    price = [10, 8, 9, 12, 7, 11]          # buy at index1 (8), sell at index3 (12)
+    out = trade_sim(price, buy_days=[1], sell_days=[3], cost=0.0)
+    assert out["final"] > 1.0              # 8 -> 12 is a profit
+    assert out["buys"] == [1] and out["sells"] == [3]

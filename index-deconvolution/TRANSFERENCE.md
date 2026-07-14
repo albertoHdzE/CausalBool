@@ -621,3 +621,29 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   the untested fusion equation (bivariate buy⇄sell Hawkes, level14/15). Trading is closed:
   b27 + b30 both say no return edge; only risk, and turn-timing is too weak a risk proxy.
 - Reproduce the last result: `python level18/exp40_individual_vs_universal.py`.
+
+---
+
+## STATE AT HANDBACK (Level 18 cont. — clock prediction + granular walkthrough, 2026-07-14)
+
+- HEAD: the Level 18 walkthrough commit. 146 tests pass (143 + 3 new in `level18/`).
+- Confirmed state (bitacora 31), the user's ask for a finer notebook 14 (build the model
+  step by step on 3 stocks → predict clock vs oracle w/ precision+recall → 100-stock summary
+  → trade 3 examples with equity plots):
+  - **What the model IS (stated plainly):** behaviour table's ratio column SCATTERS (cv≈0.75
+    on all 3 stocks) → NO exact formula → NOT a behaviour table, NOT a complex network; it is
+    a STATISTICAL behaviour formula (3-number Hawkes) built from 3 surviving regularities
+    (self-excitation, self-similarity α≈½, lognormal gaps).
+  - **Clock prediction (100 stocks, tolerance SWEEP — the honest way):** model F1 vs random
+    F1: ±1d 0.463/0.235, ±2d 0.474/0.372, ±3d 0.479/0.475, ±5d 0.485/0.592, ±8d 0.491/0.674.
+    The model wins at PRECISE tolerances (locates turns 2–3× better than random), loses at
+    loose ones (random tiles the timeline). At ±2d: precision 0.44, recall 0.53. The clock is
+    predictable to a FEW DAYS, modestly. (Caught a near-trap: tol=5 alone looked like a null.)
+  - **Trade (3 examples):** buy predicted troughs / sell predicted peaks → does NOT beat
+    buy&hold (b27/b30 confirmed again). Notebook plots price+moves+accumulated profit.
+  - Adds `level18/predict.py` (predicted_events, match_events, trade_sim) + `exp41`.
+  - Notebook `notebooks/14_individual_vs_universal.ipynb` fully refactored (4-phase
+    walkthrough; 6 plots; foreign-cwd run).
+- Most promising open door: unchanged — the α≈½ coarse-scale softening (universal crossover?)
+  and the untested bivariate buy⇄sell fusion Hawkes. Trading closed (3 independent negatives).
+- Reproduce the last result: `python level18/exp41_clock_prediction.py`.
