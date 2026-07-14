@@ -595,3 +595,29 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   crossover scale, and is it universal? Also still open: the fusion equation (bivariate
   buy⇄sell Hawkes, from level14/15). And whether α couples to any per-stock property.
 - Reproduce the last result: `python level17/exp39_universal_collapse.py`.
+
+---
+
+## STATE AT HANDBACK (Level 18 — individual vs universal, in practice, 2026-07-14)
+
+- HEAD: the Level 18 commit. 143 tests pass (137 + 6 new in `level18/`).
+- Confirmed state (bitacora 30), the user's ask — save per-stock models, plot by sector,
+  then trade individual vs universal and compare practically:
+  - **Universal shape** (median over stocks): branching n=0.590, decay β=0.0101 (≈99-day
+    memory). Per-stock self-excitation overlaps across all 11 sectors (no distinct sector
+    clock) — itself an argument for a universal model. All per-stock models saved in the JSON.
+  - **Forecast head-to-head (OOS): UNIVERSAL WINS/TIES.** held-out gain universal +0.050 vs
+    individual +0.047 (universal better on 66/100); AUC 0.590 vs 0.591 (tied). Pooling beats
+    noisy per-stock fits — one law > a hundred fits (vindicates the universality instinct).
+  - **Trading head-to-head (OOS): NEITHER beats buy&hold (honest negative).** risk-timing on
+    turn-intensity → Sharpe 0.339 (ind) / 0.337 (uni) vs 0.358 (buy&hold); worse drawdowns
+    (−63% vs −58%); beat b&h on only 27/100 each. Turn-FREQUENCY is not volatility MAGNITUDE,
+    so it is a poor risk proxy (unlike b19's realised-vol timing). Winner = buy&hold.
+  - Practical verdict: universal model is the better MODEL (simpler, forecasts ≥ as well);
+    for MONEY, neither works — the clock is a good scientific object and a poor trading signal.
+  - Notebook `notebooks/14_individual_vs_universal.ipynb` (sector boxplot, forecast scatter,
+    Sharpe/drawdown bars; 3 plots; foreign-cwd run).
+- Most promising open door: still the α≈½ coarse-scale softening (universal crossover?), and
+  the untested fusion equation (bivariate buy⇄sell Hawkes, level14/15). Trading is closed:
+  b27 + b30 both say no return edge; only risk, and turn-timing is too weak a risk proxy.
+- Reproduce the last result: `python level18/exp40_individual_vs_universal.py`.
