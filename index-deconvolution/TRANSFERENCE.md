@@ -570,3 +570,28 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   carries cross-sectional meaning. Then the fusion equation (bivariate Hawkes, still open
   from level14/15) for the buy⇄sell coupling.
 - Reproduce the last result: `python level16/exp38_clock_as_gate.py`.
+
+---
+
+## STATE AT HANDBACK (Level 17 — one universal clock law, 2026-07-14)
+
+- HEAD: the Level 17 commit. 137 tests pass (128 + 9 new in `level17/`).
+- Confirmed state (bitacora 29), answering "a model per stock, or universal?" (universal)
+  by data collapse on 100 stocks:
+  - **Universal gap SHAPE (but marginal):** per-stock gaps rescaled by their mean collapse
+    onto ONE lognormal (μ=−0.365, σ=0.851), mean KS 0.095. BUT the return-shuffle collapses
+    onto the SAME lognormal (real-vs-shuffle KS 0.049) → the shape is a marginal (fat-tail)
+    property, NOT structural. Fat-tail-marginal trap (b16) at panel scale; reported, not sold.
+  - **Universal STRUCTURAL constant = α ≈ ½:** self-similarity exponent 0.43/0.49/0.47/0.36
+    across θ=0.01/0.02/0.04/0.08, tight (±0.09) at fine scales, softening coarse; shuffle ≈0.
+    The one market-wide constant that survives the null.
+  - **Universal model factorises:** {per-stock scale (mean gap 4–9 days)} × {universal
+    lognormal shape — marginal} × {universal α≈½ — structural}. NOT 100 models.
+  - The Level-16 nested ratio r≈3.2 is, by this standard, NOT a representation-free constant
+    (model/grid-dependent) — flagged, not claimed fundamental.
+  - Notebook `notebooks/13_universal_law.ipynb` (raw→normalised collapse spaghetti, universal
+    lognormal with shuffle drawn on top, α error-bars vs ½ and vs shuffle; 3 plots, foreign cwd).
+- Most promising open door: the α≈½ softening at coarse scales is unexplained — is there a
+  crossover scale, and is it universal? Also still open: the fusion equation (bivariate
+  buy⇄sell Hawkes, from level14/15). And whether α couples to any per-stock property.
+- Reproduce the last result: `python level17/exp39_universal_collapse.py`.
