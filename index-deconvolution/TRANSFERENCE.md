@@ -541,3 +541,32 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   formulae apart, OOS vs shuffle? (Prior: cross-terms largely encode the alternation;
   measure honestly.)
 - Reproduce the last result: `python level15/exp37_blind_play.py`.
+
+---
+
+## STATE AT HANDBACK (Level 16 — clock as a synthetic gate-network, 2026-07-14)
+
+- HEAD: the Level 16 commit. 128 tests pass (122 + 6 new in `level16/`).
+- Confirmed state (bitacora 28), the user's challenge to formalize the clock via the
+  original behaviour-table/gate logic (read `papers/method/derivations/02_cb_and.pdf`,
+  `02_cb_or.pdf` for the intelligence: AND = pivot+offset, OR = band-union, self-similar
+  via the nested dyadic φ_K branch):
+  - **The clock's self-similarity = the NESTED / fractal (φ_K) branch, not a flat gate.**
+    Fano exponent: market +0.494, shuffle -0.037, flat OR-superposition -0.029 (Palm-
+    Khinchin → Poisson, structurally CANNOT self-organise), branching/Hawkes +0.247
+    (under-shoots, the b20 shortfall), nested fractal +0.499 (matches, residual 0.017).
+    Nested is closest on **99/100** stocks.
+  - **Recovered behaviour-formula parameter:** the fractal spacing ratio r (the market's
+    (n+1)/n analogue) is tight — median 3.20, mean 3.23 across 100 stocks.
+  - **Honest boundary:** distributional match of the self-similar SIGNATURE (one exponent,
+    made credible by structural discrimination — two rivals cannot reach it), NOT the exact
+    turns. No exact index-set formula (market not deterministic); the events stay stochastic.
+  - Notebook `notebooks/12_clock_as_gate.ipynb` (rotated occurrence set + behaviour table,
+    Fano curve of the 3 constructions, exponent bar, recovered-r histogram, real-vs-synthetic
+    raster; 4 plots; foreign-cwd run).
+- Most promising open door: turn the signature match into a fuller behaviour formula —
+  test whether the fitted nested/fractal model regenerates statistics it was NOT fitted to
+  (gap distribution KS, multifractal width, Benford of gaps), and whether the recovered r
+  carries cross-sectional meaning. Then the fusion equation (bivariate Hawkes, still open
+  from level14/15) for the buy⇄sell coupling.
+- Reproduce the last result: `python level16/exp38_clock_as_gate.py`.
