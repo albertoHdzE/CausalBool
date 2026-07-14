@@ -489,3 +489,30 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
   intraday data (b23); the value-axis ε-machine (door #3) is now well-posed to attempt
   but expected null on determinism (may still have compressible *statistical* structure).
 - Reproduce the last result: `python level13/exp34_spacetime_deconvolution.py`.
+
+---
+
+## STATE AT HANDBACK (Level 14 — buy/sell behaviour formulae, 2026-07-13)
+
+- HEAD: the Level 14 commit. 115 tests pass (107 + 8 new in `level14/`).
+- Confirmed state (bitacora 26), the user's refined idea (the two strands are the BUY
+  pattern and the SELL pattern, each with a behaviour table/formula):
+  - **No exact closed-form formula** for either pattern (0/100 stocks; cv_gaps≈0.77) —
+    the honest controlled-vs-uncontrolled boundary; a periodic control IS flagged exact,
+    so the instrument works.
+  - **Statistical behaviour formula (3-number Hawkes) earns its name** on 100 stocks vs
+    shuffle: compresses ~129×, self-exciting n≈0.456, regenerates gaps (KS≈0.19) and
+    ~half the Fano clustering, forecasts OOS +0.026 beating shuffle 82–83/100. Buy and
+    sell are symmetric (n 0.456≈0.455).
+  - **Direction kept honest:** the two patterns mark direction in HINDSIGHT only (they
+    ARE the turns); no forward direction call is licensed (side = trivial alternation,
+    timing = weak clock edge = risk control not return).
+  - Dedicated notebook `notebooks/10_buy_sell_behaviour_formulae.ipynb` (1 stock → 100 →
+    zoom-in "match"; 7 plots; executed from foreign cwd).
+- Most promising open door / EXPLICIT NEXT STEP the user asked for: **the fusion equation
+  = a mutually-exciting BIVARIATE Hawkes** (buy⇄sell cross-excitation matrix), the
+  physics-style merge of the two univariate formulae. Off-diagonal A_bs, A_sb = the
+  base-pairing. Fit it, test whether the join carries more than the two apart, OOS vs
+  shuffle. This is `level15/` — the "first two separate equations, then fuse" the user
+  described. (Prior: cross-terms will mostly encode the trivial alternation; test honestly.)
+- Reproduce the last result: `python level14/exp36_behaviour_formulae.py`.
