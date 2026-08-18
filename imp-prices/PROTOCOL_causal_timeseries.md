@@ -163,6 +163,131 @@ Recorded so that they are not re-invented, and not run until Phases 1 and 2 clos
 
 ---
 
+## Phase 1b — the corrected comparison (pre-declared 2026-08-18, before any run)
+
+Phase 1's B4 compared a parent set plus an *arbitrary lookup table* against a
+conditional probability table. That is not the index-set method; it is what the
+index-set method was invented to replace. The gate family was not used, the
+pivot/sumando factorisation was not used, the network was not built — one node
+was modelled — and the deconvolution machinery was never invoked. The instrument
+was a Shannon counting code, which is blind to structure by construction and
+discontinuous with the three sibling packages, all of which use BDM.
+
+Phase 1b repeats B4 and B5 with the method as it actually is. Everything below is
+fixed before the first run.
+
+### 1b.1 Binarisation (pre-declared, all variants reported)
+
+The Boolean gate family requires bits. The three regimes are **ordered** by mean
+monthly log return — that is how they are labelled — so the primary encoding is
+**thermometer (ordinal)**, which preserves that order and gives each bit an
+economic reading:
+
+| regime | bit 0 = "not bear" | bit 1 = "bull" |
+| --- | --- | --- |
+| bear | 0 | 0 |
+| stagnant | 1 | 0 |
+| bull | 1 | 1 |
+
+Two alternatives are declared now and **must both be reported** whatever they
+show (rule R5): plain 2-bit binary (which admits an unrealisable code, 11), and
+one-hot over three bits (which is redundant by construction). Reporting only the
+best of three would be selection over encodings, which is the error Level 4
+records and GWP3 conclusion 2 warns about.
+
+Seven series × 2 bits gives **14 binary nodes**. Every node is a target, so the
+object built is a network, not a conditional.
+
+### 1b.2 Model class
+
+For each target bit: a parent set of size ≤ 3 drawn from the 14 candidates, and a
+**named gate** from the family implemented in
+`index-deconvolution/src/causalbool.py` (AND, OR, XOR, NAND, NOR, XNOR, NOT,
+IMPLIES, NIMPLIES, MAJORITY, KOFN, CANALISING, REGULATORY, REGULATORY\_DNF,
+TRUE, FALSE), falling back to a general LUT only when no named gate fits better.
+
+Real data will not match any gate exactly, so gates are fitted as **nearest
+gates**: the gate minimising mismatches against the observed successor bit. This
+is the approximate-gate idea already on the programme's roadmap, and it carries
+the guard agreed there: an approximate gate must beat **both** the LUT
+description length **and** the shuffle null, or it is overfitting and is reported
+as such.
+
+### 1b.3 Instrument — algorithmic two-part, not counting
+
+    L(model) = BDM(model encoded as a discrete array)
+    L(data | model) = residual code (index-set) or negative log likelihood (CPT)
+
+This is the Kolmogorov structure function in the form the sibling packages use:
+algorithmic on the model side, while still paying for misfit, so that neither an
+empty model nor an unconstrained one can win by construction.
+
+**Both models are encoded symmetrically as discrete arrays** so that BDM is
+applied to like objects: the connectivity matrix, concatenated with the truth
+tables (index-set) or with the probability tables quantised to the same
+½log₂N-bit precision (CPT). Quantising the CPT is what makes the comparison
+symmetric; without it BDM would be applied to a discrete object on one side and a
+continuous one on the other.
+
+**The object is the whole network**, a 14 × 14 connectivity matrix, not a
+single node. This is both faithful to the method and necessary for the
+instrument: BDM separates structure from noise by 17.9σ at 8 × 8 and 34.1σ at
+12 × 12, but only 3.5σ at 4 × 4, so single-node objects are below its resolution.
+
+The counting two-part code of Phase 1 is retained and reported alongside, as the
+prequential code was, so that any disagreement between instruments is visible
+rather than hidden.
+
+### 1b.4 Controls — the verdict is void without them
+
+- **Resolution.** BDM must separate structured from random objects *at matched
+  size*. imp-pathinfo established that BDM can track size rather than structure,
+  so the resolution control compares objects of identical dimensions and the
+  size-matching is asserted.
+
+  *Refinement, made before the first run.* Requiring identical dimensions of
+  every BDM comparison would forbid the comparison itself, since a smaller model
+  object is exactly what the parsimony claim asserts. The two questions are
+  therefore separated and reported separately:
+
+  - **Structure axis.** BDM of the two connectivity matrices, both 14 × 14 by
+    construction. Identical shape, so any difference is structure and not size.
+  - **Total axis.** The algorithmic two-part length, in which the table term is
+    BDM of the truth tables for the index-set model and quantised parameter bits
+    for the table model. Here the objects differ in kind — a discrete program
+    against continuous parameters — and that asymmetry is intrinsic to the
+    comparison rather than a modelling choice. It is stated wherever the number
+    is reported, and the pure-counting variant is reported alongside so that a
+    reader can see how much of any gap the instrument is responsible for.
+- **Positive.** A deterministic system (rule 110 as a network) must be recovered
+  with named gates and must win decisively.
+- **Negative.** On independent noise, neither encoding may beat the marginal
+  baseline, and the named-gate class must not fit noise better than chance.
+- **Falsifiability of the gate class.** A random Boolean function of the same
+  arity must require materially more description than a real gate — the standing
+  test of rule R4.
+
+### 1b.5 What Phase 1b can and cannot settle
+
+It can settle whether the *method as actually defined* describes this panel more
+compactly than a probabilistic graphical model, and whether its selection is
+stable. It cannot produce price prediction: the target is a regime, and Gate 1.0
+(C9, C10) already established that the regime is not predictable beyond
+persistence at monthly frequency. That negative is instrument-independent and
+Phase 1b does not revisit it.
+
+### 1b.6 Declared in advance: what would count as each outcome
+
+- **B4 upheld** if the index-set network's algorithmic two-part length is
+  strictly smaller, with controls passing and the counting code agreeing in sign.
+- **B4 refuted again** if the CPT wins under both instruments.
+- **Instruments disagree** — reported as the primary finding, not resolved by
+  preferring the flattering one.
+- **C18 reversal is possible and is declared now**: the named-gate class has ~17
+  members against 3^m arbitrary maps, so selection may prove more stable than
+  Phase 1 found. If it does, C18 was an artefact of the degenerate encoding, and
+  that is to be stated plainly rather than presented as a new discovery.
+
 ## Amendments
 
 ### A1 — 2026-08-18. Gate 1.0 statistic and null, following the controls.

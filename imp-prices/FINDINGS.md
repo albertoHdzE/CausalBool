@@ -47,7 +47,7 @@ Fixed before any run. See `PROTOCOL_causal_timeseries.md` for the full criteria.
 | B1 | *Feasibility.* The discretised GWP3 panel contains deterministic Boolean structure: the contradiction rate over observed input patterns is materially below the base rate, and survives a time-order shuffle | Contradiction rate on the 139 training months, with a rule-110 positive control run through the identical analyser | `PENDING` |
 | B2 | *Coverage.* The fraction of the 2^n input space visited, and the number of recurring patterns, are sufficient to identify gates at in-degree ≤ 3 | Coverage histogram; recurrence counts | `PENDING` |
 | B3 | *Drop-in.* An index-set network selected by two-part description length matches or beats the improved belief network on the identical splits and metrics | Extension of report Table 11, with McNemar against persistence and majority | `PENDING` |
-| B4 | *Parsimony.* The selected index-set network has a strictly smaller description length than the belief network encoding the same conditional structure | D(network) in bits, both encodings self-delimiting | **`NEGATIVE`** — refuted, C15–C17 |
+| B4 | *Parsimony.* The selected index-set network has a strictly smaller description length than the belief network encoding the same conditional structure | D(network) in bits, both encodings self-delimiting | **`NEGATIVE`** — refuted twice: C15–C17 (degenerate encoding), then C19–C22 (real gate family, whole network, BDM) |
 | B5 | *Stability.* Functional connectivity of the forecast node is stable under bootstrap resampling, where the belief network's edge set was not (A15) | Bootstrap edge frequencies over the full hypothesis class | **`NEGATIVE`** — refuted, C18. The belief network's separate *hash* instability is confirmed, C11–C14 |
 | B6 | *Re-target.* On the near-balanced clock target, an index-set network beats the marginal-preserving null out of sample | Design C; return-shuffle null; sign test across thresholds | `PENDING` |
 | B7 | *Intervention.* Node knockout on the fitted network ranks the macro drivers, and the ranking is economically interpretable | Exact Δ|Im(F)| and Δ(attractors) | `PENDING` |
@@ -174,9 +174,44 @@ therefore more stable. It is less stable.
 pre-registered B4 claim, and the second half of the pre-registered B5 claim. All
 three failed on measurements built to be capable of showing the opposite.
 
+### Phase 1b — B4 redone with the method as it actually is
+
+Run 2026-08-18. `scripts/phase1b_gate_network.py`,
+`results/phase1b_gate_network.json` (content sha256 `290893e291e79cc3`),
+`tests/test_gate_network.py`. Design pre-declared in `PROTOCOL` §1b **before** the
+first run, after the assessor established that Phase 1 had used a counting
+instrument and, more seriously, had not been applying the method: an arbitrary
+lookup table where the method has seventeen named gates, one conditional where the
+method has a network, and no BDM where all three sibling packages use it.
+
+| # | Claim | Evidence | Status |
+| --- | --- | --- | --- |
+| C19 | **B4 is refuted again, with the real gate family, a whole 14-node network, and BDM.** Algorithmic two-part length, primary (thermometer) binarisation: gate network **933.0** bits against CPT network **904.5**, a margin of **+28.5**. Counting agrees at +51.1. The verdict holds on all three pre-declared binarisations (thermometer +28.5, binary +18.7, one-hot +13.3) and under both instruments, so it is an artefact of neither. BDM does *narrow* the gap relative to counting — it credits the gate network's structure — but does not reverse it | `test_b4b_the_cpt_still_wins_with_the_real_gate_family` | `NEGATIVE` |
+| C20 | **Essentially nothing in this panel is gate-like — the deepest result of Phase 1b.** Named gates fitted: **0 of 14** nodes under thermometer, 1 of 14 under binary (REGULATORY), 2 of 21 under one-hot (CANALISING). Every other node falls back to a general lookup table. The family that names AND, XOR, MAJORITY, CANALISING and REGULATORY names almost nothing here, because the conditionals are not gate-shaped. This is the coding-side counterpart of C9: a gate is a deterministic object, and Gate 1.0 established there is nothing deterministic beyond persistence | `test_almost_no_panel_node_is_describable_by_a_named_gate` | `CONFIRMED` |
+| C21 | **The controls pass decisively in both directions, so the comparison is sound.** Rule 110 as a 14-node network: the gate network fits it with **zero errors** at 258.94 bits against the CPT's 714.98 — a 456-bit win. On independent binary noise the gate network *loses* (+131.63) at a 46.3 per cent error rate, which is chance. The gate class covers 17 of 256 arity-3 functions (6.6 per cent) and random draws match at 6.5 per cent, so it tracks its own coverage and does not fit anything | `test_a_deterministic_network_is_fitted_exactly_and_wins`, `test_the_gate_network_does_not_compress_noise`, `test_the_gate_class_does_not_fit_anything` | `CONFIRMED` |
+| C22 | **BDM's resolution is enforced, not assumed.** Separation between structured and random arrays: **32.6σ** at 14 × 14, 25.1σ at 14 × 8, **3.2σ at 4 × 4 — unusable**. This is why the scored object is the whole network rather than a single node's table, and the 4 × 4 limit is asserted in the suite so it cannot be quietly forgotten. imp-pathinfo had established that BDM can track size rather than structure; on the structure axis both matrices are 14 × 14 by construction, so size cannot confound, and there the gate network is *more* complex (BDM 156.45 against 123.37) and denser (23 edges against 17) | `test_bdm_resolution_is_checked_not_assumed`, `test_structure_axis_requires_identical_shapes` | `CONFIRMED` |
+
+**Relation to C15–C18.** Phase 1's numbers stand as measurements of a degenerate
+encoding; only their *label* was wrong. C15 should be read as "an arbitrary-map
+encoding loses", not "the index-set method loses". C19 is the claim that survives
+scrutiny. C18's over-selection finding survives into the corrected design: on the
+structure axis the gate network still selects a denser, more complex connectivity
+and still loses.
+
+**What is not claimed.** That the index-set method is unsuitable for financial
+time series in general. The result is narrower: at monthly frequency, on seven
+macro series binarised three ways, over 137 observations, at in-degree ≤ 3, the
+conditionals are not gate-like and a probabilistic encoding describes them more
+compactly. The rule-110 control in the same run shows the representation working
+perfectly on a system that *is* deterministic, which localises the failure to the
+data rather than to the method.
+
 **Status of the Phase 1 objectives.** B5 is **done** (C11–C14 for the belief
-network, C18 for ours). B4 is **done and negative** (C15–C17). Phase 1 is closed;
-Phase 2 carries the weight of the project.
+network, C18 for ours). B4 is **done and negative twice** — C15–C17 on the
+degenerate encoding, C19–C22 on the method proper. Phase 1 is closed; Phase 2
+carries the weight of the project, and now for a stated reason: the monthly regime
+target has no deterministic structure, so no representation built on exact
+functional dependence can win on it.
 
 **What C1 licenses and what it does not.** It licenses every subsequent
 comparison against GWP3's discretised frames, which is the shared input to both

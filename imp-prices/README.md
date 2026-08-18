@@ -68,8 +68,17 @@ Phase 1 in progress. 45 tests passing.
   *less* stable than the table's (22 distinct winners against 4). This contradicts
   an argument made in bitácora 03 and the correction is recorded there
   (bitácora 04, C15–C18).
+- **Phase 1b — B4 redone properly, and refuted again.** Phase 1 had used a
+  counting instrument and, more seriously, had not been applying the method: an
+  arbitrary lookup table where the method has seventeen named gates, one
+  conditional where it has a network. Rebuilt with the real gate family from the
+  validated forward model, a 14-node network, and BDM. The table still wins
+  (933.0 against 904.5 bits) on all three pre-declared binarisations and under
+  both instruments. **Essentially no node is describable by a named gate** — 0 of
+  14 under the primary encoding — which is the sharpest statement of why: the
+  conditionals are not gate-shaped (bitácora 05, C19–C22).
 - **Phase 1 is closed.** **Next:** Phase 2, the clock re-target, which now carries
-  the weight of the project.
+  the weight of the project for a stated reason rather than by default.
 
 **Executed notebooks** carry the confirmed results as reproducible evidence:
 [`notebooks/00_reference_parity_and_feasibility.ipynb`](notebooks/00_reference_parity_and_feasibility.ipynb)
@@ -89,6 +98,7 @@ See [`FINDINGS.md`](FINDINGS.md) for the ledger.
 .venv/bin/python scripts/gate10_feasibility.py --shuffles 1000
 .venv/bin/python scripts/phase1_stability.py --seeds 20
 .venv/bin/python scripts/phase1_b4_description_length.py --boot 300
+.venv/bin/python scripts/phase1b_gate_network.py
 
 # regenerate and re-execute the notebooks
 cd notebooks && ../.venv/bin/python build_00.py && ../.venv/bin/python build_01.py && cd ..
@@ -109,6 +119,7 @@ that determines an outcome is hash-invariant and is asserted as such.
 | `reference/figures/` | The twenty-five GWP3 figures, the replication targets |
 | `data/monthly/` | `sterilized_monthly_data.csv` — the 199×7 panel, 2010-01-31 to 2026-07-31 |
 | `data/daily/` | Daily WTI futures and the raw FRED pull, held for the Phase 3 frequency extension |
-| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm, 04 description length |
-| `src/imp_prices/` | `config`, `data`, `discretise`, `feasibility`, `controls`, `belief_network`, `index_set` |
+| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm, 04 description length, 05 Phase 1b |
+| `src/imp_prices/` | `config`, `data`, `discretise`, `feasibility`, `controls`, `belief_network`, `index_set`, `binarise`, `gate_network`, `algorithmic` |
+| `vendor/` | `causalbool.py` and `deconvolution.py`, copied unmodified from `index-deconvolution/src/` — the validated forward model and gate identifier |
 | `tests/`, `results/`, `figures/`, `notebooks/` | As in the sibling replication packages |
