@@ -265,13 +265,31 @@ be uninformative: WTI\\_CL shares the target's contemporaneous regime in 87.7 pe
 cent of months. The graph is asserting a causal direction between two names for
 the same barrel.
 
-**Not established.** That the index-set method avoids this. The argument is
-structural — functional connectivity is exact functional dependence, checkable one
-input at a time with a printed witness, with no aggregate score to tie, and
-genuine ambiguity reported as an explicit equivalence class rather than resolved
-silently — but it is an argument from the method's definition, not a measurement
-in this package. Converting it into a measurement is ledger entry B4, and it is
-labelled as an argument until then.
+**Measured since, and it went against the argument.** When this notebook was
+first written, the claim that the index-set method avoids this defect was an
+argument from the method's definition — functional connectivity is exact
+functional dependence, checkable one input at a time, with no aggregate score to
+tie — and it was labelled as an argument pending measurement in ledger entry B4.
+
+B4 has since been measured twice (notebook 02, C15–C22) and the argument does not
+survive intact. What survives is narrower than what was implied here:
+
+- **There is no arrow to reverse in an index-set model.** The map runs from
+  parents to successor by construction, so the specific pathology above — two
+  Markov-equivalent graphs making opposite causal statements — cannot arise. That
+  part stands.
+- **Reproducibility is not stability, and on reproducibility the index-set side
+  still wins outright.** The instability shown above is *same data, same
+  configuration, different answer*, decided by string hashing; it has no
+  statistical content. The index-set computation is deterministic to a content
+  hash.
+- **But the choice of parents is *less* stable, not more.** On identical
+  moving-block resamples the index-set code length selects 22 distinct parent
+  sets against the conditional probability table's 4 (C18). The implication drawn
+  when this notebook was written — that exact functional dependence would make
+  selection more stable — is false, and it survives into the corrected Phase 1b
+  design, where the gate network selects a denser, more complex connectivity
+  (BDM 156.45 against 123.37, 23 edges against 17) and still loses.
 
 **Consequence.** The Phase 1 forecasting contest remains not attempted, per the
 Gate 1.0 verdict. Nothing here changes that: the belief network's predictive

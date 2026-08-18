@@ -134,9 +134,12 @@ than resolving it silently. Establishing that this difference is real, and not
 merely rhetorical, is the object of B4 and the remainder of Phase 1.
 
 **Evidence.** C1–C10 are carried by
-`notebooks/00_reference_parity_and_feasibility.ipynb` and C11–C14 by
-`notebooks/01_comparison_arm_and_orientation.ipynb`, both executed, 0 errors, 6
-figures between them. Every figure and number is recomputed in the notebook, not
+`notebooks/00_reference_parity_and_feasibility.ipynb`, C11–C14 by
+`notebooks/01_comparison_arm_and_orientation.ipynb`, and C15–C22 by
+`notebooks/02_description_length_and_correction.ipynb` — all executed, 0 errors, 9
+figures between them. Notebook 01's closing section carries the correction that
+B4 later forced on it; notebook 02 answers B4 twice, keeping the first answer
+visible because deleting it would hide how the conclusion was reached. Every figure and number is recomputed in the notebook, not
 quoted from a script. `scripts/check_notebooks.py` verifies three things, each of
 which has actually gone wrong here: no errors; no unexecuted cells (an aborted
 nbconvert run leaves a notebook that passes an error-only check); and no

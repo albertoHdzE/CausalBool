@@ -84,8 +84,12 @@ Phase 1 in progress. 45 tests passing.
 [`notebooks/00_reference_parity_and_feasibility.ipynb`](notebooks/00_reference_parity_and_feasibility.ipynb)
 (C1–C10) and
 [`notebooks/01_comparison_arm_and_orientation.ipynb`](notebooks/01_comparison_arm_and_orientation.ipynb)
-(C11–C14). Every number in them is recomputed rather than quoted, and the two
-Markov-equivalent graphs of C13 are drawn from the sweep that found them.
+(C11–C14) and
+[`notebooks/02_description_length_and_correction.ipynb`](notebooks/02_description_length_and_correction.ipynb)
+(C15–C22). Every number in them is recomputed rather than quoted; the two
+Markov-equivalent graphs of C13 are drawn from the sweep that found them; and
+notebook 02 answers B4 twice, keeping the first, wrong-question answer visible
+rather than deleting it.
 Notebooks are *generated* from `notebooks/build_NN.py` rather than hand-edited, so
 they cannot drift from the code they document.
 
