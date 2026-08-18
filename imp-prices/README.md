@@ -86,7 +86,11 @@ Phase 1 in progress. 45 tests passing.
   uninformative. But **B6 is not supported**: 7 of 9 cells beat the
   return-shuffle null with mean excess +0.129, sign test *p* = 0.0898. The sign
   is right and consistent with prior work; the sample cannot establish it
-  (bitácora 06, C23–C26).
+  (bitácora 06, C23–C26). Challenged afterwards as summary statistics with no
+  shape behind them — correctly. On inspection the headline "mean excess" turned
+  out to sum a real edge with the null's **overfitting penalty**, and is demoted;
+  the rank-based p-values survived, and the honest summary of B6 is **one
+  significant cell of nine** (bitácora 06 §9, C27–C28, notebook 03).
 - **Next:** Phase 3 — daily frequency and an enlarged panel, pre-declared to run
   regardless of the Phase 1 and Phase 2 outcomes. Daily data yields 322 legs
   against monthly's 57.
@@ -97,7 +101,9 @@ Phase 1 in progress. 45 tests passing.
 [`notebooks/01_comparison_arm_and_orientation.ipynb`](notebooks/01_comparison_arm_and_orientation.ipynb)
 (C11–C14) and
 [`notebooks/02_description_length_and_correction.ipynb`](notebooks/02_description_length_and_correction.ipynb)
-(C15–C22). Every number in them is recomputed rather than quoted; the two
+(C15–C22) and
+[`notebooks/03_phase2_clock_and_looking.ipynb`](notebooks/03_phase2_clock_and_looking.ipynb)
+(C23–C28). Every number in them is recomputed rather than quoted; the two
 Markov-equivalent graphs of C13 are drawn from the sweep that found them; and
 notebook 02 answers B4 twice, keeping the first, wrong-question answer visible
 rather than deleting it.

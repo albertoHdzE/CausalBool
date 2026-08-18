@@ -154,6 +154,40 @@ enlarged with EIA inventories and the Kilian index, and rolling-origin
 evaluation. The pooled sign test across instruments — the design that gave Level
 5 its 12/12 — is what this dataset cannot provide and Phase 3 can.
 
+## 9. Postscript, 2026-08-18 — challenged, and rightly
+
+The assessor put this phase down to **Datasaurus syndrome**: summary statistics
+reported with no shape behind them. Phase 2 contained no figures at all. Acting
+on the objection changed what should be reported, though not the verdict.
+
+**The headline statistic was the artefact.** The null's mean edge is about −0.115
+*even after conditioning on test-set size*. That is not noise: a lookup table
+fitted on a random prefix scores about 0.5 on the test suffix while the base rate
+is about 0.58, so a correctly specified null model *must* score negative. It is an
+overfitting penalty. The reported "mean excess +0.129" therefore adds a modest
+real edge of about +0.096 to that penalty and presents the sum as one effect,
+which flatters and conceals that everything rests on one cell.
+
+**What survived.** The rank-based *p*-values, which are what the verdict actually
+rested on. Conditioning on matched test-set size moves them from 0.0050 to 0.0082,
+0.1433 to 0.1319 and 0.4393 to 0.4423 — the mismatch is real but immaterial.
+
+**A suspicion of mine that did not survive.** I expected volatility clustering to
+give the real series systematically fewer pivots than its own shuffle, which would
+have left the null unmatched on leg count. It does not, at this resolution:
+z = −1.07, −0.73, +0.38 across the three thresholds, none significant. Reasonable
+concern, wrong.
+
+**What the looking confirmed.** The pivots are the turning points an energy
+analyst would name — the 2011 peak, the 2014 peak that begins the shale collapse,
+the 2016 bottom, the 2018 trough. The encoding is sound, so the negative is about
+the sample and not about the representation.
+
+**The corrected summary of B6.** Not a mean excess but a count: one cell of nine
+significant, Bonferroni 0.074, sign consistently positive across ten of twelve
+cells, sample insufficient. Notebook 03 carries the figures that should have
+existed before any of this was written down.
+
 ## 8. Next
 
 Phase 3. Fetch the longer daily history first, since every other decision depends
