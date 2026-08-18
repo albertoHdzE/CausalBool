@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imp-prices"
+version = "0.1.0"
+description = "Causality in time series by index-set deconvolution: the CausalBool method against a probabilistic graphical model on the Alvi (2018) crude oil forecasting problem"
+readme = "README.md"
+requires-python = ">=3.11"
+# Pinned to the exact versions of the GWP3 virtual environment. Reference parity
+# is asserted to 1e-4 on 3,124 fitted numbers; Baum-Welch is sensitive to the
+# linear-algebra stack, so these are pins and not lower bounds. Verified against
+# GWP_1/RiskManagement/GWP3/.venv on 2026-08-18.
+dependencies = [
+  "numpy==2.2.6",
+  "scipy==1.18.0",
+  "pandas==2.3.3",
+  "matplotlib==3.11.1",
+  "scikit-learn==1.9.0",
+  "hmmlearn==0.3.3",
+  "pgmpy==1.1.2",
+  "networkx==3.6.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "jupyter", "ipykernel", "nbconvert", "nbformat"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::UserWarning", "ignore::DeprecationWarning"]
