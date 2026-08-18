@@ -49,7 +49,7 @@ Fixed before any run. See `PROTOCOL_causal_timeseries.md` for the full criteria.
 | B3 | *Drop-in.* An index-set network selected by two-part description length matches or beats the improved belief network on the identical splits and metrics | Extension of report Table 11, with McNemar against persistence and majority | `PENDING` |
 | B4 | *Parsimony.* The selected index-set network has a strictly smaller description length than the belief network encoding the same conditional structure | D(network) in bits, both encodings self-delimiting | **`NEGATIVE`** — refuted twice: C15–C17 (degenerate encoding), then C19–C22 (real gate family, whole network, BDM) |
 | B5 | *Stability.* Functional connectivity of the forecast node is stable under bootstrap resampling, where the belief network's edge set was not (A15) | Bootstrap edge frequencies over the full hypothesis class | **`NEGATIVE`** — refuted, C18. The belief network's separate *hash* instability is confirmed, C11–C14 |
-| B6 | *Re-target.* On the near-balanced clock target, an index-set network beats the marginal-preserving null out of sample | Design C; return-shuffle null; sign test across thresholds | `PENDING` |
+| B6 | *Re-target.* On the near-balanced clock target, an index-set network beats the marginal-preserving null out of sample | Design C; return-shuffle null; sign test across thresholds | **`NEGATIVE`** — underpowered, not null: C26. 7/9 positive, mean excess +0.129, sign test p = 0.0898 |
 | B7 | *Intervention.* Node knockout on the fitted network ranks the macro drivers, and the ranking is economically interpretable | Exact Δ|Im(F)| and Δ(attractors) | `PENDING` |
 | B8 | *Frequency.* Every conclusion above is re-derived at daily frequency, where the sample constraint is relaxed by two orders of magnitude | Phase 3 | `PENDING` |
 
@@ -208,6 +208,31 @@ conditionals are not gate-like and a probabilistic encoding describes them more
 compactly. The rule-110 control in the same run shows the representation working
 perfectly on a system that *is* deterministic, which localises the failure to the
 data rather than to the method.
+
+### Phase 2 — the clock re-target
+
+Run 2026-08-18. `scripts/phase2_gate.py` (sha `b9f4826f1b86b6bc`),
+`scripts/phase2_forecast.py` (sha `27c84648ccaf15cc`), `tests/test_pivots.py`,
+`tests/test_clock.py`.
+
+| # | Claim | Evidence | Status |
+| --- | --- | --- | --- |
+| C23 | **The confirmed-only pivot rule is enforced and it bites hard.** A directional-change pivot occurs at one time and becomes knowable at a later one; the lag is always ≥ 1 and is never assumed. On monthly WTI the mean confirmation lag runs from 1.3 months (θ = 0.05) to 5.3 (θ = 0.25), the maximum reaching **19 months**, and **31 to 52 per cent of the series** sits inside a window where a pivot has occurred but is not yet knowable. The leak is *exploitable*: a rule peeking at unconfirmed pivots predicts next-step direction at above 55 per cent against 50 for anything causal. The running median defining "short" is likewise causal, recomputed from the prefix in the tests | `test_the_leak_window_is_large_enough_to_matter`, `test_the_leak_is_exploitable_which_is_why_it_must_be_guarded`, `test_the_running_median_is_causal` | `CONFIRMED` |
+| C24 | **The re-target achieves its design goal: the base-rate trap is gone.** Short-wait base rates of 0.396 to 0.467 on the panel, against the 66–73 per cent stagnant share that made raw accuracy uninformative on the regime target (A7, A11, A13). The encoding is also scale-invariant: multiplying every price by 37.5 leaves every pivot index and kind unchanged | `test_short_wait_target_is_near_balanced_by_construction`, `test_threshold_is_relative_so_the_encoding_is_scale_invariant` | `CONFIRMED` |
+| C25 | **Gate 2.0 passes, barely.** Monthly WTI spot yields 57 legs at θ = 0.05, 39 at 0.08, 37 at 0.10, against a pre-declared minimum of 30; θ ≥ 0.15 fails. The daily series held for Phase 3 yields **322** legs at θ = 0.05 — a factor of six, and the single number quantifying what the monthly constraint costs | `results/phase2_gate.json` | `CONFIRMED` |
+| C26 | **B6 is not supported: the sign is right, the sample is not enough.** Against a return-shuffle null passed through the entire pipeline, 7 of 9 monthly cells are positive with mean excess **+0.129**, sign test **p = 0.0898**. Two cells clear 0.05 individually, but with nine cells the chance of two or more doing so is 0.071, so they do not survive their own multiple-comparison accounting. Daily, shown for contrast, gives 3 of 3 positive, mean excess +0.093, no cell significant. Test sets hold 10 to 19 decisions | `test_b6_is_not_supported_on_the_monthly_panel`; `results/phase2_forecast.json` | `NEGATIVE` (underpowered, not null) |
+
+**C26 is a different kind of negative from Phase 1's.** Gate 1.0 measured
+something and found it *absent* — the increment over persistence sat on its null
+at −0.0003 to +0.0073, p from 0.32 to 0.64. Here the effect is consistently
+positive, ten of twelve cells across both frequencies, and fails on **power**
+rather than on sign. That is what a real effect looks like at this sample size,
+and it is equally what a mild pipeline bias looks like; the distinction cannot be
+drawn from 199 monthly observations and is not drawn by selecting θ = 0.08. The
+direction agrees with the deconvolution programme's Level 5 result (same target,
+same null, 12/12 at p = 2.4 × 10⁻⁴) — but that used twelve instruments over three
+decades of daily data, and agreement in sign with prior work is encouraging, not
+evidence.
 
 **Status of the Phase 1 objectives.** B5 is **done** (C11–C14 for the belief
 network, C18 for ours). B4 is **done and negative twice** — C15–C17 on the

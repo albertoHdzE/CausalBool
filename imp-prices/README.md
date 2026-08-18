@@ -77,8 +77,19 @@ Phase 1 in progress. 45 tests passing.
   both instruments. **Essentially no node is describable by a named gate** — 0 of
   14 under the primary encoding — which is the sharpest statement of why: the
   conditionals are not gate-shaped (bitácora 05, C19–C22).
-- **Phase 1 is closed.** **Next:** Phase 2, the clock re-target, which now carries
-  the weight of the project for a stated reason rather than by default.
+- **Phase 1 is closed.**
+- **Phase 2 — the clock re-target.** The confirmed-only pivot rule is enforced
+  and measured: 31–52 per cent of the series sits in a window where a pivot has
+  occurred but is not yet knowable, and peeking at it is demonstrably
+  exploitable. The re-target achieves its design goal — short-wait base rates of
+  0.40–0.47 against the 66–73 per cent stagnant share that made accuracy
+  uninformative. But **B6 is not supported**: 7 of 9 cells beat the
+  return-shuffle null with mean excess +0.129, sign test *p* = 0.0898. The sign
+  is right and consistent with prior work; the sample cannot establish it
+  (bitácora 06, C23–C26).
+- **Next:** Phase 3 — daily frequency and an enlarged panel, pre-declared to run
+  regardless of the Phase 1 and Phase 2 outcomes. Daily data yields 322 legs
+  against monthly's 57.
 
 **Executed notebooks** carry the confirmed results as reproducible evidence:
 [`notebooks/00_reference_parity_and_feasibility.ipynb`](notebooks/00_reference_parity_and_feasibility.ipynb)
@@ -103,6 +114,8 @@ See [`FINDINGS.md`](FINDINGS.md) for the ledger.
 .venv/bin/python scripts/phase1_stability.py --seeds 20
 .venv/bin/python scripts/phase1_b4_description_length.py --boot 300
 .venv/bin/python scripts/phase1b_gate_network.py
+.venv/bin/python scripts/phase2_gate.py
+.venv/bin/python scripts/phase2_forecast.py --null 200
 
 # regenerate and re-execute the notebooks
 cd notebooks && ../.venv/bin/python build_00.py && ../.venv/bin/python build_01.py && cd ..
@@ -123,7 +136,7 @@ that determines an outcome is hash-invariant and is asserted as such.
 | `reference/figures/` | The twenty-five GWP3 figures, the replication targets |
 | `data/monthly/` | `sterilized_monthly_data.csv` — the 199×7 panel, 2010-01-31 to 2026-07-31 |
 | `data/daily/` | Daily WTI futures and the raw FRED pull, held for the Phase 3 frequency extension |
-| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm, 04 description length, 05 Phase 1b |
-| `src/imp_prices/` | `config`, `data`, `discretise`, `feasibility`, `controls`, `belief_network`, `index_set`, `binarise`, `gate_network`, `algorithmic` |
+| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm, 04 description length, 05 Phase 1b, 06 Phase 2 |
+| `src/imp_prices/` | `config`, `data`, `discretise`, `feasibility`, `controls`, `belief_network`, `index_set`, `binarise`, `gate_network`, `algorithmic`, `pivots`, `clock` |
 | `vendor/` | `causalbool.py` and `deconvolution.py`, copied unmodified from `index-deconvolution/src/` — the validated forward model and gate identifier |
 | `tests/`, `results/`, `figures/`, `notebooks/` | As in the sibling replication packages |
