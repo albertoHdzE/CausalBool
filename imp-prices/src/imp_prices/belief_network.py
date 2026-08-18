@@ -22,6 +22,9 @@ than reconstructs.
 
 from __future__ import annotations
 
+import contextlib
+import sys
+
 import numpy as np
 import pandas as pd
 from pgmpy.estimators import HillClimbSearch
@@ -76,10 +79,37 @@ def fit_parameters(model, data, state_names=None):
     return model.fit(as_categorical(data), estimator=est)
 
 
+@contextlib.contextmanager
+def _no_progress_bar():
+    """Silence the progress bar pgmpy's ``predict`` raises unconditionally.
+
+    ``DiscreteBayesianNetwork.predict`` calls ``tqdm.auto.tqdm`` with no option to
+    disable it. Under ``tqdm.auto`` that resolves to an ipywidgets bar inside a
+    notebook, and a widget view cannot be rendered outside the session that
+    produced it: the saved notebook shows "Could not render content for
+    application/vnd.jupyter.widget-view+json" instead of an output. That makes the
+    notebook fail as evidence, so the bar is suppressed at the only place we
+    control — our own wrapper.
+
+    The module-level ``tqdm`` name is patched rather than the library file, so
+    ``reference/`` and the installed package both stay untouched.
+    """
+    mod = sys.modules.get("pgmpy.models.DiscreteBayesianNetwork")
+    original = getattr(mod, "tqdm", None) if mod is not None else None
+    if original is not None:
+        mod.tqdm = lambda iterable=None, *a, **k: iterable
+    try:
+        yield
+    finally:
+        if original is not None:
+            mod.tqdm = original
+
+
 def predict_regimes(model, data, target="forecast"):
     evidence = as_categorical(data.drop(columns=[target]))
     evidence = evidence[[c for c in evidence.columns if c in model.nodes()]]
-    return model.predict(evidence, n_jobs=1)[target].astype(int).values
+    with _no_progress_bar():
+        return model.predict(evidence, n_jobs=1)[target].astype(int).values
 
 
 def posterior_probabilities(model, data, target="forecast"):

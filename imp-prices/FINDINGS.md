@@ -137,9 +137,15 @@ merely rhetorical, is the object of B4 and the remainder of Phase 1.
 `notebooks/00_reference_parity_and_feasibility.ipynb` and C11–C14 by
 `notebooks/01_comparison_arm_and_orientation.ipynb`, both executed, 0 errors, 6
 figures between them. Every figure and number is recomputed in the notebook, not
-quoted from a script. `scripts/check_notebooks.py` verifies that an executed
-notebook contains no errors *and* no unexecuted cells — the second check exists
-because an aborted nbconvert run leaves a notebook that passes the first.
+quoted from a script. `scripts/check_notebooks.py` verifies three things, each of
+which has actually gone wrong here: no errors; no unexecuted cells (an aborted
+nbconvert run leaves a notebook that passes an error-only check); and no
+`application/vnd.jupyter.widget-view+json` outputs, which cannot be rendered
+outside the session that produced them and leave a reader looking at "Could not
+render content" where an output should be. pgmpy's `predict` raises a `tqdm.auto`
+bar unconditionally, which produced 41 such outputs in notebook 01; it is now
+suppressed in `predict_regimes`. Every number in the re-executed notebook is
+unchanged.
 
 **Status of the Phase 1 objectives.** B5 (stability) is **done** and is C11–C14.
 B4 (description length of the two encodings) is **not started**: it requires the

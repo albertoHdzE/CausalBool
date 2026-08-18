@@ -151,6 +151,26 @@ Phase 1, and until then it stays labelled as an argument.
   should be scoped to what is reproducible, and the scope should be measured
   rather than assumed.
 
+## 6a. A third defect, in the evidence rather than the science
+
+The executed notebook contained 41 outputs of type
+`application/vnd.jupyter.widget-view+json`. A widget view holds no data — only a
+model identifier resolved by the kernel that created it — so a reader opening the
+notebook sees "Could not render content" where an output should be. The notebook
+was therefore not evidence at those points, even though it had run without error.
+
+The source is pgmpy: `DiscreteBayesianNetwork.predict` calls `tqdm.auto.tqdm`
+unconditionally, with no parameter to disable it, and under `tqdm.auto` that
+resolves to an ipywidgets bar inside a notebook. It is suppressed in
+`predict_regimes`, our own wrapper, by patching the module-level `tqdm` name for
+the duration of the call — `reference/` and the installed package stay untouched.
+
+`scripts/check_notebooks.py` now rejects any widget output, so the class of defect
+cannot recur silently. Re-executing left every number identical; only the display
+changed. Three distinct ways a notebook can look fine and not be evidence have now
+been found in this package — errors, unexecuted cells, and unrenderable outputs —
+and all three are checked.
+
 ## 7. Status of Phase 1
 
 - **B5, stability: done.** C11–C14.
