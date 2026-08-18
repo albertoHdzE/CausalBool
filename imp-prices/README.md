@@ -59,8 +59,17 @@ Phase 1 in progress. 45 tests passing.
   turns out to be **orientation-unstable**: two Markov-equivalent variants occur
   across interpreter hash seeds, reversing the arrows GWP3 Figure 8 reports
   (bitácora 03, C11–C14).
-- **Next:** B4, the description-length comparison, which needs the index-set
-  encoder.
+- **B4, description length: refuted.** The conditional probability table
+  describes the panel in 15.56 fewer bits (138.07 against 153.63), and the
+  prequential code length, which needs no precision convention, agrees. The
+  encoding is sound — on rule 110 it costs 16.13 bits against the table's 48.46 —
+  but on stochastic data a deterministic map pays too much for its residual.
+- **B5, second half: refuted.** On identical resamples the index-set selection is
+  *less* stable than the table's (22 distinct winners against 4). This contradicts
+  an argument made in bitácora 03 and the correction is recorded there
+  (bitácora 04, C15–C18).
+- **Phase 1 is closed.** **Next:** Phase 2, the clock re-target, which now carries
+  the weight of the project.
 
 **Executed notebooks** carry the confirmed results as reproducible evidence:
 [`notebooks/00_reference_parity_and_feasibility.ipynb`](notebooks/00_reference_parity_and_feasibility.ipynb)
@@ -79,6 +88,7 @@ See [`FINDINGS.md`](FINDINGS.md) for the ledger.
 .venv/bin/python -m pytest -q                              # 45 tests
 .venv/bin/python scripts/gate10_feasibility.py --shuffles 1000
 .venv/bin/python scripts/phase1_stability.py --seeds 20
+.venv/bin/python scripts/phase1_b4_description_length.py --boot 300
 
 # regenerate and re-execute the notebooks
 cd notebooks && ../.venv/bin/python build_00.py && ../.venv/bin/python build_01.py && cd ..
@@ -99,6 +109,6 @@ that determines an outcome is hash-invariant and is asserted as such.
 | `reference/figures/` | The twenty-five GWP3 figures, the replication targets |
 | `data/monthly/` | `sterilized_monthly_data.csv` — the 199×7 panel, 2010-01-31 to 2026-07-31 |
 | `data/daily/` | Daily WTI futures and the raw FRED pull, held for the Phase 3 frequency extension |
-| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm |
-| `src/imp_prices/` | `config`, `data`, `discretise`, `feasibility`, `controls`, `belief_network` |
+| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm, 04 description length |
+| `src/imp_prices/` | `config`, `data`, `discretise`, `feasibility`, `controls`, `belief_network`, `index_set` |
 | `tests/`, `results/`, `figures/`, `notebooks/` | As in the sibling replication packages |

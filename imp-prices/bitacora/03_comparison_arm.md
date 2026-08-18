@@ -140,6 +140,15 @@ index-set side is currently an argument from the method's definition, not a
 measurement in this package. Turning it into a measurement is B4 and the rest of
 Phase 1, and until then it stays labelled as an argument.
 
+> **Superseded, 2026-08-18 (bitácora 04, ledger C18).** The measurement was made
+> and it went against this argument. On identical moving-block resamples the
+> index-set code length selects 22 distinct parent sets against the conditional
+> probability table's 4, and is therefore *less* stable, not more. What survives
+> is narrower: there is no arrow to reverse in an index-set model, so C13's
+> specific pathology cannot arise, and the computation is reproducible to a
+> content hash where the belief network's is not. The implication drawn above —
+> that the choice of parents would consequently be more stable — is false.
+
 ## 6. Two errors of mine, corrected
 
 - I asserted the binomial interval as [56.46, **89.71**], reading the report's

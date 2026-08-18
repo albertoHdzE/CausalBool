@@ -47,8 +47,8 @@ Fixed before any run. See `PROTOCOL_causal_timeseries.md` for the full criteria.
 | B1 | *Feasibility.* The discretised GWP3 panel contains deterministic Boolean structure: the contradiction rate over observed input patterns is materially below the base rate, and survives a time-order shuffle | Contradiction rate on the 139 training months, with a rule-110 positive control run through the identical analyser | `PENDING` |
 | B2 | *Coverage.* The fraction of the 2^n input space visited, and the number of recurring patterns, are sufficient to identify gates at in-degree ≤ 3 | Coverage histogram; recurrence counts | `PENDING` |
 | B3 | *Drop-in.* An index-set network selected by two-part description length matches or beats the improved belief network on the identical splits and metrics | Extension of report Table 11, with McNemar against persistence and majority | `PENDING` |
-| B4 | *Parsimony.* The selected index-set network has a strictly smaller description length than the belief network encoding the same conditional structure | D(network) in bits, both encodings self-delimiting | `PENDING` |
-| B5 | *Stability.* Functional connectivity of the forecast node is stable under bootstrap resampling, where the belief network's edge set was not (A15) | Bootstrap edge frequencies over the full hypothesis class | `PENDING` |
+| B4 | *Parsimony.* The selected index-set network has a strictly smaller description length than the belief network encoding the same conditional structure | D(network) in bits, both encodings self-delimiting | **`NEGATIVE`** — refuted, C15–C17 |
+| B5 | *Stability.* Functional connectivity of the forecast node is stable under bootstrap resampling, where the belief network's edge set was not (A15) | Bootstrap edge frequencies over the full hypothesis class | **`NEGATIVE`** — refuted, C18. The belief network's separate *hash* instability is confirmed, C11–C14 |
 | B6 | *Re-target.* On the near-balanced clock target, an index-set network beats the marginal-preserving null out of sample | Design C; return-shuffle null; sign test across thresholds | `PENDING` |
 | B7 | *Intervention.* Node knockout on the fitted network ranks the macro drivers, and the ranking is economically interpretable | Exact Δ|Im(F)| and Δ(attractors) | `PENDING` |
 | B8 | *Frequency.* Every conclusion above is re-derived at daily frequency, where the sample constraint is relaxed by two orders of magnitude | Phase 3 | `PENDING` |
@@ -147,9 +147,36 @@ bar unconditionally, which produced 41 such outputs in notebook 01; it is now
 suppressed in `predict_regimes`. Every number in the re-executed notebook is
 unchanged.
 
-**Status of the Phase 1 objectives.** B5 (stability) is **done** and is C11–C14.
-B4 (description length of the two encodings) is **not started**: it requires the
-index-set encoder, which does not exist in this package yet.
+### Phase 1 — B4, description length, and the stability comparison completed
+
+Run 2026-08-18. `scripts/phase1_b4_description_length.py --boot 300`,
+`results/b4_description_length.json` (content sha256 `160d8437a2eb20dc`),
+`tests/test_index_set.py`.
+
+| # | Claim | Evidence | Status |
+| --- | --- | --- | --- |
+| C15 | **B4 fails: the conditional probability table describes the panel in fewer bits.** Two-part code length on the 137 training months, both encodings selecting the same parent set {WTI\_CL}: index-set **153.63** bits (9.56 model + 144.07 data) against CPT **138.07** (26.10 model + 111.96 data), a margin of **15.56 bits**. Both beat the marginal baseline of 178.14, so the panel does contain compressible signal — the persistence of C8 — and the probabilistic encoding captures it better. The CPT spends 16.5 more bits on its model and buys 32 fewer bits of data | `test_b4_fails_the_cpt_describes_the_panel_in_fewer_bits` | `NEGATIVE` |
+| C16 | **The verdict does not rest on the parameter-precision convention.** The prequential code length, which needs no such convention, agrees: over 125 scored months the CPT costs 116.50 bits against the index-set encoding's 134.90 (0.932 against 1.079 bits per month) | `test_prequential_agrees_so_the_verdict_is_not_a_precision_convention` | `CONFIRMED` |
+| C17 | **The encoding is sound; the controls pass decisively.** On rule 110 the index-set code recovers the true parent set {c6, c0, c1}, makes zero errors, and costs **16.13** bits against the CPT's 48.46 and a marginal baseline of 200.85. On independent uniform ternary symbols **neither** encoding beats the marginal baseline (325.82 and 330.61 against 321.03), so the bit accounting is not biased in our favour | `test_rule110_is_compressed_by_the_index_set_encoding`, `test_neither_encoding_beats_the_marginal_on_noise`, Kraft checks on every code | `CONFIRMED` |
+| C18 | **The second half of B5 fails, and it contradicts the argument of bitácora 03 §5.** On identical moving-block resamples with an identical candidate space, changing only the encoding that picks the winner: the index-set code length yields **22** distinct winning parent sets over 300 resamples (modal 26.7 per cent) against the CPT's **4** (modal {WTI\_CL}, 51.7 per cent); pgmpy's own hill climbing yields 5 over 120 resamples (modal {WTI\_CL}, 55.0 per cent). The index-set selection is **far less stable**, and its full-sample winner {WTI\_CL} is chosen in only 5.3 per cent of resamples. Diagnosis, visible in the accounting: a map costs log₂3 = 1.585 bits per pattern against the table's 2 × ½log₂137 = 7.098, so the index-set code under-penalises in-degree by a factor of 4.5 and over-selects | `test_index_set_selection_is_less_stable_than_the_cpt_selection` | `NEGATIVE` |
+
+**What survives, narrowly.** *Reproducibility is not stability.* The belief
+network's C13 instability is *same data, same configuration, different answer*,
+decided by string hashing — irreproducibility with no statistical content. The
+index-set instability is *different data, different answer* — genuine sampling
+uncertainty that the bootstrap surfaces rather than hides; the computation itself
+is deterministic to the content hash. And there is no arrow to reverse in an
+index-set model, so C13's specific pathology cannot arise. What does **not**
+follow, and what bitácora 03 §5 wrongly implied, is that the choice of parents is
+therefore more stable. It is less stable.
+
+**Superseded.** The stability argument of `bitacora/03_comparison_arm.md` §5, the
+pre-registered B4 claim, and the second half of the pre-registered B5 claim. All
+three failed on measurements built to be capable of showing the opposite.
+
+**Status of the Phase 1 objectives.** B5 is **done** (C11–C14 for the belief
+network, C18 for ours). B4 is **done and negative** (C15–C17). Phase 1 is closed;
+Phase 2 carries the weight of the project.
 
 **What C1 licenses and what it does not.** It licenses every subsequent
 comparison against GWP3's discretised frames, which is the shared input to both
