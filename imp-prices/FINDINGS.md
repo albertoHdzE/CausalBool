@@ -133,6 +133,14 @@ index-set method reports the ambiguity as an explicit equivalence class rather
 than resolving it silently. Establishing that this difference is real, and not
 merely rhetorical, is the object of B4 and the remainder of Phase 1.
 
+**Evidence.** C1–C10 are carried by
+`notebooks/00_reference_parity_and_feasibility.ipynb` and C11–C14 by
+`notebooks/01_comparison_arm_and_orientation.ipynb`, both executed, 0 errors, 6
+figures between them. Every figure and number is recomputed in the notebook, not
+quoted from a script. `scripts/check_notebooks.py` verifies that an executed
+notebook contains no errors *and* no unexecuted cells — the second check exists
+because an aborted nbconvert run leaves a notebook that passes the first.
+
 **Status of the Phase 1 objectives.** B5 (stability) is **done** and is C11–C14.
 B4 (description length of the two encodings) is **not started**: it requires the
 index-set encoder, which does not exist in this package yet.

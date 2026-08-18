@@ -62,6 +62,15 @@ Phase 1 in progress. 45 tests passing.
 - **Next:** B4, the description-length comparison, which needs the index-set
   encoder.
 
+**Executed notebooks** carry the confirmed results as reproducible evidence:
+[`notebooks/00_reference_parity_and_feasibility.ipynb`](notebooks/00_reference_parity_and_feasibility.ipynb)
+(C1–C10) and
+[`notebooks/01_comparison_arm_and_orientation.ipynb`](notebooks/01_comparison_arm_and_orientation.ipynb)
+(C11–C14). Every number in them is recomputed rather than quoted, and the two
+Markov-equivalent graphs of C13 are drawn from the sweep that found them.
+Notebooks are *generated* from `notebooks/build_NN.py` rather than hand-edited, so
+they cannot drift from the code they document.
+
 See [`FINDINGS.md`](FINDINGS.md) for the ledger.
 
 ### Reproducing
@@ -70,6 +79,11 @@ See [`FINDINGS.md`](FINDINGS.md) for the ledger.
 .venv/bin/python -m pytest -q                              # 45 tests
 .venv/bin/python scripts/gate10_feasibility.py --shuffles 1000
 .venv/bin/python scripts/phase1_stability.py --seeds 20
+
+# regenerate and re-execute the notebooks
+cd notebooks && ../.venv/bin/python build_00.py && ../.venv/bin/python build_01.py && cd ..
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/0*.ipynb
+.venv/bin/python scripts/check_notebooks.py notebooks/0*.ipynb
 ```
 
 The validation grid of the belief network is reproducible only up to three BDeu
