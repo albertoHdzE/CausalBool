@@ -91,6 +91,14 @@ Phase 1 in progress. 45 tests passing.
   out to sum a real edge with the null's **overfitting penalty**, and is demoted;
   the rank-based p-values survived, and the honest summary of B6 is **one
   significant cell of nine** (bitácora 06 §9, C27–C28, notebook 03).
+- **Datasaurus audit (bitácora 07).** After Phase 2 was challenged, every ledger
+  entry was re-examined through the four gates of the `datasaurus` skill. Three
+  infected sites: the Phase 2 headline mean, C22's structure axis (66 per cent
+  density artefact, **withdrawn**), and C19's model term (arrays of different size,
+  number **demoted**, conclusion surviving on the counting comparison). Three
+  clean: C1–C4 immune by construction, C5–C10 structurally immune (in-sample
+  statistics), C20 a count of an elementwise property. No headline conclusion
+  changes (C29–C31).
 - **Next:** Phase 3 — daily frequency and an enlarged panel, pre-declared to run
   regardless of the Phase 1 and Phase 2 outcomes. Daily data yields 322 legs
   against monthly's 57.
@@ -142,7 +150,7 @@ that determines an outcome is hash-invariant and is asserted as such.
 | `reference/figures/` | The twenty-five GWP3 figures, the replication targets |
 | `data/monthly/` | `sterilized_monthly_data.csv` — the 199×7 panel, 2010-01-31 to 2026-07-31 |
 | `data/daily/` | Daily WTI futures and the raw FRED pull, held for the Phase 3 frequency extension |
-| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm, 04 description length, 05 Phase 1b, 06 Phase 2 |
+| `bitacora/` | The scientific logbook: 00 kick-off, 01 reference parity, 02 Gate 1.0, 03 comparison arm, 04 description length, 05 Phase 1b, 06 Phase 2, 07 Datasaurus audit |
 | `src/imp_prices/` | `config`, `data`, `discretise`, `feasibility`, `controls`, `belief_network`, `index_set`, `binarise`, `gate_network`, `algorithmic`, `pivots`, `clock` |
 | `vendor/` | `causalbool.py` and `deconvolution.py`, copied unmodified from `index-deconvolution/src/` — the validated forward model and gate identifier |
 | `tests/`, `results/`, `figures/`, `notebooks/` | As in the sibling replication packages |
