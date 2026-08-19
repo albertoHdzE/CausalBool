@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from imp_prices.pivots import (Pivot, directional_change, known_pivots,
+from imp_prices.pivots import (Pivot, clean_prices, directional_change, known_pivots,
                                leak_opportunities, leaked_pivots, legs,
                                short_wait_target)
 
@@ -199,3 +199,40 @@ def test_the_running_median_is_causal():
     for _, r in tgt.iterrows():
         past = tab["dt"].to_numpy()[:int(r["leg"]) + 1]
         assert r["running_median"] == pytest.approx(float(np.median(past)))
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 data policy: non-positive prices (protocol P3.1-P3.3)
+# ---------------------------------------------------------------------------
+
+def test_non_positive_prices_raise_rather_than_produce_numbers():
+    """WTI closed at -37.63 on 2020-04-20 and every part of this breaks silently."""
+    from imp_prices.pivots import NonPositivePriceError, validate_prices
+    good = np.array([10.0, 11.0, 12.0])
+    validate_prices(good)
+    for bad in ([10.0, -1.0, 12.0], [10.0, 0.0, 12.0], [10.0, np.nan, 12.0]):
+        with pytest.raises(NonPositivePriceError):
+            validate_prices(np.array(bad))
+        with pytest.raises(NonPositivePriceError):
+            directional_change(np.array(bad), 0.05)
+
+
+def test_the_inequality_really_does_invert_on_a_negative_extreme():
+    """Why the guard is a raise and not a warning.
+
+    In an upward phase the downturn test is p <= ext*(1-theta). With a negative
+    extreme the threshold sits ABOVE it, so any higher price 'confirms' a
+    reversal. The detector would produce pivots, not errors.
+    """
+    ext, theta = -37.63, 0.05
+    assert ext * (1 - theta) > ext, "threshold must be above the extreme -- inverted"
+
+
+def test_clean_prices_excludes_and_reports_rather_than_interpolating():
+    p = np.array([10.0, 11.0, -5.0, 12.0, 13.0])
+    out, _, rep = clean_prices(p)
+    assert rep["n_dropped"] == 1 and rep["n_out"] == 4
+    assert (out > 0).all()
+    assert len(out) == 4, "excluded, never replaced by an invented price"
+    padded, _, rep2 = clean_prices(p, pad=1)
+    assert rep2["n_dropped"] == 3, "pad drops the neighbourhood too"

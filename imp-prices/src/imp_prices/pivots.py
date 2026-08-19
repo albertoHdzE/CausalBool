@@ -49,6 +49,68 @@ class Pivot:
         return self.confirm_index - self.extreme_index
 
 
+class NonPositivePriceError(ValueError):
+    """Raised when a relative-threshold method is handed a non-positive price.
+
+    Found in Phase 3 by rendering the series before quoting any number. WTI
+    closed at **-37.63 on 2020-04-20**, and every part of this encoding breaks on
+    it *silently*:
+
+    * the downturn test ``p <= ext * (1 - theta)`` **inverts** when ``ext`` is
+      negative, so the threshold sits above the extreme and any higher price
+      "confirms" a reversal;
+    * ``log`` of a non-positive price is undefined, so the return-shuffle null
+      propagates nan and loses most of its path;
+    * nothing raises. The detector returned 550 pivots including a *trough* at
+      -37.63, with **seven pivots inside a fifteen-day window** around the print
+      — a burst of spurious reversals biasing towards the clustering hypothesis
+      under test.
+
+    A method whose arithmetic assumes positivity must refuse non-positive input
+    rather than produce numbers from it. Callers declare a handling policy
+    explicitly via :func:`clean_prices`.
+    """
+
+
+def validate_prices(prices) -> np.ndarray:
+    """Reject input a relative-threshold method cannot meaningfully process."""
+    p = np.asarray(prices, dtype=float)
+    if not np.all(np.isfinite(p)):
+        raise NonPositivePriceError(
+            f"{int((~np.isfinite(p)).sum())} non-finite prices; declare a policy")
+    bad = np.where(p <= 0)[0]
+    if len(bad):
+        raise NonPositivePriceError(
+            f"{len(bad)} non-positive price(s) at index {bad[:5].tolist()} "
+            f"(min {p.min():.2f}). A relative threshold is undefined here; use "
+            f"clean_prices() and report the exclusion.")
+    return p
+
+
+def clean_prices(prices, dates=None, pad: int = 0):
+    """The declared policy: drop non-positive prices, and report what was dropped.
+
+    ``pad`` additionally drops ``pad`` observations either side, so that a
+    sensitivity check can show the result does not depend on the neighbourhood of
+    the excluded print. Nothing is winsorised or interpolated: inventing a price
+    where the market printed a negative one would put a number into the series
+    that no one could have traded.
+    """
+    p = np.asarray(prices, dtype=float)
+    keep = np.isfinite(p) & (p > 0)
+    if pad:
+        drop = ~keep
+        for k in range(1, pad + 1):
+            drop |= np.roll(drop, k) | np.roll(drop, -k)
+        keep = ~drop
+    report = dict(n_in=len(p), n_out=int(keep.sum()), n_dropped=int((~keep).sum()),
+                  pad=pad,
+                  dropped_dates=[str(d.date()) if hasattr(d, "date") else str(d)
+                                 for d in (np.asarray(dates)[~keep] if dates is not None
+                                           else [])][:10])
+    return p[keep], (np.asarray(dates)[keep] if dates is not None else None), report
+
+
 def directional_change(prices, theta: float) -> list[Pivot]:
     """Confirmed directional-change pivots at relative threshold ``theta``.
 
@@ -62,7 +124,7 @@ def directional_change(prices, theta: float) -> list[Pivot]:
     sets the mode; before it there is no basis for calling the phase up or down,
     and assuming one would plant an artefact at the left edge.
     """
-    p = np.asarray(prices, dtype=float)
+    p = validate_prices(prices)
     if len(p) < 2 or theta <= 0:
         return []
 

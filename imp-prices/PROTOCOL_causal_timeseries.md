@@ -288,6 +288,48 @@ Phase 1b does not revisit it.
   Phase 1 found. If it does, C18 was an artefact of the degenerate encoding, and
   that is to be stated plainly rather than presented as a new discovery.
 
+## Phase 3 data policy (pre-declared 2026-08-18, before any Phase 3 analysis)
+
+Found by applying G1 — render the object at full length before quoting any
+number — to the newly fetched daily panel, and demonstrated rather than assumed.
+
+**P3.1 — non-positive prices are refused, not handled silently.** WTI futures
+closed at **−37.63 on 2020-04-20**. A relative-threshold method is undefined
+there and fails in three ways at once, none of which raises: the downturn test
+`p ≤ ext·(1−θ)` *inverts* when `ext` is negative, so any higher price "confirms"
+a reversal; `log` of a non-positive price is undefined, so the return-shuffle
+null propagates nan and loses most of its path; and the detector returned 550
+pivots including a *trough* at −37.63, with **seven pivots inside a fifteen-day
+window** — a burst of spurious reversals biasing towards the clustering
+hypothesis under test. `directional_change` now raises `NonPositivePriceError`.
+
+**P3.2 — the declared handling is exclusion, never interpolation.** Inventing a
+price where the market printed a negative one puts a number into the series that
+nobody could have traded. `clean_prices` drops non-positive observations and
+reports what it dropped.
+
+**P3.3 — the exclusion pad is a knob, so it is swept and reported (G3).**
+Dropping the print alone is *not* sufficient: the neighbouring returns still
+carry a 60 per cent single-day move, and the 26-year kurtosis stays at 51.8. At
+pad = 5 it is 12.4, at pad = 20 it is 7.3. The primary setting is **pad = 5**
+(one trading week) and every Phase 3 result is reported at **pad ∈ {0, 5, 20}**.
+A result that depends on the pad is a result about April 2020.
+
+**P3.4 — the pooled panel's nuisance dimensions, enumerated before pooling (G2).**
+The six instruments differ in length (4,742–6,524), start date (2000 vs 2007),
+price level (0.41 to 5,318), annualised volatility (0.179–0.611) and kurtosis
+(7.3–21.2 after cleaning). Any pooled statistic must be matched or conditioned on
+these; a pooled sign test must state how many instruments and how many
+independent decisions it rests on. `Gold_control` is included as a **non-energy
+control**: a clock result that appears equally in gold is not about oil.
+
+**P3.5 — data provenance.** FRED was unreachable from this environment
+(HTTP/2 error, then timeout), so the daily panel comes from the Yahoo v8 endpoint
+with explicit `period1`/`period2`, which reaches 2000 rather than the 1986 that
+FRED `DCOILWTICO` would have given. The pre-declared 1986 start is therefore
+**not achieved**, and this is recorded as a shortfall rather than quietly
+substituted.
+
 ## Amendments
 
 ### A1 — 2026-08-18. Gate 1.0 statistic and null, following the controls.

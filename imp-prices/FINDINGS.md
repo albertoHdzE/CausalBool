@@ -279,3 +279,16 @@ the belief network and the index-set network. It does *not* yet cover the belief
 network itself: `results.json` also holds `validation_grid_A/B`, `modelA/B/C`,
 `benchmarks_test` and `inference`, and those remain unported. They are the
 comparison targets of Phase 1, not of this gate.
+
+### Phase 3 — opening: the data policy, found by rendering first
+
+Run 2026-08-18. `scripts/fetch_daily.py`, `figures/phase3_g1_render.png`,
+protocol §P3. The `datasaurus` gates were applied from the first action rather
+than after the fact.
+
+| # | Claim | Evidence | Status |
+| --- | --- | --- | --- |
+| C32 | **A relative-threshold method breaks silently on the 2020 negative oil price, and G1 caught it before any Phase 3 number existed.** WTI futures closed at **−37.63 on 2020-04-20**. Three simultaneous failures, none of which raises: the downturn test `p ≤ ext·(1−θ)` **inverts** when `ext` is negative, so any higher price "confirms" a reversal; `log` of a non-positive price is undefined, so the return-shuffle null propagates nan and retains only **2,627 of 6,524** path values; and the detector returned 550 pivots including a *trough* at −37.63, with **seven pivots inside a fifteen-day window** — a burst of spurious reversals biasing **towards** the clustering hypothesis under test. `directional_change` now raises `NonPositivePriceError` | `test_non_positive_prices_raise_rather_than_produce_numbers`, `test_the_inequality_really_does_invert_on_a_negative_extreme` | `CONFIRMED` |
+| C33 | **The exclusion pad is a knob and behaves like one (G3).** Dropping the print alone is insufficient: the neighbouring returns still carry a 60 per cent single-day move and the 26-year kurtosis stays at **51.8**. At pad = 5 it falls to 12.4, at pad = 20 to 7.3; pivot counts go 550 / 544 / 506 at θ = 0.05. Primary setting pad = 5, with every Phase 3 result to be reported at pad ∈ {0, 5, 20}. A result that depends on the pad is a result about April 2020 | `clean_prices`, protocol P3.3 | `CONFIRMED` |
+| C34 | **The daily panel is fetched and its nuisance dimensions enumerated before any pooling (G2).** Six instruments: WTI, Brent, natural gas, heating oil, gasoline, and **gold as a non-energy control** — a clock result appearing equally in gold is not about oil. They differ in length (4,742–6,524), start (2000 vs 2007), price level (0.41 to 5,318), annualised volatility (0.179–0.611) and kurtosis (7.3–21.2 cleaned). WTI now gives **6,524 daily observations against the monthly 199** | `figures/phase3_g1_render.png` | `CONFIRMED` |
+| C35 | **The pre-declared 1986 start is not achieved, and is recorded as a shortfall.** FRED was unreachable from this environment (HTTP/2 error, then timeout), so the panel comes from Yahoo v8 and reaches 2000, not the 1986 that `DCOILWTICO` would have given | protocol P3.5 | `NEGATIVE` (scope shortfall) |
