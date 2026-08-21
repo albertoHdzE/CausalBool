@@ -383,6 +383,203 @@ to daily data, where the oil series have texture at the scale the pivots live on
 and drop the macro covariates that are constant at monthly resolution rather than
 carrying them along as decoration.
 """),
+
+md("""
+---
+
+# 8. Didactic appendix
+
+Three things above are asserted compactly and are worth being able to *do* rather
+than accept: how a month becomes bits, what a thin support looks like in the
+geometry, and why persistence is such a hard bar. Each is built here at a size
+that can be checked by hand.
+
+## 8a. One month, turned into bits, by hand
+
+The encoding is a two-step map: the HMM assigns each series a regime, and the
+thermometer code turns each regime into two bits. Take April 2020 — the month WTI
+futures printed negative — and follow every step.
+
+The thermometer code is `bear -> (0,0)`, `stagnant -> (1,0)`, `bull -> (1,1)`. The
+first bit answers *is this at least stagnant?* and the second *is this bull?* The
+pattern `(0,1)` is unreachable by construction, which is what makes the code
+order-preserving rather than an arbitrary relabelling.
+"""),
+code('''
+lr = np.log(full).diff().dropna()
+NAMES = {0: "bear", 1: "stagnant", 2: "bull"}
+CODE = {0: (0, 0), 1: (1, 0), 2: (1, 1)}
+
+when = "2020-04-30"
+i = list(reg.index.strftime("%Y-%m-%d")).index(when)
+
+print(f"ONE MONTH BY HAND: {when}\\n")
+print(f"{'series':<10s} {'log return':>11s} {'state':>6s} {'name':>9s}   bits")
+print("-" * 52)
+for c in reg.columns:
+    st = int(reg[c].iloc[i])
+    print(f"{c:<10s} {lr[c].iloc[i]:>+11.5f} {st:>6d} {NAMES[st]:>9s}   {CODE[st]}")
+
+row = B.iloc[i].to_numpy()
+print("\\nthe 14-bit row, in column order:")
+for c, b in zip(B.columns, row):
+    print(f"    {b}   {c}")
+print("\\nas a word:", "".join(map(str, row)))
+'''),
+
+md("""
+Two things are visible in that single row, and neither needed a statistic.
+
+WTI is **bear** while Brent is **bull** in the very same month: the two benchmark
+crudes diverged in April 2020, which is exactly the storage crisis that drove WTI
+negative and left seaborne Brent alone. So the three oil series are not
+*identical* — they are one factor plus episodes.
+
+And most of the bits in that row are zero, four of them from CPI and USD_Idx,
+which are zero in **every** row. Those four positions in the word never change,
+whatever month is chosen.
+
+## 8b. The support, drawn as the cube it actually is
+
+A three-input gate is a rule assigning an output to each of the eight corners of a
+cube. Which corners the data visits therefore decides how much of that rule is
+fixed by evidence and how much by nothing at all.
+"""),
+code('''
+from itertools import combinations
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+
+CORNERS = np.array([[(i >> b) & 1 for b in range(3)] for i in range(8)])
+
+def draw_cube(ax, cols, title):
+    cnt = support(B, cols)
+    for a in range(8):
+        for b in range(a + 1, 8):
+            if bin(a ^ b).count("1") == 1:
+                ax.plot(*zip(CORNERS[a], CORNERS[b]), color="0.85", lw=0.8, zorder=1)
+    vis = cnt > 0
+    ax.scatter(CORNERS[vis, 0], CORNERS[vis, 1], CORNERS[vis, 2],
+               s=30 + 900 * cnt[vis] / cnt.sum(), color="#2166AC",
+               zorder=3, depthshade=False)
+    if (~vis).any():
+        ax.scatter(CORNERS[~vis, 0], CORNERS[~vis, 1], CORNERS[~vis, 2], s=90,
+                   facecolors="none", edgecolors="#B2182B", linewidths=1.6,
+                   zorder=3, depthshade=False)
+    for a in range(8):
+        ax.text(CORNERS[a, 0], CORNERS[a, 1], CORNERS[a, 2],
+                f" {format(a,'03b')}:{cnt[a]}", fontsize=6,
+                color="#B2182B" if cnt[a] == 0 else "0.2")
+    ax.set_title(title, fontsize=7)
+    ax.set_xticks([0, 1]); ax.set_yticks([0, 1]); ax.set_zticks([0, 1])
+    ax.tick_params(labelsize=5); ax.grid(False)
+
+triples = list(combinations(list(B.columns), 3))
+scored = sorted(((int((support(B, t) > 0).sum()), t) for t in triples),
+                key=lambda z: z[0])
+picks = [scored[-1][1], scored[len(scored) // 2][1], scored[0][1]]
+labels = ["BEST covered", "MEDIAN triple", "WORST covered"]
+
+fig = plt.figure(figsize=(13, 4.4))
+for j, (t, lab) in enumerate(zip(picks, labels)):
+    ax = fig.add_subplot(1, 3, j + 1, projection="3d")
+    draw_cube(ax, t, lab + "\\n" + "\\n".join(t))
+fig.suptitle("The cube the gate is defined on. Filled blue = a corner the data visits "
+             "(size = how often);\\nhollow red = a corner it NEVER visits, where the "
+             "gate's output would be set by nothing.", fontsize=9)
+plt.tight_layout(); plt.savefig(os.path.join(ROOT, "figures", "04_C1_support_cube.png"),
+                                dpi=130, bbox_inches="tight")
+plt.show()
+'''),
+
+md("""
+Turn the knob: how many gates does an unvisited corner actually confuse? Each
+corner the data never reaches halves the number of rules this panel can tell
+apart, because the two rules that differ only there are indistinguishable.
+"""),
+code('''
+vis_counts = np.array([int((support(B, t) > 0).sum()) for t in triples])
+print("Distinguishable Boolean functions of 3 inputs, given the corners visited:")
+print(f"{'corners visited':>16s} {'triples':>9s} {'distinguishable rules':>24s}")
+for v in sorted(set(vis_counts)):
+    print(f"{v:>16d} {int((vis_counts == v).sum()):>9d} {2**v:>18d} of 256")
+med = int(np.median(vis_counts))
+print(f"\\nmedian triple: {med} corners -> {2**med} of the 256 three-input rules are "
+      f"distinguishable.")
+print("The rest are not wrong here. They are the SAME rule, as far as this panel "
+      "can see.")
+'''),
+
+md("""
+## 8c. Why persistence is such a hard bar
+
+Anchor A11 records one-month regime persistence at 79.31 per cent on the GWP3
+monthly sample. On the 198-row panel rebuilt here the same quantity is computed
+below; the windows differ, so the two are reported separately rather than
+reconciled.
+
+The reason the bar is hard is structural rather than statistical. Predicting *the
+same regime as last month* is free, uses no data, and is right on every month
+that is not a turning point. To beat it a model must gain on the switches without
+losing on the stays — and the stays vastly outnumber the switches.
+"""),
+code('''
+y = reg[TARGET].to_numpy()
+stays = int((y[1:] == y[:-1]).sum())
+switches = int((y[1:] != y[:-1]).sum())
+n_tr = stays + switches
+print(f"target: {TARGET}, {n_tr} transitions on this 198-row panel")
+print(f"   stays    : {stays:>4d}  ({stays/n_tr:.4f})  <- what the free rule gets right")
+print(f"   switches : {switches:>4d}  ({switches/n_tr:.4f})  <- what it always gets wrong")
+print(f"\\npersistence accuracy on this panel : {stays/n_tr:.4f}")
+print(f"inherited anchor A11 (GWP3 sample)  : 0.7931")
+print("Different windows. Reported separately, not reconciled.")
+'''),
+
+code('''
+# THE KNOB. r = fraction of switches the model calls correctly.
+#           f = fraction of stays it wrongly disturbs while chasing them.
+r = np.linspace(0, 1, 101)
+fig, ax = plt.subplots(figsize=(8.6, 4.0))
+for f, col in zip([0.0, 0.02, 0.05, 0.10, 0.20],
+                  plt.cm.viridis(np.linspace(0, 0.85, 5))):
+    ax.plot(r, (stays * (1 - f) + switches * r) / n_tr, color=col, lw=1.6,
+            label=f"disturbs {f:.0%} of stays")
+ax.axhline(stays / n_tr, color="#B2182B", ls="--", lw=1.2,
+           label=f"free persistence rule ({stays/n_tr:.3f})")
+ax.set_xlabel("fraction of the switches the model calls correctly  (r)")
+ax.set_ylabel("overall accuracy")
+ax.set_title(f"Stays outnumber switches {stays}:{switches}, so every stay broken in "
+             f"pursuit of a switch\\ncosts {stays/switches:.2f} switches to earn back.",
+             fontsize=9)
+ax.legend(fontsize=7.5); plt.tight_layout()
+plt.savefig(os.path.join(ROOT, "figures", "04_C2_persistence_bar.png"),
+            dpi=130, bbox_inches="tight")
+plt.show()
+
+print(f"break-even condition: r > {stays/switches:.3f} x f")
+for f in (0.02, 0.05, 0.10):
+    print(f"   disturbing {f:>4.0%} of stays requires calling "
+          f"{min(1.0, stays/switches*f):>5.1%} of switches right merely to break even")
+'''),
+
+md("""
+That is the whole difficulty in one line: **stays outnumber switches by roughly
+three to one, so a model must be about three times more accurate on the switches
+than it is disruptive on the stays simply to draw level with a rule that uses no
+data at all.**
+
+It also explains why Phase 1 was never going to be rescued by a better scoring
+rule. A model can only clear this bar by anticipating turning points, and that
+requires a variable that moves *before* the target does. The panel's near-constant
+columns cannot move before anything, and the oil columns are the target itself
+under other names.
+
+The argument carries into Phase 3 unchanged. Re-targeting from "next month's
+regime" to the clock — how long until the next directional-change pivot — was
+chosen precisely because a running-median split puts the base rate near one half
+by construction, so the free rule earns nothing and the comparison becomes
+informative rather than a contest against arithmetic.
+"""),
 ]
 
 if __name__ == "__main__":
