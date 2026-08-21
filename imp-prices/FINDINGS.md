@@ -300,3 +300,34 @@ than after the fact.
 the *narrative* was not: a number was computed correctly, looked striking, and was
 given a causal reading with no reference distribution in the same sentence. The
 guards live in the tests; the infection enters at the moment of writing prose.
+
+### The visual pass — the objects drawn, and Phase 1 re-read through them
+
+Run 2026-08-21. `notebooks/04_the_visual_pass.ipynb` (23 cells, 0 errors, 7
+figures), `figures/04_*.png`. Built after the assessor required that the method's
+own discovery order be restored: look at the distribution of ones and zeros
+first, and let the table headers, the formulae and the statistics follow from
+what was seen. Before this notebook the project held **one** figure in
+`figures/` for all of Phases 1 and 2.
+
+| # | Claim | Evidence | Status |
+| --- | --- | --- | --- |
+| C37 | **The binary object the method eats had never been rendered, and rendering it explains Phase 1 without any new statistic.** The 198×14 thermometer matrix shows four near-white columns and two solid ones at a glance. Run counts over 198 months: **CPI 1 and 1** (a literally constant column, both bits), Fed_Funds.not_bear **3**, USD_Idx **4 and 4**, Ind_Prod **5 and 5**; against **23–39** for the six crude-oil nodes. Four of seven series barely move at monthly resolution | `figures/04_A3_binary_object.png`, `04_B3_run_counts.png`, notebook §6b | `CONFIRMED` |
+| C38 | **The panel is one crude-oil factor observed three ways, and the co-occurrence ordering finds this unprompted.** Hierarchical ordering on Hamming distance places the three `not_bear` oil nodes adjacent and the three `bull` oil nodes adjacent; WTI_CL, Brent_BZ and WTI_Spot are the same underlying object. So the Phase 1 parent search offered crude oil as the predictor of crude oil, plus four columns that do not vary | `figures/04_A4_column_order.png` | `CONFIRMED` |
+| C39 | **The three-state HMM collapses to two states on three of seven series, and this is a property of the panel, not of the evaluation window.** Middle state occupancy is **0** for USD_Idx (175/0/23), CPI (198/0/0) and Ind_Prod (6/0/192). CPI's log-return dispersion is **sd = 0.00264** against WTI's **0.11726**, a factor of about forty-four; 29 non-convergence warnings fire during the fit. The collapse holds inside the 139 training rows alone | notebook §6, `discretise.RegimeDiscretiser` | `CONFIRMED` |
+| C40 | **The support is thin, so most of the gate catalogue is unidentifiable on this panel.** Across all **364** node triples the median triple visits **5 of 8** corners of its cube, and the modal corner holds a median **0.697** of the rows. A gate is a labelling of all eight corners, so much of what separates one catalogue member from another is decided on corners the data never visits. This is a statement about what the panel can identify, not a defect of the method — and it should have been known before any gate was fitted | `figures/04_B2_support.png`, notebook §5b | `CONFIRMED` |
+| C41 | **WITHDRAWN BEFORE PUBLICATION — "eight of fourteen nodes are frozen across the test window" does not survive its own reference.** Observed 8 of 14; a circular-shift null that preserves each column's run structure and randomises only where the test window falls gives median **6**, 5–95 pct **[4, 8]**, rank-based **p = 0.1100**. The figure is a restatement of the run structure of C37, not an additional finding. Recorded because the number was computed, looked striking, and was stopped at the gate rather than after the fact | notebook §6b, executed in place | `NEGATIVE` (withdrawn at the gate) |
+
+**C41 is the first time the reporting failure was caught before the claim was
+written**, rather than by the assessor (C27, C29) or by a deliberate audit (C36).
+The mechanism was the rule that no number enters prose without its reference
+distribution in the same sentence: computing the reference is what demoted it.
+
+**What C37–C40 change.** Phase 1's verdict is unaltered — the panel carries no
+predictive content for the one-month WTI regime beyond the regime's own
+persistence (A11, 79.31 per cent) — but it now has a mechanism that can be seen
+rather than inferred from a score: the candidate parents either do not move, or
+they are crude oil under another name. No scoring rule, description length or
+gate catalogue could have rescued that panel. This is a statement about the data,
+not about the method, and it is the reason Phase 3 moves to daily resolution and
+drops the macro covariates rather than carrying them along as decoration.
