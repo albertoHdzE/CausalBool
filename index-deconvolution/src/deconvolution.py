@@ -10,7 +10,8 @@ then names ``f`` with the canonical CausalBool gate family.
 Method (see ``bitacora/01_deconvolution_method_design.md`` for the full
 derivation).  The forward CausalBool transform factorises over nodes: output
 column ``k`` is a function of the connected inputs only, with the disconnected
-nodes acting purely as the free offset dimension ("sumandos").  Therefore
+nodes contributing only the free offset dimension, whose decimal encoding is
+the "sumandos".  Therefore
 deconvolution factorises into independent per-column problems, each solved
 exactly by:
 
@@ -37,7 +38,15 @@ from causalbool import Network, apply_gate, truth_table, repertoire
 
 
 # ---------------------------------------------------------------------------
-# Step 1 - essential-variable detection (pivots vs sumandos)
+# Step 1 - essential-variable detection (connected vs free coordinates)
+#
+# Terminology, GLOSSARY.md sec.1c: the complement of the PIVOT COORDINATES is the
+# FREE COORDINATES, *not* the sumandos.  Each side has its own decimal encoding --
+# connected -> decimal anchor, free -> sumandos -- so pairing "pivots vs sumandos"
+# puts a set opposite an encoding.  It also wrongly suggests a lossy split: this
+# factorisation is EXACT, Dec(L,S) = {l+s} rebuilds the repertoire, so there is no
+# residual here.  pivot/residual is the lossy pair, and it belongs to causal
+# reachability, not to this method.
 # ---------------------------------------------------------------------------
 
 def essential_variables(column: list[int], n: int) -> list[int]:
@@ -45,13 +54,18 @@ def essential_variables(column: list[int], n: int) -> list[int]:
 
     Bit ``i`` is essential iff there exists an input ``x`` with
     ``column[x] != column[x ^ (1 << i)]``.  These are exactly the connected
-    inputs (pivots); the remaining bits are the disconnected offset dimension
-    (sumandos).
+    inputs -- the PIVOT COORDINATES.  The remaining bits are the FREE
+    COORDINATES; their subset sums are the sumandos.  (The sumandos are the
+    free coordinates' decimal *encoding*, not the coordinates themselves --
+    GLOSSARY.md sec.1c.)
     """
     if len(column) != 2 ** n:
         raise ValueError("column length must be 2**n")
     essential = []
     for i in range(n):
+        # Create a number with only the i-th bit set (1 shifted left by i positions)
+        # Example: if i=2 (0-based, 3rd bit), 1 << 2 = 4 (binary 100)
+        # This lets us check if flipping just that one bit changes the output
         bit = 1 << i
         sensitive = False
         for x in range(2 ** n):
@@ -228,7 +242,7 @@ def identify_gate(reduced: list[int]) -> tuple[list[GateMatch], GateMatch]:
         matches.append(GateMatch("REGULATORY", {"activators": activators, "arity": m}))
 
     # Regulatory disjunctive normal form: any regulatory function as a compact
-    # union of activator/inhibitor clauses (a union of pivot-shifted cosets).
+    # union of activator/inhibitor clauses (a union of anchor-shifted cosets).
     # Named only when it genuinely compresses the on-set and the arity is small
     # enough for the cover to be meaningful; otherwise the look-up table stands.
     if 1 < sum(reduced) < len(reduced) and m <= 12:
