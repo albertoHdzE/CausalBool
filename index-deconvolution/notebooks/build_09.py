@@ -46,12 +46,17 @@ hand-picked few.
 
 The story in one breath:
 
-1. A **pivot** is a turning point of a price — a peak or a trough.
-2. The **perfect trader** (who sees the future) buys low and sells high, but pays a
-   fee, so it only bothers with moves big enough to cover the fee.
-3. **Claim:** the perfect trader's buy/sell days are *exactly the pivots* at a size
-   set by the fee. We will find this is **true — but it is pure geometry**, true of
-   any wiggly line, even random noise. It is *not* a market secret. We say so loudly.
+1. The **perfect trader** — the **oracle** — sees the future and buys low and sells
+   high, but pays a fee, so it only bothers with moves big enough to cover the fee.
+   It is an **answer key**, not a strategy: you cannot run it forward.
+2. A **pivot** is a point of that answer key which a **causal** process — one with
+   **no look-ahead** — reproduces **exactly**. What no causal process reaches is the
+   **residual**: the part that genuinely requires the future.
+3. **Claim:** the causal turning-point rule at a size set by the fee recovers a
+   **subset** of the perfect trader's days — containment, not identity. This turns
+   out to hold on any wiggly line, even random noise, and that is **expected**: it
+   says the causal rule never invents days outside the answer key. What it does *not*
+   show is anything about markets. We say so loudly.
 4. The one thing that is genuinely about markets is the **clock**: *when* the turning
    points happen. They arrive in **bursts** (calm, calm, then a flurry). That
    clustering is real, survives a shuffle, and forecasts the next burst a little —
@@ -65,12 +70,43 @@ code(BOOTSTRAP),
 code(EXTRA),
 
 md(r"""
-## Step 1 · What is a pivot? (a turning point)
+## Step 1 · What a pivot **is**, and how we **recover** one
 
-Take one real stock. Its price wiggles up and down. A **pivot** is a confirmed turning
-point: we only call the top of a hill a "peak" once the price has fallen back down by
-some percentage `theta` (say 2%). That rule ignores tiny jiggles and keeps the real
-turns. Below, the orange dots are the pivots at `theta = 2%`.
+These are two different things, and an earlier version of this notebook confused them.
+Keep them apart.
+
+**The definition** (settled 2026-08-22; the source of truth is
+`series-deconvolution/GLOSSARY.md` §1, which outranks every paper and notebook in this
+programme on a definition):
+
+> A **pivot** is a position that a **causal** process — one with no look-ahead —
+> reproduces **exactly**. What no such process reaches is the **residual**.
+
+This is the programme's founding object, not something invented at Level 10.
+`PROTOCOL_order_discovery.md`: *"the positions that a discovered process reproduces
+exactly are the pivots… the positions that no process reaches are the residual."*
+Bitácora 14: *"the points and segments where **local determinism holds exactly** are
+the gold."* In finance the thing to be reproduced is the **oracle** (Step 2), so a
+**financial pivot** is an oracle action point recovered exactly without seeing the
+future.
+
+**The recovery method** is what the code below runs: walk the series, and only call the
+top of a hill a "peak" once the price has fallen back by some percentage `theta` (say
+2%). The walk never reads an index ahead of the one it stands on — *that* is what makes
+its output eligible to be called pivots. It ignores tiny jiggles and keeps the real
+turns. Orange dots below are the pivots at `theta = 2%`.
+
+> ⚠️ **Confusion source #1**, logged in `GLOSSARY.md` §2: this cell used to say
+> *"a pivot **is** a confirmed turning point"* — defining the object by the algorithm
+> that finds it. That inverts the logic. A walk always returns *something*; the
+> definition carries a claim that can **fail**, namely that what it returns is exactly
+> right. Any agent propagating this correction should look for the same slip elsewhere.
+
+Note also: do **not** pair *pivot* with *sumandos*. `pivot`/`residual` is a partition by
+causal reachability and is **lossy**. `decimal family`/`sumandos` is the Boolean
+indexing method's compressed form and is **lossless** — `Dec(L,S) = {ℓ+s}` rebuilds the
+repertoire exactly. There is no residual in the Boolean method and no sumando in
+finance (`GLOSSARY.md` §1c, confusion source #5).
 """),
 code(r"""
 from pivots import directional_change_pivots
@@ -125,9 +161,15 @@ print("predict direction; we only study WHEN it acts.")
 md(r"""
 ## Step 3 · The claim — and the hostile audit
 
-**The claim:** the perfect trader's action days are *exactly the pivots* at threshold
-`theta = c`. Let us overlay them. If the claim holds, every orange pivot sits under a
-trader action.
+**The claim:** every pivot recovered causally at `theta = c` is a perfect-trader day —
+**containment**, and the oracle is the strictly larger set. Let us overlay them. If the
+claim holds, every orange pivot sits under a trader action, while some trader actions
+have no pivot on them: those are the **residual**, the days that require the future.
+
+> ⚠️ **Confusion source #2**, logged in `GLOSSARY.md` §2: bitácora 21 first stated this
+> as an *identity* — "the perfect trader's days **are** the pivots". Bitácora 22's
+> adversarial audit retracted that. It is containment, one way, and the direction
+> matters: `DC(θ=c) ⊆ oracle(κ)`.
 """),
 code(r"""
 from oracle import oracle_points, match_sets
@@ -157,7 +199,9 @@ objection. Let us test the identical claim on things that are **not** markets:
 * **pure random noise**,
 * a smooth **sine wave**.
 
-If the containment is ~100% on those too, the "theorem" is just geometry.
+The containment *will* come out ~100% on all of them. Read the next cell carefully,
+because what follows that result is where this notebook previously went wrong in the
+**opposite** direction.
 """),
 code(r"""
 from controls import geometric_random_walk
@@ -182,12 +226,19 @@ fig, ax = plt.subplots(figsize=(7.5, 3.4))
 ax.bar(list(vals), list(vals.values()), color=[INK, "#888", "#aaa", HL])
 ax.set_ylim(0, 105); ax.set_ylabel("pivots that are\nperfect-trader days (%)")
 ax.axhline(100, color=BAD, lw=1, ls="--")
-ax.set_title("The 'theorem' is ~100% on markets AND on noise -> it is pure geometry")
+ax.set_title("Containment is ~100% on markets AND on noise -- as the definition requires")
 for i, v in enumerate(vals.values()):
     ax.text(i, v-6, f"{v:.1f}%", ha="center", color="white", fontweight="bold")
 plt.tight_layout(); plt.show()
-print("VERDICT: real and exact, but NOT a market fact. It is a construction identity.")
-print("Its only worth: it lets us call the pivot clock the *perfect-opportunity* clock.")
+print("VERDICT, in two parts -- keep them apart:")
+print("  1. The CONTAINMENT is constitutive of the definition. A pivot just IS an oracle")
+print("     point recovered causally, so containment holding on noise and on a sine is")
+print("     EXPECTED and CORRECT: the causal rule never invents days outside the answer")
+print("     key. That is what a sound recovery method must do. It is not a defect.")
+print("  2. The AGREEMENT RATE is NOT evidence about markets. It is ~100% on data with no")
+print("     market structure at all, so it can never support 'pivots are where a perfect")
+print("     trader would act, therefore markets have structure'.")
+print("Discard only claim 2. Keep the definition.")
 """),
 
 md(r"""
@@ -413,8 +464,9 @@ The whole point of the audit is to separate what is **real and new** from what i
 code(r"""
 se, oo = R100["self_excitation"], R100["oos_forecast"]
 rows = [
- ["Perfect trades = pivots at theta=c", "TRUE but GEOMETRY",
-  f"~100% on stocks, GBM & noise alike; says nothing about markets"],
+ ["Pivots at theta=c are CONTAINED in\nthe perfect trader's days", "TRUE; DEFINITIONAL",
+  f"~100% on stocks, GBM & noise alike -- as the definition requires.\n"
+  f"The RATE is not market evidence; the containment is what a pivot IS."],
  ["Clock self-excites (bursts)", "REAL market signal",
   f"n={se['mean_branching']:.2f} vs shuffle {se['mean_branching_null']:.2f}; "
   f"{se['n_self_exciting']}/{R100['n_series']} stocks"],
@@ -427,7 +479,7 @@ rows = [
   "not attempted; proven dead elsewhere in the project"],
 ]
 fig, ax = plt.subplots(figsize=(12, 2.4)); ax.axis("off")
-colecol = {"TRUE but GEOMETRY": HL, "REAL market signal": OK, "REAL but INHERITED": "#4a7",
+colecol = {"TRUE; DEFINITIONAL": HL, "REAL market signal": OK, "REAL but INHERITED": "#4a7",
            "SUGGESTIVE": BAD, "IMPOSSIBLE": "#888"}
 tab = ax.table(cellText=rows, colLabels=["claim", "verdict", "evidence"],
                colWidths=[0.30, 0.20, 0.50], loc="center", cellLoc="left")
@@ -446,10 +498,14 @@ md(r"""
   price will rise or fall (that is impossible, proven elsewhere in the project). The
   only thing the clock forecasts is *when* turbulence arrives, which helps *manage
   risk* (smaller drawdowns), not *make* money. A risk tool, not a money machine.
-* The neat "perfect trader = pivots" rule is **real but not a discovery about
-  markets** — it is geometry, true of any line, even a sine wave. Its worth is only
-  *interpretive*: it lets us call the turning-point clock the *perfect-opportunity*
-  clock.
+* **Pivots are contained in the perfect trader's days**, and this is **definitional,
+  not a discovery about markets**. A pivot *is* an oracle point a causal process
+  recovers exactly, so containment holding on a sine wave is exactly what a sound
+  recovery method should do — it never invents days outside the answer key. What
+  carries **no** information about markets is the **agreement rate**, since it is
+  ~100% on data with no market structure. Two separate statements; an earlier draft of
+  this notebook collapsed them and threw the definition out with the rate
+  (`GLOSSARY.md` §2, confusion source #3).
 * The genuine market signal is small and about **timing, never direction**: turning
   points **cluster in bursts**, that clustering beats a shuffle on essentially all
   100 stocks, and it forecasts the *next* turn a little out of sample — but this is

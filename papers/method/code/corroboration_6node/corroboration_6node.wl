@@ -20,16 +20,16 @@ allOffsets[n_Integer, connected_List] := Module[
 ];
 
 onPossibleBehaviour[mechanism_List, substate_List, dynVector_List, cm_List] := Module[
-  {target, desired, n, connected, pivot, sumandos},
+  {target, desired, n, connected, decimalAnchor, sumandos},
   target = First[mechanism];
   desired = First[substate];
   n = Length[dynVector];
   connected = Flatten@Position[cm[[target]], 1];
   Which[
     dynVector[[target]] === "AND" && desired === 1,
-      pivot = {1 + Total[2^(connected - 1)]};
+      decimalAnchor = {1 + Total[2^(connected - 1)]};
       sumandos = allOffsets[n, connected];
-      <|"DecimalRepertoire" -> pivot, "Sumandos" -> sumandos|>,
+      <|"DecimalRepertoire" -> decimalAnchor, "Sumandos" -> sumandos|>,
     True,
       $Failed
   ]

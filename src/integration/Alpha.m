@@ -5453,12 +5453,12 @@ possible purview (partition) of the whole system.
 Concept is then, couple [mechanism, purview] that results in the highest value of smallphi
 for a single mechanism.
 
-intputs: mechanism (pivot for computation) and nodes of the whole system. From the nodes
+intputs: mechanism (the reference mechanism for computation) and nodes of the whole system. From the nodes
 of the system all possible partition is computed to form all possible purviews.
 
 Update: 
 pastt and future reference distros are those computed at partition level and not
-to the whole system level. Then must be computed for pivot mecha and each purview.
+to the whole system level. Then must be computed for the reference mechanism and each purview.
 *)
 (* At this level mecha cannot be [ ] (the empty set). See fig 8 in main paper*)
 computeConceptOfAMechanism[parentMecha_, systemNodes_,cm_, dyn_,cs_,fbupo_,pastWholeSysDistro_,
@@ -6291,19 +6291,19 @@ computeBigAlpha[sysNodes_,cm_,dyn_,cs_,concepts_,alphas_,distances_,pastRefProbD
 
 
 IntegratedInformation[cm_,dyn_,cs_]:=Module[
-	{unconstrDistros,allOptions,pastUnconstrDistr,futUnconstrDistr,fbupo,mechaPivot,conceptualSpace,concepts,alphas,
+	{unconstrDistros,allOptions,pastUnconstrDistr,futUnconstrDistr,fbupo,wholeSystemMechanism,conceptualSpace,concepts,alphas,
 	distances,alpha},
 	allOptions = {0, 0, 0, 0, 0};
 	unconstrDistros = computeUnconstrainedDistros[cm, dyn, cs, allOptions];
 	pastUnconstrDistr = unconstrDistros["UnconstrPastProb"];
 	futUnconstrDistr = unconstrDistros["UnconstrFutProb"];
 	fbupo = unconstrDistros["bitProbDistro4Outs"];
-	mechaPivot = Range[Length[cm]];
-	conceptualSpace= computeConceptualSpace[mechaPivot, pastUnconstrDistr, futUnconstrDistr, cm, dyn, cs, fbupo, 1]["Conste"];
+	wholeSystemMechanism = Range[Length[cm]];
+	conceptualSpace= computeConceptualSpace[wholeSystemMechanism, pastUnconstrDistr, futUnconstrDistr, cm, dyn, cs, fbupo, 1]["Conste"];
 	concepts = conceptualSpace[[All, 1]];
 	alphas = conceptualSpace[[All, 4]];
 	distances = conceptualSpace[[All, 9]];
-	alpha=computeBigAlpha[mechaPivot, cm, dyn, cs, concepts, alphas, distances, pastUnconstrDistr, futUnconstrDistr,fbupo]["Alpha"];
+	alpha=computeBigAlpha[wholeSystemMechanism, cm, dyn, cs, concepts, alphas, distances, pastUnconstrDistr, futUnconstrDistr,fbupo]["Alpha"];
 	
 	<|"Alpha"-> alpha|>
 ];

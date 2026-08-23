@@ -1,14 +1,60 @@
 """oracle.py  (Level 10)
 
-The perfect trader, and the theorem that its action points are the pivots.
+The perfect trader -- God's answer key -- and the set of it that causality can reach.
 
 Given a price path, the *oracle* is the in-hindsight optimal buy/sell schedule that
 maximises terminal wealth under a proportional transaction cost.  With zero cost the
 oracle is trivial and useless (capture every up-tick); with a realistic per-trade
 cost ``kappa`` it only trades when a swing clears the cost, and the buy/sell points
-become a sparse set of troughs and peaks.  The flagship hypothesis (TRANSFERENCE
-sec. 6) is that this set *is* the directional-change pivot set at a reversal
-threshold fixed by the cost.
+become a sparse set of troughs and peaks.  Crucially it is computed *with the future
+visible*: it is the answer key, not a strategy.
+
+THE DEFINITION (settled 2026-08-22; source of truth is
+``series-deconvolution/GLOSSARY.md`` section 1, which outranks every paper and notebook
+in this programme on a definition):
+
+    A PIVOT is a position that a CAUSAL process -- one with no look-ahead --
+    reproduces EXACTLY.  What no such process reaches is the RESIDUAL.
+
+This is the programme's founding object, not a Level-10 invention: see
+``PROTOCOL_order_discovery.md`` lines 142-148 ("the positions that a discovered process
+reproduces exactly are the pivots ... the positions that no process reaches are the
+residual") and bitacora 14 ("the points and segments where local determinism holds
+exactly are the gold").  Specialised to finance:
+
+    A FINANCIAL PIVOT is an oracle action point that the causal, one-pass
+    directional-change construction at theta = c recovers exactly.
+    The RESIDUAL is the part of the answer key that REQUIRES the future.
+
+    DC(theta = c)  is a SUBSET of  oracle(kappa),      c = round_trip_cost(kappa)
+
+- Containment, NOT identity: the oracle is the strictly larger set.  Measured here:
+  ~0.4% superset, 11/12 exact, the 12th a measure-zero break-even tie.  Measured in
+  ``series-deconvolution`` over 12 series x 4 theta: 56,500/56,509 = 0.9998 contained,
+  exact on 42/48 pairs, oracle residual 1.37%.  Both on the record; neither is quoted
+  as the other.
+- It requires theta == c.  Comparing a theta against a mismatched kappa measures nothing.
+
+CORRECTION HISTORY -- read this before re-editing, two errors have already been made
+here in opposite directions:
+
+1. This docstring once asserted bitacora 21's "flagship hypothesis" that the oracle set
+   *is* the pivot set.  Retracted by bitacora 22: containment, not identity.
+2. The 2026-08-21 fix then over-corrected, calling the relation "a GEOMETRIC IDENTITY,
+   NOT A MARKET FACT ... its only worth is interpretive".  **That also is wrong**, and
+   it is logged as confusion source #3 in ``GLOSSARY.md`` section 2.  It merged two
+   different things.  The containment is CONSTITUTIVE OF THE DEFINITION -- a pivot just
+   *is* an oracle point recovered causally, so containment holding on GBM, on shuffled
+   returns and on a pure sine is EXPECTED and CORRECT: it says the causal construction
+   never invents points outside the answer key, which is what a sound recovery method
+   must do.  What is *not* evidence about markets is the AGREEMENT RATE.  Keep the
+   definition; discard only "look, they agree, therefore markets have structure".
+
+Note also that the walk implemented in ``level5/pivots.py`` is HOW pivots are recovered,
+not WHAT THEY ARE.  Defining a pivot as "whatever that walk returns" is confusion
+source #1.
+
+See TRANSFERENCE.md, "STATE AT HANDBACK (Level 10 adversarial audit + 100 stocks)".
 
 The optimiser is an exact O(N) two-state dynamic programme (the classic
 trade-with-fee recursion, in log-wealth so it is stable over multi-decade paths):
