@@ -1246,3 +1246,38 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
   remote remains the pristine pre-fix reference for review diffs. Progressive merge
   to `main` deferred until the full fix programme passes its own acceptance gates
   (T0.4 policy unchanged).
+
+## VERIFICATION STAMPS (Part F) — 2026-08-24
+
+- **V1 — VERIFIED (with sharpening).** (i) `SESSION_HANDOFF.md` ("Full Reproduction
+  Complete", all ✓, ρ=+1.0 EXACT all 10 rules) vs latest `imp-results.md` ("partial,
+  reduced, qualitative shadow… not a full reproduction") — direct contradiction; latest
+  wins. (ii) Persisted `results/ca/summary.json`: `inferred_rule=222` vs `rule=254` — at
+  least one artifact contradicts the blanket EXACT claim. (iii) SHARPENED: imp-results.md
+  :69/:71 contain **false existence claims** — `scripts/run_ecoli_perturbation.py`,
+  `scripts/run_cellnet_complexity.py`, `data/processed/ecoli/*` (RegulonDB 14.5 metadata)
+  and `data/processed/cellnet_16ct/*.csv` all exist on disk. The newest audit document is
+  itself factually wrong about the tree it audits.
+- **V2 — VERIFIED.** bitacora/21 titles Result A "the cost-threshold theorem (the
+  headline, and it is exact)" and ":144 closes the flagship"; bare "identity" only for
+  θ=c (:163). bitacora/22 re-RATES (containment ~1.0 on stocks/GBM/noise ⇒ "true but
+  geometry"), does not retract the mathematics; GLOSSARY #3 later amends 22's demotion.
+  Three-step history confirmed; sibling one-line summaries compress it. Decoy module:
+  `imp-causalNet-paper/.../deconvolution.py` header = "Algorithms 1 and 2 of
+  arXiv:1802.09904v8" + networkx/numpy ⇒ unrelated algorithm, same filename; sibling §9.6
+  entry false as stated (collision is the real hazard; resolved for that repo by T2.3).
+- **V3 — VERIFIED.** Ledger :793 states paper used ~9.x (2018), RegulonDB 14.5 adopted as
+  best-available proxy, network grown ⇒ exact comparison impossible by construction;
+  artifact JSON carries version=14.5, downloaded 2026-07-03.
+- **V4 — VERIFIED.** Ground truth chain: `bnet.py` parses .bnet → columns evaluated
+  exhaustively to LSB-first LUTs; `causalbool.repertoire()` builds the 2^n×n matrix;
+  `deconvolve()` validates len==2^n and inverts THAT matrix ⇒ round-trip certificate,
+  exactness guaranteed modulo bugs. n≤16 cap explicit (grieco 54, remy 35 excluded).
+  REGULATORY was defined from the fission yeast clause and counted on fission yeast ⇒
+  mild training-on-test flavor CONFIRMED. Audit §3.1 framing stands.
+- **V5 — VERIFIED.** Four cost models are structurally distinct; on a shared toy node
+  (n=4, d=2, AND): row-run model **6.9658** bits, pathinfo/BioMetrics-family
+  **7.1699** bits, measure.model_description_length **6.3399** bits. Additionally
+  BioMetrics.encodeNodeCost ≡ pathinfo.node_description_cost in structure, but
+  graph_description_length adds a log2(n) header BioMetrics' D lacks ⇒ cross-repo "D"
+  is not one quantity. Gate for T4.5 open.
