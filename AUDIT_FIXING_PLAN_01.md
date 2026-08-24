@@ -1281,3 +1281,16 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
   BioMetrics.encodeNodeCost ≡ pathinfo.node_description_cost in structure, but
   graph_description_length adds a log2(n) header BioMetrics' D lacks ⇒ cross-repo "D"
   is not one quantity. Gate for T4.5 open.
+
+- `[T0.1b/T0.2]` **INCIDENT (datasaurus class, caught by U1/U7):** the T0.1a watchdog line
+  `perl -e 'alarm $ARGV[0]; exec @ARGV'` silently no-ops the exec on this platform
+  (rc=0, kernel never starts). Every runner-based "suite run" from T0.1a until the fix
+  classified stale Status.txt artifacts, not fresh executions; BASELINE v1's rollup is
+  therefore superseded by method error. Caught via a wall-clock impossibility (1 s for
+  50 kernels) during T0.1b. Fixed idiom: `alarm shift @ARGV; exec @ARGV or die`.
+  **BASELINE v2 (fresh, verified-executing, wall=167 s) is the first genuine ledger:
+  OK=46 FAIL=4 TOTAL=50** — two v1 "failures" were stale-artifact ghosts that pass when
+  actually run (MIXED-002-Dispatch, TEST-002-Property); four genuine reds remain
+  (Topologies dead-export, KOFN-network, IMPLIES-network, ARCH-004 unevaluated export).
+  All direct-kernel evidence elsewhere in this log (new tests, flagship runs,
+  composition lemma) was produced by real executions and stands unaffected.

@@ -35,7 +35,10 @@ SEARCH_DIRS=()
 if [[ -n "$SECTION" ]]; then
   SEARCH_DIRS=("$ROOT_DIR/$SECTION")
 else
-  SEARCH_DIRS=("$ROOT_DIR" "$ROOT_DIR/Analysis" "$ROOT_DIR/Gates" "$ROOT_DIR/Pattern" "$ROOT_DIR/Theory" "$ROOT_DIR/Algo" "$ROOT_DIR/Mixed")
+  # AUDIT01/T0.1b: root recursion alone discovers every section exactly once
+  # (the old root+7-section list double-counted). Skipped sections must carry
+  # a SKIP_REASON.txt, which is reported below — never silent.
+  SEARCH_DIRS=("$ROOT_DIR")
 fi
 TEST_FILES=()
 for d in $SEARCH_DIRS; do
@@ -97,9 +100,9 @@ FAILED_NAMES=()
 for f in $FILTERED; do
   bn=$(basename "$f")
   if [[ -n "$TESTMODE" ]]; then
-    perl -e 'alarm $ARGV[0]; exec @ARGV' "$TIMEOUT_SECS" "$KERNEL" -script "$f" mode="$TESTMODE"
+    perl -e 'alarm shift @ARGV; exec @ARGV or die "exec failed: $!"' "$TIMEOUT_SECS" "$KERNEL" -script "$f" mode="$TESTMODE"
   else
-    perl -e 'alarm $ARGV[0]; exec @ARGV' "$TIMEOUT_SECS" "$KERNEL" -script "$f"
+    perl -e 'alarm shift @ARGV; exec @ARGV or die "exec failed: $!"' "$TIMEOUT_SECS" "$KERNEL" -script "$f"
   fi
   rc=$?
   kmsg=""
@@ -127,4 +130,9 @@ echo "OK=$OK FAIL=$FAIL TOTAL=$((${#FILTERED[@]}))" | tee "$SUMMARY_DIR/Status.t
 if [[ ${#FAILED_NAMES[@]} -gt 0 ]]; then
   printf 'TRUE DETAIL: FAILED=%s\n' "${(j:, :)FAILED_NAMES}" | tee -a "$SUMMARY_DIR/Status.txt"
 fi
+# T0.1b: sections carrying SKIP_REASON.txt are reported, never silent
+for sr in "$ROOT_DIR"/*/SKIP_REASON.txt(N); do
+  sec="${sr:h:t}"
+  echo "SKIPPED SECTION: $sec — $(head -n1 "$sr")" | tee -a "$SUMMARY_DIR/Status.txt"
+done
 [[ $FAIL -eq 0 ]]
