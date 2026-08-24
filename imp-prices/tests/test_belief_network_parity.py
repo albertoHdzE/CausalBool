@@ -26,6 +26,11 @@ from __future__ import annotations
 import json
 
 import numpy as np
+try:
+    import hmmlearn  # noqa: F401
+except ImportError:
+    import pytest
+    pytest.importorskip('hmmlearn', reason='AUDIT01/T2.0: HMM stack absent; pivot/clock suite remains runnable')
 import pytest
 
 from imp_prices import RegimeDiscretiser, SERIES, TARGET, load_and_split

@@ -27,7 +27,9 @@ def test_the_null_is_run_through_the_whole_pipeline():
     real = len(directional_change(p, 0.05))
     surr = [len(directional_change(return_shuffle(p, rng), 0.05)) for _ in range(30)]
     assert len(set(surr)) > 1, "surrogate pivot counts must vary; else detection was reused"
-    assert real not in (min(surr),) or True
+    assert min(surr) <= real <= max(surr), (
+        "real pivot count outside the surrogate envelope; "
+        "detection semantics or theta drifted relative to the null pipeline")
 
 
 def _zigzag(durations, amplitude=0.30, start=100.0):

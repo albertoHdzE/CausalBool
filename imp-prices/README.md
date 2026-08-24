@@ -46,7 +46,8 @@ an empirical question with a measurable answer, and the answer is the deliverabl
 
 ## Status
 
-Phase 1 in progress. 45 tests passing.
+"Status: Phase 1 closed (B4/B5 refuted); Phase 2 closed (B6 unsupported — underpowered);
+Phase 3 open. Suite: 95 passed + 2 skipped (HMM-guarded) in own venv, rc=0 (AUDIT01/T2.0).
 
 - **Reference parity** established on 3,124 numbers (bitácora 01, C1–C4).
 - **Gate 1.0**, the pre-registered feasibility test: there is structure in the
@@ -123,7 +124,7 @@ See [`FINDINGS.md`](FINDINGS.md) for the ledger.
 ### Reproducing
 
 ```bash
-.venv/bin/python -m pytest -q                              # 45 tests
+.venv/bin/python -m pytest -q                              # 97 collected; 95 passed + 2 HMM-gated skips
 .venv/bin/python scripts/gate10_feasibility.py --shuffles 1000
 .venv/bin/python scripts/phase1_stability.py --seeds 20
 .venv/bin/python scripts/phase1_b4_description_length.py --boot 300

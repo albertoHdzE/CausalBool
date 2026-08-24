@@ -13,6 +13,11 @@ from __future__ import annotations
 
 import math
 
+try:
+    import hmmlearn  # noqa: F401
+except ImportError:
+    import pytest
+    pytest.importorskip('hmmlearn', reason='AUDIT01/T2.0: HMM-dependent module; core pivot/clock suite stays runnable')
 import numpy as np
 import pandas as pd
 import pytest
