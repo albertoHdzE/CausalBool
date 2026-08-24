@@ -1226,7 +1226,9 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T1.3 MAJORITY | ✅ DONE (D-3 adopted) | `e87927e`; tiePolicy param both policies tested; PROBE: node10 d=4 has ties but output-neutral verified (0.66875/3392 unchanged) |
 | T1.4 governance | ✅ DONE | `316ce22`; GLOSSARY in-repo w/ provenance + 3-state sync (controls 0/1/2 all shown); 6 citations repointed → 0 dangling; CLAUDE.md D-4 + branch + BASELINE; 21 technical-sense pivots fixed across backbone+derivations; inventory frozen @0 |
 | T1.5 interim disclosure | ✅ DONE | `bd6a365`; tab:four-paths row+caption disclose archived 0.51875 vs current 1.0, T4.1 open; snapshot delta audited post-hoc: 1 semantic block + pure line-shifts |
-| V1–V5 stamps | 🔶 NEXT | cheap; run before dependent Wave-2 tasks |
+| V1–V5 stamps | ✅ DONE | `dae59a3`; all five VERIFIED with evidence |
+| T0.1b discovery + baseline v2 | ✅ DONE | `2d89313` (see INCIDENT entry) — genuine ledger OK=46 FAIL=4 @167s |
+| T2.0 imp-prices hygiene | ✅ DONE | `470682a`; parity gate caught real drift first-run; 97 passed own-venv / 35+4skipped root-venv |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
