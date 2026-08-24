@@ -1238,3 +1238,11 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
   `--all`. To be fixed in T1.1 alongside the script repair.
 - `[T0.2]` Three genuine reds silent since Feb 2026 (KOFN-network, IMPLIES-network,
   TEST-002-property) — the exit-code runner hid them for ~7 months.
+
+## Execution findings ledger (new defects/discoveries during implementation) — cont.
+
+- `[branching]` 2026-08-23: all restart-point work pushed to **`fixing`** (`c5c08ca`,
+  tracks origin/fixing). Local `clean` intentionally left ahead-but-unpushed so its
+  remote remains the pristine pre-fix reference for review diffs. Progressive merge
+  to `main` deferred until the full fix programme passes its own acceptance gates
+  (T0.4 policy unchanged).
