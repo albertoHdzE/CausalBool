@@ -1066,6 +1066,17 @@ The perturbation methodology also matters: the canonical approach builds the adj
 | IntermediateNet | 331/340 (97%) | Alphabetical ordering |
 | EarlyNet | 203/209 (97%) | in_degree_desc ordering |
 
+> **Researcher degree of freedom — recorded 2026-08-24 (AUDIT01/T2.4).** The
+> sign-agreement percentages above are computed under **post-hoc per-network node
+> orderings**: each row uses whichever ordering (alphabetical vs `in_degree_desc`)
+> was selected *after* seeing results, and no single ordering reproduces all three
+> networks (see "Ordering sensitivity" above and `scripts/investigate_node_ordering.py`).
+> BDM is not a graph invariant, so these numbers quantify agreement *given* a
+> favourable, retrospectively chosen encoding choice; they are upper-bound style
+> figures for that reason and are not comparable across rows. They are retained as
+> recorded history; any future use must either fix the ordering ex ante or report
+> the full ordering sweep.
+
 **Magnitude scaling** remains non-linear: for FinalNet, paper deltas are ~4–5× larger for negative genes (e.g., STAT6: paper=−445, ours=−87) but ~1–2× for positive genes (e.g., RUNX1: paper=1441, ours=1448 — nearly identical). This is a scale difference, not a sign error, and does not affect classification or reprogrammability conclusions.
 
 **Conclusion**: The `pybdm` perturbation pipeline correctly captures the sign of BDM perturbation effects for all three networks when the appropriate per-network node ordering is used. The claim "only three negative genes in FinalNet" (STAT6, TCFEB, TRIM24) is confirmed. The magnitude gap is a known pybdm/algodyn scale difference and does not affect the paper's primary conclusions about reprogrammability direction.

@@ -6,7 +6,11 @@
 > a full reproduction"), corroborated by `results/ca/summary.json`
 > (`inferred_rule=222` vs true `rule=254`) and by REPRODUCTION_LEDGER.md's
 > partials (RegulonDB 14.5 proxy for the paper's ~9.x; CellNet 14/16). This file
-> is preserved unedited as history. See also AI_AGENT_HANDOFF.md, which carries
+> is preserved unedited as history. **Additional note (AUDIT01/T2.4):** the
+> "97-99% sign agreement" figures quoted below (three occurrences) embed
+> post-hoc per-network node orderings — see REPRODUCTION_LEDGER.md,
+> "Ordering sensitivity" (:1045-1067) and the researcher-degree-of-freedom
+> note recorded there 2026-08-24. See also AI_AGENT_HANDOFF.md, which carries
 > the same supersession notice. — AUDIT01/T2.4
 
 # Session Handoff: Full Reproduction Complete
