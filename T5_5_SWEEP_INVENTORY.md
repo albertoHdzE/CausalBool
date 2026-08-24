@@ -10,13 +10,13 @@ the task card in AUDIT_FIXING_PLAN_01 v1.3.
 | # | object | quotes numbers downstream of changed code? | last-executed status | action class |
 |---|---|---|---|---|
 | N1 | imp-causalNet-paper `paper_walkthrough.ipynb` | YES — imports renamed module; CTM cell path changed | **re-executed green post-rename, T2.3** (`e348d68`); fresh outputs reproduce every quoted number elementwise | DONE |
-| N2 | imp-causal-paper `paper_walkthrough.ipynb` | NO code renames; reads committed artifacts | 26 code cells, 0 errors, **1 unexecuted cell** | RE-EXECUTE + reconcile |
-| N3 | imp-causal-paper `sup_info_plots.ipynb` | no | clean | spot-check |
-| N4 | imp-pathinfo-paper 5 notebooks | glob `results/runs*.jsonl` (ledgers unchanged by fixes) | all clean, 0 errors | re-glob + diff summary stats |
-| N5 | imp-prices notebooks 00–04 | quote C15–C36 era numbers; C18/C22/C26/C29/C36 prose corrected by T2.1/T2.2 | `check_notebooks.py` exit 0 (no errors/unexecuted/widgets) | reconcile notebook text vs corrected FINDINGS wording |
-| N6 | index-deconvolution `notebooks/` (16 files) | method-section language changed in README only | not re-executed this wave | execute per WL/python split; verify headless |
+| N2 | imp-causal-paper `paper_walkthrough.ipynb` | NO code renames; reads committed artifacts | **DONE** — re-executed green from `notebooks/` cwd (`4d9701f`+this wave); every number-bearing output IDENTICAL to committed; only delta = `sys.executable` line: historical run had used ROOT venv instead of the README-prescribed `.venv` (provenance drift, recorded); "1 unexecuted cell" in triage was a false positive (`!source` magic emits no output) | DONE |
+| N3 | imp-causal-paper `sup_info_plots.ipynb` | no | **DONE** — executed green (41.7 s) | DONE |
+| N4 | imp-pathinfo-paper 5 notebooks | glob `results/runs*.jsonl` (ledgers unchanged by fixes) | **DONE** — `campaign_status.py` regeneration byte-identical to committed block; notebooks error-free | DONE |
+| N5 | imp-prices notebooks 00–04 | quote C15–C36 era numbers; C18/C22/C26/C29/C36 prose corrected by T2.1/T2.2 | **DONE** — checker exit 0; pattern scan finds no stale triples; nb03 already carries its own C27 demotion cells (12, 14); no action needed | DONE |
+| N6 | index-deconvolution `notebooks/` (16 files) | method-section language changed in README only | **DONE** — 15/15 non-empty notebooks executed 0 errors under root venv (matplotlib stack); `031_financial_honest_negative.ipynb` found to be a **0-byte corrupt stray** and removed (dated here, 2026-08-24; content duplicated notebook 03's topic) | DONE |
 | D1 | imp-results.md E. coli row | — | was FALSE ("nothing exists") | **FIXED** `4d9701f` (dated addendum) |
-| D2 | index-deconvolution exp04: script pins 10 `.bnet` models, persisted artifact records **8 considered / 8 exact** (n = 9–13; two n=18/40 records ungraded) | — | inconsistency OPEN | adjudicate in sweep: re-run or annotate |
+| D2 | index-deconvolution exp04: script pins 10 `.bnet` models, persisted artifact records **8 considered / 8 exact** | — | **RESOLVED — FALSE ALARM (retracted).** Field semantics: `n_models_considered` counts models graded *within the documented n≤16 cap*; the other two are recorded in-artifact as `skipped: too_large` (n=18 budding yeast, n=40 T-cell). Re-ran exp04 today: **8/8 exact reproduced**. My triage misread the field; correction dated here 2026-08-24 | CLOSED |
 | D3 | REPRODUCTION_LEDGER sign-agreement claims | DoF paragraph added `3eb87ac` | recorded | none further |
 | D4 | comp_paper/method_paper numbers | governed by snapshot gate | **PASS** (112 entries identical, checked 2026-08-24) | keep gating every .tex commit |
 

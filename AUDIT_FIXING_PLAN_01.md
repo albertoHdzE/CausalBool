@@ -1305,8 +1305,17 @@ Template per entry:
   Not reproduced") was factually false — parse/perturb/enrichment scripts and
   RegulonDB 14.5 artifacts (949 nodes; classification 122/38/789) exist and ran;
   corrected by dated addendum `4d9701f`. Triage inventory:
-  `T5_5_SWEEP_INVENTORY.md` (N1–N6 notebooks, D1–D4 docs; exp04 script-vs-artifact
-  10-vs-8 inconsistency registered for adjudication).
+  `T5_5_SWEEP_INVENTORY.md`.
+- `[T5.5]` **SWEEP EXECUTED 2026-08-24 — ALL ROWS CLOSED.** N2: imp-causal-paper
+  walkthrough re-executed green, all number-bearing outputs identical to committed;
+  only delta = historical run had used ROOT venv instead of README-prescribed `.venv`
+  (provenance drift recorded); refreshed notebook committed. N3/N4/N5 closed (N4:
+  campaign-status regeneration byte-identical). N6: 15/15 non-empty idx-deconvolution
+  notebooks executed 0 errors under root venv; **0-byte corrupt stray**
+  `031_financial_honest_negative.ipynb` removed. D2 RETRACTED as false alarm —
+  `n_models_considered` = graded-within-cap semantics; exp04 re-ran today, 8/8 exact
+  reproduced; two over-cap models correctly recorded `skipped: too_large` in-artifact.
+  D1 fixed pre-sweep (`4d9701f`). D4 paper gate PASS re-confirmed.
 
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
 
@@ -1335,6 +1344,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T2.6 idx-deconv docs | ✅ DONE | `005dcc1`; README method section rewritten per GLOSSARY §1c (two decompositions, decimal anchor/sumandos encodings, lossless Dec(L,S); old dichotomy phrasing greps clean); bitacora inventory 00–31 (32 files); status refreshed (pytest 146/146; BASELINE v2 reference; levels 11–18 → T5.3) with historical snapshot labelled; TRANSFERENCE dated append-only addendum (+33/−0) recording #3 chain b21→b22→GLOSSARY amendment |
 | T2.4 causal-paper arc | ✅ DONE (D-5(i) + D-7 approved) | headers `70068fd`+`3eb87ac`; DoF paragraph adjacent to canonical sign-agreement table (`3eb87ac`); comparison `bc3935e`: **10/10 ECA rules exact** elementwise (0/225,280 cells mismatched per-rule set; seeds pinned, no outcome-dependent tuning), Th17+E.coli EXCLUDED-WITH-REASON (no ground truth without inventing gates — recorded as finding); D-5(i) live: results un-ignored selectively, MANIFEST.sha256 + verify_manifest.py PASS, reruns byte-identical |
 | T2.7 sibling addendum | ✅ DONE (U6 granted) | sibling series-deconvolution @main, LOCAL commits `62fb3b3` (§9.6 corrections: divergence entry false → unrelated arXiv module; banner+hmmlearn fixed upstream) & `b868cd0` (GLOSSARY precision note: three-step chain) — append-only, NOT pushed to remote; CausalBool GOVERNANCE/GLOSSARY.md resynced @b868cd0 (`3e23d0c`), check_glossary_sync.sh exit 0 |
+| T5.5 post-fix sweep | ✅ DONE (v1.3) | `9b8c655`+`4d9701f`; all inventory rows closed: imp-causal-paper walkthrough re-executed (numbers identical; root-venv provenance drift recorded), 15/15 idx-deconv notebooks green, 0-byte stray removed, pathinfo regeneration identical, N5 no-action verified, D2 retracted as my misread (exp04 re-run: 8/8 exact reproduced); paper gate PASS |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
