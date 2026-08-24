@@ -1195,3 +1195,46 @@ Template per entry:
 
 
 
+
+- `[T1.2]` **F36:** canalisingIndex coordinate schism — MUnit copy used ABSOLUTE network
+  coordinate; package ApplyGate/core use Ic-relative position. Latent only (benchmark
+  sets no CANALISING params); owner T4.1 ordering-unification.
+- `[T1.1]` **F37:** the archived `accuracyIndex=0.51875` is a STALE artefact from a
+  superseded script revision; current code executes the index path at 1.0. The audit's
+  §2.3 defect was real but had already been half-healed silently — F35 orphaning kept
+  the healed script out of the suite so nobody could know. Root-cause archaeology stays
+  open under T4.1.
+- `[T1.1]` Composition lemma (D-2d) verified empirically at n=6 — first positive theory
+  result produced by this plan; feeds Part I item 7.
+- `[T0.5/T1.5]` Process slip recorded: snapshot was rebaselined before its delta was
+  read; repaired post-hoc from git (`HEAD~1` diff): exactly ONE semantic block changed.
+
+# APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
+
+Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
+
+| Task | Status | Evidence / commit |
+|---|---|---|
+| T0.3 checkpoint | ✅ DONE | `406a010` commit-all WIP; tree clean after |
+| T0.1a parser wiring | ✅ DONE | `2b414aa` + resolver fix `ad97eb8`; planted-FAIL control exit=1 naming test; NOT/AND slices green end-to-end |
+| T0.2 baseline v1 | ✅ DONE | `2fc2b7b`; **OK=77 FAIL=10** (6 unique root-caused); F35 discovered: FormulaVsExhaustive orphaned from `*Tests.m` glob — never executed by `--all` |
+| T0.5 paper-number snapshot | ✅ DONE | `6cb0f58`; 112 entries / 14 table blocks; deterministic `--check` gate PASS |
+| T0.1b discovery + baseline v2 | ⏳ PENDING | after Wave-1 core, per DAG |
+| T0.4 branch/tag | ➖ NOT STARTED | gated on Waves 1–2 |
+| T1.2 package engine | ✅ DONE | `d8d3809`; IndexSetAnalytic packaged (12 families incl. closed CANALISING); {} fallthrough dead via Phi transport; 3 copies deduped; OneSetAllFamilies+NIMPLIES+MAJORITY tests OK; suite +6 OK / FAIL set identical |
+| T1.1 flagship script | ✅ DONE (D-2(d)) | `d42f371`; COMPOSITION LEMMA VERIFIED n=6: symDiff ∅ between composed-set (XOR{x1}⊕XOR{x3}⊕AND{x2,4}) and exhaustive LUT; banner→real exit-gate (10 checks listed); F35 fixed by rename→glob, theorem-paths criterion OK |
+| T1.3 MAJORITY | ✅ DONE (D-3 adopted) | `e87927e`; tiePolicy param both policies tested; PROBE: node10 d=4 has ties but output-neutral verified (0.66875/3392 unchanged) |
+| T1.4 governance | ✅ DONE | `316ce22`; GLOSSARY in-repo w/ provenance + 3-state sync (controls 0/1/2 all shown); 6 citations repointed → 0 dangling; CLAUDE.md D-4 + branch + BASELINE; 21 technical-sense pivots fixed across backbone+derivations; inventory frozen @0 |
+| T1.5 interim disclosure | ✅ DONE | `bd6a365`; tab:four-paths row+caption disclose archived 0.51875 vs current 1.0, T4.1 open; snapshot delta audited post-hoc: 1 semantic block + pure line-shifts |
+| V1–V5 stamps | 🔶 NEXT | cheap; run before dependent Wave-2 tasks |
+
+## Execution findings ledger (new defects/discoveries during implementation)
+
+- `[T0.1a]` arch4 + MIXED-002-Dispatch export **unevaluated WL expressions** as verdicts
+  (`If[…]` strings) — a defect class the old runner could never see. Recorded in
+  BASELINE.md; owners UNOWNED.
+- `[T0.2]` **F35:** flagship `TSK-MIXED-001-FormulaVsExhaustive.m` does not match the
+  runner's `*Tests.m` glob ⇒ the suite's most important failing test never runs under
+  `--all`. To be fixed in T1.1 alongside the script repair.
+- `[T0.2]` Three genuine reds silent since Feb 2026 (KOFN-network, IMPLIES-network,
+  TEST-002-property) — the exit-code runner hid them for ~7 months.
