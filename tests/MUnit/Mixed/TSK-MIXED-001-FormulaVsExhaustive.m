@@ -237,6 +237,13 @@ encodeCostBits[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length
   Total@Table[
     Module[{d = Length[ics[[i]]], g = dyn[[i]], p = Lookup[params, i, <||>], cost = 0.0},
       cost += log2Int[K];
+      (* In-degree field: required for unique decodability. Without d the decoder
+         cannot determine the width of the input-set field, nor read it as an index
+         into the d-subsets of [n]. Added 2026-08-14; earlier revisions omitted it
+         and yielded D_formula = 101.07 bits, which was not a valid description
+         length. The corrected figure is 135.66 bits. Mirrored in
+         papers/method/code/complexity_analysis/complexity_analysis.py. *)
+      cost += log2Int[n + 1];
       cost += log2Int[Max[1, Binomial[n, d]]];
       Switch[g,
         "KOFN", cost += log2Int[d + 1] + 1,

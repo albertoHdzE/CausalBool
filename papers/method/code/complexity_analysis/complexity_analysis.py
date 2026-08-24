@@ -87,6 +87,15 @@ def _eval_gate(name: str, inputs: list[int], params: dict) -> int:
     if name == "KOFN":
         k = params.get("k", 1)
         return int(sum(inputs) >= k)
+    if name == "CANALISING":
+        # Mirrors myCanalising in src/Packages/Integration/Gates.m:18 —
+        #   If[list[[i]] == v, out, myOr[list]]
+        # with defaults canalisingIndex=1 (1-based in Wolfram), canalisingValue=1,
+        # canalisedOutput=0.
+        i = params.get("canalisingIndex", 1) - 1
+        v = params.get("canalisingValue", 1)
+        out = params.get("canalisedOutput", 0)
+        return int(out) if inputs[i] == v else int(any(inputs))
     raise ValueError(f"Unknown gate: {name}")
 
 
@@ -158,10 +167,46 @@ def compute_c_formula(cm: list[list[int]], dyn: list[str], params: dict) -> int:
 # ---------------------------------------------------------------------------
 # Measure 2 – D_formula: programme-length proxy in bits
 #
-# Each node i is encoded by three fields:
+# IMPORTANT — WHAT THIS IS AND IS NOT
+# -----------------------------------
+# D_formula is the COST OF ENCODING THE GENERATOR: the number of bits needed to
+# write down the network specification (gate types, wiring, parameters) under the
+# declared encoding below.  It is a description length of the PROGRAMME.
+#
+# It is NOT a complexity measure of the network's behaviour, and must never be
+# reported as one.  Concretely:
+#
+#   * D_formula never reads a single output bit.  It is a function of n, the
+#     in-degrees, and the gate types, and of nothing else.  Rewire a node to a
+#     different input set of the same size and D_formula does not move, while the
+#     behaviour changes substantially (verified in D_formula_explained.ipynb §6:
+#     440 of 1024 output rows change, distinct output states 206 -> 172, and
+#     D_formula is bit-identical).  The same degeneracy was found independently in
+#     the imp-pathinfo replication, where a wiring-based D separated 0 of 250
+#     same-degree pairs.
+#
+#   * It therefore CANNOT rank, discriminate, or say anything about behaviours.
+#     Any claim of the form "network A is more complex than network B because
+#     D_formula(A) > D_formula(B)" is invalid.
+#
+#   * It is an UPPER BOUND on the shortest description in ONE declared language,
+#     not an estimate of K.  Write "a description of 101.07 bits", never "the
+#     complexity is 101.07 bits".
+#
+# Why this is legitimate here rather than a limitation: in this research the
+# generator is GIVEN.  The network is a controlled object, not an unknown to be
+# reverse-engineered, so no algorithmic-complexity estimation problem arises on
+# the mechanism side.  All that is required is the cost of encoding a known
+# programme.  That is exactly what D_formula supplies, and it is the correct
+# quantity for the programme side of a programme-versus-output comparison.
+#
+# ENCODING
+# --------
+# Each node i is encoded by four fields:
 #   (a) gate type:       log2(K)                  K = 12 gate types
-#   (b) input set:       log2(C(n, d_i))          C(n,d) ways to choose d of n
-#   (c) gate-specific:
+#   (b) in-degree:       log2(n + 1)              d_i in {0, ..., n}
+#   (c) input set:       log2(C(n, d_i))          C(n,d) ways to choose d of n
+#   (d) gate-specific:
 #         KOFN           log2(d+1) + 1            threshold k in {0,...,d}
 #         CANALISING     log2(n) + 2              index + value + output bit
 #         IMPLIES/NIMPLIES  log2(max(1,d(d-1)))   ordered pair within inputs
@@ -169,8 +214,17 @@ def compute_c_formula(cm: list[list[int]], dyn: list[str], params: dict) -> int:
 #         XOR/XNOR/MAJORITY  1                    parity / majority flag
 #         others         1                        polarity bit
 #
+# The in-degree field (b) is required for the code to be uniquely decodable: a
+# decoder cannot read log2(C(n,d_i)) bits, nor interpret them as an index into the
+# d_i-subsets of [n], without first knowing d_i.  Earlier revisions of this script
+# and of both manuscripts omitted it and reported D_formula = 101.07 bits; that
+# figure was not a valid description length and has been superseded by 135.66 bits.
+# The cost of specifying n itself is not charged, since it is constant across the
+# networks being compared.
+#
 # Source: encodeCostBits function in
-#   tests/MUnit/Mixed/TSK-MIXED-001-FormulaVsExhaustive.m (lines 235-254)
+#   tests/MUnit/Mixed/TSK-MIXED-001-FormulaVsExhaustive.m (lines 235-254),
+#   extended here with the in-degree field.
 # ---------------------------------------------------------------------------
 
 def _log2(x: float) -> float:
@@ -181,6 +235,7 @@ def encode_node_cost(d: int, gate: str, n: int) -> float:
     """D contribution for one node."""
     K = len(GATE_LABELS)
     cost = _log2(K)
+    cost += _log2(n + 1)                      # in-degree d, required for decodability
     cost += _log2(max(1, math.comb(n, d)))
     if gate == "KOFN":
         cost += _log2(d + 1) + 1.0
@@ -315,7 +370,7 @@ def main() -> None:
     # Verification against published values (method_paper.tex, Table 2)
     # -----------------------------------------------------------------------
     PAPER_C    = 23
-    PAPER_D    = 101.07    # bits, rounded
+    PAPER_D    = 135.66    # bits, rounded (self-delimiting; supersedes 101.07)
     PAPER_H    = 10229.61  # bits, rounded
 
     ok_c = (c_formula == PAPER_C)

@@ -277,23 +277,16 @@ BDM node perturbation results (pybdm, `log2 |V(G)|` threshold):
 
 3. *K-means 5-cluster analysis* — STAT6/TCFEB/TRIM24 fall in cluster 2 (167 genes) in our analysis, not in an isolated group of 3. The most-negative cluster contains 22 genes.
 
-**Cross-validation against Zenil ground truth (supplementary Data S1-S6):**
-
-The Zenil paper's own supplementary CSV files (mmc2-mmc7) provide the authors' actual BDM perturbation deltas. Direct comparison:
-
-| Network | Sign agreement | Notes |
-|---------|---------------|-------|
-| FinalNet | 202/204 (99%) | Excellent; STAT6/TCFEB/TRIM24 confirmed negative in both |
-| IntermediateNet | 331/340 (97%) | Good agreement |
-| EarlyNet | 15/209 (7%) | Systematic sign inversion; all our deltas are non-negative |
-
-For FinalNet, the paper's positive genes (e.g., RUNX1: paper=1441.5, ours=1448.0) match closely. The paper's negative genes have consistent sign but ~4-5x larger absolute magnitudes (e.g., STAT6: paper=-445.0, ours=-86.8). The EarlyNet anomaly (7% sign agreement, complete sign inversion of "negative" genes) is specific to the smaller 578-node network and is attributed to BDM implementation differences between `pybdm` and `algodyn` on smaller sparse matrices.
-
 **Root cause assessment:**
 
-The discrepancy is attributed to BDM implementation differences between `pybdm` (used here) and `algodyn` (used by the Zenil group). The non-linear magnitude scaling and EarlyNet-specific sign inversion confirm this is a deep implementation-level difference, not a network-selection or threshold-choice issue.
+The discrepancy is attributed to BDM implementation differences between `pybdm` (used here) and `algodyn` (used by the Zenil group). Both implement BDM/CTM but may differ in:
+- CTM look-up table version or block size
+- Boundary handling for non-square-divisible matrices
+- Normalisation or pre-processing of the adjacency matrix
 
-**Scientific status:** The Th17 perturbation pipeline is now **operational** on the **correct upstream network** with **correct provenance**. FinalNet and IntermediateNet perturbation directions are reproduced with 97-99% fidelity. Exact numerical reproduction of all three networks is blocked on the BDM implementation boundary.
+This is NOT a network-selection or threshold-choice issue — the same network (Yosef Table S3) is used, and the discrepancy persists regardless of threshold adjustments or clustering approach.
+
+**Scientific status:** The Th17 perturbation pipeline is now **operational** on the **correct upstream network** with **correct provenance**. Exact numerical reproduction is blocked on the BDM implementation boundary.
 
 ## Most Important Missing Pieces for Fuller Reproduction
 

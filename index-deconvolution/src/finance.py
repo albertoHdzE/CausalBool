@@ -132,9 +132,18 @@ def best_support_accuracy(states: list[list[int]], node: int,
 
 def base_rate(states: list[list[int]], node: int) -> float:
     """Accuracy of always predicting the more common next value of ``node``."""
-    ones = sum(states[t + 1][node] for t in range(len(states) - 1))
-    total = len(states) - 1
-    return max(ones, total - ones) / total
+    # Extract all values for the selected node across all consecutive state pairs
+    node_values = [states[t + 1][node] for t in range(len(states) - 1)]
+    # Count number of 1s in the extracted values
+    ones = sum(node_values)
+    # Calculate total number of observations
+    total = len(node_values)
+    # Calculate number of 0s
+    zeros = total - ones
+    # Print count summary for verification
+    # print(f"Selected node: {node}, Number of 1s: {ones}, Number of 0s: {zeros}")
+    # Return the ratio of the majority class (base prediction accuracy)
+    return max(ones, zeros) / total
 
 
 def daily_returns(matrix: list[list[float]]) -> list[list[float]]:

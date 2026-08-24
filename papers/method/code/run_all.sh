@@ -63,8 +63,13 @@ echo "--- Experiment 3: Scalability resource envelope ---"
 run_py "$ROOT/scalability_resource_envelope/scalability_resource_envelope.py"
 
 echo ""
-echo "--- Experiment 4: Complexity analysis ---"
+echo "--- Experiment 4: Section 2.2 worked example ---"
+run_py "$ROOT/worked_example_7node/worked_example_7node.py"
+
+echo ""
+echo "--- Experiment 5: Complexity analysis ---"
 run_py "$ROOT/complexity_analysis/complexity_analysis.py"
+run_py "$ROOT/complexity_analysis/bdm_comparison.py"
 
 echo ""
 echo "================================================================="

@@ -96,7 +96,7 @@ THIS PAPER:
 - 10-node mixed-gate benchmark with all 6 query patterns — computational demonstration
 - Overlap analysis showing compression from 2^21 to 2^10 — explained computationally
 - Scalability benchmarks at n=30,60,80,200 — timing tables
-- Description-length comparison: D_formula=101.07 bits vs H_total=10229.61 bits
+- Description-length comparison: D_formula=135.66 bits vs H_total=10229.61 bits
 - Dynamical landscape: 206 reachable states, 4 attractors, basin sizes 488/320/204/12
 - Numerical anchors: all verified values carry over unchanged
 
@@ -161,7 +161,7 @@ THIS PAPER:
   Cost governed by support size |C_q|, not network size n.
   Tables from formal manuscript (tab:exact-method, tab:synthesis) re-presented.
 - **5.2 Description length**
-  D_formula=101.07 bits, C_formula=23, ZIP=1600 bits, H_total=10229.61 bits.
+  D_formula=135.66 bits, C_formula=23, ZIP=10016 bits, H_total=10229.61 bits.
   The causal description is two orders of magnitude shorter than statistical encoding.
   "This is causal compression in a precise, non-rhetorical sense."
 - **5.3 Validation summary**
@@ -196,7 +196,8 @@ THIS PAPER:
 - S1 subsystem: d_q=10, c_q=7, μ_q=3, R_q=8
 - S2 subsystem: d_q=14, c_q=10, μ_q=4, R_q=16
 - Dynamical landscape: |Im(F)|=206, 4 attractors, A1 basin 488, A2 basin 320, A3 basin 204, A4 basin 12
-- D_formula=101.07 bits, C_formula=23, ZIP=1600 bits, H_total=10229.61 bits
+- D_formula=135.66 bits, C_formula=23, ZIP=10016 bits, H_total=10229.61 bits
+  (101.07 and 1600 were invalid; see REVISION_PLAN.md §0.1 and §0.4)
 - Scalability: median |C_q|=10 for T3 across all n=30,60,80,200; exact time sub-ms
 
 ---

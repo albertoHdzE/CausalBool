@@ -42,6 +42,11 @@ def eca_next_cell(left: int, centre: int, right: int, rule: int) -> int:
 
 def evolve_eca(rule: int, initial: list[int], steps: int) -> list[list[int]]:
     """Space-time diagram of an ECA with periodic boundary conditions."""
+    # This function does evolve an elementary cellular automaton (ECA):
+    # It generates a full space-time diagram by iteratively applying the ECA rule
+    # to compute each subsequent row of cell states from the previous one.
+    # It uses periodic (wrap-around) boundary conditions for the grid of cells,
+    # so the first and last cells in the row are treated as neighbours.
     w = len(initial)
     rows = [list(initial)]
     for _ in range(steps - 1):
