@@ -296,3 +296,38 @@ This is NOT a network-selection or threshold-choice issue — the same network (
 4. Exhaustive 5-node Boolean-network experiments over AND/OR/XOR and multiple topologies.
 5. Real-world MILS benchmarks, including comparison against transitive and spectral sparsification.
 6. E. coli and CellNet data pipelines with documented preprocessing and enrichment analysis, plus the remaining exact Th17 spectrum / enrichment / `FinalNet` reconstruction steps.
+
+---
+
+## Addendum 2026-08-24 (AUDIT_FIXING_PLAN_01 — sweep task T5.5, first finding)
+
+The table row above stating, for **E. coli network analysis (Fig. 5A/E/H)**, that
+"No biological network ingestion or enrichment analysis exists in the
+implementation — **Not reproduced** — None of the E. coli claims are currently
+tested" is **factually false about this tree**:
+
+- `scripts/parse_ecoli_network.py`, `scripts/run_ecoli_perturbation.py` and
+  `scripts/run_ecoli_enrichment.py` exist and run;
+- `data/processed/ecoli/` holds the parsed RegulonDB 14.5 network
+  (**949 nodes, 1,148 edges**, confidence C, downloaded 2026-07-03),
+  per-node BDM perturbation spectra (`ecoli_confC_node_signature.csv`) and
+  enrichment outputs;
+- `data/processed/ecoli/ecoli_confC_perturbation_summary.json` records the
+  executed classification (**122 positive / 38 neutral / 789 negative**;
+  base complexity 2,637.73 bits);
+- `REPRODUCTION_LEDGER.md` documents the run and its validation limitation
+  (no mmc-equivalent ground truth exists for E. coli, so sign-agreement
+  cross-validation is not possible).
+
+What **is** true and must be kept distinct: numeric comparison against the
+paper's own E. coli numbers is impossible *by construction* because the paper
+used RegulonDB ~9.x and this replication uses 14.5 (verification stamp V3).
+The accurate status is therefore **"pipeline reproduced; numerically
+non-comparable across versions"** — not "Not reproduced". Additionally, the
+programme's own index-set method has never been applied to E. coli anywhere
+(zero references in `imp-causalNet-paper`; `index-deconvolution/exp04` covers
+10 PyBoolNet `.bnet` models that carry explicit Boolean rules), because exact
+deconstruction requires ground-truth update functions, which RegulonDB signed
+interaction lists do not provide. This distinction was clarified for the author
+on 2026-08-24 and is registered as the first finding of sweep task T5.5
+(plan amendment v1.3).
