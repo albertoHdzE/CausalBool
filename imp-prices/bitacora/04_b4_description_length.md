@@ -184,3 +184,34 @@ Phase 2, as pre-registered: directional-change pivots, the near-balanced
 short-wait target, and the return-shuffle null. The confirmed-only pivot rule
 (protocol R1) is the principal false-positive risk and is the first thing to
 build.
+
+---
+
+## Addendum 2026-08-24 (AUDIT01/T2.1) — correction to §4's hill-climbing row
+
+The §4 table row "hill climbing (BIC-d, in-degree ≤ 2) | 5 of 120 | WTI\_CL | 55.0%"
+does not match the artifact this bitácora pins in its header
+(`results/b4_description_length.json`, content sha256 `160d8437a2eb20dc`), whose
+`bootstrap.hill_climb` block records **6 distinct winning parent sets over 120
+resamples, modal {WTI\_Spot} at 37.5 per cent**, with {WTI\_CL} second at 33.33.
+The corrected triple is therefore **(6, {WTI_Spot}, 37.5%)**, traced to the pinned
+artifact and to the executed re-check below.
+
+Executed re-check (`scripts/recheck_c18_hillclimb.py`; outputs, transcript and
+environment fingerprint under `results/recheck_c18/`): re-running the committed
+hill-climb block under a 45-value `PYTHONHASHSEED` sweep (rng seed fixed at 42,
+120 resamples of block 12, BIC-d, in-degree ≤ 2) shows the statistic itself is
+hash-seed-unstable — the C13 tie-breaking mechanism reaches this block. Outcomes:
+5–7 distinct winners; modal set {WTI\_CL} or {WTI\_Spot}; modal frequency
+35–55 per cent. Exactly one seed (19) reproduces the pinned map elementwise;
+three seeds (17, 33, 39) reproduce the triple originally printed in §4, which
+explains — without excusing — how the misquotation arose: numbers from an ad-hoc
+re-run were written next to a pin pointing at a different draw.
+
+§4's text above stands unmodified (no-retro-edit rule). FINDINGS.md's C18 row now
+quotes the pin, with a dated correction note. The stability verdict is unaffected:
+under every observed draw, 22 distinct index-set winners remain far less stable than
+either the CPT's 4 or hill climbing's 5–7. The instability finding extends ledger
+C13/C12: any future structural claim from this search must fix and record
+`PYTHONHASHSEED` (see `results/recheck_c18/environment.txt` for the stack this
+sweep ran on).
