@@ -225,6 +225,22 @@ sites, three clean.
 Gate 1.0 still explains GWP3's result. What changes is that two numbers used as
 *supporting* evidence turn out to have been measuring density and array size.
 
+**Provenance note 2026-08-24 (AUDIT01/T2.2).** C29's null existed only in prose;
+the generating procedure (draw count, seed, sampler convention) was not recorded
+and is not uniquely recoverable. Committed machinery now exists —
+`experiments/c29_density_matched_null.py`, output
+`results/c29_density_matched_null.json` (seeds pinned; N = 20,000 per cell) —
+implementing the density-matched null in the two conventions matching the
+observed objects (directed, zero-diagonal: uniform exact-k over the 182
+off-diagonal cells; sensitivity: 196-cell placement). Recomputed moments land
+close to but not exactly on the quoted ones (off-diagonal: 188.58 ± 22.54 at 17
+edges, 212.26 ± 17.78 at 23; the prose values sit between the two conventions).
+What reproduces under every principled sampler is the *conclusion*: the density
+share of the +33.08-bit gap is 66–72 per cent, and both networks sit ≈3σ below
+their own-density nulls (recomputed z −2.89 to −3.35 for matched conventions).
+The quoted null moments should therefore be read as one unrecoverable scratch
+draw; the committed script is now the single source for this null.
+
 **The pattern, recorded because it is the actionable part.** Mechanical faults —
 a leaky decoder, an unexecuted notebook, widget outputs, a runtime inside a
 content hash — my checks catch reliably. **Interpretive faults — a mean that sums
@@ -259,7 +275,7 @@ Run 2026-08-18. `scripts/phase2_gate.py` (sha `b9f4826f1b86b6bc`),
 | C23 | **The confirmed-only pivot rule is enforced and it bites hard.** A directional-change pivot occurs at one time and becomes knowable at a later one; the lag is always ≥ 1 and is never assumed. On monthly WTI the mean confirmation lag runs from 1.3 months (θ = 0.05) to 5.3 (θ = 0.25), the maximum reaching **19 months**, and **31 to 52 per cent of the series** sits inside a window where a pivot has occurred but is not yet knowable. The leak is *exploitable*: a rule peeking at unconfirmed pivots predicts next-step direction at above 55 per cent against 50 for anything causal. The running median defining "short" is likewise causal, recomputed from the prefix in the tests | `test_the_leak_window_is_large_enough_to_matter`, `test_the_leak_is_exploitable_which_is_why_it_must_be_guarded`, `test_the_running_median_is_causal` | `CONFIRMED` |
 | C24 | **The re-target achieves its design goal: the base-rate trap is gone.** Short-wait base rates of 0.396 to 0.467 on the panel, against the 66–73 per cent stagnant share that made raw accuracy uninformative on the regime target (A7, A11, A13). The encoding is also scale-invariant: multiplying every price by 37.5 leaves every pivot index and kind unchanged | `test_short_wait_target_is_near_balanced_by_construction`, `test_threshold_is_relative_so_the_encoding_is_scale_invariant` | `CONFIRMED` |
 | C25 | **Gate 2.0 passes, barely.** Monthly WTI spot yields 57 legs at θ = 0.05, 39 at 0.08, 37 at 0.10, against a pre-declared minimum of 30; θ ≥ 0.15 fails. The daily series held for Phase 3 yields **322** legs at θ = 0.05 — a factor of six, and the single number quantifying what the monthly constraint costs | `results/phase2_gate.json` | `CONFIRMED` |
-| C26 | **B6 is not supported: the sign is right, the sample is not enough.** Against a return-shuffle null passed through the entire pipeline, 7 of 9 monthly cells are positive with mean excess **+0.129**, sign test **p = 0.0898**. Two cells clear 0.05 individually, but with nine cells the chance of two or more doing so is 0.071, so they do not survive their own multiple-comparison accounting. Daily, shown for contrast, gives 3 of 3 positive, mean excess +0.093, no cell significant. Test sets hold 10 to 19 decisions | `test_b6_is_not_supported_on_the_monthly_panel`; `results/phase2_forecast.json` | `NEGATIVE` (underpowered, not null) |
+| C26 | **B6 is not supported: the sign is right, the sample is not enough.** Against a return-shuffle null passed through the entire pipeline, 7 of 9 monthly cells are positive with mean excess **+0.129**, sign test **p = 0.0898**. Two cells clear 0.05 individually, but with nine cells the chance of two or more doing so is 0.071, so they do not survive their own multiple-comparison accounting. Daily, shown for contrast, gives 3 of 3 positive, mean excess +0.093, no cell significant **[Caveat 2026-08-24, AUDIT01/T2.2: the daily cells were computed hours *before* the negative-price guard existed, on data containing −37.63; surrogates completed 170/151/130 of the requested 200 per cell (`results/phase2_forecast.json` `daily[*].n_surrogates`), the shortfall evidencing nan-propagation through the shuffle null — pre-guard numbers, superseded by the guarded pipeline]**. Test sets hold 10 to 19 decisions | `test_b6_is_not_supported_on_the_monthly_panel`; `results/phase2_forecast.json` | `NEGATIVE` (underpowered, not null) |
 
 | C27 | **The Phase 2 headline statistic was a Datasaurus artefact, and is demoted.** Phase 2 was reported with no figures. On inspection: (i) the null's mean edge is ≈ **−0.115 even at matched test-set size**, and it is not noise but an **overfitting penalty** — a lookup table fitted on a random prefix scores ≈ 0.5 against a base rate of ≈ 0.58 — so the headline "mean excess +0.129" sums a real edge of ≈ +0.096 with that penalty and reports the total as one effect; (ii) surrogate test-set sizes are *not* matched (observed 12, surrogate median 14, range 7–18, matching in 22.5 per cent of cases), but conditioning on them barely moves the p-values (0.0050→0.0082, 0.1433→0.1319, 0.4393→0.4423), so the **rank-based tests are robust and the mean was the misleading statistic, not the test**; (iii) a suspicion of mine did *not* survive — I expected volatility clustering to give the real series systematically fewer pivots than its shuffle, and it does not at this resolution (z = −1.07, −0.73, +0.38) | `notebooks/03_phase2_clock_and_looking.ipynb` | `CONFIRMED` |
 | C28 | **The pivots are economically real, so the negative is about the sample and not the representation.** Visual inspection against the price series recovers the turning points an analyst would name: the April 2011 peak at 113.39, the June 2014 peak at 106.07 that begins the shale collapse, the February 2016 bottom at 32.74, the December 2018 trough at 45.15 | same notebook | `CONFIRMED` |
@@ -315,6 +331,23 @@ than after the fact.
 the *narrative* was not: a number was computed correctly, looked striking, and was
 given a causal reading with no reference distribution in the same sentence. The
 guards live in the tests; the infection enters at the moment of writing prose.
+
+**Provenance note 2026-08-24 (AUDIT01/T2.2).** C36's reference distribution also
+existed only in prose; committed machinery now exists —
+`experiments/c36_window_distribution.py`, output
+`results/c36_window_distribution.json` — rebuilding it from `clean_prices`
+(pad = 5) and `directional_change` (θ = 0.05) over the committed daily series.
+Every quoted statistic reproduces exactly: 1.26 ± 1.12 pivots per 15-day window,
+two windows holding 7 (0.031 %), max still 7 under cleaning, the negative print
+contributing exactly one pivot (a trough at −37.63; the raw-series run yields
+550 pivots, as C32 states). Two disclosures. First, all starts enumerated give
+6,479 windows, not the quoted 6,478 — an off-by-one window enumeration in the
+original scratch computation; no statistic is affected. Second, the quoted
+March 2020 price sequence is the **raw-series** detector's episode: it ends at
+the trough 20.09 (2020-03-30), which pad = 5 cleaning removes along with
+everything after the guarded neighbourhood; under the current policy the same
+episode's in-window extremes are seven, ending at 22.60. The pre-guard numbers
+in this entry are retained as history; the guarded pipeline is authoritative.
 
 ### The visual pass — the objects drawn, and Phase 1 re-read through them
 
