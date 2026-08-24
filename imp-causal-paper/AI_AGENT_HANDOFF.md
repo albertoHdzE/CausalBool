@@ -1,3 +1,11 @@
+> **SUPERSEDED 2026-08-24 (AUDIT_FIXING_PLAN_01 / T2.4).** The status picture in
+> this handoff predates the completed implementation-vs-paper audit and is
+> stale where it conflicts with it. The current statement of record is
+> [`imp-results.md`](imp-results.md); chronologically later evidence includes
+> SESSION_HANDOFF.md (itself superseded), REPRODUCTION_LEDGER.md, and the
+> persisted artifacts (e.g. `results/ca/summary.json`: inferred_rule 222 vs
+> rule 254). This file is preserved unedited as history. — AUDIT01/T2.4
+
 # AI Agent Handoff For `imp-causal-paper`
 
 ## Purpose

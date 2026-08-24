@@ -1,3 +1,14 @@
+> **SUPERSEDED 2026-08-24 (AUDIT_FIXING_PLAN_01 / T2.4).** This document claimed
+> "Full Reproduction Complete" with all checks ✓ and ρ=+1.0 EXACT for all 10 ECA
+> rules. That claim is contradicted by the project's own later records and
+> artifacts and **must not be relied on**: the current statement of record is
+> [`imp-results.md`](imp-results.md) ("partial, reduced, qualitative shadow… not
+> a full reproduction"), corroborated by `results/ca/summary.json`
+> (`inferred_rule=222` vs true `rule=254`) and by REPRODUCTION_LEDGER.md's
+> partials (RegulonDB 14.5 proxy for the paper's ~9.x; CellNet 14/16). This file
+> is preserved unedited as history. See also AI_AGENT_HANDOFF.md, which carries
+> the same supersession notice. — AUDIT01/T2.4
+
 # Session Handoff: Full Reproduction Complete
 
 ## Branch: clean
