@@ -5,6 +5,9 @@
 
 baseDir = DirectoryName[$InputFileName];
 Get[FileNameJoin[{baseDir, "..", "code", "lib", "CausalBoolCore.wl"}]];
+AppendTo[$Path, FileNameJoin[{baseDir, "..", "..", "..", "src", "Packages"}]];
+Needs["Integration`Gates`"];
+
 
 (* ================================================================== *)
 (* SECTION 3.1 — Six-node AND deconvolution                           *)
@@ -81,8 +84,8 @@ ic6 = Sort@Flatten@Position[cm06[[6]], 1];
 Print["Node 6 connected inputs (ic6): ", ic6];
 
 (* Analytic one-set via indexSetAnalytic *)
-predictedXOR = Sort@indexSetAnalytic[6, ic6, "XOR"];
-Print["indexSetAnalytic[6, {1,3,5}, \"XOR\"]: ", predictedXOR];
+predictedXOR = Sort@IndexSetAnalytic[6, ic6, "XOR"];
+Print["IndexSetAnalytic[6, {1,3,5}, \"XOR\"]: ", predictedXOR];
 Print["Length: ", Length[predictedXOR]];
 
 (* Offset decomposition for XOR *)
@@ -114,69 +117,9 @@ Print["Exact match: ", verifiedXOR];
 
 Print["\n=== SECTION 3.3: All gate families (indexSetAnalytic) ==="];
 
-(* This is the function from the companion code mixed_interaction_10node.wl *)
-indexSetAnalytic[n_Integer, Ic_List, gate_String, params_Association : <||>] := Module[
-  {free, pow, d, indexFromPos, subsFree, k, strict, pair, a, b, ii},
-  free = Complement[Range[n], Ic];
-  pow = weights[n];
-  d = Length[Ic];
-  indexFromPos[pos_List] := 1 + Total[pow[[pos]]];
-  subsFree = Subsets[free];
-  Which[
-    gate === "AND",
-      indexFromPos[Join[Ic, #]] & /@ subsFree,
-    gate === "OR",
-      Complement[Range[1, 2^n], indexFromPos /@ subsFree],
-    gate === "XOR",
-      Module[{assigns},
-        assigns = Select[Tuples[{0, 1}, d], Mod[Total[#], 2] == 1 &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}]],
-    gate === "XNOR",
-      Module[{assigns},
-        assigns = Select[Tuples[{0, 1}, d], Mod[Total[#], 2] == 0 &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}]],
-    gate === "NAND",
-      Complement[Range[1, 2^n], indexFromPos[Join[Ic, #]] & /@ subsFree],
-    gate === "NOR",
-      indexFromPos /@ subsFree,
-    gate === "NOT",
-      ii = Lookup[params, "i", First[Ic]];
-      indexFromPos /@ Subsets[Complement[Range[n], {ii}]],
-    gate === "IMPLIES",
-      pair = Lookup[params, "pair", Ic[[;; 2]]];
-      a = pair[[1]]; b = pair[[2]];
-      Complement[Range[1, 2^n],
-        indexFromPos /@ (Join[{a}, #] & /@ Subsets[Complement[Range[n], {a, b}]])],
-    gate === "NIMPLIES",
-      pair = Lookup[params, "pair", Ic[[;; 2]]];
-      a = pair[[1]]; b = pair[[2]];
-      indexFromPos /@ (Join[{a}, #] & /@ Subsets[Complement[Range[n], {a, b}]]),
-    gate === "MAJORITY",
-      Module[{t, assigns},
-        t = Floor[d/2] + 1;
-        assigns = Select[Tuples[{0, 1}, d], Total[#] >= t &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}]],
-    gate === "KOFN",
-      Module[{assigns},
-        k = Lookup[params, "k", 1];
-        strict = TrueQ[Lookup[params, "strict", False]];
-        assigns = Select[Tuples[{0, 1}, d], If[strict, Total[#] > k, Total[#] >= k] &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}]],
-    True, {}
-  ]
-];
-
 (* Quick demo: AND on {2,4} in 6-node *)
-demo = Sort@indexSetAnalytic[6, {2, 4}, "AND"];
-Print["indexSetAnalytic[6, {2,4}, \"AND\"]: ", demo];
+demo = Sort@IndexSetAnalytic[6, {2, 4}, "AND"];
+Print["IndexSetAnalytic[6, {2,4}, \"AND\"]: ", demo];
 Print["Matches predicted5: ", demo === Sort[predicted5]];
 
 (* ================================================================== *)
@@ -217,7 +160,7 @@ Do[Print["  Node ", k, " (", dyn10[[k]], "): N_", k, " = ", ics10[[k]]], {k, 1, 
 
 (* Analytic one-sets *)
 oneSets10 = Table[
-  Sort@indexSetAnalytic[n10, ics10[[k]], dyn10[[k]], Lookup[params10, k, <||>]],
+  Sort@IndexSetAnalytic[n10, ics10[[k]], dyn10[[k]], Lookup[params10, k, <||>]],
   {k, 1, n10}];
 
 (* Baseline one-sets *)

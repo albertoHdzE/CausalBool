@@ -1,5 +1,7 @@
 baseDir = DirectoryName[$InputFileName];
 Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
+AppendTo[$Path, FileNameJoin[{baseDir, "..", "..", "..", "src", "Packages"}]];
+Needs["Integration`Gates`"];
 
 cm10 = {
   {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
@@ -35,78 +37,6 @@ allOffsets[n_Integer, connected_List] := Module[
 
 givePlaces[locations_List, sumandos_List] := Sort@Flatten[Table[loc + sumandos, {loc, locations}]];
 
-indexSetAnalytic[n_Integer, Ic_List, gate_String, params_Association : <||>] := Module[
-  {free, pow, d, indexFromPos, subsFree, k, strict, pair, a, b, ii},
-  free = Complement[Range[n], Ic];
-  pow = weights[n];
-  d = Length[Ic];
-  indexFromPos[pos_List] := 1 + Total[pow[[pos]]];
-  subsFree = Subsets[free];
-  Which[
-    gate === "AND",
-      indexFromPos[Join[Ic, #]] & /@ subsFree,
-    gate === "OR",
-      Complement[Range[1, 2^n], indexFromPos /@ subsFree],
-    gate === "XOR",
-      Module[{assigns},
-        assigns = Select[Tuples[{0, 1}, d], Mod[Total[#], 2] == 1 &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}
-        ]
-      ],
-    gate === "XNOR",
-      Module[{assigns},
-        assigns = Select[Tuples[{0, 1}, d], Mod[Total[#], 2] == 0 &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}
-        ]
-      ],
-    gate === "NAND",
-      Complement[Range[1, 2^n], indexFromPos[Join[Ic, #]] & /@ subsFree],
-    gate === "NOR",
-      indexFromPos /@ subsFree,
-    gate === "NOT",
-      ii = Lookup[params, "i", First[Ic]];
-      indexFromPos /@ Subsets[Complement[Range[n], {ii}]],
-    gate === "IMPLIES",
-      pair = Lookup[params, "pair", Ic[[;; 2]]];
-      a = pair[[1]];
-      b = pair[[2]];
-      Complement[
-        Range[1, 2^n],
-        indexFromPos /@ (Join[{a}, #] & /@ Subsets[Complement[Range[n], {a, b}]])
-      ],
-    gate === "NIMPLIES",
-      pair = Lookup[params, "pair", Ic[[;; 2]]];
-      a = pair[[1]];
-      b = pair[[2]];
-      indexFromPos /@ (Join[{a}, #] & /@ Subsets[Complement[Range[n], {a, b}]]),
-    gate === "MAJORITY",
-      Module[{t, assigns},
-        t = Floor[d/2] + 1;
-        assigns = Select[Tuples[{0, 1}, d], Total[#] >= t &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}
-        ]
-      ],
-    gate === "KOFN",
-      Module[{assigns},
-        k = Lookup[params, "k", 1];
-        strict = TrueQ[Lookup[params, "strict", False]];
-        assigns = Select[Tuples[{0, 1}, d], If[strict, Total[#] > k, Total[#] >= k] &];
-        Flatten@Table[
-          indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],
-          {u, Length[assigns]}, {s, subsFree}
-        ]
-      ],
-    True,
-      {}
-  ]
-];
-
 formatVector[vec_List] := StringJoin[ToString /@ vec];
 texSet[list_List] := "\\(\\{" <> StringRiffle[ToString /@ list, ", "] <> "\\}\\)";
 texVector[list_List] := "\\texttt{" <> formatVector[list] <> "}";
@@ -118,7 +48,7 @@ inputs10 = Normal@dispatch10["RepertoireInputs"];
 outputs10 = Normal@dispatch10["RepertoireOutputs"];
 
 oneSets10 = Table[
-  Sort@indexSetAnalytic[n10, ics10[[k]], dyn10[[k]], Lookup[params10, k, <||>]],
+  Sort@IndexSetAnalytic[n10, ics10[[k]], dyn10[[k]], Lookup[params10, k, <||>]],
   {k, 1, n10}
 ];
 

@@ -1,4 +1,5 @@
 AppendTo[$Path, "src/Packages"];
+Needs["Integration`Gates`"];
 Needs["Integration`Experiments`"];
 base = FileNameJoin[{"results", "tests", "mixed001FormulaVsExhaustive"}]; If[!DirectoryQ[base], CreateDirectory[base, CreateIntermediateDirectories -> True]];
 inputsFor[n_Integer] := IntegerDigits[Range[0, 2^n - 1], 2, n];
@@ -68,45 +69,9 @@ indexSetPredict[inputs_List, cm_List, dyn_List, params_Association:<||>] := Modu
   Developer`ToPackedArray[out]
 ];
 
-indexSetAnalytic[n_Integer, Ic_List, gate_String, params_Association:<||>] := Module[{free, pow, d, indexFromPos, subsFree, subsIc, k, strict, pair, a, b, ii, ciAbs, vcan, cout, icRest},
-  free = Complement[Range[n], Ic];
-  pow = Table[2^(i - 1), {i, 1, n}];
-  d = Length[Ic];
-  indexFromPos[pos_List] := 1 + Total[pow[[pos]]];
-  subsFree = Subsets[free];
-  subsIc = Subsets[Ic];
-  Which[
-    gate === "AND",
-    indexFromPos[Join[Ic, #]] & /@ subsFree,
-    gate === "OR",
-    Complement[Range[1, 2^n], indexFromPos /@ subsFree],
-    gate === "XOR",
-    Module[{assigns}, assigns = Select[Tuples[{0, 1}, d], Mod[Total[#], 2] == 1 &]; Flatten[Table[indexFromPos[Join[Pick[Ic, assigns[[t]], 1], s]], {t, Length[assigns]}, {s, subsFree}]]],
-    gate === "XNOR",
-    Module[{assigns}, assigns = Select[Tuples[{0, 1}, d], Mod[Total[#], 2] == 0 &]; Flatten[Table[indexFromPos[Join[Pick[Ic, assigns[[t]], 1], s]], {t, Length[assigns]}, {s, subsFree}]]],
-    gate === "NAND",
-    Complement[Range[1, 2^n], indexFromPos[Join[Ic, #]] & /@ subsFree],
-    gate === "NOR",
-    indexFromPos /@ subsFree,
-    gate === "NOT",
-    ii = Lookup[params, "i", If[Length[Ic] == 1, Ic[[1]], Ic[[1]]]]; indexFromPos /@ Subsets[Complement[Range[n], {ii}]],
-    gate === "IMPLIES",
-    pair = Lookup[params, "pair", If[Length[Ic] == 2, Ic, Ic[[;; Min[2, d]]]]]; a = pair[[1]]; b = pair[[2]]; Complement[Range[1, 2^n], indexFromPos /@ (Join[{a}, #] & /@ Subsets[Complement[Range[n], {a, b}]] )],
-    gate === "NIMPLIES",
-    pair = Lookup[params, "pair", If[Length[Ic] == 2, Ic, Ic[[;; Min[2, d]]]]]; a = pair[[1]]; b = pair[[2]]; indexFromPos /@ (Join[{a}, #] & /@ Subsets[Complement[Range[n], {a, b}]] ),
-    gate === "MAJORITY",
-    Module[{t, assigns}, t = Floor[d/2] + 1; assigns = Select[Tuples[{0, 1}, d], Total[#] >= t &]; Flatten[Table[indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]], {u, Length[assigns]}, {s, subsFree}]]],
-    gate === "KOFN",
-    Module[{assigns}, k = Lookup[params, "k", 1]; strict = TrueQ[Lookup[params, "strict", False]]; assigns = Select[Tuples[{0, 1}, d], If[strict, Total[#] > k, Total[#] >= k] &]; Flatten[Table[indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]], {u, Length[assigns]}, {s, subsFree}]]],
-    gate === "CANALISING",
-    ciAbs = Lookup[params, "canalisingIndex", If[Length[Ic] >= 1, Ic[[1]], 1]]; vcan = Lookup[params, "canalisingValue", 1]; cout = Lookup[params, "canalisedOutput", 0]; icRest = Complement[Ic, {ciAbs}]; Module[{band = indexFromPos /@ (Join[If[vcan == 1, {ciAbs}, {}], #] & /@ Subsets[Complement[Range[n], {ciAbs}]]) , offBase = If[vcan == 1, {}, {ciAbs}], restFree = Complement[Range[n], Join[{ciAbs}, icRest]], offFallback}, offFallback = Union @@ Table[indexFromPos /@ (Join[offBase, t, s] & /@ Subsets[restFree]), {t, Subsets[icRest], If[Length[t] == 0, Sequence @@ {}, Sequence @@ {t}]}]; If[cout == 1, Union[band, offFallback], offFallback]],
-    True, {}
-  ]
-];
-
 indexSetPredictAnalytic[n_Integer, cm_List, dyn_List, params_Association:<||>] := Module[{ics, onesSets, out},
   ics = Table[Flatten@Position[cm[[k]], 1], {k, n}];
-  onesSets = Table[indexSetAnalytic[n, ics[[k]], dyn[[k]], Lookup[params, k, <||>]], {k, 1, n}];
+  onesSets = Table[IndexSetAnalytic[n, ics[[k]], dyn[[k]], Lookup[params, k, <||>]], {k, 1, n}];
   out = ConstantArray[0, {2^n, n}];
   Do[If[Length[onesSets[[k]]] > 0, out[[onesSets[[k]], k]] = 1], {k, n}];
   Developer`ToPackedArray[out]
@@ -174,7 +139,7 @@ Export[FileNameJoin[{base, "OutputsAnalyticSample.txt"}], sampleTextAnalytic, "T
 (* OnPossibleBehaviour for one node *)
 nodeSingle = 7;
 IcSingle = Flatten@Position[cm10[[nodeSingle]], 1];
-onesSingleAna = indexSetAnalytic[Length[dyn10], IcSingle, dyn10[[nodeSingle]], Lookup[params10, nodeSingle, <||>]];
+onesSingleAna = IndexSetAnalytic[Length[dyn10], IcSingle, dyn10[[nodeSingle]], Lookup[params10, nodeSingle, <||>]];
 zerosSingleAna = Complement[Range[1, 2^Length[dyn10]], onesSingleAna];
 onesSingleBase = Flatten@Position[outputsBase[[All, nodeSingle]], 1, 1];
 zerosSingleBase = Flatten@Position[outputsBase[[All, nodeSingle]], 0, 1];
@@ -186,7 +151,7 @@ Export[FileNameJoin[{base, "OPB_Node7_Summary.json"}], <|"ok" -> okSingle, "coun
 (* Pattern indices for subsets *)
 subset4 = {1, 3, 5, 7}; pattern4 = {0, 0, 0, 0};
 subset7 = {1, 2, 4, 5, 6, 8, 10}; pattern7 = Table[0, {Length[subset7]}];
-onesSetsAll = Table[indexSetAnalytic[Length[dyn10], Flatten@Position[cm10[[k]], 1], dyn10[[k]], Lookup[params10, k, <||>]], {k, 1, Length[dyn10]}];
+onesSetsAll = Table[IndexSetAnalytic[Length[dyn10], Flatten@Position[cm10[[k]], 1], dyn10[[k]], Lookup[params10, k, <||>]], {k, 1, Length[dyn10]}];
 allIdx = Range[1, 2^Length[dyn10]];
 condIdx[node_, bit_] := If[bit == 1, onesSetsAll[[node]], Complement[allIdx, onesSetsAll[[node]]]];
 idx4Ana = Fold[Intersection, allIdx, MapThread[condIdx, {subset4, pattern4}]];
