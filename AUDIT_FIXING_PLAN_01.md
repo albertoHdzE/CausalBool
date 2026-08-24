@@ -1209,6 +1209,21 @@ Template per entry:
 - `[T0.5/T1.5]` Process slip recorded: snapshot was rebaselined before its delta was
   read; repaired post-hoc from git (`HEAD~1` diff): exactly ONE semantic block changed.
 
+- `[T2.1]` **DEV-2.1 (2026-08-24) — re-execution matched NEITHER step-1 branch; logged
+  before any text edit per task-card escalation clause.** Committed hill-climb code is
+  byte-identical to the pinned commit and the pin's content hash is intact — but across
+  a 45-seed `PYTHONHASHSEED` sweep (rng seed 42 fixed; determinism control passed) the
+  statistic itself is hash-seed-unstable: winners 5–7, modal {WTI_CL|WTI_Spot}, modal
+  frequency 35–55%. Pinned map (6/{WTI_Spot}/37.5%) reproduced **elementwise** by
+  exactly seed 19/45 (provenance did NOT break — the JSON is a genuine draw); the prose
+  triple (5/{WTI_CL}/55%) by seeds 17/33/39 (writer likely quoted an ad-hoc re-run).
+  Original run recorded no PYTHONHASHSEED ⇒ pin is one unrepeatable-as-stood draw of a
+  seed lottery. Resolution executed: quote-the-pin correction in FINDINGS C18 + dated
+  note; bitácora/04 append-only addendum; instability disclosed in both; C18 verdict
+  robust under every observed draw (22 ≫ max 7). New standing implication recorded:
+  pgmpy structural claims must fix+record PYTHONHASHSEED (extends C12/C13). Evidence:
+  `imp-prices/results/recheck_c18/`, `8c6f6e2`.
+
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1229,6 +1244,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | V1–V5 stamps | ✅ DONE | `dae59a3`; all five VERIFIED with evidence |
 | T0.1b discovery + baseline v2 | ✅ DONE | `2d89313` (see INCIDENT entry) — genuine ledger OK=46 FAIL=4 @167s |
 | T2.0 imp-prices hygiene | ✅ DONE | `470682a`; parity gate caught real drift first-run; 97 passed own-venv / 35+4skipped root-venv |
+| T2.1 C18 reconciliation | ✅ DONE (DEV-2.1) | `8c6f6e2`; prose-vs-pin confirmed (6/{WTI_Spot}/37.5 vs printed 5/{WTI_CL}/55); 45-seed recheck: hash-unstable statistic, pin = genuine draw (seed 19 elementwise); quote-the-pin correction + dated notes both docs; lint PASS + 3 planted-mismatch controls exit 1 |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
