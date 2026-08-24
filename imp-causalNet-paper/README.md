@@ -64,16 +64,32 @@ replaced by raw zlib deflate.
 | # | Figure | Claim | Verdict |
 |---|---|---|---|
 | 1 | 1A–B | Short-mechanism strings are far more perturbation-sensitive; invariant under reversal | **Replicated** — 29.5x separation in mean \|I\| |
-| 2 | 1F–G | Footprint separates interacting CA of grossly different complexity (255 vs 110) | **Replicated** — Cliff's delta −0.78 |
+| 2 | 1F–G | Footprint separates interacting CA of grossly different complexity (255 vs 110) | **Replicated** — Cliff's delta −0.770 |
 | 3 | 2 | Footprint separates interacting CA of *similar* behaviour (60 vs 110) | **Not replicated** — delta 0.15 on the paper's *own* digitised figure (medium needs 0.33) |
 | 4 | 4 | Signature breaking points at log(2)+ε deconvolve a composite graph | **Partial** — signature reproduces; 2 of 4 planted edges found |
 | 5 | 3C–D | Complete+S-F and E-R+S-F broken into their two components | **Not replicated** — planted edges at ranks 93–163 and ~500/980 |
 | 5b | Sec. 3.2 | Same task, both components of *low* algorithmic complexity | **Replicated** — planted edges at ranks 0, 1, 2 |
 | 6 | 5 | Robust to additive noise (~0.9 precision, ~5% false positives) | **Replicated in the low-complexity regime** — precision 1.000, FPR 0.000 |
 | 7 | Sup. 8–9 | Entropy and compression are not sensitive enough | **Replicated** — MI collapses to a single value, exactly as reported |
-| M | Part IX | *Mirror*: index-set calculus on the Fig. 2 image | **Exact** — 99.8% attribution; both rules recovered by number from 256 candidates |
+| M | Part IX | *Mirror*: index-set calculus on the Fig. 2 image | **Exact** — 96.7% per-pixel attribution vs withheld ground truth (2,084 decided columns; 98.8% on all 3,891 cells it decides); both rules recovered by number from 256 candidates |
 | X | Part X | Authors' CTM table versus ours, entry by entry | **Identical** — all 65,536 blocks agree to 1e-6 |
 | F | Part XI | CA parameters recovered by digitising the published figures | **Recovered** — 100 cells × 100 steps; rules 60/110 recovered uniquely from 256 |
+
+### Machine-readable results
+
+Every number this README quotes from the walkthrough is exported to JSON by a committed
+command, `.venv/bin/python scripts/export_notebook_results.py`, which parses the executed
+notebook cells (cell index + verbatim output retained for provenance):
+
+- `results/fig1_separation.json` — Fig. 1 strings; Cliff's delta −0.770 (Fig. 1F–G); Sup. Fig. 2c re-test (+0.147)
+- `results/fig2_mirror_attribution.json` — the mirror on the Fig. 2 image: 0.98766 on 3,891 decided cells, 0.9669 on 2,084 columns vs withheld ground truth, 43 no-rule columns
+- `results/graphs_deconvolution.json` — Fig. 4 outcome dict, planted-edge ranks, recogniser exactness
+- `results/ctm_parity.json` — CTM parity: 65,536 / 65,536 blocks agree to 1e-6
+- `results/capability_tally.json` — the COMPARISON.md capability table, machine-counted
+
+The CTM parity table itself is vendored at `reference/ctm/K-4x4.csv` (pinned upstream
+commit `76d38039`, sha256 in `reference/ctm/MANIFEST.md`), replacing the former dependency
+on an ephemeral `/tmp/cdn` clone.
 
 The failures share one cause. BDM estimates *program length*, so it separates mechanisms
 whose lengths differ and cannot separate mechanisms whose lengths are similar however
@@ -115,10 +131,15 @@ for this data?*; the index-set method asks *what is the program?* — for each c
 smallest set of inputs and the exact Boolean function reproducing every observation, or a
 proof that none exists. That proof of non-existence is the boundary signal.
 
-On the rule-60/rule-110 image that defeated the paper's own method, it attributes every
-decidable cell with 99.8% accuracy, locates the interaction front as the 37 cells no
-elementary rule explains, and recovers both generating rules **by number** out of 256
-candidates from the binary image alone.
+On the rule-60/rule-110 image that defeated the paper's own method, it decides 3,891 of
+the 10,000 cells and is 98.8% accurate on them (mechanism-map pass); scored per pixel
+against withheld ground truth on 2,084 decided columns it reaches **96.7%**; it marks out
+the interaction zone as the **43 columns** no elementary rule explains; and it recovers
+both generating rules **by number** out of 256 candidates from the binary image alone.
+(The earlier "99.8%" was the figure on synthetic data, not on this image.)
+
+*Source artifacts for this paragraph: `results/fig2_mirror_attribution.json` — exported
+from the executed notebook cells by `scripts/export_notebook_results.py`.*
 
 On graphs it is a partial improvement (Fig. 3D planted edges move from rank ~500/980 to
 ~80/980) and does not solve the scale-free case, for a reason stated precisely in the
@@ -135,13 +156,18 @@ intrinsically ordered.
 | `src/imp_causalnet_paper/ca.py` | elementary CA, the twelve mixed neighbourhoods, `R[x]`, Gray-code helpers |
 | `src/imp_causalnet_paper/footprint.py` | `CausalDeconvolution`, `PIDMI`, `PIDNCD`, `CalculateInformationRow*` |
 | `src/imp_causalnet_paper/graphs.py` | generators per Sup. Inf. 4.2 (BA from a 3-cycle seed, E-R, K-ary trees) |
-| `src/imp_causalnet_paper/deconvolution.py` | Algorithms 1 and 2, information signature, ε estimation, breaking points |
+| `src/imp_causalnet_paper/zenil_algorithms.py` | Algorithms 1 and 2, information signature, ε estimation, breaking points |
 | `src/imp_causalnet_paper/strings.py` | Fig. 1A–B |
 | `src/imp_causalnet_paper/experiments.py` | Figs. 3C–D and 5 runners with the paper's replicate counts |
 | `src/imp_causalnet_paper/causalbool_mirror.py` | the index-set mirror; loads the root project's deconvolution code |
 | `notebooks/paper_walkthrough.ipynb` | the didactic walkthrough (executed, 141 cells, 28 figures) |
 | `notebooks/_build_notebook.py` | its generator |
-| `tests/test_replication.py` | 25 fidelity tests |
+| `tests/test_replication.py` | 47 fidelity tests |
+
+*Source artifact for the test count: `pytest tests/test_replication.py` collection
+(46 passing + 1 CTM-parity check, vendored at `reference/ctm/` since AUDIT01/T2.3);
+for the capability tally: `results/capability_tally.json`; for Cliff's delta:
+`results/fig1_separation.json`.*
 
 | `src/imp_causalnet_paper/measure.py` | model description length and the two-part certificate |
 | `src/imp_causalnet_paper/graph_mechanism.py` | graph deconvolution by index-set law: exact recognisers + mechanism peeling |
@@ -262,7 +288,8 @@ and names the mechanism; on Fig. 3D it correctly reports that neither side has a
 
 A capability-by-capability comparison of the two methods, with every row backed by a run, is
 in [`COMPARISON.md`](COMPARISON.md) and Part XIII of the notebook. Summary tally across 16
-capabilities: **ours 6, both 5, theirs 4, neither 1**.
+capabilities: **ours 7, both 5, theirs 4, neither 1** (machine-counted from the table into
+`results/capability_tally.json`; an earlier draft of this line said ours 6).
 
 The short version: BDM answers *"is there structure here, and where?"* for any object,
 always, approximately, and without ever saying what the structure is. The index-set calculus

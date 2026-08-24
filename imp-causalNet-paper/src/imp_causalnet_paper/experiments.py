@@ -15,7 +15,7 @@ from typing import Callable, Iterable
 import networkx as nx
 import numpy as np
 
-from .deconvolution import deconvolve_epsilon
+from .zenil_algorithms import deconvolve_epsilon
 from .graphs import complete_graph, erdos_renyi, join_random, scale_free
 
 __all__ = [

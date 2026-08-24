@@ -1102,7 +1102,9 @@ code(r"""
 import csv, pathlib
 from pybdm.encoding import normalize_key, string_from_array
 
-csv_path = pathlib.Path("/tmp/cdn/data/K-4x4.csv")
+csv_path = pathlib.Path("reference/ctm/K-4x4.csv")
+if not csv_path.exists():
+    csv_path = pathlib.Path("/tmp/cdn/data/K-4x4.csv")
 if csv_path.exists():
     ctm = complexity._BDM_2D._ctm[(4, 4)]
     n = agree = 0
@@ -1115,7 +1117,7 @@ if csv_path.exists():
     print(f"=> the two implementations share an identical CTM backend: {agree == n}")
 else:
     print("clone https://github.com/allgebrist/Causal-Deconvolution-of-Networks")
-    print("to /tmp/cdn to run this check")
+    print("vendored table reference/ctm/K-4x4.csv missing; see reference/ctm/MANIFEST.md")
 """)
 
 md(r"""

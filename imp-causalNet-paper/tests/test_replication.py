@@ -14,7 +14,7 @@ import numpy as np
 import pytest
 
 from imp_causalnet_paper import (
-    ca, causal_models, complexity, deconvolution, figures, footprint, graphs, official, strings,
+    ca, causal_models, complexity, figures, footprint, graphs, official, strings, zenil_algorithms,
 )
 from imp_causalnet_paper.causalbool_mirror import (
     consistent_rules,
@@ -183,7 +183,7 @@ def test_ncd_of_an_object_with_itself_is_small():
 
 def test_edge_information_is_the_difference_of_complexities():
     G = graphs.complete_graph(16)
-    info = deconvolution.edge_information(G)
+    info = zenil_algorithms.edge_information(G)
     A = graphs.adjacency(G)
     u, v = info.edges[0]
     B = A.copy()
@@ -197,7 +197,7 @@ def test_algorithm_1_reaches_the_requested_number_of_components():
     G, _, _ = graphs.join_random(
         graphs.complete_graph(12), graphs.scale_free(20, seed=4), n_links=2, seed=4
     )
-    H, removed = deconvolution.deconvolve_n(G, N=2)
+    H, removed = zenil_algorithms.deconvolve_n(G, N=2)
     assert nx.number_connected_components(H) >= 2
     assert removed
 
@@ -205,7 +205,7 @@ def test_algorithm_1_reaches_the_requested_number_of_components():
 def test_algorithm_1_rejects_out_of_range_component_counts():
     G = graphs.complete_graph(8)
     with pytest.raises(ValueError):
-        deconvolution.deconvolve_n(G, N=G.number_of_nodes() + 1)
+        zenil_algorithms.deconvolve_n(G, N=G.number_of_nodes() + 1)
 
 
 def test_cutoff_constant_is_one_bit_as_in_the_authors_r_code():
@@ -215,8 +215,8 @@ def test_cutoff_constant_is_one_bit_as_in_the_authors_r_code():
     "log(2)".  Reading it as a natural logarithm is what made Algorithm 2 look
     self-contradictory in an earlier version of this replication.
     """
-    assert deconvolution.LOG2 == 1.0 == official.LOG2_BITS
-    assert deconvolution.EPSILON_DEFAULT == official.EPSILON_DEFAULT == 1.0
+    assert zenil_algorithms.LOG2 == 1.0 == official.LOG2_BITS
+    assert zenil_algorithms.EPSILON_DEFAULT == official.EPSILON_DEFAULT == 1.0
 
 
 def test_both_readings_of_algorithm_2_agree_at_the_official_epsilon():
@@ -228,8 +228,8 @@ def test_both_readings_of_algorithm_2_agree_at_the_official_epsilon():
     G, _, _ = graphs.join_random(
         graphs.complete_graph(16), graphs.scale_free(32, seed=5), n_links=3, seed=5
     )
-    text = deconvolution.deconvolve_epsilon(G, verbatim=False)
-    printed = deconvolution.deconvolve_epsilon(G, verbatim=True)
+    text = zenil_algorithms.deconvolve_epsilon(G, verbatim=False)
+    printed = zenil_algorithms.deconvolve_epsilon(G, verbatim=True)
     assert {tuple(sorted(e)) for e in text.removed} == {tuple(sorted(e)) for e in printed.removed}
     assert len(printed.removed) < G.number_of_edges() / 2
 
@@ -250,14 +250,24 @@ def test_official_bdm2d_matches_pybdm_on_the_non_overlapping_partition():
 def test_official_ctm_table_agrees_with_pybdm_entry_by_entry():
     """The R repo ships data/K-4x4.csv; every block it lists must match pybdm.
 
-    Skipped unless the repository has been cloned alongside this one.
+    The table is vendored at ``reference/ctm/K-4x4.csv`` (pinned upstream
+    commit 76d38039, sha256 d0912b8d...; see reference/ctm/MANIFEST.md), so
+    this check runs offline. A legacy fallback reads an ephemeral clone at
+    /tmp/cdn; if neither is present the skip reason says so loudly.
     """
     import csv, pathlib
     from pybdm.encoding import normalize_key, string_from_array
 
-    csv_path = pathlib.Path("/tmp/cdn/data/K-4x4.csv")
+    vendored = pathlib.Path(__file__).resolve().parent.parent / \
+        "reference" / "ctm" / "K-4x4.csv"
+    csv_path = vendored if vendored.exists() else \
+        pathlib.Path("/tmp/cdn/data/K-4x4.csv")
     if not csv_path.exists():
-        pytest.skip("official R repository not present")
+        pytest.skip(
+            "CTM parity table absent: expected the vendored copy at "
+            f"{vendored} (see reference/ctm/MANIFEST.md) or a clone of "
+            "https://github.com/allgebrist/Causal-Deconvolution-of-Networks "
+            "at /tmp/cdn")
     ctm = complexity._BDM_2D._ctm[(4, 4)]
     for key, value in csv.reader(csv_path.open()):
         arr = np.array([int(c) for c in key]).reshape(4, 4)

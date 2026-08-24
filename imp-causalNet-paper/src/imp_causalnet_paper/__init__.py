@@ -6,7 +6,7 @@ Two layers:
 
 * a faithful transcription of the paper's own algorithms and estimators
   (:mod:`complexity`, :mod:`ca`, :mod:`footprint`, :mod:`graphs`,
-  :mod:`deconvolution`, :mod:`strings`, :mod:`experiments`);
+  :mod:`zenil_algorithms`, :mod:`strings`, :mod:`experiments`);
 * a mirror of the same results using the CausalBool index-set causal calculus
   developed in the root of this project (:mod:`causalbool_mirror`).
 """
@@ -20,7 +20,7 @@ from . import (  # noqa: F401
     causal_models,
     causalbool_mirror,
     complexity,
-    deconvolution,
+    zenil_algorithms,
     experiments,
     fastbdm,
     figures,
@@ -37,7 +37,7 @@ __all__ = [
     "causal_models",
     "causalbool_mirror",
     "complexity",
-    "deconvolution",
+    "zenil_algorithms",
     "experiments",
     "fastbdm",
     "figures",

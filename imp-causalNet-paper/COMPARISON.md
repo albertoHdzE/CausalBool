@@ -25,7 +25,7 @@ A scalar and a mechanism are different kinds of answer. Neither subsumes the oth
 | 3 | Fig. 1: separate a regular from a random string segment | yes — 29.5× ratio in mean \|I\| | yes — exact model one side, none the other | both |
 | 4 | Fig. 1: return the **generating program** | **no** — drawn by hand in Figs. 1C–E, not inferred | yes — `b[i] = NOT b[i-1]`, inferred and run forward | **ours** |
 | 5 | Fig. 1: locate the seam between mechanisms | approximately, from a break in the signature | exactly, at **bit 52**, with a proof bits 50–51 still fit | **ours** |
-| 6 | Figs. 1F–G: separate CA of grossly different complexity | yes — Cliff's delta −0.78 | yes — rules 255 and 110 recovered exactly | both |
+| 6 | Figs. 1F–G: separate CA of grossly different complexity | yes — Cliff's delta −0.770 | yes — rules 255 and 110 recovered exactly | both |
 | 7 | Fig. 2: separate CA of **similar** complexity (60 vs 110) | **no** — delta 0.15 on their own figure | yes — 96.7% attribution | **ours** |
 | 8 | Fig. 2: say **which rule** made each region | **no** — the footprint is unlabelled | yes — by rule number, from 256, unsupervised | **ours** |
 | 9 | Recover a full Boolean network from a space-time diagram | no | yes — exact on the full 2¹² global map | **ours** |
@@ -124,7 +124,7 @@ everything BDM does?** Part XIV of the notebook answers it deliverable by delive
 |---|---|---|---|---|
 | 1A–B | separate two string segments made by different programs | perturb each bit → 29.5× ratio | minimal lag index sets → exact model one side, provably none the other | parallel |
 | 1C–E | exhibit the generating program of `01ⁿ` | **drawn by hand** → a picture | infer the recurrence → `b[i] = NOT b[i-1]`, run forward | **ours stronger** |
-| 1F–G | separate CA of grossly different complexity | BDM footprint → delta −0.78 | per-cell rule consistency → rules 255 and 110 recovered; Fig. 1F regenerated 4026/4026 | **ours stronger** |
+| 1F–G | separate CA of grossly different complexity | BDM footprint → delta −0.770 | per-cell rule consistency → rules 255 and 110 recovered; Fig. 1F regenerated 4026/4026 | **ours stronger** |
 | 2 | separate CA of **similar** complexity | BDM footprint → delta 0.15, **fails** | per-cell consistency → 96.7%, both rules named from 256 | **ours solves it** |
 | 3A–B | deconvolve K-ary trees | minimal-loss edge removal → components | recognise the law → `kary_tree(k=2)`, any labelling | parallel |
 | 3C | split a complete from a scale-free graph | signature cut → ranks 93/162/163, **fails** | peel the largest exact law → **precision 1.00, recall 1.00** | **ours solves it** |
@@ -164,3 +164,11 @@ and noiseless by construction.** That is the regime the index-set calculus is bu
 to noisy data and the strict method stops answering while BDM keeps returning usable numbers
 (see the noise table above). Within this paper that regime never arises — which is precisely
 why the parallel holds as well as it does.
+
+---
+
+*Correction 2026-08-24 (AUDIT01/T2.3): the two "Cliff's delta −0.78" values above were
+re-misquotations of the executed notebook output, which is **−0.770** (Part I cell,
+Fig. 1F–G block; artifact `results/fig1_separation.json`). The capability tally in this
+file ("ours 7, both 5, theirs 4, neither 1") was verified by machine count against the
+table above (`results/capability_tally.json`) and is unchanged.*
