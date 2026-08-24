@@ -74,10 +74,10 @@ Print["ApplyGate[\"AND\", {1,0}]: ", ApplyGate["AND", {1, 0}]];
 Print["ApplyGate[\"AND\", {0,1}]: ", ApplyGate["AND", {0, 1}]];
 
 (* ================================================================== *)
-(* SECTION 3.2 — XOR case (synchronous: node 6 reads x1, x3, x5)     *)
+(* SECTION 3.2 — XOR case, LOCAL semantics: node 6 reads raw coords {1,3,5}. *)
 (* ================================================================== *)
 
-Print["\n=== SECTION 3.2: XOR case (node 6, synchronous) ==="];
+Print["\n=== SECTION 3.2: XOR case \(LOCAL semantics, Ic={1,3,5}\) ==="];
 
 (* Node 6 = XOR, connected inputs = {1, 3, 5} from the CM *)
 ic6 = Sort@Flatten@Position[cm06[[6]], 1];
@@ -109,7 +109,37 @@ baselineXOR = Flatten@Position[outputs06[[All, 6]], 1];
 Print["Baseline one-set:  ", baselineXOR];
 
 verifiedXOR = Sort[predictedXOR] === Sort[baselineXOR];
-Print["Exact match: ", verifiedXOR];
+Print["Exact match (LOCAL): ", verifiedXOR];
+verifiedXORLocal = verifiedXOR;
+
+(* ================================================================== *)
+(* SECTION 3.2b — COMPOSED semantics (paper flagship):                *)
+(*   y6 = x1 XOR x3 XOR AND(x2, x4).                                   *)
+(* AUDIT01/T1.1 D-2(d): node 6 is an in-degree-4 composite gate OUTSIDE *)
+(* the twelve-family catalogue; its one-set is obtained by COMPOSING    *)
+(* index sets (indicator arithmetic over constituents), not by the      *)
+(* XOR closed form over raw coordinates. Composition lemma is verified  *)
+(* here empirically, elementwise, against an exhaustive LUT.            *)
+(* ================================================================== *)
+Print["\n=== SECTION 3.2b: COMPOSED flagship node \(y6 = x1+x3+AND(x2,x4) mod 2\) ==="];
+
+exhaustiveComposed = Table[
+  With[{r = Reverse@IntegerDigits[x, 2, 6]},   (* LSB row: r[[k]] = coordinate k, matching IndexSetAnalytic convention *)
+    Mod[r[[1]] + r[[3]] + Boole[r[[2]] == 1 && r[[4]] == 1], 2]],
+  {x, 0, 63}];
+indicatorsOf[set_List] := Module[{v = ConstantArray[0, 64]}, v[[set]] = 1; v];
+constituentXORone = Sort@IndexSetAnalytic[6, {1}, "XOR"];
+constituentXORthree = Sort@IndexSetAnalytic[6, {3}, "XOR"];
+constituentAND = Sort@IndexSetAnalytic[6, {2, 4}, "AND"];
+composedOneSet = Pick[Range[64],
+  Mod[indicatorsOf[constituentXORone] + indicatorsOf[constituentXORthree] + indicatorsOf[constituentAND], 2], 1];
+lutComposedOnes = Flatten@Position[exhaustiveComposed, 1];
+symDiffComposed = Sort@Join[Complement[composedOneSet, lutComposedOnes], Complement[lutComposedOnes, composedOneSet]];
+verifiedComposedXOR = symDiffComposed == {};
+Print["Composed one-set |J|: ", Length[composedOneSet]];
+Print["LUT on-set |J|:       ", Length[lutComposedOnes]];
+Print["Symmetric difference: ", If[symDiffComposed == {}, "∅ (elementwise equal)", symDiffComposed]];
+Print["Exact match (COMPOSED, composition lemma): ", verifiedComposedXOR];
 
 (* ================================================================== *)
 (* SECTION 3.3 — All gate families via indexSetAnalytic                *)
@@ -363,9 +393,17 @@ Do[
   {i, Length[cycles]}
 ];
 
-Print["\n=== ALL VERIFICATIONS PASSED ==="];
-Print["6-node AND:  ", verified5];
-Print["6-node XOR:  ", verifiedXOR];
-Print["10-node per-node: ", And @@ nodeVerification10];
-Print["F1: ", vF1, "  F2: ", vF2, "  F3: ", vF3, "  F4: ", vF4];
-Print["S1: ", vS1, "  S2: ", vS2];
+(* AUDIT01/T1.1: banner replaced by a REAL gate — exits non-zero on any failure *)
+verificationList = <|
+  "6-node AND" -> verified5,
+  "6-node XOR (local)" -> TrueQ[verifiedXORLocal],
+  "6-node flagship XOR (composed, D-2d)" -> TrueQ[verifiedComposedXOR],
+  "10-node per-node" -> And @@ nodeVerification10,
+  "F1" -> vF1, "F2" -> vF2, "F3" -> vF3, "F4" -> vF4,
+  "S1" -> vS1, "S2" -> vS2|>;
+failedChecks = Keys@Select[verificationList, Not[#] &] /. Not[x_] :> x;
+Scan[Print["  ", #, ": ", verificationList[[#]]] &, Keys[verificationList]];
+If[failedChecks == {},
+  Print["\n=== ALL VERIFICATIONS PASSED ==="],
+  Print["\n=== VERIFICATION FAILED: ", failedChecks, " ==="]; Exit[1]
+];

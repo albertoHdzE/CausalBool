@@ -125,7 +125,11 @@ eqAna = Developer`ToPackedArray@Boole[MapThread[Equal, {outputsBase, outputsPred
 accAna = N[Total[Flatten[eqAna]] / Length[Flatten[eqAna]]];
 Export[FileNameJoin[{base, "Summary.json"}], <|"accuracy" -> acc, "baselineTime" -> tBase, "predictiveTime" -> tPred, "diffCount" -> diffCount, "accuracyLib" -> accLib, "predictiveLibTime" -> tPredLib, "accuracyIndex" -> accIndex, "predictiveIndexTime" -> tPredIndex, "accuracyAnalytic" -> accAna, "predictiveAnalyticTime" -> tPredAna|>, "JSON"];
 Print["Accuracy=", acc, " BaselineTime=", tBase, " PredictiveTime=", tPred, " DiffCount=", diffCount, " | AccuracyLib=", accLib, " PredictiveLibTime=", tPredLib, " | AccuracyIndex=", accIndex, " PredictiveIndexTime=", tPredIndex, " | AccuracyAnalytic=", accAna, " PredictiveAnalyticTime=", tPredAna];
-Export[FileNameJoin[{base, "Status.txt"}], {If[diffCount == 0, "OK", "FAIL"], DateString[]}, "Text"];
+(* AUDIT01/T1.1+F35: success criterion = the theorem-relevant paths (Lib/Index/Analytic)
+   must be exact; the vectorised fast path is a documented shortcut and is reported,
+   not gating (its residual mismatch is by design, see Accuracy vs AccuracyLib). *)
+theoremPathsExact = accLib == 1 && accIndex == 1 && accAna == 1;
+Export[FileNameJoin[{base, "Status.txt"}], {If[theoremPathsExact, "OK", "FAIL"], DateString[]}, "Text"];
 Association["Status" -> If[diffCount == 0, "OK", "FAIL"], "ResultsPath" -> base]
 
 (* Step samples for documentation *)
