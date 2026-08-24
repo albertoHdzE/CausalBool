@@ -1060,9 +1060,9 @@ Ordered by expected scientific value:
 | D-2 | Flagship network semantics | (a) local recompute / ~~(b) layered evaluator~~ → Part I item 7 / (c) drop node 6 / **(d) composite-gate declaration: node 6 = in-degree-4 gate outside the twelve-family catalogue, one-set obtained by composing index sets** | **(d)** v1.1 — keeps the example, no new theory on the critical path, makes the scope boundary visible; composition lemma verified empirically in T1.1 | OPEN (options expanded v1.1) |
 | D-3 | MAJORITY tie convention | ties→0 / ties→1 / tiePolicy param | (iii) param, default ties→0; gated on tie-row probe | OPEN |
 | D-4 | Manuscript roles | two-canonical-scoped / merge | two canonical, distinct scopes | OPEN |
-| D-5 | imp-causal-paper evidence policy | track summaries / external+manifest | summaries ≤ few MB tracked | OPEN |
+| D-5 | imp-causal-paper evidence policy | track summaries / external+manifest | summaries ≤ few MB tracked | **CLOSED 2026-08-24: option (i)** |
 | D-6 | Derivations completion vs scoping | generate 10 derivations / rescope claim | (i) generate | OPEN |
-| D-7 | T2.4 comparison pre-registration sign-off | agent self-certifies / author approves before run | **author approves** (v1.2) — new experiment, analysis freedom must be closed pre-run; agent drafts only | OPEN |
+| D-7 | T2.4 comparison pre-registration sign-off | agent self-certifies / author approves before run | **author approves** (v1.2) — new experiment, analysis freedom must be closed pre-run; agent drafts only | **CLOSED 2026-08-24: APPROVED as drafted** |
 
 # APPENDIX B — EXECUTION ORDER (DAG)
 
@@ -1235,6 +1235,22 @@ Template per entry:
   scratch draw (`6bbc9fb`). C36 by contrast reproduces exactly incl. two disclosed
   presentation artefacts (6,479-vs-6,478 window enumeration; March-2020 sequence =
   raw-series episode, elementwise 8/8).
+
+- `[T2.4/T2.7]` **AUTHOR DECISIONS RECORDED 2026-08-24** (interactive session; this
+  entry is the pre-run approval record required by AC-2.4e):
+  - **D-7 APPROVED** — index-method-comparison pre-registration
+    (`imp-causal-paper/index_method_comparison/PROTOCOL.md`, committed `6bfedca`)
+    approved AS DRAFTED. Execution may proceed under its rules; no outcome-dependent
+    changes permitted.
+  - **D-5 CLOSED — option (i)**: JSON summaries tracked in git + committed
+    `MANIFEST.sha256`, raw gitignored.
+  - **Supersession headers APPROVED AS DRAFTED** for SESSION_HANDOFF.md and
+    AI_AGENT_HANDOFF.md.
+  - **U6 PERMISSION GRANTED (both)** — sibling series-deconvolution may receive the
+    drafted §9.6 correction and GLOSSARY §8 precision note (append-only).
+  - **DEV-2.1 / DEV-2.2 RATIFIED**, with the added condition: verification through
+    the `datasaurus` skill's four gates (render / elementwise compare / knobs /
+    mechanism), acting on any failure. Gate artifacts to follow in the results tree.
 
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
 
