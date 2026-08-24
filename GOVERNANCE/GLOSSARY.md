@@ -1,8 +1,10 @@
-# GOVERNANCE/GLOSSARY.md
-
-> **Synchronized copy.** Canonical source of truth:
-> `~/Documents/projects/series-deconvolution/GLOSSARY.md` @ commit `77a5381`
-> Copied 2026-08-24 by AUDIT01/T1.4. On definitions this file outranks every document in this repository.
+># GOVERNANCE/GLOSSARY.md — synchronized copy
+>
+> **Canonical source of truth:** `~/Documents/projects/series-deconvolution/GLOSSARY.md`
+> @ sibling commit `b868cd0` (T2.7 precision note appended 2026-08-24).
+> Recopied 2026-08-24 by AUDIT01/T27 after the author-permitted sibling edit;
+> previous sync @ `77a5381` by AUDIT01/T1.4.
+> On definitions this file outranks every other document in this repository.
 > Verify freshness: `tools/check_glossary_sync.sh` (0=clean, 1=drift, 2=sibling absent).
 
 # GLOSSARY — the gold source of truth for terminology
@@ -299,3 +301,24 @@ derivation is a separate piece of work.
    readings.
 3. New term minted → add it here **with its source**, in the same commit.
 4. Term corrected → amend **in place**, dated, and say which documents are now stale.
+
+---
+
+## ADDENDUM 2026-08-24 (AUDIT_FIXING_PLAN_01 / T2.7) — precision note on the b21/b22 history
+
+Wherever this GLOSSARY or TRANSFERENCE compresses the oracle/pivot correction
+into one line ("21 stated an identity; 22 retracted it"), read the **three-step**
+chain instead, per the V2 verification stamp of AUDIT_FIXING_PLAN_01
+(2026-08-24):
+
+1. `bitacora/21` established **containment-with-residual** and called the θ=c
+   case an "identity" (bare "identity" only for θ=c), titling it the headline.
+2. `bitacora/22` re-rated the **epistemics** ("true but geometry") without
+   retracting any mathematics.
+3. The #3 amendment in this GLOSSARY's confusion-source table then corrected
+   22's demotion: definition-level containment is constitutive; the measured
+   rate is the recovery method's fidelity.
+
+No mathematics was retracted at any step. This note exists so the compressed
+one-liner cannot mislead a court-style reader into thinking a result died when
+only its interpretation was re-rated.
