@@ -10,7 +10,7 @@ become a sparse set of troughs and peaks.  Crucially it is computed *with the fu
 visible*: it is the answer key, not a strategy.
 
 THE DEFINITION (settled 2026-08-22; source of truth is
-``series-deconvolution/GLOSSARY.md`` section 1, which outranks every paper and notebook
+``GOVERNANCE/GLOSSARY.md`` (in-repo synchronized copy; canonical at ``series-deconvolution/GLOSSARY.md``) section 1, which outranks every paper and notebook
 in this programme on a definition):
 
     A PIVOT is a position that a CAUSAL process -- one with no look-ahead --
@@ -42,7 +42,7 @@ here in opposite directions:
    *is* the pivot set.  Retracted by bitacora 22: containment, not identity.
 2. The 2026-08-21 fix then over-corrected, calling the relation "a GEOMETRIC IDENTITY,
    NOT A MARKET FACT ... its only worth is interpretive".  **That also is wrong**, and
-   it is logged as confusion source #3 in ``GLOSSARY.md`` section 2.  It merged two
+   it is logged as confusion source #3 in ``GOVERNANCE/GLOSSARY.md`` section 2.  It merged two
    different things.  The containment is CONSTITUTIVE OF THE DEFINITION -- a pivot just
    *is* an oracle point recovered causally, so containment holding on GBM, on shuffled
    returns and on a pure sine is EXPECTED and CORRECT: it says the causal construction

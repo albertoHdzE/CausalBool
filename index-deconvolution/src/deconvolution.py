@@ -40,7 +40,7 @@ from causalbool import Network, apply_gate, truth_table, repertoire
 # ---------------------------------------------------------------------------
 # Step 1 - essential-variable detection (connected vs free coordinates)
 #
-# Terminology, GLOSSARY.md sec.1c: the complement of the PIVOT COORDINATES is the
+# Terminology, GOVERNANCE/GLOSSARY.md sec.1c (in-repo synchronized copy; canonical at ../series-deconvolution): the complement of the PIVOT COORDINATES is the
 # FREE COORDINATES, *not* the sumandos.  Each side has its own decimal encoding --
 # connected -> decimal anchor, free -> sumandos -- so pairing "pivots vs sumandos"
 # puts a set opposite an encoding.  It also wrongly suggests a lossy split: this
@@ -57,7 +57,7 @@ def essential_variables(column: list[int], n: int) -> list[int]:
     inputs -- the PIVOT COORDINATES.  The remaining bits are the FREE
     COORDINATES; their subset sums are the sumandos.  (The sumandos are the
     free coordinates' decimal *encoding*, not the coordinates themselves --
-    GLOSSARY.md sec.1c.)
+    GOVERNANCE/GLOSSARY.md sec.1c.)
     """
     if len(column) != 2 ** n:
         raise ValueError("column length must be 2**n")

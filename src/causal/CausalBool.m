@@ -2180,7 +2180,7 @@ Note: First element has index 0.
 		    (*0s->odds, 1s->evens*)
 		    (* create list of sequence-start indexes, where sequences begin.
 		       NOT a pivot: a pivot is a position a causal process reproduces exactly
-		       (GLOSSARY.md sec.1). These are block offsets. *)
+		       (GOVERNANCE/GLOSSARY.md sec.1, synchronized copy; canonical at series-deconvolution). Block offsets. *)
 		    If[outputExpected === 1, serie = evening[repetitions], 
 		     serie = odding[repetitions]];
 		    
@@ -2286,7 +2286,7 @@ findPatternIndices[nodes_, wantedPatt_, sizeCM_] := Module[
     period = 2^(ki - 1); (* Length of consecutive 0s or 1s *)
     numSequences = limit / period; (* Number of sequences *)
     
-    (* Generate the sequence-start block offsets (NOT pivots -- see GLOSSARY.md sec.1) *)
+    (* Generate the sequence-start block offsets (NOT pivots -- see GOVERNANCE/GLOSSARY.md sec.1) *)
     sequenceStarts = If[pi == 1,
       Range[1, numSequences - 1, 2], (* Odd indices for 1s: 1, 3, 5, ... *)
       Range[0, numSequences - 2, 2]  (* Even indices for 0s: 0, 2, 4, ... *)

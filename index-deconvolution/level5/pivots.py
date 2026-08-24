@@ -4,7 +4,7 @@ Representation-free pivots: describe a sequence not by the digits of its values
 but by where its salient points occur along two axes -- time and value.
 
 WHAT A PIVOT IS (settled 2026-08-22; the source of truth is
-``series-deconvolution/GLOSSARY.md`` section 1, which outranks every paper and notebook
+``GOVERNANCE/GLOSSARY.md`` (in-repo synchronized copy; canonical at ``series-deconvolution/GLOSSARY.md``) section 1, which outranks every paper and notebook
 in this programme on a definition):
 
     A PIVOT is a position that a CAUSAL process -- one with no look-ahead --
@@ -18,7 +18,7 @@ exactly; the RESIDUAL is the part of the answer key that requires the future.
 WHAT FOLLOWS IS THE RECOVERY METHOD, NOT THE DEFINITION.  This module implements the
 directional-change construction, which is *how* pivots are recovered at scale theta --
 run it with theta = c and it returns financial pivots.  Defining a pivot as "whatever
-this walk returns" is logged as confusion source #1 in ``GLOSSARY.md`` section 2, and
+this walk returns" is logged as confusion source #1 in ``GOVERNANCE/GLOSSARY.md`` section 2, and
 this docstring is one of the two places that made that error.  The distinction matters
 because the walk is a procedure that always returns *something*, whereas the definition
 carries a claim that can fail: that the returned positions are exactly right.
@@ -27,7 +27,7 @@ Do not pair *pivot* with *sumandos*.  ``pivot``/``residual`` is a partition by c
 reachability and is LOSSY.  ``decimal family``/``sumandos`` is the Boolean indexing
 method's compressed form and is LOSSLESS -- Dec(L,S) = {l+s} reconstructs the repertoire
 exactly.  There is no residual in the Boolean method and no sumando in finance
-(``GLOSSARY.md`` section 1c, confusion source #5).
+(``GOVERNANCE/GLOSSARY.md`` section 1c, confusion source #5).
 
 THE CONSTRUCTION.  Walking the sequence, we hold the current direction and the running
 extreme reached in that direction.  When the sequence reverses away from that extreme by

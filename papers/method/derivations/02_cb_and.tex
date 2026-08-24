@@ -56,7 +56,7 @@ The input repertoire is a sequence of \( 2^n \) binary vectors, ordered by their
 8 & (1, 1, 1) & 111 & 1 \\
 \end{array}
 \]
-If node 1 uses AND with inputs from nodes 2 and 3 (\( I_c = \{2, 3\} \)), the output is 1 only at index 8, where \( v_2 = v_3 = 1 \). The structure hinges on connected nodes’ contributions, forming a baseline index (pivot \( P \)), while disconnected nodes (\( I_{nc} = \{1\} \)) shift this baseline.
+If node 1 uses AND with inputs from nodes 2 and 3 (\( I_c = \{2, 3\} \)), the output is 1 only at index 8, where \( v_2 = v_3 = 1 \). The structure hinges on connected nodes’ contributions, forming a baseline index (the decimal anchor \( P \), GOVERNANCE/GLOSSARY.md sec.1a), while disconnected nodes (\( I_{nc} = \{1\} \)) shift this baseline.
 
 The decimal value of a vector \( v \) is:
 \[
@@ -70,7 +70,7 @@ The indices \( J_k \) where node \( k \)’s AND output is 1 are computed as:
 J_k = P + 1 + \Delta_{nc}
 \]
 where:
-- \( P = \sum_{i \in I_c} 2^{i-1} \) is the pivot, the sum of decimal contributions from connected nodes.
+- \( P = \sum_{i \in I_c} 2^{i-1} \) is the decimal anchor, the sum of decimal contributions from connected nodes.
 - \( \Delta_{nc} = \sum_{i \in I_{nc}} v_i \cdot 2^{i-1} \) is the offset from disconnected nodes’ states, with \( v_i \in \{0, 1\} \).
 - \( I_c = \{i \mid C_{k,i} = 1\} \) and \( I_{nc} = \{1, 2, \dots, n\} \setminus I_c \).
 - \( J_k \leq 2^n \) to stay within the repertoire.
@@ -93,7 +93,7 @@ Under LSB-first and weights \(2^{i-1}\), this equals the filtered subset of \(\{
 Let’s break down the formula step-by-step, imagining we’re tuning a system to find when the AND gate activates.
 
 \begin{enumerate}
-    \item \textbf{Set the Baseline with Connected Nodes}: The pivot \( P \) is the decimal value when all connected inputs are 1. For \( I_c = \{2, 3\} \), \( P = 2^{2-1} + 2^{3-1} = 2 + 4 = 6 \). This is the starting point after which 1s can occur.
+    \item \textbf{Set the Anchor with Connected Nodes}: The decimal anchor \( P \) is the value when all connected inputs are 1. For \( I_c = \{2, 3\} \), \( P = 2^{2-1} + 2^{3-1} = 2 + 4 = 6 \). This is the starting point after which 1s can occur.
     
     \item \textbf{Adjust with Disconnected Nodes}: The offset \( \Delta_{nc} \) comes from the binary states of disconnected nodes. If \( I_{nc} = \{1\} \), \( \Delta_{nc} = v_1 \cdot 2^{1-1} = v_1 \cdot 1 \), so \( \Delta_{nc} \) is 0 or 1.
     

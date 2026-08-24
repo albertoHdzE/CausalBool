@@ -182,7 +182,7 @@ This section provides a simplified mathematical representation of the solutions 
 
 \subsection{Simplified Mathematical Answer}
 - \textbf{Problem 1 (Input Patterns)}: The solution involves identifying indices \( j \) where specific bits match a given pattern, leveraging the periodic structure of binary sequences. The general form can be expressed as a set intersection of index ranges determined by each node’s bit periodicity.
-- \textbf{Problem 2 (AND Gates)}: The solution involves computing indices \( j \) where all connected inputs are 1, expressed as a function of a pivot value and offsets from disconnected nodes, such as \( J_k = P + 1 + \Delta_{nc} \), where \( P \) is the sum of decimal contributions from connected nodes, and \( \Delta_{nc} \) is the offset from disconnected nodes.
+- \textbf{Problem 2 (AND Gates)}: The solution involves computing indices \( j \) where all connected inputs are 1, expressed as a function of a decimal-anchor value and offsets from disconnected nodes, such as \( J_k = P + 1 + \Delta_{nc} \), where \( P \) is the sum of decimal contributions from connected nodes, and \( \Delta_{nc} \) is the offset from disconnected nodes.
 
 \subsection{Code Functions}
 Candidates must develop functions in their chosen language. Example function signatures are:
@@ -227,18 +227,18 @@ findPatternIndices[n_, cm_, dyn_, nodes_, pattern_] := Module[
 
 (* Problem 2: AND Gates *)
 findANDIndices[n_, cm_, dyn_, node_] := Module[
-  {inputs, pivot, powC, decC, powNC, numNC, deltaNCValues, resultIndices},
+  {inputs, decimalAnchor, powC, decC, powNC, numNC, deltaNCValues, resultIndices},
   inputs = Position[cm[[node]], 1][[All, 1]];
   If[dyn[[node]] != "AND", Return[<|"Node" -> node, "Error" -> "Node does not use AND function"|>, Module]];
   powC = inputs - 1;
   decC = 2^powC;
-  pivot = Total[decC];
+  decimalAnchor = Total[decC];
   powNC = Complement[Range[n] - 1, powC];
   numNC = Length[powNC];
   deltaNCValues = Flatten[Table[Sum[v[[i]] * 2^powNC[[i]], {i, 1, numNC}], {v, Tuples[{0, 1}, numNC]}]];
-  resultIndices = pivot + 1 + deltaNCValues;
+  resultIndices = decimalAnchor + 1 + deltaNCValues;
   resultIndices = Select[resultIndices, # <= 2^n &];
-  <|"Node" -> node, "Pivot" -> pivot, "Locations" -> Sort[resultIndices]|>
+  <|"Node" -> node, "DecimalAnchor" -> decimalAnchor, "Locations" -> Sort[resultIndices]|>
 ]
 \end{lstlisting}
 
@@ -247,15 +247,15 @@ findANDIndices[n_, cm_, dyn_, node_] := Module[
   - Output: \{2, 4, 6, 8\}
   - Explanation: Indices 2 (010), 4 (011), 6 (110), 8 (111) have \( b_1 = 1 \) and \( b_2 = 0 \), correctly matching the pattern.
 - \textbf{Problem 2 Example 1}: For \( n = 3 \), \( node = 1 \), \( I_c = \{2, 3\} \):
-  - Output: \{<|"Node" -> 1, "Pivot" -> 6, "Locations" -> \{8\}\>\}
+  - Output: \{<|"Node" -> 1, "DecimalAnchor" -> 6, "Locations" -> \{8\}\>\}
   - Explanation: Only index 8 (111) has \( v_2 = v_3 = 1 \), satisfying the AND condition.
 - \textbf{Problem 2 Example 2}: For \( n = 4 \), \( node = 1 \), \( I_c = \{2, 4\} \):
-  - Output: \{<|"Node" -> 1, "Pivot" -> 5, "Locations" -> \{6, 7, 14, 15\}\>\}
+  - Output: \{<|"Node" -> 1, "DecimalAnchor" -> 5, "Locations" -> \{6, 7, 14, 15\}\>\}
   - Explanation: Indices 6 (0110), 7 (0111), 14 (1110), 15 (1111) have \( v_2 = v_4 = 1 \), correctly identifying AND outputs.
 
 \subsection{Derived Models}
 - \textbf{Problem 1 Model}: The solution leverages the periodicity \( 2^{k_i - 1} \), where indices form blocks based on bit positions, intersected to match the pattern.
-- \textbf{Problem 2 Model}: The formula \( J_k = P + 1 + \Delta_{nc} \) uses \( P = \sum_{i \in I_c} 2^{i-1} \) as the pivot and \( \Delta_{nc} = \sum_{i \in I_{nc}} v_i \cdot 2^{i-1} \) as the offset, a simple yet effective representation of AND gate behaviour.
+- \textbf{Problem 2 Model}: The formula \( J_k = P + 1 + \Delta_{nc} \) uses \( P = \sum_{i \in I_c} 2^{i-1} \) as the decimal anchor and \( \Delta_{nc} = \sum_{i \in I_{nc}} v_i \cdot 2^{i-1} \) as the offset, a simple yet effective representation of AND gate behaviour.
 These models, despite their simplicity, demonstrate that elegant solutions emerge from understanding the binary structure.
 
 \section{Validation with Traditional Approach}

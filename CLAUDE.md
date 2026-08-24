@@ -27,7 +27,24 @@ Tests require a local WolframKernel at `/Applications/Wolfram.app/Contents/MacOS
 cd doc/newIntPaper && pdflatex -interaction=nonstopmode docProcess.tex
 ```
 
-Active manuscript: `papers/method/manuscript/method_paper.tex`
+### Active Manuscripts (D-4, AUDIT_FIXING_PLAN_01)
+
+Both are canonical, with distinct scopes — regenerate their numbers via
+`tools/snapshot_paper_numbers.py --check` before citing:
+- `papers/method/manuscript_formal/method_paper.tex` — theory/method paper.
+- `papers/method/manuscript_computational/comp_paper.tex` — computational/validation paper
+  (its output generator is `generate_paper_outputs.wl`, which now exits non-zero on any
+  failed verification).
+
+### Branch status
+
+Live branch: **`clean`**. `main` is stale by policy until plan task T0.4 retags it;
+do not trust `main` for current state.
+
+### Governance
+
+Definitions: `GOVERNANCE/GLOSSARY.md` (synchronized from `series-deconvolution`; check
+with `tools/check_glossary_sync.sh`). Test truth: `tests/MUnit/BASELINE.md`.
 
 ### Python (venv-based)
 ```

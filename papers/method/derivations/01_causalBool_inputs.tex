@@ -65,7 +65,7 @@ Two orderings are relevant and must be held explicit:
  \item \textbf{LSB-first (code default)}: \(v(j)=\mathrm{Reverse}\,\mathrm{IntegerDigits}(j-1,2,n)\). Bit weights for index construction are \(2^{i-1}\).
  \item \textbf{MSB-first (manuscript style)}: \(v(j)=\mathrm{IntegerDigits}(j-1,2,n)\). Bit weights are \(2^{n-i}\).
 \end{itemize}
-Define the bit-reversal mapping \(\varphi(j)=1+\mathrm{FromDigits}(\mathrm{Reverse}(\mathrm{IntegerDigits}(j-1,2,n)),2)\). For any network-aware construction of index sets (bands, parity, pivots, collapse), the MSB-first indices equal \(\varphi\) applied to LSB-first indices. All examples and validations must state the ordering and verify equality modulo \(\varphi\).
+Define the bit-reversal mapping \(\varphi(j)=1+\mathrm{FromDigits}(\mathrm{Reverse}(\mathrm{IntegerDigits}(j-1,2,n)),2)\). For any network-aware construction of index sets (bands, parity, decimal anchors, collapse), the MSB-first indices equal \(\varphi\) applied to LSB-first indices. All examples and validations must state the ordering and verify equality modulo \(\varphi\).
 
 \section{Mathematical Formulation}
 \label{sec:math_formulation}
@@ -80,7 +80,7 @@ Each sequence has length:
 \[
 l_i = 2^{k_i - 1}
 \]
-The sequences where \( b_{k_i} = 0 \) occur at even multiples of \( l_i \), and those where \( b_{k_i} = 1 \) occur at odd multiples, due to the binary counting pattern. The pivot indices (starting points of sequences) are:
+The sequences where \( b_{k_i} = 0 \) occur at even multiples of \( l_i \), and those where \( b_{k_i} = 1 \) occur at odd multiples, due to the binary counting pattern. The sequence-start indices (starting points of sequences; NOT anchors -- GOVERNANCE/GLOSSARY.md sec.8) are:
 \[
 S_i =
 \begin{cases}
@@ -174,6 +174,6 @@ Nodes 1, 2, 4 yield \( \{0, 0, 0\}, \{0, 0, 0\}, \{0, 1, 0\}, \{0, 1, 1\} \), in
 The formulation, rooted in the intuitive idea of periodic ``clocks,'' leverages the structure of binary sequences to achieve efficiency. Each bit alternates at a power-of-2 interval, with 0s at even multiples and 1s at odd multiples. The method is computationally efficient, avoiding brute-force enumeration. However, the example suggests the implementation may include indices (e.g., 17, 21) that do not match the pattern, possibly due to specific helper functions (e.g., \texttt{evening}, \texttt{odding}).
 
 \section{Conclusion}
-We have presented a mathematical framework for finding binary patterns in the input repertoire of a Boolean network, with an intuitive explanation, formal expression, and step-by-step breakdown. The method is generalizable and efficient, though care must be taken with indexing and pivot definitions. Future work could extend this to output repertoires or clarify implementation details.
+We have presented a mathematical framework for finding binary patterns in the input repertoire of a Boolean network, with an intuitive explanation, formal expression, and step-by-step breakdown. The method is generalizable and efficient, though care must be taken with indexing and decimal-anchor definitions. Future work could extend this to output repertoires or clarify implementation details.
 
 \end{document}

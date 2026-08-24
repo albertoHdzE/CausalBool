@@ -482,13 +482,13 @@ Each \(g_i\) is drawn from the catalogue (AND, OR, XOR, NAND, NOR, XNOR, NOT, IM
 \textbf{Artefacts:} \texttt{results/tests/mixed001/Example1.json}, \texttt{Example2.json}, \texttt{Example3.json}, \texttt{Example4.json}, \texttt{Example5.json}, \texttt{Example6.json}, \texttt{Status.txt}.\\
 \paragraph{Verification Update} Examples 1 and 2 refactored to dispatch pair (repertoires vs run). Status OK in \texttt{results/tests/mixed001/Status.txt}.
 \subsection{TSK-MIXED-001 (Extended): Predictive Composition Framework and Comparative Validation}
-\textbf{Mathematical Formalism:} Combine per-gate index formulae from the analysis series to form node-level predictive rules over ordered inputs: AND (pivot-plus-offset with connected bits fixed to one), OR (union of one-bands), XOR/XNOR (parity/equivalence classes), NAND/NOR (complements of AND/OR sets), NOT (unary inversion on the designated index), IMPLIES/NIMPLIES (asymmetric band and its complement), KOFN (Hamming weight bands, strict/non-strict), canalising (collapse band plus off-band fallback). Under synchronous updates, the predicted network output matrix \(Y_{\mathrm{pred}}\) is obtained by evaluating each node’s rule over the ordered inputs.\\
+\textbf{Mathematical Formalism:} Combine per-gate index formulae from the analysis series to form node-level predictive rules over ordered inputs: AND (anchor-plus-offset with connected bits fixed to one), OR (union of one-bands), XOR/XNOR (parity/equivalence classes), NAND/NOR (complements of AND/OR sets), NOT (unary inversion on the designated index), IMPLIES/NIMPLIES (asymmetric band and its complement), KOFN (Hamming weight bands, strict/non-strict), canalising (collapse band plus off-band fallback). Under synchronous updates, the predicted network output matrix \(Y_{\mathrm{pred}}\) is obtained by evaluating each node’s rule over the ordered inputs.\\
 \textbf{Implementation Specifications:} Two parallel methods with identical parameters and ordering:
 \begin{itemize}
  \item Baseline: repertoire generation via \texttt{Integration\textasciigrave Experiments::CreateRepertoiresDispatch}.
  \item Predictive: analytic evaluation \textit{without} gate calls, using bitwise rules on input vectors and connected index sets \(I_c\).
 \end{itemize}
-\textbf{Developing Intuition (Analogous to \texttt{02\_cb\_and.pdf}):} The predictive method replaces per-node gate evaluation with direct recognition of index structures in the ordered input repertoire. Each gate induces (i) bands (OR, KOFN), (ii) pivots plus offsets under fixed connected bits (AND), (iii) parity masks (XOR/XNOR), (iv) complements (NAND/NOR), or (v) collapse bands (canalising). When composed over all nodes, these rules yield the entire output matrix by pure bit arithmetic and set operations, eliminating function dispatch at evaluation time and enabling symbolic reasoning about outcomes.\\
+\textbf{Developing Intuition (Analogous to \texttt{02\_cb\_and.pdf}):} The predictive method replaces per-node gate evaluation with direct recognition of index structures in the ordered input repertoire. Each gate induces (i) bands (OR, KOFN), (ii) anchor plus offsets under fixed connected bits (AND), (iii) parity masks (XOR/XNOR), (iv) complements (NAND/NOR), or (v) collapse bands (canalising). When composed over all nodes, these rules yield the entire output matrix by pure bit arithmetic and set operations, eliminating function dispatch at evaluation time and enabling symbolic reasoning about outcomes.\\
 \textbf{Formal Derivation (Network Level):} For node \(k\) with connected input indices \(I_c\) and ordered inputs \(v(j)\), the predictive output is
 \[
 Y_{\mathrm{pred}}(j,k) = R_k\big(v(j); I_c, \theta_k\big),\quad R_k \in \{\text{AND},\text{OR},\text{XOR},\text{XNOR},\text{NAND},\text{NOR},\text{NOT},\text{IMPLIES},\text{NIMPLIES},\text{MAJORITY},\text{KOFN},\text{CANALISING}\},
@@ -511,11 +511,11 @@ Medium-scale (n=10, mixed catalogue) & 1.0 & $1.16\times 10^{-1}$ & $1.76\times 
 \bottomrule
 \end{tabular}
 \end{center}
-\textbf{Highlights and Understanding:} The predictive method provides (i) direct interpretability of outputs through per-gate structures (bands, pivots, parity), (ii) ready proofs for invariances and sensitivities at the network level, and (iii) portability to topology sweeps and composition analyses without re-deriving gate semantics. In contrast, the baseline defers understanding to function calls, obscuring analytic reuse.\\
+\textbf{Highlights and Understanding:} The predictive method provides (i) direct interpretability of outputs through per-gate structures (bands, decimal anchors, parity), (ii) ready proofs for invariances and sensitivities at the network level, and (iii) portability to topology sweeps and composition analyses without re-deriving gate semantics. In contrast, the baseline defers understanding to function calls, obscuring analytic reuse.\\
 \textbf{Why the Predictive Method is Better (Justification):}
 \begin{itemize}
  \item \emph{Compositional clarity:} Column-wise outputs are explained by explicit index structures (bands, parity sets, complements), matching the style and rigour of \texttt{02\_cb\_and.pdf}.
- \item \emph{Analytic reuse and caching:} Band unions, parity masks, and pivots can be precomputed once for given \(I_c\), enabling rapid recomposition and theoretical integration proofs.
+ \item \emph{Analytic reuse and caching:} Band unions, parity masks, and decimal anchors can be precomputed once for given \(I_c\), enabling rapid recomposition and theoretical integration proofs.
  \item \emph{Proof alignment:} The method ties results to formal derivations (Analysis series), easing peer review and manuscript integration.
  \item \emph{Optimisation potential:} Vectorised bit operations and mask precomputation reduce runtime; predictive evaluation avoids dispatch overhead and is amenable to GPU-style bitset acceleration.
 \end{itemize}
@@ -760,7 +760,7 @@ Thus the average sensitivity under the uniform repertoire is
 \]
 Empirical verification for \(d=1,2,3,4\) matches the formula exactly (see artefacts).\\
 \textbf{Pattern Outcomes:} Over exhaustive inputs with full in-degree, AND outputs vary except at the all-ones input; consequently, column-wise patterns are \(*\) in typical configurations.\\
-\textbf{Index Formula (Ordered Repertoires):} Let inputs be ordered by the binary representation of \(j-1\) with 1-based indexing, and weights \(2^{i-1}\) assigned to bit \(i\). For node \(k\) with connected input index set \(I_c=\{i\mid cm_{k,i}=1\}\) and disconnected set \(I_{nc}=\{1,\dots,n\}\setminus I_c\), define the pivot and offset
+\textbf{Index Formula (Ordered Repertoires):} Let inputs be ordered by the binary representation of \(j-1\) with 1-based indexing, and weights \(2^{i-1}\) assigned to bit \(i\). For node \(k\) with connected input index set \(I_c=\{i\mid cm_{k,i}=1\}\) and disconnected set \(I_{nc}=\{1,\dots,n\}\setminus I_c\), define the decimal anchor \(P(I_c)\) and the offset family
 \[
 P=\sum_{i\in I_c}2^{i-1},\qquad \Delta_{nc}(\mathbf{v})=\sum_{i\in I_{nc}} v_i\,2^{i-1}.
 \]
@@ -769,7 +769,7 @@ Then candidate indices with output 1 are
 J_k=\big\{\,P+1+\Delta_{nc}(\mathbf{v})\ \big|\ \mathbf{v}\in\{0,1\}^{n-\lvert I_c\rvert}\,\big\},\qquad J_k\subseteq\{1,\dots,2^n\},
 \]
 under the constraint that all connected inputs equal 1. In practice, one must ensure the ordering convention matches the repertoire generation (e.g., some implementations use \texttt{Reverse[IntegerDigits]}).\\
-\textbf{Worked Example (n=3, \(I_c=\{2,3\}\)):} With weights \((2^{0},2^{1},2^{2})=(1,2,4)\), the pivot is \(P=2+4=6\) and \(I_{nc}=\{1\}\). The candidates are \(J_k=\{7,8\}\). Under the AND constraint (connected inputs equal 1), the valid index corresponds to \(\mathbf{v}=(1,1,1)\) (index 8). Ordering differences (e.g., reversing bit order) change which of \(\{7,8\}\) is valid; hence ordering must be specified and held fixed.\\
+\textbf{Worked Example (n=3, \(I_c=\{2,3\}\)):} With weights \((2^{0},2^{1},2^{2})=(1,2,4)\), the decimal anchor is \(P=2+4=6\) and \(I_{nc}=\{1\}\). The candidates are \(J_k=\{7,8\}\). Under the AND constraint (connected inputs equal 1), the valid index corresponds to \(\mathbf{v}=(1,1,1)\) (index 8). Ordering differences (e.g., reversing bit order) change which of \(\{7,8\}\) is valid; hence ordering must be specified and held fixed.\\
 \textbf{Illustrative Examples:}
 \begin{itemize}
 \item \textbf{Two-node full in-degree, AND/AND:} With
@@ -1100,7 +1100,7 @@ For gate-induced index sets over ordered inputs: (i) \(J^{\mathrm{NAND}}=\mathca
 \textbf{Algorithmic Sketch:} Construct bands \(\mathcal{B}_{i=1}, \mathcal{B}_{i=0}\); form unions/intersections/complements; validate against \texttt{IndexSetNetwork} for representative \(n,I_c\).
 \subsection{TSK-THEORY-001: Behavioural Compression Functional (Formulae-Based)}
 \textbf{Objective:} Formalise a compression functional \(\mathcal{C}\) for ordered exhaustive repertoires using per-gate index-set formulae, and state axioms and bounds consistent with information-theoretic intuition (Zenil perspective).\\
-\textbf{Definition (\(\mathcal{C}\)):} For outputs \(Y\in\{0,1\}^{2^n\times n}\), define \(\mathcal{C}(Y)\) as a description-length proxy obtained from exact per-node formulae (bands, parity, pivots, complements, canalising collapse). Concretely, \(\mathcal{C}\) counts symbolic components needed to reproduce \(Y\) (e.g., number and type of bands, parity masks, thresholds), vs naive exhaustive enumeration length \(2^n\cdot n\).\\
+\textbf{Definition (\(\mathcal{C}\)):} For outputs \(Y\in\{0,1\}^{2^n\times n}\), define \(\mathcal{C}(Y)\) as a description-length proxy obtained from exact per-node formulae (bands, parity, decimal anchors, complements, canalising collapse). Concretely, \(\mathcal{C}\) counts symbolic components needed to reproduce \(Y\) (e.g., number and type of bands, parity masks, thresholds), vs naive exhaustive enumeration length \(2^n\cdot n\).\\
 \textbf{Axioms:} Non-negativity (\(\mathcal{C}\ge 0\)); invariance under relabelling; monotone improvement under collapse (canalising reduces description length); compositional additivity across independent substructures.\\
 \textbf{Bounds:} \(\mathcal{C}\) bounded by functions of arity, subsystem size and output entropy; parity and threshold families yield tight bounds; canalising reduces bounds via band collapse.\\
 \textbf{Acceptance:} Functional defined; axioms and bounds stated; examples linked to MIXED sections.\
