@@ -19,7 +19,7 @@ vectorPredict[cm_List, dyn_List, inputs_List, params_Association:<||>] := Module
         "NOR", out[[All, k]] = Boole[Total[bits, {2}] == 0],
         "NOT", (ci = Lookup[p, "i", If[Length[Ic] >= 1, Ic[[1]], Ic[[1]]]]; out[[All, k]] = 1 - packedInputs[[All, ci]]),
         "IMPLIES" | "NIMPLIES", ( {a, b} = Lookup[p, "pair", If[Length[Ic] >= 2, {Ic[[1]], Ic[[2]]}, {Ic[[1]], Ic[[1]]}]]; If[d === "IMPLIES", out[[All, k]] = Boole[(1 - packedInputs[[All, a]]) + packedInputs[[All, b]] >= 1], out[[All, k]] = Boole[packedInputs[[All, a]] * (1 - packedInputs[[All, b]])]] ),
-        "MAJORITY", (t = Ceiling[Max[1, Length[Ic]]/2]; out[[All, k]] = Boole[Total[bits, {2}] >= t]),
+        "MAJORITY", (t = Floor[Length[Ic]/2] + 1; out[[All, k]] = Boole[Total[bits, {2}] >= t]),
         "KOFN", (kthr = Lookup[p, "k", 1]; strict = TrueQ[Lookup[p, "strict", False]]; out[[All, k]] = If[strict, Boole[Total[bits, {2}] > kthr], Boole[Total[bits, {2}] >= kthr]]),
         "CANALISING",
           (

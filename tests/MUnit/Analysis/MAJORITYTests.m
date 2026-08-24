@@ -25,6 +25,12 @@ Scan[
     If[v =!= 0, ok = False; Print["MAJORITY tie row ", #, " must output 0 (ties->0)"]]) &,
   tieRows
 ];
+(* AUDIT01/T1.3: pin the declared alternative policy explicitly *)
+Scan[
+  (v = ApplyGate["MAJORITY", #, <|"tiePolicy" -> "atOrAbove"|>];
+    If[v =!= 1, ok = False; Print["MAJORITY atOrAbove tie row ", #, " must output 1"]]) &,
+  tieRows
+];
 (* closed form vs LUT at n=5 over Ic=Range[4] *)
 lut = Module[{rows, outs},
   rows = Table[Reverse[IntegerDigits[x, 2, 5]], {x, 0, 31}];

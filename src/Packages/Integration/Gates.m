@@ -14,7 +14,15 @@ myXnor[list_] := Mod[Total[list], 2] /. {0 -> 1, 1 -> 0}
 myNot[list_] := 1 - First[list]
 myImplies[list_] := myOr[{1 - list[[1]], list[[2]]}]
 myNImplies[list_] := myAnd[{list[[1]], 1 - list[[2]]}]
-myMajority[list_] := If[Count[list, 1] > Count[list, 0], 1, 0]
+(* AUDIT01/T1.3 (D-3): even-arity tie convention is an explicit, declared parameter.
+   "strict" (default) -> ties output 0  (threshold Floor[d/2]+1)
+   "atOrAbove"        -> ties output 1  (threshold Ceiling[d/2])
+   Odd arity: both coincide. Published mixed-10 tables were produced under "strict". *)
+myMajority[list_, params_: <||>] := Module[{d, ones, th},
+  d = Length[list]; ones = Count[list, 1];
+  th = If[TrueQ[Lookup[params, "tiePolicy", "strict"] === "atOrAbove"], Ceiling[d/2], Floor[d/2] + 1];
+  If[ones >= th, 1, 0]
+]
 myKOfN[list_, k_Integer] := If[Count[list, 1] >= k, 1, 0]
 myCanalising[list_, params_Association] := Module[{i, v, out}, i = Lookup[params, "canalisingIndex", 1]; v = Lookup[params, "canalisingValue", 1]; out = Lookup[params, "canalisedOutput", 0]; If[list[[i]] == v, out, myOr[list]]]
 ApplyGate[gate_String, inputs_List, params_: <||>] := Module[{res, p},
@@ -28,7 +36,7 @@ ApplyGate[gate_String, inputs_List, params_: <||>] := Module[{res, p},
     gate === "NOT", myNot[inputs],
     gate === "IMPLIES", myImplies[inputs],
     gate === "NIMPLIES", myNImplies[inputs],
-    gate === "MAJORITY", myMajority[inputs],
+    gate === "MAJORITY", myMajority[inputs, params],
     gate === "KOFN", myKOfN[inputs, Lookup[params, "k", 1]],
     gate === "CANALISING", myCanalising[inputs, params],
     True, 0
@@ -117,7 +125,8 @@ indexSetAnalyticCore[n_Integer, Ic_List, gate_String, params_Association] := Mod
       Sort[indexFromPos /@ (Join[{a}, #] & /@ Subsets[Complement[Range[n], {a, b}]])],
     gate === "MAJORITY",
       Module[{t},
-        t = Floor[d/2] + 1;
+        (* AUDIT01/T1.3 D-3: honor tiePolicy identically to myMajority *)
+        t = If[TrueQ[Lookup[params, "tiePolicy", "strict"] === "atOrAbove"], Ceiling[d/2], Floor[d/2] + 1];
         assigns = Select[Tuples[{0, 1}, d], Total[#] >= t &];
         Sort[Flatten@Table[
           indexFromPos[Join[Pick[Ic, assigns[[u]], 1], s]],

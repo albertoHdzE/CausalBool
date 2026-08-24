@@ -24,7 +24,7 @@ ApplyGate[gate_String, inputs_List, params_: <||>] := Which[
   gate === "NOT",      1 - First[inputs],
   gate === "IMPLIES",  If[inputs[[1]] == 0 || inputs[[2]] == 1, 1, 0],
   gate === "NIMPLIES", If[inputs[[1]] == 1 && inputs[[2]] == 0, 1, 0],
-  gate === "MAJORITY", If[Count[inputs, 1] > Floor[Length[inputs] / 2], 1, 0],
+  gate === "MAJORITY", If[Count[inputs, 1] > Floor[Length[inputs]/2], 1, 0], (* AUDIT01/T1.3: ties->0 (strict); declared convention D-3 *)
   gate === "KOFN",     If[Count[inputs, 1] >= Lookup[params, "k", 1], 1, 0],
   True, 0
 ];
