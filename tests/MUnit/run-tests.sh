@@ -66,11 +66,11 @@ KERNEL="/Applications/Wolfram.app/Contents/MacOS/WolframKernel"
 #               (e.g. TSK-MIXED-001, NOTNetworkTests -> Status_network_not.txt).
 status_path_for() {
   local f="$1" dir fname
-  # Directory: contiguous form first, then FileNameJoin list form
-  dir=$(grep -o 'results/tests/[A-Za-z0-9_.-]*' "$f" 2>/dev/null | sort -u | head -1)
+  # Directory: contiguous "results/..." first, then any FileNameJoin[{"results",<x>,<y>}] list
+  dir=$(grep -o 'results/[A-Za-z0-9_.-]*/[A-Za-z0-9_.-]*' "$f" 2>/dev/null | sort -u | head -1)
   if [[ -z "$dir" ]]; then
-    dir=$(grep -o '[{]"results", *"tests", *"[A-Za-z0-9_.-]*"' "$f" 2>/dev/null | head -1 \
-          | sed 's/.*"results", *"tests", *"\([A-Za-z0-9_.-]*\)".*/results\/tests\/\1/')
+    dir=$(grep -o '[{]"results", *"[A-Za-z0-9_.-]*", *"[A-Za-z0-9_.-]*"' "$f" 2>/dev/null | head -1 \
+          | sed 's|.*"results", *"\([A-Za-z0-9_.-]*\)", *"\([A-Za-z0-9_.-]*\)".*|results/\1/\2|')
   fi
   [[ -z "$dir" ]] && return 1
   # Filename: any quoted "*status*.txt" written by this script; default Status.txt
