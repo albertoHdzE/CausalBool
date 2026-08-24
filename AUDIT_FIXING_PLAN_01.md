@@ -1,6 +1,9 @@
 # AUDIT_FIXING_PLAN_01
 
-**Version:** 1.2 — 2026-08-23 (v1.2: sibling-absence fallback defined for T1.4;
+**Version:** 1.3 — 2026-08-24 (v1.3: author-initiated at the gate session —
+T5.5 post-fix cross-replication accuracy sweep added as MANDATORY; inventory at
+`T5_5_SWEEP_INVENTORY.md`; first finding: imp-results.md E. coli row corrected).
+**Version 1.2:** 2026-08-23 (v1.2: sibling-absence fallback defined for T1.4;
 T2.4 pre-registration sign-off added as AUTHOR-DECISION D-7).
 **Version 1.1:** 2026-08-23 (amended per second review pass: Wave-0 paper-number
 snapshot added as T0.5; T0.1 split into parser/discovery phases; T1.1 decoupled from
@@ -1006,6 +1009,37 @@ documentation rule (TRANSFERENCE.md:295–297). Acceptance: README exists per le
 Sweep every C-section's quoted statistics against cited artifacts; report first, fix by
 same addendum protocol after author review.
 
+## T5.5 — Post-fix cross-replication accuracy sweep (added v1.3; MANDATORY)
+
+**Priority:** P0 · Wave: 5 · Depends on: Waves 1–2 landed. **Effort:** L.
+**Origin:** author directive 2026-08-24 at the gate session ("review carefully all
+replication notebooks and all related subprojects to update carefully with accuracy —
+this should be mandatory").
+
+**Context.** Waves 0–2 changed code (packaged engine, MAJORITY policy, renames,
+runners), corrected ledger prose (C18, C26, C29/C36 provenance), renamed a decoy
+module, and re-based campaign counts on ledgers. Any notebook or document that quotes
+numbers downstream of those objects is now unverified until reconciled. First sweep
+finding: `imp-causal-paper/imp-results.md`'s E. coli row denied work that demonstrably
+exists (fixed `4d9701f`). Second registered inconsistency: index-deconvolution exp04
+pins 10 `.bnet` models in code while the persisted artifact records 8 considered/8 exact.
+
+**Steps.**
+1. Work item by item through `T5_5_SWEEP_INVENTORY.md` (N1–N6 notebooks, D1–D4 docs);
+   the inventory itself is living — extend it as items close.
+2. Re-execute each notebook in its own environment; require 0 errors / 0 unexecuted;
+   reconcile quoted numbers elementwise against current artifacts; corrections enter
+   as dated addenda (U5), never retro-edits of executed outputs without re-execution.
+3. Adjudicate D2 (exp04 10-vs-8): either re-run exp04 with the current model list or
+   annotate the artifact with a dated note naming the discrepancy cause.
+4. Every equality/agreement claim touched passes datasaurus gates before it is written.
+
+**Acceptance criteria.**
+- AC-5.5a Inventory file shows every row DONE or explicitly deferred with reason.
+- AC-5.5b No notebook in any subproject carries error/unexecuted cells post-sweep.
+- AC-5.5c Every number quoted in living docs traces to a post-fix executed run or
+  carries a dated pointer to the historical artifact it cites.
+
 ---
 
 # PART I — POST-CLEANUP RESEARCH BACKLOG (pointers only; new plans will own these)
@@ -1264,6 +1298,15 @@ Template per entry:
   into agreement) ✓; G3 knobs (45-seed bracket, duplicate-seed determinism, SE≈0.16)
   ✓; G4 mechanism + exact scoping (triangular/DAG null z_gate=−0.75 explicitly
   excluded from the matched-convention robustness claim) ✓.
+- `[T5.5]` **PLAN AMENDED v1.3 (2026-08-24, author-initiated at the gate session):
+  post-fix accuracy sweep is MANDATORY.** Every executed notebook and every document
+  quoting numbers must be reconciled against post-fix code/artifacts. First finding
+  already landed: `imp-causal-paper/imp-results.md`'s E. coli row ("nothing exists /
+  Not reproduced") was factually false — parse/perturb/enrichment scripts and
+  RegulonDB 14.5 artifacts (949 nodes; classification 122/38/789) exist and ran;
+  corrected by dated addendum `4d9701f`. Triage inventory:
+  `T5_5_SWEEP_INVENTORY.md` (N1–N6 notebooks, D1–D4 docs; exp04 script-vs-artifact
+  10-vs-8 inconsistency registered for adjudication).
 
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
 
