@@ -1251,6 +1251,19 @@ Template per entry:
   - **DEV-2.1 / DEV-2.2 RATIFIED**, with the added condition: verification through
     the `datasaurus` skill's four gates (render / elementwise compare / knobs /
     mechanism), acting on any failure. Gate artifacts to follow in the results tree.
+- `[T2.4/T2.7]` **GATES EXECUTED 2026-08-24** — T2.4 DONE (`70068fd`,`3eb87ac`,
+  `bc3935e`; ACs 2.4a–e all satisfied, incl. approval commit `2b6c5a8` pre-dating
+  the earliest results commit); T2.7 DONE (sibling local commits `62fb3b3`,
+  `b868cd0`, append-only, remote untouched; CausalBool resync `3e23d0c`, sync exit 0).
+- `[DEV]` **DATASAURUS VERIFICATION COMPLETE 2026-08-24 — ALL GATES PASS.**
+  `imp-prices/scripts/datasaurus_gates_c18_c29.py` renders the seed-sweep and
+  null-distribution objects (`figures/dev21_c18_seed_sweep.png`,
+  `figures/dev22_c29_nulls.png`) and writes the gate checklist to
+  `imp-prices/results/datasaurus_gates_2026-08-24.md`: G1 render ✓; G2 elementwise
+  (pinned map = seed 19 exactly; CLOSE moments reported as divergent, never rounded
+  into agreement) ✓; G3 knobs (45-seed bracket, duplicate-seed determinism, SE≈0.16)
+  ✓; G4 mechanism + exact scoping (triangular/DAG null z_gate=−0.75 explicitly
+  excluded from the matched-convention robustness claim) ✓.
 
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
 
@@ -1277,8 +1290,8 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T2.3 causalNet fixes | ✅ DONE | `e348d68`; 5 result JSONs exported by committed command; README tally 6→7 (machine-counted), −0.78→−0.770, 99.8%→executed on-figure numbers (98.8%/96.7%; 99.8% = orphaned synthetic figure), 37→43 columns, tests 25→47; CTM table vendored @pinned commit (parity test now runs: 65,536/65,536); decoy renamed zenil_algorithms.py + collision probe clean; suite 47/47 green; notebook re-executed 0 errors, numbers reproduce elementwise |
 | T2.5 pathinfo counts | ✅ DONE | `49333bb`; audit confirmed elementwise (ledger truth: 623/648 runs, 207+1 of 216 cells, all gaps = graphormer/Lipophilicity only — README's per-model gaps were wrong); scripts/campaign_status.py = single source, block quoted verbatim ×3 docs (grep-verified); test count unified to collected 41; 200-molecule cap disclosed beside every atom claim (24,880 atoms) |
 | T2.6 idx-deconv docs | ✅ DONE | `005dcc1`; README method section rewritten per GLOSSARY §1c (two decompositions, decimal anchor/sumandos encodings, lossless Dec(L,S); old dichotomy phrasing greps clean); bitacora inventory 00–31 (32 files); status refreshed (pytest 146/146; BASELINE v2 reference; levels 11–18 → T5.3) with historical snapshot labelled; TRANSFERENCE dated append-only addendum (+33/−0) recording #3 chain b21→b22→GLOSSARY amendment |
-| T2.4 causal-paper arc | ⏸️ DRAFTED — HALTED AT AUTHOR GATES (D-5/D-7) | supersession headers + index-method-comparison pre-registration drafted as `imp-causal-paper/SUPERSESSION_HEADERS_DRAFT.md` and `imp-causal-paper/index_method_comparison/PROTOCOL.md`; NO target document edited, NO run executed, pending explicit D-5 policy choice + D-7 sign-off |
-| T2.7 sibling addendum | ⏸️ DRAFTED — AWAITING SIBLING PERMISSION (U6) | correction texts for series-deconvolution TRANSFERENCE §9.6 (false "deconvolution.py diverges" entry → same-named unrelated arXiv:1802.09904 module) + GLOSSARY §8 precision note (b21 containment-with-residual → b22 re-rate → GLOSSARY #3 amendment) presented in session report; no sibling file touched |
+| T2.4 causal-paper arc | ✅ DONE (D-5(i) + D-7 approved) | headers `70068fd`+`3eb87ac`; DoF paragraph adjacent to canonical sign-agreement table (`3eb87ac`); comparison `bc3935e`: **10/10 ECA rules exact** elementwise (0/225,280 cells mismatched per-rule set; seeds pinned, no outcome-dependent tuning), Th17+E.coli EXCLUDED-WITH-REASON (no ground truth without inventing gates — recorded as finding); D-5(i) live: results un-ignored selectively, MANIFEST.sha256 + verify_manifest.py PASS, reruns byte-identical |
+| T2.7 sibling addendum | ✅ DONE (U6 granted) | sibling series-deconvolution @main, LOCAL commits `62fb3b3` (§9.6 corrections: divergence entry false → unrelated arXiv module; banner+hmmlearn fixed upstream) & `b868cd0` (GLOSSARY precision note: three-step chain) — append-only, NOT pushed to remote; CausalBool GOVERNANCE/GLOSSARY.md resynced @b868cd0 (`3e23d0c`), check_glossary_sync.sh exit 0 |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
