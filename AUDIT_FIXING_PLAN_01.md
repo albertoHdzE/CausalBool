@@ -1296,3 +1296,82 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
   (Topologies dead-export, KOFN-network, IMPLIES-network, ARCH-004 unevaluated export).
   All direct-kernel evidence elsewhere in this log (new tests, flagship runs,
   composition lemma) was produced by real executions and stands unaffected.
+
+---
+
+# APPENDIX F — SESSION HANDOFF FOR THE NEXT INSTANCE (2026-08-24)
+
+You are a fresh agent continuing AUDIT_FIXING_PLAN_01. Read this appendix FIRST, then
+Part B (conventions U1–U8), then Appendix E (status). You need no prior conversation
+history: everything below is sufficient.
+
+## F.1 Where things stand
+
+- **Branch:** `fixing` (tracks `origin/fixing`). Work ONLY here; commit per task with
+  `[AUDIT01/<task-id>]`; PUSH after every completed task. Local `clean` is deliberately
+  unpushed (pristine pre-fix reference). `main` untouched until T0.4.
+- **Restart point COMPLETE:** T0.1a, T0.1b(+incident), T0.2(v2), T0.3, T0.5, T1.1–T1.5,
+  V1–V5, T2.0 — all DONE with commit refs in Appendix E.
+- **Genuine suite ledger:** `tests/MUnit/BASELINE.md` v2 = OK=46 FAIL=4 TOTAL=50
+  (@167 s wall-clock). The 4 owned reds: TopologiesTests (dead export),
+  KOFNNetworkTests, IMPLIESNetworkTests (silent-since-Feb reds), TSK-ARCH-004
+  (exports unevaluated code as verdict).
+
+## F.2 Remaining queue (in this order)
+
+1. **T2.1** C18 reconciliation — re-run `imp-prices/scripts/phase1_b4_description_length.py`
+   hill-climb block; reconcile prose (`FINDINGS.md:164`, bitácora 04) against
+   `results/b4_description_length.json`; dated addendum; ledger lint script.
+   ACs: AC-2.1a–c.
+2. **T2.2** C29/C36 — write+run `experiments/c29_density_matched_null.py` and
+   `experiments/c36_window_distribution.py` (density-matched random matrices @17/23
+   edges; pybdm; pinned seeds); verify prose numbers reproduce; date-caveat pre-guard
+   daily cells in FINDINGS C26. ACs: AC-2.2a–c.
+3. **T2.3** causalNet — export notebook results to committed JSONs; fix README tally
+   6→7, −0.78→−0.770, 99.8%→96.7%-on-figure; rename decoy module
+   `src/imp_causalnet_paper/deconvolution.py` → `zenil_algorithms.py` (+ imports).
+   ACs: AC-2.3a–c.
+4. **T2.5** pathinfo — `scripts/campaign_status.py` deriving from ledgers; replace
+   status blocks in README/FINDINGS/NEXT_PHASES verbatim; single test-count;
+   subsample-cap disclosure. ACs: AC-2.5a–c.
+5. **T2.6** index-deconvolution README pivots/sumandos category-error rewrite +
+   TRANSFERENCE dated addendum + inventory refresh. ACs: AC-2.6a–c.
+6. **STOP — AUTHOR GATES.** T2.4: draft supersession headers + index-method-comparison
+   pre-registration, then HALT for D-5/D-7 approval. T2.7: sibling edit needs explicit
+   author permission (U6). Do not improvise past these.
+
+## F.3 Environment facts (all verified by execution)
+
+- WolframKernel fixed path `/Applications/Wolfram.app/Contents/MacOS/WolframKernel`.
+- Suite: `zsh tests/MUnit/run-tests.sh` (~3 min genuine; ~50 tests). Judge health ONLY
+  vs `tests/MUnit/BASELINE.md` v2. New failures block; pre-existing 4 reds stay.
+- Paper gate: `python3 tools/snapshot_paper_numbers.py --check` must PASS before ANY
+  commit touching `.tex`. If numbers legitimately moved, run snapshot (rebaseline) AND
+  list changed IDs explicitly in the commit message. Post-hoc delta reconstruction from
+  git is the recovery protocol if you forget (see T1.5 slip in Appendix E).
+- GLOSSARY sync: `tools/check_glossary_sync.sh` → exit 0 clean / 1 drift / 2 sibling-absent.
+- imp-prices uses ITS OWN venv: `cd imp-prices && .venv/bin/python -m pytest`
+  (97 passed). Root venv has NO hmmlearn BY DESIGN: `pytest imp-prices/tests`
+  there yields 35 passed / 4 loud skips. pytest summary line can hide under `-q`;
+  trust exit code + `grep -E "passed,"`.
+- **Vendor two-copies rule:** editing `index-deconvolution/src/causalbool.py` or
+  `deconvolution.py` REQUIRES mirroring into `imp-prices/vendor/` in the same commit,
+  else `tests/test_vendor_parity.py` fails (it already caught one real drift).
+- Python gotcha recorded: `perl -e 'alarm $ARGV[0]; exec @ARGV'` silently no-ops exec;
+  correct idiom is `alarm shift @ARGV; exec @ARGV or die ...` (Incident, Appendix E).
+- WL test-writing gotchas: pure-function pairing `Function[{a,b}] & /@ pairs` breaks
+  silently — use `Function[pair, …] & /@ pairs` and unpack; scripts need
+  `AppendTo[$Path, "src/Packages"]` BEFORE Needs; test filenames MUST end `Tests.m` to
+  enter the runner glob; exports follow `base = FileNameJoin[{"results","tests",…}]`.
+- Conventions inside WL core: LSB-canonical internally; MSB only via Phi transport;
+  MAJORITY tiePolicy ("strict" default); CANALISING coordinate schism (F36) is OPEN —
+  do not "fix" silently; belongs to T4.1.
+- Definitions authority: `GOVERNANCE/GLOSSARY.md` outranks every document including
+  papers. Historical bitácoras/pre-registrations: never retro-edit; dated addenda only.
+
+## F.4 Standing rules recap (full text Part B)
+
+Evidence re-statement before acting (U1); binary acceptance criteria (U2); baselines
+first (U3); decisions marked AUTHOR-DECISION pause their thread (U4/U6); protected
+history (U5); suite/paper-gate bracketing with recorded deltas (U7); elementwise
+symmetric-difference reporting, never counts alone (U8).
