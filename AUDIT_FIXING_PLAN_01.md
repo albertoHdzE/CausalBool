@@ -1224,6 +1224,18 @@ Template per entry:
   pgmpy structural claims must fix+record PYTHONHASHSEED (extends C12/C13). Evidence:
   `imp-prices/results/recheck_c18/`, `8c6f6e2`.
 
+- `[T2.2]` **DEV-2.2 (2026-08-24) — C29's exact null moments are not recoverable;
+  conclusion robust.** The prose-only null (189.39±22.75 @17 / 214.83±17.40 @23)
+  matches no principled committed sampler (off-diagonal 182-cell, 196-cell,
+  upper-triangular, Bernoulli matched-density; N=20000, seeds pinned): recomputed
+  moments land CLOSE but derived share/z diverge (71.6% vs 66%; z_gate −3.14 vs
+  −3.35). Under every principled sampler the CONCLUSION holds (density share
+  66–72%; both networks ≈3σ below own-density nulls). Resolution: committed script
+  is single source going forward; quoted moments annotated as one unrecoverable
+  scratch draw (`6bbc9fb`). C36 by contrast reproduces exactly incl. two disclosed
+  presentation artefacts (6,479-vs-6,478 window enumeration; March-2020 sequence =
+  raw-series episode, elementwise 8/8).
+
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1245,6 +1257,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T0.1b discovery + baseline v2 | ✅ DONE | `2d89313` (see INCIDENT entry) — genuine ledger OK=46 FAIL=4 @167s |
 | T2.0 imp-prices hygiene | ✅ DONE | `470682a`; parity gate caught real drift first-run; 97 passed own-venv / 35+4skipped root-venv |
 | T2.1 C18 reconciliation | ✅ DONE (DEV-2.1) | `8c6f6e2`; prose-vs-pin confirmed (6/{WTI_Spot}/37.5 vs printed 5/{WTI_CL}/55); 45-seed recheck: hash-unstable statistic, pin = genuine draw (seed 19 elementwise); quote-the-pin correction + dated notes both docs; lint PASS + 3 planted-mismatch controls exit 1 |
+| T2.2 C29/C36 machinery | ✅ DONE (DEV-2.2) | `6bbc9fb`; C36 reproduces exactly (1.26±1.12, two 7-windows/0.031%, one negative-print pivot; off-by-one + raw-series-sequence disclosed); C29 conclusion robust (share 66–72%, z≈3σ) but exact moments unrecoverable → committed pinned nulls as single source; C26 pre-guard caveat appended |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
