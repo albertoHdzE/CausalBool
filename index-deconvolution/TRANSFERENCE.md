@@ -647,3 +647,36 @@ Dare greatly. Shuffle everything. Keep the negatives. Compress or it does not co
 - Most promising open door: unchanged — the α≈½ coarse-scale softening (universal crossover?)
   and the untested bivariate buy⇄sell fusion Hawkes. Trading closed (3 independent negatives).
 - Reproduce the last result: `python level18/exp41_clock_prediction.py`.
+
+---
+
+## ADDENDUM 2026-08-24 (AUDIT01/T2.6) — amendment chain for the oracle/pivot relation
+
+This addendum is appended under the no-retro-edit rule; everything above it,
+including the "STATE AT HANDBACK (Level 10 adversarial audit + 100 stocks,
+2026-07-13)" section, stands as written.
+
+The handback section describes the bitacora-21 "theorem" as "a **geometric
+identity**, not a market fact" whose "only worth is interpretive (cost = reversal
+scale)". That framing is the over-correction recorded as confusion source #3 in
+`GOVERNANCE/GLOSSARY.md` (§1b, #3, amended 2026-08-23). The full chain, now on
+record in one place:
+
+1. **Bitácora 21** established containment-with-residual and called the θ=c case
+   an "identity", titling it the headline that "closes the flagship" — the
+   oversell.
+2. **Bitácora 22** re-rated the *epistemics* ("true but geometry") without
+   retracting any mathematics; the handback section above inherits 22's demotion.
+3. **GLOSSARY amendment (#3, 2026-08-23)** corrected the demotion itself: two
+   different things had been merged. At the level of *definition*, every pivot is
+   an oracle point — a constitutive containment, not mere geometry. What the
+   measured rate (0.9998 over 56,509 outputs; `results/containment_exceptions.json`)
+   actually quantifies is the **fidelity of the directional-change walk as a
+   recovery method** — 6 exact ties + 3 walk errors — and what holds on a sine
+   wave is exactly that fidelity, expected of any sound recovery method; it is
+   not evidence about markets. Keep the definition-level containment; discard the
+   "look, they agree!" market claim.
+
+Nothing above this addendum is edited. The governing definitions remain those of
+`GOVERNANCE/GLOSSARY.md` §1b and its amendment table, which outrank every
+document including this one.

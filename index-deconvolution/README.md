@@ -17,12 +17,19 @@ simulation. This project provides the **deconvolution**: the exact inverse,
 recovering `(C, D)` from the repertoire alone, with the original hidden and used
 only to corroborate correctness.
 
-The method rests on the pivots/sumandos structure of the forward transform:
-connected nodes (pivots) participate in the output; disconnected nodes
-(sumandos) form a free offset dimension and never change it. Single-bit
+The method rests on the compressed form of the forward transform, whose two
+decompositions must not be confused (`GOVERNANCE/GLOSSARY.md` §1c). In the
+Boolean indexing method the *coordinates* split into **connected** inputs `I_c`,
+which determine the output, and **free** inputs, which never change it. Each side
+has its own decimal encoding: the connected set is encoded as the **decimal
+anchor** `P(I_c)` (ranging over the **decimal family** `L`), and the free set as
+the **sumandos** `S`. Unfolding is lossless — `Dec(L,S) = {ℓ+s}` reconstructs the
+repertoire exactly, which is where the word *deconvolution* comes from. Single-bit
 perturbation against the exact output column therefore recovers the functional
 connectivity, after which the reduced truth table identifies the gate. Because
-the forward method is exact, the inverse is exact and verifiable.
+the forward method is exact, the inverse is exact and verifiable. (This
+decimal-family/sumandos decomposition is *not* the finance-side pivot/residual
+decomposition; there are no sumandos in finance and no residual here.)
 
 See `bitacora/` for the full scientific logbook:
 
@@ -61,7 +68,7 @@ See `bitacora/` for the full scientific logbook:
       verify_notebook.wl             evaluates the network notebook's input cells
       verify_ca_notebook.wl          evaluates the CA notebook's input cells
     results/                     JSON outputs of the experiments
-    bitacora/                    scientific logbook (00-04)
+    bitacora/                    scientific logbook (00-31; 32 files)
 
 ## How to run
 
@@ -101,12 +108,30 @@ Regenerate and verify (paths via environment variables), for example:
       CB_EXPDIR="$ROOT/index-deconvolution/experiments/" \
       /Applications/Wolfram.app/Contents/MacOS/WolframKernel -script crosscheck/verify_ca_notebook.wl
 
-## Current status (2026-07-09)
+## Current status
+
+### Refreshed 2026-08-24 (AUDIT01/T2.6)
+
+- Python tests: **146 collected / 146 passed** (`python3 -m pytest` from this
+  directory — the 18 per-level suites `levelN/test_levelN.py` plus
+  `tests/test_deconvolution.py`; counts derive from collection, not prose).
+- Wolfram-side suite health is governed by the root repo's ledger
+  `tests/MUnit/BASELINE.md` (v2: OK=46 FAIL=4 TOTAL=50 @167 s; the four reds are
+  owned there — see AUDIT_FIXING_PLAN_01 Appendix E).
+- Bitácora inventory: `bitacora/00`–`31` (32 files).
+- Levels 11–18 have no per-level READMEs yet; that documentation debt is tracked
+  as backlog item T5.3 of AUDIT_FIXING_PLAN_01.
+- Method language follows `GOVERNANCE/GLOSSARY.md` §1c (two decompositions;
+  decimal anchor / decimal family / sumandos; lossless `Dec(L,S)`).
+
+### Snapshot 2026-07-09 (historical, superseded for counts only)
 
 - Unit tests: 11 / 11 pass (network and cellular-automaton cases).
 - Exact repertoire reproduction: 200 / 200 networks (sizes 7 to 10, full 12-gate
   family).
-- Pivots/sumandos: disconnected nodes never sensitive across 1700 nodes (100%).
+- Free-coordinate insensitivity (experiment `exp01_pivots_sumandos.py` — the
+  filename names a set and an encoding side by side, per GLOSSARY §1c):
+  disconnected nodes never sensitive across 1700 nodes (100%).
 - Functional connectivity recovered exactly for all gates except degenerate
   CANALISING parameterisations (which are functionally independent of a declared
   input; the deconvolution correctly recovers the smaller functional set).
@@ -121,7 +146,7 @@ Regenerate and verify (paths via environment variables), for example:
   (contradiction rate 0.66, 0 / 9 instruments exact), while the identical
   analyser recovers a deterministic control exactly (contradiction 0, 9 / 9).
 - Three demonstration notebooks verified headless: 0 messages, all checks pass.
-- Unit tests: 16 / 16.
+- Unit tests at snapshot time: 16 / 16 (superseded by the refreshed count above).
 
 ## Conventions
 
