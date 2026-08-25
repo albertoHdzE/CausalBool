@@ -1102,7 +1102,7 @@ Ordered by expected scientific value:
 | D-3 | MAJORITY tie convention | ties→0 / ties→1 / tiePolicy param | (iii) param, default ties→0; gated on tie-row probe | OPEN |
 | D-4 | Manuscript roles | two-canonical-scoped / merge | two canonical, distinct scopes | OPEN |
 | D-5 | imp-causal-paper evidence policy | track summaries / external+manifest | summaries ≤ few MB tracked | **CLOSED 2026-08-24: option (i)** |
-| D-6 | Derivations completion vs scoping | generate 10 derivations / rescope claim | (i) generate | OPEN |
+| D-6 | Derivations completion vs scoping | generate 10 derivations / rescope claim | **CLOSED 2026-08-25: generate — extended by author to ALL TWELVE families** (not only the 10 missing); executed as T5.2 |
 | D-7 | T2.4 comparison pre-registration sign-off | agent self-certifies / author approves before run | **author approves** (v1.2) — new experiment, analysis freedom must be closed pre-run; agent drafts only | **CLOSED 2026-08-24: APPROVED as drafted** |
 
 # APPENDIX B — EXECUTION ORDER (DAG)
@@ -1431,6 +1431,13 @@ Template per entry:
   gate (mixed001 kernel run, complexity_analysis, ALGO-004). Session lesson
   recorded: an uncommitted-file `git checkout` during control setup wiped
   marker edits once — controls must run against COMMITTED state only (done).
+- `[T5.2]` **T5.2 EXECUTED 2026-08-25 — D-6 CLOSED interactively.** Author chose
+  full coverage: "consider the whole set of gates... all of them, not only 10."
+  Witnesses are EXECUTED artifacts (not prose): 250 elementwise cases across 12
+  families × arities ≤6, zero failures. En-route finding: implication-family
+  `pair`/NOT `i` params are absolute-coordinate while canalisingIndex is
+  Ic-relative — both now pinned with named authority in ORDERING.md §4b;
+  witness ground truth follows the established vectorPredict semantics.
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1465,6 +1472,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T4.4 NULLS rule | ✅ DONE | GOVERNANCE/NULLS.md `6e84464`: response-profile/held-fixed/destroyed-dimension rule + both case studies bitácora-traceable (C22→C29 density; B1 codeword syntax) + pre-registration checklist template; sibling Phase-2 TODO pointer PENDING its own U6 gate |
 | T4.5 description-length consolidation | ✅ DONE | GOVERNANCE/DESCRIPTION_LENGTHS.md `5f48c24`: variants A–D named/scoped/mapped; shared wrapper src/description_lengths.py (pybdm==0.1.0 pinned, bdm_2d below_floor knob preserves pathinfo None-semantics per-consumer); toy fixture EXECUTED (A=20.8974/B=27.9248/C=6.3399/D=25.9248 — four distinct values = nonidentity by execution; header delta exactly 2=log₂4); parity test PASS incl. V5 stamps reproduced elementwise (7.1699…/6.3399…); subproject mirrors documented exceptions (AC-4.5a/b) |
 | T5.1 regenerate-and-diff | ✅ DONE | harness `baed4ad` + control `baed4ad`-successor: Makefile verify-paper → tools/verify_paper_artefacts.py; inventory 3 COVERED (four_paths_table incl. mandatory 0.51875 disclosure; mechanism_vs_dataset D=135.66/C=23; comp_validation_summary ALGO-004 all-zero+1020rows) + 5 PENDING-with-reasons (T5.1.v2); markers embedded both manuscripts; AC-5.1a control: planted digit change → FAIL naming ID, revert → green; AC-5.1b closed visibly via T4.1 wording; snapshot gate PASS |
+| T5.2 derivations | ✅ DONE (D-6 CLOSED) | author directive: ALL TWELVE; `t52_family_witnesses.wl` executed → verification/*.json (250 cases, 0 failures, arities 2–6); ten derivation docs generated w/ embedded witnesses + README index; :1936 sentence matches reality; pair/i-vs-canalisingIndex coordinate conventions pinned in ORDERING.md §4b; gates PASS |
 | T4.7 validation-map repair | ✅ DONE (option i) | `cf31b20`: NEW closed-form-set audit ALGO-004 — node-COMPLETE pattern comparison + 4080 stratified rows, n∈{16,20}, all 12 families, **0 mismatches**; **DEV-T4.7-1**: ApplyGate KOFN silently dropped `strict` (diverged from analytic exactly when strict=True) → myKOfN now honors params (default False = historical), GATES-013's Scan level-spec hole repaired (Tuples); both manuscripts rescoped: theorem evidence = closed-form-set audit n∈{16,20}, n∈{20,50} explicitly dispatch-only/no-theorem-weight (AC-4.7b grep clean); snapshot rebaselined after token-delta verification (109 entries, gate PASS); suite OK=47 FAIL=4 TOTAL=51 |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
