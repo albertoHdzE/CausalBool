@@ -1145,7 +1145,6 @@ Au = author-gated or author-required.
 | T2.0 hygiene bundle | M | A | T4.7 validation-map | M/L | A |
 | T2.1 C18 reconcile | M | A | T5.1 regenerate-diff | L | A |
 | T2.2 C29/C36 code | M | A | T5.2 derivations | L/M | Au(D-6) |
-| T5.4 full ledger lint | ✅ DONE (report-first) | `201677f`: scripts/lint_ledger_full.py sweeps 41 C-rows / 170 quoted decimals (row+window citations, JSON+CSV harvest, rounding-tolerant); **75 verified directly; 95 UNVERIFIED across 27 rows listed for author review** (unverified ≠ wrong — defined in report header); FINDINGS untouched pending review per fix protocol |
 | T2.3 causalNet fixes | M | A | T5.3 level READMEs | S | A |
 | T2.4 causal-paper arc | L | A(+Au: D-5, D-7) | T5.4 full lint | M | A |
 | T2.5 pathinfo counts | S | A | T2.6 idx-deconv docs | S | A |
@@ -1445,6 +1444,45 @@ Template per entry:
   ledger lint executed report-first; 95 decimals across 27 rows queued for
   author adjudication via the T2.1 addendum protocol; known harvest limits
   documented (prose-only stats per DEV-2.2, notebook-executed numbers).
+
+- `[CLOSE-OUT]` **BOARDING EXECUTED 2026-08-25 — closure triad re-run fresh;
+  Appendix E set final; Route 4 pre-registration DRAFTED and HALTED for author
+  sign-off.**
+  (1) TRIAD (all fresh this session): paper-number gate PASS — 109 entries
+  identical (exit 0); GLOSSARY sync clean (exit 0); MUnit fresh run
+  **OK=47 FAIL=4 TOTAL=51** — vs BASELINE v2 (OK=46 FAIL=4 TOTAL=50): +1 OK
+  exactly {TSK-GATES-014-CanalisingCoordTests} (the intended T4.1 addition; its
+  log line reports 40 cases, all three paths elementwise-equal); FAIL-set
+  symmetric difference ∅ — same four owned reds (TopologiesTests,
+  KOFNNetworkTests, IMPLIESNetworkTests, TSK-ARCH-004). No new failures.
+  Subproject spot-checks NOT re-run this pass (boarding queue scoped the triad
+  to the three commands; §G.2 values remain the standing record).
+  (2) SUITE ENVIRONMENT INCIDENT (first attempt, superseded): the first `--all`
+  run wedged inside Gates/TSK-GATES-002-Tests.m — kernel alive at 0% CPU for
+  ≥11 min with no verdict exported; wrapper and orphan kernel killed. Isolated
+  rerun of that test: OK in ≈4 s. Full re-run then completed cleanly; the
+  numbers above are the clean run's. No engine or runner changes made; logged
+  as an environment stall of unknown cause, watch-listed for the successor plan.
+  (3) U1 NOTE: the session handoff described a closure audit as "logged
+  2026-08-25", but no dedicated close-out entry existed in this log (only
+  scattered per-task gate mentions). This entry establishes it from today's
+  fresh runs.
+  (4) BOARD CLEANUP: Appendix E finalized — stale placeholders corrected
+  (T0.1b ⏳ → ✅ `2d89313`, merging the later duplicate row into the Wave-0
+  slot; T0.4 ➖ → ✅ `366d771`) and the two missing Wave-4 rows added
+  (T5.3 `28b6005`, T5.4 `201677f`). Also removed the T5.4 status row that
+  commit `72b3f1a` inserted into the Appendix B2 EFFORT table (wrong shape,
+  wrong appendix); B2 restored to effort/owner form.
+  (5) R4 BOARDING STEP 3: pre-registration drafted strictly from the roadmap's
+  frozen decisions D1–D4 at `experiments/r4_segmented_grammar/PROTOCOL.md`,
+  status DRAFT — **HALTED for author sign-off** per the roadmap's own rules.
+  NO R4 route executed; no engine code modified; ROADMAP_R4_SEGMENTED_GRAMMAR.md
+  untouched beyond reading.
+  (6) CARRY-FORWARD UNCHANGED:
+  `imp-prices/results/ledger_lint_full/report.md` — 95 unverified decimals
+  across 27 FINDINGS rows (C5–C41 subset) await AUTHOR adjudication via the
+  T2.1 dated-addendum protocol; left untouched this session per directive.
+
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1455,15 +1493,14 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T0.1a parser wiring | ✅ DONE | `2b414aa` + resolver fix `ad97eb8`; planted-FAIL control exit=1 naming test; NOT/AND slices green end-to-end |
 | T0.2 baseline v1 | ✅ DONE | `2fc2b7b`; **OK=77 FAIL=10** (6 unique root-caused); F35 discovered: FormulaVsExhaustive orphaned from `*Tests.m` glob — never executed by `--all` |
 | T0.5 paper-number snapshot | ✅ DONE | `6cb0f58`; 112 entries / 14 table blocks; deterministic `--check` gate PASS |
-| T0.1b discovery + baseline v2 | ⏳ PENDING | after Wave-1 core, per DAG |
-| T0.4 branch/tag | ➖ NOT STARTED | gated on Waves 1–2 |
+| T0.1b discovery + baseline v2 | ✅ DONE | `2d89313` (see INCIDENT entry) — genuine ledger OK=46 FAIL=4 @167s; supersedes v1 by method error |
+| T0.4 branch/tag | ✅ DONE | `366d771` main reconciled over clean parents fff5750+0cb3646; tag `audit01-baseline` pushed; legacy-data exclusion policy in merge message (Appendix D T0.4) |
 | T1.2 package engine | ✅ DONE | `d8d3809`; IndexSetAnalytic packaged (12 families incl. closed CANALISING); {} fallthrough dead via Phi transport; 3 copies deduped; OneSetAllFamilies+NIMPLIES+MAJORITY tests OK; suite +6 OK / FAIL set identical |
 | T1.1 flagship script | ✅ DONE (D-2(d)) | `d42f371`; COMPOSITION LEMMA VERIFIED n=6: symDiff ∅ between composed-set (XOR{x1}⊕XOR{x3}⊕AND{x2,4}) and exhaustive LUT; banner→real exit-gate (10 checks listed); F35 fixed by rename→glob, theorem-paths criterion OK |
 | T1.3 MAJORITY | ✅ DONE (D-3 adopted) | `e87927e`; tiePolicy param both policies tested; PROBE: node10 d=4 has ties but output-neutral verified (0.66875/3392 unchanged) |
 | T1.4 governance | ✅ DONE | `316ce22`; GLOSSARY in-repo w/ provenance + 3-state sync (controls 0/1/2 all shown); 6 citations repointed → 0 dangling; CLAUDE.md D-4 + branch + BASELINE; 21 technical-sense pivots fixed across backbone+derivations; inventory frozen @0 |
 | T1.5 interim disclosure | ✅ DONE | `bd6a365`; tab:four-paths row+caption disclose archived 0.51875 vs current 1.0, T4.1 open; snapshot delta audited post-hoc: 1 semantic block + pure line-shifts |
 | V1–V5 stamps | ✅ DONE | `dae59a3`; all five VERIFIED with evidence |
-| T0.1b discovery + baseline v2 | ✅ DONE | `2d89313` (see INCIDENT entry) — genuine ledger OK=46 FAIL=4 @167s |
 | T2.0 imp-prices hygiene | ✅ DONE | `470682a`; parity gate caught real drift first-run; 97 passed own-venv / 35+4skipped root-venv |
 | T2.1 C18 reconciliation | ✅ DONE (DEV-2.1) | `8c6f6e2`; prose-vs-pin confirmed (6/{WTI_Spot}/37.5 vs printed 5/{WTI_CL}/55); 45-seed recheck: hash-unstable statistic, pin = genuine draw (seed 19 elementwise); quote-the-pin correction + dated notes both docs; lint PASS + 3 planted-mismatch controls exit 1 |
 | T2.2 C29/C36 machinery | ✅ DONE (DEV-2.2) | `6bbc9fb`; C36 reproduces exactly (1.26±1.12, two 7-windows/0.031%, one negative-print pivot; off-by-one + raw-series-sequence disclosed); C29 conclusion robust (share 66–72%, z≈3σ) but exact moments unrecoverable → committed pinned nulls as single source; C26 pre-guard caveat appended |
@@ -1481,6 +1518,8 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T5.1 regenerate-and-diff | ✅ DONE | harness `baed4ad` + control `baed4ad`-successor: Makefile verify-paper → tools/verify_paper_artefacts.py; inventory 3 COVERED (four_paths_table incl. mandatory 0.51875 disclosure; mechanism_vs_dataset D=135.66/C=23; comp_validation_summary ALGO-004 all-zero+1020rows) + 5 PENDING-with-reasons (T5.1.v2); markers embedded both manuscripts; AC-5.1a control: planted digit change → FAIL naming ID, revert → green; AC-5.1b closed visibly via T4.1 wording; snapshot gate PASS |
 | T5.2 derivations | ✅ DONE (D-6 CLOSED) | author directive: ALL TWELVE; `t52_family_witnesses.wl` executed → verification/*.json (250 cases, 0 failures, arities 2–6); ten derivation docs generated w/ embedded witnesses + README index; :1936 sentence matches reality; pair/i-vs-canalisingIndex coordinate conventions pinned in ORDERING.md §4b; gates PASS |
 | T4.7 validation-map repair | ✅ DONE (option i) | `cf31b20`: NEW closed-form-set audit ALGO-004 — node-COMPLETE pattern comparison + 4080 stratified rows, n∈{16,20}, all 12 families, **0 mismatches**; **DEV-T4.7-1**: ApplyGate KOFN silently dropped `strict` (diverged from analytic exactly when strict=True) → myKOfN now honors params (default False = historical), GATES-013's Scan level-spec hole repaired (Tuples); both manuscripts rescoped: theorem evidence = closed-form-set audit n∈{16,20}, n∈{20,50} explicitly dispatch-only/no-theorem-weight (AC-4.7b grep clean); snapshot rebaselined after token-delta verification (109 entries, gate PASS); suite OK=47 FAIL=4 TOTAL=51 |
+| T5.3 level READMEs | ✅ DONE | `28b6005`; eight READMEs for levels 11–18: purpose + qualitative verdict + bitácora/experiment pointers; no numbers quoted (single source stays the pinned artifacts) |
+| T5.4 full ledger lint | ✅ DONE (report-first) | `201677f`; scripts/lint_ledger_full.py sweeps 41 C-rows / 170 quoted decimals; **75 verified directly; 95 UNVERIFIED across 27 rows listed for author review** (unverified ≠ wrong — defined in report header); FINDINGS untouched pending adjudication via T2.1 addendum protocol |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
