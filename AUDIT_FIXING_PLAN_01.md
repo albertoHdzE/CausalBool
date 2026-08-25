@@ -1384,7 +1384,6 @@ Template per entry:
   **BACKLOG PROMOTED:** trajectory-route validation experiment on n>16 models
   (observe state trajectories, deconvolve from data instead of self-repertoire)
   — routed to the successor plan's intake list, not executed under this plan.
-
 - `[T4.3]` **T4.3 EXECUTED 2026-08-25 — identifiability envelope measured.**
   Protocol frozen pre-run (`4c848da`); three deviations logged before adoption
   (D1 string-form rng seed; D2 target-level binning; D3 coverage redefined as
@@ -1395,6 +1394,12 @@ Template per entry:
   degradation below. Determinism control: second execution byte-equivalent.
   Paper sentence drafted in experiments/ca_coverage/PAPER_SENTENCE.md. The
   first-run artifacts were superseded and never cited (U5/U8 respected).
+
+- `[T4.4]` **T4.4 EXECUTED 2026-08-25 — NULLS.md live.** Rule + both case
+  studies (anchors: imp-prices FINDINGS:210/:220 + bitacora/07 §1; sibling
+  bitacora 03:316, 05:62, 06:77) + checklist template. AC-4.4b's sibling
+  Phase-2-TODO pointer is a PENDING SIBLING EDIT requiring its own U6 approval —
+  recorded here so it is not silently dropped in close-out.
 
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
@@ -1427,6 +1432,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T4.1 ordering unification | ✅ DONE | root cause `12e481b`: archived 0.51875 = ALL-ZERO dead-path artifact (= baseline zero-fraction 5312/10240 exactly; Φ-omitted/doubled bridges give 0.6, i.e. NO scramble reproduces it — plan-context suspicion corrected); ORDERING.md live (LSB canonical, Φ-exactly-once, public-contract table, BioExperiments migration path §7); F36 CLOSED Ic-relative (IndexSetNetwork branch fixed, 40-case elementwise pinning test GATES-014 OK); F24 guards ×6 legacy sites (negative-control probe exit-gated; positive controls vs packaged dispatch programmatically derived); MIXED-002 pre-guard FALSE-GREEN exposed & fixed (identical stale corruption had counted as agreement; now Failure-pairs consistent-by-construction + UnsupportedGateCells disclosed = 8); mixed001 published figures invariant (0.66875/3392/1.0×3); suite bracket-after **OK=47 FAIL=4 TOTAL=51** (+1 intended GATES-014; owned reds unchanged) |
 | T4.2 bio-arm reframing | ✅ DONE | README living claims → round-trip-certificate framing + n≤16 scope + V4 pointer + REGULATORY training-on-test caveat; papers grepped clean; bitácora 05 untouched (U5); n>16 trajectory-validation backlog promoted (Appendix D) |
 | T4.3 CA coverage sweep | ✅ DONE | protocol frozen `4c848da` (D1 `296e48e`, D2/D3 pre-adoption `65b0287`); EXECUTED: 12 rules × 20 seeds × levels k∈{4..8}/8, min-over-CELLS coverage; **all 12 saturating: 20/20 global-map exact at k=8**; below-full-coverage degradation is rule-class-dependent (170/204 from k=4; 90/250 ~k=6–7; 30/45/57 near 8; 110/232/150/73 only at 8; 254 needs full); deterministic rerun byte-equivalent; figure committed; PAPER_SENTENCE.md drafted (AC-4.3a–c) |
+| T4.4 NULLS rule | ✅ DONE | GOVERNANCE/NULLS.md `6e84464`: response-profile/held-fixed/destroyed-dimension rule + both case studies bitácora-traceable (C22→C29 density; B1 codeword syntax) + pre-registration checklist template; sibling Phase-2 TODO pointer PENDING its own U6 gate |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
