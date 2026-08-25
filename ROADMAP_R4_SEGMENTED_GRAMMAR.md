@@ -119,3 +119,23 @@ honestly (the profile itself is the G1 object).
 - Majority-vote robustness precedent: rule 110 recovered at 20% noise.
 - Kraft checks already enforced per code component (bitacora 04 s1);
   residual_bits implemented (src index_set).
+
+## Boarding sequence (terminal step of the remediation line)
+
+Boarding this roadmap is the **natural last step** of AUDIT_FIXING_PLAN_01,
+with one precision: what boards here is the *pre-registration*, not execution —
+R4 runs open the successor plan. Sequence, in order:
+
+1. Close Wave 3 (T4.1 → T4.7) and Wave 4 (T5.1 → T5.4; D-6 author decision at
+   T5.2), each with Appendix E rows and the standing gates.
+2. Final closure audit of the whole programme line: paper-number gate, GLOSSARY
+   sync, MUnit vs BASELINE v2, subproject suite spot-checks; set every
+   Appendix E row final.
+3. Draft the Route 4 pre-registration from THIS file's frozen decisions
+   (segmenter spec per D1, dictionary per D2, frame cap per D3, scope per D4,
+   controls, thresholds, Kraft/prefix-free tests) and HALT for author sign-off.
+4. On sign-off: execute under the successor plan; nothing here runs under
+   AUDIT_FIXING_PLAN_01 authority.
+
+Next-session entry context: AUDIT_FIXING_PLAN_01.md **APPENDIX G**
+(post-T0.4 handoff).
