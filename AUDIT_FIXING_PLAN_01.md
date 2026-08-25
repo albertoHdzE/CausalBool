@@ -1401,6 +1401,14 @@ Template per entry:
   Phase-2-TODO pointer is a PENDING SIBLING EDIT requiring its own U6 approval —
   recorded here so it is not silently dropped in close-out.
 
+- `[T4.5]` **T4.5 EXECUTED 2026-08-25 — one wrapper, four named quantities.**
+  Nonidentity re-established by FRESH EXECUTION on a shared toy network (four
+  distinct values) rather than by quoting V5's scratch numbers; V5's stamped
+  single-node values reproduced ELEMENTWISE by the committed parity test.
+  Header asymmetry pinned at exactly log₂(4)=2 bits on the toy. WL side pinned
+  via t45_biometrics_toy.m. Subproject mirrors remain frozen exceptions pending
+  their own venvs' migration tasks.
+
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1433,6 +1441,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T4.2 bio-arm reframing | ✅ DONE | README living claims → round-trip-certificate framing + n≤16 scope + V4 pointer + REGULATORY training-on-test caveat; papers grepped clean; bitácora 05 untouched (U5); n>16 trajectory-validation backlog promoted (Appendix D) |
 | T4.3 CA coverage sweep | ✅ DONE | protocol frozen `4c848da` (D1 `296e48e`, D2/D3 pre-adoption `65b0287`); EXECUTED: 12 rules × 20 seeds × levels k∈{4..8}/8, min-over-CELLS coverage; **all 12 saturating: 20/20 global-map exact at k=8**; below-full-coverage degradation is rule-class-dependent (170/204 from k=4; 90/250 ~k=6–7; 30/45/57 near 8; 110/232/150/73 only at 8; 254 needs full); deterministic rerun byte-equivalent; figure committed; PAPER_SENTENCE.md drafted (AC-4.3a–c) |
 | T4.4 NULLS rule | ✅ DONE | GOVERNANCE/NULLS.md `6e84464`: response-profile/held-fixed/destroyed-dimension rule + both case studies bitácora-traceable (C22→C29 density; B1 codeword syntax) + pre-registration checklist template; sibling Phase-2 TODO pointer PENDING its own U6 gate |
+| T4.5 description-length consolidation | ✅ DONE | GOVERNANCE/DESCRIPTION_LENGTHS.md `5f48c24`: variants A–D named/scoped/mapped; shared wrapper src/description_lengths.py (pybdm==0.1.0 pinned, bdm_2d below_floor knob preserves pathinfo None-semantics per-consumer); toy fixture EXECUTED (A=20.8974/B=27.9248/C=6.3399/D=25.9248 — four distinct values = nonidentity by execution; header delta exactly 2=log₂4); parity test PASS incl. V5 stamps reproduced elementwise (7.1699…/6.3399…); subproject mirrors documented exceptions (AC-4.5a/b) |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
