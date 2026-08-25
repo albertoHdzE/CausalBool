@@ -2,6 +2,14 @@
 
 (* Wolfram Language package *)(* Wolfram Language Raw Program *)
 
+(* AUDIT01/T4.1 (F24): message for the stale-resOp guards installed in every legacy
+   dispatch loop (runDynamic, createRepertoires, runDynamicHD, runDynamicInputsFromFile,
+   runDynamicFromFileBatches, calculateOneOutptuOfNetwork). Unsupported gates used to
+   silently append the previous node's resOp; they now assign an explicit
+   Failure["UnsupportedGate", ...] and emit this message. *)
+AlphaLegacyDispatch::unsupportedgate = "AUDIT01/T4.1: gate `1` at node index `2` is not supported by legacy `3`; assigned Failure[\"UnsupportedGate\"] instead of silently reusing stale resOp.";
+
+
 (* This function implements the OR logical operation on a list of binary values (0s and 1s)
    It returns 1 if there is at least one 1 in the list, otherwise returns 0
    Input: list - A list of binary values (0s and 1s)
@@ -235,6 +243,13 @@ calculateOneOutptuOfNetwork[input_,cm_,dynamic_] :=
                 Null
             ];
 
+            (* AUDIT01/T4.1 (F24): stale-resOp guard - an unsupported gate used to
+               silently append the PREVIOUS node's resOp. Now loud + explicit. *)
+            If[ !MemberQ[{"AND","OR","XOR","NAND","MAJORITY"}, nodeOp],
+                Message[AlphaLegacyDispatch::unsupportedgate, nodeOp, n, "calculateOneOutptuOfNetwork"];
+                resOp = Failure["UnsupportedGate", <|"Gate" -> nodeOp, "NodeIndex" -> n, "Function" -> "calculateOneOutptuOfNetwork"|>]
+            ];
+
             AppendTo[oneNetOutput, resOp];
         ];
         
@@ -293,6 +308,12 @@ runDynamic[cm_, dynamic_] :=
 	                     (*Print["Result: "];
 	                     Print[resOp];*)
 	                     (* end  ----------------------  *)
+	                     (* AUDIT01/T4.1 (F24): stale-resOp guard (was silent for any
+	                        gate outside AND/OR/XOR/NAND). *)
+	                     If[ !MemberQ[{"AND","OR","XOR","NAND"}, nodeOp],
+	                         Message[AlphaLegacyDispatch::unsupportedgate, nodeOp, n, "runDynamic"];
+	                         resOp = Failure["UnsupportedGate", <|"Gate" -> nodeOp, "NodeIndex" -> n, "Function" -> "runDynamic"|>]
+	                     ];
 	                     AppendTo[oneNetOutput, resOp];
                  ];
                  (* begin --------------------*)
@@ -389,6 +410,12 @@ createRepertoires[cm_, dynamic_] :=
 	                         Null
 	                     ];
 
+	                     (* AUDIT01/T4.1 (F24): stale-resOp guard (audit cite Alpha.m :375-390). *)
+	                     If[ !MemberQ[{"AND","OR","XOR","NAND"}, nodeOp],
+	                         Message[AlphaLegacyDispatch::unsupportedgate, nodeOp, n, "createRepertoires"];
+	                         resOp = Failure["UnsupportedGate", <|"Gate" -> nodeOp, "NodeIndex" -> n, "Function" -> "createRepertoires"|>]
+	                     ];
+
 	                     AppendTo[oneNetOutput, resOp];
                  ];
 
@@ -447,6 +474,11 @@ runDynamicHD[cm_, dynamic_, resultsPath_] :=
                      Null
                  ];
                  (*Print[resOp];*)
+                 (* AUDIT01/T4.1 (F24): stale-resOp guard. *)
+                 If[ !MemberQ[{"AND","OR","XOR","NAND"}, nodeOp],
+                     Message[AlphaLegacyDispatch::unsupportedgate, nodeOp, n, "runDynamicHD"];
+                     resOp = Failure["UnsupportedGate", <|"Gate" -> nodeOp, "NodeIndex" -> n, "Function" -> "runDynamicHD"|>]
+                 ];
                  AppendTo[oneNetOutput, resOp];
              ];
              AppendTo[repertoireResultsNet, oneNetOutput];
@@ -539,6 +571,11 @@ runDynamicInputsFromFile[cm_, dynamic_,Path_,insFileName_,outsFileName_] :=
                          Null
                      ];
                      (*Print[resOp];*)
+                     (* AUDIT01/T4.1 (F24): stale-resOp guard. *)
+                     If[ !MemberQ[{"AND","OR","XOR","NAND"}, nodeOp],
+                         Message[AlphaLegacyDispatch::unsupportedgate, nodeOp, n, "runDynamicInputsFromFile"];
+                         resOp = Failure["UnsupportedGate", <|"Gate" -> nodeOp, "NodeIndex" -> n, "Function" -> "runDynamicInputsFromFile"|>]
+                     ];
                      AppendTo[oneNetOutput, resOp];
              ];
              AppendTo[repertoireResultsNet, oneNetOutput];
@@ -613,6 +650,11 @@ runDynamicFromFileBatches[cm_, dynamic_,pathProject_,inputsFileName_,outputsPath
                                  Null
                              ];
                              (*Print[resOp];*)
+                             (* AUDIT01/T4.1 (F24): stale-resOp guard. *)
+                             If[ !MemberQ[{"AND","OR","XOR","NAND"}, nodeOp],
+                                 Message[AlphaLegacyDispatch::unsupportedgate, nodeOp, n, "runDynamicFromFileBatches"];
+                                 resOp = Failure["UnsupportedGate", <|"Gate" -> nodeOp, "NodeIndex" -> n, "Function" -> "runDynamicFromFileBatches"|>]
+                             ];
                              AppendTo[oneNetOutput, resOp];
                      ];
                      AppendTo[repertoireResultsNet, oneNetOutput];

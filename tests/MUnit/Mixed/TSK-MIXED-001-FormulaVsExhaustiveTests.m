@@ -23,10 +23,14 @@ vectorPredict[cm_List, dyn_List, inputs_List, params_Association:<||>] := Module
         "KOFN", (kthr = Lookup[p, "k", 1]; strict = TrueQ[Lookup[p, "strict", False]]; out[[All, k]] = If[strict, Boole[Total[bits, {2}] > kthr], Boole[Total[bits, {2}] >= kthr]]),
         "CANALISING",
           (
-            ci = Lookup[p, "canalisingIndex", If[Length[Ic] >= 1, Ic[[1]], Ic[[1]]]];
+            (* AUDIT01/T4.1 (F36 closure): canalisingIndex is Ic-relative, matching
+               package ApplyGate + closed-form engine (GOVERNANCE/ORDERING.md). bits
+               are already the Ic-selected columns; default 1 reproduces the old
+               absolute-default (Ic[[1]] = relative position 1). *)
+            ci = Lookup[p, "canalisingIndex", 1];
             vcan = Lookup[p, "canalisingValue", 1];
             cout = Lookup[p, "canalisedOutput", 0];
-            Module[{fallback = Boole[Total[bits, {2}] >= 1], mask = Boole[packedInputs[[All, ci]] == vcan]},
+            Module[{fallback = Boole[Total[bits, {2}] >= 1], mask = Boole[bits[[All, ci]] == vcan]},
               out[[All, k]] = mask*cout + (1 - mask)*fallback
             ]
           ),

@@ -1324,8 +1324,7 @@ Template per entry:
   reproduced; two over-cap models correctly recorded `skipped: too_large` in-artifact.
   D1 fixed pre-sweep (`4d9701f`). D4 paper gate PASS re-confirmed.
 
-- `[T0.4]` **T0.4 EXECUTED 2026-08-24 — main reconciled, tag audit01-baseline published.**
-  Pre-merge audit all green (paper gate 112/112; GLOSSARY sync 0; MUnit fresh
+- `[T0.4]` **T0.4 EXECUTED 2026-08-24 — main reconciled, tag audit01-baseline published.**  Pre-merge audit all green (paper gate 112/112; GLOSSARY sync 0; MUnit fresh
   OK=46 FAIL=4 == BASELINE v2; subproject suites green). Two merge-construction
   events recorded for audit: (1) first local merge a081ff6 inherited ~28 GiB of
   gitignored legacy data blobs from unpushed April lineage (3f9bd13/ceab8db:
@@ -1337,6 +1336,42 @@ Template per entry:
   remain on local disk/local history, documented in merge message. Tag
   audit01-baseline @ 366d771 pushed. Author's untracked workspaces build
   artifacts backed up to /tmp/premerge_workspaces_backup/.
+
+- `[T4.1]` **T4.1 EXECUTED 2026-08-25 — root cause + ordering unification closed.**
+  (1) ROOT CAUSE of archived accuracyIndex=0.51875 CORRECTS the plan's own
+  context: it is not an ordering-bridge mismatch. The archived
+  OutputsPredictiveIndex.csv (@406a010, Status Sat 22 Nov 2025) is an all-zero
+  matrix; agreement = baseline zero-cell fraction 1−4928/10240 = 0.51875 EXACTLY.
+  Fresh-executed bridge falsification: Φ-omitted and Φ-doubled paths both give
+  accuracy 0.6/4096 mismatches — no scramble reproduces the figure. Mechanism:
+  superseded script revision with a silently dead Index path, preserved by F35
+  orphaning + exit-code-only runner. Evidence: tools/T41_RootCauseProbe.wl,
+  tools/t41_archived_artifact_diff.py, rootcause/*.json (`12e481b`). Lesson
+  appended to ORDERING.md §6: accuracies must ship confusion counts/per-node
+  symmetric differences so degenerate all-zero agreement is visible.
+  (2) GOVERNANCE/ORDERING.md established: LSB-canonical representation,
+  Φ-exactly-once at interop boundaries, public-function contract table,
+  BioExperiments migration path documented (§7, execution deferred), spot-check
+  grep audit list embedded (all expectations verified).
+  (3) F36 CLOSED: canalisingIndex is Ic-relative everywhere;
+  Gates.m IndexSetNetwork CANALISING branch fixed (was reorder-and-pass-through,
+  correct only for ci=Ic[[1]]); pinned elementwise by new
+  TSK-GATES-014-CanalisingCoordTests.m (40 cases incl. ci∉first, all three paths
+  equal). Non-globbed helpers Comparison.m/OnPossibleBehaviour.m keep absolute
+  reading as DOCUMENTED EXCEPTIONS pending their own coverage.
+  (4) F24 CLOSED: stale-resOp guards ×6 legacy dispatch loops
+  (Failure["UnsupportedGate"] + message); negative-control probe green;
+  positive controls cross-checked against packaged dispatch with programmatically
+  derived references after TWO hand-built references were themselves wrong
+  (U8 lesson reconfirmed: never hand-compute reference constants).
+  (5) COLLATERAL DISCOVERY: TSK-MIXED-002 was a pre-guard FALSE GREEN — it
+  validated legacy createRepertoires-vs-runDynamic consistency on networks with
+  NOR/XNOR nodes where BOTH sides were identically stale; guard made Failure
+  metadata differ → symbolic inequality also broke its Status.txt export
+  (unevaluated If exported as verdict, ARCH-004 defect class). Fixed in
+  experiments/mixed/Mixed.m: cell-level MapThread(…,{2}), Failure-pairs counted
+  consistent-by-construction, UnsupportedGateCells=8 disclosed in Metrics.json.
+  Published mixed001 figures invariant. Suite delta exactly +1 intended test.
 
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
@@ -1366,6 +1401,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T2.4 causal-paper arc | ✅ DONE (D-5(i) + D-7 approved) | headers `70068fd`+`3eb87ac`; DoF paragraph adjacent to canonical sign-agreement table (`3eb87ac`); comparison `bc3935e`: **10/10 ECA rules exact** elementwise (0/225,280 cells mismatched per-rule set; seeds pinned, no outcome-dependent tuning), Th17+E.coli EXCLUDED-WITH-REASON (no ground truth without inventing gates — recorded as finding); D-5(i) live: results un-ignored selectively, MANIFEST.sha256 + verify_manifest.py PASS, reruns byte-identical |
 | T2.7 sibling addendum | ✅ DONE (U6 granted) | sibling series-deconvolution @main, LOCAL commits `62fb3b3` (§9.6 corrections: divergence entry false → unrelated arXiv module; banner+hmmlearn fixed upstream) & `b868cd0` (GLOSSARY precision note: three-step chain) — append-only, NOT pushed to remote; CausalBool GOVERNANCE/GLOSSARY.md resynced @b868cd0 (`3e23d0c`), check_glossary_sync.sh exit 0 |
 | T5.5 post-fix sweep | ✅ DONE (v1.3) | `9b8c655`+`4d9701f`; all inventory rows closed: imp-causal-paper walkthrough re-executed (numbers identical; root-venv provenance drift recorded), 15/15 idx-deconv notebooks green, 0-byte stray removed, pathinfo regeneration identical, N5 no-action verified, D2 retracted as my misread (exp04 re-run: 8/8 exact reproduced); paper gate PASS |
+| T4.1 ordering unification | ✅ DONE | root cause `12e481b`: archived 0.51875 = ALL-ZERO dead-path artifact (= baseline zero-fraction 5312/10240 exactly; Φ-omitted/doubled bridges give 0.6, i.e. NO scramble reproduces it — plan-context suspicion corrected); ORDERING.md live (LSB canonical, Φ-exactly-once, public-contract table, BioExperiments migration path §7); F36 CLOSED Ic-relative (IndexSetNetwork branch fixed, 40-case elementwise pinning test GATES-014 OK); F24 guards ×6 legacy sites (negative-control probe exit-gated; positive controls vs packaged dispatch programmatically derived); MIXED-002 pre-guard FALSE-GREEN exposed & fixed (identical stale corruption had counted as agreement; now Failure-pairs consistent-by-construction + UnsupportedGateCells disclosed = 8); mixed001 published figures invariant (0.66875/3392/1.0×3); suite bracket-after **OK=47 FAIL=4 TOTAL=51** (+1 intended GATES-014; owned reds unchanged) |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 

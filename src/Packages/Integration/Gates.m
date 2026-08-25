@@ -183,7 +183,13 @@ IndexSetNetwork[gate_String, n_Integer, Ic_List, params_: <||>] := Module[{input
     gate === "NOT",
     Module[{ii = If[i === None, If[Length[Ic] == 1, Ic[[1]], None], i]}, If[ii === None, {}, Flatten@Position[(ApplyGate[gate, {#[[ii]]}, params] == 1) & /@ inputs, True, 1]]],
     gate === "CANALISING",
-    Module[{ci = Lookup[params, "canalisingIndex", If[Length[Ic] >= 1, Ic[[1]], 1]]}, Flatten@Position[(ApplyGate[gate, {#[[ci]]} ~Join~ Part[#, Complement[Ic, {ci}]], params] == 1) & /@ inputs, True, 1]],
+    (* AUDIT01/T4.1 (F36 closure): params are Ic-relative here, identical to
+       ApplyGate/myCanalising and the closed-form engine (GOVERNANCE/ORDERING.md).
+       The previous branch reordered the row to place the canalising bit first while
+       passing the original canalisingIndex through - correct only when that value
+       happened to be position 1 of Ic. Callers holding network-absolute indices
+       translate once at their boundary (First@Position[Ic, ciAbs]). *)
+    Flatten@Position[(ApplyGate[gate, Part[#, Ic], params] == 1) & /@ inputs, True, 1],
     True,
     Flatten@Position[(ApplyGate[gate, Part[#, Ic], params] == 1) & /@ inputs, True, 1]
   ]
