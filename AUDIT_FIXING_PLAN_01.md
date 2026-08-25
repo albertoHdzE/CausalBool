@@ -1409,6 +1409,23 @@ Template per entry:
   via t45_biometrics_toy.m. Subproject mirrors remain frozen exceptions pending
   their own venvs' migration tasks.
 
+- `[T4.7]` **T4.7 EXECUTED 2026-08-25 — overclaim converted into a real result;
+  one new engine defect found and fixed en route.**
+  **DEV-T4.7-1:** ApplyGate's KOFN branch dropped `params["strict"]`
+  (myKOfN had no params argument) while IndexSet/IndexSetAnalytic honored it —
+  the exact three-site drift class T1.3 fixed for MAJORITY ties. Found because
+  ALGO-004 draws strict=True at random; node-level COMPLETE comparison
+  localized it to popcount-1..k patterns elementwise. Fix: myKOfN[.,k,params]
+  with default strict=False (zero historical behaviour change); GATES-013's
+  KOFN grid repaired (Scan level-spec had fed sublists as #1, never truly
+  exercising strict=True — the hole that hid this for months).
+  Harness lessons recorded in-code: Module init-list entries evaluate before
+  earlier locals bind (ConstantArray[0,2^d] stayed symbolic); Flatten dissolves
+  row vectors; lsbBits is integer-only. The audit's final run: 0 mismatches,
+  node-complete + 4080 rows.
+  Paper: both manuscripts' validation claims rescoped to what the artifacts
+  show; snapshot rebaseline verified token-exact before commit.
+
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1442,6 +1459,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T4.3 CA coverage sweep | ✅ DONE | protocol frozen `4c848da` (D1 `296e48e`, D2/D3 pre-adoption `65b0287`); EXECUTED: 12 rules × 20 seeds × levels k∈{4..8}/8, min-over-CELLS coverage; **all 12 saturating: 20/20 global-map exact at k=8**; below-full-coverage degradation is rule-class-dependent (170/204 from k=4; 90/250 ~k=6–7; 30/45/57 near 8; 110/232/150/73 only at 8; 254 needs full); deterministic rerun byte-equivalent; figure committed; PAPER_SENTENCE.md drafted (AC-4.3a–c) |
 | T4.4 NULLS rule | ✅ DONE | GOVERNANCE/NULLS.md `6e84464`: response-profile/held-fixed/destroyed-dimension rule + both case studies bitácora-traceable (C22→C29 density; B1 codeword syntax) + pre-registration checklist template; sibling Phase-2 TODO pointer PENDING its own U6 gate |
 | T4.5 description-length consolidation | ✅ DONE | GOVERNANCE/DESCRIPTION_LENGTHS.md `5f48c24`: variants A–D named/scoped/mapped; shared wrapper src/description_lengths.py (pybdm==0.1.0 pinned, bdm_2d below_floor knob preserves pathinfo None-semantics per-consumer); toy fixture EXECUTED (A=20.8974/B=27.9248/C=6.3399/D=25.9248 — four distinct values = nonidentity by execution; header delta exactly 2=log₂4); parity test PASS incl. V5 stamps reproduced elementwise (7.1699…/6.3399…); subproject mirrors documented exceptions (AC-4.5a/b) |
+| T4.7 validation-map repair | ✅ DONE (option i) | `cf31b20`: NEW closed-form-set audit ALGO-004 — node-COMPLETE pattern comparison + 4080 stratified rows, n∈{16,20}, all 12 families, **0 mismatches**; **DEV-T4.7-1**: ApplyGate KOFN silently dropped `strict` (diverged from analytic exactly when strict=True) → myKOfN now honors params (default False = historical), GATES-013's Scan level-spec hole repaired (Tuples); both manuscripts rescoped: theorem evidence = closed-form-set audit n∈{16,20}, n∈{20,50} explicitly dispatch-only/no-theorem-weight (AC-4.7b grep clean); snapshot rebaselined after token-delta verification (109 entries, gate PASS); suite OK=47 FAIL=4 TOTAL=51 |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
