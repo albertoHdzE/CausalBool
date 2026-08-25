@@ -23,7 +23,15 @@ myMajority[list_, params_: <||>] := Module[{d, ones, th},
   th = If[TrueQ[Lookup[params, "tiePolicy", "strict"] === "atOrAbove"], Ceiling[d/2], Floor[d/2] + 1];
   If[ones >= th, 1, 0]
 ]
-myKOfN[list_, k_Integer] := If[Count[list, 1] >= k, 1, 0]
+(* AUDIT01/T4.7 (DEV-T4.7-1): KOFN now honors params["strict"] identically to
+   IndexSet/IndexSetAnalytic (strict -> Count>k). Default False preserves the
+   historical >= behaviour of every existing caller. Found by
+   TSK-ALGO-004-ClosedFormSetAudit: ApplyGate silently dropped "strict",
+   diverging from the closed-form engine exactly when strict=True. *)
+myKOfN[list_, k_Integer, params_: <||>] :=
+  If[TrueQ[Lookup[params, "strict", False]],
+    Boole[Count[list, 1] > k],
+    Boole[Count[list, 1] >= k]]
 myCanalising[list_, params_Association] := Module[{i, v, out}, i = Lookup[params, "canalisingIndex", 1]; v = Lookup[params, "canalisingValue", 1]; out = Lookup[params, "canalisedOutput", 0]; If[list[[i]] == v, out, myOr[list]]]
 ApplyGate[gate_String, inputs_List, params_: <||>] := Module[{res, p},
   res = Which[
@@ -37,7 +45,7 @@ ApplyGate[gate_String, inputs_List, params_: <||>] := Module[{res, p},
     gate === "IMPLIES", myImplies[inputs],
     gate === "NIMPLIES", myNImplies[inputs],
     gate === "MAJORITY", myMajority[inputs, params],
-    gate === "KOFN", myKOfN[inputs, Lookup[params, "k", 1]],
+    gate === "KOFN", myKOfN[inputs, Lookup[params, "k", 1], params],
     gate === "CANALISING", myCanalising[inputs, params],
     True, 0
   ];

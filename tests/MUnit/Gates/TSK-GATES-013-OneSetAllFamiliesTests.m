@@ -43,12 +43,14 @@ checkOne := Module[{n, ic, res, diffs},
   If[res =!= lutOneSet[4, {1, 3, 4}, "IMPLIES", <|"pair" -> {1, 3}|>], AppendTo[diffs, <|"family" -> "IMPLIES-pair13-n4"|>]];
   res = IndexSetAnalytic[4, {1, 3, 4}, "NIMPLIES", <|"pair" -> {1, 3}|>];
   If[res =!= lutOneSet[4, {1, 3, 4}, "NIMPLIES", <|"pair" -> {1, 3}|>], AppendTo[diffs, <|"family" -> "NIMPLIES-pair13-n4"|>]];
-  (* KOFN strict/non-strict grid *)
+  (* KOFN strict/non-strict grid - AUDIT01/T4.7: was Scan[..., {False,True}, {1,2,3}]
+     whose LEVEL SPEC fed sublists as #1 and never actually exercised strict=True
+     against the LUT; that hole hid the ApplyGate-strict drop (DEV-T4.7-1). *)
   Scan[
     (res = IndexSetAnalytic[5, Range[4], "KOFN", <|"k" -> #2, "strict" -> #1|>];
       If[res =!= lutOneSet[5, Range[4], "KOFN", <|"k" -> #2, "strict" -> #1|>],
         AppendTo[diffs, <|"family" -> "KOFN", "k" -> #2, "strict" -> #1|>]
-      ]) &, {False, True}, {1, 2, 3}
+      ]) &, Tuples[{{False, True}, {1, 2, 3}}]
   ];
   (* CANALISING grid incl. non-default canalising index/value/output *)
   Scan[

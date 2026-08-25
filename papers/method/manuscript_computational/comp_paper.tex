@@ -1356,9 +1356,15 @@ specification.
 \subsection{Validation summary}\label{sec:validation}
 
 Exact reconstruction has been verified at $n=10$ and $n=13$ by exhaustive
-comparison against the baseline repertoire, and at $n=20$ and $n=50$ by
-stratified importance sampling over Hamming-weight layers (1020 rows,
-seeds 301 and 302), with accuracy $1.0$ in all cases.
+comparison against the baseline repertoire, and beyond the exhaustive-baseline
+range at $n\in\{16,20\}$ by a stratified closed-form-set audit across all twelve
+gate families (seeds 301 and 302): each node's packaged closed-form one-set is
+materialised and compared entry-by-entry against the full gate truth table over
+all $2^{d}$ connected-input patterns, and the composed analytic prediction is
+checked row-wise against direct evaluation on 1020 Hamming-stratified rows per
+seed, with zero elementwise mismatches in all cases. A dispatch-consistency
+audit additionally covers $n\in\{20,50\}$ (1020 stratified rows, seeds 201 and
+202); it validates large-scale evaluation plumbing and carries no theorem weight.
 
 \begin{table}[h]
 \centering
