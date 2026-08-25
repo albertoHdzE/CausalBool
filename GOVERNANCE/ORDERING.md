@@ -84,6 +84,20 @@ semantics; alignment requires its own executed test before landing.
 Callers holding network-absolute canalising coordinates translate once at their
 boundary: `rel = First@FirstPosition[Ic, ciAbs]`.
 
+## §4b Gate-parameter coordinate conventions (pinned by executed witnesses)
+
+| Parameter | Coordinates | Honored by | Ground-truth form |
+|---|---|---|---|
+| `canalisingIndex` | **Ic-relative** | myCanalising, indexSetAnalyticCore, IndexSetNetwork (post-T4.1), MUnit fast path | `ApplyGate` on `Part[row,Ic]` |
+| `pair` (IMPLIES/NIMPLIES) | **network-absolute** | indexSetAnalyticCore, MUnit vectorPredict | direct connective evaluation on `row[[a]],row[[b]]` |
+| `i` (NOT) | **network-absolute** | indexSetAnalyticCore | `(1-row[[ii]])` |
+| `k`,`strict` (KOFN) | threshold (+ policy flag, post-T4.7-1) | all sites incl. ApplyGate | `ApplyGate` |
+
+Note the deliberate asymmetry: CANALISING names a connected input by its
+*position among connected inputs*; IMPLIES/NIMPLIES/NOT name coordinates by
+*absolute network index*. Each convention is single-sourced and pinned by
+`papers/method/derivations/verification/*.json`; do not "unify" silently.
+
 ## §5 Legacy stale-`resOp` guard (F24)
 
 Every legacy dispatch loop (`runDynamic`, `createRepertoires`, `runDynamicHD`,
