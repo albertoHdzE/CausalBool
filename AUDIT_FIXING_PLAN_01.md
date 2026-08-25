@@ -1317,7 +1317,21 @@ Template per entry:
   reproduced; two over-cap models correctly recorded `skipped: too_large` in-artifact.
   D1 fixed pre-sweep (`4d9701f`). D4 paper gate PASS re-confirmed.
 
-# APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first)
+- `[T0.4]` **T0.4 EXECUTED 2026-08-24 — main reconciled, tag audit01-baseline published.**
+  Pre-merge audit all green (paper gate 112/112; GLOSSARY sync 0; MUnit fresh
+  OK=46 FAIL=4 == BASELINE v2; subproject suites green). Two merge-construction
+  events recorded for audit: (1) first local merge a081ff6 inherited ~28 GiB of
+  gitignored legacy data blobs from unpushed April lineage (3f9bd13/ceab8db:
+  data/DepMap/** incl. 4.17 GB blob, data/cancer/patients_mapk_large/**,
+  data/gnomAD/**) via ours-side conflict stages — superseded pre-publication;
+  (2) published merge **366d771** = fixing's audited tree + adjudicated
+  resolutions (170 files, 3.9 MiB: archive preservation + level-8 paper outputs
+  + CellCollective exports), parents fff5750+0cb3646; excluded legacy dumps
+  remain on local disk/local history, documented in merge message. Tag
+  audit01-baseline @ 366d771 pushed. Author's untracked workspaces build
+  artifacts backed up to /tmp/premerge_workspaces_backup/.
+
+# APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
 
