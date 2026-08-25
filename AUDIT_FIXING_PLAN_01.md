@@ -1373,6 +1373,18 @@ Template per entry:
   consistent-by-construction, UnsupportedGateCells=8 disclosed in Metrics.json.
   Published mixed001 figures invariant. Suite delta exactly +1 intended test.
 
+- `[T4.2]` **T4.2 EXECUTED 2026-08-25 — bio-arm reframing per V4 stamp.** Living
+  claims reframed to "round-trip exactness certificate" with explicit scope
+  (parser + forward model + inverter consistency, guaranteed modulo bugs; n≤16)
+  and V4 evidence pointer: index-deconvolution/README.md experiments table row +
+  snapshot bullet. REGULATORY 8/8 now carries the V4-confirmed training-on-test
+  caveat (gate defined from the fission-yeast clause, counted on those same
+  networks). Papers carry no bio-recovery claim (grepped). Bitácora 05 line 117
+  ("recovers real gene-regulatory networks exactly") left byte-identical per U5.
+  **BACKLOG PROMOTED:** trajectory-route validation experiment on n>16 models
+  (observe state trajectories, deconvolve from data instead of self-repertoire)
+  — routed to the successor plan's intake list, not executed under this plan.
+
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1402,6 +1414,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T2.7 sibling addendum | ✅ DONE (U6 granted) | sibling series-deconvolution @main, LOCAL commits `62fb3b3` (§9.6 corrections: divergence entry false → unrelated arXiv module; banner+hmmlearn fixed upstream) & `b868cd0` (GLOSSARY precision note: three-step chain) — append-only, NOT pushed to remote; CausalBool GOVERNANCE/GLOSSARY.md resynced @b868cd0 (`3e23d0c`), check_glossary_sync.sh exit 0 |
 | T5.5 post-fix sweep | ✅ DONE (v1.3) | `9b8c655`+`4d9701f`; all inventory rows closed: imp-causal-paper walkthrough re-executed (numbers identical; root-venv provenance drift recorded), 15/15 idx-deconv notebooks green, 0-byte stray removed, pathinfo regeneration identical, N5 no-action verified, D2 retracted as my misread (exp04 re-run: 8/8 exact reproduced); paper gate PASS |
 | T4.1 ordering unification | ✅ DONE | root cause `12e481b`: archived 0.51875 = ALL-ZERO dead-path artifact (= baseline zero-fraction 5312/10240 exactly; Φ-omitted/doubled bridges give 0.6, i.e. NO scramble reproduces it — plan-context suspicion corrected); ORDERING.md live (LSB canonical, Φ-exactly-once, public-contract table, BioExperiments migration path §7); F36 CLOSED Ic-relative (IndexSetNetwork branch fixed, 40-case elementwise pinning test GATES-014 OK); F24 guards ×6 legacy sites (negative-control probe exit-gated; positive controls vs packaged dispatch programmatically derived); MIXED-002 pre-guard FALSE-GREEN exposed & fixed (identical stale corruption had counted as agreement; now Failure-pairs consistent-by-construction + UnsupportedGateCells disclosed = 8); mixed001 published figures invariant (0.66875/3392/1.0×3); suite bracket-after **OK=47 FAIL=4 TOTAL=51** (+1 intended GATES-014; owned reds unchanged) |
+| T4.2 bio-arm reframing | ✅ DONE | README living claims → round-trip-certificate framing + n≤16 scope + V4 pointer + REGULATORY training-on-test caveat; papers grepped clean; bitácora 05 untouched (U5); n>16 trajectory-validation backlog promoted (Appendix D) |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
