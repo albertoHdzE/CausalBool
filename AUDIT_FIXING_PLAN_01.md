@@ -1426,6 +1426,11 @@ Template per entry:
   Paper: both manuscripts' validation claims rescoped to what the artifacts
   show; snapshot rebaseline verified token-exact before commit.
 
+- `[T5.1]` **T5.1 EXECUTED 2026-08-25 — regenerate-and-diff live.** Generic
+  marker-based verifier + inventory; producers genuinely re-executed by the
+  gate (mixed001 kernel run, complexity_analysis, ALGO-004). Session lesson
+  recorded: an uncommitted-file `git checkout` during control setup wiped
+  marker edits once — controls must run against COMMITTED state only (done).
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1459,6 +1464,7 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T4.3 CA coverage sweep | ✅ DONE | protocol frozen `4c848da` (D1 `296e48e`, D2/D3 pre-adoption `65b0287`); EXECUTED: 12 rules × 20 seeds × levels k∈{4..8}/8, min-over-CELLS coverage; **all 12 saturating: 20/20 global-map exact at k=8**; below-full-coverage degradation is rule-class-dependent (170/204 from k=4; 90/250 ~k=6–7; 30/45/57 near 8; 110/232/150/73 only at 8; 254 needs full); deterministic rerun byte-equivalent; figure committed; PAPER_SENTENCE.md drafted (AC-4.3a–c) |
 | T4.4 NULLS rule | ✅ DONE | GOVERNANCE/NULLS.md `6e84464`: response-profile/held-fixed/destroyed-dimension rule + both case studies bitácora-traceable (C22→C29 density; B1 codeword syntax) + pre-registration checklist template; sibling Phase-2 TODO pointer PENDING its own U6 gate |
 | T4.5 description-length consolidation | ✅ DONE | GOVERNANCE/DESCRIPTION_LENGTHS.md `5f48c24`: variants A–D named/scoped/mapped; shared wrapper src/description_lengths.py (pybdm==0.1.0 pinned, bdm_2d below_floor knob preserves pathinfo None-semantics per-consumer); toy fixture EXECUTED (A=20.8974/B=27.9248/C=6.3399/D=25.9248 — four distinct values = nonidentity by execution; header delta exactly 2=log₂4); parity test PASS incl. V5 stamps reproduced elementwise (7.1699…/6.3399…); subproject mirrors documented exceptions (AC-4.5a/b) |
+| T5.1 regenerate-and-diff | ✅ DONE | harness `baed4ad` + control `baed4ad`-successor: Makefile verify-paper → tools/verify_paper_artefacts.py; inventory 3 COVERED (four_paths_table incl. mandatory 0.51875 disclosure; mechanism_vs_dataset D=135.66/C=23; comp_validation_summary ALGO-004 all-zero+1020rows) + 5 PENDING-with-reasons (T5.1.v2); markers embedded both manuscripts; AC-5.1a control: planted digit change → FAIL naming ID, revert → green; AC-5.1b closed visibly via T4.1 wording; snapshot gate PASS |
 | T4.7 validation-map repair | ✅ DONE (option i) | `cf31b20`: NEW closed-form-set audit ALGO-004 — node-COMPLETE pattern comparison + 4080 stratified rows, n∈{16,20}, all 12 families, **0 mismatches**; **DEV-T4.7-1**: ApplyGate KOFN silently dropped `strict` (diverged from analytic exactly when strict=True) → myKOfN now honors params (default False = historical), GATES-013's Scan level-spec hole repaired (Tuples); both manuscripts rescoped: theorem evidence = closed-form-set audit n∈{16,20}, n∈{20,50} explicitly dispatch-only/no-theorem-weight (AC-4.7b grep clean); snapshot rebaselined after token-delta verification (109 entries, gate PASS); suite OK=47 FAIL=4 TOTAL=51 |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
