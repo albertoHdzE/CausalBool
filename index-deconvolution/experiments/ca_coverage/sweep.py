@@ -38,39 +38,49 @@ RESULTS_DIR = os.path.join(IDX_ROOT, "results", "ca_coverage")
 FIG_DIR = os.path.join(IDX_ROOT, "..", "figures", "ca_coverage")
 
 
-def interior_patterns(diagram: list[list[int]]) -> set[tuple[int, int, int]]:
+def cell_patterns(diagram: list[list[int]]) -> list[set[tuple[int, int, int]]]:
+    """Per-cell radius-1 window patterns observed across all row transitions."""
     w = len(diagram[0])
-    pats: set[tuple[int, int, int]] = set()
+    pats: list[set[tuple[int, int, int]]] = [set() for _ in range(w)]
     for t in range(len(diagram) - 1):
         cur = diagram[t]
-        c = INTERIOR
-        pats.add((cur[(c - 1) % w], cur[c], cur[(c + 1) % w]))
+        for c in range(w):
+            pats[c].add((cur[(c - 1) % w], cur[c], cur[(c + 1) % w]))
     return pats
 
 
 def select_diagrams(rule: int, seed0: int, target_k: int):
-    """Greedy IC selection per PROTOCOL. Returns (diagrams, achieved_k)."""
-    # PROTOCOL DEVIATION D1 (logged in PROTOCOL.md): random.Random does not accept
-    # tuple seeds; the stream is fixed by the canonical string form instead.
+    """Greedy IC selection per PROTOCOL (as amended by D3): stop when the MINIMUM
+    per-cell distinct-pattern count reaches target_k. Returns (diagrams, stats)."""
+    # PROTOCOL DEVIATION D1: random.Random rejects tuple seeds; canonical string form.
     rng = random.Random(f"{seed0}:{rule}")
     chosen: list[list[list[int]]] = []
-    seen: set[tuple[int, int, int]] = set()
+    seen: list[set[tuple[int, int, int]]] = [set() for _ in range(WIDTH)]
     stale = 0
-    while len(seen) < target_k and stale < MAX_CANDIDATES_WITHOUT_GAIN:
+    while min(len(s) for s in seen) < target_k and stale < MAX_CANDIDATES_WITHOUT_GAIN:
         ic = [rng.randint(0, 1) for _ in range(WIDTH)]
         d = evolve_eca(rule, ic, STEPS)
-        new = interior_patterns(d) - seen
-        if new:
-            seen |= new
+        new = cell_patterns(d)
+        gain = any(new[c] - seen[c] for c in range(WIDTH))
+        if gain:
+            for c in range(WIDTH):
+                seen[c] |= new[c]
             chosen.append(d)
             stale = 0
         else:
             stale += 1
-    return chosen, len(seen)
+    covs = sorted(len(s) / 8 for s in seen)
+    stats = {
+        "achieved_min_k": min(len(s) for s in seen),
+        "min_cell_coverage": covs[0],
+        "max_cell_coverage": covs[-1],
+        "cells_below_target": sum(1 for s in seen if len(s) < target_k),
+    }
+    return chosen, stats
 
 
 def run_rule_level(rule: int, seed0: int, level: int) -> dict:
-    diagrams, achieved_k = select_diagrams(rule, seed0, level)
+    diagrams, stats = select_diagrams(rule, seed0, level)
     net, reports = deconvolve_ca(diagrams, max_radius=MAX_RADIUS)
     vr = verify_ca(diagrams, net, rule=rule)
     rep = reports[INTERIOR]
@@ -78,12 +88,12 @@ def run_rule_level(rule: int, seed0: int, level: int) -> dict:
         "rule": rule,
         "seed": seed0,
         "level": level,
-        "achieved_k": achieved_k,
         "n_diagrams": len(diagrams),
         "global_map_exact": bool(vr.get("global_map_exact")),
         "trajectory_exact": bool(vr["trajectory_exact"]),
         "interior_support_size": len(rep.support),
         "interior_gate": rep.canonical.as_dict(),
+        **stats,
     }
 
 
@@ -97,33 +107,36 @@ def main() -> int:
                 records.append(rec)
             print(f"rule {rule} seed {seed0}: done", flush=True)
 
-    # Recovery curves at ACHIEVED k (protocol: report vs achieved coverage).
+    # Recovery curves by TARGET level (protocol, as amended by D2).
     curve: dict[int, dict[int, dict[str, int]]] = {}
     for rule in RULES:
         curve[rule] = {}
-        for k in sorted({r["achieved_k"] for r in records if r["rule"] == rule}):
-            rows = [r for r in records if r["rule"] == rule and r["achieved_k"] == k]
+        for k in LEVELS:
+            rows = [r for r in records if r["rule"] == rule and r["level"] == k]
             exact = sum(1 for r in rows if r["global_map_exact"])
             curve[rule][k] = {"runs": len(rows), "exact": exact}
         for k, v in curve[rule].items():
-            print(f"rule {rule} k={k}: {v['exact']}/{v['runs']} global-exact")
+            print(f"rule {rule} level {k}/8: {v['exact']}/{v['runs']} global-exact")
 
     classification = {
-        str(rule): ("saturating" if curve[rule].get(8, {}).get("exact", 0) == SEEDS[-1]
+        str(rule): ("saturating" if curve[rule][8]["exact"] == len(SEEDS)
                     else "non-saturating")
         for rule in RULES
     }
     all_full_exact = all(
-        r["global_map_exact"] for r in records if r["achieved_k"] == 8
+        r["global_map_exact"] for r in records if r["level"] == 8
     )
     summary = {
         "experiment": "ca_coverage_sweep",
-        "protocol": "experiments/ca_coverage/PROTOCOL.md (frozen 2026-08-25)",
+        "protocol": "experiments/ca_coverage/PROTOCOL.md (frozen 2026-08-25; "
+                    "deviations D1-D3 logged)",
         "width": WIDTH, "steps": STEPS, "seeds": SEEDS, "levels": LEVELS,
         "rules": RULES, "max_radius": MAX_RADIUS,
+        "coverage_definition": "min over cells of distinct radius-1 window "
+                               "patterns at that cell (D3)",
         "success_criterion": "elementwise equality of recovered network repertoire "
                              "vs true ca_global_map on all 2^12 states",
-        "all_rules_20_of_20_at_k8": all_full_exact,
+        "all_rules_20_of_20_at_level8": all_full_exact,
         "classification": classification,
         "recovery_curve": {str(r): {str(k): v for k, v in kv.items()}
                            for r, kv in curve.items()},
@@ -138,10 +151,10 @@ def main() -> int:
         os.makedirs(FIG_DIR, exist_ok=True)
         fig, ax = plt.subplots(figsize=(7, 4.5))
         for rule in RULES:
-            xs = sorted(int(k) for k in curve[rule])
-            ys = [100.0 * curve[rule][k]["exact"] / curve[rule][k]["runs"] for k in xs]
+            xs = LEVELS
+            ys = [100.0 * curve[rule][k]["exact"] / max(1, curve[rule][k]["runs"]) for k in xs]
             ax.plot([x / 8 for x in xs], ys, marker="o", ms=3, lw=1, label=str(rule))
-        ax.set_xlabel("achieved neighbourhood coverage k/8 (interior cell)")
+        ax.set_xlabel("neighbourhood coverage level k/8 (min over cells)")
         ax.set_ylabel("seeds with exact global-map recovery (%)")
         ax.set_title("CA->network identifiability envelope (12 rules x 20 seeds)")
         ax.set_ylim(-2, 102)

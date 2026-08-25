@@ -69,3 +69,20 @@ before inversion.
   rule))` is not executable (Python seeds must be None/int/float/str/bytes).
   Implementation uses `random.Random(f"{seed0}:{rule}")` — same intent: a stream
   uniquely determined by (seed0, rule). No result-dependent change.
+- **D2 (2026-08-25, first execution discarded before adoption):** reporting bug —
+  recovery curves were binned by *achieved* pattern count instead of the
+  pre-registered *target level*. Curves are now reported by target level;
+  achieved-k retained per record as supplementary data. First execution's outputs
+  are superseded and were regenerated.
+- **D3 (2026-08-25, first execution discarded before adoption — scope correction):**
+  the first implementation measured neighbourhood coverage at the INTERIOR CELL
+  ONLY. Diagnosis of its output showed why this cannot define the envelope: with
+  8/8 patterns at the interior cell but 0.75–0.88 coverage at other cells,
+  unobserved truth-table entries default to 0 and the reconstructed network is
+  globally wrong while remaining trajectory-exact — i.e. the quantity that gates
+  identifiability is coverage pooled over ALL cells. Coverage is therefore
+  redefined as **k = min over cells of the number of distinct radius-1 window
+  patterns observed at that cell**, and the greedy selector targets this
+  minimum. Per-cell coverage distributions are recorded for transparency.
+  This is the reading the task card intended ("pooled ICs ensuring neighbourhood
+  coverage"); no results from the discarded run are cited anywhere.
