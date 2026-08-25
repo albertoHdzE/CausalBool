@@ -65,4 +65,7 @@ before inversion.
 
 ## Deviations
 
-(none at freeze time)
+- **D1 (2026-08-25, before any results were produced):** `random.Random((seed0,
+  rule))` is not executable (Python seeds must be None/int/float/str/bytes).
+  Implementation uses `random.Random(f"{seed0}:{rule}")` — same intent: a stream
+  uniquely determined by (seed0, rule). No result-dependent change.
