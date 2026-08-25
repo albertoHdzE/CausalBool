@@ -1009,6 +1009,13 @@ documentation rule (TRANSFERENCE.md:295–297). Acceptance: README exists per le
 Sweep every C-section's quoted statistics against cited artifacts; report first, fix by
 same addendum protocol after author review.
 
+> **PROGRAMME CLOSE-OUT.** When all Wave 3–4 rows above reach DONE in Appendix E,
+> the terminal step of this programme line is **boarding**
+> `ROADMAP_R4_SEGMENTED_GRAMMAR.md`: run the final closure audit (both gates +
+> suite vs BASELINE), set every Appendix E row final, then draft the Route 4
+> pre-registration and HALT for author sign-off. R4 *execution* opens the
+> successor effort and never runs under this plan's authority.
+
 ## T5.5 — Post-fix cross-replication accuracy sweep (added v1.3; MANDATORY)
 
 **Priority:** P0 · Wave: 5 · Depends on: Waves 1–2 landed. **Effort:** L.
@@ -1431,6 +1438,9 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 
 # APPENDIX F — SESSION HANDOFF FOR THE NEXT INSTANCE (2026-08-24)
 
+> **SUPERSEDED 2026-08-24 by APPENDIX G** (post-T0.4 state). Kept for
+> provenance; environment facts in F.3 remain valid and are restated in G.
+
 You are a fresh agent continuing AUDIT_FIXING_PLAN_01. Read this appendix FIRST, then
 Part B (conventions U1–U8), then Appendix E (status). You need no prior conversation
 history: everything below is sufficient.
@@ -1505,3 +1515,78 @@ Evidence re-statement before acting (U1); binary acceptance criteria (U2); basel
 first (U3); decisions marked AUTHOR-DECISION pause their thread (U4/U6); protected
 history (U5); suite/paper-gate bracketing with recorded deltas (U7); elementwise
 symmetric-difference reporting, never counts alone (U8).
+
+---
+
+# APPENDIX G — SESSION HANDOFF FOR THE NEXT INSTANCE (2026-08-24, post-T0.4)
+
+Read this appendix FIRST, then Part B (U1–U8), then the task cards you will
+execute (Part G for Wave 3, Part H for Wave 4), then Appendix E (statuses).
+You need no prior conversation history.
+
+## G.1 Where things stand
+
+- **Branches:** work on `fixing` (push per task). `main` = published remediation
+  baseline, synced via merge; **tag `audit01-baseline` @ 366d771**. Local branch
+  `clean` = pristine pre-fix reference — NEVER touch. T0.4 DONE: main
+  reconciled at 366d771 over clean parents (fff5750 + 0cb3646); superseded
+  local lineage a081ff6/ceab8db/3f9bd13 carried ~28 GiB gitignored legacy data
+  and was never published (see Appendix D T0.4 entry). Those data dirs
+  (`data/DepMap/**`, `data/cancer/patients_mapk_large/**`, `data/gnomAD/**`)
+  stay OUT of any published tree.
+- **COMPLETE:** Wave 0 (instrument + BASELINE v2), Wave 1 (T1.1–T1.5), V1–V5,
+  Wave 2 (T2.0–T2.3, T2.5, T2.6, T2.4 with approved D-5/D-7, T2.7 sibling
+  local commits 62fb3b3/b868cd0 unpushed-by-design), sweep T5.5, T0.4.
+- **REMAINING QUEUE (exact order):**
+  1. **T4.1** ordering root-cause formal closure (F37: archived 0.51875 was a
+     stale artifact; current index path measures 1.0 — archaeology + ORDERING.md)
+  2. **T4.2** bio-arm reframing per V4 stamp
+  3. **T4.3** CA coverage-sweep experiment (pre-registered)
+  4. **T4.4** GOVERNANCE/NULLS.md
+  5. **T4.5** description-length consolidation (V5 tabulation on record)
+  6. **T4.6** offset-notation disambiguation
+  7. **T4.7** validation-map honesty repair (recommend option (i))
+  8. **T5.1** regenerate-and-diff harness (`make verify-paper`)
+  9. **T5.2** derivations/scoping — **HALT: D-6 is an open AUTHOR decision**
+  10. **T5.3** levels 11–18 READMEs · **T5.4** full ledger lint
+  11. Close-out → board ROADMAP_R4_SEGMENTED_GRAMMAR.md (see its "Boarding
+      sequence"; draft pre-registration, HALT for sign-off; R4 execution opens
+      the successor plan).
+
+## G.2 Environment facts (verified)
+
+- WolframKernel: `/Applications/Wolfram.app/Contents/MacOS/WolframKernel`.
+- WL suite: `zsh tests/MUnit/run-tests.sh` (~3 min); judge ONLY vs
+  `tests/MUnit/BASELINE.md` v2 (**OK=46 FAIL=4 TOTAL=50**, owned reds:
+  TopologiesTests, KOFNNetworkTests, IMPLIESNetworkTests, TSK-ARCH-004).
+- Paper gate before ANY `.tex` commit: `python3 tools/snapshot_paper_numbers.py --check`.
+- GLOSSARY sync: `bash tools/check_glossary_sync.sh` → 0 clean / 1 drift / 2 absent.
+- imp-prices own venv `.venv/bin/python -m pytest` = 97 passed; root venv has NO
+  hmmlearn by design (35 passed / 4 loud skips).
+- pathinfo venv 41 passed · causalNet venv 47 passed incl. vendored CTM parity ·
+  idx-deconvolution pytest 146/146 · exp04 re-run 8/8 exact.
+- Vendor two-copies rule: editing `index-deconvolution/src/{causalbool,
+  deconvolution}.py` ⇒ mirror into `imp-prices/vendor/` same commit.
+- pgmpy structural claims must fix AND record `PYTHONHASHSEED`
+  (DEV-2.1 lesson; see imp-prices/results/recheck_c18/).
+- Pushes can be slow (repo carries GiB-scale packs); use nohup+log if needed.
+- Never publish: `data/DepMap/**`, `data/cancer/patients_mapk_large/**`,
+  `data/gnomAD/**` (merge message 366d771 documents the policy).
+
+## G.3 Conventions recap
+
+Commit prefix `[AUDIT01/<task-id>]`, push after each task, Appendix E row per
+task, dated deviations to Appendix D, U1–U8 in force, protected history
+(addenda only), AUTHOR-DECISION items halt their thread (D-6 at T5.2).
+
+## G.4 Kickoff prompt (paste verbatim in the new session)
+
+Continue AUDIT_FIXING_PLAN_01 from APPENDIX G (post-T0.4 handoff) in this file.
+Read Appendix G first, then Part B conventions, then the Part G task cards for
+Wave 3. Work on branch `fixing`, one commit per task prefixed [AUDIT01/<task-id>],
+pushing after each task and updating Appendix E as you go. Execute the remaining
+queue exactly in G.1 order: T4.1 → T4.7, then T5.1 → T5.4. Halt only at T5.2's
+D-6 author decision and at anything that trips U1/U4. Judge suite health only
+against tests/MUnit/BASELINE.md v2 and run both gates (paper numbers, glossary
+sync) before touching .tex or governance files. Do NOT execute or draft anything
+under ROADMAP_R4_SEGMENTED_GRAMMAR.md until Waves 3–4 are closed and logged.
