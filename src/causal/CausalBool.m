@@ -2178,13 +2178,15 @@ Note: First element has index 0.
 		    longi = limit/repetitions;
 		    
 		    (*0s->odds, 1s->evens*)
-		    (* create list of pivot indexes, where sequences begins*)
+		    (* create list of sequence-start indexes, where sequences begin.
+		       NOT a pivot: a pivot is a position a causal process reproduces exactly
+		       (GOVERNANCE/GLOSSARY.md sec.1, synchronized copy; canonical at series-deconvolution). Block offsets. *)
 		    If[outputExpected === 1, serie = evening[repetitions], 
 		     serie = odding[repetitions]];
 		    
-		    (* Create the list of indexes using pivots
+		    (* Create the list of indexes using the sequence starts.
 		    A sequence has lenght "powered" or "longi", then each sequence ends
-		    at (powered * currentPivot) and starts at (powered*currentPivot)-longi + 1.
+		    at (powered * currentStart) and starts at (powered*currentStart)-longi + 1.
 		    As they are consecutive indexes, goes one by one. 
 		    *)
 		    found = 
@@ -2257,7 +2259,7 @@ Note: First element has index 0.
    
 (* Function to find indices in the input repertoire where nodes match a pattern *)
 findPatternIndices[nodes_, wantedPatt_, sizeCM_] := Module[
-  {n, m, nodeIndices, pattern, limit, locations, i, ki, pi, period, numSequences, pivots, indices},
+  {n, m, nodeIndices, pattern, limit, locations, i, ki, pi, period, numSequences, sequenceStarts, indices},
   
   (* Initialize parameters *)
   n = sizeCM; (* Number of nodes *)
@@ -2284,8 +2286,8 @@ findPatternIndices[nodes_, wantedPatt_, sizeCM_] := Module[
     period = 2^(ki - 1); (* Length of consecutive 0s or 1s *)
     numSequences = limit / period; (* Number of sequences *)
     
-    (* Generate pivot indices *)
-    pivots = If[pi == 1,
+    (* Generate the sequence-start block offsets (NOT pivots -- see GOVERNANCE/GLOSSARY.md sec.1) *)
+    sequenceStarts = If[pi == 1,
       Range[1, numSequences - 1, 2], (* Odd indices for 1s: 1, 3, 5, ... *)
       Range[0, numSequences - 2, 2]  (* Even indices for 0s: 0, 2, 4, ... *)
     ];
@@ -2294,7 +2296,7 @@ findPatternIndices[nodes_, wantedPatt_, sizeCM_] := Module[
     indices = Flatten[
       Table[
         Range[p * period + 1, (p + 1) * period], (* Indices from start to end *)
-        {p, pivots}
+        {p, sequenceStarts}
       ]
     ];
     
@@ -2310,7 +2312,7 @@ findPatternIndices[nodes_, wantedPatt_, sizeCM_] := Module[
    
 (* Function to compute indices where an AND node's output is 1 using the formula J_k = P + 1 + Δ_nc *)
 findANDIndicesFormula[node_, cm_, dyn_, n_] := Module[
-  {inputs, pivot, powC, decC, powNC, numNC, deltaNCValues, resultIndices, j},
+  {inputs, decimalAnchor, powC, decC, powNC, numNC, deltaNCValues, resultIndices, j},
   
   (* Determine inputs to the node from connectivity matrix *)
   inputs = Position[cm[[node]], 1][[All, 1]];
@@ -2323,7 +2325,7 @@ findANDIndicesFormula[node_, cm_, dyn_, n_] := Module[
   (* Calculate power and decimal values for connected nodes *)
   powC = inputs - 1;
   decC = 2^powC;
-  pivot = Total[decC]; (* P = sum of dec_c *)
+  decimalAnchor = Total[decC]; (* P = sum of dec_c -- the DECIMAL ANCHOR *)
   
   (* Calculate power values for disconnected nodes *)
   powNC = Complement[Range[n] - 1, powC];
@@ -2338,13 +2340,13 @@ findANDIndicesFormula[node_, cm_, dyn_, n_] := Module[
   ];
   
   (* Compute indices using J_k = P + 1 + Δ_nc *)
-  resultIndices = pivot + 1 + deltaNCValues;
+  resultIndices = decimalAnchor + 1 + deltaNCValues;
   
-  (* Filter indices to ensure they are within bounds and meet AND condition implicitly via pivot *)
+  (* Filter indices to ensure they are within bounds and meet AND condition implicitly via the anchor *)
   resultIndices = Select[resultIndices, # <= 2^n &];
   
-  (* Return result with node, pivot, and indices *)
-  <|"Node" -> node, "Pivot" -> pivot, "Locations" -> Sort[resultIndices]|>
+  (* Return result with node, decimal anchor, and indices *)
+  <|"Node" -> node, "DecimalAnchor" -> decimalAnchor, "Locations" -> Sort[resultIndices]|>
 ];
 
 
@@ -5394,12 +5396,12 @@ possible purview (partition) of the whole system.
 Concept is then, couple [mechanism, purview] that results in the highest value of smallphi
 for a single mechanism.
 
-intputs: mechanism (pivot for computation) and nodes of the whole system. From the nodes
+intputs: mechanism (the reference mechanism for computation) and nodes of the whole system. From the nodes
 of the system all possible partition is computed to form all possible purviews.
 
 Update: 
 pastt and future reference distros are those computed at partition level and not
-to the whole system level. Then must be computed for pivot mecha and each purview.
+to the whole system level. Then must be computed for the reference mechanism and each purview.
 *)
 (* At this level mecha cannot be [ ] (the empty set). See fig 8 in main paper*)
 computeConceptOfAMechanism[parentMecha_, systemNodes_,cm_, dyn_,cs_,fbupo_,pastWholeSysDistro_,
@@ -6232,19 +6234,19 @@ computeBigAlpha[sysNodes_,cm_,dyn_,cs_,concepts_,alphas_,distances_,pastRefProbD
 
 
 IntegratedInformation[cm_,dyn_,cs_]:=Module[
-	{unconstrDistros,allOptions,pastUnconstrDistr,futUnconstrDistr,fbupo,mechaPivot,conceptualSpace,concepts,alphas,
+	{unconstrDistros,allOptions,pastUnconstrDistr,futUnconstrDistr,fbupo,wholeSystemMechanism,conceptualSpace,concepts,alphas,
 	distances,alpha},
 	allOptions = {0, 0, 0, 0, 0};
 	unconstrDistros = computeUnconstrainedDistros[cm, dyn, cs, allOptions];
 	pastUnconstrDistr = unconstrDistros["UnconstrPastProb"];
 	futUnconstrDistr = unconstrDistros["UnconstrFutProb"];
 	fbupo = unconstrDistros["bitProbDistro4Outs"];
-	mechaPivot = Range[Length[cm]];
-	conceptualSpace= computeConceptualSpace[mechaPivot, pastUnconstrDistr, futUnconstrDistr, cm, dyn, cs, fbupo, 1]["Conste"];
+	wholeSystemMechanism = Range[Length[cm]];
+	conceptualSpace= computeConceptualSpace[wholeSystemMechanism, pastUnconstrDistr, futUnconstrDistr, cm, dyn, cs, fbupo, 1]["Conste"];
 	concepts = conceptualSpace[[All, 1]];
 	alphas = conceptualSpace[[All, 4]];
 	distances = conceptualSpace[[All, 9]];
-	alpha=computeBigAlpha[mechaPivot, cm, dyn, cs, concepts, alphas, distances, pastUnconstrDistr, futUnconstrDistr,fbupo]["Alpha"];
+	alpha=computeBigAlpha[wholeSystemMechanism, cm, dyn, cs, concepts, alphas, distances, pastUnconstrDistr, futUnconstrDistr,fbupo]["Alpha"];
 	
 	<|"Alpha"-> alpha|>
 ];

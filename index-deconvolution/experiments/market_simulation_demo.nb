@@ -1,0 +1,99 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      4360,         90]
+NotebookOptionsPosition[      3160,         68]
+NotebookOutlinePosition[      3482,         82]
+CellTagsIndexPosition[      3439,         79]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["How Close Is the Deconvolution to the Market?", "Title",ExpressionUUID->"4f7805d2-a332-4d8c-8449-37015ac4c55d"],
+
+Cell["Real versus model-generated paths, out of sample", "Subtitle",ExpressionUUID->"88446039-6066-42f1-ae23-494fdebe0078"],
+
+Cell["\<\
+This notebook asks how close the deconvolution comes to reproducing the \
+market. The deconvolution fits, for each instrument, the best small-support \
+deterministic directional rule from the training period; that rule then \
+generates a directed price path on a held-out test period, keeping the real \
+magnitude of each move but the model's predicted sign. The generated path is \
+compared with the real one out of sample, which is the only honest test: any \
+in-sample edge is overfitting. The statistics and the per-instrument chart \
+quantify the directional skill; the contradiction rates measure how far the \
+one-step dynamics are from any deterministic law.\
+\>", "Text",ExpressionUUID->"4f06b1ef-278e-4071-9d42-2b7adf2c0004"],
+
+Cell["Setup and statistics", "Section",ExpressionUUID->"3e2da31e-dddc-4eab-9a80-7c2d99f9857f"],
+
+Cell["\<\
+(* Load the market plotting library and the out-of-sample comparison data
+   exported by exp06_market_simulation.py. *)
+nbDir = NotebookDirectory[];
+idDir = ParentDirectory[nbDir];
+Get[FileNameJoin[{nbDir, \"MarketDemoLibrary.wl\"}]];
+plotdataPath = FileNameJoin[{idDir, \"finance\", \"market_plotdata.json\"}];
+result = MarketComparison[plotdataPath];\
+\>", "Input",ExpressionUUID->"bd89f5d6-5817-47dd-8980-0a89980d477f"],
+
+Cell["Real vs model-generated cumulative path", "Section",ExpressionUUID->"6a0972e5-9f65-4900-af6b-586d2e04d97c"],
+
+Cell["result[\"pathPlot\"]", "Input",ExpressionUUID->"3dd99853-de68-43e3-92a1-aa5b36010a06"],
+
+Cell["Per-instrument accuracy versus base rate", "Section",ExpressionUUID->"29e7bfe3-ab77-4c17-8fce-189745edd446"],
+
+Cell["result[\"barPlot\"]", "Input",ExpressionUUID->"5dc0d3b9-e265-4c65-9f74-f4896a54295d"],
+
+Cell["Reading", "Section",ExpressionUUID->"095b2d16-c3d2-4c88-bf9b-b3d67ac0b5db"],
+
+Cell["\<\
+Out of sample the model does not beat the base rate of always predicting the \
+more common direction: the mean edge is slightly negative and no instrument \
+is predicted reliably. The real and generated paths track loosely but the \
+model carries no exploitable determinism. This is consistent with the \
+contradiction rates near one half: binarised daily markets are close to \
+random at the one-step scale, unlike the cellular automata and gene networks \
+the same method recovers exactly.\
+\>", "Text",ExpressionUUID->"73f39493-a582-40ea-9d07-96215071550d"]
+},
+FrontEndVersion->"14.2 for Mac OS X ARM (64-bit) (December 26, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"c34abece-623c-41ac-93a2-c52f58498725"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 117, 0, 70, "Title",ExpressionUUID->"4f7805d2-a332-4d8c-8449-37015ac4c55d"],
+Cell[674, 22, 123, 0, 70, "Subtitle",ExpressionUUID->"88446039-6066-42f1-ae23-494fdebe0078"],
+Cell[800, 24, 745, 10, 70, "Text",ExpressionUUID->"4f06b1ef-278e-4071-9d42-2b7adf2c0004"],
+Cell[1548, 36, 94, 0, 70, "Section",ExpressionUUID->"3e2da31e-dddc-4eab-9a80-7c2d99f9857f"],
+Cell[1645, 38, 432, 8, 70, "Input",ExpressionUUID->"bd89f5d6-5817-47dd-8980-0a89980d477f"],
+Cell[2080, 48, 113, 0, 70, "Section",ExpressionUUID->"6a0972e5-9f65-4900-af6b-586d2e04d97c"],
+Cell[2196, 50, 92, 0, 70, "Input",ExpressionUUID->"3dd99853-de68-43e3-92a1-aa5b36010a06"],
+Cell[2291, 52, 114, 0, 70, "Section",ExpressionUUID->"29e7bfe3-ab77-4c17-8fce-189745edd446"],
+Cell[2408, 54, 91, 0, 70, "Input",ExpressionUUID->"5dc0d3b9-e265-4c65-9f74-f4896a54295d"],
+Cell[2502, 56, 81, 0, 70, "Section",ExpressionUUID->"095b2d16-c3d2-4c88-bf9b-b3d67ac0b5db"],
+Cell[2586, 58, 570, 8, 70, "Text",ExpressionUUID->"73f39493-a582-40ea-9d07-96215071550d"]
+}
+]
+*)
+
+(* End of internal cache information *)

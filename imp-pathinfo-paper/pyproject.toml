@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imp-pathinfo-paper"
+version = "0.1.0"
+description = "Replication of 'Algorithmic Complexity Predicts when Path Information Improves Graph Neural Networks Performance on Molecular Graphs' (TMLR submission)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pybdm==0.1.0",
+  "setuptools<81",
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "pandas>=2.1",
+  "matplotlib>=3.8",
+  "scikit-learn>=1.4",
+  "torch>=2.2",
+  "rdkit>=2023.9",
+  "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "jupyter", "ipykernel"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::UserWarning", "ignore::DeprecationWarning"]

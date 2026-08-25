@@ -1,0 +1,17 @@
+In := cm06 = {{1, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 0, 0}, {0, 0, 1, 0, 0, 0}, {1, 0, 0, 1, 0, 0}, {0, 1, 0, 1, 0, 0}, {1, 0, 1, 0, 1, 0}}
+In := dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"}
+
+(* Computing places in output repertoire where node 5 = 1 *)
+In := res061 = onPossibleBehaviour[{5}, {1}, dyn06, cm06]
+
+(* Summarized representation of analytic behaviour *)
+In := gp06 = givePlaces[res061["DecimalRepertoire"], res061["Sumandos"]]
+
+(* Compressed representation of analytic behaviour *)
+Out = <|"DecimalRepertoire" -> {11}, "Sumandos" -> {0, 1, 4, 5, 16, 17, 20, 21, 32, 33, 36, 37, 48, 49, 52, 53}|>
+
+(* Unfolded representation of analytic behaviour *)
+Out = {11, 12, 15, 16, 27, 28, 31, 32, 43, 44, 47, 48, 59, 60, 63, 64}
+
+(* Exact corroboration against exhaustive outputs of node 5 *)
+Out = True

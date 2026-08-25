@@ -4,6 +4,7 @@ import sys
 import json
 import re
 import glob
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -15,13 +16,37 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
 
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _paper_root() -> Path:
+    env = os.getenv("CAUSALBOOL_PAPER_ROOT")
+    if env:
+        return Path(env).expanduser().resolve()
+    repo = _repo_root()
+    candidates = [
+        repo / "workspaces" / "claude-nature" / "paper",
+        repo / "workspaces" / "level8-paper" / "paper",
+        repo / "4ClaudeCode" / "claude-Nature" / "paper",
+    ]
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return candidates[-1]
+
+
+def _paper_figures_dir() -> Path:
+    return _paper_root() / "figures"
+
+
 class BioNetworkOverlay:
     def __init__(self):
         self.results = []
         self.processed_dir = os.path.join(os.path.dirname(__file__), '../../data/bio/processed')
         self.sweep_path = os.path.join(os.path.dirname(__file__), '../../results/bio/phase_transition/phase_transition_sweep.csv')
         self.output_csv = os.path.join(os.path.dirname(__file__), '../../results/bio/phase_transition/bio_overlay.csv')
-        self.output_plot = os.path.join(os.path.dirname(__file__), '../../4ClaudeCode/claude-Nature/paper/figures/phase_transition_overlay.png')
+        self.output_plot = os.getenv("BIO_OVERLAY_PLOT", str(_paper_figures_dir() / "phase_transition_overlay.png"))
 
     def load_network(self, filepath):
         with open(filepath, 'r') as f:

@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,13 +16,37 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
 from data.cancer_network_builder import CancerNetworkBuilder
 
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _paper_root() -> Path:
+    env = os.getenv("CAUSALBOOL_PAPER_ROOT")
+    if env:
+        return Path(env).expanduser().resolve()
+    repo = _repo_root()
+    candidates = [
+        repo / "workspaces" / "claude-nature" / "paper",
+        repo / "workspaces" / "level8-paper" / "paper",
+        repo / "4ClaudeCode" / "claude-Nature" / "paper",
+    ]
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return candidates[-1]
+
+
+def _paper_figures_dir() -> str:
+    return str(_paper_root() / "figures")
+
+
 # Configuration
 DATA_DIR = os.getenv("CANCER_DATA_DIR", "data/cancer/patients")
 METADATA_PATH = os.getenv("CANCER_METADATA_PATH", "data/cancer/clinical_metadata.csv")
 TCGA_INDEX_PATH = os.getenv("TCGA_INDEX_PATH", "")
 OUTPUT_DIR = os.getenv("CANCER_OUTPUT_DIR", "results/cancer")
 OUTPUT_BASENAME = os.getenv("CANCER_OUTPUT_BASENAME", "corruption_metrics.csv")
-FIGURE_DIR = os.getenv("CANCER_FIGURE_DIR", "4ClaudeCode/claude-Nature/paper/figures")
+FIGURE_DIR = os.getenv("CANCER_FIGURE_DIR", _paper_figures_dir())
 TCGA_SWEEP_THRESHOLDS = os.getenv("TCGA_SWEEP_THRESHOLDS", "")
 TCGA_COUNTS_ROOT = os.getenv("TCGA_COUNTS_ROOT", "data/cancer/tcga_paired")
 TCGA_BASE_NETWORK_PATH = os.getenv("TCGA_BASE_NETWORK_PATH", "data/bio/processed/egfr_signaling.json")

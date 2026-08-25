@@ -1,0 +1,63 @@
+In := cm10 = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0}, {1, 0, 1, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 1, 0, 0, 0, 0, 0}, {0, 1, 1, 0, 1, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0, 0, 0}, {0, 0, 0, 0, 1, 0, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0, 0, 0}, {1, 0, 0, 0, 0, 0, 0, 0, 1, 0}, {0, 1, 0, 0, 0, 0, 0, 0, 0, 1}, {0, 0, 1, 1, 0, 0, 1, 1, 0, 0}}
+In := dyn10 = {"AND", "OR", "XOR", "KOFN", "NOR", "XNOR", "NOT", "IMPLIES", "NIMPLIES", "MAJORITY"}
+In := params10 = <|4 -> <|"k" -> 2|>, 8 -> <|"pair" -> {1, 9}|>, 9 -> <|"pair" -> {2, 10}|>|>
+
+(* F1: All outputs active *)
+In := resF110 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpF110 = givePlaces[resF110["DecimalRepertoire"], resF110["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {143, 215, 399, 400, 471, 472}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {143, 215, 399, 400, 471, 472}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+
+(* F2: All active except y10 *)
+In := resF210 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 0}]
+
+(* Unfolding the compressed representation *)
+In := gpF210 = givePlaces[resF210["DecimalRepertoire"], resF210["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {15, 87, 271, 272, 343, 344}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {15, 87, 271, 272, 343, 344}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+
+(* F3: All active except y9 *)
+In := resF310 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpF310 = givePlaces[resF310["DecimalRepertoire"], resF310["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {655, 727, 911, 912, 983, 984}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {655, 727, 911, 912, 983, 984}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True
+
+(* F4: All active except y6 *)
+In := resF410 = mixedQueryRepresentation[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {1, 1, 1, 1, 1, 0, 1, 1, 1, 1}]
+
+(* Unfolding the compressed representation *)
+In := gpF410 = givePlaces[resF410["DecimalRepertoire"], resF410["Sumandos"]]
+
+(* Compressed representation of the query *)
+Out = <|"DecimalRepertoire" -> {79, 207, 335, 336, 463, 464}, "Sumandos" -> {0}|>
+
+(* Exact unfolded repertoire indices *)
+Out = {79, 207, 335, 336, 463, 464}
+
+(* Exact corroboration against the exhaustive baseline *)
+Out = True

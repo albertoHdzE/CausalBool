@@ -1,0 +1,193 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      9170,        184]
+NotebookOptionsPosition[      6856,        150]
+NotebookOutlinePosition[      7178,        164]
+CellTagsIndexPosition[      7135,        161]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["Cellular Automaton to Network by Deconvolution", "Title",ExpressionUUID->"f79799da-420b-4f3d-ba4b-7742168c34d5"],
+
+Cell["Recovering, describing and verifying the generating network", "Subtitle",ExpressionUUID->"efeed03a-a1ec-4a24-bbfc-7a06c5f8a0e3"],
+
+Cell["\<\
+An elementary cellular automaton is a synchronous Boolean network: each cell \
+is a node connected to its neighbourhood, and the rule is the shared local \
+gate. A space-time diagram gives only a trajectory, in which each row is the \
+input to the next, not the exhaustive input repertoire. This notebook \
+recovers the network from such observations, shows the recovered model in \
+full (its connectivity matrix, its gates, and each cell's index-set rule in \
+pivot and sumandos form), and compares the original pattern with the \
+reconstructed evolution row by row.\
+\>", "Text",ExpressionUUID->"d58e504a-a7bb-4658-837b-8030eeb4f26c"],
+
+Cell["Setup", "Section",ExpressionUUID->"cd750cd7-739d-4540-84d4-dd43a0788e92"],
+
+Cell["\<\
+(* Load the forward method, the deconvolution, the cellular-automaton
+   deconvolution and the demonstration and detail libraries. *)
+nbDir = NotebookDirectory[];
+idDir = ParentDirectory[nbDir];
+root  = ParentDirectory[idDir];
+Get[FileNameJoin[{root, \"papers\", \"method\", \"code\", \"lib\", \
+\"CausalBoolCore.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"Deconvolution.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"CADeconvolution.wl\"}]];
+Get[FileNameJoin[{nbDir, \"CADemoLibrary.wl\"}]];
+Get[FileNameJoin[{nbDir, \"CADetailLibrary.wl\"}]];\
+\>", "Input",ExpressionUUID->"0fd2a8d8-91dc-4a89-b8be-5385929099d5"],
+
+Cell["Walkthrough: rule 90", "Section",ExpressionUUID->"06bcc3ef-cf91-42f9-8ebe-e860b08c0af0"],
+
+Cell["\<\
+Rule 90 is the clearest case: its next value is the exclusive-or of the two \
+outer cells, so the deconvolution drops the irrelevant centre and names the \
+gate XOR over a support of size two.\
+\>", "Text",ExpressionUUID->"a08f8f30-3eeb-4c03-9635-1b2f1b2dde1e"],
+
+Cell["\<\
+diagrams90 = CAMakeEnsemble[90, 12, 10, 80, 1];
+dec90 = DeconvolveCA[diagrams90, 3];
+ver90 = VerifyCA[diagrams90, dec90, 90];
+Print[\"recovered interior gate     : \", dec90[\"reports\"][[6]][\"canonical\
+\"][[1]]];
+Print[\"recovered interior support  : \", \
+dec90[\"reports\"][[6]][\"support\"]];
+Print[\"global map exact            : \", ver90[\"global_map_exact\"]];\
+\>", "Input",ExpressionUUID->"0bf4d6c0-d732-4fb4-b09c-78eb32387cd7"],
+
+Cell["All example rules", "Section",ExpressionUUID->"b45c33bf-a214-45aa-81b0-b6fae7297d4b"],
+
+Cell["\<\
+Across the example rules the recovered networks realise the exact global map. \
+Rule 254 is recovered as OR, rule 232 as MAJORITY, rule 150 as three-input \
+XOR, and the complex rules 30 and 110 as unions of regulatory clauses.\
+\>", "Text",ExpressionUUID->"0a1d0298-9197-4724-bb92-5be6c5f17f38"],
+
+Cell["allPass = RunCADemo[];", "Input",ExpressionUUID->"0c646016-3ef6-408b-b41f-7affcdbb6d74"],
+
+Cell["The recovered network (connectivity and gates)", "Section",ExpressionUUID->"d34a74b6-0ac9-4f02-90ee-8594bf6fe1ca"],
+
+Cell["\<\
+The recovered model is defined exactly like the forward model: a connectivity \
+matrix C, with C[[k]] listing the cells feeding cell k, and one gate per \
+cell. The table lists, for every cell, its gate, its inputs, the size of its \
+one-set (the number of global states in which it fires), and the number of \
+clauses in its index-set rule.\
+\>", "Text",ExpressionUUID->"428fd7dc-c30c-4efc-91eb-909b8ad38a43"],
+
+Cell["\<\
+(* The recovered model is a network: a connectivity matrix and a gate per
+   cell.  We take rule 30, one of the most complex, and show the network. *)
+diagrams30 = CAMakeEnsemble[30, 12, 10, 80, 1];
+dec30 = DeconvolveCA[diagrams30, 3];
+Print[\"the recovered network is C (connectivity) plus one gate per cell\"];
+Print[\"gates: \", dec30[\"gates\"]];
+CBNetworkTable[dec30]\
+\>", "Input",ExpressionUUID->"dc8faedf-d52f-4826-addb-c594e0a9cd30"],
+
+Cell["The index-set rules (pivots and sumandos)", "Section",ExpressionUUID->"b8241cc8-fd9f-44ee-a464-3b16625aa38f"],
+
+Cell["\<\
+Each cell's rule is a short index-set expression: a union of pivot-shifted \
+cosets. Each clause has a pivot, the decimal value of its activator cells, \
+and ranges freely (the sumandos) over the cells it does not fix. Rule 30 at \
+an interior cell is three clauses over its three neighbours; a named gate \
+such as XOR is the same structure with a fixed clause pattern.\
+\>", "Text",ExpressionUUID->"6f0d7205-cbec-4fa1-924f-fcbc3fe3ce08"],
+
+Cell["\<\
+(* Each cell's rule as index-set pivots and sumandos: a union of cosets, one
+   pivot (decimal) per clause, shifted over the free cells. *)
+CBPrintRule[dec30, 6];
+CBPrintRule[dec30, 7];\
+\>", "Input",ExpressionUUID->"e3c8e032-b013-4ea1-ae05-d96f64f66fb1"],
+
+Cell["Original versus reconstructed pattern", "Section",ExpressionUUID->"c4523ed7-0218-4b8b-8571-8d27a1212858"],
+
+Cell["\<\
+The reconstructed network, run forward from the same initial row, reproduces \
+the original space-time diagram exactly; the difference panel is entirely \
+white.\
+\>", "Text",ExpressionUUID->"b4cd23e3-090d-4ee5-b39f-393ca0231920"],
+
+Cell["\<\
+(* Original cellular automaton versus the reconstructed network evolution,
+   with the difference (all white means identical). *)
+cmp30 = CBCompareEvolution[dec30, diagrams30[[1]]];
+Print[\"evolution reproduced exactly: \", cmp30[\"match\"]];
+Row[{cmp30[\"original\"], cmp30[\"reconstructed\"], cmp30[\"difference\"]}]\
+\>", "Input",ExpressionUUID->"62605bb2-da6f-48c5-bbd6-10987f65b8ed"],
+
+Cell["Locating a pattern in time", "Section",ExpressionUUID->"4b38e0ab-6a80-4693-9110-e2bfe3515483"],
+
+Cell["\<\
+Finally we pick a spatial pattern (one row of the diagram) and use the index \
+framework to find every time step at which it recurs, highlighting those rows \
+in red and reporting their indices.\
+\>", "Text",ExpressionUUID->"750f1a6d-d4f3-4e93-bb91-e103a8f451ba"],
+
+Cell["\<\
+(* Locate a chosen spatial pattern in time using the index framework, and
+   highlight the matching rows in red with their time indices. *)
+hl30 = CBHighlightPattern[diagrams30[[1]], diagrams30[[1, 5]]];
+Print[\"target pattern occurs at time steps: \", hl30[\"matching_time_indices\
+\"]];
+hl30[\"plot\"]\
+\>", "Input",ExpressionUUID->"126d5e08-71db-40b0-88bf-7ab00cc5401f"]
+},
+FrontEndVersion->"14.2 for Mac OS X ARM (64-bit) (December 26, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"ca3303f4-8c5b-415d-b05e-3cf93e78c942"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 118, 0, 70, "Title",ExpressionUUID->"f79799da-420b-4f3d-ba4b-7742168c34d5"],
+Cell[675, 22, 134, 0, 70, "Subtitle",ExpressionUUID->"efeed03a-a1ec-4a24-bbfc-7a06c5f8a0e3"],
+Cell[812, 24, 646, 9, 70, "Text",ExpressionUUID->"d58e504a-a7bb-4658-837b-8030eeb4f26c"],
+Cell[1461, 35, 79, 0, 70, "Section",ExpressionUUID->"cd750cd7-739d-4540-84d4-dd43a0788e92"],
+Cell[1543, 37, 623, 12, 70, "Input",ExpressionUUID->"0fd2a8d8-91dc-4a89-b8be-5385929099d5"],
+Cell[2169, 51, 94, 0, 70, "Section",ExpressionUUID->"06bcc3ef-cf91-42f9-8ebe-e860b08c0af0"],
+Cell[2266, 53, 271, 4, 70, "Text",ExpressionUUID->"a08f8f30-3eeb-4c03-9635-1b2f1b2dde1e"],
+Cell[2540, 59, 450, 9, 70, "Input",ExpressionUUID->"0bf4d6c0-d732-4fb4-b09c-78eb32387cd7"],
+Cell[2993, 70, 91, 0, 70, "Section",ExpressionUUID->"b45c33bf-a214-45aa-81b0-b6fae7297d4b"],
+Cell[3087, 72, 306, 4, 70, "Text",ExpressionUUID->"0a1d0298-9197-4724-bb92-5be6c5f17f38"],
+Cell[3396, 78, 94, 0, 70, "Input",ExpressionUUID->"0c646016-3ef6-408b-b41f-7affcdbb6d74"],
+Cell[3493, 80, 120, 0, 70, "Section",ExpressionUUID->"d34a74b6-0ac9-4f02-90ee-8594bf6fe1ca"],
+Cell[3616, 82, 420, 6, 70, "Text",ExpressionUUID->"428fd7dc-c30c-4efc-91eb-909b8ad38a43"],
+Cell[4039, 90, 452, 8, 70, "Input",ExpressionUUID->"dc8faedf-d52f-4826-addb-c594e0a9cd30"],
+Cell[4494, 100, 115, 0, 70, "Section",ExpressionUUID->"b8241cc8-fd9f-44ee-a464-3b16625aa38f"],
+Cell[4612, 102, 449, 6, 70, "Text",ExpressionUUID->"6f0d7205-cbec-4fa1-924f-fcbc3fe3ce08"],
+Cell[5064, 110, 265, 5, 70, "Input",ExpressionUUID->"e3c8e032-b013-4ea1-ae05-d96f64f66fb1"],
+Cell[5332, 117, 111, 0, 70, "Section",ExpressionUUID->"c4523ed7-0218-4b8b-8571-8d27a1212858"],
+Cell[5446, 119, 240, 4, 70, "Text",ExpressionUUID->"b4cd23e3-090d-4ee5-b39f-393ca0231920"],
+Cell[5689, 125, 398, 6, 70, "Input",ExpressionUUID->"62605bb2-da6f-48c5-bbd6-10987f65b8ed"],
+Cell[6090, 133, 100, 0, 70, "Section",ExpressionUUID->"4b38e0ab-6a80-4693-9110-e2bfe3515483"],
+Cell[6193, 135, 273, 4, 70, "Text",ExpressionUUID->"750f1a6d-d4f3-4e93-bb91-e103a8f451ba"],
+Cell[6469, 141, 383, 7, 70, "Input",ExpressionUUID->"126d5e08-71db-40b0-88bf-7ab00cc5401f"]
+}
+]
+*)
+
+(* End of internal cache information *)

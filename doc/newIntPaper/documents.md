@@ -36,7 +36,7 @@
   - `docProcess.tex` — supplementary documentation of process and experiments (updated per ticket)
 
 ## Pattern Formulae Documents
-- LaTeX derivations reside in `doc/causalBinpaper/`:
+- LaTeX derivations reside in `papers/method/derivations/`:
   - `01_causalBool_inputs.tex` — ordered exhaustive repertoire patterns and methodology
   - `02_cb_and.tex` — application to `AND` dynamics
   - `exam.tex` — exploratory generalisations
@@ -44,28 +44,28 @@
 - Summarise formulae in manuscript sections (`theory.md` and `results.md`) with links to sensitivity/influence and canalisation properties.
 
 ### Per‑Gate Analysis Document Naming
-- `doc/causalBinpaper/02_cb_or.tex` — OR dynamics
-- `doc/causalBinpaper/02_cb_xor.tex` — XOR dynamics (parity)
-- `doc/causalBinpaper/02_cb_nand.tex` — NAND dynamics (monotone complement)
-- `doc/causalBinpaper/02_cb_nor.tex` — NOR dynamics (monotone complement)
-- `doc/causalBinpaper/02_cb_xnor.tex` — XNOR dynamics (equivalence)
-- `doc/causalBinpaper/02_cb_not.tex` — NOT unary inversion
-- `doc/causalBinpaper/02_cb_impl.tex` — IMPLIES/NIMPLIES asymmetric entailment
-- `doc/causalBinpaper/02_cb_kofn.tex` — k‑of‑n threshold bands
-- `doc/causalBinpaper/02_cb_canalising.tex` — canalising/nested‑canalising collapse
+- `papers/method/derivations/02_cb_or.tex` — OR dynamics
+- `papers/method/derivations/02_cb_xor.tex` — XOR dynamics (parity)
+- `papers/method/derivations/02_cb_nand.tex` — NAND dynamics (monotone complement)
+- `papers/method/derivations/02_cb_nor.tex` — NOR dynamics (monotone complement)
+- `papers/method/derivations/02_cb_xnor.tex` — XNOR dynamics (equivalence)
+- `papers/method/derivations/02_cb_not.tex` — NOT unary inversion
+- `papers/method/derivations/02_cb_impl.tex` — IMPLIES/NIMPLIES asymmetric entailment
+- `papers/method/derivations/02_cb_kofn.tex` — k‑of‑n threshold bands
+- `papers/method/derivations/02_cb_canalising.tex` — canalising/nested‑canalising collapse
 
 ### Index Formulae Derivations
 - Each per‑gate document should include a closed‑form index formula describing the set of repertoire indices where the gate outputs 1 over ordered inputs (e.g., `pivot + offset` for AND/NAND, unions for OR/NOR, parity constraints for XOR/XNOR, band conditions for KOFN, canalising collapse for specified parameters).
 - Provide numeric and symbolic examples with matrices and tables; verify against empirical repertoires.
 
 ### Mixed Dynamics Composition
-- Use `doc/causalBinpaper/exam.tex` to present intuitive composition across mixed gate networks:
+- Use `papers/method/derivations/exam.tex` to present intuitive composition across mixed gate networks:
   - Combine per‑gate formulae via network connectivity and subsystem partitions.
   - Explain interaction effects (synergy, redundancy, canalisation) in mixed settings.
   - Provide examples and figures with ordered inputs and outputs.
 
 ### Documentation Format Requirements (per‑gate)
-- Follow the structure exemplified by `doc/causalBinpaper/02_cb_and.tex` for every gate document:
+- Follow the structure exemplified by `papers/method/derivations/02_cb_and.tex` for every gate document:
   - Abstract, Intuition, Problem Definition, Data Structure, Mathematical Formulation, Index Formula, Step‑by‑Step Explanation, Examples, Discussion, Conclusion
 - Use professional typesetting in `docProcess.tex` (bmatrix, align, booktabs) for all examples.
 - Ensure proofs/derivations are complete and link to empirical validations.

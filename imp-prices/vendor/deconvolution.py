@@ -1,0 +1,401 @@
+"""deconvolution.py
+
+Index-set deconvolution for synchronous Boolean networks.
+
+Given only the output repertoire of a network (a ``2**n x n`` binary matrix)
+this module recovers, per node, the exact pair ``(I_c, f)`` where ``I_c`` is the
+set of connected inputs and ``f`` is the Boolean function on those inputs, and
+then names ``f`` with the canonical CausalBool gate family.
+
+Method (see ``bitacora/01_deconvolution_method_design.md`` for the full
+derivation).  The forward CausalBool transform factorises over nodes: output
+column ``k`` is a function of the connected inputs only, with the disconnected
+nodes contributing only the free offset dimension, whose decimal encoding is
+the "sumandos".  Therefore
+deconvolution factorises into independent per-column problems, each solved
+exactly by:
+
+  1. Essential-variable detection by single-bit perturbation.  Bit ``i`` is a
+     connected input of node ``k`` iff flipping bit ``i`` of some input changes
+     column ``k``.  Perturbing a disconnected node never changes the output;
+     perturbing a connected node can.  This is the exact, deterministic analogue
+     of the perturbation step in Zenil's algorithmic-information deconvolution.
+
+  2. Gate identification.  Restrict the column to its essential variables to
+     obtain a reduced truth table, then match it against every canonical gate
+     signature (searching KOFN and CANALISING parameters).  Because the forward
+     method is an exact index-set formula, this inversion is exact and the
+     reconstructed network reproduces the repertoire byte for byte.
+
+Node/bit indices are 0-based, matching :mod:`causalbool`.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from causalbool import Network, apply_gate, truth_table, repertoire
+
+
+# ---------------------------------------------------------------------------
+# Step 1 - essential-variable detection (connected vs free coordinates)
+#
+# Terminology, GOVERNANCE/GLOSSARY.md sec.1c (in-repo synchronized copy; canonical at ../series-deconvolution): the complement of the PIVOT COORDINATES is the
+# FREE COORDINATES, *not* the sumandos.  Each side has its own decimal encoding --
+# connected -> decimal anchor, free -> sumandos -- so pairing "pivots vs sumandos"
+# puts a set opposite an encoding.  It also wrongly suggests a lossy split: this
+# factorisation is EXACT, Dec(L,S) = {l+s} rebuilds the repertoire, so there is no
+# residual here.  pivot/residual is the lossy pair, and it belongs to causal
+# reachability, not to this method.
+# ---------------------------------------------------------------------------
+
+def essential_variables(column: list[int], n: int) -> list[int]:
+    """Return the ascending list of bit positions on which ``column`` depends.
+
+    Bit ``i`` is essential iff there exists an input ``x`` with
+    ``column[x] != column[x ^ (1 << i)]``.  These are exactly the connected
+    inputs -- the PIVOT COORDINATES.  The remaining bits are the FREE
+    COORDINATES; their subset sums are the sumandos.  (The sumandos are the
+    free coordinates' decimal *encoding*, not the coordinates themselves --
+    GOVERNANCE/GLOSSARY.md sec.1c.)
+    """
+    if len(column) != 2 ** n:
+        raise ValueError("column length must be 2**n")
+    essential = []
+    for i in range(n):
+        # Create a number with only the i-th bit set (1 shifted left by i positions)
+        # Example: if i=2 (0-based, 3rd bit), 1 << 2 = 4 (binary 100)
+        # This lets us check if flipping just that one bit changes the output
+        bit = 1 << i
+        sensitive = False
+        for x in range(2 ** n):
+            if x & bit:
+                continue  # visit each unordered pair once (x has bit i = 0)
+            if column[x] != column[x | bit]:
+                sensitive = True
+                break
+        if sensitive:
+            essential.append(i)
+    return essential
+
+
+def reduce_column(column: list[int], n: int, essential: list[int]) -> list[int]:
+    """Project ``column`` onto its essential variables.
+
+    Returns a length ``2**m`` reduced truth table (``m = len(essential)``),
+    enumerated LSB-first over the essential variables in ascending order.
+    Raises ``AssertionError`` if the column is not in fact constant across the
+    non-essential dimension, which would indicate the essential set is wrong.
+    """
+    m = len(essential)
+    reduced: list[int] = [-1] * (2 ** m)
+    for x in range(2 ** n):
+        y = 0
+        for j, e in enumerate(essential):
+            if x & (1 << e):
+                y |= (1 << j)
+        val = column[x]
+        if reduced[y] == -1:
+            reduced[y] = val
+        else:
+            assert reduced[y] == val, (
+                "non-essential variable affects output; essential set is wrong"
+            )
+    assert all(v != -1 for v in reduced)
+    return reduced
+
+
+# ---------------------------------------------------------------------------
+# Step 2 - gate identification against the canonical family
+# ---------------------------------------------------------------------------
+
+# Canonical priority: simplest / most specific named gates first.  Any match
+# reproduces the reduced truth table exactly, so this ordering only selects the
+# representative reported as canonical; the full match list records ambiguity.
+_CANONICAL_PRIORITY = (
+    "AND", "OR", "NAND", "NOR", "XOR", "XNOR",
+    "NOT", "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "REGULATORY", "CANALISING",
+    "REGULATORY_DNF",
+)
+
+
+def minimal_dnf(reduced: list[int]) -> list[dict]:
+    """Cover the on-set of a reduced truth table by regulatory clauses.
+
+    Uses Quine-McCluskey to find the prime implicants and a greedy set cover to
+    choose a compact subset.  Each returned clause is a dict with ``activators``
+    (variables required to be 1) and ``inhibitors`` (required to be 0); variables
+    in neither are don't-care.  The union of the clauses' cosets equals the
+    on-set exactly.
+    """
+    m = (len(reduced)).bit_length() - 1
+    minterms = [y for y, v in enumerate(reduced) if v == 1]
+    if not minterms:
+        return []
+
+    full_mask = (1 << m) - 1
+    terms = {(y, full_mask) for y in minterms}  # (fixed bits, fixed mask)
+    primes: set[tuple[int, int]] = set()
+    while terms:
+        merged: set[tuple[int, int]] = set()
+        used: set[tuple[int, int]] = set()
+        tlist = list(terms)
+        for i in range(len(tlist)):
+            for j in range(i + 1, len(tlist)):
+                b1, mask1 = tlist[i]
+                b2, mask2 = tlist[j]
+                if mask1 != mask2:
+                    continue
+                diff = b1 ^ b2
+                if diff and (diff & (diff - 1)) == 0 and (diff & mask1):
+                    newmask = mask1 & ~diff
+                    merged.add((b1 & newmask, newmask))
+                    used.add(tlist[i])
+                    used.add(tlist[j])
+        for t in terms:
+            if t not in used:
+                primes.add(t)
+        terms = merged
+
+    def covers(prime: tuple[int, int], mt: int) -> bool:
+        b, mask = prime
+        return (mt & mask) == b
+
+    prime_list = list(primes)
+    uncovered = set(minterms)
+    chosen: list[tuple[int, int]] = []
+    while uncovered:
+        best = max(prime_list,
+                   key=lambda p: sum(1 for mt in uncovered if covers(p, mt)))
+        chosen.append(best)
+        uncovered = {mt for mt in uncovered if not covers(best, mt)}
+
+    clauses = []
+    for b, mask in chosen:
+        activators = [j for j in range(m) if (mask >> j) & 1 and (b >> j) & 1]
+        inhibitors = [j for j in range(m) if (mask >> j) & 1 and not ((b >> j) & 1)]
+        clauses.append({"activators": activators, "inhibitors": inhibitors})
+    return clauses
+
+
+@dataclass
+class GateMatch:
+    gate: str
+    params: dict = field(default_factory=dict)
+
+    def as_dict(self) -> dict:
+        return {"gate": self.gate, "params": dict(self.params)}
+
+
+def _candidate_gates(m: int) -> list[GateMatch]:
+    """Enumerate all (gate, params) candidates for arity ``m``."""
+    cands: list[GateMatch] = []
+    if m == 0:
+        return cands  # constant handled separately
+    for g in ("AND", "OR", "XOR", "NAND", "NOR", "XNOR", "MAJORITY"):
+        cands.append(GateMatch(g))
+    if m == 1:
+        cands.append(GateMatch("NOT"))
+    if m == 2:
+        cands.append(GateMatch("IMPLIES"))
+        cands.append(GateMatch("NIMPLIES"))
+    for k in range(1, m + 1):
+        cands.append(GateMatch("KOFN", {"k": k}))
+    for ci in range(m):
+        for cv in (0, 1):
+            for co in (0, 1):
+                cands.append(GateMatch(
+                    "CANALISING",
+                    {"canalisingIndex": ci, "canalisingValue": cv,
+                     "canalisedOutput": co},
+                ))
+    return cands
+
+
+def identify_gate(reduced: list[int]) -> tuple[list[GateMatch], GateMatch]:
+    """Match a reduced truth table against the canonical gate family.
+
+    Returns ``(matches, canonical)`` where ``matches`` is every candidate whose
+    truth table equals ``reduced`` (the ambiguity/equivalence class) and
+    ``canonical`` is the highest-priority representative.  Handles the constant
+    (arity 0) case with the pseudo-gates ``TRUE`` / ``FALSE``.
+    """
+    m = (len(reduced)).bit_length() - 1  # log2 of length
+    if 2 ** m != len(reduced):
+        raise ValueError("reduced table length must be a power of two")
+
+    if m == 0:
+        g = "TRUE" if reduced[0] == 1 else "FALSE"
+        match = GateMatch(g)
+        return [match], match
+
+    matches = [c for c in _candidate_gates(m)
+               if truth_table(c.gate, m, c.params) == reduced]
+
+    # Regulatory (activator/inhibitor) clause: the reduced truth table has a
+    # single 1, whose position encodes which inputs are activators (bit 1) and
+    # which are inhibitors (bit 0).  This names the mixed AND-NOT functions that
+    # pervade gene-regulatory logic and have no other canonical name.
+    if sum(reduced) == 1:
+        ystar = reduced.index(1)
+        activators = [j for j in range(m) if (ystar >> j) & 1]
+        matches.append(GateMatch("REGULATORY", {"activators": activators, "arity": m}))
+
+    # Regulatory disjunctive normal form: any regulatory function as a compact
+    # union of activator/inhibitor clauses (a union of anchor-shifted cosets).
+    # Named only when it genuinely compresses the on-set and the arity is small
+    # enough for the cover to be meaningful; otherwise the look-up table stands.
+    if 1 < sum(reduced) < len(reduced) and m <= 12:
+        clauses = minimal_dnf(reduced)
+        params = {"clauses": clauses, "arity": m}
+        if truth_table("REGULATORY_DNF", m, params) == reduced and len(clauses) < sum(reduced):
+            matches.append(GateMatch("REGULATORY_DNF", params))
+
+    if not matches:
+        # No canonical gate reproduces this function.  Report as a raw truth
+        # table so the caller can still reconstruct via an explicit LUT.
+        lut = GateMatch("LUT", {"table": list(reduced)})
+        return [lut], lut
+
+    def priority(mm: GateMatch) -> tuple[int, int]:
+        base = _CANONICAL_PRIORITY.index(mm.gate)
+        # Prefer smaller k for KOFN, lower index for canalising: stable choice.
+        secondary = mm.params.get("k", 0) + mm.params.get("canalisingIndex", 0)
+        return (base, secondary)
+
+    canonical = min(matches, key=priority)
+    return matches, canonical
+
+
+# ---------------------------------------------------------------------------
+# Per-node and full-network deconvolution
+# ---------------------------------------------------------------------------
+
+@dataclass
+class NodeReconstruction:
+    node: int
+    connected_inputs: list[int]
+    reduced_truth_table: list[int]
+    matches: list[GateMatch]
+    canonical: GateMatch
+
+    def as_dict(self) -> dict:
+        return {
+            "node": self.node,
+            "connected_inputs": list(self.connected_inputs),
+            "arity": len(self.connected_inputs),
+            "reduced_truth_table": list(self.reduced_truth_table),
+            "num_matches": len(self.matches),
+            "matches": [m.as_dict() for m in self.matches],
+            "canonical": self.canonical.as_dict(),
+        }
+
+
+def deconvolve_column(column: list[int], n: int, node: int) -> NodeReconstruction:
+    """Deconvolve a single output column into ``(I_c, gate)``."""
+    ic = essential_variables(column, n)
+    reduced = reduce_column(column, n, ic)
+    matches, canonical = identify_gate(reduced)
+    return NodeReconstruction(node, ic, reduced, matches, canonical)
+
+
+def deconvolve(rep: list[list[int]]) -> tuple[Network, list[NodeReconstruction]]:
+    """Deconvolve a full ``2**n x n`` repertoire into a :class:`Network`.
+
+    Returns the reconstructed network and the per-node reconstruction reports.
+    The reconstructed network is built so that its canonical gate is applied to
+    its connected inputs in ascending order, matching the forward method.
+    """
+    R = len(rep)
+    n = len(rep[0])
+    if 2 ** n != R:
+        raise ValueError("repertoire must have 2**n rows and n columns")
+
+    reports: list[NodeReconstruction] = []
+    C = [[0] * n for _ in range(n)]
+    gates: list[str] = ["FALSE"] * n
+    params: list[dict] = [dict() for _ in range(n)]
+
+    for k in range(n):
+        column = [rep[x][k] for x in range(R)]
+        rec = deconvolve_column(column, n, k)
+        reports.append(rec)
+        for i in rec.connected_inputs:
+            C[k][i] = 1
+        gates[k] = rec.canonical.gate
+        params[k] = dict(rec.canonical.params)
+
+    net = Network(n=n, C=C, gates=gates, params=params)
+    return net, reports
+
+
+# ---------------------------------------------------------------------------
+# Verification
+# ---------------------------------------------------------------------------
+
+def _apply_reconstructed_column(rec: NodeReconstruction, n: int) -> list[int]:
+    """Recompute a node column from its reconstruction (supports LUT gates)."""
+    ic = rec.connected_inputs
+    g = rec.canonical
+    col = []
+    for x in range(2 ** n):
+        sub = [(x >> i) & 1 for i in ic]
+        if g.gate == "TRUE":
+            col.append(1)
+        elif g.gate == "FALSE":
+            col.append(0)
+        elif g.gate == "LUT":
+            y = 0
+            for j in range(len(ic)):
+                if sub[j]:
+                    y |= (1 << j)
+            col.append(g.params["table"][y])
+        else:
+            col.append(apply_gate(g.gate, sub, g.params))
+    return col
+
+
+def verify_forward(original: list[list[int]], net: Network) -> dict:
+    """Provably non-circular verification: rebuild the whole repertoire through
+    the forward model from the recovered network ``(C, gates, params)`` and
+    compare it to the original.
+
+    This shares nothing with the deconvolution's internal bookkeeping: it takes
+    the recovered network object and runs the same forward transform used to
+    generate any network's behaviour.  It is the honest test that the recovered
+    structure reproduces the data, as opposed to replaying a stored column.
+    """
+    rebuilt = repertoire(net)
+    exact = rebuilt == original
+    mismatched = [k for k in range(len(original[0]))
+                  if [row[k] for row in rebuilt] != [row[k] for row in original]]
+    return {"exact": exact, "mismatched_nodes": mismatched,
+            "n_nodes": len(original[0]), "repertoire_rows": len(original)}
+
+
+def verify(original: list[list[int]], reports: list[NodeReconstruction]) -> dict:
+    """Check that the reconstruction reproduces the original repertoire exactly.
+
+    Reconstruction is done from the per-node reports.  Note the scope honestly:
+    for a node named LUT the stored truth table is replayed, so reproduction is
+    exact by construction; the non-trivial content is the recovered functional
+    connectivity (which drives the reduction) and the named-gate identification.
+    For a fully independent check that shares no bookkeeping with the
+    deconvolution, use :func:`verify_forward` on the recovered network.
+    """
+    R = len(original)
+    n = len(original[0])
+    exact = True
+    mismatched_nodes = []
+    for k in range(n):
+        col_orig = [original[x][k] for x in range(R)]
+        col_rec = _apply_reconstructed_column(reports[k], n)
+        if col_orig != col_rec:
+            exact = False
+            mismatched_nodes.append(k)
+    return {
+        "exact": exact,
+        "mismatched_nodes": mismatched_nodes,
+        "n_nodes": n,
+        "repertoire_rows": R,
+    }

@@ -1,0 +1,96 @@
+{
+  "document_id": "LEV8-THEORY-MAP-2026-04-06",
+  "date": "2026-04-06",
+  "proxy_boundary": {
+    "D_gzip": {
+      "label": "D_gzip",
+      "definition": "len(gzip(cm.tobytes())) on canonicalized adjacency",
+      "used_in": [
+        "Figure 1 null-family meta-analysis (paper/code/analysis_pipeline.py)",
+        "Bias-defense and stress-testing suites (paper/code/analysis_pipeline.py)"
+      ]
+    },
+    "D_v2": {
+      "label": "D^(v2)",
+      "definition": "UniversalDv2Encoder(cm).compute()['dv2'] on adjacency",
+      "used_in": [
+        "KR-A essentiality Delta_D dataset (src/analysis/Essentiality_Prediction_v3.py)",
+        "DepMap validation Mean_Delta_D (src/analysis/DepMap_Validation.py)",
+        "Cancer corruption paired Delta_D^(v2) (src/analysis/Cancer_Corruption.py)"
+      ]
+    }
+  },
+  "objects": [
+    {
+      "theory": "Structural description length of wiring diagram",
+      "symbol": "D(G)",
+      "computed": "D_gzip(G)",
+      "artifact_fields": [
+        "results_summary.csv:D_bio",
+        "results_summary.csv:D_random_mean"
+      ],
+      "implementation": "paper/code/analysis_pipeline.py:compute_compression_complexity",
+      "units": "bytes",
+      "exactness": "proxy",
+      "assumptions": [
+        "adjacency-only encoding",
+        "canonical ordering by degree; optional WL tie-break"
+      ]
+    },
+    {
+      "theory": "Null comparison statistic",
+      "symbol": null,
+      "computed": "z_score=(D_random_mean - D_bio)/D_random_std; p_value=Pr(D_null<=D_bio)",
+      "artifact_fields": [
+        "results_summary.csv:z_score",
+        "results_summary.csv:p_value"
+      ],
+      "implementation": "paper/code/analysis_pipeline.py:compute_D_bio_vs_random",
+      "units": "z, probability",
+      "exactness": "proxy",
+      "assumptions": [
+        "empirical null (finite n_random)",
+        "one-sided p_value"
+      ]
+    },
+    {
+      "theory": "Information lost if node removed",
+      "symbol": "ΔD(v)",
+      "computed": "Delta_D = D^(v2)(G) - D^(v2)(G\\{v})",
+      "artifact_fields": [
+        "results/bio/essentiality_prediction_dataset.csv:Delta_D"
+      ],
+      "implementation": "src/analysis/Essentiality_Prediction_v3.py",
+      "units": "encoder units (bits proxy)",
+      "exactness": "proxy",
+      "assumptions": [
+        "UniversalDv2Encoder approximation",
+        "node removal by deleting row/column"
+      ]
+    },
+    {
+      "theory": "Paired corruption (tumor vs normal)",
+      "symbol": "ΔD^(v2)",
+      "computed": "Delta_D = D_tumor - D_normal",
+      "artifact_fields": [
+        "results/cancer*/corruption_metrics*.csv:Delta_D"
+      ],
+      "implementation": "src/analysis/Cancer_Corruption.py",
+      "units": "encoder units (bits proxy)",
+      "exactness": "proxy",
+      "assumptions": [
+        "frozen scaffold; tumor instantiation by expression-triggered fixing/pruning",
+        "paired index correctness is required"
+      ]
+    }
+  ],
+  "ordering_policy": {
+    "default": "degree sort",
+    "tie_breaker": [
+      "index",
+      "wl"
+    ],
+    "wl_iterations": 4
+  }
+}
+

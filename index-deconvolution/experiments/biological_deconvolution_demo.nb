@@ -1,0 +1,177 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      8292,        168]
+NotebookOptionsPosition[      6162,        136]
+NotebookOutlinePosition[      6484,        150]
+CellTagsIndexPosition[      6441,        147]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell["Deconvolving Biological Networks", "Title",ExpressionUUID->"68d30592-3a08-494d-850b-78a00115fd44"],
+
+Cell["\<\
+Recovering, describing and verifying gene-regulatory networks\
+\>", "Subtitle",ExpressionUUID->"64a276e7-01f7-49f0-82e0-8acc45695893"],
+
+Cell["\<\
+The algorithmic-information causal calculus of Zenil and colleagues applies \
+its perturbation analysis to biological networks but reconstructs only \
+cellular automata, never the biological networks themselves. Here the \
+index-set deconvolution recovers real gene-regulatory Boolean networks \
+exactly from their output repertoire, shows the recovered model in full (its \
+connectivity matrix, its gates, and each node's index-set rule), and compares \
+the original repertoire with the reconstructed one.\
+\>", "Text",ExpressionUUID->"1e709b10-87fa-4fb4-b641-69374720ffe3"],
+
+Cell["The regulatory gate family", "Section",ExpressionUUID->"9e16d517-dba3-45cf-aba9-722aaae65d74"],
+
+Cell["\<\
+Real regulatory logic is dominated by conjunctions: a gene is expressed when \
+its activators are present and its repressors absent. The single-repressor \
+case is NIMPLIES and the all-repressor case is NOR; the mixed case is the \
+REGULATORY gate, and unions of clauses are the regulatory disjunctive normal \
+form. Each is a union of pivot-shifted cosets in the index set.\
+\>", "Text",ExpressionUUID->"ad7f516f-4218-421a-ad29-2f2b054292c7"],
+
+Cell["Setup", "Section",ExpressionUUID->"be545806-ec22-47bf-90df-345a4c49d491"],
+
+Cell["\<\
+(* Load the forward method, the deconvolution and its extensions, and the
+   biological demonstration and detail libraries. *)
+nbDir = NotebookDirectory[];
+idDir = ParentDirectory[nbDir];
+root  = ParentDirectory[idDir];
+Get[FileNameJoin[{root, \"papers\", \"method\", \"code\", \"lib\", \
+\"CausalBoolCore.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"Deconvolution.wl\"}]];
+Get[FileNameJoin[{idDir, \"src\", \"CADeconvolution.wl\"}]];
+Get[FileNameJoin[{nbDir, \"BioDemoLibrary.wl\"}]];
+Get[FileNameJoin[{nbDir, \"CADetailLibrary.wl\"}]];
+Get[FileNameJoin[{nbDir, \"BioDetailLibrary.wl\"}]];
+biocasesPath = FileNameJoin[{idDir, \"crosscheck\", \"bio_cases.json\"}];\
+\>", "Input",ExpressionUUID->"135241a1-641f-4eac-8060-03357f253140"],
+
+Cell["Deconvolve all the biological networks", "Section",ExpressionUUID->"5c078c0d-e989-4e08-b2cf-4cf192beffcc"],
+
+Cell["\<\
+(* Deconvolve each biological network from its output repertoire alone and
+   confirm the recovered network reproduces the repertoire exactly. *)
+bioPass = RunBioDemo[biocasesPath];\
+\>", "Input",ExpressionUUID->"8b77f525-ebf1-434c-9ae0-2c8d601ea4a1"],
+
+Cell["The recovered network (connectivity and gates)", "Section",ExpressionUUID->"c39db910-b781-4b2e-8a5b-91d9247c4900"],
+
+Cell["\<\
+The recovered model is defined exactly like the forward model: a connectivity \
+matrix and one gate per node. The table lists each node's gate, its inputs, \
+the size of its one-set, and the number of clauses in its index-set rule.\
+\>", "Text",ExpressionUUID->"d16c1a1a-7f0c-4afc-bf8c-c3a99553126b"],
+
+Cell["\<\
+(* Take the fission yeast cell cycle and show the recovered model in full:
+   a connectivity matrix and a gate per node. *)
+cases = Import[biocasesPath, \"RawJSON\"];
+yeast = cases[[1]];
+decY = DeconvolveRepertoire[yeast[\"repertoire\"], yeast[\"n\"]];
+Print[\"model: \", yeast[\"label\"], \"   nodes: \", yeast[\"n\"]];
+Print[\"recovered gates: \", decY[\"gates\"]];
+CBNetworkTable[decY]\
+\>", "Input",ExpressionUUID->"a9c582de-fdd7-40e4-a84e-4543cc75cab6"],
+
+Cell["An index-set rule (pivots and sumandos)", "Section",ExpressionUUID->"aec143aa-2423-43ca-8e79-4e9d82acb2eb"],
+
+Cell["\<\
+The activator/inhibitor node is shown as its index-set rule: a pivot (the \
+decimal value of the activator inputs) and the free inputs (the sumandos) \
+over which it ranges.\
+\>", "Text",ExpressionUUID->"eb7cefb7-aab6-4f14-b196-6389bb21dbf6"],
+
+Cell["\<\
+(* The activator/inhibitor node, in index-set pivot/sumandos form. *)
+regNode = FirstPosition[decY[\"gates\"], \"REGULATORY\"][[1]];
+Print[\"regulatory (activator/inhibitor) node index: \", regNode];
+CBPrintRule[decY, regNode];\
+\>", "Input",ExpressionUUID->"94176a94-34a0-40f0-9eed-6d0f7913619b"],
+
+Cell["Original versus reconstructed repertoire", "Section",ExpressionUUID->"76606642-c6a5-45af-8bfc-c48fcb40062b"],
+
+Cell["\<\
+The reconstructed network reproduces the output repertoire exactly; the \
+difference panel is entirely white.\
+\>", "Text",ExpressionUUID->"3b3d2f8b-1b54-415a-9e4e-4247027b25b2"],
+
+Cell["\<\
+(* Original versus reconstructed repertoire, with the difference. *)
+cmpY = CBCompareRepertoire[decY, yeast[\"repertoire\"]];
+Print[\"repertoire reproduced exactly: \", cmpY[\"match\"]];
+Row[{cmpY[\"original\"], cmpY[\"reconstructed\"], cmpY[\"difference\"]}]\
+\>", "Input",ExpressionUUID->"b0c5ab15-af0a-44d5-b147-152b7f87b40f"],
+
+Cell["Locating a node's one-set", "Section",ExpressionUUID->"77467c79-eda1-4b39-86f2-96bd4d65eb3f"],
+
+Cell["\<\
+Finally we locate the node's one-set, the set of input states in which it \
+fires, and highlight that node's column across the repertoire.\
+\>", "Text",ExpressionUUID->"901d6981-b7a5-48fe-aed3-c33523d40847"],
+
+Cell["\<\
+(* Locate the node's one-set: the input states in which it fires. *)
+idxY = CBOneSetIndices[yeast[\"repertoire\"], regNode];
+Print[\"node \", regNode, \" fires in \", Length[idxY], \" of \", 2^yeast[\"n\
+\"], \" input states\"];
+Print[\"first firing input indices (1-based): \", Take[idxY, UpTo[12]]];
+CBHighlightNodeOneSet[yeast[\"repertoire\"], regNode]\
+\>", "Input",ExpressionUUID->"cf9da693-0760-4c77-984b-bf480352fda6"]
+},
+FrontEndVersion->"14.2 for Mac OS X ARM (64-bit) (December 26, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"adce5334-8d27-417b-aaa6-fbd1a634a3a5"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 104, 0, 70, "Title",ExpressionUUID->"68d30592-3a08-494d-850b-78a00115fd44"],
+Cell[661, 22, 144, 2, 70, "Subtitle",ExpressionUUID->"64a276e7-01f7-49f0-82e0-8acc45695893"],
+Cell[808, 26, 585, 8, 70, "Text",ExpressionUUID->"1e709b10-87fa-4fb4-b641-69374720ffe3"],
+Cell[1396, 36, 100, 0, 70, "Section",ExpressionUUID->"9e16d517-dba3-45cf-aba9-722aaae65d74"],
+Cell[1499, 38, 453, 6, 70, "Text",ExpressionUUID->"ad7f516f-4218-421a-ad29-2f2b054292c7"],
+Cell[1955, 46, 79, 0, 70, "Section",ExpressionUUID->"be545806-ec22-47bf-90df-345a4c49d491"],
+Cell[2037, 48, 744, 14, 70, "Input",ExpressionUUID->"135241a1-641f-4eac-8060-03357f253140"],
+Cell[2784, 64, 112, 0, 70, "Section",ExpressionUUID->"5c078c0d-e989-4e08-b2cf-4cf192beffcc"],
+Cell[2899, 66, 261, 4, 70, "Input",ExpressionUUID->"8b77f525-ebf1-434c-9ae0-2c8d601ea4a1"],
+Cell[3163, 72, 120, 0, 70, "Section",ExpressionUUID->"c39db910-b781-4b2e-8a5b-91d9247c4900"],
+Cell[3286, 74, 310, 4, 70, "Text",ExpressionUUID->"d16c1a1a-7f0c-4afc-bf8c-c3a99553126b"],
+Cell[3599, 80, 468, 9, 70, "Input",ExpressionUUID->"a9c582de-fdd7-40e4-a84e-4543cc75cab6"],
+Cell[4070, 91, 113, 0, 70, "Section",ExpressionUUID->"aec143aa-2423-43ca-8e79-4e9d82acb2eb"],
+Cell[4186, 93, 252, 4, 70, "Text",ExpressionUUID->"eb7cefb7-aab6-4f14-b196-6389bb21dbf6"],
+Cell[4441, 99, 307, 5, 70, "Input",ExpressionUUID->"94176a94-34a0-40f0-9eed-6d0f7913619b"],
+Cell[4751, 106, 114, 0, 70, "Section",ExpressionUUID->"76606642-c6a5-45af-8bfc-c48fcb40062b"],
+Cell[4868, 108, 188, 3, 70, "Text",ExpressionUUID->"3b3d2f8b-1b54-415a-9e4e-4247027b25b2"],
+Cell[5059, 113, 339, 5, 70, "Input",ExpressionUUID->"b0c5ab15-af0a-44d5-b147-152b7f87b40f"],
+Cell[5401, 120, 99, 0, 70, "Section",ExpressionUUID->"77467c79-eda1-4b39-86f2-96bd4d65eb3f"],
+Cell[5503, 122, 217, 3, 70, "Text",ExpressionUUID->"901d6981-b7a5-48fe-aed3-c33523d40847"],
+Cell[5723, 127, 435, 7, 70, "Input",ExpressionUUID->"cf9da693-0760-4c77-984b-bf480352fda6"]
+}
+]
+*)
+
+(* End of internal cache information *)

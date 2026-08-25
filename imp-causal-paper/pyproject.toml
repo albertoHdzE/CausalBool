@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imp-causal-paper"
+version = "0.1.0"
+description = "Standalone implementation of Zenil et al. (2019) algorithmic information calculus"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+authors = [{ name = "OpenAI Coding Agent" }]
+dependencies = [
+  "matplotlib>=3.11,<3.12",
+  "networkx>=3.6,<4",
+  "numpy>=2.4,<3",
+  "pandas>=3.0,<4",
+  "pybdm==0.1.0",
+  "pytest>=9.1,<10",
+  "scipy>=1.17,<2",
+  "setuptools<81",
+  "xlrd>=2.0,<3",
+]
+
+[project.scripts]
+causal-paper = "imp_causal_paper.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

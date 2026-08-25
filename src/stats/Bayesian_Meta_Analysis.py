@@ -5,11 +5,36 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 from datetime import datetime
 import os
+from pathlib import Path
 
 # Configuration
 INPUT_FILE = "results/bio/null_stats.json"
 OUTPUT_DIR = "results/stats"
-FIGURE_DIR = "4ClaudeCode/claude-Nature/paper/figures"
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _paper_root() -> Path:
+    env = os.getenv("CAUSALBOOL_PAPER_ROOT")
+    if env:
+        return Path(env).expanduser().resolve()
+    repo = _repo_root()
+    candidates = [
+        repo / "workspaces" / "claude-nature" / "paper",
+        repo / "workspaces" / "level8-paper" / "paper",
+        repo / "4ClaudeCode" / "claude-Nature" / "paper",
+    ]
+    for c in candidates:
+        if c.is_dir():
+            return c
+    return candidates[-1]
+
+
+def _paper_figures_dir() -> str:
+    return str(_paper_root() / "figures")
+
+
+FIGURE_DIR = os.getenv("BAYES_FIGURE_DIR", _paper_figures_dir())
 SEED = 42
 CHAINS = 4
 DRAWS = 5000

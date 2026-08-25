@@ -1,0 +1,149 @@
+{
+  "config": {
+    "draws_per_null": 20000,
+    "seed": 42,
+    "shape": [
+      14,
+      14
+    ],
+    "primary_sampler": "exact-k uniform over 182 off-diagonal cells"
+  },
+  "observed": {
+    "bdm_gate": 156.449,
+    "edges_gate": 23,
+    "bdm_cpt": 123.368,
+    "edges_cpt": 17,
+    "difference": 33.081
+  },
+  "prose": {
+    "mean_17": 189.39,
+    "sd_17": 22.75,
+    "mean_23": 214.83,
+    "sd_23": 17.4,
+    "density_share_bits": 21.82,
+    "density_share_pct": 66.0,
+    "z_gate": -3.35,
+    "z_cpt": -2.9
+  },
+  "samplers": {
+    "k=17": {
+      "offdiag_182": {
+        "mean": 188.58,
+        "sd": 22.54,
+        "n": 20000
+      },
+      "diag196": {
+        "mean": 190.44,
+        "sd": 22.05,
+        "n": 20000
+      },
+      "upper_tri_91": {
+        "mean": 153.32,
+        "sd": 18.14,
+        "n": 20000
+      },
+      "bernoulli_p_matched": {
+        "mean": 187.25,
+        "sd": 29.43,
+        "n": 20000,
+        "mean_edges_actual": 17.02
+      }
+    },
+    "k=23": {
+      "offdiag_182": {
+        "mean": 212.26,
+        "sd": 17.78,
+        "n": 20000
+      },
+      "diag196": {
+        "mean": 213.66,
+        "sd": 17.09,
+        "n": 20000
+      },
+      "upper_tri_91": {
+        "mean": 168.4,
+        "sd": 16.04,
+        "n": 20000
+      },
+      "bernoulli_p_matched": {
+        "mean": 211.1,
+        "sd": 22.73,
+        "n": 20000,
+        "mean_edges_actual": 23.03
+      }
+    }
+  },
+  "primary_vs_prose": {
+    "mean_17": {
+      "prose": 189.39,
+      "recomputed": 188.58,
+      "verdict": "CLOSE"
+    },
+    "sd_17": {
+      "prose": 22.75,
+      "recomputed": 22.54,
+      "verdict": "CLOSE"
+    },
+    "mean_23": {
+      "prose": 214.83,
+      "recomputed": 212.26,
+      "verdict": "CLOSE"
+    },
+    "sd_23": {
+      "prose": 17.4,
+      "recomputed": 17.78,
+      "verdict": "CLOSE"
+    },
+    "density_share_bits": {
+      "prose": 21.82,
+      "recomputed": 23.68,
+      "verdict": "DIVERGENT"
+    },
+    "z_gate": {
+      "prose": -3.35,
+      "recomputed": -3.14,
+      "verdict": "DIVERGENT"
+    },
+    "z_cpt": {
+      "prose": -2.9,
+      "recomputed": -2.89,
+      "verdict": "CLOSE"
+    },
+    "density_share_pct": {
+      "prose": 66.0,
+      "recomputed": 71.6,
+      "verdict": "DIVERGENT"
+    }
+  },
+  "conclusion_robustness": [
+    {
+      "sampler": "offdiag_182",
+      "share_bits": 23.68,
+      "share_pct": 71.6,
+      "z_gate": -3.14,
+      "z_cpt": -2.89
+    },
+    {
+      "sampler": "diag196",
+      "share_bits": 23.22,
+      "share_pct": 70.2,
+      "z_gate": -3.35,
+      "z_cpt": -3.04
+    },
+    {
+      "sampler": "upper_tri_91",
+      "share_bits": 15.08,
+      "share_pct": 45.6,
+      "z_gate": -0.75,
+      "z_cpt": -1.65
+    },
+    {
+      "sampler": "bernoulli_p_matched",
+      "share_bits": 23.85,
+      "share_pct": 72.1,
+      "z_gate": -2.4,
+      "z_cpt": -2.17
+    }
+  ],
+  "verdict": "DIVERGENT: mean_17, sd_17, mean_23, sd_23, density_share_bits, z_gate, z_cpt, density_share_pct (see AUDIT_FIXING_PLAN_01 Appendix D DEV-2.2)"
+}

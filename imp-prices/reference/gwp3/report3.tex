@@ -1,0 +1,1132 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{array}
+\usepackage{ragged2e}
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
+
+\title{Risk Management \\ GWP3\\[0.3em]}
+\author{Ge Zhang \\ Alberto Hernandez-Espinosa}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+
+\vspace{0.6em}
+
+\section*{On AI usage}
+
+This research used artificial intelligence tools in three limited ways: first, to help with
+literature search and to check academic sources and datasets; second, when refining
+algorithmic implementations and their validation; third, for grammar,
+spelling and style corrections. All intellectual contributions (the
+theoretical framing, the empirical analysis and the final reading of the results) remain entirely our own.
+
+% \tableofcontents
+%\newpage
+
+%==========================================================================
+\section{Introduction}
+
+This report closes the mini-capstone begun in GWP1 and GWP2. The study underneath it is still Danish A.
+Alvi's \textit{Application of Probabilistic Graphical Models in
+Forecasting Crude Oil Price} (University College London, 2018). That dissertation claims that the price
+of crude oil can be forecast in three steps: first, by reducing a panel of macroeconomic and physical-market
+time series into latent regimes via hidden Markov models; second, by learning a belief network over those
+discretised variables with a hill-climbing search; and third, by performing probabilistic inference on
+the network to recover the regime of the oil price in the coming month.
+
+Forecasting the price of crude oil is a well-studied problem, and the literature already tells us
+that its moves come from different types of demand and supply shock (Kilian; Baumeister and Kilian).
+
+Our own findings and conclusions are gathered at the end of the report.
+
+%==========================================================================
+\section{Training, validation and testing sets}
+
+Our dataset has 199 month-end observations, running from January 2010 to July 2026.
+It is put together as follows.
+\begin{itemize}
+    \item \textbf{Variables}: Seven time series in total (see Figure~\ref{fig:panel_gauss}).
+    Three come from Yahoo Finance: front-month WTI and Brent crude futures, plus the US Dollar Index.
+    The remaining four come from the Federal Reserve Economic Data service (see United States, Federal
+    Reserve Bank of St. Louis): the Consumer Price Index, the effective federal funds rate, the industrial
+    production index, and the WTI spot price.
+    \item \textbf{Temporal alignment}: Every series was snapped to the last business day of the month
+    so that all seven variables line up in time.
+    \item \textbf{Outlier handling}: Very large values were capped using the interquartile-range rule,
+    with a multiplier of three, to stop outliers from pulling the rest of the analysis around.
+    \item \textbf{Gap filling}: Where the aligned series had missing observations, they were filled in
+    by linear interpolation along the time axis.
+\end{itemize}
+
+The dataset is then split chronologically into three windows. Table~\ref{tab:roles} sets this division out,
+and the sub-sections below add detail on each window in turn.
+
+\begin{table}[H]
+\centering
+\caption{The division of the dataset between the three windows.}
+\label{tab:roles}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lp{5.1cm}p{4.6cm}r@{}}
+\toprule
+\textbf{Set} & \textbf{What is estimated on it} & \textbf{How often it may be consulted} &
+\textbf{Months} \\
+\midrule
+Training   & Hidden Markov parameters, network structure, conditional probability tables &
+Freely & 139 \\
+Validation & Nothing & Freely, but only to choose between specifications already fitted & 30 \\
+Testing    & Nothing & Once, after every choice has been frozen & 30 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As Table~\ref{tab:roles} makes plain, the split is strictly chronological:
+training comes before validation, and validation before testing. Nothing later is ever used to fit
+anything earlier.
+
+\subsection{The training set}
+
+The training set is the only window where parameters are actually estimated. Three estimation
+problems are solved on it, and they are summarised in Table~\ref{tab:training_tasks}.
+
+\begin{table}[H]
+\centering
+\caption{Estimation tasks performed on the training set}
+\label{tab:training_tasks}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{3.5cm}p{\dimexpr\textwidth-3.5cm-2\tabcolsep\relax}@{}}
+\toprule
+\textbf{Estimation Task} & \textbf{Implementation Details} \\
+\midrule
+Three-state hidden Markov model parameters $(\Pi, A, B)$ (one per time series) & Fitted via the Baum-Welch algorithm (Rabiner); re-estimated from 10 random initialisations to avoid local optima, retaining the solution with the highest log-likelihood. \\
+\midrule
+Belief network structure & Searched via hill climbing over the discretised training dataset (Chickering). \\
+\midrule
+Conditional probability tables (for each node given its parents) & Estimated under a K2 prior (Cooper and Herskovits) to avoid zero probability assignments for unobserved (but not impossible) state configurations, which would occur with maximum-likelihood estimation given the small sample size. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As Table~\ref{tab:roles} also shows, the training window runs from January 2010 to July 2021,
+139 months, or 69.8 per cent of the sample. Critically, it contains the two structural episodes
+that define the modern crude market: the collapse of late 2014, driven by the expansion of US
+shale supply, and the demand destruction of 2020. A training window missing either of those two
+events would leave the model without any experience of crisis dynamics.
+
+\subsection{The validation set}
+
+Nothing is estimated on the validation set. Its job is to choose between specifications that have
+already been fitted on the training set. It is needed because a specification that is chosen only
+by how well it reproduces the training data is partly chosen for how well it reproduces noise.
+Four decisions were settled here:
+
+\begin{enumerate}
+\item the scoring function for the structure search. Three candidates were considered: the K2 score, the Bayesian Dirichlet
+      equivalent uniform score (Heckerman, Geiger and Chickering), or the discrete Bayesian
+      information criterion;
+\item the maximum in-degree allowed in the search, set at 2, 3 or unrestricted; this controls how
+      many parents a node may take on, and therefore how quickly the conditional probability
+      tables become thinly populated;
+\item whether the search is seeded with an expert graph that encodes standard energy-market
+      economics, or started from an empty graph;
+\item the decision threshold that turns the posterior distribution over regimes into an actual
+      position.
+\end{enumerate}
+
+This mirrors the source paper, which experiments with ``different Bayesian Dirichlet scoring
+functions such as the BDeu or K2 and the Bayesian Information Criterion'' (Alvi 41) and notes that
+``the validation step is to adjust the model if the error is too high'' (Alvi 62). The window itself
+runs from August 2021 to January 2024, thirty months covering the post-pandemic recovery and the
+energy shock that followed the invasion of Ukraine. Eighteen configurations were compared on it
+for each of the two specifications reported in Section~\ref{sec:results}.
+
+\subsection{The testing set}
+
+The testing set is used only to measure. It was consulted under three rules:
+
+\begin{enumerate}
+\item it is opened once, after discretisation, structure, parameters and decision threshold have
+      all been frozen;
+\item nothing is adjusted after the fact, because each fresh look would simply turn it into a
+      second validation window;
+\item the error it reports is the number quoted, with no after-the-fact qualification or selection
+      among variants.
+\end{enumerate}
+
+The window runs from February 2024 to July 2026, again 30 months. This follows the spirit of the
+target reference, which suggests at least thirty observations before a proportion can be read
+with any confidence (Alvi 41). A 70:15:15 split was therefore adopted instead of the 80:10:10
+split used in the source. With 199 months, an 80:10:10 split would leave only twenty months on
+each side, and the exact binomial confidence interval around an accuracy of, say, 60 per cent
+would then stretch from roughly 36 to 81 per cent, far too wide to support any firm conclusion.
+The 70:15:15 split keeps the paper's logic while giving 30 months to each hold-out window; even
+so, and as Section~\ref{sec:results} makes clear, the intervals remain wide.
+
+%==========================================================================
+\section{Allocation of the data and comparison of the hold-out sets}
+
+Table~\ref{tab:split} gives the basic statistics for each window, and
+Figure~\ref{fig:allocation} plots the division on top of the price series itself.
+
+\begin{table}[H]
+\centering
+\caption{Allocation of the 199 monthly observations and descriptive statistics of the WTI spot
+price in each window.}
+\label{tab:split}
+\begin{tabular}{@{}lrlrrrrr@{}}
+\toprule
+\textbf{Set} & \textbf{Months} & \textbf{Period} & \textbf{Share} & \textbf{Mean} &
+\textbf{Mean} & \textbf{Vol.} & \textbf{Range} \\
+ & & & (\%) & price & log ret. & log ret. & (USD) \\
+\midrule
+Training   & 139 & 2010-01 to 2021-07 & 69.8 & 69.34 & \phantom{-}0.0001 & 0.1231 & 19.2--113.4 \\
+Validation &  30 & 2021-08 to 2024-01 & 15.1 & 83.61 & \phantom{-}0.0037 & 0.0950 & 66.1--114.4 \\
+Testing    &  30 & 2024-02 to 2026-07 & 15.1 & 73.39 & -0.0000 & 0.1196 & 57.3--108.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/data_allocation.png}
+\caption{Chronological allocation of the sample. The division respects the arrow of time: every
+observation used for model selection postdates every observation used for estimation, and every
+observation used for testing postdates both.}
+\label{fig:allocation}
+\end{figure}
+
+\subsection{Are the two hold-out windows comparable?}
+
+The question that matters here is whether the validation and testing windows describe the market
+in roughly comparable terms. That was tested on the monthly log returns of the WTI spot price
+using three standard tests:
+\begin{itemize}
+    \item a two-sample Kolmogorov-Smirnov test for equality of the full distributions,
+    \item Levene's test for equality of variances,
+    \item and Welch's test for equality of the sample means.
+\end{itemize}
+Table~\ref{tab:ks} gives the results.
+
+\begin{table}[H]
+\centering
+\caption{Tests of distributional equality between the windows, monthly log returns of the WTI spot
+price.}
+\label{tab:ks}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Comparison} & \textbf{KS statistic} & \textbf{KS $p$} & \textbf{Levene $p$} &
+\textbf{Welch $p$} \\
+\midrule
+Training vs validation & 0.144 & 0.647 & 0.921 & 0.860 \\
+Training vs testing    & 0.123 & 0.812 & 0.972 & 0.996 \\
+Validation vs testing  & 0.172 & 0.791 & 0.953 & 0.895 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+None of the tests rejects at the five per cent level. On a statistical reading, then, the three
+windows look much the same in central tendency, spread and overall shape. That is reassuring,
+because it suggests that choosing the model on the validation window is not the same as tuning it
+on a market that behaves completely differently from the one used for final testing. Even so, two
+qualifications are essential.
+
+First, failing to reject is not the same as proving the windows are equal. With around thirty
+observations these tests have low power, and only a very large difference would reliably be
+picked up. Second, similarity in the distribution of returns is not the same thing as similarity
+in the underlying economic environment. The validation window is shaped by a war-driven supply
+shock; the testing window is a period of gradual normalisation. Those two situations can easily
+produce return distributions that look alike on paper even if they are driven by very different
+mechanisms, and it is precisely the mechanism that a belief network claims to capture. The
+comparison therefore licenses the validation procedure, but it does not guarantee that a
+structure learned in one part of the sample will transfer cleanly to another.
+
+\subsection{How the regimes are distributed within each window}
+
+The distributional tests are run on the raw returns, but what the model actually
+forecasts is the regime. The two hold-out windows therefore also need to be compared
+in terms of their regime composition. Table~\ref{tab:shares} reports that breakdown
+for the discretisation kept in Section~\ref{sec:regimes}.
+
+\begin{table}[H]
+\centering
+\caption{Composition of each window by decoded regime of the WTI spot price, log-return emissions
+(per cent of months).}
+\label{tab:shares}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Set} & \textbf{Months} & \textbf{Bear} & \textbf{Stagnant} & \textbf{Bull} \\
+\midrule
+Training   & 138 & 21.7 & 65.9 & 12.3 \\
+Validation &  30 & 23.3 & 63.3 & 13.3 \\
+Testing    &  30 & 13.3 & 73.3 & 13.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The training and validation windows look much alike, but the testing window is noticeably quieter
+than either. The stagnant state accounts for 73.3 per cent of its months, against 63.3 per cent
+in the validation window, and the bear share falls from 23.3 per cent to 13.3 per cent. The
+practical consequences of this shift are summarised below and taken up again in
+Section~\ref{sec:results}.
+
+Table~\ref{tab:window_implications} pulls together the main differences between validation and
+testing that matter when the model is being judged:
+
+\begin{table}[H]
+\centering
+\caption{Key distinctions between validation and testing windows that impact model performance
+assessment. The baselines are measured on the window itself; the 72.4 per cent reported in
+Table~\ref{tab:accuracy} is the same rule measured over the 29 months of the one-month-ahead
+target.}
+\label{tab:window_implications}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{3.5cm}p{5.2cm}p{5.2cm}@{}}
+\toprule
+\textbf{Metric} & \textbf{Validation Window} & \textbf{Testing Window} \\
+\midrule
+Always-stagnant baseline accuracy & 63.3\% & 73.3\% \\
+Number of directional (non-stagnant) months & 11 (36.7\% of window) & 8 (26.7\% of window) \\
+Total economically informative months for forecasting & 11 & 8 \\
+\midrule
+Core evaluation implication & Model accuracy must outperform the lower 63.3\% baseline to demonstrate skill & The higher 73.3\% baseline means raw accuracy can appear inflated without additional context; small sample of directional months produces wide confidence intervals that cannot be resolved by model refinement alone \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Comparison by purpose}
+
+Beyond the numbers, the two sets differ in what a poor result on each one would actually mean:
+
+\begin{itemize}
+    \item A poor result on the validation set is informative, and it is actionable. It tells us to
+    change the scoring function, the in-degree limit or the discretisation, and we can do that as
+    often as we like.
+    \item A poor result on the testing set, by contrast, is terminal for the specification. To
+    start re-working things at that stage would simply corrupt the final estimate.
+\end{itemize}
+
+This asymmetry is the reason both windows are used, and it is why the 18 configurations reported
+in Section~\ref{sec:replication} were compared on the validation window alone.
+
+%==========================================================================
+\section{Regime detection: from prices to discrete evidence}
+\label{sec:regimes}
+
+A discrete belief network needs inputs drawn from a fixed and finite set of states, but our panel
+is made of continuous series. Following the source paper, each series was therefore converted into
+a sequence of three regimes (bear, stagnant, bull) using a three-state hidden Markov model
+estimated on the training window alone (Rabiner). The states were then ordered by the arithmetic
+mean of the underlying monthly change, so that the labels carry an economic meaning rather than
+being arbitrary state numbers.
+
+Two emission schemes were fitted and compared.
+
+\paragraph{Parity emissions (the source paper's scheme).} Each series is first differenced, and each
+change is then reduced to its sign. This yields a two-symbol alphabet: one symbol for an increase
+and zero for a decrease (Alvi 42). The resulting model is a discrete-emission hidden Markov model
+with three hidden states.
+
+\paragraph{Log-return emissions (our modification).} In the modified scheme, the emission is the
+monthly log return itself. To stop extreme observations from distorting things, returns are capped
+at three training-sample standard deviations and then modelled with a Gaussian density with
+diagonal covariance. The transition matrix receives a sticky Dirichlet prior, implemented by
+adding pseudo-counts of five to the diagonal (Fox et al.). In practical terms, this encodes the
+prior belief that market regimes tend to last for several months, rather than swapping every
+month.
+
+In both cases decoding is done \textit{in real time}. Concretely, the regime assigned to month
+$t$ is obtained by running the Viterbi recursion on emissions up to and including month $t$ only.
+This is a deliberate change from the source paper, which decodes each hold-out window as a whole
+(Alvi 60, 63). Decoding an entire window at once lets the state assigned to a given month be
+influenced by what happens later in the sample. The resulting regime series then contains
+information that would not have been available at the time, and any forecast built on it is
+contaminated by look-ahead bias. Our first implementation reproduced that choice and produced a
+nominal one-month-ahead accuracy of 100 per cent, which is a tell-tale sign of leakage rather
+than genuine predictive skill.
+
+\subsection{What the two schemes produce}
+
+Table~\ref{tab:hmm} summarises the fitted models for the WTI spot price, and
+Figure~\ref{fig:transmat} plots the two transition matrices side by side.
+
+\begin{table}[H]
+\centering
+\caption{Hidden Markov models of the WTI spot price estimated on the training window.}
+\label{tab:hmm}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & \textbf{Parity emissions} & \textbf{Log-return emissions} \\
+\midrule
+Log-likelihood & $-92.37$ & $138.53$ \\
+Average diagonal of the transition matrix & 0.000 & 0.742 \\
+Regime switches over 198 months & 189 & 52 \\
+Mean monthly log return, bear state & $-$ & $-0.129$ \\
+Mean monthly log return, stagnant state & $-$ & $+0.014$ \\
+Mean monthly log return, bull state & $-$ & $+0.152$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/transition_matrices.png}
+\caption{Estimated transition matrices for the WTI spot price. Under parity emissions the diagonal
+is empty: the chain is obliged to leave its state at every step. Under log-return emissions the
+mass concentrates on the diagonal, which is the behaviour a market regime is supposed to exhibit.}
+\label{fig:transmat}
+\end{figure}
+
+The message is straightforward. The parity specification does not recover usable market regimes.
+Because it sees only whether the price moved up or down, it produces a sequence that switches
+state in 189 of 198 months and behaves almost like a simple alternation. The log-return
+specification, by contrast, recovers persistent, economically interpretable states. Average
+persistence is 0.74, which implies an expected duration of about four months, and the full sample
+contains only 52 regime switches. This is behaviour much closer to what the regime-switching
+literature describes (Hamilton; Ang and Timmermann). The log-return model is therefore the one
+that is carried forward into the rest of the analysis. Table~\ref{tab:regime_summary} summarises
+the comparison, Table~\ref{tab:latent} spells out the latent meaning of each state,
+Figure~\ref{fig:regimes} plots the decoded sequence against the price, and
+Figure~\ref{fig:regimes_parity} shows the same series under the parity scheme.
+
+\begin{table}[H]
+\centering
+\caption{Why the log-return specification is more interpretable than the parity specification}
+\label{tab:regime_summary}
+{\small\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.15}\begin{tabular}{>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}p{5.0cm} >{\raggedright\arraybackslash}p{5.0cm}}
+\toprule
+Feature & Parity emissions & Log-return emissions \\
+\midrule
+What the model sees & Only whether the monthly change is positive or negative. & The size and sign of the monthly log return, after capping extremes. \\
+Decoded behaviour & Regimes switch in 189 of 198 months, so states alternate almost every month. & Regimes switch 52 times, which is much more consistent with persistent market phases. \\
+Economic meaning & Weak: the states mainly separate signs, not genuine market conditions. & Strong: the states map naturally into bear, stagnant, and bull phases. \\
+Persistence & Zero probability of remaining in the same state. & Average persistence is 0.74, implying a regime duration of about four months. \\
+Overall interpretation & The model does not recover usable market regimes. & The model produces regimes an analyst can interpret and use. \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+
+
+
+\begin{table}[H]
+\centering
+\caption{Latent meaning of the hidden states under log-return emissions, training window.}
+\label{tab:latent}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{State} & \textbf{Months} & \textbf{Mean log return} & \textbf{Volatility} &
+\textbf{Share (\%)} \\
+\midrule
+Bear     & 30 & $-0.1289$ & 0.1463 & 21.7 \\
+Stagnant & 91 & $+0.0143$ & 0.0532 & 65.9 \\
+Bull     & 17 & $+0.1518$ & 0.1350 & 12.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/regimes_full_gaussian.png}
+\caption{Decoded regimes of the WTI spot price under log-return emissions. The bear state captures
+the second half of 2014, the first months of 2020 and the 2025 correction; the bull state captures
+the 2021 recovery and the first quarter of 2022.}
+\label{fig:regimes}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/regimes_full_parity.png}
+\caption{Decoded regimes of the same series under the parity emissions of the dissertation. The
+colour changes almost every month; no episode of the past sixteen years is identified as a
+sustained bear or bull market.}
+\label{fig:regimes_parity}
+\end{figure}
+
+\subsection{The seven series, not only the price}
+
+The belief network consumes the discretised version of all seven variables, so
+Figures~\ref{fig:panel_gauss} and~\ref{fig:panel_parity} plot every series coloured by the regime
+that its own hidden Markov model assigns to it. These labels are relative to each series, so for a
+trending macroeconomic index ``bear'' means the state of slowest growth, not a falling market.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/regimes_panel_gaussian.png}
+\caption{Decoded regimes of all seven modelled series under log-return emissions. The two crude
+futures and the spot price show blocks lasting several months; the Consumer Price Index, the
+industrial production index and the dollar index are almost monochromatic.}
+\label{fig:panel_gauss}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/regimes_panel_parity.png}
+\caption{The same seven series under the parity emissions of the dissertation. The dollar index
+changes regime in 197 of 198 months and the spot price in 189; Brent, by contrast, collapses onto a
+single state. Neither behaviour is a market regime.}
+\label{fig:panel_parity}
+\end{figure}
+
+The panel view reveals something that the single-series plot in Figure~\ref{fig:regimes} leaves
+hidden. Under log-return emissions, the three oil-price series behave in a way that broadly fits
+the idea of a regime process: WTI futures switch regime 46 times, Brent 35 times, and the spot
+price 52 times over 198 months. The macroeconomic variables behave very differently. The Consumer
+Price Index never leaves its first state, industrial production spends 97 per cent of the sample
+in a single state, and the dollar index spends 88 per cent in one. At monthly frequency these
+series are close to monotonic, so once they are modelled with Gaussian emissions and a prior that
+favours persistence, one state absorbs virtually every observation. After discretisation the
+variable is therefore left close to constant.
+
+That matters because a nearly constant variable brings almost no information to the belief
+network. It is for this reason that the structure search in Section~\ref{sec:results} drops the
+Consumer Price Index, the federal funds rate and the dollar index while retaining the price-based
+nodes. Put another way, the macroeconomic block of the model is silenced before the network is
+even estimated. The bottleneck is the discretisation scheme, not the belief network itself. Any
+future work on this pipeline would probably do better to discretise trending macroeconomic series
+against a moving growth benchmark rather than on the raw monthly change.
+
+Under parity emissions the failure takes the opposite shape, but it is just as serious. The dollar
+index alternates in 197 of 198 months, while Brent, whose differenced monthly changes are
+nearly always of the same sign, collapses onto a single state and switches only twice in
+sixteen years. One series changes state almost every month, the other barely changes state at
+all. Neither pattern corresponds to a useful economic idea of a regime.
+
+This is the main economic reading of the two figures. A regime that lasts a single month is not
+really a regime, and a system that reports a fresh market state each month cannot inform a
+position meant to be held for a quarter. The advantage of the improved specification is therefore
+not just a question of statistical tidiness. It changes the type of state sequence that the
+downstream network is being asked to learn and predict.
+
+%==========================================================================
+\section{Re-running the Bayesian network with hill climbing}
+\label{sec:replication}
+
+The original paper's protocol was reproduced as literally as possible. A node called
+\texttt{forecast}, which simply duplicates the discretised WTI spot-price regime, is added
+to the training frame. The network structure is then searched by hill climbing, the conditional
+probability tables are estimated under a K2 prior, and the network is asked for the most probable
+state of \texttt{forecast} given the evidence in the seven remaining variables. The sequence of
+inferences that comes out is then rolled forward by one month so that it can be read as a
+forecast. This is the same one-month shift that the original paper applies in its own code (Alvi
+62--63). The computations use open-source implementations of hidden Markov models and belief
+networks (Ankan and Panda).
+
+Eighteen configurations were compared on the validation window, crossing three scoring functions,
+three in-degree limits and the presence or absence of the expert seed. The configuration retained
+was the one using the K2 score with unrestricted in-degree, seeded with the expert graph. It
+produced a network with 24 edges, in which the Markov blanket of the forecast node (Koller and
+Friedman) contains all seven remaining variables. Figure~\ref{fig:network_k2} shows the network
+learned by the unseeded K2 search on the training window.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/network_k2_train.png}
+\caption{Belief network over the discretised variables learned by hill climbing with the K2 score
+on the training window. The forecast node, shaded, is attached to the futures and macroeconomic
+nodes, reproducing the densely connected topology reported by the dissertation (Alvi 60).}
+\label{fig:network_k2}
+\end{figure}
+
+\subsection{Were the results of the paper replicated?}
+
+Table~\ref{tab:replication} places our figures beside those reported in the dissertation.
+
+\begin{table}[H]
+\centering
+\caption{Replication of the validation and testing errors of Alvi (2018, 62--63).}
+\label{tab:replication}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{Study} & \textbf{Set} & \textbf{Months} & \textbf{Error (\%)} & \textbf{Accuracy (\%)} \\
+\midrule
+Alvi (2018)      & Validation & 28 & 67.86 & 32.14 \\
+Alvi (2018)      & Testing    & 28 & 42.86 & 57.14 \\
+This replication & Validation & 30 & 86.67 & 13.33 \\
+This replication & Testing    & 30 & 76.67 & 23.33 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The short answer is: \textbf{partially}.
+
+What does replicate is the procedure, and its qualitative shape. The full pipeline runs end to end
+on an independent dataset. The hill-climbing search returns a densely connected graph of the same
+general type as the one shown in the original paper. The forecast node picks up the futures and
+macroeconomic variables as parents, and the validation error is very high, just as it is in the
+paper, where roughly two-thirds of the validation months are misclassified.
+
+What does not replicate is the magnitude of the testing error. The original paper reports a
+42.9 per cent error, equivalent to 57.1 per cent accuracy, and presents that figure as
+encouraging. Our replication produces 76.7 per cent error, or 23.3 per cent accuracy. That is
+\textit{worse} than the 33.3 per cent accuracy an uninformed guess would deliver if the three
+states were equally likely. When a model performs consistently below chance, the problem is not
+noise. It is evidence that the model is systematically wrong, and that kind of systematic error
+needs an explanation.
+
+The explanation lies in the interaction between the parity discretisation of
+Section~\ref{sec:regimes} and the one-month rolling convention. The network only ever produces a
+\textit{nowcast}: because the \texttt{forecast} node is an exact copy of the current month's
+target regime, the structure search simply learns that deterministic relationship and replicates
+the current regime almost perfectly. Rolling this perfect nowcast forward by one month turns its
+accuracy into a measure of regime persistence; the forecast is only right if the regime happens
+not to change.
+
+Under the parity emission framework, regimes are constructed with near-zero persistence by design
+(the estimated chain leaves its state at almost every step). The protocol therefore never really
+measures the network's predictive power; it measures only how persistent the discretised labels
+are. The 57 per cent testing accuracy in the original paper is plausibly explained by its sample
+generating more persistent regimes from the same procedure. On our implementation, at least,
+there is no evidence that the network genuinely forecasts future states.
+
+This gives one of the central methodological conclusions of the exercise: if the forecast is to
+come from the network, it has to be produced by the network itself, and not pulled out of the
+persistence of the labelling scheme.
+
+%==========================================================================
+\section{Results: the accuracy of the crude oil forecast}
+\label{sec:results}
+
+Three specifications were used to judge the network's predictive power, all over the same months
+of the testing window.
+
+\begin{description}
+\item[Replication model.] The original protocol as described above: parity emissions, a duplicated
+forecast node, and the inferred state rolled forward by one month.
+
+\item[Improved model.] The target is redefined as the regime of the \textit{following} month, so
+the network is asked to forecast rather than reconstruct. The evidence is the current regime of
+all seven series, under log-return emissions. Model selection is again performed on the validation
+window. The retained specification uses the discrete Bayesian information criterion, a maximum
+in-degree of two, and no expert seed. It produces a sparse four-edge network
+(Figure~\ref{fig:network_pred}):
+\texttt{WTI\_Spot}\,$\rightarrow$\,\texttt{WTI\_CL}\,$\rightarrow$\,\texttt{Brent\_BZ},
+\texttt{WTI\_CL}\,$\rightarrow$\,\texttt{forecast}, and
+\texttt{Brent\_BZ}\,$\rightarrow$\,\texttt{Ind\_Prod}. In that network the Markov blanket of the
+forecast node reduces to the front-month WTI futures contract.
+
+\item[Expected-return rule.] The posterior distribution over next month's regime, produced by the
+improved model, is turned into a trading position by maximising the expected monthly log return
+implied by that posterior, using the regime means from Table~\ref{tab:latent}. A threshold of one
+per cent, chosen on the validation window, keeps the rule flat when the expected move is small.
+\end{description}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/network_predictive.png}
+\caption{The improved predictive network. Selection on the validation window favours a sparse
+graph: with 138 training months and three states per node, dense networks exhaust the data in
+their conditional probability tables.}
+\label{fig:network_pred}
+\end{figure}
+
+\subsection{Classification accuracy}
+
+Table~\ref{tab:accuracy} gives the headline numbers, and Figure~\ref{fig:bars} sets them against
+three benchmarks: an uninformed guess, always predicting the modal regime from the training
+window, and simply repeating last month's regime.
+
+\begin{table}[H]
+\centering
+\caption{One-month-ahead forecast of the WTI spot regime. Balanced accuracy is the mean of the
+per-regime recalls and is not inflated by the dominance of the stagnant state.}
+\label{tab:accuracy}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Set} & \textbf{Months} & \textbf{Accuracy} & \textbf{Balanced} &
+\textbf{Macro} \\
+ & & & (\%) & \textbf{accuracy (\%)} & \textbf{F1 (\%)} \\
+\midrule
+Replication          & Validation & 30 & 13.33 & 17.32 & 13.03 \\
+Replication          & Testing    & 30 & 23.33 & 22.35 & 19.26 \\
+Improved             & Validation & 29 & 58.62 & 34.39 & 30.95 \\
+Improved             & Testing    & 29 & 75.86 & 41.67 & 39.31 \\
+Expected-return rule & Testing    & 29 & 68.97 & 45.24 & 45.46 \\
+\midrule
+Uninformed guess     & Testing    & 29 & 34.48 & -- & -- \\
+Majority regime      & Testing    & 29 & 72.41 & -- & -- \\
+Persistence          & Testing    & 29 & 79.31 & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/accuracy_comparison.png}
+\caption{Accuracy on the testing window. The dashed line is the accuracy of an uninformed guess
+over three states. Neither belief-network specification beats the persistence benchmark.}
+\label{fig:bars}
+\end{figure}
+
+Three points stand out, and the third is the one that matters.
+
+First, \textbf{the replication model performs worse than chance}. Its exact 95 per cent binomial
+confidence interval runs from 9.9 to 42.3 per cent, for the structural reason already explained
+in Section~\ref{sec:replication}.
+
+Second, \textbf{the improved model classifies 75.9 per cent of months correctly, with an exact
+interval from 56.5 to 89.7 per cent}. That is above the majority benchmark of 72.4 per cent, but
+still below the persistence benchmark of 79.3 per cent. Exact McNemar tests on the paired
+month-by-month outcomes (McNemar) give $p = 1.00$ against both benchmarks. Over a sample this
+short, the belief network is therefore statistically indistinguishable from the very simple rule
+of repeating last month's regime.
+
+Third, \textbf{the balanced accuracy of the improved model is only 41.7 per cent}.
+Figure~\ref{fig:conf} shows why. Under the maximum a posteriori rule, the model answers
+``stagnant'' in twenty-six of the twenty-nine months. It correctly picks up the 21 stagnant
+months, but it captures only one of the four bear months and none of the four bull months.
+Figure~\ref{fig:timeline} tells the same story month by month: the model rides the long stagnant
+stretch of 2024 and early 2025, and misses the turning points of mid-2025 and 2026. A rule that
+is right three times out of four mainly because it keeps saying ``nothing much will happen'' may
+look respectable on a headline accuracy measure, but it is not much use in practice. The
+difference between raw accuracy and actual decision usefulness is exactly the distinction a risk
+manager needs to keep in view.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\textwidth}
+\includegraphics[width=\textwidth]{figures/confusion_modelA_test.png}
+\end{minipage}
+\begin{minipage}{0.49\textwidth}
+\includegraphics[width=\textwidth]{figures/confusion_modelB_test.png}
+\end{minipage}
+\caption{Confusion matrices on the testing window: replication model (left) and improved model
+(right). The improved model concentrates its answers on the stagnant regime; the replication model
+distributes its errors across all three.}
+\label{fig:conf}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/timeline_modelB_test.png}
+\caption{Month-by-month forecasts of the improved model on the testing window. Correct months are
+marked with a circle and incorrect months with a cross. The model tracks the long stagnant stretch
+of 2024 and early 2025 and misses the turning points of mid-2025 and 2026.}
+\label{fig:timeline}
+\end{figure}
+
+\subsection{From probabilities to decisions}
+
+The failure of the maximum a posteriori rule is a decision-theoretic failure, not a
+probabilistic one. The posterior itself, shown in Figure~\ref{fig:posterior}, does move in
+sensible ways: the probability of the bear state rises ahead of the mid-2025 correction, and the
+probability of the bull state rises before the 2026 rebound, even though neither ever becomes the
+modal state. Keeping only the most probable regime simply discards that information. The reason
+is that the loss function implicit in the maximum a posteriori rule treats all three types of
+error as equally costly, whereas in a commodity book the cost of missing a twelve per cent decline
+is plainly not the same as the cost of missing a one per cent drift.
+
+The expected-return rule puts the economics back in. Writing $p_t(k)$ for the posterior
+probability of regime $k$ in month $t$ and $\mu_k$ for the mean monthly log return of that regime
+estimated on the training window, the rule goes long when $\sum_k p_t(k)\mu_k$ exceeds a
+threshold $\tau$, short when it falls below $-\tau$, and flat otherwise. The threshold is fixed
+at $\tau = 0.01$ on the validation window.
+
+The result, shown in Table~\ref{tab:accuracy}, is that raw accuracy falls from 75.9 to
+69.0 per cent, while balanced accuracy rises from 41.7 to 45.2 per cent and macro F1 from 39.3 to
+45.5 per cent. The rule issues a directional call in nine of the twenty-nine months, giving 31
+per cent coverage, and it is right in 66.7 per cent of those calls.
+Figure~\ref{fig:strategy} traces the value of one barrel traded on those signals: starting from
+79.2 US dollars, it ends the testing window at 157.0 dollars, compared with 70.6 dollars for a
+barrel held throughout.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/posterior_modelC.png}
+\caption{Posterior probability of each regime for the coming month over the testing window, with
+the realised regime marked above. The bear probability rises before the mid-2025 decline without
+ever becoming modal, which is what the maximum a posteriori rule discards.}
+\label{fig:posterior}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/strategy_modelC.png}
+\caption{Value of one barrel traded on the expected-return rule against a barrel held throughout
+the testing window. Transaction costs, financing and slippage are excluded and the path rests on
+nine decisions; the exhibit illustrates the decision rule and is not a performance claim.}
+\label{fig:strategy}
+\end{figure}
+
+That backtest needs to be read with discipline. It excludes transaction costs, financing and
+slippage; it assumes execution at the month-end print; it rests on only nine directional
+decisions, so a single reversed call would move the terminal value materially; and the threshold
+was chosen on a thirty-month validation window, which is itself a source of selection bias. What
+the exhibit does legitimately show is that the same posterior can produce very different, and
+more useful, behaviour when it is read through an economic loss function rather than a symmetric
+classification rule. In that sense, the choice of loss function deserves at least as much
+attention as the choice of scoring metric for the network.
+
+\subsection{Summary of the empirical findings}
+
+\begin{enumerate}
+\item The dissertation's original protocol does not transfer well to an independent sample. On
+our data it produces 23.3 per cent accuracy, below chance, because it combines non-persistent
+regimes with a rolled-forward nowcast.
+\item Redefining regimes on the magnitude of the monthly move, together with a prior that favours
+persistence and strictly causal decoding, produces economically interpretable states and lifts
+raw accuracy to 75.9 per cent.
+\item Even so, that accuracy is statistically indistinguishable from a simple persistence rule
+($p = 1.00$), and the balanced accuracy of 41.7 per cent reveals a model that leans too heavily
+on the ``stagnant'' answer.
+\item Turning the posterior into a trading position via an expected-return rule raises balanced
+accuracy to 45.2 per cent and yields directional calls that are correct two times out of three,
+at the cost of some raw accuracy.
+\item Over a sample of only thirty months, none of these differences is statistically
+significant. The honest reading is that the belief network may be picking up a small amount of
+information about the direction of crude oil, but the sample is too short to demonstrate
+conclusively that the signal is real.
+\end{enumerate}
+
+%==========================================================================
+\section{Assessment of the contributions claimed by the dissertation}
+
+The dissertation closes with eight claimed contributions (Alvi 66--67). Each one is assessed here
+against the evidence the document itself provides, and against what came out of reproducing the
+work. Our verdicts are pulled together in Table~\ref{tab:contrib} and then argued in detail
+below.
+
+\begin{table}[H]
+\centering
+\caption{Assessment of the eight claimed contributions of Alvi (2018).}
+\label{tab:contrib}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{0.5cm}p{7.4cm}p{2.6cm}p{4.2cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Claim} & \textbf{Verdict} & \textbf{Principal evidence} \\
+\midrule
+1 & Bayesian views replace EGARCH-M views in a Black-Litterman model & Not achieved &
+pp. 66--67; no allocation implemented \\
+2 & Time series discretised by hidden Markov models as inputs to belief networks & Achieved &
+Secs. 3.3, 4.2--4.2.5, pp. 42--43, 54--58 \\
+3 & A working trading mechanism capable of independent decisions & Partially achieved &
+Sec. 4.3.1, pp. 64--65 \\
+4 & An autonomous system requiring no prior expert knowledge & Partially achieved &
+Sec. 4.2.6, p. 59 \\
+5 & The abstraction of the Python libraries clarifies the design process & Achieved &
+Secs. 2.2.1--2.2.2, pp. 28--29 \\
+6 & A global macro strategy returning more than high-frequency or fixed-income funds & Not achieved
+& Sec. 4.3.1, p. 65 \\
+7 & Better models of energy markets to inform policy & Partially achieved &
+Sec. 3.4, pp. 43--45; figure p. 60 \\
+8 & Amalgamation of existing research to increase alpha for commodity traders & Partially achieved
+& Ch. 5, p. 67 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{1. Replacing EGARCH-M derived views with Bayesian model derived views in the
+Black-Litterman framework (p. 66).} The claim picks up Beach and Orlov, whose 2007 paper derives
+Black-Litterman views from an EGARCH-M model. The dissertation proposes the substitution in its
+concluding section and cites the source, but no Black-Litterman allocation is ever actually
+computed anywhere in the document. There is no prior equilibrium return vector, no view matrix,
+no confidence matrix and no resulting portfolio. Chapter 4 ends with a single-asset long/short
+rule on one barrel of crude (pp. 64--65), which is not a portfolio allocation. This contribution
+is judged not achieved; it is a research proposal rather than a delivered result. Had it been
+carried through, it would probably have been the most valuable of the eight, since a probabilistic
+model that outputs a full posterior is exactly the kind of object that can supply the view
+confidences Black-Litterman requires, and which practitioners usually have to set by hand.
+
+\paragraph{2. Using time series discretised by hidden Markov models as inputs to belief networks
+(p. 66).} This is the methodological core of the work and it is genuinely implemented. Section 3.3
+lays out the design (pp. 42--43), Sections 4.2 to 4.2.5 fit the models and decode the regimes
+(pp. 54--58), the regime-switch plot of the spot price on p. 56 shows the output, and the
+discretised frames then feed the structure search. We reproduced the mechanism successfully,
+which is about the strongest evidence one can have that it actually works. It is judged achieved,
+with one qualification on novelty. Regime-switching representations of commodity markets long
+predate the dissertation, so the specific contribution is the coupling of the decoded states to a
+structure-learned belief network rather than the discretisation itself. That distinction matters,
+because the coupling is the one part of the paper a practitioner could adopt directly, and our
+own results show that its value depends entirely on how the emissions are defined.
+
+\paragraph{3. A working trading mechanism capable of independent decision making (p. 66).}
+Section 4.3.1 implements a rule that goes long on a forecast bull regime, short on a forecast bear
+regime and flat otherwise, and plots the resulting value of one barrel against the price and
+against the EIA Short Term Energy Outlook (figure on p. 65; United States, Energy Information
+Administration). So the mechanism exists, and it does make decisions without human intervention.
+It is not, however, a trading system in any operational sense: transaction costs, financing,
+slippage and position limits are all absent, the evaluation covers only twenty-eight months, and
+no risk-adjusted measure is computed. Our own equivalent exhibit (Figure~\ref{fig:strategy}) has
+the same limitations, which is why it is presented here as an illustration. Partially achieved.
+
+\paragraph{4. An autonomous system requiring no prior expert knowledge beyond dataset selection
+(p. 66).} The dissertation's own code contradicts the claim in its strong form. On p. 59 the hill
+climbing is initialised from an expert graph built from EIA relationships: six edges linking
+OPEC and non-OPEC production, and OECD and non-OECD demand, to the spot price, and the search
+then attaches the remaining variables. A search seeded with an expert structure is plainly not
+free of expert knowledge. The seed determines which local optimum the greedy search lands in. Our
+experiments make the point concrete: seeded and unseeded searches returned different networks
+under the same score, and on the improved specification it was the unseeded sparse network that
+was selected on the validation window. The claim holds for the unseeded variant, which the
+dissertation does not evaluate on its own. Partially achieved.
+
+\paragraph{5. The level of abstraction of the Python modelling libraries clarifies the design
+process (p. 66--67).} Sections 2.2.1 and 2.2.2 (pp. 28--29) do explain how the libraries express
+the underlying theory, and the exposition is clear and pedagogically useful. The claim is accepted
+as achieved, while noting that it is a presentational contribution about third-party software
+rather than a scientific one, and that it has aged. The library used for the hidden Markov models
+is no longer maintained, which forced both our Group Work Project 2 and this project to substitute
+a different implementation. The episode is a useful reminder that reproducibility claims resting
+on a specific software stack decay quite quickly.
+
+\paragraph{6. A systematic, event-driven global macro strategy capable of generating higher returns
+than funds based on high-frequency or fixed-income strategies (p. 67).} No comparison with any
+fund, index or strategy of either type is made anywhere in the document. The only benchmark
+shown is the EIA Short Term Energy Outlook (p. 65), which is a forecast rather than an investable
+strategy, and the comparison covers only a handful of episodes in 2016 and 2017, discussed
+qualitatively. The author's own closing sentence on that page concedes that ``further research is
+necessary to statistically conclude with confidence if the model performs better than the EIA's
+STEO''. This claim is judged not achieved, and is regarded as the weakest of the eight. It
+compares asset classes and strategy families on the back of a twenty-eight-month, single-asset
+backtest with no risk adjustment.
+
+\paragraph{7. Better models of energy markets, allowing policy makers to understand the underlying
+structure (p. 67).} Section 3.4 (pp. 43--45) and the learned graph on p. 60 do deliver a structure
+that can be inspected and argued about, which is more than a black-box forecaster offers, and
+that is the real appeal of the graphical approach for a policy audience. The qualification is
+stability. A structure meant to inform policy has to be robust, and ours was not: across eighteen
+configurations the number of edges ranged from two to twenty-five, and the parents of the forecast
+node moved around with the scoring function. Greedy search over a super-exponential space on 139
+observations was never likely to recover a stable causal graph, and the dissertation does not
+report any stability analysis such as bootstrap edge frequencies. Partially achieved; the
+framework is appropriate, the evidential standard is not.
+
+\paragraph{8. Amalgamating research from several disciplines and applying it to the commodity
+markets to increase alpha for quantitative traders (p. 67).} The synthesis is real, and it is the
+document's principal strength. Probabilistic graphical models, regime detection, macroeconomic
+data engineering and a trading application are pulled together into a single coherent pipeline,
+and the dissertation is a useful map of that territory. The clause about increasing alpha is
+unsupported: no risk-adjusted return, benchmark comparison or significance test is reported
+anywhere in the document. Partially achieved.
+
+\subsection{Why the achieved contributions matter}
+
+Two of the eight claims stand up to scrutiny, and both are worth keeping. The coupling of hidden
+Markov discretisation with structure-learned belief networks (claim 2) matters because it gives
+an energy desk something that neither a GARCH model nor a neural network naturally provides: a
+forecast that comes with an explicit, inspectable statement of which variables it depended on.
+When the model says the coming month is likely to be bearish, the Markov blanket says why, and a
+risk committee can argue with the reasoning rather than just the number. The expository
+contribution (claim 5) matters for a narrower but still practical reason: it lowers the cost of
+entry for practitioners who need to audit such a model rather than build it from scratch.
+
+The four partially achieved claims share a single shortcoming, and it is not conceptual but
+evidential. The trading mechanism, the autonomy of the structure search, the policy relevance of
+the graph and the alpha claim could all have been settled by evidence that the dissertation could
+have produced but did not: transaction costs, a seeded-versus-unseeded comparison, bootstrap edge
+stability, and a risk-adjusted benchmark. Our own results press the same point from the other
+direction. Some of that evidence was produced here (exact confidence intervals, McNemar tests
+against persistence and majority benchmarks, a coverage-and-hit-rate decomposition), and it
+showed that what looked like a respectable 75.9 per cent accuracy is statistically
+indistinguishable from simply repeating last month's answer. The lesson is that in this problem
+the evidential apparatus is not a decoration bolted on after the modelling; it is what separates a
+genuine result from a statistical artefact.
+
+%==========================================================================
+\section{Discussion}
+
+\textit{This section is written for a reader who takes investment decisions and is deliberately
+free of technical vocabulary.}
+
+\subsection{What the study did and what it found}
+
+Using information anyone can obtain free of charge (the price of oil, the strength of the dollar,
+inflation, the interest rate set by the Federal Reserve and a measure of industrial activity),
+we built a system that describes the oil market each month as being in one of three conditions:
+falling, flat or rising. The system then works out the chance that each condition will hold in
+the month ahead.
+
+Tested against the two and a half years the system had never seen, it named the prevailing
+condition correctly in roughly three months out of four. That number sounds good on paper, but it is
+mostly misleading. The market was flat in most of those months, and a rule that simply always
+said ``flat'' would have scored almost as well. The more honest measure is how the system behaved
+at the moments that actually mattered. When it took a clear directional view, which happened in
+roughly one month in three, it was right two times out of three. Acting on those views over
+the period would have been materially more profitable than simply holding a barrel of oil the whole
+time.
+
+The original study on which this work is based was also repeated, and its method does not transfer
+cleanly to our data. The reason is worth stating plainly, since it is probably the single most
+useful thing we learned: the original method defined the market's condition purely by whether
+the price went up or down last month. Defined in that way, the condition changes almost every
+month, and a description that changes every month cannot reasonably support a decision held for
+a quarter. Once the condition was instead defined by the size of the move, not just its
+direction, the descriptions became stable, recognisable and usable. The system on its own
+identified the 2014 collapse, the 2020 crash, the 2021 recovery and the 2025 correction as
+clear episodes.
+
+\subsection{The recommended course of action}
+
+We do not recommend trading on this system alone. We do recommend using it in three specific ways.
+
+\textbf{Use it to size risk, not to pick trades.} Its most reliable output is not a prediction
+but a warning: the small number of months in which the evidence points clearly up or down.
+In those months an energy book should be positioned more decisively. In the remaining two-thirds of
+months, the sensible course is to reduce activity rather than invent a view.
+
+\textbf{Use it as a challenge to the house view.} Because the system states which indicators drove
+its conclusion, a committee can interrogate it. When it disagrees with the desk's opinion,
+the disagreement pinpoints exactly which piece of evidence the two readings weigh differently.
+That conversation is valuable even when the system turns out to be wrong.
+
+\textbf{Keep any position modest and reviewed monthly.} The evidence base is thirty months and nine
+directional calls. The apparent profitability excludes trading costs. On that basis, positions should
+be small, should carry a predefined loss limit, and should be revisited each month as new figures
+are published.
+
+\subsection{The factors that move the result}
+
+Three factors dominate, and a decision maker should keep an eye on them in this order.
+
+\textbf{The definition of the market's condition.} This is the single largest influence on the
+answer, larger than any refinement of the model downstream of it. A definition based on the size
+of price moves produces conditions that persist for about four months. A definition based on
+direction alone produces noise. Anyone commissioning a similar system should look closely at this
+choice first.
+
+\textbf{The dollar and the cost of money.} Oil is priced in dollars, so a stronger dollar makes it
+more expensive everywhere else and weighs on demand. Higher policy rates raise the cost of carrying
+inventory and financing production. Together they tend to push the market towards the falling condition,
+and they were among the indicators the system attached to its forecast.
+
+\textbf{Industrial activity.} It stands as a proxy for demand. When it weakens, the flat
+condition tends to give way to the falling one.
+
+A fourth factor is the reason for caution: events with no statistical precedent. Wars, production
+decisions by exporting countries and the storage crisis of 2020 all dominate the price for
+months at a time and are not in the information the system reads. It will always be late to
+these, and no amount of statistical refinement will change that. It should be used as one
+considered opinion among several, and never as the only one.
+
+%==========================================================================
+\section{Conclusion and practical takeaways}
+
+The mini-capstone set out to decide whether probabilistic graphical models can forecast the
+price of crude oil better than conventional time-series methods. Our answer, on sixteen years of
+monthly data and a thirty-month hold-out window, is a qualified no, but a no with a useful
+remainder.
+
+\begin{enumerate}
+\item \textbf{The framework is sound, the published implementation is fragile.} The dissertation's
+testing accuracy could not be replicated, and the reason is now clear: its regime definition
+produces non-persistent labels, and its evaluation protocol turns an accurate nowcast into a
+systematically wrong forecast. Anyone picking this literature up in practice should test the
+persistence of their regime labels before doing anything else.
+\item \textbf{Discretisation matters more than model choice.} Changing the emission from the sign
+of the monthly move to its magnitude, together with a prior that favours persistence, lifted
+accuracy from 23.3 to 75.9 per cent. No change to the scoring function, in-degree limit or prior
+inside the belief network came anywhere near that effect.
+\item \textbf{Accuracy is the wrong headline number.} An accuracy of 75.9 per cent that is
+indistinguishable from persistence ($p = 1.00$), and that comes with a balanced accuracy of 41.7
+per cent, describes a model whose default answer is inaction. Balanced accuracy, coverage and hit
+rate should be reported alongside accuracy in any regime-forecasting study.
+\item \textbf{The loss function is part of the model.} Reading the same posterior with an
+expected-return rule rather than a maximum a posteriori rule raised balanced accuracy by three and
+a half points, produced directional calls that were right two times out of three, and changed the
+economic outcome materially. This is the cheapest improvement available anywhere in the whole
+pipeline.
+\item \textbf{Sample size is the binding constraint.} Monthly macroeconomic data yield roughly two
+hundred observations per decade and a half. Thirty-month hold-out windows produce confidence
+intervals thirty points wide. Any future work in this direction should either move to a higher
+frequency, pool across related commodities, or adopt a rolling-origin evaluation that re-uses the
+sample honestly instead of relying on a single hold-out split (Hyndman and Athanasopoulos).
+\end{enumerate}
+
+For a risk manager, the practical value of the exercise lies less in the forecast itself than in
+its transparency. A belief network states which variables its conclusion rests on. When it is
+wrong, the reason is inspectable and the model can be corrected rather than merely retrained. In
+a market whose structure shifts every few years, that property may matter more than a few points
+of headline accuracy.
+
+%==========================================================================
+\newpage
+\section*{Works Cited}
+\addcontentsline{toc}{section}{Works Cited}
+
+\noindent
+Alvi, Danish A. \textit{Application of Probabilistic Graphical Models in Forecasting Crude Oil
+Price}. 2018. University College London, dissertation. \textit{arXiv},
+\url{https://arxiv.org/abs/1804.10869}.
+
+\vspace{0.6em}\noindent
+Ang, Andrew, and Allan Timmermann. ``Regime Changes and Financial Markets.'' \textit{Annual Review
+of Financial Economics}, vol. 4, no. 1, 2012, pp. 313--337.
+
+\vspace{0.6em}\noindent
+Ankan, Ankur, and Abinash Panda. ``pgmpy: Probabilistic Graphical Models Using Python.''
+\textit{Proceedings of the 14th Python in Science Conference}, 2015, pp. 6--11.
+
+\vspace{0.6em}\noindent
+Baumeister, Christiane, and Lutz Kilian. ``Forecasting the Real Price of Oil in a Changing World: A
+Forecast Combination Approach.'' \textit{Journal of Business \& Economic Statistics}, vol. 33,
+no. 3, 2015, pp. 338--351.
+
+\vspace{0.6em}\noindent
+Beach, Steven L., and Alexei G. Orlov. ``An Application of the Black--Litterman Model with
+EGARCH-M-Derived Views for International Portfolio Management.'' \textit{Financial Markets and
+Portfolio Management}, vol. 21, no. 2, 2007, pp. 147--166.
+
+\vspace{0.6em}\noindent
+Chickering, David Maxwell. ``Optimal Structure Identification with Greedy Search.'' \textit{Journal
+of Machine Learning Research}, vol. 3, 2002, pp. 507--554.
+
+\vspace{0.6em}\noindent
+Cooper, Gregory F., and Edward Herskovits. ``A Bayesian Method for the Induction of Probabilistic
+Networks from Data.'' \textit{Machine Learning}, vol. 9, no. 4, 1992, pp. 309--347.
+
+\vspace{0.6em}\noindent
+Fox, Emily B., et al. ``A Sticky HDP-HMM with Application to Speaker Diarization.'' \textit{The
+Annals of Applied Statistics}, vol. 5, no. 2A, 2011, pp. 1020--1056.
+
+\vspace{0.6em}\noindent
+Hamilton, James D. ``A New Approach to the Economic Analysis of Nonstationary Time Series and the
+Business Cycle.'' \textit{Econometrica}, vol. 57, no. 2, 1989, pp. 357--384.
+
+\vspace{0.6em}\noindent
+Heckerman, David, Dan Geiger, and David M. Chickering. ``Learning Bayesian Networks: The
+Combination of Knowledge and Statistical Data.'' \textit{Machine Learning}, vol. 20, no. 3, 1995,
+pp. 197--243.
+
+\vspace{0.6em}\noindent
+Hyndman, Rob J., and George Athanasopoulos. \textit{Forecasting: Principles and Practice}. 3rd ed.,
+OTexts, 2021.
+
+\vspace{0.6em}\noindent
+Kilian, Lutz. ``Not All Oil Price Shocks Are Alike: Disentangling Demand and Supply Shocks in the
+Crude Oil Market.'' \textit{American Economic Review}, vol. 99, no. 3, 2009, pp. 1053--1069.
+
+\vspace{0.6em}\noindent
+Koller, Daphne, and Nir Friedman. \textit{Probabilistic Graphical Models: Principles and
+Techniques}. MIT Press, 2009.
+
+\vspace{0.6em}\noindent
+McNemar, Quinn. ``Note on the Sampling Error of the Difference between Correlated Proportions or
+Percentages.'' \textit{Psychometrika}, vol. 12, no. 2, 1947, pp. 153--157.
+
+\vspace{0.6em}\noindent
+Rabiner, Lawrence R. ``A Tutorial on Hidden Markov Models and Selected Applications in Speech
+Recognition.'' \textit{Proceedings of the IEEE}, vol. 77, no. 2, 1989, pp. 257--286.
+
+\vspace{0.6em}\noindent
+United States, Energy Information Administration. \textit{Short-Term Energy Outlook}. U.S.
+Department of Energy, 2026, \url{https://www.eia.gov/outlooks/steo/}.
+
+\vspace{0.6em}\noindent
+United States, Federal Reserve Bank of St. Louis. \textit{Federal Reserve Economic Data (FRED)}.
+2026, \url{https://fred.stlouisfed.org/}.
+
+\end{document}

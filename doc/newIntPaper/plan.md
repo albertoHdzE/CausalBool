@@ -313,7 +313,7 @@ This plan is refactored to address ordering invariance, canonical representation
   - Phase/Epic: Phase 2 / EPIC‑FOUNDATIONS
   - Title: Ordering transform invariance for index‑set algebra
   - Status: pending
-  - File IDs: `doc/newIntPaper/docProcess.tex`, `doc/causalBinpaper/01_causalBool_inputs.tex`, `doc/causalBinpaper/02_cb_and.tex`, `src/Packages/Integration/Experiments.m`, `src/Packages/Integration/Gates.m`
+  - File IDs: `doc/newIntPaper/docProcess.tex`, `papers/method/derivations/01_causalBool_inputs.tex`, `papers/method/derivations/02_cb_and.tex`, `src/Packages/Integration/Experiments.m`, `src/Packages/Integration/Gates.m`
   - Dependencies: TSK‑GATES‑001..002
   - Acceptance Criteria: Formal MSB/LSB orderings; mapping functions and invariance proofs; parameterised ordering policy in docs/tests; examples updated.
   - Deliverables: Ordering policy section; updated LaTeX; mapping utilities; unit tests.
@@ -484,7 +484,7 @@ This plan is refactored to address ordering invariance, canonical representation
 - Each ticket must update `doc/newIntPaper/docProcess.tex` with a subsection covering objective, methods, inputs, outputs, acceptance tests, and artefacts.
 - Include at least one example with explicit ordering policy, `cm`, `dynamic`, `I_c`, and sample inputs/outputs.
 - Compile `docProcess.tex` and ensure `docProcess.pdf` is generated without errors; store the PDF alongside the source.
-- Cross‑link per‑gate LaTeX in `doc/causalBinpaper/*` to the ordering policy.
+- Cross‑link per‑gate LaTeX in `papers/method/derivations/*` to the ordering policy.
 
 ### Documentation Acceptance Checklist (applies to every ticket)
 - [ ] `docProcess.tex` updated with ticket subsection
@@ -707,7 +707,7 @@ This plan is refactored to address ordering invariance, canonical representation
   - Phase/Epic: Phase 4A / EPIC‑PATTERN
   - Title: Generalise ordered repertoire pattern method beyond AND
   - Status: pending
-  - File IDs: `doc/causalBinpaper/01_causalBool_inputs.tex`, `doc/causalBinpaper/02_cb_and.tex`, `doc/newIntPaper/fullEvalIntPaper.md`
+  - File IDs: `papers/method/derivations/01_causalBool_inputs.tex`, `papers/method/derivations/02_cb_and.tex`, `doc/newIntPaper/fullEvalIntPaper.md`
   - Dependencies: TSK‑GATES‑001, TSK‑THEORY‑001
   - Acceptance Criteria: Pattern alphabet and derivation method specified for all gate families (monotone, non‑monotone, unary, directional, threshold, canalising); documented linkage to compression (description length), sensitivity and canalisation.
   - Acceptance Checklist:
@@ -723,7 +723,7 @@ This plan is refactored to address ordering invariance, canonical representation
   - Phase/Epic: Phase 4A / EPIC‑PATTERN
   - Title: Derive symbolic pattern formulae per gate family
   - Status: pending
-  - File IDs: `doc/causalBinpaper/*`, `doc/newIntPaper/fullEvalIntPaper.md`
+  - File IDs: `papers/method/derivations/*`, `doc/newIntPaper/fullEvalIntPaper.md`
   - Dependencies: TSK‑PATTERN‑001
   - Acceptance Criteria: Closed‑form or piecewise formulae for ordered exhaustive repertoires per gate; parity/equivalence rules for XOR/XNOR; Hamming weight bands for thresholds; canalising collapse conditions; mapping to compression components (bands, parity masks, thresholds, collapse).
   - Acceptance Checklist:
@@ -756,7 +756,7 @@ This plan is refactored to address ordering invariance, canonical representation
   - Phase/Epic: Phase 4A / EPIC‑PATTERN
   - Title: Integrate pattern formulae into manuscript
   - Status: pending
-  - File IDs: `doc/newIntPaper/theory.md`, `doc/newIntPaper/results.md`, `doc/causalBinpaper/*`
+  - File IDs: `doc/newIntPaper/theory.md`, `doc/newIntPaper/results.md`, `papers/method/derivations/*`
   - Dependencies: TSK‑PATTERN‑002..003
   - Acceptance Criteria: Pattern section added with derivations, examples, and compression perspective; figures and tables included.
   - Acceptance Checklist:
@@ -775,7 +775,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑ANALYSIS
   - Title: AND — pivot‑plus‑offset formalisation (network‑aware)
   - Status: re‑opened
-  - File IDs: `doc/causalBinpaper/02_cb_and.tex`, `doc/newIntPaper/docProcess.tex`
+  - File IDs: `papers/method/derivations/02_cb_and.tex`, `doc/newIntPaper/docProcess.tex`
   - Dependencies: TSK‑THEORY‑005
   - Acceptance Criteria: Pivot/offset with ordering; connected‑bit constraints enforced; equality to empirical indices for multiple `I_c` and `n`; docProcess updated.
   - Deliverables: Updated LaTeX; validation artefacts.
@@ -787,7 +787,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑ANALYSIS
   - Title: OR — band‑union formalisation (network‑aware)
   - Status: re‑opened
-  - File IDs: `doc/causalBinpaper/02_cb_or.tex`, `doc/newIntPaper/docProcess.tex`
+  - File IDs: `papers/method/derivations/02_cb_or.tex`, `doc/newIntPaper/docProcess.tex`
   - Dependencies: TSK‑THEORY‑005
   - Acceptance Criteria: Union of one‑bands per connected index; ordering consistency; equality to empirical across ensembles; docProcess updated.
   - Deliverables: Updated LaTeX; artefacts.
@@ -799,7 +799,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑ANALYSIS
   - Title: XOR — odd parity (network‑aware)
   - Status: re‑opened
-  - File IDs: `doc/causalBinpaper/02_cb_xor.tex`, `doc/newIntPaper/docProcess.tex`
+  - File IDs: `papers/method/derivations/02_cb_xor.tex`, `doc/newIntPaper/docProcess.tex`
   - Dependencies: TSK‑THEORY‑005
   - Acceptance Criteria: Odd parity sets with ordering mapping; equality to empirical; sensitivity properties included.
   - Deliverables: Updated LaTeX; artefacts.
@@ -811,7 +811,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑ANALYSIS
   - Title: NAND — complement of AND one‑set
   - Status: re‑opened
-  - File IDs: `doc/causalBinpaper/02_cb_nand.tex`, `doc/newIntPaper/docProcess.tex`
+  - File IDs: `papers/method/derivations/02_cb_nand.tex`, `doc/newIntPaper/docProcess.tex`
   - Dependencies: TSK‑THEORY‑005
   - Acceptance Criteria: NAND zero‑set equals AND one‑set; ordering consistent; equality to empirical.
   - Deliverables: Updated LaTeX; artefacts.
@@ -823,7 +823,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑ANALYSIS
   - Title: NOR — complement of OR one‑set
   - Status: re‑opened
-  - File IDs: `doc/causalBinpaper/02_cb_nor.tex`, `doc/newIntPaper/docProcess.tex`
+  - File IDs: `papers/method/derivations/02_cb_nor.tex`, `doc/newIntPaper/docProcess.tex`
   - Dependencies: TSK‑THEORY‑005
   - Acceptance Criteria: One‑set where all connected inputs are zero; ordering consistent; equality to empirical.
   - Deliverables: Updated LaTeX; artefacts.
@@ -835,7 +835,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑ANALYSIS
   - Title: XNOR — even parity (network‑aware)
   - Status: re‑opened
-  - File IDs: `doc/causalBinpaper/02_cb_xnor.tex`, `doc/newIntPaper/docProcess.tex`
+  - File IDs: `papers/method/derivations/02_cb_xnor.tex`, `doc/newIntPaper/docProcess.tex`
   - Dependencies: TSK‑THEORY‑005
   - Acceptance Criteria: Even parity index sets with ordering mapping; equality to empirical.
   - Deliverables: Updated LaTeX; artefacts.
@@ -847,7 +847,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑ANALYSIS
   - Title: NOT — unary inversion band (network‑aware)
   - Status: re‑opened
-  - File IDs: `doc/causalBinpaper/02_cb_not.tex`, `doc/newIntPaper/docProcess.tex`
+  - File IDs: `papers/method/derivations/02_cb_not.tex`, `doc/newIntPaper/docProcess.tex`
   - Dependencies: TSK‑THEORY‑005
   - Acceptance Criteria: Zero‑band of designated bit with ordering mapping; equality to empirical; docProcess updated.
   - Deliverables: Updated LaTeX; artefacts.
@@ -859,7 +859,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 4B / EPIC‑ANALYSIS
   - Title: IMPLIES/NIMPLIES — asymmetric entailment patterns and formulae
   - Status: pending
-  - File IDs: `doc/causalBinpaper/02_cb_impl.tex`
+  - File IDs: `papers/method/derivations/02_cb_impl.tex`
   - Dependencies: TSK‑PATTERN‑001
   - Acceptance Criteria: Asymmetric region characterisation; validation.
   - Acceptance Checklist:
@@ -874,7 +874,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 4B / EPIC‑ANALYSIS
   - Title: k‑of‑n thresholds — banded Hamming weight formulae
   - Status: pending
-  - File IDs: `doc/causalBinpaper/02_cb_kofn.tex`
+  - File IDs: `papers/method/derivations/02_cb_kofn.tex`
   - Dependencies: TSK‑PATTERN‑001
   - Acceptance Criteria: Piecewise band formulae and validation.
   - Acceptance Checklist:
@@ -889,7 +889,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 4B / EPIC‑ANALYSIS
   - Title: Canalising/nested‑canalising — collapse rules and formulae
   - Status: pending
-  - File IDs: `doc/causalBinpaper/02_cb_canalising.tex`
+  - File IDs: `papers/method/derivations/02_cb_canalising.tex`
   - Dependencies: TSK‑PATTERN‑001
   - Acceptance Criteria: Canalising value conditions, collapse effects; validation.
   - Acceptance Checklist:
@@ -907,7 +907,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
   - Phase/Epic: Phase 6B / EPIC‑MIXED
   - Title: Define composition rules for mixed gate dynamics in networks
   - Status: pending
-  - File IDs: `doc/causalBinpaper/exam.tex`, `doc/newIntPaper/fullEvalIntPaper.md`
+  - File IDs: `papers/method/derivations/exam.tex`, `doc/newIntPaper/fullEvalIntPaper.md`
   - Dependencies: TSK‑ANALYSIS‑AND..CANALISING
   - Acceptance Criteria: Composition framework linking per‑gate formulae to network‑level mixed dynamics; intuitive explanations.
   - Acceptance Checklist:
@@ -969,7 +969,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
 ## Global Index Formulae Policy
 - Derive closed‑form network‑aware index formulae for ordered exhaustive inputs with explicit ordering and `I_c` dependence.
 - Validate index formulae by exact equality to empirical index sets from `CreateRepertoiresDispatch` under MSB‑first and LSB‑first (via mapping functions).
-- Include derivations and representative examples in `doc/newIntPaper/docProcess.tex`; extend per‑gate LaTeX under `doc/causalBinpaper/`.
+- Include derivations and representative examples in `doc/newIntPaper/docProcess.tex`; extend per‑gate LaTeX under `papers/method/derivations/`.
 - Documentation Acceptance Checklist additions (analysis tickets):
   - [ ] Index formulae derived clearly with ordering and `I_c`
   - [ ] Empirical index sets equal analytic sets (both orderings)
@@ -980,7 +980,7 @@ Policy (applies to all ANALYSIS tickets): reformat `doc/newIntPaper/docProcess.t
 - Derive formal gate functionals (conjunction/disjunction/parity/threshold/canalising) and property proofs (monotonicity, sensitivity, thresholds, canalising).
 - Link properties to observed repertoire behaviour and index‑set derivations under explicit ordering.
 - Validate against truth tables and repertoire outputs deterministically.
-- Follow per‑gate documentation format exemplified by `doc/causalBinpaper/02_cb_and.tex` with ordering references.
+- Follow per‑gate documentation format exemplified by `papers/method/derivations/02_cb_and.tex` with ordering references.
 
 ### Per‑Gate Analysis Acceptance Checklist (applies to TSK‑ANALYSIS‑AND/OR/XOR/NAND/NOR/XNOR/NOT/IMPLIES/KOFN/CANALISING)
 - [ ] Formal mathematical gate formula derived

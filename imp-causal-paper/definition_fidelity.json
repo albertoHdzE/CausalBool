@@ -1,0 +1,111 @@
+{
+  "author_adjacent_reference": {
+    "source": "reference/algodyn/R",
+    "notes": [
+      "This local reference is treated as the strongest currently recovered author-adjacent implementation source.",
+      "Only definitions directly present in this reference can currently be classified as exact-to-reference."
+    ]
+  },
+  "definitions": [
+    {
+      "name": "info_spectra",
+      "status": "exact_to_author_reference",
+      "paper_role": "Sequential perturbation contribution table for graph edges or vertices.",
+      "author_reference": "reference/algodyn/R/info_spectra.R",
+      "local_reference": "src/imp_causal_paper/perturbation.py",
+      "local_symbols": [
+        "GraphPerturbationAnalyzer.spectra"
+      ],
+      "evidence": [
+        "Uses C(G) - C(G-e) or C(G) - C(G-v) sequential deletions.",
+        "Supports both edges and vertices.",
+        "Returns one row per perturbed element."
+      ],
+      "open_questions": []
+    },
+    {
+      "name": "info_signature",
+      "status": "exact_to_author_reference",
+      "paper_role": "Information spectra sorted decreasingly by information contribution.",
+      "author_reference": "reference/algodyn/R/info_signature.R",
+      "local_reference": "src/imp_causal_paper/perturbation.py",
+      "local_symbols": [
+        "GraphPerturbationAnalyzer.signature"
+      ],
+      "evidence": [
+        "Implements descending sort on contribution values.",
+        "Tie-breaking is deterministic but not semantically material to the descending-rank definition."
+      ],
+      "open_questions": []
+    },
+    {
+      "name": "inforank",
+      "status": "exact_to_author_reference",
+      "paper_role": "Rank of perturbed elements by descending information contribution with min-tie handling.",
+      "author_reference": "reference/algodyn/R/inforank.R",
+      "local_reference": "src/imp_causal_paper/perturbation.py",
+      "local_symbols": [
+        "GraphPerturbationAnalyzer.inforank"
+      ],
+      "evidence": [
+        "Uses descending contribution ranking.",
+        "Uses min-tie ranking to mirror algodyn ties.method = min."
+      ],
+      "open_questions": []
+    },
+    {
+      "name": "relative_reprogrammability",
+      "status": "reference_paper_discrepancy",
+      "paper_role": "Median absolute deviation of the information signature divided by its maximum value.",
+      "author_reference": "reference/algodyn/R/relative_reprogrammability.R",
+      "local_reference": "src/imp_causal_paper/reprogrammability.py",
+      "local_symbols": [
+        "median_absolute_deviation",
+        "relative_reprogrammability",
+        "relative_reprogrammability_paper_formula"
+      ],
+      "evidence": [
+        "The recovered local algodyn reference implements MAD(signature) / max(signature).",
+        "The main paper text states Pr(G) := MAD(sigma) / max(|sigma|).",
+        "The project now exposes both variants explicitly."
+      ],
+      "open_questions": [
+        "Without the missing supplement-level operational definition, it is unresolved whether the paper text or the recovered local reference is the authoritative implementation target."
+      ]
+    },
+    {
+      "name": "absolute_reprogrammability",
+      "status": "unresolved",
+      "paper_role": "Balance between positive and negative contribution regimes in the information signature.",
+      "author_reference": null,
+      "local_reference": "src/imp_causal_paper/reprogrammability.py",
+      "local_symbols": [
+        "absolute_reprogrammability"
+      ],
+      "evidence": [
+        "Current implementation uses trapezoidal areas over sorted positive and negative magnitudes."
+      ],
+      "open_questions": [
+        "No direct author-adjacent implementation is currently present in reference/algodyn/R.",
+        "Supplement-level formula and normalization must still be matched before exact biological reprogrammability claims are made."
+      ]
+    },
+    {
+      "name": "combined_reprogrammability",
+      "status": "unresolved",
+      "paper_role": "Joint reprogrammability magnitude combining relative and absolute components.",
+      "author_reference": null,
+      "local_reference": "src/imp_causal_paper/reprogrammability.py",
+      "local_symbols": [
+        "combined_reprogrammability"
+      ],
+      "evidence": [
+        "Current implementation uses Euclidean norm sqrt(rel^2 + abs^2)."
+      ],
+      "open_questions": [
+        "No direct author-adjacent implementation is currently present in reference/algodyn/R.",
+        "Supplement-level definition still needs exact corroboration."
+      ]
+    }
+  ]
+}

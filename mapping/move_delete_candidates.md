@@ -1,0 +1,129 @@
+# Move Delete Candidates
+
+## Purpose
+
+This register is the first action-oriented cleanup map.
+
+It does not assume that every candidate should be deleted.
+It separates:
+
+- delete-ready items
+- archive-ready items
+- move-ready items
+- verify-first items
+- hold items
+
+Each entry is evaluated against the current mapping, source-of-truth index, and paper-tree policy.
+
+## Status Labels
+
+- `delete-ready`: low-risk removal candidate
+- `archive-ready`: not primary, but should be preserved in an archive location rather than deleted
+- `move-ready`: can be reorganized with low risk once target structure is chosen
+- `verify-first`: plausible cleanup candidate, but evidence is still insufficient
+- `hold`: should not be moved or deleted in the next cleanup wave
+
+## Candidate Register
+
+| Candidate | Area | Current Role | Proposed Action | Risk | Verification Gate | Rationale |
+| --- | --- | --- | --- | --- | --- | --- |
+| `doc/finalpaper/final-draft.tex` | manuscript | historical manuscript branch | `archive-ready` | low-medium | preserve explicit provenance references before move | `bitacora-lev8.md` still references it as the previous manuscript comparison branch, so deletion would be wrong; archival isolation is appropriate later. Executed by moving it to `doc/finalpaper/archive/historical_manuscripts/`. |
+| `doc/finalpaper/final-draft.pdf` | manuscript | review-support historical output | `archive-ready` | low-medium | keep paired with `final-draft.tex` | Historical comparison artifact mentioned in review material and provenance context. Executed by moving it to `doc/finalpaper/archive/historical_manuscripts/`. |
+| `doc/finalpaper/nature_final.tex` | manuscript | alternate Nature manuscript branch | `verify-first` | medium | preserve as side branch unless an explicit manuscript-branch policy supersedes it | Distinct standalone manuscript centered on a larger-corpus "Algorithmic Cost of Function" framing; not the current Level 8 target, but not disposable clutter. |
+| `doc/finalpaper/nature_final.pdf` | manuscript | compiled companion of alternate Nature branch | `verify-first` | medium | resolve status of `nature_final.tex` first | The PDF cannot be classified until its source branch is resolved. |
+| `doc/finalpaper/supInfo.txt` | manuscript support | auxiliary supplementary text | `archive-ready` | low-medium | verify whether it is really manuscript source rather than plain notes | Confirmed to be a standalone LaTeX supplementary document; executed by archiving it as `doc/finalpaper/archive/historical_manuscripts/supInfo.tex`. |
+| `doc/finalpaper/together.tex` | manuscript synthesis | condenser | `hold` | high | none before extraction/indexing plan | Historical synthesis artifact, not a safe deletion or move candidate yet. |
+| `doc/finalpaper/together_full.tex` | manuscript synthesis | condenser | `hold` | high | none before extraction/indexing plan | Preserves cross-level integration and assembly logic not cleanly encoded elsewhere. |
+| `doc/finalpaper/together_full.pdf` | manuscript synthesis | review-support compiled condenser | `verify-first` | medium | decide whether condensers keep PDF companions as archival evidence | May be deletable later, but only after condenser retention policy is formalized. |
+| `workspaces/claude-nature/paper/paper3_algorithmic_corruption.tex` | Level 8 paper tree | side-branch manuscript | `hold` | medium | none before explicit Level 8 paper-branch policy | Active-looking paired-TCGA manuscript inside the live Level 8 workspace; not the main source-of-truth, but also not a safe archive target now. |
+| `index.js` | root artifact | generated frontend bundle candidate | `archive-ready` | low-medium | check for repository references before moving | Large Vite-style bundle with no repository references found; preserved as artifact rather than active source. |
+| `cc_index.js` | root artifact | generated frontend bundle candidate | `archive-ready` | low-medium | same as `index.js` | Same bundle family and file size as `index.js`, with no repository references found. |
+| `debug_ccapi.py` | root scratch scripts | ad hoc diagnostic script | `archive-ready` | low-medium | skim for unique operational notes before moving | Likely non-production, but may preserve debugging knowledge worth retaining in an archive bucket. |
+| `debug_sbml.py` | root scratch scripts | ad hoc diagnostic script | `archive-ready` | low-medium | skim for unique parser/format knowledge before moving | Fits scratch-tool pattern better than production code. |
+| `debug_lambda.m` | root scratch scripts | Mathematica debug script | `archive-ready` | low-medium | skim for unique symbolic or logic notes before moving | Strong scratch/debug signal from naming and location. |
+| `debug_symbolic.m` | root scratch scripts | Mathematica debug script | `archive-ready` | low-medium | skim for unique symbolic notes before moving | Same rationale as `debug_lambda.m`. |
+| `explore_ccapi.py` | root scratch scripts | exploratory vendor wrapper script | `archive-ready` | low-medium | confirm no workflow docs still instruct its use | Appears exploratory rather than stable pipeline code. |
+| `inspect_ccapi.py` | root scratch scripts | exploratory vendor inspection script | `archive-ready` | low-medium | confirm no workflow docs still instruct its use | Better treated as archived troubleshooting support than active code. |
+| `inspect_ccapi_methods.py` | root scratch scripts | exploratory vendor inspection script | `archive-ready` | low-medium | confirm no workflow docs still instruct its use | Same exploratory pattern as other ccapi inspection helpers. |
+| `test_bdm.py` | root scratch scripts | top-level diagnostic test script | `archive-ready` | low-medium | check for repository references before moving | Small standalone BDM probe with no repository references found; preserved in archive with its data fixture. |
+| `test_bdm_debug.m` | root scratch scripts | top-level Mathematica debug test | `archive-ready` | low-medium | skim for unique benchmark or failure context before moving | Appears debugging-oriented and separate from formal test harnesses. |
+| `test_bdm.json` | root scratch scripts | data fixture for BDM probe | `archive-ready` | low-medium | move together with `test_bdm.py` | Tiny fixture file paired with the standalone BDM probe. |
+| `test_ccapi_search.py` | root scratch scripts | exploratory/vendor diagnostic script | `archive-ready` | low-medium | confirm no documented workflow depends on it | Fits the exploratory test utility pattern. |
+| `process_data.py` | root utility scripts | thin wrapper entrypoint | `archive-ready` | low-medium | verify that module-level entrypoints already cover its behavior | Unreferenced stale wrapper that does not bootstrap `src/`; `src/integration/grn_data_pipeline.py` already exposes the same processing path more directly. |
+| `report_dataset.py` | root utility scripts | thin reporting utility | `archive-ready` | low-medium | confirm no documented workflow depends on the root path | Unreferenced operator utility; safe to preserve in `archive/root_wrappers/` rather than occupying the repo root. |
+| `run_process.py` | root utility scripts | thin runner script | `archive-ready` | low-medium | confirm no documented workflow depends on the root path | Unreferenced process-only wrapper; preserved in `archive/root_wrappers/` rather than kept at root. |
+| `run_scraper.py` | root utility scripts | thin runner script | `hold` | medium | none before an explicit root-entrypoint consolidation policy | Historical planning documents still reference it explicitly, so it currently reads as an intentional convenience launcher rather than stale clutter. |
+| `workspaces/claude-nature/paper/results/` | Level 8 paper outputs | mixed paper-support output tree | `hold` | medium-high | none before an explicit paper-support output policy changes | A targeted subset of governance-support artifacts has now been restored from `3f9bd13`; they are provenance-bearing and should not be treated like disposable duplicated test outputs. |
+| `mat-bdm/` | math workspace | thinner historical computational workspace with unique notebook | `verify-first` | high | resolve the local notebook dependency on `squares2Dsize1to4.m` before any deduplication or archival move | `squares2Dsize1to4.m` is an exact duplicate of the copy under `mathematicabdm/`, but `IntegratedInformationByAlgorithmicDynamics.nb` is unique and currently loads the local table. |
+| `mathematicabdm/` | math workspace | richer historical BDM table/notebook workspace | `hold` | high | none before an explicit BDM workspace policy is defined | Contains the broader D3/D4/D5 table set and is directly referenced by `src/integration/NatureBDM.wl`, so it is currently the more anchored workspace. |
+| `src/analysis/optimize_alpha_draft.py` | analysis code | incomplete draft | `archive-ready` | low-medium | compare line-by-line with `optimize_alpha.py` before moving | Comparison shows it stops at an unresolved data-shape question and is superseded by the working `optimize_alpha.py`. |
+| `results/tests/` vs historical paper-side `results/tests/` | test outputs | root test-output tree versus previously duplicated paper-side test mirror | `hold` | medium | none unless a paper-packaging requirement overrides current redundancy evidence | Historical comparison shows the paper-side `tests/` tree (previously under `4ClaudeCode/claude-Nature/paper/results/tests/`) was a strict subset of current `results/tests/` (114 overlapping files, 0 historical uniques), so keeping that mirror absent is now the cleaner policy. |
+| `4ClaudeCode/claude-Nature/` -> `workspaces/claude-nature/` | workspace consolidation | integrate Level 8 reproducibility workspace into a standard `workspaces/` layout | `move-ready` | high | stage external path abstraction first; preserve signpost at old location | Executed: external scripts now resolve the paper workspace via `CAUSALBOOL_PAPER_ROOT`, and the workspace has been moved to `workspaces/claude-nature/` with a signpost README kept at the old path. |
+
+## Immediate Safe Zone
+
+The safest next operational actions are not manuscript deletions.
+
+They are:
+
+1. archive-oriented reclassification of top-level scratch/debug scripts
+2. line-by-line comparison of obvious draft/code duplicates
+3. dependency check for generated bundle artifacts
+
+### Execution note
+
+The first item in this safe zone has now been executed on the `clean` branch.
+
+Archived from repository root to `archive/root_scratch/`:
+
+- `debug_ccapi.py`
+- `debug_sbml.py`
+- `debug_lambda.m`
+- `debug_symbolic.m`
+- `explore_ccapi.py`
+- `inspect_ccapi.py`
+- `inspect_ccapi_methods.py`
+- `test_bdm_debug.m`
+- `test_ccapi_search.py`
+
+These items remain historically preserved, but they no longer occupy the active repository root.
+
+The next two items in this safe zone have now also been executed on the `clean` branch.
+
+Archived from repository root to `archive/root_scratch/`:
+
+- `test_bdm.py`
+- `test_bdm.json`
+
+Archived from repository root to `archive/generated_web_bundles/`:
+
+- `index.js`
+- `cc_index.js`
+
+Archived from `src/analysis/` to `archive/analysis_drafts/`:
+
+- `optimize_alpha_draft.py`
+
+Archived from repository root to `archive/root_wrappers/`:
+
+- `process_data.py`
+
+## Not Ready For Action
+
+The following remain protected for now:
+
+- `doc/newIntPaper/`
+- `workspaces/claude-nature/paper/`
+- `src/Packages/Integration/`
+- `src/integration/Alpha.m`
+- `src/external/ccapi/`
+- `data/`
+- `results/`
+
+## Recommended Next Cleanup Execution Order
+
+1. Revisit `run_process.py` only if root-entrypoint consolidation becomes an explicit cleanup goal.
+2. Return to manuscript branch policy once explicit retention criteria are chosen for side branches and compiled companions.
+3. Revisit `mat-bdm/` only if a concrete BDM deduplication plan can preserve the unique notebook execution path.
+4. Revisit broader result/output policy only if a new paper-packaging requirement appears beyond the current restored support documents.
+5. Only after those checks, perform the next mixed document/code cleanup wave.
