@@ -1145,6 +1145,7 @@ Au = author-gated or author-required.
 | T2.0 hygiene bundle | M | A | T4.7 validation-map | M/L | A |
 | T2.1 C18 reconcile | M | A | T5.1 regenerate-diff | L | A |
 | T2.2 C29/C36 code | M | A | T5.2 derivations | L/M | Au(D-6) |
+| T5.4 full ledger lint | ✅ DONE (report-first) | `201677f`: scripts/lint_ledger_full.py sweeps 41 C-rows / 170 quoted decimals (row+window citations, JSON+CSV harvest, rounding-tolerant); **75 verified directly; 95 UNVERIFIED across 27 rows listed for author review** (unverified ≠ wrong — defined in report header); FINDINGS untouched pending review per fix protocol |
 | T2.3 causalNet fixes | M | A | T5.3 level READMEs | S | A |
 | T2.4 causal-paper arc | L | A(+Au: D-5, D-7) | T5.4 full lint | M | A |
 | T2.5 pathinfo counts | S | A | T2.6 idx-deconv docs | S | A |
@@ -1438,6 +1439,12 @@ Template per entry:
   `pair`/NOT `i` params are absolute-coordinate while canalisingIndex is
   Ic-relative — both now pinned with named authority in ORDERING.md §4b;
   witness ground truth follows the established vectorPredict semantics.
+- `[T5.3/T5.4]` **EXECUTED 2026-08-25.** T5.3: eight level READMEs (11–18)
+  added — purpose + qualitative verdict + bitácora/experiment pointers; no
+  numbers quoted (single source stays the pinned artifacts). T5.4: full-sweep
+  ledger lint executed report-first; 95 decimals across 27 rows queued for
+  author adjudication via the T2.1 addendum protocol; known harvest limits
+  documented (prose-only stats per DEV-2.2, notebook-executed numbers).
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
