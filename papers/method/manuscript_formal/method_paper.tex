@@ -1783,13 +1783,14 @@ compared.
 
 \begin{table}[h]
 \centering
+%% ARTEFACT-BEGIN four_paths_table (producer: tests/MUnit/Mixed/TSK-MIXED-001-FormulaVsExhaustiveTests.m -> Summary.json)
 \begin{tabular}{p{0.29\linewidth}p{0.12\linewidth}p{0.18\linewidth}p{0.23\linewidth}}
 \toprule
 \textbf{Path} & \textbf{Accuracy} & \textbf{Time} & \textbf{Status} \\
 \midrule
 Vectorised shortcut formula path & \(0.66875\) & \(1.10\times10^{-3}\)\,s & fast but inexact \\
 Exact library semantics           & \(1.0\)     & \(0.081\)\,s             & exact \\
-Packaged index-set transport path & see note   & \(7.03\times10^{-2}\)\,s & exact (post-repair); archived artefact recorded \(0.51875\), superseded --- under investigation (T4.1) \\
+Packaged index-set transport path & see note   & \(7.03\times10^{-2}\)\,s & exact (post-repair); archived artefact recorded \(0.51875\), superseded --- root cause closed (T4.1) \\
 Analytic index-set formulae       & \(1.0\)     & \(9.85\times10^{-3}\)\,s & exact; fastest exact path \\
 Baseline exhaustive generation    & ---         & \(0.118\)\,s             & reference \\
 \bottomrule
@@ -1799,8 +1800,11 @@ Accuracy is measured against the exhaustive baseline repertoire. The packaged in
 transport path (``IndexSetNetwork''\(+\Phi\)) is disclosed per remediation plan T1.5: the
 archived artefact of 2025-11-22 recorded \(0.51875\) under a superseded script revision;
 the current revision executes at \(1.0\) on all theorem-relevant paths, and the root-cause
-archaeology of the archived figure remains open (plan task T4.1).}
+archaeology of the archived figure was closed by remediation task T4.1: the archived figure is the
+signature of an all-zero dead-path artefact (exactly the baseline zero-cell fraction), not an
+ordering mismatch (\texttt{GOVERNANCE/ORDERING.md} \S6).}
 \label{tab:four-paths}
+%% ARTEFACT-END four_paths_table
 \end{table}
 
 Two distinct scientific points follow. First, a correctness discipline: the fastest non-exact
@@ -1856,6 +1860,7 @@ complexity of the \emph{mechanism description} is not the same object as the com
 measured:
 
 \begin{center}
+%% ARTEFACT-BEGIN mechanism_vs_dataset_table (producer: papers/method/code/complexity_analysis/complexity_analysis.py -> complexity_results.json)
 \begin{tabular}{p{0.34\linewidth}p{0.18\linewidth}p{0.30\linewidth}}
 \toprule
 \textbf{Measure} & \textbf{Value} & \textbf{Interpretation} \\
@@ -1874,6 +1879,7 @@ Total Shannon content \(H_{\mathrm{total}}\) & \(10229.61\) bits
   & mechanism is far shorter than full repertoire-level coding \\
 \bottomrule
 \end{tabular}
+%% ARTEFACT-END mechanism_vs_dataset_table
 \end{center}
 
 The exact formulae are not merely another way to print the same table: they constitute a

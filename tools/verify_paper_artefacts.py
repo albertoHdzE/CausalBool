@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""AUDIT01/T5.1 - `make verify-paper` engine.
+
+Reads papers/method/artifact_baseline/artefacts.json. For every COVERED
+artefact: runs its producer command, loads the produced JSON, and checks the
+marker-delimited block in the .tex against the declared expectations
+(values present, value counts, disclosure strings, metric invariants).
+Exits non-zero listing mismatched ARTEFACT IDs (never silent, never counts
+alone: each failure names the missing/incorrect value).
+
+Volatile fields (wall-clock times) are excluded by policy, mirroring
+tests/MUnit/BASELINE.md.
+"""
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+INVENTORY = ROOT / "papers/method/artifact_baseline/artefacts.json"
+
+
+def block_text(tex_file: Path, block_id: str) -> str:
+    text = tex_file.read_text()
+    m = re.search(
+        rf"%% ARTEFACT-BEGIN {re.escape(block_id)}.*?%% ARTEFACT-END {re.escape(block_id)}",
+        text, re.S)
+    if not m:
+        raise AssertionError(f"markers for {block_id} not found in {tex_file}")
+    return m.group(0)
+
+
+def run_producer(cmd: str) -> None:
+    subprocess.run(cmd, shell=True, cwd=ROOT, check=True,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def check(art: dict) -> list[str]:
+    errs: list[str] = []
+    tex = ROOT / art["tex_file"]
+    run_producer(art["producer_cmd"])
+    produced = json.loads((ROOT / art["produced_json"]).read_text())
+    blob = block_text(tex, art["block"])
+    checks = art.get("checks", {})
+
+    for val in checks.get("values_present", []):
+        if val not in blob:
+            errs.append(f"{art['id']}: expected value '{val}' absent from .tex block")
+    for val, want in checks.get("value_count", {}).items():
+        got = len(re.findall(rf"(?<![\d.]){re.escape(val)}(?![\d])", blob))
+        if got != want:
+            errs.append(f"{art['id']}: value '{val}' occurs {got}x, expected {want}")
+    for s in checks.get("disclosure_present", []):
+        if s not in blob:
+            errs.append(f"{art['id']}: required disclosure string '{s}' absent")
+
+    if "json_expect" in checks:
+        for path, want in checks["json_expect"].items():
+            node = produced
+            for key in path.split("_"):
+                node = node[key] if isinstance(node, dict) else node
+            key0 = path.split("_")[0]
+            got = round(produced[key0], 2) if path.endswith("round2") else produced[path]
+            if abs(got - want) > 1e-9:
+                errs.append(f"{art['id']}: json {path}={got} != expected {want}")
+
+    if checks.get("metrics_all_zero_mismatches"):
+        runs = produced if isinstance(produced, list) else produced.get("runs", [])
+        for r in runs:
+            if r["nodeAuditMismatches"] != 0 or r["networkMismatchCells"] != 0:
+                errs.append(f"{art['id']}: n={r['n']} seed={r['seed']} has "
+                            f"nodeMM={r['nodeAuditMismatches']} netMM={r['networkMismatchCells']}")
+    if "sampled_rows_per_run" in checks:
+        rows = checks["sampled_rows_per_run"]
+        runs = produced if isinstance(produced, list) else produced.get("runs", [])
+        for r in runs:
+            if r["sampledRows"] != rows:
+                errs.append(f"{art['id']}: sampledRows {r['sampledRows']} != {rows}")
+    return errs
+
+
+def main() -> int:
+    inv = json.loads(INVENTORY.read_text())
+    failures: list[str] = []
+    for art in inv["covered"]:
+        try:
+            failures.extend(check(art))
+            print(f"PASS {art['id']}")
+        except Exception as exc:  # noqa: BLE001 - report, then exit non-zero
+            failures.append(f"{art['id']}: {type(exc).__name__}: {exc}")
+            print(f"FAIL {art['id']}")
+    for p in inv["pending"]:
+        if not p.get("reason"):
+            failures.append(f"PENDING entry without reason: {p}")
+    if failures:
+        print("\nVERIFY-PAPER FAILED — mismatched artefact IDs / errors:")
+        for f in failures:
+            print(" -", f)
+        return 1
+    print(f"\nVERIFY-PAPER OK ({len(inv['covered'])} covered, "
+          f"{len(inv['pending'])} pending with reasons)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
