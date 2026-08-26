@@ -1744,3 +1744,33 @@ D-6 author decision and at anything that trips U1/U4. Judge suite health only
 against tests/MUnit/BASELINE.md v2 and run both gates (paper numbers, glossary
 sync) before touching .tex or governance files. Do NOT execute or draft anything
 under ROADMAP_R4_SEGMENTED_GRAMMAR.md until Waves 3–4 are closed and logged.
+
+- `[BOARD-COMPLETE]` **POST-CLOSE-OUT DIRECTIVES EXECUTED 2026-08-25 (author
+  adopted the agent's recommended decisions wholesale: "proceed as
+  recommended").** Sequence and evidence:
+  (1) SIBLING PUSH (T2.7 residue): U1 correction — commits `62fb3b3`/`b868cd0`
+  were ALREADY on origin/main (Appendix D's "unpushed-by-design" note had aged);
+  the actual unpushed pair was the author's finished Phase-4 work
+  (`faeeb77` prereg frozen, `58b14f9` executed NO-GO). Pushing my new commit
+  published that pair with it; disclosed here as intended under the durability
+  rationale. Sibling main now at `db6343d`.
+  (2) U6 GRANTED + EXECUTED (T4.4/AC-4.4b): NULLS.md standing-rule pointer
+  added to sibling TRANSFERENCE.md as dated append-only addendum (`db6343d`) —
+  the routed-to "Phase-2 TODO" never existed as a file; T2.6-precedent home
+  chosen. NULLS.md §5 updated to DONE.
+  (3) R4 PROTOCOL FROZEN (`02b6f85`, route b): Addendum A1 gates C4 pocket
+  CLAIMS on an empirical surrogate null (≥100 matched-length iid surrogates,
+  99th-percentile count + max-length gates; w_min stays 16 for detection);
+  Addendum A2 upgrades the C2 ≤2 budget from assertion to economics derivation;
+  `experiments/r4_segmented_grammar/calibration.py` committed as the single
+  deterministic source of the quoted envelope numbers. Sign-off provenance in
+  the freeze commit message (AC-2.4e pattern: no R4 results commit precedes it).
+  (4) SUCCESSOR OPENED: `SUCCESSOR_PLAN_R4.md` v0.1 — Wave 0 = ORDERING §7
+  migration + F36 exception coverage under fresh baselines; Wave 1 = R4
+  instrument per frozen protocol; intake = n>16 trajectory validation, dossier
+  regeneration candidates, R1/R3 arms.
+  (5) FINDINGS ADJUDICATION APPLIED (batch rule): addendum `eecf918` — 68/95
+  decimals stand on artifacts (C29/C36 prose-pins confirmed), 27 annotated as
+  historical draws, 0 retracted as wrong; dossier is canonical evidence.
+  This plan now holds NO open items; all further authority rests with
+  SUCCESSOR_PLAN_R4.md.

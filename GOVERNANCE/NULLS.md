@@ -90,3 +90,7 @@ enumerated before the draw.
 - Pointer to be added to the series-deconvolution Phase-2 pre-registration TODO
   (**pointer only** — the sibling edit itself remains gated behind its own U6
   approval and is logged in AUDIT_FIXING_PLAN_01 Appendix D).
+  **DONE 2026-08-25 (U6 granted):** pointer landed as a dated TRANSFERENCE.md
+  addendum in series-deconvolution (commit `db6343d`, pushed) — that sibling has
+  no standalone Phase-2 TODO file, so the living transfer document received it
+  per T2.6 precedent. Binding for all sibling pre-registrations from this date.
