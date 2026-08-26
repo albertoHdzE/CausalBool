@@ -30,8 +30,10 @@ changes expected — if the gate moves, stop and log.
    (**AC-R4-4** constructed inconsistency case).
 3. W1.3 Controls C1–C3 on synthetic strings (deterministic generators,
    byte-identical rerun **AC-R4-2**).
-4. W1.4 C4 WTI case incl. 100-surrogate null gate (Addendum A1); profile figure
-   renders raw timeline (**AC-R4-6**).
+4. W1.4 C4 WTI case incl. surrogate null gates per Addendum A1 **as amended by
+   A3** (Tier 1 Bernoulli(p̂) marginal-matched; Tier 2 circular-block shuffle,
+   block = 20 trading days; claim gate = BOTH tiers' 99th percentiles); profile
+   figure renders raw timeline (**AC-R4-6**).
 5. W1.5 Results write-up under label discipline ("codelength under G",
    "mechanism under F"); every recovery claim elementwise (**AC-R4-3**).
 
@@ -60,3 +62,10 @@ hash-order-sensitive output.
 
 - 2026-08-25 PLAN-OPENED v0.1 at protocol freeze. Intake as above. No tasks
   executed yet.
+- 2026-08-25 v0.2 — adversarial review remediation (pre-result, therefore not
+  tuning): PROTOCOL Addendum A3 landed (C1→rule 150; C3→[150,232,150,105]/
+  [90,150]; C2 ≥1.00; A1 two-tier null; expressivity pinned at 46/256 via
+  mirror-tested catalogue `567b170`; envelope re-derived `d1ef6d5` — w=16
+  P(any)=1.67e-4±2.9e-5, E[raw]≈1.2 @7000 obs). Wave 0 unchanged; W1.3/W1.4
+  generators must consume catalogue_from_gates.json only (mirror test is the
+  authority chain).
