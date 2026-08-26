@@ -209,6 +209,62 @@ count. The pre-economics envelope (raw hits before economics) is recorded by
 the committed calibration tool for transparency; it is NOT the expected
 transmission count.
 
+## Addendum A3 (2026-08-25, pre-results; adversarial-review remediation) —
+controls re-designated to reachable rules, expressivity pinned by mirror test,
+C2 tightened, A1 null upgraded
+
+Adopted following an independent adversarial review (F1–F5) whose substance was
+reproduced by the boarding agent before adoption. No R4 result exists; every
+change below is therefore pre-registration hygiene, not tuning. This addendum
+SUPERSEDES the following clauses, which remain in place above unmodified:
+§6 C1 (rule-110 criterion), §6 C3 (rules 110/30/45), §4.5 sentence "Kraft gives
+…" is unaffected, §6 C2 threshold 0.90, Addendum A1 item 1 (iid-fair-coin-only
+null) and A1 item 2's quoted envelope arithmetic.
+
+**A3.1 Frame expressivity (authoritative).** The mechanism catalogue is the
+ApplyGate-generated, mirror-tested export
+(`catalogue_from_gates.json`; generator `tools/r4_catalogue_from_gates.wl`;
+elementwise parity `tools/r4_catalogue_mirror_test.py`, exit-gated). Usable
+(non-constant) mechanisms: 177; distinct truth tables: 46; **reachable 3-input
+rules: 46 of 256**. Supports are ALL non-empty subsets of {b[t−1], b[t−2],
+b[t−3]} including non-contiguous ones ({1,3} admissible); KOFN carries both
+strict modes as distinct mechanisms; constants ride the LUT tail and are
+excluded from the catalogue. Controls may only nominate rules from the
+exported reachable set.
+
+**A3.2 C1 (positive control) re-designated.** Rule **150** (= XOR₃ on lags
+{1,2,3}) replaces rule 110: n ∈ {256, 1024} × 20 seeds each; PASS ⟺ 40/40
+runs yield M_F = one segment whose tuple is exactly the rule-150 recurrence,
+zero residual on positions 4..n (symDiff ∅).
+
+**A3.3 C3 (regime-switching) re-designated.** RS-A = rules [150, 232, 150,
+105] in blocks of 64 (n=256); RS-B = [90, 150] alternated ×5 in blocks of 32
+(n=320) — RS-B exercises non-contiguous support inference ({1,3}). Cut set and
+per-segment tuple criteria unchanged (symDiff ∅, 20/20 per regime).
+
+**A3.4 C2 threshold tightened 0.90 → 1.00.** PASS requires per-cell mean
+L_G/n ≥ 1.00: any honest grammar on iid fair bits carries non-negative
+overhead, so mean < 1 now fires on genuine claimed compression rather than
+essentially only on Kraft violations.
+
+**A3.5 A1 null upgraded (two tiers, claim gate = BOTH).**
+Tier 1 — marginal-matched surrogates: ≥100 Bernoulli(p̂) strings, p̂ = empirical
+P(b=1) of the binarised series recorded in the results artifact.
+Tier 2 — dependence-preserving surrogates: ≥100 circular-block shuffles of the
+binarised series (block = 20 trading days), preserving short-range volatility
+clock while destroying law structure. A pocket claim requires observed count >
+99th percentile of surrogate counts AND max length > surrogate max under BOTH
+tiers (house doctrine: marginal preservation, TRANSFERENCE.md; exp19/20
+precedent).
+
+**A3.6 Envelope figures superseded.** All previously quoted noise-envelope
+numbers (including ≈3×10⁻³ per start at w=16 inside Addendum A1) derived from
+the pre-fix catalogue/event mismatch and are RETIRED. Authoritative figures
+(`calibration.py` v2, byte-identical rerun): P(any-start regeneration) =
+1.67×10⁻⁴ ± 2.9×10⁻⁵ at w=16 → E[raw hits] ≈ 1.2 on ~7000 observations;
+w=14: 9.6×10⁻⁴; w=12: 4.1×10⁻³; w≥20 below MC resolution (bounds 4.4×10⁻⁵,
+2.7×10⁻⁶). Pre-economics label applies throughout.
+
 ## Deviations
 
 - (none yet — section exists for dated addenda only)
