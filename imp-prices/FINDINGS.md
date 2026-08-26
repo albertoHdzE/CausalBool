@@ -379,3 +379,32 @@ they are crude oil under another name. No scoring rule, description length or
 gate catalogue could have rescued that panel. This is a statement about the data,
 not about the method, and it is the reason Phase 3 moves to daily resolution and
 drops the macro covariates rather than carrying them along as decoration.
+
+---
+
+## ADJUDICATION ADDENDUM 2026-08-25 (AUDIT01/T5.4 residue; author-delegated batch rule)
+
+The full ledger lint (T5.4) left 95 quoted decimals UNVERIFIED across 27 C-rows
+(`results/ledger_lint_full/report.md`; "unverified ≠ wrong" per its header). A
+deep search over the whole artifact corpus
+(`results/ledger_lint_full/adjudication_dossier.md`, committed with its generator
+script) located every one. The author delegated adjudication to the standing
+batch rule this date; verdicts, by class:
+
+1. **68 decimals — FOUND-IN-ARTIFACT: values stand.** Each is present in a
+   machine artifact (`reference/gwp3/results.json` for the C11/C13 benchmark
+   block; row-local `results/*.json` for most others). Where a row cited an
+   unreadable or wrong path (bare `results.json`), the dossier line IS the
+   corrected pointer; rows are not retro-edited.
+2. **Of these, values recorded inside committed prose-preservation blocks**
+   (C29's `"prose"` null moments, C36's `"prose"`/`provenance` fields): governed
+   by quote-the-pin (DEV-2.2/T2.2); confirmed as pinned records, no action.
+3. **27 decimals — PROSE-ECHO ONLY: annotated as historical draws** (DEV-2.2
+   precedent). No machine-reachable source exists in this repository; they are
+   NOT retracted as errors — they are declared unrecoverable-from-artifacts.
+   Rows most affected: C18 (the DEV-2.1 seed-lottery triple), C27/C28/C29
+   partial, C30/C32/C39/C40/C41, C15/C26 singles. Regeneration candidates are
+   registered in the successor plan's intake queue.
+
+No numeric value in any row is changed or withdrawn by this addendum. Per-
+decimal evidence and file locations: `results/ledger_lint_full/adjudication_dossier.md`.
