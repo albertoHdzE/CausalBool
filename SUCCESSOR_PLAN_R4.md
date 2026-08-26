@@ -1,0 +1,62 @@
+# SUCCESSOR_PLAN_R4 — Segmented Gate-Grammar Execution (opened 2026-08-25)
+
+**Status:** OPENED at R4 protocol freeze. Authority for everything
+ROADMAP_R4_SEGMENTED_GRAMMAR.md now governs transfers here;
+AUDIT_FIXING_PLAN_01 is CLOSED and holds no further jurisdiction.
+**Binding inputs:** `experiments/r4_segmented_grammar/PROTOCOL.md` (FROZEN
+2026-08-25 — its addenda are law), `GOVERNANCE/{ORDERING,NULLS,DESCRIPTION_LENGTHS,GLOSSARY}.md`,
+MUnit BASELINE v2 (+ intended deltas, bracketed per U7).
+
+Conventions: U1–U8 in force; one commit per task `[R4/<task-id>]`, push after
+each; dated deviations to this file's log section (append-only); AUTHOR-DECISION
+items halt their thread; datasaurus gates on every equality claim or quoted
+number.
+
+## Wave 0 — hygiene debt carried from close-out (engine-adjacent; bracket first)
+
+| Task | Content | Notes |
+|---|---|---|
+| W0.1 ORDERING §7 migration | BioExperiments → LSB-canonical public contract per GOVERNANCE/ORDERING.md §7 | suite bracket before/after; mixed001 figures must stay invariant |
+| W0.2 F36 exception coverage | Comparison.m / OnPossibleBehaviour.m keep ABSOLUTE canalising reading as documented exceptions — give them their own pinned tests or migrate to Ic-relative | ORDERING §4b authority; negative+positive controls |
+
+Gate: both under fresh MUnit baseline bracket (record deltas); no paper-number
+changes expected — if the gate moves, stop and log.
+
+## Wave 1 — R4 instrument (per FROZEN protocol)
+
+1. W1.1 Grammar/codec module + Kraft/prefix-free component checks (**AC-R4-1**:
+   join test green before ANY length is quoted anywhere).
+2. W1.2 Segmenter (D1 refine-on-residual, deterministic) + refusal path
+   (**AC-R4-4** constructed inconsistency case).
+3. W1.3 Controls C1–C3 on synthetic strings (deterministic generators,
+   byte-identical rerun **AC-R4-2**).
+4. W1.4 C4 WTI case incl. 100-surrogate null gate (Addendum A1); profile figure
+   renders raw timeline (**AC-R4-6**).
+5. W1.5 Results write-up under label discipline ("codelength under G",
+   "mechanism under F"); every recovery claim elementwise (**AC-R4-3**).
+
+Implementation home: Python-first (`src/analysis/r4_segment_grammar.py` +
+tests) unless a task card says otherwise; vendor two-copies rule if
+index-deconvolution sources are touched; record PYTHONHASHSEED for any
+hash-order-sensitive output.
+
+## Intake queue (registered, unowned)
+
+- n>16 trajectory-route validation experiment (promoted from T4.2 backlog).
+- Regeneration producers for any FINDINGS rows adjudicated "re-runnable"
+  during the 2026-08-25 dossier pass (see imp-prices
+  `results/ledger_lint_full/adjudication_dossier.md`).
+- R1/R3 application arms (literature .bnet head-to-head; E. coli
+  declared-semantics synthesis). R2 stays out unless forced.
+- OEIS-thread context exploration (roadmap Origin, future context only).
+
+## Author gates
+
+- Any catalogue growth (dated amendment + catalogue cost paid in code).
+- Any change to frozen thresholds/addenda.
+- First results readout of C4 before any external claim.
+
+## Log (append-only)
+
+- 2026-08-25 PLAN-OPENED v0.1 at protocol freeze. Intake as above. No tasks
+  executed yet.
