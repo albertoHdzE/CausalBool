@@ -408,3 +408,25 @@ batch rule this date; verdicts, by class:
 
 No numeric value in any row is changed or withdrawn by this addendum. Per-
 decimal evidence and file locations: `results/ledger_lint_full/adjudication_dossier.md`.
+
+## CORRECTION ADDENDUM 2026-08-25 (T5.4 residue; supersedes the TRACEABILITY
+headline of the same-day adjudication addendum above — nothing else)
+
+An independent adversarial review showed the v1 dossier matcher carried no
+reference distribution and an unconditional ×100 rescale: random 1–2 dp decoys
+match an artifact at saturation rates under declared domains
+(D1[0,1): 95/95 at 1 dp, 93/95 WEAK at 2 dp), so "68 FOUND-IN-ARTIFACT /
+0 UNRESOLVED" claimed more traceability than the method supports.
+
+Corrected classification (dossier v2: STRONG requires ≥4 dp TOKEN precision,
+machine artifact, no rescale; decoy false-STRONG rate 0/95 in every bucket):
+**STRONG=16 · WEAK=52 · PROSE=22 · UNRESOLVED=5** (total 95).
+
+The batch-rule VALUE verdicts stand unchanged — nothing is retracted as wrong.
+What changes is evidence tiering: only the 16 STRONG decimals support "value
+stands on artifact" as-standing; the remainder keep their annotated-evidence
+status (historical draws / prose-only) with decoy-calibrated uncertainty, and
+WEAK rows with re-runnable producers are queued for regeneration in
+SUCCESSOR_PLAN_R4 intake. Canonical evidence:
+`results/ledger_lint_full/adjudication_dossier_v2.md` (+ generator v2);
+the v1 dossier is preserved untouched for provenance.
