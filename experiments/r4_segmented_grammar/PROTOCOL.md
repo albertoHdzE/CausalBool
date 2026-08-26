@@ -1,13 +1,10 @@
 # PROTOCOL — Route 4: Segmented gate-grammar codelengths for 1-D binary strings
 
-**Status: DRAFT — AWAITING AUTHOR SIGN-OFF. HALTED per
-`ROADMAP_R4_SEGMENTED_GRAMMAR.md` "Boarding sequence" step 3.** No R4 route may
-execute until sign-off is recorded (commit trail or Appendix-D-style entry dated
-after this file's commit, AC-2.4e pattern). Execution opens the SUCCESSOR PLAN;
-nothing runs under AUDIT_FIXING_PLAN_01 authority. After sign-off this protocol
-is frozen: no result-dependent changes; deviations only as dated addenda below,
+**Status: FROZEN 2026-08-25 — signed off by the author (directive "proceed as
+recommended", adopting route (b): approval conditional on Addendum A1 below).
+No result-dependent changes permitted; deviations only as dated addenda below,
 logged BEFORE adoption, with any affected run discarded and superseded (T4.3
-precedent).
+precedent).**
 
 Drafted 2026-08-25 by the boarding agent from the roadmap's frozen decisions
 (D1–D4, author-accepted 2026-08-24) and its standing controls. Every parameter
@@ -167,8 +164,50 @@ synthetic benchmark when folded in).
 
 ## 9. Sign-off
 
-AUTHOR DECISION — thread halted. On sign-off: freeze this file (status line
-updated by dated addendum only), open the successor plan, execute routes there.
+**RECORDED 2026-08-25:** author adopted the boarding agent's recommendation —
+route (b): approve conditional on Addendum A1 (empirical surrogate-null claim
+gate for C4) and A2 (derived C2 budget rationale). Freeze effective with the
+commit carrying these addenda; approval provenance = session directive, quoted
+in that commit message (AC-2.4e pattern: no R4 results commit may precede it).
+Execution opens `SUCCESSOR_PLAN_R4.md`; nothing runs under AUDIT_FIXING_PLAN_01
+authority.
+
+## Addendum A1 (2026-08-25, pre-results) — C4 pocket CLAIMS gated on an empirical surrogate null
+
+Detection keeps w_min = 16. A **claim** about real-data pockets additionally
+requires all of:
+
+1. **Surrogate null:** ≥ 100 iid fair-coin binary surrogates of length matched
+   to the binarised WTI series are run through the IDENTICAL pipeline and
+   pocket definition. Destroyed dimension: all deterministic structure.
+   Held fixed: length, alphabet, pipeline, thresholds. Declared limitation:
+   iid fair coins are the null; volatility-clustering structure in returns is
+   part of what is being tested against, not matched.
+2. **Claim gate:** observed pocket count exceeds the 99th percentile of the
+   surrogate per-series pocket counts AND observed maximum pocket length
+   exceeds the surrogate maximum. Otherwise the honest verdict is "consistent
+   with the exact-reproduction noise envelope" — which Addendum-derived
+   arithmetic puts at ≈3×10⁻³ per window start at w=16 (≈24 raw hits expected
+   on ~7000 observations; committed derivation:
+   `experiments/r4_segmented_grammar/calibration.py`, MC-confirmed).
+3. **Elementwise listing (unchanged, U8):** every claimed pocket listed with
+   span + regenerating tuple + regeneration check.
+
+Rationale: exact reproduction under exhaustive search is a multiple-comparisons
+magnet; only a richest-control null licenses a positive claim.
+
+## Addendum A2 (2026-08-25, pre-results) — C2 noise budget retained ≤2, rationale upgraded from assertion to derivation
+
+The budget stands: ≤ 2 transmitted non-LUT dictionary entries across all 60
+noise strings. Derivation: an isolated chance exact-reproduction fails the
+segmenter's strict-improvement acceptance because its bit savings are smaller
+than its charged overhead (mechanism code + dictionary share + pointer + cut
+costs); pattern-luck alone therefore does not transmit mechanisms. The budget
+guards aggregate/residual risk across seeds and cells. Backstop: ANY transmitted
+noise mechanism with span ≥ 16 is reported individually regardless of total
+count. The pre-economics envelope (raw hits before economics) is recorded by
+the committed calibration tool for transparency; it is NOT the expected
+transmission count.
 
 ## Deviations
 
