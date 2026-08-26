@@ -23,7 +23,15 @@ myMajority[list_, params_: <||>] := Module[{d, ones, th},
   th = If[TrueQ[Lookup[params, "tiePolicy", "strict"] === "atOrAbove"], Ceiling[d/2], Floor[d/2] + 1];
   If[ones >= th, 1, 0]
 ]
-myKOfN[list_, k_Integer] := If[Count[list, 1] >= k, 1, 0]
+(* AUDIT01/T4.7 (DEV-T4.7-1): KOFN now honors params["strict"] identically to
+   IndexSet/IndexSetAnalytic (strict -> Count>k). Default False preserves the
+   historical >= behaviour of every existing caller. Found by
+   TSK-ALGO-004-ClosedFormSetAudit: ApplyGate silently dropped "strict",
+   diverging from the closed-form engine exactly when strict=True. *)
+myKOfN[list_, k_Integer, params_: <||>] :=
+  If[TrueQ[Lookup[params, "strict", False]],
+    Boole[Count[list, 1] > k],
+    Boole[Count[list, 1] >= k]]
 myCanalising[list_, params_Association] := Module[{i, v, out}, i = Lookup[params, "canalisingIndex", 1]; v = Lookup[params, "canalisingValue", 1]; out = Lookup[params, "canalisedOutput", 0]; If[list[[i]] == v, out, myOr[list]]]
 ApplyGate[gate_String, inputs_List, params_: <||>] := Module[{res, p},
   res = Which[
@@ -37,7 +45,7 @@ ApplyGate[gate_String, inputs_List, params_: <||>] := Module[{res, p},
     gate === "IMPLIES", myImplies[inputs],
     gate === "NIMPLIES", myNImplies[inputs],
     gate === "MAJORITY", myMajority[inputs, params],
-    gate === "KOFN", myKOfN[inputs, Lookup[params, "k", 1]],
+    gate === "KOFN", myKOfN[inputs, Lookup[params, "k", 1], params],
     gate === "CANALISING", myCanalising[inputs, params],
     True, 0
   ];
@@ -183,7 +191,13 @@ IndexSetNetwork[gate_String, n_Integer, Ic_List, params_: <||>] := Module[{input
     gate === "NOT",
     Module[{ii = If[i === None, If[Length[Ic] == 1, Ic[[1]], None], i]}, If[ii === None, {}, Flatten@Position[(ApplyGate[gate, {#[[ii]]}, params] == 1) & /@ inputs, True, 1]]],
     gate === "CANALISING",
-    Module[{ci = Lookup[params, "canalisingIndex", If[Length[Ic] >= 1, Ic[[1]], 1]]}, Flatten@Position[(ApplyGate[gate, {#[[ci]]} ~Join~ Part[#, Complement[Ic, {ci}]], params] == 1) & /@ inputs, True, 1]],
+    (* AUDIT01/T4.1 (F36 closure): params are Ic-relative here, identical to
+       ApplyGate/myCanalising and the closed-form engine (GOVERNANCE/ORDERING.md).
+       The previous branch reordered the row to place the canalising bit first while
+       passing the original canalisingIndex through - correct only when that value
+       happened to be position 1 of Ic. Callers holding network-absolute indices
+       translate once at their boundary (First@Position[Ic, ciAbs]). *)
+    Flatten@Position[(ApplyGate[gate, Part[#, Ic], params] == 1) & /@ inputs, True, 1],
     True,
     Flatten@Position[(ApplyGate[gate, Part[#, Ic], params] == 1) & /@ inputs, True, 1]
   ]

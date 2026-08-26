@@ -1,0 +1,51 @@
+{
+  "authority": "AUDIT_FIXING_PLAN_01 T5.1 (AC-5.1c inventory). Every numeric table in both flagship manuscripts maps to an entry here: either COVERED (marker-delimited block in the .tex, producer command, expected-value source) or PENDING with a reason. Pending entries become covered in task order; a pending entry with no reason is a defect.",
+  "covered": [
+    {
+      "id": "four_paths_table",
+      "tex_file": "papers/method/manuscript_formal/method_paper.tex",
+      "block": "four_paths_table",
+      "producer_cmd": "/Applications/Wolfram.app/Contents/MacOS/WolframKernel -script tests/MUnit/Mixed/TSK-MIXED-001-FormulaVsExhaustiveTests.m",
+      "produced_json": "results/tests/mixed001FormulaVsExhaustive/Summary.json",
+      "checks": {
+        "values_present": ["0.66875"],
+        "value_count": {"1.0": 3},
+        "disclosure_present": ["0.51875"]
+      },
+      "volatile_fields": ["baselineTime", "predictiveTime", "predictiveLibTime", "predictiveIndexTime", "predictiveAnalyticTime"],
+      "note": "Accuracy columns exact-checked; wall-clock times are volatile and excluded per BASELINE.md policy."
+    },
+    {
+      "id": "mechanism_vs_dataset_table",
+      "tex_file": "papers/method/manuscript_formal/method_paper.tex",
+      "block": "mechanism_vs_dataset_table",
+      "producer_cmd": "python3 papers/method/code/complexity_analysis/complexity_analysis.py",
+      "produced_json": "papers/method/code/complexity_analysis/complexity_results.json",
+      "checks": {
+        "values_present": ["23", "135.66", "10", "016", "10229.61", "1.35", "1.33"]
+      },
+      "json_expect": {"D_formula_bits_round2": 135.66, "C_formula": 23},
+      "note": "Values printed rounded to 2dp in .tex; JSON carries full precision."
+    },
+    {
+      "id": "comp_validation_summary",
+      "tex_file": "papers/method/manuscript_computational/comp_paper.tex",
+      "block": "comp_validation_summary",
+      "producer_cmd": "/Applications/Wolfram.app/Contents/MacOS/WolframKernel -script tests/MUnit/Algo/TSK-ALGO-004-ClosedFormSetAudit.m",
+      "produced_json": "results/tests/algo004closedformsetaudit/Metrics.json",
+      "checks": {
+        "values_present": ["16", "20", "301", "302", "1020", "201", "202"],
+        "metrics_all_zero_mismatches": true,
+        "sampled_rows_per_run": 1020
+      },
+      "note": "ALGO-004 runtime ~7 min; it is the artefact regeneration, not an extra cost."
+    }
+  ],
+  "pending": [
+    {"table": "method_paper tab:mixed-overlap / :1070-1234 mixed10 summary tables", "reason": "producer = mixed_interaction_10node.wl; wiring scheduled T5.1.v2"},
+    {"table": "method_paper corroboration constants (Section 4 worked examples)", "reason": "producer = corroboration_6node.wl; wiring scheduled T5.1.v2"},
+    {"table": "method_paper scalability tables (tab:exact-method, tab:synthesis)", "reason": "producer = scalability_resource_envelope.py (~minutes); wiring scheduled T5.1.v2"},
+    {"table": "comp_paper attractor statistics from generate_paper_outputs.wl §6", "reason": "producer repaired in T1.1 (exit-gated); embedding rows into .tex scheduled T5.1.v2"},
+    {"table": "remaining appendix/expansion tables", "reason": "enumerated by papers/method/artifact_baseline/paper_numbers.json; each gains markers as its producer is wired"}
+  ]
+}

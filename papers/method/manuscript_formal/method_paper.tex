@@ -1679,8 +1679,8 @@ over truth-table lookup is that neither requires preprocessing exponential in lo
 Table~\ref{tab:four-paths}.
 
 \begin{proposition}[Validation-Burden Reduction]\label{prop:validation-burden}
-Exhaustive validation requires \(\Theta(2^n)\) rows. Stratified importance sampling validates
-equality on a fixed \(m\) sampled rows, preserving the exact method while reducing the validation
+Exhaustive validation requires \(\Theta(2^n)\) rows. Stratified row sampling (Hamming-weight layers)
+validates equality on a fixed \(m\) sampled rows, preserving the exact method while reducing the validation
 burden from exponential in \(n\) to linear in \(m\).
 \end{proposition}
 
@@ -1783,13 +1783,14 @@ compared.
 
 \begin{table}[h]
 \centering
+%% ARTEFACT-BEGIN four_paths_table (producer: tests/MUnit/Mixed/TSK-MIXED-001-FormulaVsExhaustiveTests.m -> Summary.json)
 \begin{tabular}{p{0.29\linewidth}p{0.12\linewidth}p{0.18\linewidth}p{0.23\linewidth}}
 \toprule
 \textbf{Path} & \textbf{Accuracy} & \textbf{Time} & \textbf{Status} \\
 \midrule
 Vectorised shortcut formula path & \(0.66875\) & \(1.10\times10^{-3}\)\,s & fast but inexact \\
 Exact library semantics           & \(1.0\)     & \(0.081\)\,s             & exact \\
-Packaged index-set transport path & see note   & \(7.03\times10^{-2}\)\,s & exact (post-repair); archived artefact recorded \(0.51875\), superseded --- under investigation (T4.1) \\
+Packaged index-set transport path & see note   & \(7.03\times10^{-2}\)\,s & exact (post-repair); archived artefact recorded \(0.51875\), superseded --- root cause closed (T4.1) \\
 Analytic index-set formulae       & \(1.0\)     & \(9.85\times10^{-3}\)\,s & exact; fastest exact path \\
 Baseline exhaustive generation    & ---         & \(0.118\)\,s             & reference \\
 \bottomrule
@@ -1799,8 +1800,11 @@ Accuracy is measured against the exhaustive baseline repertoire. The packaged in
 transport path (``IndexSetNetwork''\(+\Phi\)) is disclosed per remediation plan T1.5: the
 archived artefact of 2025-11-22 recorded \(0.51875\) under a superseded script revision;
 the current revision executes at \(1.0\) on all theorem-relevant paths, and the root-cause
-archaeology of the archived figure remains open (plan task T4.1).}
+archaeology of the archived figure was closed by remediation task T4.1: the archived figure is the
+signature of an all-zero dead-path artefact (exactly the baseline zero-cell fraction), not an
+ordering mismatch (\texttt{GOVERNANCE/ORDERING.md} \S6).}
 \label{tab:four-paths}
+%% ARTEFACT-END four_paths_table
 \end{table}
 
 Two distinct scientific points follow. First, a correctness discipline: the fastest non-exact
@@ -1813,7 +1817,7 @@ is the one probed in Tables~\ref{tab:exact-method} and~\ref{tab:synthesis}.
 
 \subsection{Validation Summary}
 
-Exact reconstruction has been verified at $n=10$ and $n=13$ by exhaustive comparison against the baseline repertoire, and at $n=20$ and $n=50$ by stratified importance sampling over Hamming-weight layers (1020 rows, seeds 301 and 302), with accuracy $1.0$ in all cases. The XOR flip probability $p_{\mathrm{flip}}(q,k) = (1-(1-2q)^k)/2$ provides an independent perturbative check. Table~\ref{tab:validation-map} summarises the mapping from formal claims to validation evidence.
+Exact reconstruction has been verified at $n=10$ and $n=13$ by exhaustive comparison against the baseline repertoire, and beyond the exhaustive-baseline range at $n\in\{16,20\}$ by a stratified closed-form-set audit across all twelve gate families (seeds 301 and 302): every node's packaged closed-form one-set is materialised, projected onto its connected inputs, and compared entry-by-entry against the full gate truth table over all $2^{d}$ connected-input patterns, while the composed analytic prediction is checked row-wise against direct evaluation on 1020 Hamming-stratified rows per seed, with zero elementwise mismatches in all cases. A dispatch-consistency audit additionally covers $n\in\{20,50\}$ (1020 stratified rows, seeds 201 and 202); it validates the large-scale evaluation plumbing and carries no theorem weight. The XOR flip probability $p_{\mathrm{flip}}(q,k) = (1-(1-2q)^k)/2$ provides an independent perturbative check. Table~\ref{tab:validation-map} summarises the mapping from formal claims to validation evidence.
 
 \begin{table}[h]
 \centering
@@ -1831,17 +1835,17 @@ Six-node ordering check &
 Table~\ref{tab:ordering-invariance-summary} &
 \(n=6\) \\[3pt]
 Thm.~\ref{thm:canonical-reconstruction}: network exactness &
-Dispatch consistency; phased benchmarks &
-Zero discrepancy at \(n\leq 4\); accuracy \(1.0\) at \(n\leq 13\) &
-\(n\leq 13\) \\[3pt]
+Closed-form-set audit; phased benchmarks &
+Zero discrepancy at \(n\leq 4\); accuracy \(1.0\) at \(n\leq 13\); zero elementwise mismatches (complete node patterns + stratified rows) at \(n\in\{16,20\}\) &
+exhaustive \(n\leq 13\); audited \(n\leq 20\) \\[3pt]
 Prop.~\ref{prop:support-locality}: cost governed by \(|C_q|\) &
 Resource-envelope benchmark &
 Tables~\ref{tab:exact-method} and~\ref{tab:synthesis} &
 \(n\leq 200\) \\[3pt]
 Prop.~\ref{prop:validation-burden}: sampling reduces validation cost &
-Stratified sampled audit &
-Accuracy \(1.0\); seeds 301, 302 &
-\(n\in\{20,50\}\) \\
+Stratified closed-form-set audit &
+Zero elementwise mismatches; seeds 301, 302 &
+\(n\in\{16,20\}\) \\
 \bottomrule
 \end{tabular}
 \caption{Mapping from formal claims to validation layers, following the theorem sequence of the manuscript.}
@@ -1856,6 +1860,7 @@ complexity of the \emph{mechanism description} is not the same object as the com
 measured:
 
 \begin{center}
+%% ARTEFACT-BEGIN mechanism_vs_dataset_table (producer: papers/method/code/complexity_analysis/complexity_analysis.py -> complexity_results.json)
 \begin{tabular}{p{0.34\linewidth}p{0.18\linewidth}p{0.30\linewidth}}
 \toprule
 \textbf{Measure} & \textbf{Value} & \textbf{Interpretation} \\
@@ -1874,6 +1879,7 @@ Total Shannon content \(H_{\mathrm{total}}\) & \(10229.61\) bits
   & mechanism is far shorter than full repertoire-level coding \\
 \bottomrule
 \end{tabular}
+%% ARTEFACT-END mechanism_vs_dataset_table
 \end{center}
 
 The exact formulae are not merely another way to print the same table: they constitute a
@@ -1927,7 +1933,7 @@ Two limitations should be stated explicitly. First, the computational advantage 
 \section{Conclusion}
 We have presented a causality-first index-set calculus for Boolean networks. The framework rests on five pillars.
 
-\emph{Exactness.} Each gate family admits a closed-form one-set over the ordered exhaustive repertoire. These one-sets are not approximations or statistical estimates; they are exact causal specifications, certified by Proposition~\ref{prop:gate-family-one-sets} and corroborated by gate-level derivations and truth-table equality checks across all twelve supported gate types.
+\emph{Exactness.} Each gate family admits a closed-form one-set over the ordered exhaustive repertoire. These one-sets are not approximations or statistical estimates; they are exact causal specifications, certified by Proposition~\ref{prop:gate-family-one-sets} and corroborated by per-family derivations with executed arity-$\leq 6$ mechanical witnesses (\texttt{papers/method/derivations/}, all twelve supported gate types) and truth-table equality checks across all twelve supported gate types.
 
 \emph{Causality.} The unit of explanation is the rule-induced index set, not the output table and not the trajectory. The one-set specifies why a node is active under given inputs by identifying the exact subset of repertoire rows on which the gate's logic evaluates to one. This replaces descriptive enumeration with analytic causal derivation.
 
@@ -1937,7 +1943,7 @@ We have presented a causality-first index-set calculus for Boolean networks. The
 
 \emph{Scalability.} The analytic evaluation cost is governed by the support size \(|C_q|\) rather than by the total network size \(n\), as established by Proposition~\ref{prop:support-locality} and confirmed by the resource-envelope benchmark across \(n\in\{30,60,80,200\}\). Median analytic times stay at or below roughly a millisecond throughout that range and show no growth with \(n\), and the description-length comparison (\(D_{\mathrm{formula}}=135.66\) bits against \(H_{\mathrm{total}}=10229.61\) bits) quantifies the two-orders-of-magnitude compression that the causal formulas achieve over the full realised output.
 
-Exact reconstruction has been verified by exhaustive comparison at $n\leq 13$ and by stratified-sampled audits at $n\in\{20,50\}$; the scalability characterisation is confirmed by resource-envelope benchmarks at $n\leq 200$ (Section~\ref{sec:scalability}). The core scientific claim is therefore not only stated but corroborated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulae, and the cost of that reconstruction is governed by local support size rather than global repertoire size.
+Exact reconstruction has been verified by exhaustive comparison at $n\leq 13$, by a stratified closed-form-set audit at $n\in\{16,20\}$, and by dispatch-consistency audits at $n\in\{20,50\}$; the scalability characterisation is confirmed by resource-envelope benchmarks at $n\leq 200$ (Section~\ref{sec:scalability}). The core scientific claim is therefore not only stated but corroborated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulae, and the cost of that reconstruction is governed by local support size rather than global repertoire size.
 
 \appendix
 
@@ -2068,8 +2074,8 @@ Scalability resource envelope experiment &
 Median analytic time of order \(1\) ms or below, with no growth across \(n\in\{30,60,80,200\}\); support-governed cost confirmed against Proposition~\ref{prop:support-locality} \\[4pt]
 
 Stratified sampled audit &
-Large-scale benchmark with seeds~301 and~302 &
-Accuracy~\(1.0\) on \(1020\) stratified rows at \(n=20\) and \(n=50\); confirms Theorem~\ref{thm:canonical-reconstruction} beyond exhaustive-baseline range \\
+Closed-form-set audit with seeds~301 and~302 &
+Zero elementwise mismatches: complete node-level pattern comparison plus \(1020\) stratified rows per seed at \(n=16\) and \(n=20\), all twelve gate families; supports Theorem~\ref{thm:canonical-reconstruction} beyond exhaustive-baseline range \\
 \bottomrule
 \end{tabular}
 \end{center}

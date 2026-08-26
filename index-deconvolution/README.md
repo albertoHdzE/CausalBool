@@ -53,7 +53,7 @@ See `bitacora/` for the full scientific logbook:
       exp01_pivots_sumandos.py   verifies the pivots/sumandos factorisation
       exp02_exact_recovery.py    main result: exact recovery over a batch
       exp03_ca_to_network.py     cellular automaton to network, exact global map
-      exp04_biological.py        real gene-regulatory networks, exact recovery
+      exp04_biological.py        real gene-regulatory networks, round-trip exactness certificate
       exp05_financial.py         binarised markets vs a deterministic control
       DemoLibrary.wl, build_notebook.wl, full_pipeline_demo.nb
       CADemoLibrary.wl, build_ca_notebook.wl, ca_to_network_demo.nb
@@ -139,9 +139,16 @@ Regenerate and verify (paths via environment variables), for example:
   repertoires identical.
 - Cellular automaton to network: exact global-map recovery on 12 / 12 rules,
   agreeing between the Python and Wolfram implementations.
-- Biological networks: exact recovery on 8 / 8 PyBoolNet models; the new
-  REGULATORY (activator/inhibitor) gate names the mixed conjunctions of real
-  regulatory logic. Python and Wolfram agree.
+- Biological networks: 8 / 8 PyBoolNet models pass the round-trip exactness
+  certificate — ground truth is the exhaustive evaluation of each parsed `.bnet`,
+  and the deconvolution is inverted against that same repertoire, so exactness is
+  a consistency property of parser + forward model + inverter (guaranteed modulo
+  bugs), NOT evidence that the networks' rules were *discovered* from data.
+  Scope: n ≤ 16 (larger models excluded by design). Reframing per V4 stamp,
+  AUDIT_FIXING_PLAN_01 Appendix F. The REGULATORY (activator/inhibitor) gate was
+  defined from the fission-yeast clause and counted on those same networks, so
+  its 8 / 8 figure carries a mild training-on-test caveat and must not be read
+  as out-of-sample gate validation.
 - Financial data: binarised daily markets admit no deterministic Boolean network
   (contradiction rate 0.66, 0 / 9 instruments exact), while the identical
   analyser recovers a deterministic control exactly (contradiction 0, 9 / 9).

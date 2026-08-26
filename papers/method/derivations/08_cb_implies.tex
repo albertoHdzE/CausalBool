@@ -1,0 +1,36 @@
+% AUDIT01/T5.2 - generated derivation document (D-6: all twelve families)
+% Witness source: verification/IMPLIES.json (executed Tue 25 Aug 2026 15:27:25)
+\documentclass{article}
+\usepackage{amsmath,amssymb}
+\title{Gate family IMPLIES: closed-form one-set derivation}
+\date{2026-08-25}
+\begin{document}
+\maketitle
+
+\paragraph{Definition.} $g(x)=\neg x_{a}\vee x_{b}$, $\langle a,b\rangle=$\texttt{pair} (absolute coordinates; default first two of $I_c$).
+
+\paragraph{Closed form.} $J=\mathcal{U}\setminus\bigl(B_{a}\cap\overline{B}_{b}\bigr)$: implication fails exactly on $(1,0)$.
+
+\paragraph{Ordering transport.} The failure pattern transports as $\varphi(B_a\cap\overline{B}_b)=B_{\varphi(a)}\cap\overline{B}_{\varphi(b)}$.
+Canonical internal representation is LSB-first (weights $w(i)=2^{i-1}$);
+transport to MSB row order exclusively via the involution $\varphi$
+(\texttt{GOVERNANCE/ORDERING.md} \S2).
+
+\paragraph{Mechanical witness (arity up to 6).} Executed elementwise equality
+against the exhaustive truth-table repertoire:
+\begin{center}
+\begin{tabular}{lc}
+\hline
+Witness property & Value \\ \hline
+Parameterisations swept & per \texttt{tools/t52_family_witnesses.wl} grid \\
+Arities covered & 2, 3, 4, 5, 6 \\
+Total cases & 35 \\
+Elementwise failures & \textbf{0} \\
+Maximum symmetric-difference size & 0 \\ \hline
+\end{tabular}
+\end{center}
+
+\paragraph{Reproduce.} \texttt{WolframKernel -script tools/t52_family_witnesses.wl}
+(regenerates every family's \texttt{verification/*.json}; exits non-zero on any failure).
+
+\end{document}

@@ -1,0 +1,36 @@
+% AUDIT01/T5.2 - generated derivation document (D-6: all twelve families)
+% Witness source: verification/CANALISING.json (executed Tue 25 Aug 2026 15:27:25)
+\documentclass{article}
+\usepackage{amsmath,amssymb}
+\title{Gate family CANALISING: closed-form one-set derivation}
+\date{2026-08-25}
+\begin{document}
+\maketitle
+
+\paragraph{Definition.} If $x_{c}=v$ (canalising coordinate $c=$\texttt{canalisingIndex}, Ic-relative per T4.1/F36) the output is the fixed \texttt{canalisedOutput} $o$; otherwise it falls back to OR over the remaining connected inputs.
+
+\paragraph{Closed form.} For $o=1$: $J=B_{c}^{v}\cup\bigl(\overline{B}_{c}^{v}\cap R\bigr)$ where $B^{v}_c$ is the value-$v$ band of $c$ and $R$ is the OR one-set over $I_c\setminus\{c\}$ lifted through its own band expression; for $o=0$: $J=\overline{B}^{v}_{c}\cap R$. The closed-form engine realises this by selecting accepting assignments over the $I_c$-tuple and joining free coordinates.
+
+\paragraph{Ordering transport.} Transport requires care: $\varphi$ flips coordinate positions, so the canalising coordinate must be re-expressed after transport --- this is why blind $\Phi$-transport was rejected for CANALISING in \texttt{IndexSet} (T1.2) and why F36 fixed the branch explicitly (T4.1).
+Canonical internal representation is LSB-first (weights $w(i)=2^{i-1}$);
+transport to MSB row order exclusively via the involution $\varphi$
+(\texttt{GOVERNANCE/ORDERING.md} \S2).
+
+\paragraph{Mechanical witness (arity up to 6).} Executed elementwise equality
+against the exhaustive truth-table repertoire:
+\begin{center}
+\begin{tabular}{lc}
+\hline
+Witness property & Value \\ \hline
+Parameterisations swept & per \texttt{tools/t52_family_witnesses.wl} grid \\
+Arities covered & 2, 3, 4, 5, 6 \\
+Total cases & 80 \\
+Elementwise failures & \textbf{0} \\
+Maximum symmetric-difference size & 0 \\ \hline
+\end{tabular}
+\end{center}
+
+\paragraph{Reproduce.} \texttt{WolframKernel -script tools/t52_family_witnesses.wl}
+(regenerates every family's \texttt{verification/*.json}; exits non-zero on any failure).
+
+\end{document}

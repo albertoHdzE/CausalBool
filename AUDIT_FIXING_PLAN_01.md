@@ -1102,7 +1102,7 @@ Ordered by expected scientific value:
 | D-3 | MAJORITY tie convention | ties→0 / ties→1 / tiePolicy param | (iii) param, default ties→0; gated on tie-row probe | OPEN |
 | D-4 | Manuscript roles | two-canonical-scoped / merge | two canonical, distinct scopes | OPEN |
 | D-5 | imp-causal-paper evidence policy | track summaries / external+manifest | summaries ≤ few MB tracked | **CLOSED 2026-08-24: option (i)** |
-| D-6 | Derivations completion vs scoping | generate 10 derivations / rescope claim | (i) generate | OPEN |
+| D-6 | Derivations completion vs scoping | generate 10 derivations / rescope claim | **CLOSED 2026-08-25: generate — extended by author to ALL TWELVE families** (not only the 10 missing); executed as T5.2 |
 | D-7 | T2.4 comparison pre-registration sign-off | agent self-certifies / author approves before run | **author approves** (v1.2) — new experiment, analysis freedom must be closed pre-run; agent drafts only | **CLOSED 2026-08-24: APPROVED as drafted** |
 
 # APPENDIX B — EXECUTION ORDER (DAG)
@@ -1324,8 +1324,7 @@ Template per entry:
   reproduced; two over-cap models correctly recorded `skipped: too_large` in-artifact.
   D1 fixed pre-sweep (`4d9701f`). D4 paper gate PASS re-confirmed.
 
-- `[T0.4]` **T0.4 EXECUTED 2026-08-24 — main reconciled, tag audit01-baseline published.**
-  Pre-merge audit all green (paper gate 112/112; GLOSSARY sync 0; MUnit fresh
+- `[T0.4]` **T0.4 EXECUTED 2026-08-24 — main reconciled, tag audit01-baseline published.**  Pre-merge audit all green (paper gate 112/112; GLOSSARY sync 0; MUnit fresh
   OK=46 FAIL=4 == BASELINE v2; subproject suites green). Two merge-construction
   events recorded for audit: (1) first local merge a081ff6 inherited ~28 GiB of
   gitignored legacy data blobs from unpushed April lineage (3f9bd13/ceab8db:
@@ -1338,6 +1337,152 @@ Template per entry:
   audit01-baseline @ 366d771 pushed. Author's untracked workspaces build
   artifacts backed up to /tmp/premerge_workspaces_backup/.
 
+- `[T4.1]` **T4.1 EXECUTED 2026-08-25 — root cause + ordering unification closed.**
+  (1) ROOT CAUSE of archived accuracyIndex=0.51875 CORRECTS the plan's own
+  context: it is not an ordering-bridge mismatch. The archived
+  OutputsPredictiveIndex.csv (@406a010, Status Sat 22 Nov 2025) is an all-zero
+  matrix; agreement = baseline zero-cell fraction 1−4928/10240 = 0.51875 EXACTLY.
+  Fresh-executed bridge falsification: Φ-omitted and Φ-doubled paths both give
+  accuracy 0.6/4096 mismatches — no scramble reproduces the figure. Mechanism:
+  superseded script revision with a silently dead Index path, preserved by F35
+  orphaning + exit-code-only runner. Evidence: tools/T41_RootCauseProbe.wl,
+  tools/t41_archived_artifact_diff.py, rootcause/*.json (`12e481b`). Lesson
+  appended to ORDERING.md §6: accuracies must ship confusion counts/per-node
+  symmetric differences so degenerate all-zero agreement is visible.
+  (2) GOVERNANCE/ORDERING.md established: LSB-canonical representation,
+  Φ-exactly-once at interop boundaries, public-function contract table,
+  BioExperiments migration path documented (§7, execution deferred), spot-check
+  grep audit list embedded (all expectations verified).
+  (3) F36 CLOSED: canalisingIndex is Ic-relative everywhere;
+  Gates.m IndexSetNetwork CANALISING branch fixed (was reorder-and-pass-through,
+  correct only for ci=Ic[[1]]); pinned elementwise by new
+  TSK-GATES-014-CanalisingCoordTests.m (40 cases incl. ci∉first, all three paths
+  equal). Non-globbed helpers Comparison.m/OnPossibleBehaviour.m keep absolute
+  reading as DOCUMENTED EXCEPTIONS pending their own coverage.
+  (4) F24 CLOSED: stale-resOp guards ×6 legacy dispatch loops
+  (Failure["UnsupportedGate"] + message); negative-control probe green;
+  positive controls cross-checked against packaged dispatch with programmatically
+  derived references after TWO hand-built references were themselves wrong
+  (U8 lesson reconfirmed: never hand-compute reference constants).
+  (5) COLLATERAL DISCOVERY: TSK-MIXED-002 was a pre-guard FALSE GREEN — it
+  validated legacy createRepertoires-vs-runDynamic consistency on networks with
+  NOR/XNOR nodes where BOTH sides were identically stale; guard made Failure
+  metadata differ → symbolic inequality also broke its Status.txt export
+  (unevaluated If exported as verdict, ARCH-004 defect class). Fixed in
+  experiments/mixed/Mixed.m: cell-level MapThread(…,{2}), Failure-pairs counted
+  consistent-by-construction, UnsupportedGateCells=8 disclosed in Metrics.json.
+  Published mixed001 figures invariant. Suite delta exactly +1 intended test.
+
+- `[T4.2]` **T4.2 EXECUTED 2026-08-25 — bio-arm reframing per V4 stamp.** Living
+  claims reframed to "round-trip exactness certificate" with explicit scope
+  (parser + forward model + inverter consistency, guaranteed modulo bugs; n≤16)
+  and V4 evidence pointer: index-deconvolution/README.md experiments table row +
+  snapshot bullet. REGULATORY 8/8 now carries the V4-confirmed training-on-test
+  caveat (gate defined from the fission-yeast clause, counted on those same
+  networks). Papers carry no bio-recovery claim (grepped). Bitácora 05 line 117
+  ("recovers real gene-regulatory networks exactly") left byte-identical per U5.
+  **BACKLOG PROMOTED:** trajectory-route validation experiment on n>16 models
+  (observe state trajectories, deconvolve from data instead of self-repertoire)
+  — routed to the successor plan's intake list, not executed under this plan.
+- `[T4.3]` **T4.3 EXECUTED 2026-08-25 — identifiability envelope measured.**
+  Protocol frozen pre-run (`4c848da`); three deviations logged before adoption
+  (D1 string-form rng seed; D2 target-level binning; D3 coverage redefined as
+  min-over-ALL-cells after the discarded first run DIAGNOSED the interior-cell
+  blind spot: cells at 0.75–0.88 coverage default unobserved LUT entries to 0 →
+  globally wrong yet trajectory-exact). Final run: all 12 exp03 rules saturating
+  at 20/20 seeds when every cell has seen all 8 neighbourhoods; class-dependent
+  degradation below. Determinism control: second execution byte-equivalent.
+  Paper sentence drafted in experiments/ca_coverage/PAPER_SENTENCE.md. The
+  first-run artifacts were superseded and never cited (U5/U8 respected).
+
+- `[T4.4]` **T4.4 EXECUTED 2026-08-25 — NULLS.md live.** Rule + both case
+  studies (anchors: imp-prices FINDINGS:210/:220 + bitacora/07 §1; sibling
+  bitacora 03:316, 05:62, 06:77) + checklist template. AC-4.4b's sibling
+  Phase-2-TODO pointer is a PENDING SIBLING EDIT requiring its own U6 approval —
+  recorded here so it is not silently dropped in close-out.
+
+- `[T4.5]` **T4.5 EXECUTED 2026-08-25 — one wrapper, four named quantities.**
+  Nonidentity re-established by FRESH EXECUTION on a shared toy network (four
+  distinct values) rather than by quoting V5's scratch numbers; V5's stamped
+  single-node values reproduced ELEMENTWISE by the committed parity test.
+  Header asymmetry pinned at exactly log₂(4)=2 bits on the toy. WL side pinned
+  via t45_biometrics_toy.m. Subproject mirrors remain frozen exceptions pending
+  their own venvs' migration tasks.
+
+- `[T4.7]` **T4.7 EXECUTED 2026-08-25 — overclaim converted into a real result;
+  one new engine defect found and fixed en route.**
+  **DEV-T4.7-1:** ApplyGate's KOFN branch dropped `params["strict"]`
+  (myKOfN had no params argument) while IndexSet/IndexSetAnalytic honored it —
+  the exact three-site drift class T1.3 fixed for MAJORITY ties. Found because
+  ALGO-004 draws strict=True at random; node-level COMPLETE comparison
+  localized it to popcount-1..k patterns elementwise. Fix: myKOfN[.,k,params]
+  with default strict=False (zero historical behaviour change); GATES-013's
+  KOFN grid repaired (Scan level-spec had fed sublists as #1, never truly
+  exercising strict=True — the hole that hid this for months).
+  Harness lessons recorded in-code: Module init-list entries evaluate before
+  earlier locals bind (ConstantArray[0,2^d] stayed symbolic); Flatten dissolves
+  row vectors; lsbBits is integer-only. The audit's final run: 0 mismatches,
+  node-complete + 4080 rows.
+  Paper: both manuscripts' validation claims rescoped to what the artifacts
+  show; snapshot rebaseline verified token-exact before commit.
+
+- `[T5.1]` **T5.1 EXECUTED 2026-08-25 — regenerate-and-diff live.** Generic
+  marker-based verifier + inventory; producers genuinely re-executed by the
+  gate (mixed001 kernel run, complexity_analysis, ALGO-004). Session lesson
+  recorded: an uncommitted-file `git checkout` during control setup wiped
+  marker edits once — controls must run against COMMITTED state only (done).
+- `[T5.2]` **T5.2 EXECUTED 2026-08-25 — D-6 CLOSED interactively.** Author chose
+  full coverage: "consider the whole set of gates... all of them, not only 10."
+  Witnesses are EXECUTED artifacts (not prose): 250 elementwise cases across 12
+  families × arities ≤6, zero failures. En-route finding: implication-family
+  `pair`/NOT `i` params are absolute-coordinate while canalisingIndex is
+  Ic-relative — both now pinned with named authority in ORDERING.md §4b;
+  witness ground truth follows the established vectorPredict semantics.
+- `[T5.3/T5.4]` **EXECUTED 2026-08-25.** T5.3: eight level READMEs (11–18)
+  added — purpose + qualitative verdict + bitácora/experiment pointers; no
+  numbers quoted (single source stays the pinned artifacts). T5.4: full-sweep
+  ledger lint executed report-first; 95 decimals across 27 rows queued for
+  author adjudication via the T2.1 addendum protocol; known harvest limits
+  documented (prose-only stats per DEV-2.2, notebook-executed numbers).
+
+- `[CLOSE-OUT]` **BOARDING EXECUTED 2026-08-25 — closure triad re-run fresh;
+  Appendix E set final; Route 4 pre-registration DRAFTED and HALTED for author
+  sign-off.**
+  (1) TRIAD (all fresh this session): paper-number gate PASS — 109 entries
+  identical (exit 0); GLOSSARY sync clean (exit 0); MUnit fresh run
+  **OK=47 FAIL=4 TOTAL=51** — vs BASELINE v2 (OK=46 FAIL=4 TOTAL=50): +1 OK
+  exactly {TSK-GATES-014-CanalisingCoordTests} (the intended T4.1 addition; its
+  log line reports 40 cases, all three paths elementwise-equal); FAIL-set
+  symmetric difference ∅ — same four owned reds (TopologiesTests,
+  KOFNNetworkTests, IMPLIESNetworkTests, TSK-ARCH-004). No new failures.
+  Subproject spot-checks NOT re-run this pass (boarding queue scoped the triad
+  to the three commands; §G.2 values remain the standing record).
+  (2) SUITE ENVIRONMENT INCIDENT (first attempt, superseded): the first `--all`
+  run wedged inside Gates/TSK-GATES-002-Tests.m — kernel alive at 0% CPU for
+  ≥11 min with no verdict exported; wrapper and orphan kernel killed. Isolated
+  rerun of that test: OK in ≈4 s. Full re-run then completed cleanly; the
+  numbers above are the clean run's. No engine or runner changes made; logged
+  as an environment stall of unknown cause, watch-listed for the successor plan.
+  (3) U1 NOTE: the session handoff described a closure audit as "logged
+  2026-08-25", but no dedicated close-out entry existed in this log (only
+  scattered per-task gate mentions). This entry establishes it from today's
+  fresh runs.
+  (4) BOARD CLEANUP: Appendix E finalized — stale placeholders corrected
+  (T0.1b ⏳ → ✅ `2d89313`, merging the later duplicate row into the Wave-0
+  slot; T0.4 ➖ → ✅ `366d771`) and the two missing Wave-4 rows added
+  (T5.3 `28b6005`, T5.4 `201677f`). Also removed the T5.4 status row that
+  commit `72b3f1a` inserted into the Appendix B2 EFFORT table (wrong shape,
+  wrong appendix); B2 restored to effort/owner form.
+  (5) R4 BOARDING STEP 3: pre-registration drafted strictly from the roadmap's
+  frozen decisions D1–D4 at `experiments/r4_segmented_grammar/PROTOCOL.md`,
+  status DRAFT — **HALTED for author sign-off** per the roadmap's own rules.
+  NO R4 route executed; no engine code modified; ROADMAP_R4_SEGMENTED_GRAMMAR.md
+  untouched beyond reading.
+  (6) CARRY-FORWARD UNCHANGED:
+  `imp-prices/results/ledger_lint_full/report.md` — 95 unverified decimals
+  across 27 FINDINGS rows (C5–C41 subset) await AUTHOR adjudication via the
+  T2.1 dated-addendum protocol; left untouched this session per directive.
+
 # APPENDIX E — EXECUTION STATUS LOG (living; one line per task, newest wave first) (living; one line per task, newest wave first)
 
 Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (reason) · ➖ NOT STARTED
@@ -1348,15 +1493,14 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T0.1a parser wiring | ✅ DONE | `2b414aa` + resolver fix `ad97eb8`; planted-FAIL control exit=1 naming test; NOT/AND slices green end-to-end |
 | T0.2 baseline v1 | ✅ DONE | `2fc2b7b`; **OK=77 FAIL=10** (6 unique root-caused); F35 discovered: FormulaVsExhaustive orphaned from `*Tests.m` glob — never executed by `--all` |
 | T0.5 paper-number snapshot | ✅ DONE | `6cb0f58`; 112 entries / 14 table blocks; deterministic `--check` gate PASS |
-| T0.1b discovery + baseline v2 | ⏳ PENDING | after Wave-1 core, per DAG |
-| T0.4 branch/tag | ➖ NOT STARTED | gated on Waves 1–2 |
+| T0.1b discovery + baseline v2 | ✅ DONE | `2d89313` (see INCIDENT entry) — genuine ledger OK=46 FAIL=4 @167s; supersedes v1 by method error |
+| T0.4 branch/tag | ✅ DONE | `366d771` main reconciled over clean parents fff5750+0cb3646; tag `audit01-baseline` pushed; legacy-data exclusion policy in merge message (Appendix D T0.4) |
 | T1.2 package engine | ✅ DONE | `d8d3809`; IndexSetAnalytic packaged (12 families incl. closed CANALISING); {} fallthrough dead via Phi transport; 3 copies deduped; OneSetAllFamilies+NIMPLIES+MAJORITY tests OK; suite +6 OK / FAIL set identical |
 | T1.1 flagship script | ✅ DONE (D-2(d)) | `d42f371`; COMPOSITION LEMMA VERIFIED n=6: symDiff ∅ between composed-set (XOR{x1}⊕XOR{x3}⊕AND{x2,4}) and exhaustive LUT; banner→real exit-gate (10 checks listed); F35 fixed by rename→glob, theorem-paths criterion OK |
 | T1.3 MAJORITY | ✅ DONE (D-3 adopted) | `e87927e`; tiePolicy param both policies tested; PROBE: node10 d=4 has ties but output-neutral verified (0.66875/3392 unchanged) |
 | T1.4 governance | ✅ DONE | `316ce22`; GLOSSARY in-repo w/ provenance + 3-state sync (controls 0/1/2 all shown); 6 citations repointed → 0 dangling; CLAUDE.md D-4 + branch + BASELINE; 21 technical-sense pivots fixed across backbone+derivations; inventory frozen @0 |
 | T1.5 interim disclosure | ✅ DONE | `bd6a365`; tab:four-paths row+caption disclose archived 0.51875 vs current 1.0, T4.1 open; snapshot delta audited post-hoc: 1 semantic block + pure line-shifts |
 | V1–V5 stamps | ✅ DONE | `dae59a3`; all five VERIFIED with evidence |
-| T0.1b discovery + baseline v2 | ✅ DONE | `2d89313` (see INCIDENT entry) — genuine ledger OK=46 FAIL=4 @167s |
 | T2.0 imp-prices hygiene | ✅ DONE | `470682a`; parity gate caught real drift first-run; 97 passed own-venv / 35+4skipped root-venv |
 | T2.1 C18 reconciliation | ✅ DONE (DEV-2.1) | `8c6f6e2`; prose-vs-pin confirmed (6/{WTI_Spot}/37.5 vs printed 5/{WTI_CL}/55); 45-seed recheck: hash-unstable statistic, pin = genuine draw (seed 19 elementwise); quote-the-pin correction + dated notes both docs; lint PASS + 3 planted-mismatch controls exit 1 |
 | T2.2 C29/C36 machinery | ✅ DONE (DEV-2.2) | `6bbc9fb`; C36 reproduces exactly (1.26±1.12, two 7-windows/0.031%, one negative-print pivot; off-by-one + raw-series-sequence disclosed); C29 conclusion robust (share 66–72%, z≈3σ) but exact moments unrecoverable → committed pinned nulls as single source; C26 pre-guard caveat appended |
@@ -1366,6 +1510,16 @@ Legend: ✅ DONE (commit ref) · 🔶 PARTIAL · ⏳ PENDING · 🚫 BLOCKED (re
 | T2.4 causal-paper arc | ✅ DONE (D-5(i) + D-7 approved) | headers `70068fd`+`3eb87ac`; DoF paragraph adjacent to canonical sign-agreement table (`3eb87ac`); comparison `bc3935e`: **10/10 ECA rules exact** elementwise (0/225,280 cells mismatched per-rule set; seeds pinned, no outcome-dependent tuning), Th17+E.coli EXCLUDED-WITH-REASON (no ground truth without inventing gates — recorded as finding); D-5(i) live: results un-ignored selectively, MANIFEST.sha256 + verify_manifest.py PASS, reruns byte-identical |
 | T2.7 sibling addendum | ✅ DONE (U6 granted) | sibling series-deconvolution @main, LOCAL commits `62fb3b3` (§9.6 corrections: divergence entry false → unrelated arXiv module; banner+hmmlearn fixed upstream) & `b868cd0` (GLOSSARY precision note: three-step chain) — append-only, NOT pushed to remote; CausalBool GOVERNANCE/GLOSSARY.md resynced @b868cd0 (`3e23d0c`), check_glossary_sync.sh exit 0 |
 | T5.5 post-fix sweep | ✅ DONE (v1.3) | `9b8c655`+`4d9701f`; all inventory rows closed: imp-causal-paper walkthrough re-executed (numbers identical; root-venv provenance drift recorded), 15/15 idx-deconv notebooks green, 0-byte stray removed, pathinfo regeneration identical, N5 no-action verified, D2 retracted as my misread (exp04 re-run: 8/8 exact reproduced); paper gate PASS |
+| T4.1 ordering unification | ✅ DONE | root cause `12e481b`: archived 0.51875 = ALL-ZERO dead-path artifact (= baseline zero-fraction 5312/10240 exactly; Φ-omitted/doubled bridges give 0.6, i.e. NO scramble reproduces it — plan-context suspicion corrected); ORDERING.md live (LSB canonical, Φ-exactly-once, public-contract table, BioExperiments migration path §7); F36 CLOSED Ic-relative (IndexSetNetwork branch fixed, 40-case elementwise pinning test GATES-014 OK); F24 guards ×6 legacy sites (negative-control probe exit-gated; positive controls vs packaged dispatch programmatically derived); MIXED-002 pre-guard FALSE-GREEN exposed & fixed (identical stale corruption had counted as agreement; now Failure-pairs consistent-by-construction + UnsupportedGateCells disclosed = 8); mixed001 published figures invariant (0.66875/3392/1.0×3); suite bracket-after **OK=47 FAIL=4 TOTAL=51** (+1 intended GATES-014; owned reds unchanged) |
+| T4.2 bio-arm reframing | ✅ DONE | README living claims → round-trip-certificate framing + n≤16 scope + V4 pointer + REGULATORY training-on-test caveat; papers grepped clean; bitácora 05 untouched (U5); n>16 trajectory-validation backlog promoted (Appendix D) |
+| T4.3 CA coverage sweep | ✅ DONE | protocol frozen `4c848da` (D1 `296e48e`, D2/D3 pre-adoption `65b0287`); EXECUTED: 12 rules × 20 seeds × levels k∈{4..8}/8, min-over-CELLS coverage; **all 12 saturating: 20/20 global-map exact at k=8**; below-full-coverage degradation is rule-class-dependent (170/204 from k=4; 90/250 ~k=6–7; 30/45/57 near 8; 110/232/150/73 only at 8; 254 needs full); deterministic rerun byte-equivalent; figure committed; PAPER_SENTENCE.md drafted (AC-4.3a–c) |
+| T4.4 NULLS rule | ✅ DONE | GOVERNANCE/NULLS.md `6e84464`: response-profile/held-fixed/destroyed-dimension rule + both case studies bitácora-traceable (C22→C29 density; B1 codeword syntax) + pre-registration checklist template; sibling Phase-2 TODO pointer PENDING its own U6 gate |
+| T4.5 description-length consolidation | ✅ DONE | GOVERNANCE/DESCRIPTION_LENGTHS.md `5f48c24`: variants A–D named/scoped/mapped; shared wrapper src/description_lengths.py (pybdm==0.1.0 pinned, bdm_2d below_floor knob preserves pathinfo None-semantics per-consumer); toy fixture EXECUTED (A=20.8974/B=27.9248/C=6.3399/D=25.9248 — four distinct values = nonidentity by execution; header delta exactly 2=log₂4); parity test PASS incl. V5 stamps reproduced elementwise (7.1699…/6.3399…); subproject mirrors documented exceptions (AC-4.5a/b) |
+| T5.1 regenerate-and-diff | ✅ DONE | harness `baed4ad` + control `baed4ad`-successor: Makefile verify-paper → tools/verify_paper_artefacts.py; inventory 3 COVERED (four_paths_table incl. mandatory 0.51875 disclosure; mechanism_vs_dataset D=135.66/C=23; comp_validation_summary ALGO-004 all-zero+1020rows) + 5 PENDING-with-reasons (T5.1.v2); markers embedded both manuscripts; AC-5.1a control: planted digit change → FAIL naming ID, revert → green; AC-5.1b closed visibly via T4.1 wording; snapshot gate PASS |
+| T5.2 derivations | ✅ DONE (D-6 CLOSED) | author directive: ALL TWELVE; `t52_family_witnesses.wl` executed → verification/*.json (250 cases, 0 failures, arities 2–6); ten derivation docs generated w/ embedded witnesses + README index; :1936 sentence matches reality; pair/i-vs-canalisingIndex coordinate conventions pinned in ORDERING.md §4b; gates PASS |
+| T4.7 validation-map repair | ✅ DONE (option i) | `cf31b20`: NEW closed-form-set audit ALGO-004 — node-COMPLETE pattern comparison + 4080 stratified rows, n∈{16,20}, all 12 families, **0 mismatches**; **DEV-T4.7-1**: ApplyGate KOFN silently dropped `strict` (diverged from analytic exactly when strict=True) → myKOfN now honors params (default False = historical), GATES-013's Scan level-spec hole repaired (Tuples); both manuscripts rescoped: theorem evidence = closed-form-set audit n∈{16,20}, n∈{20,50} explicitly dispatch-only/no-theorem-weight (AC-4.7b grep clean); snapshot rebaselined after token-delta verification (109 entries, gate PASS); suite OK=47 FAIL=4 TOTAL=51 |
+| T5.3 level READMEs | ✅ DONE | `28b6005`; eight READMEs for levels 11–18: purpose + qualitative verdict + bitácora/experiment pointers; no numbers quoted (single source stays the pinned artifacts) |
+| T5.4 full ledger lint | ✅ DONE (report-first) | `201677f`; scripts/lint_ledger_full.py sweeps 41 C-rows / 170 quoted decimals; **75 verified directly; 95 UNVERIFIED across 27 rows listed for author review** (unverified ≠ wrong — defined in report header); FINDINGS untouched pending adjudication via T2.1 addendum protocol |
 
 ## Execution findings ledger (new defects/discoveries during implementation)
 
@@ -1590,3 +1744,33 @@ D-6 author decision and at anything that trips U1/U4. Judge suite health only
 against tests/MUnit/BASELINE.md v2 and run both gates (paper numbers, glossary
 sync) before touching .tex or governance files. Do NOT execute or draft anything
 under ROADMAP_R4_SEGMENTED_GRAMMAR.md until Waves 3–4 are closed and logged.
+
+- `[BOARD-COMPLETE]` **POST-CLOSE-OUT DIRECTIVES EXECUTED 2026-08-25 (author
+  adopted the agent's recommended decisions wholesale: "proceed as
+  recommended").** Sequence and evidence:
+  (1) SIBLING PUSH (T2.7 residue): U1 correction — commits `62fb3b3`/`b868cd0`
+  were ALREADY on origin/main (Appendix D's "unpushed-by-design" note had aged);
+  the actual unpushed pair was the author's finished Phase-4 work
+  (`faeeb77` prereg frozen, `58b14f9` executed NO-GO). Pushing my new commit
+  published that pair with it; disclosed here as intended under the durability
+  rationale. Sibling main now at `db6343d`.
+  (2) U6 GRANTED + EXECUTED (T4.4/AC-4.4b): NULLS.md standing-rule pointer
+  added to sibling TRANSFERENCE.md as dated append-only addendum (`db6343d`) —
+  the routed-to "Phase-2 TODO" never existed as a file; T2.6-precedent home
+  chosen. NULLS.md §5 updated to DONE.
+  (3) R4 PROTOCOL FROZEN (`02b6f85`, route b): Addendum A1 gates C4 pocket
+  CLAIMS on an empirical surrogate null (≥100 matched-length iid surrogates,
+  99th-percentile count + max-length gates; w_min stays 16 for detection);
+  Addendum A2 upgrades the C2 ≤2 budget from assertion to economics derivation;
+  `experiments/r4_segmented_grammar/calibration.py` committed as the single
+  deterministic source of the quoted envelope numbers. Sign-off provenance in
+  the freeze commit message (AC-2.4e pattern: no R4 results commit precedes it).
+  (4) SUCCESSOR OPENED: `SUCCESSOR_PLAN_R4.md` v0.1 — Wave 0 = ORDERING §7
+  migration + F36 exception coverage under fresh baselines; Wave 1 = R4
+  instrument per frozen protocol; intake = n>16 trajectory validation, dossier
+  regeneration candidates, R1/R3 arms.
+  (5) FINDINGS ADJUDICATION APPLIED (batch rule): addendum `eecf918` — 68/95
+  decimals stand on artifacts (C29/C36 prose-pins confirmed), 27 annotated as
+  historical draws, 0 retracted as wrong; dossier is canonical evidence.
+  This plan now holds NO open items; all further authority rests with
+  SUCCESSOR_PLAN_R4.md.
