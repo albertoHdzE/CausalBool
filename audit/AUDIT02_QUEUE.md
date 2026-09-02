@@ -4,7 +4,23 @@ Every item that is open at the close of AUDIT02/P9, in execution order. Ids are
 stable; nothing here is invented, each traces to a plan, a protocol, or a
 recorded finding.
 
-## Q1 — arm-1 reproducibility sweep (EXECUTING NOW)
+## Status at 2026-09-02
+
+| id | state |
+|---|---|
+| Q1 | **DONE** — `a4de229`. Findings in `AUDIT02_Q1_reproducibility/FINDING.md` |
+| Q3.3 (W0.5) | **DONE** — `85717ab`. verify-paper 3/8 → 7/8 covered |
+| Q2.1–Q2.4, Q3.1, Q3.2, Q3.4, Q3.5 | open (author-gated or unstarted) |
+
+Next natural step, in priority order:
+1. **Q2.4** — adjudicate P9 (author's call; blocks any external CA-arm claim).
+2. **Q1-C** — adjudicate the two imp-prices Phase-2 producers that will not run.
+3. **Q3.1/Q3.2** — Wave 0 hygiene (ORDERING §7, F36 coverage); both are
+   engine-adjacent and want a fresh MUnit bracket, which is now cheap because
+   the ledger is stable at OK=53 FAIL=1.
+4. **Q3.4** — the R4 instrument, once Wave 0 closes.
+
+## Q1 — arm-1 reproducibility sweep (DONE, `a4de229`)
 
 The audit so far graded the *our-method* arms. This grades the other sense the
 author asked for: **do the committed replication results still regenerate from
