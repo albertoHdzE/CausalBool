@@ -50,7 +50,7 @@ indices from different producers may be compared without transport.
 | `IndexAlgebra`OneBandIndices/ZeroBandIndices | **MSB** | band indices over `IntegerDigits` enumeration |
 | `Experiments`CreateRepertoiresDispatch / RunDynamicDispatch | **LSB** (`Reverse[IntegerDigits]`) | packaged dispatch |
 | legacy Alpha.m `createRepertoires` / `runDynamic` / `runDynamicHD` / file variants | **LSB** via `allPosibleInputsReverse` | supported gates only since T4.1 (§6) |
-| `BioExperiments.m:126 states = Tuples[{0,1},n]` | **lexicographic ≡ MSB digit order** | see §7 migration path |
+| `BioExperiments.m` `ComputeAttractors` state enumeration | **LSB-canonical** (`Reverse[IntegerDigits[x,2,n]]`) | migrated 2026-09-02, AUDIT02/W0.1; §7 |
 
 Rule of thumb: anything "table-like" (`TruthTable`, `IndexSet`, band indices,
 `Tuples`) is MSB; anything "repertoire-like" (dispatch repertoires, legacy Alpha,
@@ -138,7 +138,30 @@ degenerate all-zero/all-one twin; any reported accuracy should be accompanied by
 its confusion counts or per-node symmetric differences so degenerate agreement is
 visible immediately.
 
-## §7 BioExperiments migration path (documented, not yet executed)
+## §7 BioExperiments migration path (EXECUTED 2026-09-02, AUDIT02/W0.1)
+
+**Status: done.** `ComputeAttractors` now enumerates
+`Reverse[IntegerDigits[x,2,n]]`, so §3 no longer carries an MSB exception.
+
+Executed only after the invariance was *established*, not assumed. The function
+was run through its public API over 40 real corpus networks (n = 4…11) under
+both enumerations; the attractor sets agree elementwise, **0/40 differing**. The
+reason is structural: `states` feeds a `Graph` keyed by state *vectors*, and the
+two enumerations are the same set in a different order, so fixed points and
+cycles are unchanged. The comparison was proven able to detect a difference by a
+planted defect — removing half the state space moves 18/40 — because a check
+that has never failed proves nothing. Step 2 of the path below therefore did not
+bite: nothing this function returns is keyed by row order.
+
+Two traps were caught on the way, both worth recording because they would
+silently invalidate any similar probe:
+- `Reverse /@ Tuples[{0,1},n]` is **not** a defect — it permutes the state set
+  onto itself, so it is useless as a control.
+- `ComputeNextState` is private; calling
+  `Integration`BioExperiments`ComputeNextState` reaches a definition-less symbol
+  that returns unevaluated. Probes must go through `ComputeAttractors`.
+
+The original path, retained for provenance:
 
 `src/Packages/Integration/BioExperiments.m:126` enumerates states as
 `Tuples[{0,1}, n]` (lexicographic ≡ MSB digit order) while downstream metric code
