@@ -393,6 +393,28 @@ Do[
   {i, Length[cycles]}
 ];
 
+(* AUDIT02/W0.5: the dynamical-landscape statistics were computed and PRINTED
+   but never exported, so the manuscript's |Im(F)|, attractor count and basin
+   sizes had no machine-checkable producer output to be reconciled against and
+   the artefact group stayed PENDING for want of a file, not for want of a
+   computation. Emitting them here closes that gap; tools/verify_paper_artefacts.py
+   ties each table cell to a field below. Basin sizes are sorted descending so
+   the order is a property of the run, not of cycle-discovery order. *)
+Module[{basins},
+  basins = Reverse[Sort[Table[
+    Count[Values[allTrajectories], t_ /; ContainsAny[t, cycles[[i]]]],
+    {i, Length[cycles]}]]];
+  Export[FileNameJoin[{DirectoryName[$InputFileName], "dynamical_landscape.json"}],
+    <|"n" -> n10,
+      "StateSpaceSize" -> 2^n10,
+      "ImageSize" -> Length[imageStates],
+      "UnreachableCount" -> 2^n10 - Length[imageStates],
+      "AttractorCount" -> Length[cycles],
+      "AttractorPeriods" -> Sort[Length /@ cycles],
+      "BasinSizesDescending" -> basins,
+      "BasinSizeTotal" -> Total[basins]|>,
+    "JSON"]];
+
 (* AUDIT01/T1.1: banner replaced by a REAL gate — exits non-zero on any failure *)
 verificationList = <|
   "6-node AND" -> verified5,

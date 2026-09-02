@@ -67,6 +67,40 @@ def check(art: dict) -> list[str]:
             if abs(got - want) > 1e-9:
                 errs.append(f"{art['id']}: json {path}={got} != expected {want}")
 
+    # AUDIT02/W0.5: json_expect resolves only flat top-level keys, so it cannot
+    # reach a value inside a list of case records. json_paths is additive -- it
+    # leaves json_expect and every existing entry untouched -- and supports
+    # dotted paths with [i] indices and [Name=X] record selection, so a table
+    # cell can be tied to the exact JSON field it was transcribed from.
+    for path, want in checks.get("json_paths", {}).items():
+        try:
+            node = produced
+            for part in path.split("."):
+                while part.endswith("]"):
+                    part, _, sel = part[:-1].partition("[")
+                    if part:
+                        node = node[part]
+                        part = ""
+                    if "=" in sel:
+                        k, _, v = sel.partition("=")
+                        hits = [r for r in node if str(r.get(k)) == v]
+                        if len(hits) != 1:
+                            raise KeyError(f"{sel} matched {len(hits)} records")
+                        node = hits[0]
+                    else:
+                        node = node[int(sel)]
+                if part:
+                    node = node[part]
+            got = node
+        except Exception as exc:  # noqa: BLE001
+            errs.append(f"{art['id']}: json path '{path}' unresolvable: {exc}")
+            continue
+        if isinstance(want, (int, float)) and isinstance(got, (int, float)):
+            if abs(got - want) > 1e-9:
+                errs.append(f"{art['id']}: json {path}={got} != expected {want}")
+        elif got != want:
+            errs.append(f"{art['id']}: json {path}={got!r} != expected {want!r}")
+
     if checks.get("metrics_all_zero_mismatches"):
         runs = produced if isinstance(produced, list) else produced.get("runs", [])
         for r in runs:

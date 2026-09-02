@@ -70,29 +70,211 @@
     "sampled_rows_per_run": 1020
    },
    "note": "ALGO-004 runtime ~7 min; it is the artefact regeneration, not an extra cost."
+  },
+  {
+   "id": "w05_mixed10_tables",
+   "tex_file": "papers/method/manuscript_formal/method_paper.tex",
+   "block": "w05_mixed10_tables",
+   "producer_cmd": "/Applications/Wolfram.app/Contents/MacOS/WolframKernel -script papers/method/code/mixed_interaction_10node/mixed_interaction_10node.wl",
+   "produced_json": "papers/method/code/mixed_interaction_10node/summary.json",
+   "checks": {
+    "values_present": [
+     "21",
+     "10",
+     "11",
+     "2048",
+     "2^{11}",
+     "2^3=8",
+     "2^4=16"
+    ],
+    "json_paths": {
+     "FullCases[Name=F1].DegreeSum": 21,
+     "FullCases[Name=F1].UnionSize": 10,
+     "FullCases[Name=F1].OverlapMultiplicity": 11,
+     "FullCases[Name=F1].ReductionFactor": 2048,
+     "FullCases[Name=F4].ReductionFactor": 2048,
+     "SubsystemCases[Name=S1].DegreeSum": 10,
+     "SubsystemCases[Name=S1].UnionSize": 7,
+     "SubsystemCases[Name=S1].OverlapMultiplicity": 3,
+     "SubsystemCases[Name=S1].ReductionFactor": 8,
+     "SubsystemCases[Name=S2].DegreeSum": 14,
+     "SubsystemCases[Name=S2].UnionSize": 10,
+     "SubsystemCases[Name=S2].OverlapMultiplicity": 4,
+     "SubsystemCases[Name=S2].ReductionFactor": 16,
+     "NodeVerification[0]": true
+    }
+   },
+   "note": "AUDIT02/W0.5. Every cell of tab:mixed10-overlap-stats is tied to the JSON field it was transcribed from, per row, rather than to a bare count. The producer had never executed under -script before AUDIT02/A1 fixed a $Path bootstrap one level too shallow."
+  },
+  {
+   "id": "w05_corroboration_constants",
+   "tex_file": "papers/method/manuscript_formal/method_paper.tex",
+   "block": "w05_corroboration_constants",
+   "producer_cmd": "/Applications/Wolfram.app/Contents/MacOS/WolframKernel -script papers/method/code/corroboration_6node/corroboration_6node.wl",
+   "produced_json": "papers/method/code/corroboration_6node/summary.json",
+   "checks": {
+    "values_present": [
+     "\\{11\\}",
+     "0,1,4,5,16,17,20,21,32,33,36,37,48,49,52,53",
+     "64"
+    ],
+    "json_paths": {
+     "AND.DecimalRepertoire[0]": 11,
+     "AND.Sumandos": [
+      0,
+      1,
+      4,
+      5,
+      16,
+      17,
+      20,
+      21,
+      32,
+      33,
+      36,
+      37,
+      48,
+      49,
+      52,
+      53
+     ],
+     "AND.PredictedIndices": [
+      11,
+      12,
+      15,
+      16,
+      27,
+      28,
+      31,
+      32,
+      43,
+      44,
+      47,
+      48,
+      59,
+      60,
+      63,
+      64
+     ],
+     "AND.Verified": true,
+     "XOR.Verified": true
+    }
+   },
+   "note": "AUDIT02/W0.5. The anchor and offset set quoted in the prose are tied to AND.DecimalRepertoire and AND.Sumandos. AND.PredictedIndices is checked against the value of AND.BaselineIndices read from the same file, so the analytic and exhaustive paths are compared elementwise rather than the Verified flag being trusted on its own."
+  },
+  {
+   "id": "w05_scalability_tables",
+   "tex_file": "papers/method/manuscript_formal/method_paper.tex",
+   "block": "w05_scalability_tables",
+   "producer_cmd": "venv/bin/python papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py",
+   "produced_json": "papers/method/code/scalability_resource_envelope/scalability_summary.json",
+   "checks": {
+    "values_present": [
+     "30",
+     "60",
+     "80",
+     "200",
+     "10",
+     "190"
+    ],
+    "json_paths": {
+     "exact_aggregated[0].n": 30,
+     "exact_aggregated[0].median_support_size": 3,
+     "exact_aggregated[0].median_free_coordinates": 27,
+     "exact_aggregated[0].median_overlap_multiplicity": 0,
+     "exact_aggregated[1].n": 30,
+     "exact_aggregated[1].median_support_size": 7,
+     "exact_aggregated[1].median_free_coordinates": 23,
+     "exact_aggregated[1].median_overlap_multiplicity": 4,
+     "exact_aggregated[2].n": 30,
+     "exact_aggregated[2].median_support_size": 10,
+     "exact_aggregated[2].median_free_coordinates": 20,
+     "exact_aggregated[2].median_overlap_multiplicity": 13,
+     "exact_aggregated[3].n": 60,
+     "exact_aggregated[3].median_support_size": 3,
+     "exact_aggregated[3].median_free_coordinates": 57,
+     "exact_aggregated[3].median_overlap_multiplicity": 0,
+     "exact_aggregated[4].n": 60,
+     "exact_aggregated[4].median_support_size": 5,
+     "exact_aggregated[4].median_free_coordinates": 55,
+     "exact_aggregated[4].median_overlap_multiplicity": 5,
+     "exact_aggregated[5].n": 60,
+     "exact_aggregated[5].median_support_size": 10,
+     "exact_aggregated[5].median_free_coordinates": 50,
+     "exact_aggregated[5].median_overlap_multiplicity": 10,
+     "exact_aggregated[6].n": 80,
+     "exact_aggregated[6].median_support_size": 4,
+     "exact_aggregated[6].median_free_coordinates": 76,
+     "exact_aggregated[6].median_overlap_multiplicity": 0,
+     "exact_aggregated[7].n": 80,
+     "exact_aggregated[7].median_support_size": 6,
+     "exact_aggregated[7].median_free_coordinates": 74,
+     "exact_aggregated[7].median_overlap_multiplicity": 4,
+     "exact_aggregated[8].n": 80,
+     "exact_aggregated[8].median_support_size": 10,
+     "exact_aggregated[8].median_free_coordinates": 70,
+     "exact_aggregated[8].median_overlap_multiplicity": 10,
+     "exact_aggregated[9].n": 200,
+     "exact_aggregated[9].median_support_size": 3,
+     "exact_aggregated[9].median_free_coordinates": 197,
+     "exact_aggregated[9].median_overlap_multiplicity": 0,
+     "exact_aggregated[10].n": 200,
+     "exact_aggregated[10].median_support_size": 6,
+     "exact_aggregated[10].median_free_coordinates": 194,
+     "exact_aggregated[10].median_overlap_multiplicity": 3,
+     "exact_aggregated[11].n": 200,
+     "exact_aggregated[11].median_support_size": 10,
+     "exact_aggregated[11].median_free_coordinates": 190,
+     "exact_aggregated[11].median_overlap_multiplicity": 10
+    }
+   },
+   "volatile_fields": [
+    "median_wall_time_seconds",
+    "max_wall_time_seconds",
+    "median_peak_memory_bytes"
+   ],
+   "note": "AUDIT02/W0.5. Every structural cell of tab:exact-method is tied to its JSON field. Wall-clock and peak-memory columns are excluded: a rerun was measured and ONLY median_wall_time_seconds and max_wall_time_seconds move, so the structural columns are checked exactly rather than approximately. Note the previous inventory recorded a producer path that does not exist; the file lives in the scalability_resource_envelope/ directory and the corrected path is used here."
+  },
+  {
+   "id": "w05_comp_attractor_stats",
+   "tex_file": "papers/method/manuscript_computational/comp_paper.tex",
+   "block": "w05_comp_attractor_stats",
+   "producer_cmd": "/Applications/Wolfram.app/Contents/MacOS/WolframKernel -script papers/method/manuscript_computational/generate_paper_outputs.wl",
+   "produced_json": "papers/method/manuscript_computational/dynamical_landscape.json",
+   "checks": {
+    "values_present": [
+     "206",
+     "818",
+     "1024",
+     "488",
+     "320",
+     "204",
+     "12"
+    ],
+    "json_paths": {
+     "StateSpaceSize": 1024,
+     "ImageSize": 206,
+     "UnreachableCount": 818,
+     "AttractorCount": 4,
+     "AttractorPeriods": [
+      1,
+      2,
+      2,
+      6
+     ],
+     "BasinSizesDescending": [
+      488,
+      320,
+      204,
+      12
+     ],
+     "BasinSizeTotal": 1024
+    }
+   },
+   "note": "AUDIT02/W0.5. These statistics were computed and printed by the generator but never exported, so the group was PENDING for want of a FILE, not for want of a computation; JSON emission was added. BasinSizeTotal is checked against StateSpaceSize as an internal consistency condition -- the basins must partition the state space, so a wrong basin vector that still summed to 1024 would be caught by the elementwise BasinSizesDescending check and a right vector that failed to sum would be caught here."
   }
  ],
  "pending": [
-  {
-   "table": "method_paper tab:mixed-overlap / :1070-1234 mixed10 summary tables",
-   "reason": "producer = mixed_interaction_10node.wl; wiring scheduled SUCCESSOR_PLAN_R4 W0.5 (adopted 2026-09-02, AUDIT02/P6; formerly the unowned \"T5.1.v2\")",
-   "id": "w05_mixed10_tables"
-  },
-  {
-   "table": "method_paper corroboration constants (Section 4 worked examples)",
-   "reason": "producer = corroboration_6node.wl; wiring scheduled SUCCESSOR_PLAN_R4 W0.5 (adopted 2026-09-02, AUDIT02/P6; formerly the unowned \"T5.1.v2\")",
-   "id": "w05_corroboration_constants"
-  },
-  {
-   "table": "method_paper scalability tables (tab:exact-method, tab:synthesis)",
-   "reason": "producer = papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py (~minutes); wiring scheduled SUCCESSOR_PLAN_R4 W0.5 (adopted 2026-09-02, AUDIT02/P6; formerly the unowned \"T5.1.v2\")",
-   "id": "w05_scalability_tables"
-  },
-  {
-   "table": "comp_paper attractor statistics from generate_paper_outputs.wl \u00a76",
-   "reason": "producer repaired in T1.1 (exit-gated); embedding rows into .tex scheduled SUCCESSOR_PLAN_R4 W0.5 (adopted 2026-09-02, AUDIT02/P6; formerly the unowned \"T5.1.v2\")",
-   "id": "w05_comp_attractor_stats"
-  },
   {
    "table": "remaining appendix/expansion tables",
    "reason": "enumerated by papers/method/artifact_baseline/paper_numbers.json; each gains markers as its producer is wired",
