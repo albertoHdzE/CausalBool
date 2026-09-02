@@ -1,0 +1,57 @@
+#!/usr/bin/env zsh
+# AUDIT02/P5.2 — GLOSSARY code-conformance check.
+#
+# Companion to check_glossary_sync.sh, which compares our GOVERNANCE/GLOSSARY.md
+# against the sibling copy and therefore verifies DOCUMENT MIRRORING ONLY. It is
+# green whether or not the code matches the glossary. This script closes that
+# gap from the other side: it asserts that terms the glossary has RETIRED do not
+# appear in live (non-archived) source.
+#
+# Retired senses and their replacements, per GOVERNANCE/GLOSSARY.md sec.1:
+#   pivot / pivots / currentPivot  ->  decimalAnchor, sequenceStarts
+#   mechaPivot / purPivot          ->  wholeSystemMechanism
+#
+# "pivot" in its FINANCIAL sense is legitimate and is confined to the
+# index-deconvolution and imp-prices programmes, which are excluded below. That
+# distinction is the whole reason the rename happened: in this framework the
+# term means a decimal anchor, and reusing it for the financial pivot was the
+# collision the glossary resolves.
+#
+#   exit 0  no retired term in live engine/package source
+#   exit 1  a retired term reappeared
+
+set -u
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO" || exit 1
+
+# Scope: the Wolfram engine and packaged API. Archived provenance is exempt by
+# design, and the financial programmes use "pivot" in its own, correct sense.
+SCOPE=(src/Packages src/integration)
+
+RETIRED=(currentPivot mechaPivot purPivot)
+STATUS=0
+
+for term in $RETIRED; do
+  hits=$(grep -rn "\b${term}\b" $SCOPE --include='*.m' --include='*.wl' 2>/dev/null || true)
+  if [[ -n "$hits" ]]; then
+    echo "GLOSSARY-CONFORMANCE: FAIL  retired identifier '${term}' present in live source:"
+    printf '  %s\n' ${(f)hits}
+    STATUS=1
+  fi
+done
+
+# The bare technical senses: a local named `pivot`, or an output key "Pivot".
+tech=$(grep -rnE '(\bpivot[[:space:]]*=|"Pivot")' $SCOPE --include='*.m' --include='*.wl' 2>/dev/null || true)
+if [[ -n "$tech" ]]; then
+  echo "GLOSSARY-CONFORMANCE: FAIL  technical-sense 'pivot' present in live source"
+  echo "  (use decimalAnchor / DecimalAnchor, or sequenceStarts for block offsets)"
+  printf '  %s\n' ${(f)tech}
+  STATUS=1
+fi
+
+if [[ "$STATUS" -eq 0 ]]; then
+  echo "GLOSSARY-CONFORMANCE: clean  (no retired term in ${SCOPE})"
+else
+  echo "GLOSSARY-CONFORMANCE: retired terminology reappeared — see GOVERNANCE/GLOSSARY.md sec.1"
+fi
+exit $STATUS

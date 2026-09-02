@@ -52,6 +52,34 @@ hash-order-sensitive output.
   declared-semantics synthesis). R2 stays out unless forced.
 - OEIS-thread context exploration (roadmap Origin, future context only).
 
+- **W0.5 — artefact wiring, formerly "T5.1.v2" (adopted 2026-09-02, AUDIT02/P6).**
+  `papers/method/artifact_baseline/artefacts.json` carries 3 COVERED and 5
+  PENDING groups, every pending one routed to a task called `T5.1.v2`. That task
+  existed in NO plan: not as a numbered task in `AUDIT_FIXING_PLAN_01.md`, and
+  nowhere in this file. The plan was BOARD-COMPLETE with the debt unowned. It is
+  adopted here under a real id.
+
+  The five groups, and what AUDIT02 already changed for each:
+  1. `method_paper` mixed-overlap tables — producer `mixed_interaction_10node.wl`.
+     **Now runnable**: it had never executed under `-script` (a `$Path` bootstrap
+     one level too shallow, fixed in AUDIT02/A1) and reproduces the anchors
+     `d_q=21, c_q=10, mu_q=11, R_q=2048`; S1 `10/7/3/8`; S2 `14/10/4/16`.
+  2. `method_paper` corroboration constants — producer `corroboration_6node.wl`,
+     exits 0.
+  3. `method_paper` scalability tables — producer
+     `papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py`
+     (note: `artefacts.json` records a path that does not exist; the file lives in
+     the `scalability_resource_envelope/` directory). Exits 0; median `|C_q| = 10`
+     at n = 30, 60, 80, 200.
+  4. `comp_paper` attractor statistics — `generate_paper_outputs.wl` is exit-gated
+     and passes; only the `.tex` marker embedding remains.
+  5. Remaining appendix tables — markers as each producer is wired.
+
+  Blocking work is therefore only the marker embedding and the `checks` entries,
+  not the producers. Each pending entry also carries `id: null`, against the
+  file's own rule that an inventory entry be identified; give each a real id when
+  wiring it.
+
 ## Author gates
 
 - Any catalogue growth (dated amendment + catalogue cost paid in code).
