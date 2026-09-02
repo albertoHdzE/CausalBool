@@ -1,6 +1,12 @@
 baseDir = DirectoryName[$InputFileName];
 Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
-AppendTo[$Path, FileNameJoin[{baseDir, "..", "..", "..", "src", "Packages"}]];
+(* AUDIT02/A1: the bootstrap was one level too shallow. baseDir is
+   papers/method/code/mixed_interaction_10node/, so three ".." reach papers/,
+   not the repo root: Needs failed with Get::noopen, IndexSetAnalytic never
+   resolved, every downstream expression stayed unevaluated and the script
+   exited 1. Verified by probe: DirectoryQ of the three-".." path is False,
+   of the four-".." path is True. *)
+AppendTo[$Path, FileNameJoin[{baseDir, "..", "..", "..", "..", "src", "Packages"}]];
 Needs["Integration`Gates`"];
 
 cm10 = {
