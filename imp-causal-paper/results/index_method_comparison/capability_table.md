@@ -29,3 +29,54 @@ Zenil-calculus side is quoted ONLY from committed replication
 artifacts (results/ca/summary.json: inferred_rule 222 vs true rule
 254 on its 6-node demo network; SESSION_HANDOFF's rho=+1.0 claim is
 superseded) and was not re-executed here.
+
+---
+
+## Addendum 2026-09-02 (AUDIT02/P9) — what the CA row does and does not establish
+
+The 10/10 above stands as executed and is not restated: the D-7 protocol forbids
+outcome-dependent changes and nothing in `runs.json` has been touched. What
+follows is additive context, without which the row reads as stronger than it is.
+
+**The criterion is passed by the whole population.** Running the identical
+pipeline — same `deconvolve_ca`, width 11, 30 steps, 60 initial conditions,
+radius 1, per-rule seed `SEED + rule` — over all 256 ECA rules gives **256/256
+exact**. The gate search includes `LUT` (an explicit truth table) and
+`REGULATORY_DNF` (a functionally complete normal form), so no rule *can* fail.
+A criterion no member of the population fails carries no information about the
+ten that were sampled. Reporting 256/256 as the headline would be a stronger
+form of the same problem, not a correction.
+
+**The informative statistic, from the same run.** Stratifying by gate class:
+
+| statistic | value |
+|---|---|
+| exact global map | 256/256 — uninformative, see above |
+| expressible within the canonical twelve | **40/256** |
+| requiring an extension family (`LUT`, `REGULATORY`, `REGULATORY_DNF`) | 216/256 |
+| of the ten D-7 rules, canonical-expressible | **2/10** |
+
+Producer: `index_method_comparison/run_expressivity_census.py` →
+`expressivity_census.{json,md}` (full 256-row table). It is deterministic
+(byte-identical on rerun) and reproduces the D-7 arm on all ten of its rules,
+so the two sit in a common coordinate rather than being separate measurements.
+
+**Criterion deviation, logged.** Protocol §5.1 pre-registered exact recovery as
+"recovered connectivity C' equals C elementwise AND recovered gates D' equal D
+gate-for-gate". An ECA rule has no ground-truth *named* gate, so that criterion
+is inapplicable to the CA arm; what was delivered is **global-map equality**, a
+behavioural criterion. The substitution is defensible — arguably it is the only
+gradable criterion available here — but §5.4 makes it a deviation and it was
+recorded nowhere until now.
+
+**A separate, bounded defect found in the same pass.** `_CANONICAL_PRIORITY`
+(`index-deconvolution/src/deconvolution.py:115`) ranks `REGULATORY` (index 11)
+**above** `CANALISING` (index 12). `REGULATORY` is an extension with no Wolfram
+counterpart; `CANALISING` is one of the parity-proven twelve. So a cell that a
+canonical gate names can still be reported under an extension. Measured rather
+than estimated: **33 of 2,816 cells across 6 rules** (10, 12, 34, 48, 68, 80),
+in every case with `CANALISING` available. Counted, not corrected — reordering
+would move every downstream gate-naming result (exp02's
+`gate_function_correct_rate`, exp03, the D-7 arm, imp-prices), which is not a
+change to make inside an audit. It is why "canonical-expressible" is 40 while
+the *chosen* families are canonical on only 34.
