@@ -2065,23 +2065,50 @@ vertexOfAllconnectedSubgraphs[g_] :=
     ];
 
 (*for a gate, returns inputs of definited length that generate specific output*)
-createRepertoireByResult[gate_, length_,res_] := 
+(* AUDIT02/P4a: this is the exhaustive baseline of the analytic query surface --
+   "which inputs produce this output" -- and the reference against which the
+   closed-form IndexSet/IndexSetAnalytic results are compared.
+
+   Before this fix it carried two defects:
+     (i)  the Which covered only XOR/OR/AND/MAJORITY; the other eight families
+          (NAND NOR XNOR NOT IMPLIES NIMPLIES KOFN CANALISING) matched no branch,
+          so Which returned Null SILENTLY -- confirmed by probe, Head=Symbol;
+     (ii) the MAJORITY branch tested "== 1" and ignored the requested res, so a
+          request for res=0 returned the res=1 set. At arity 3 the two sets have
+          EQUAL SIZE (4 and 4), so a count-based check could not see it; the
+          elementwise symmetric difference is all 8 inputs. At arity 4 it is
+          |got|=5 against |truth|=11.
+
+   Gate semantics are now delegated to the canonical Integration`Gates`ApplyGate
+   rather than re-encoded inline, so this file no longer carries its own copy of
+   the truth tables. Enumeration order is unchanged
+   (Reverse[Reverse[#]&/@Tuples[{1,0},length]] = LSB-first) because it is
+   load-bearing for the "DecRep" decimal encoding downstream. *)
+AlphaLegacyDispatch::unsupportedgatequery = "AUDIT02/P4a: gate `1` is not a known family in `2`; returned Failure[\"UnsupportedGate\"] instead of Null.";
+
+createRepertoireByResult[gate_, length_, res_] :=
+    createRepertoireByResult[gate, length, res, <||>];
+
+createRepertoireByResult[gate_, length_, res_, params_] :=
 (*
 Returns inputs for a logical gate that results in a specific output
-Example: 
+Example:
 For a gate of length 3 that results in ouput = 1
-    
+
 createRepertoireByResult["OR", 3, 1]
 Out: {{1, 0, 0}, {0, 1, 0}, {1, 1, 0}, {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {1, 1, 1}}
 *)
-    (Which[
-    	   gate=="XOR",Cases[Reverse[Reverse[#] & /@ Tuples[{1, 0}, length]], x_ /; ((Xor @@ x /. Thread[{1 -> True, 0 -> False}]) /. Thread[{True -> 1, False -> 0}]) == res],
-    	   gate=="OR",Cases[Reverse[Reverse[#] & /@ Tuples[{1, 0}, length]], x_ /; ((Or @@ x /. Thread[{1 -> True, 0 -> False}]) /. Thread[{True -> 1, False -> 0}]) == res],
-    	   gate=="AND",Cases[Reverse[Reverse[#] & /@ Tuples[{1, 0}, length]], x_ /; ((And @@ x /. Thread[{1 -> True, 0 -> False}]) /. Thread[{True -> 1, False -> 0}]) == res],
-    	   gate=="MAJORITY",Cases[Reverse[Reverse[#] & /@ Tuples[{1, 0}, length]], x_ /; (myMajority[x]) == 1]
-    	   	
-        ]
-    );
+    Module[ {known, inputs},
+        known = {"AND", "OR", "XOR", "NAND", "NOR", "XNOR", "NOT",
+                 "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "CANALISING"};
+        If[ !MemberQ[known, gate],
+            Message[AlphaLegacyDispatch::unsupportedgatequery, gate, "createRepertoireByResult"];
+            Return[Failure["UnsupportedGate",
+                <|"Gate" -> gate, "Function" -> "createRepertoireByResult"|>]]
+        ];
+        inputs = Reverse[Reverse[#] & /@ Tuples[{1, 0}, length]];
+        Select[inputs, Integration`Gates`ApplyGate[gate, #, params] === res &]
+    ];
 
 (* powering[{a,b,c},{1,2,3}]
 Res = a^1 + b^2 + c^3
