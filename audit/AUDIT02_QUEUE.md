@@ -10,15 +10,20 @@ recorded finding.
 |---|---|
 | Q1 | **DONE** — `a4de229`. Findings in `AUDIT02_Q1_reproducibility/FINDING.md` |
 | Q3.3 (W0.5) | **DONE** — `85717ab`. verify-paper 3/8 → 7/8 covered |
-| Q2.1–Q2.4, Q3.1, Q3.2, Q3.4, Q3.5 | open (author-gated or unstarted) |
+| Q3.1 (W0.1) | **DONE** — `b166b36`. ORDERING §7 executed; plus W0.1a, ComputeAttractors now refuses instead of returning `{}` |
+| Q3.2 (W0.2) | **DONE** — `8ebf794`. Last F36 exception closed; ledger OK=54 FAIL=1 TOTAL=55 |
+| Q2.1–Q2.4, Q3.4, Q3.5 | open (author-gated or unstarted) |
+
+**Wave 0 is closed.** `GOVERNANCE/ORDERING.md` no longer lists any outstanding
+ordering exception.
 
 Next natural step, in priority order:
 1. **Q2.4** — adjudicate P9 (author's call; blocks any external CA-arm claim).
 2. **Q1-C** — adjudicate the two imp-prices Phase-2 producers that will not run.
-3. **Q3.1/Q3.2** — Wave 0 hygiene (ORDERING §7, F36 coverage); both are
-   engine-adjacent and want a fresh MUnit bracket, which is now cheap because
-   the ledger is stable at OK=53 FAIL=1.
-4. **Q3.4** — the R4 instrument, once Wave 0 closes.
+3. **Q3.4** — the R4 instrument (W1.1–W1.5). Wave 0 is now closed, which was
+   its stated precondition. W1.1's AC-R4-1 (Kraft/prefix-free join test green
+   before any length is quoted) is the natural entry point.
+4. **Q3.5** — intake queue, unowned.
 
 ## Q1 — arm-1 reproducibility sweep (DONE, `a4de229`)
 
