@@ -1,4 +1,5 @@
 import json
+import re
 import math
 import random
 import sys
@@ -270,6 +271,65 @@ def compute_d_bdm_correlation(base_dir: Path, repertoire_dir: Path | None = None
     return out_path
 
 
+
+
+# --- AUDIT02/P8: Boolean formula evaluator -----------------------------------
+# Mirrors src/Packages/Integration/LogicEval.m. Scope measured over the corpus:
+# 3,709 of 4,628 expressions (80.1%) are Boolean and evaluated exactly; 512
+# multi-valued (X:k) and 407 threshold (GEQ/theta) expressions are REFUSED,
+# returning None so the caller falls back rather than fabricating a value.
+_LOGIC_WORDS = {"AND", "OR", "NOT", "TRUE", "FALSE"}
+
+
+def logic_class(expr: str) -> str:
+    if re.search(r"\b(GEQ|LEQ|LT|GT|EQ)\s*\(", expr):
+        return "Threshold"
+    if re.search(r"[A-Za-z_0-9\-]+:[0-9]", expr):
+        return "MultiValued"
+    return "Boolean"
+
+
+def evaluate_logic(expr: str, state: dict):
+    """Return 0/1, or None if the expression is refused or unbound."""
+    if logic_class(expr) != "Boolean":
+        return None
+    out = []
+    for tok in re.split(r"([&|!(),])", expr):
+        t = tok.strip()
+        if not t:
+            continue
+        if t == "&":
+            out.append(" and ")
+        elif t == "|":
+            out.append(" or ")
+        elif t == "!":
+            out.append(" not ")
+        elif t in "(),":
+            out.append(t)
+        else:
+            u = t.upper()
+            if u == "AND":
+                out.append("__AND")
+            elif u == "OR":
+                out.append("__OR")
+            elif u == "NOT":
+                out.append("__NOT")
+            elif u == "TRUE":
+                out.append("True")
+            elif u == "FALSE":
+                out.append("False")
+            else:
+                if t not in state:
+                    return None
+                out.append(f"V[{t!r}]")
+    env = {"__AND": lambda *a: all(a), "__OR": lambda *a: any(a),
+           "__NOT": lambda a: not a, "V": state}
+    try:
+        return 1 if eval("".join(out), {"__builtins__": {}}, env) else 0
+    except Exception:
+        return None
+
+
 def apply_gate(gate: str, inputs, params):
     if gate == "INPUT":
         return inputs[0] if len(inputs) > 0 else 0
@@ -281,28 +341,85 @@ def apply_gate(gate: str, inputs, params):
         return 1 if all(inputs) else 0
     if gate == "OR":
         return 1 if any(inputs) else 0
+    # AUDIT02/P8: the remaining six canonical families were MISSING and fell
+    # through to "return 0" silently. Transcribed from
+    # src/Packages/Integration/Gates.m:8-35, the canonical engine.
+    if gate == "NAND":
+        return 0 if all(inputs) else 1
+    if gate == "NOR":
+        return 0 if any(inputs) else 1
+    if gate == "XOR":
+        return sum(inputs) % 2
+    if gate == "XNOR":
+        return 1 - (sum(inputs) % 2)
+    if gate == "IMPLIES":
+        return 1 if (inputs[0] == 0 or inputs[1] == 1) else 0
+    if gate == "NIMPLIES":
+        return 1 if (inputs[0] == 1 and inputs[1] == 0) else 0
+    if gate == "MAJORITY":
+        d = len(inputs)
+        at_or_above = params.get("tiePolicy", "strict") == "atOrAbove"
+        threshold = -(-d // 2) if at_or_above else d // 2 + 1
+        return 1 if inputs.count(1) >= threshold else 0
+    if gate == "KOFN":
+        k = params.get("k", 1)
+        if params.get("strict", False):
+            return 1 if inputs.count(1) > k else 0
+        return 1 if inputs.count(1) >= k else 0
     if gate == "CANALISING":
+        # AUDIT02/P8: two divergences from Gates.m myCanalising, both corrected.
+        #   canalisedOutput defaulted to 1 here and to 0 in the engine;
+        #   the non-canalised branch excluded the canalising index, whereas the
+        #   engine is myOr over ALL inputs.
         idx = params.get("canalisingIndex", 1) - 1
         val = params.get("canalisingValue", 1)
-        out = params.get("canalisedOutput", 1)
+        out = params.get("canalisedOutput", 0)
         if 0 <= idx < len(inputs) and inputs[idx] == val:
             return out
-        fallback = [v for i, v in enumerate(inputs) if i != idx]
-        return 1 if any(fallback) else 0
-    return 0
+        return 1 if any(inputs) else 0
+    # AUDIT02/P8: fail loudly. "return 0" here silently fabricated a value for
+    # every unrecognised label, CUSTOM above all.
+    raise ValueError(
+        f"apply_gate: unsupported gate {gate!r}. CUSTOM nodes carry their Boolean "
+        f"formula in the network's 'logic' field and must be evaluated from it."
+    )
 
 
 def generate_repertoire_for_network(net):
+    """Exhaustive output repertoire.
+
+    AUDIT02/P8: the node's Boolean FORMULA in net["logic"] is now preferred over
+    its classification label in net["gates"]. The label alone left CUSTOM,
+    IDENTITY, INPUT and unlisted nodes -- 76.4% of node instances across the
+    corpus -- evaluated by a fallthrough that silently returned 0.
+
+    Formulas are evaluated against the full NAMED state, because 466 of the
+    corpus formulas reference their own node (the cm omits self-edges).
+    Multi-valued and threshold expressions are refused by evaluate_logic and
+    fall back to the label, surfacing rather than being fabricated.
+    """
     nodes = net["nodes"]
     cm = net["cm"]
     gates = net["gates"]
+    logic = net.get("logic") or {}
     n = len(nodes)
     name_to_idx = {name: i for i, name in enumerate(nodes)}
     outputs = []
     for state_int in range(2 ** n):
         x = [(state_int >> i) & 1 for i in range(n)]
+        named = {nm: x[j] for j, nm in enumerate(nodes)}
         y = [0] * n
         for i, node in enumerate(nodes):
+            expr = logic.get(node)
+            # "INPUT" is a sentinel for a free source node: it holds its value.
+            if isinstance(expr, str) and expr.strip().upper() == "INPUT":
+                y[i] = x[i]
+                continue
+            if isinstance(expr, str):
+                v = evaluate_logic(expr, named)
+                if v is not None:
+                    y[i] = v
+                    continue
             gate_info = gates.get(node)
             if gate_info is None:
                 y[i] = x[i]
@@ -311,6 +428,9 @@ def generate_repertoire_for_network(net):
             input_names = gate_info.get("inputs", [])
             inputs = [x[name_to_idx[name]] for name in input_names]
             params = gate_info.get("parameters", {})
+            if gate in ("INPUT", "IDENTITY") and not inputs:
+                y[i] = x[i]
+                continue
             y[i] = apply_gate(gate, inputs, params)
         outputs.append(y)
     return np.array(outputs, dtype=int)

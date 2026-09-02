@@ -12,12 +12,15 @@ Get["Integration`BioExperiments`"];
 (* 2. Helper Functions *)
 
 (* Helper to load network with gate fix *)
-LoadJSONNetwork[path_] := Module[{json, rawNodes, rawCM, rawGates, n, nodeNames, cm, dynamic, params, i, name, gData, gType, gParams},
+LoadJSONNetwork[path_] := Module[{json, rawNodes, rawCM, rawLogic, rawGates, n, nodeNames, cm, dynamic, params, i, name, gData, gType, gParams},
     If[!FileExistsQ[path], Return[$Failed]];
     json = Import[path, "RawJSON"];
     rawNodes = json["nodes"];
     rawCM = json["cm"];
     rawGates = json["gates"];
+    (* AUDIT02/P8: the authoritative semantics live in "logic"; "gates" is a label. *)
+    rawLogic = Lookup[json, "logic", <||>];
+    If[!AssociationQ[rawLogic], rawLogic = <||>];
     n = Length[rawNodes];
     nodeNames = rawNodes;
     cm = rawCM;
@@ -36,7 +39,7 @@ LoadJSONNetwork[path_] := Module[{json, rawNodes, rawCM, rawGates, n, nodeNames,
         dynamic[[i]] = gType;
         If[Length[gParams] > 0, params[i] = gParams];
     , {i, n}];
-    <| "name" -> json["name"], "cm" -> cm, "nodeNames" -> nodeNames, "dynamic" -> dynamic, "params" -> params, "n" -> n |>
+    <| "name" -> json["name"], "cm" -> cm, "nodeNames" -> nodeNames, "dynamic" -> dynamic, "params" -> params, "n" -> n, "logic" -> rawLogic |>
 ];
 
 (* Fix for symbolic DeltaD *)
@@ -53,20 +56,44 @@ MyApplyGate[gate_String, inputs_List, params_: <||>] := Module[{padded, maxIdx},
       If[Length[inputs] < maxIdx, padded = PadRight[inputs, maxIdx, 0]]
   ];
   
-  If[gate === "Input" || gate === "INPUT", Return[0]];
-  
+  (* AUDIT02/P8: previously "Return[0]" for INPUT. A free source node is not
+     constantly 0; in a synchronous update it holds its own value. That is done
+     by the caller, which has the node's current state; this branch is removed so
+     it cannot silently pin sources to 0 here. *)
   Integration`Gates`ApplyGate[gate, padded, params]
 ];
 
-(* Custom ComputeNextState *)
-MyComputeNextState[state_, cm_, dynamic_, params_] := Module[{n, nextState, inputs, gate, p, res},
+(* Custom ComputeNextState.
+   AUDIT02/P8: now consumes the corpus "logic" formulas, matching
+   Integration`BioExperiments`ComputeNextState. Previously this read only the
+   "gates" classification label, so CUSTOM/IDENTITY/INPUT nodes -- 76.4% of node
+   instances across the corpus -- were evaluated by label alone. The formula is
+   the authoritative semantics; the label is a classification.
+   Optional arguments keep every existing call site working unchanged. *)
+MyComputeNextState[state_, cm_, dynamic_, params_] :=
+  MyComputeNextState[state, cm, dynamic, params, <||>, {}];
+
+MyComputeNextState[state_, cm_, dynamic_, params_, logic_, nodeNames_] :=
+  Module[{n, nextState, inputs, gate, p, res, named, expr, viaLogic},
     n = Length[state];
+    named = If[Length[nodeNames] === n, Association[Thread[nodeNames -> state]], <||>];
     nextState = Table[0, {n}];
     Do[
         inputs = state[[ Flatten[Position[cm[[i]], 1]] ]];
         gate = dynamic[[i]];
         p = Lookup[params, i, <||>];
-        res = MyApplyGate[gate, inputs, p];
+        expr = If[Length[nodeNames] === n, Lookup[logic, nodeNames[[i]], None], None];
+        res = Which[
+          (* free source node: holds its own value (see MyApplyGate note) *)
+          StringQ[expr] && ToUpperCase[StringTrim[expr]] === "INPUT",
+            state[[i]],
+          StringQ[gate] && MemberQ[{"INPUT", "IDENTITY"}, ToUpperCase[gate]] && Length[inputs] === 0,
+            state[[i]],
+          True,
+            viaLogic = If[StringQ[expr] && Length[named] > 0,
+              Integration`LogicEval`EvaluateLogic[expr, named], $Failed];
+            If[IntegerQ[viaLogic], viaLogic, MyApplyGate[gate, inputs, p]]
+        ];
         nextState[[i]] = res;
     , {i, n}];
     nextState
@@ -81,7 +108,7 @@ ComputeAttractorsRobust[net_Association] := Module[
   dynamic = net["dynamic"];
   params = Lookup[net, "params", <||>];
   states = Tuples[{0, 1}, n];
-  nextStates = Map[MyComputeNextState[#, cm, dynamic, params]&, states];
+  nextStates = Map[MyComputeNextState[#, cm, dynamic, params, Lookup[net, "logic", <||>], Lookup[net, "nodeNames", {}]]&, states];
   edges = MapThread[DirectedEdge, {states, nextStates}];
   g = Graph[states, edges];
   
@@ -112,7 +139,7 @@ ComputeAttractorsKnockout[net_Association, kIdx_Integer] := Module[
   nextStates = Map[
     Function[s,
       Module[{ns},
-        ns = MyComputeNextState[s, cm, dynamic, params];
+        ns = MyComputeNextState[s, cm, dynamic, params, Lookup[net, "logic", <||>], Lookup[net, "nodeNames", {}]];
         ns[[kIdx]] = 0; 
         ns
       ]
@@ -209,7 +236,15 @@ tempReqFile = FileNameJoin[{currentDir, "temp_bdm_request.json"}];
 Export[tempReqFile, batchBDMRequest, "JSON"];
 
 scriptPath = FileNameJoin[{srcDir, "scripts", "compute_bdm_batch.py"}];
-cmd = "python3 " <> scriptPath <> " " <> tempReqFile;
+(* AUDIT02/P8: hardcoded "python3" resolved to the system interpreter, which
+   has no pybdm, so every BDM batch failed with ModuleNotFoundError while the
+   script still exited 0 and reported "Failed to parse BDM results". The repo
+   venv has pybdm 0.1.0. Overridable via CAUSALBOOL_PYTHON. *)
+pyExe = Environment["CAUSALBOOL_PYTHON"];
+If[!StringQ[pyExe] || !FileExistsQ[pyExe],
+  pyExe = FileNameJoin[{Directory[], "venv", "bin", "python"}]];
+If[!FileExistsQ[pyExe], pyExe = "python3"];
+cmd = pyExe <> " " <> scriptPath <> " " <> tempReqFile;
 process = RunProcess[{"sh", "-c", cmd}, All];
 
 If[!AssociationQ[process],
