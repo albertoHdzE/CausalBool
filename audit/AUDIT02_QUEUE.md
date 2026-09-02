@@ -12,18 +12,22 @@ recorded finding.
 | Q3.3 (W0.5) | **DONE** — `85717ab`. verify-paper 3/8 → 7/8 covered |
 | Q3.1 (W0.1) | **DONE** — `b166b36`. ORDERING §7 executed; plus W0.1a, ComputeAttractors now refuses instead of returning `{}` |
 | Q3.2 (W0.2) | **DONE** — `8ebf794`. Last F36 exception closed; ledger OK=54 FAIL=1 TOTAL=55 |
-| Q2.1–Q2.4, Q3.4, Q3.5 | open (author-gated or unstarted) |
+| Q2.4 (P9) | **DONE** — `16bbb36`. Full 256-rule expressivity census, D-7 arm untouched |
+| Q1-C (imp-prices Phase 2) | **DONE** — `f245195`. Declared exclusion applied and reported |
+| Q3.4 W1.1 | **DONE** — `6c6beae`. AC-R4-1 green: codec + Kraft/join gate, 23 tests |
+| Q2.1, Q2.2, Q2.3 | **OPEN — now blocking W1.3** |
+| Q3.4 W1.2–W1.5, Q3.5 | open |
 
 **Wave 0 is closed.** `GOVERNANCE/ORDERING.md` no longer lists any outstanding
 ordering exception.
 
-Next natural step, in priority order:
-1. **Q2.4** — adjudicate P9 (author's call; blocks any external CA-arm claim).
-2. **Q1-C** — adjudicate the two imp-prices Phase-2 producers that will not run.
-3. **Q3.4** — the R4 instrument (W1.1–W1.5). Wave 0 is now closed, which was
-   its stated precondition. W1.1's AC-R4-1 (Kraft/prefix-free join test green
-   before any length is quoted) is the natural entry point.
-4. **Q3.5** — intake queue, unowned.
+Next natural step:
+1. **W1.2** — the segmenter (§5 refine-on-residual) plus the AC-R4-4 refusal
+   path. Unblocked: AC-R4-1 is green, which was its precondition.
+2. **Q2.1–Q2.3 become blocking at W1.3**, where the controls are constructed:
+   rule 232's multiplicity-3 under C3's tuple equality, the unreconciled
+   calibration v2 MC, and rule 110's designation as the AC-R4-4 refusal case.
+3. **Q3.5** — intake queue, unowned.
 
 ## Q1 — arm-1 reproducibility sweep (DONE, `a4de229`)
 
