@@ -1,5 +1,6 @@
 BeginPackage["Integration`Gates`"]
 ApplyGate::usage = "Apply a gate to inputs with optional params";
+ApplyGate::unsupportedgate = "AUDIT02/B2: gate `1` is not a supported family; returned Failure[\"UnsupportedGate\"] instead of a silent 0. Corpus label CUSTOM carries its Boolean formula in the network's \"logic\" field and needs the logic evaluator, not a gate branch.";
 TruthTable::usage = "Return truth table for gate and arity";
 IndexSet::usage = "Return indices (1-based) where gate outputs 1 over ordered exhaustive inputs";
 IndexSetNetwork::usage = "Return indices (1-based) where the gate outputs 1 in an n-bit network for connected inputs Ic";
@@ -47,7 +48,27 @@ ApplyGate[gate_String, inputs_List, params_: <||>] := Module[{res, p},
     gate === "MAJORITY", myMajority[inputs, params],
     gate === "KOFN", myKOfN[inputs, Lookup[params, "k", 1], params],
     gate === "CANALISING", myCanalising[inputs, params],
-    True, 0
+    (* AUDIT02/B2 (Finding H). IDENTITY and INPUT are corpus labels carried by
+       data/bio/processed/*.json; they are pass-through nodes, so the correct
+       value is the first connected input. They previously matched no branch and
+       fell through to a silent 0. Measured, not assumed: a single instrumented
+       run of src/scripts/RunEssentialityValidation.m recorded 243,152
+       fallthrough calls (IDENTITY 163,240, INPUT 79,912), and supplying the
+       correct semantics moved yeast_cell_cycle essentiality accuracy from
+       3/8 (37.5%) to 5/8 (62.5%). Matches the project's own independent
+       implementation, src/integration/bio_D_experiment.py:272-277. *)
+    gate === "IDENTITY" || gate === "INPUT",
+      If[Length[inputs] > 0, First[inputs], 0],
+    (* AUDIT02/B2: fail loudly instead of returning a silent 0. Measured blast
+       radius before changing this: the full MUnit suite (53 tests) and all four
+       Wolfram producers reached this branch ZERO times, with the probe's power
+       demonstrated by a positive control. The remaining corpus label that would
+       arrive here is CUSTOM (2,486 instances), whose Boolean formula lives in
+       the network's "logic" field; those networks now fail visibly rather than
+       silently computing zeros, until the logic evaluator lands. *)
+    True,
+      (Message[ApplyGate::unsupportedgate, gate];
+       Failure["UnsupportedGate", <|"Gate" -> gate|>])
   ];
   p = Lookup[params, "noiseFlipProb", None];
   If[NumericQ[p] && p > 0, If[RandomReal[] < p, 1 - res, res], res]
