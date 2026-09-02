@@ -34,18 +34,37 @@ from typing import Callable
 # Gate semantics (verbatim from Gates.m)
 # ---------------------------------------------------------------------------
 
+#: The twelve canonical families, semantically identical to
+#: ``Integration`Gates`ApplyGate`` (src/Packages/Integration/Gates.m:8-35).
 GATE_TYPES = (
     "AND", "OR", "XOR", "NAND", "NOR", "XNOR",
     "NOT", "IMPLIES", "NIMPLIES", "MAJORITY", "KOFN", "CANALISING",
 )
 
+#: Python-only extensions with NO Wolfram counterpart.  They are accepted by
+#: :func:`apply_gate` but are outside the canonical catalogue, so no Wolfram
+#: parity check covers them and no engine result may be claimed for them.
+#: AUDIT02/P3: previously implemented but absent from ``GATE_TYPES``, so the
+#: declared surface and the accepted surface disagreed.
+EXTENSION_GATE_TYPES = ("TRUE", "FALSE", "LUT", "REGULATORY", "REGULATORY_DNF")
+
+#: Everything :func:`apply_gate` accepts.
+ALL_GATE_TYPES = GATE_TYPES + EXTENSION_GATE_TYPES
+
 
 def apply_gate(gate: str, inputs: list[int], params: dict | None = None) -> int:
     """Evaluate a Boolean gate on a list of 0/1 inputs, returning 0/1.
 
-    Semantics are identical to ``Integration`Gates`ApplyGate``.  The optional
-    ``noiseFlipProb`` parameter of the Wolfram version is intentionally omitted:
-    the deconvolution programme is deterministic by design.
+    For the twelve families in :data:`GATE_TYPES` the semantics are identical to
+    ``Integration`Gates`ApplyGate`` — including ``KOFN``'s ``strict`` flag and
+    ``MAJORITY``'s ``tiePolicy``, both of which this function honours as of
+    AUDIT02/P2.  Gates in :data:`EXTENSION_GATE_TYPES` are Python-only and have
+    no Wolfram counterpart, so the cross-language parity proof does not cover
+    them.
+
+    The optional ``noiseFlipProb`` parameter of the Wolfram version is
+    intentionally omitted: the deconvolution programme is deterministic by
+    design.
     """
     p = params or {}
     if gate == "TRUE":
@@ -84,10 +103,24 @@ def apply_gate(gate: str, inputs: list[int], params: dict | None = None) -> int:
         # myNImplies: AND[{a, 1 - b}]
         return 1 if (inputs[0] == 1 and inputs[1] == 0) else 0
     if gate == "MAJORITY":
-        # Count[1] > Count[0]  (ties resolve to 0)
-        return 1 if inputs.count(1) > inputs.count(0) else 0
+        # myMajority (Gates.m:21-27).  Declared convention D-3 is "strict"
+        # (threshold floor(d/2)+1, ties -> 0); "atOrAbove" uses ceil(d/2).
+        # AUDIT02/P2: tiePolicy was previously ignored.  Note the old expression
+        # Count[1] > Count[0] is algebraically equal to the strict threshold for
+        # every arity, so the default branch is unchanged.
+        d = len(inputs)
+        at_or_above = p.get("tiePolicy", "strict") == "atOrAbove"
+        threshold = -(-d // 2) if at_or_above else d // 2 + 1
+        return 1 if inputs.count(1) >= threshold else 0
     if gate == "KOFN":
+        # myKOfN (Gates.m:31-34).  AUDIT02/P2: "strict" was previously dropped,
+        # which is exactly the divergence T4.7/DEV-T4.7-1 fixed in the engine
+        # ("ApplyGate silently dropped strict, diverging from the closed-form
+        # engine exactly when strict=True").  Default False preserves the
+        # historical >= behaviour of every existing caller.
         k = p.get("k", 1)
+        if p.get("strict", False):
+            return 1 if inputs.count(1) > k else 0
         return 1 if inputs.count(1) >= k else 0
     if gate == "REGULATORY":
         # Activator/inhibitor conjunction (AND-NOT).  The node fires iff every

@@ -28,7 +28,16 @@ results = Table[
     paramsList = case["params"];
     (* Build a 1-based node -> params association.  Empty objects import as
        <||> which Lookup treats as no parameters. *)
-    paramsAssoc = Association[Table[node -> paramsList[[node]], {node, 1, n}]];
+    (* AUDIT02/P1: canalisingIndex is a 0-BASED position within the connected
+       sub-vector on the Python side and a 1-BASED position on the Wolfram side
+       (myCanalising does list[[i]]).  Transporting the JSON verbatim would
+       compare the two engines at different coordinates and report a divergence
+       that is purely a convention offset.  Translate exactly once, here. *)
+    paramsAssoc = Association[Table[
+      node -> Module[{p}, p = paramsList[[node]];
+        If[AssociationQ[p] && KeyExistsQ[p, "canalisingIndex"],
+           Append[p, "canalisingIndex" -> p["canalisingIndex"] + 1], p]],
+      {node, 1, n}]];
     pyRep = case["repertoire"];
     wlRep = CreateRepertoiresDispatch[cm, dynamic, paramsAssoc]["RepertoireOutputs"];
     match = (wlRep === pyRep);
