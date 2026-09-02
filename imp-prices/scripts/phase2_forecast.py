@@ -15,6 +15,7 @@ from scipy import stats
 from imp_prices import load_panel
 from imp_prices.config import DATA, RESULTS
 from imp_prices.clock import forecast_vs_null
+from imp_prices.pivots import clean_prices
 
 THETA_GRID = (0.05, 0.08, 0.10)          # the thresholds Gate 2.0 declared usable
 SERIES_MONTHLY = ("WTI_Spot", "WTI_CL", "Brent_BZ")
@@ -54,8 +55,20 @@ def main():
     daily = pd.read_csv(os.path.join(DATA, "daily", "oil_prices.csv"), skiprows=3,
                         header=None, names=["Date","Close","High","Low","Open","Volume"],
                         parse_dates=["Date"]).dropna(subset=["Close"])
-    if not a.quiet: print("\n  daily WTI futures (Phase 3 data, shown for contrast)")
-    daily_rows = run(daily["Close"].to_numpy(), "daily WTI", a.null, a.quiet)
+    # AUDIT02/Q1-C: see the twin note in phase2_gate.py. The daily series carries
+    # the 2020-04-20 negative WTI settlement (-37.63); a RELATIVE threshold is
+    # undefined once a price crosses zero, so validate_prices refuses it and this
+    # script could not run at all. Declared policy applied (drop, never
+    # interpolate) and the exclusion reported rather than passed over in silence.
+    daily_close, daily_dates, daily_excl = clean_prices(
+        daily["Close"].to_numpy(), daily["Date"].to_numpy())
+    out["daily_exclusion"] = daily_excl
+    if not a.quiet:
+        print("\n  daily WTI futures (Phase 3 data, shown for contrast)")
+        if daily_excl["n_dropped"]:
+            print(f"    excluded {daily_excl['n_dropped']} of {daily_excl['n_in']} "
+                  f"observations as non-positive (dates: {daily_excl['dropped_dates']})")
+    daily_rows = run(daily_close, "daily WTI", a.null, a.quiet)
 
     tab = pd.DataFrame([r for r in rows if not r.get("skipped")])
     dtab = pd.DataFrame([r for r in daily_rows if not r.get("skipped")])

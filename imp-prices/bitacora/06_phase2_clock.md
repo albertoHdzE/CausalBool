@@ -192,3 +192,64 @@ existed before any of this was written down.
 
 Phase 3. Fetch the longer daily history first, since every other decision depends
 on how much of it exists.
+
+---
+
+## Addendum 2026-09-02 (AUDIT02/Q1-C) — both Phase 2 producers were unrunnable; declared policy now applied
+
+An arm-1 reproducibility sweep re-ran every producer in this package against its
+committed artefact. `scripts/phase2_gate.py` and `scripts/phase2_forecast.py`
+did not merely disagree — **they aborted**:
+
+```
+NonPositivePriceError: 1 non-positive price(s) at index [2588] (min -37.63)
+```
+
+That is the 2020-04-20 negative WTI settlement, and `validate_prices` is right
+to refuse it: a *relative* threshold θ is undefined once a price crosses zero,
+so every directional-change pivot computed through it would be meaningless
+rather than merely noisy. The committed artefacts therefore predate the guard
+and could not be regenerated from the code in the tree — the strongest form of
+irreproducibility, since no amount of rerunning would have surfaced it.
+
+Both now apply the declared policy — `clean_prices`: drop, never interpolate,
+never winsorise — and **report** the exclusion in the output under
+`daily_exclusion`, which is what the guard's own message instructs.
+
+**Exactly one observation is excluded**, 4,156 → 4,155, dated 2020-04-20.
+
+### What moved, and what did not
+
+The monthly blocks are **unchanged**. Those carry the Phase 2 claims; the daily
+series is present only as a contrast for Phase 3. So the Gate 2.0 verdict and
+the monthly forecast comparison stand exactly as recorded above.
+
+What moved is confined to the daily contrast, and it is worth stating plainly:
+
+| quantity | pre-guard | after exclusion |
+|---|---|---|
+| `daily_signtest.mean_excess` | 0.0931 | **0.0506** |
+| `daily_signtest.p_value` | 0.125 | 0.125 (unchanged) |
+| `any_significant` | False | False (unchanged) |
+
+A single untradeable print was inflating the apparent daily edge by roughly
+84 per cent. The conclusion does not change — it was not significant before and
+is not now — but any future Phase 3 work that quoted the daily effect size
+would have been quoting an artefact of one settlement.
+
+### Sensitivity, because one dropped point invites the obvious objection
+
+`clean_prices` takes a `pad` that additionally drops neighbours, precisely so
+this can be checked rather than asserted. Excess over null on the daily series:
+
+| pad | observations kept | θ=0.05 | θ=0.10 | θ=0.15 |
+|---|---|---|---|---|
+| 0 | 4,155 | +0.0340 | +0.0572 | +0.1171 |
+| 1 | 4,153 | +0.0366 | +0.0546 | +0.1184 |
+| 5 | 4,125 | +0.0254 | +0.0272 | +0.1304 |
+| 20 | 3,735 | +0.0453 | +0.0716 | +0.0953 |
+
+Positive and in the same band throughout, while discarding up to 421
+observations. The daily contrast does not depend on the neighbourhood of the
+excluded print, so the exclusion is safe and the remaining signal is not an
+edge effect of the April 2020 dislocation.

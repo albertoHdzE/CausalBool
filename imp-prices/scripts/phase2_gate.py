@@ -28,7 +28,7 @@ import pandas as pd
 
 from imp_prices import SERIES, TARGET, load_panel
 from imp_prices.config import DATA, RESULTS
-from imp_prices.pivots import (directional_change, leak_opportunities, legs,
+from imp_prices.pivots import (clean_prices, directional_change, leak_opportunities, legs,
                                short_wait_target)
 
 #: Pre-declared. Monthly reversals of 5 to 25 per cent bracket what the
@@ -90,8 +90,22 @@ def main():
     daily = pd.read_csv(daily_path, skiprows=3, header=None,
                         names=["Date", "Close", "High", "Low", "Open", "Volume"],
                         parse_dates=["Date"]).dropna(subset=["Close"])
-    dtab = survey(daily["Close"].to_numpy(), "daily WTI futures (Phase 3 data)",
-                  args.quiet)
+    # AUDIT02/Q1-C: this script could not run at all. The daily series contains
+    # the 2020-04-20 negative WTI settlement (-37.63), and validate_prices
+    # rightly refuses it: a RELATIVE threshold theta is undefined once a price
+    # crosses zero, so every directional-change pivot downstream would be
+    # meaningless rather than merely noisy. The committed artefact therefore
+    # predates the guard and was not reproducible.
+    # Applying the declared policy (clean_prices: drop, never interpolate) and
+    # REPORTING the exclusion, which is what the guard's own message instructs.
+    daily_close, daily_dates, daily_excl = clean_prices(
+        daily["Close"].to_numpy(), daily["Date"].to_numpy())
+    out["daily_exclusion"] = daily_excl
+    if not args.quiet and daily_excl["n_dropped"]:
+        print(f"\n  daily series: excluded {daily_excl['n_dropped']} of "
+              f"{daily_excl['n_in']} observations as non-positive "
+              f"(dates: {daily_excl['dropped_dates']})")
+    dtab = survey(daily_close, "daily WTI futures (Phase 3 data)", args.quiet)
     out["daily_for_contrast"] = dtab.to_dict("records")
 
     banner_usable = monthly[monthly["usable"]]
