@@ -13,7 +13,16 @@ predictiveEval[v_List, Ic_List, gate_String, params_Association] := Module[{bits
   gate === "IMPLIES" || gate === "NIMPLIES", Module[{pair = Lookup[params, "pair", If[Length[Ic] >= 2, {Ic[[1]], Ic[[2]]}, {Ic[[1]], Ic[[1]]}]], a, b}, a = v[[pair[[1]]]]; b = v[[pair[[2]]]]; If[gate === "IMPLIES", Boole[(1 - a) == 1 || b == 1], Boole[a == 1 && b == 0]]],
   gate === "MAJORITY", Boole[Total[bits] >= Ceiling[Length[bits]/2]],
   gate === "KOFN", Module[{k = Lookup[params, "k", 1], strict = TrueQ[Lookup[params, "strict", False]]}, If[strict, Boole[Count[bits, 1] > k], Boole[Count[bits, 1] >= k]]],
-  gate === "CANALISING", Module[{ci = Lookup[params, "canalisingIndex", If[Length[Ic] >= 1, Ic[[1]], Ic[[1]]]], vcan = Lookup[params, "canalisingValue", 1], cout = Lookup[params, "canalisedOutput", 0]}, If[v[[ci]] == vcan, cout, Boole[MemberQ[bits, 1]]]],
+  (* AUDIT02/W0.2: migrated to the Ic-RELATIVE reading pinned by ORDERING §4/§4b.
+     This branch previously read v[[ci]] -- a network-ABSOLUTE index -- and was
+     carried as a documented exception. It agreed with the engine only when
+     Ic[[ci]] == ci, which the default (ci = first connected input) satisfies,
+     so the divergence was unreachable until params set canalisingIndex
+     explicitly. Now bits[[ci]] with a relative default of 1, identical to
+     ApplyGate on Part[row, Ic]. Pinned by TSK-MIXED-001-CanalisingExceptionTests.m
+     with both a positive control (agrees with the engine) and a negative one
+     (the old absolute reading provably disagrees). *)
+  gate === "CANALISING", Module[{ci = Lookup[params, "canalisingIndex", 1], vcan = Lookup[params, "canalisingValue", 1], cout = Lookup[params, "canalisedOutput", 0]}, If[bits[[ci]] == vcan, cout, Boole[MemberQ[bits, 1]]]],
   True, 0
 ]];
 runPredictiveMixedOnInputs[cm_, dyn_List, inputs_List, params_Association: <||>] := Module[{n = Length[dyn], out},

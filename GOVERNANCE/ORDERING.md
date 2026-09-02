@@ -75,11 +75,28 @@ Pinned elementwise by `tests/MUnit/Gates/TSK-GATES-014-CanalisingCoordTests.m`
 TSK-MIXED-001 was aligned (default case provably identical; benchmark sets no
 CANALISING parameters — published numbers invariant, verified by suite + Summary).
 
-Documented exceptions (unchanged pending their own coverage):
+Documented exceptions — **CLOSED 2026-09-02, AUDIT02/W0.2.**
 `tests/MUnit/Mixed/TSK-MIXED-001-Comparison.m` and
-`TSK-MIXED-001-OnPossibleBehaviour.m` are non-globbed provenance helpers whose
-local CANALISING branches read network-absolute indices. Do not cite them as
-semantics; alignment requires its own executed test before landing.
+`TSK-MIXED-001-OnPossibleBehaviour.m` read network-absolute indices in their
+local CANALISING branches. Both are now migrated to the Ic-relative reading
+(`bits[[ci]]`, relative default 1), so §4b holds with no exception.
+
+The alignment landed with the executed test §4 required:
+`tests/MUnit/Mixed/TSK-MIXED-001-CanalisingExceptionTests.m`, 8,960 cases over
+n = 5, every support of size 2–4, every relative `ci`, both canalising values
+and both canalised outputs. Three assertions, of which the second is what makes
+the first mean anything:
+
+| assertion | result |
+|---|---|
+| POSITIVE — migrated relative reading vs `ApplyGate` on `Part[row,Ic]` | 0 mismatches |
+| NEGATIVE — old absolute reading vs the engine | **1,440 mismatches** (the divergence was real, and the grid reaches it) |
+| DEFAULT — relative vs absolute with no explicit `canalisingIndex` | 0 mismatches |
+
+The default row explains why the exception survived: with `ci` defaulting to the
+first connected input the two conventions coincide, so the bug was unreachable
+until a caller set `canalisingIndex` explicitly. Ledger moves OK=53→54,
+TOTAL=54→55; the single red (`TopologiesTests`) is unchanged.
 
 Callers holding network-absolute canalising coordinates translate once at their
 boundary: `rel = First@FirstPosition[Ic, ciAbs]`.

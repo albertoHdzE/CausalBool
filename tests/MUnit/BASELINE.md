@@ -79,3 +79,17 @@ TRUE DETAIL: FAILED=TopologiesTests.m, KOFNNetworkTests.m, IMPLIESNetworkTests.m
 ```
 zsh tests/MUnit/run-tests.sh        # ≈167 s wall-clock on this machine (measured)
 ```
+
+## Intended deltas since the v2 ledger (append-only, U7)
+
+The v2 rollup above (`OK=46 FAIL=4 TOTAL=50`) is a provenance record and is not
+rewritten. Every movement away from it is declared here with its cause, so a
+future run can be judged elementwise rather than against a stale total.
+
+| date | task | ledger after | change |
+|---|---|---|---|
+| 2026-09-02 | AUDIT02 (P4a–P8, dev R4/W0.3 test fixes) | `OK=53 FAIL=1 TOTAL=54` | three reds retired by the developer's own test fixes (`anaIdx_k1` parsed as `Pattern`; `Or`/`And` over integers staying symbolic; `$VersionString` not a builtin) plus new query-surface, analytic-vs-exhaustive and pattern-query suites |
+| 2026-09-02 | **AUDIT02/W0.2** | **`OK=54 FAIL=1 TOTAL=55`** | adds `Mixed/TSK-MIXED-001-CanalisingExceptionTests.m`, closing the last F36 exception (ORDERING §4). +1 OK, +1 TOTAL, no red moved |
+
+`TopologiesTests.m` remains the single owned red throughout, unchanged in cause
+(no `Status.txt` exported; needs repair or an explicit `SKIP_REASON`).
