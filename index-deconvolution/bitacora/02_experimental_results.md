@@ -77,13 +77,25 @@ Scope: sizes 7, 8, 9, 10; 50 seeds each; full 12-gate family. 200 networks,
 Ambiguity class size histogram (number of canonical gates realising the
 recovered function):
 
-    class size 1 : 679 nodes
-    class size 2 : 368 nodes
-    class size 3 :  72 nodes
-    class size 4 : 298 nodes
-    class size 5 :  49 nodes
-    class size 6 :  39 nodes
-    class size 7 : 195 nodes
+    class size 1 : 292 nodes
+    class size 2 : 387 nodes
+    class size 3 : 368 nodes
+    class size 4 :  72 nodes
+    class size 5 : 298 nodes
+    class size 6 :  49 nodes
+    class size 7 :  39 nodes
+    class size 8 : 195 nodes
+
+*Corrected 2026-09-02 (AUDIT02/Q1).* The histogram above previously read
+`1:679, 2:368, 3:72, 4:298, 5:49, 6:39, 7:195`, which was this artefact's state
+before `REGULATORY` and `REGULATORY_DNF` were added to `identify_gate`
+(commits `b74953b`, `69156ce`); the committed JSON was never regenerated
+afterwards. The correction is a clean shift: every old class 2–7 count survives
+unchanged one bin higher, and the old class 1 (679) splits into 292 still-unique
+and 387 that gained a second name. Verified as pre-existing, not caused by
+AUDIT02: the producer emits byte-identical output at `f17e839` and at HEAD.
+**The headline numbers are unaffected** — 200/200 exact repertoire and 96.12%
+connectivity/gate recovery are identical before and after.
 
 Reading of the result:
 
@@ -93,8 +105,10 @@ Reading of the result:
 2. Connectivity and gate-function recovery agree at 96.12%; the 3.88% gap is
    exactly the CANALISING functional-independence cases of Experiment 1, where
    the recovered (smaller) function still reproduces the column exactly.
-3. The ambiguity histogram quantifies the naming non-uniqueness. Roughly 40% of
-   nodes have a unique canonical name; the remainder admit an equivalence class,
+3. The ambiguity histogram quantifies the naming non-uniqueness. **17.2%**
+   (292/1700) of nodes have a unique canonical name — the figure previously
+   given here was "roughly 40%", computed from the stale histogram above and
+   too high by more than a factor of two. The remainder admit an equivalence class,
    most often at small arity (identity, constant, and threshold overlaps). Every
    member of a class reproduces the function, so repertoire reproduction is
    unaffected.
