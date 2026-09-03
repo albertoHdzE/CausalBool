@@ -13,6 +13,15 @@ dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"};
 
 weights[n_Integer] := 2^Range[0, n - 1];
 
+(* CAUTION -- allOffsets computes the SPECIAL CASE, not the definition.
+   It returns the subset sums of the DISCONNECTED coordinates' bit weights.
+   Those are the don't-cares that are free in EVERY schema of a node, so they
+   are always present in Omega -- but Omega is NOT defined by them.
+   Sumandos are the fillings of a SCHEMA'S OWN don't-care positions, wherever
+   they fall, INCLUDING on connected inputs. Rule 110 is the witness: three
+   inputs, all connected, yet it decomposes as 01*, 10*, *10.
+   See GOVERNANCE/GLOSSARY.md section 1d. Reading this function as the
+   definition is how that error has been re-adopted four times. *)
 allOffsets[n_Integer, connected_List] := Module[
   {free = Complement[Range[n], connected], ws},
   ws = weights[n][[free]];

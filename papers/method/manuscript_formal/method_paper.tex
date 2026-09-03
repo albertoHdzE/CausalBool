@@ -254,9 +254,14 @@ gate evaluation.
 The set-addition form \(\{\ell+s:\ell\in L,\,s\in S\}\) resembles the Minkowski sum of two
 point sets in \(\mathbb{Z}\). The term \emph{deconvolution} is used here advisedly, because the
 operation reverses the combinatorial convolution that produces a composite repertoire index from
-independent subsystem contributions: the base set \(L\) encodes the constrained (connected)
-coordinates, the offset set \(S\) encodes the free (disconnected) coordinates, and
-\(\operatorname{Dec}\) reconstructs the full index set from these two factors. In signal-processing
+independent subsystem contributions: the base set \(L\) encodes the coordinates the schema constrains,
+the offset set \(S\) encodes those it leaves free, and
+\(\operatorname{Dec}\) reconstructs the full index set from these two factors.
+Freedom here is a property of the schema, not of the node: the disconnected
+coordinates are free in every schema and so lie in \(S\) always, but a connected
+input unconstrained by a particular schema lies in \(S\) too.  Rule~110, whose
+three inputs are all connected yet which decomposes as \(01\ast\), \(10\ast\),
+\(\ast10\), is the standing witness that \(S\) is not the disconnected set. In signal-processing
 terms, the composite index is the ``convolved'' signal and \(\operatorname{Dec}\) recovers the
 constituent structure. The distinction from a generic Minkowski sum is that the two factors here
 have a definite causal interpretation (constrained versus free coordinates) rather than being
