@@ -39,10 +39,29 @@ def log2_int(x: int) -> float:
 
 
 def encode_node_cost(cm_row, gate: str, n: int) -> float:
+    """Per-node description length in bits, in the declared node language
+
+        (gate type, in-degree, input set, gate parameters)
+
+    read in that order.  Each field is a uniform index into an alphabet whose
+    size is fixed by the fields already read, so the code is sequentially
+    decodable and its Kraft sum over the whole description space is exactly 1.
+
+    AUDIT03/R3.1 (2026-09-03): the in-degree field ``log2(n + 1)`` was absent
+    here.  Without it a decoder cannot know how wide the input-set field is, nor
+    read it as an index into the d-subsets of [n]; the Kraft sum is then n + 1,
+    so the quantity was not a description length at all and every DeltaD built
+    from it was a difference of two invalid lengths.  Restored to match
+    papers/method/code/complexity_analysis/complexity_analysis.py, which is the
+    authority (it is the field that superseded D_formula = 101.07 by 135.66).
+    Proof and cross-implementation check:
+    audit/AUDIT03_R3_description_length/verify_description_length.py.
+    """
     d = int(sum(cm_row))
     k = len(GATE_LABELS)
     cost = 0.0
     cost += log2_int(k)
+    cost += log2_int(n + 1)                     # in-degree d, required for decodability
     if 0 <= d <= n:
         binom = math.comb(n, d)
     else:

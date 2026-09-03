@@ -18,6 +18,12 @@ recorded finding.
 | Q2.1, Q2.2, Q2.3 | **OPEN — now blocking W1.3** |
 | Q3.4 W1.2–W1.5, Q3.5 | open |
 
+**Superseded by `audit/AUDIT03_PLAN.md` from 2026-09-02.** AUDIT03 re-audits this
+queue's outputs under the corrected (algorithmic, not Shannon) reading of the
+method; W1.2–W1.5 resume there as R5, after R0.3. AUDIT03/R3.1–R3.2 are closed
+(2026-09-03): the bio description length was missing its in-degree field and was
+not a valid code at all.
+
 **Wave 0 is closed.** `GOVERNANCE/ORDERING.md` no longer lists any outstanding
 ordering exception.
 

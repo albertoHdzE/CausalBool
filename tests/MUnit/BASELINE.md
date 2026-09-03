@@ -90,6 +90,7 @@ future run can be judged elementwise rather than against a stale total.
 |---|---|---|---|
 | 2026-09-02 | AUDIT02 (P4a–P8, dev R4/W0.3 test fixes) | `OK=53 FAIL=1 TOTAL=54` | three reds retired by the developer's own test fixes (`anaIdx_k1` parsed as `Pattern`; `Or`/`And` over integers staying symbolic; `$VersionString` not a builtin) plus new query-surface, analytic-vs-exhaustive and pattern-query suites |
 | 2026-09-02 | **AUDIT02/W0.2** | **`OK=54 FAIL=1 TOTAL=55`** | adds `Mixed/TSK-MIXED-001-CanalisingExceptionTests.m`, closing the last F36 exception (ORDERING §4). +1 OK, +1 TOTAL, no red moved |
+| 2026-09-03 | **AUDIT03/R3.1** | **`OK=54 FAIL=1 TOTAL=55`** | ledger totals unchanged; one pinned *value* moves. `BioMetrics.m encodeNodeCost` now charges the `log2(n+1)` in-degree field, without which the per-node code has Kraft sum `n+1` and is not decodable. `Analysis/TSK-BIO-METRICS-001` expectation 28.509775004326936 → 37.79748738387639, a delta of exactly `4·log2 5`. The test went red on the old value before it was updated, which is the evidence that it is live. Proof, four-way parity over 572 cells, and both negative controls: `audit/AUDIT03_R3_description_length/FINDING.md` |
 
 `TopologiesTests.m` remains the single owned red throughout, unchanged in cause
 (no `Status.txt` exported; needs repair or an explicit `SKIP_REASON`).
