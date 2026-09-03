@@ -1,183 +1,185 @@
-# AUDIT02 Phase 2 — real-example verification, and the fallthrough decision
+# AUDIT03 — R0: read the theory, then collapse to one owner per concept
 
 ## Context
 
-Phase 1 is committed and pushed (`f17e839..091797b` on `fixing`; revert point is
-`f17e839`). It fixed the analytic query surface (4/12 → 12/12 families), closed
-the cross-language parity hole (45/45 → 135/135 with CANALISING covered), and
-propagated `strict` / `tiePolicy` outward.
+**This file previously held the AUDIT02 Phase 2 plan (2026-09-02). Every phase of
+it is now closed** — A0/Finding H by `aca0842` and `2ee4d59`, A1/A2 by `5646fbd`,
+B1/B2 by `2ee4d59`, Phase C by `5567064` and `a757618`. Its regression bar was
+also stale (`OK=52 FAIL=1 TOTAL=53`, `verify-paper 3 of 8`; the live values are
+`OK=54 FAIL=1 TOTAL=55` and `7 of 8`). It is replaced here.
 
-All of that was verified against **synthetic enumeration** — truth tables,
-symmetric differences, random small networks. The author's position is that only
-**real examples with known expected values** can settle correctness, and that is
-right: the current evidence shows no *tested* result moved, which is not the same
-as showing no *published* result moved. Five of eight flagship artefact groups in
-`papers/method/artifact_baseline/artefacts.json` are still PENDING, so the
-paper's headline anchors are pinned by a change-detector, not reconciled to a
-producer.
+### Why this plan exists
 
-Two decisions depend on that evidence: whether the Phase-1 changes disturbed any
-published number, and whether to harden `Gates.m`'s silent `True, 0` fallthrough.
+AUDIT02 verified *computations*. AUDIT03 exists because three defects were then
+found that no amount of computational verification would have caught, and **all
+three were found by an author question, never by my own triage**:
 
-**A finding from this exploration changes the shape of the second decision.**
+1. **The bio description length was not a description length.**
+   `bio_D_experiment.py` and `BioMetrics.m` charged `log2 C(n,d)` for a node's
+   input set without ever transmitting `d`. Kraft sum `n+1`, not 1. Fixed and
+   proved by decoder in `2fd5082`.
+2. **I reached for Shannon entropy inside an algorithmic accounting**, then used
+   the same error a second time to "find" a bug in my own W1.1 codec that was not
+   a bug.
+3. **I asserted Ω is the disconnected coordinates.** It is not — sumandos are the
+   don't-cares of each schema, wherever they fall. Rule 110 has three inputs, all
+   connected, and decomposes as `01*`, `10*`, `*10`. The correct reading had been
+   recorded on 2026-07-09 and I did not find it. Purged and guarded in `cbfe02a`.
 
-### Finding H — the bio corpus contains gates outside the twelve, and they may reach the canonical engine
+All three share one signature: **I read an implementation and inferred a
+definition.** R0 is the response, and it blocks every judgement below it.
 
-`data/bio/processed/*.json` (234 networks) carries these node gate labels:
+A fourth finding reframed the work: one concept has many homes.
 
 ```
-CUSTOM 2486 · IDENTITY 762 · unknown 550 · INPUT 151 · dual 14
+per-node description length : 8 implementations   (2 were wrong for 18 days)
+gate semantics              : 8 implementations
+allOffsets / offset family  : 3 sites
+"sumandos"                  : 2 incompatible definitions
 ```
 
-None is one of the twelve families. `Integration`Gates`ApplyGate` matches none of
-them and returns a silent `0` via `True, 0` (`Gates.m:50`).
+The author considered splitting the project into sibling repositories and
+**decided against it** (2026-09-03), on evidence: the one thing already split
+carries a defect left unfixed *because* of the boundary (`GLOSSARY.md:236`,
+deferred in `AUDIT02_QUEUE` Q4), while the in-repo vendored copy
+`imp-prices/vendor/causalbool.py` is byte-identical to its source. **Split by
+ownership of a concept, not by repository.** That is R2.
 
-`src/Packages/Integration/BioExperiments.m:110` passes `dynamic[[i]]`, taken
-straight from `net["dynamic"]` (line 124), into `Integration`Gates`ApplyGate`
-with no validation. If the corpus `gates` field reaches `net["dynamic"]`
-unmapped, then attractor, knockout and essentiality results are computed with
-roughly 3,949 node instances silently forced to 0.
-
-For `IDENTITY` and `INPUT` a silent 0 is not merely "unsupported" — it is
-**wrong**. The project's own separate implementation agrees:
-`src/integration/bio_D_experiment.py:272-277` returns `inputs[0]` for both.
-
-This also means gate semantics still exist in **three** unreconciled places
-beyond the ones Phase 1 fixed:
-
-| implementation | IDENTITY / INPUT semantics |
-|---|---|
-| `src/Packages/Integration/Gates.m` | silent `0` (via fallthrough) |
-| `src/integration/bio_D_experiment.py:272` | `inputs[0]` — correct |
-| `src/integration/NatureBDM.wl:121,169` | own `INPUT`/`CONST`/`ERROR` handling |
-| `src/scripts/PhaseTransitionExperiment.m:25`, `BehavioralKnockoutAnalysis.m:56` | explicit `Return[0]` guard |
-
-Whether this is a live scientific defect or a dormant one turns entirely on
-whether the corpus `gates` field reaches `ComputeNextState`. That is an empirical
-question, and A3 below answers it before anything is changed.
+The durable record is `audit/AUDIT03_PLAN.md` (committed `61a923f`). This file is
+the operative near-term plan.
 
 ---
 
-## Plan
+## Where the work stands
 
-**Sequencing (author decision, 2026-09-02):** Finding H is probed **first**,
-before Phase A, because its answer reorders everything after it. Phase A2 runs
-the full before/after against a temporary worktree at `f17e839`.
-
-### Phase A0 — Settle Finding H first (read-only probe, no code change)
-
-Answer one question: **do non-canonical gate labels actually reach
-`Integration`Gates`ApplyGate` on a live bio path?**
-
-Method — trace the corpus field through to the call site, without editing anything:
-1. Read `data/bio/processed/*.json` and establish whether the `gates` field is
-   what becomes `net["dynamic"]` (`BioExperiments.m:124`), or whether a mapping
-   step intervenes. Follow the actual producer of the `net` association.
-2. Build `net["dynamic"]` exactly as `RunBioNetwork`/`ComputeNextState` does and
-   report the distribution of gate strings that would be passed to `ApplyGate`.
-3. For any non-canonical label found, evaluate `ApplyGate[label, inputs, <||>]`
-   directly and record what it returns.
-
-Outcomes and consequences, declared in advance:
-- **Dormant** (no non-canonical label reaches the call site) → record the
-  provenance so the question does not recur; continue to Phase A unchanged.
-- **Live** → this is a **P0 scientific defect**: bio attractor, knockout and
-  essentiality results computed through `ComputeNextState` used ~3,949 node
-  instances forced to 0, including `IDENTITY`/`INPUT` where 0 is demonstrably
-  the wrong answer (`bio_D_experiment.py:272-277` returns `inputs[0]`). It then
-  outranks the method-paper verification, and any published bio number must be
-  restated. **Stop and report before changing anything.**
-- **Not wired** (corpus never feeds this path) → record where the bio results
-  actually come from.
-
-### Phase A — Real-example verification against known anchors
-
-The flagship producers all exist and use the code Phase 1 touched:
-
-| producer | engine used | anchors it should reproduce |
+| phase | what it is | state |
 |---|---|---|
-| `papers/method/manuscript_computational/generate_paper_outputs.wl` | `CausalBoolCore.wl` (changed) **+** `Integration`Gates`` | self-verifying; `Exit[1]` on failure (line 408) |
-| `papers/method/code/mixed_interaction_10node/mixed_interaction_10node.wl` | `Integration`Gates`` + `IndexSetAnalytic` | d_q=21, c_q=10, μ_q=11, R_q=2048; S1 10/7/3/8; S2 14/10/4/16 |
-| `papers/method/code/mixed_interaction_10node/dynamical_landscape_10node.wl` | `ApplyGate` | \|Im(F)\|=206, 4 attractors, basins 488/320/204/12 |
-| `papers/method/code/corroboration_6node/corroboration_6node.wl` | own AND closed form | 6-node AND corroboration |
-| `papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py` | Python | median \|C_q\|=10 for T3 at n=30,60,80,200 |
+| **R0** | Read the primary sources → `METHOD_ACCOUNT.md` → **author gate** | **NEXT** · blocks R2b, R3, R4 |
+| **R1** | Correct the record | not started |
+| **R2** | The collapse: one owner per concept | R2a.1 census **done**; R2a.2 partly blocked |
+| **R3** | The measure decision, then regenerate | **author gate** |
+| **R4** | The thirteenth family (`REGULATORY_DNF`) | after R0.3 + R3 |
+| **R5** | W1.2–W1.5 | blocked on Q2.1–Q2.3 |
+| **R6** | Leftover guards | R6.3 done (`cbfe02a`) |
+| **R7** | Repo hygiene — `.git` is 8.8 GB | independent |
 
-**A1 — run all five and check against the recorded anchors.** `D_formula=135.66`,
-`C_formula=23`, `ZIP=10016`, `H_total=10229.61`, `BDM=580.01`. Report each as
-observed-vs-expected, elementwise where the object is a set. A number that merely
-"looks right" is not a pass; the basin vector and the index sets are compared
-member by member.
+---
 
-**A2 — the decisive before/after.** Create a read-only `git worktree` at
-`f17e839` (pre-Phase-1), run the identical five producers there, and diff the
-outputs against A1 **elementwise**. This is the only thing that can actually
-answer "did our changes disturb a published result". Expected outcome, stated in
-advance so it is falsifiable: **byte-identical outputs**, because every Phase-1
-behaviour change lies on a path that previously returned `Null` or a provably
-wrong set, and no published number can have come from such a path. If anything
-differs, that difference is the finding.
+## R0 — the work of this session
 
-*(A3 moved to Phase A0 above, by author decision — it runs first.)*
+### R0.1 Read, in this order
 
-### Phase B — the `Gates.m` fallthrough decision, made on evidence
+| source | lines |
+|---|---|
+| `papers/method/derivations/01_causalBool_inputs.tex` → `02_cb_and` → `02_cb_or` → `03`–`12` | ~990 total |
+| `papers/method/derivations/exam.tex` — the computational sampling step | |
+| `papers/method/manuscript_formal/method_paper.tex` | 2,139 |
+| `papers/method/manuscript_computational/comp_paper.tex` | 1,803 |
+| `doc/Tesis-UNAM/Capitulo4/resultados_y_analisis.tex` — the IIT-influenced origin | 1,377 |
+| `doc/newIntPaper/bioProcess.tex` and `bioPlan*.md` | |
 
-**B1 — measure the blast radius, do not guess.** Wrap `ApplyGate` in a logging
-shim (in a scratch script, not in the repo) and run the full MUnit suite plus all
-five producers, recording every distinct `gate` string it receives. There are 81
-call sites; this converts "would it break anything" from an opinion into a list.
+Read the `.tex` sources, not the PDFs. Record, while reading, every point where a
+document states something the code contradicts — that list is an R1 input.
 
-**B2 — decide from B1 plus A3.** The options are genuinely different depending on
-the evidence, so the decision is deferred to that point rather than pre-committed
-here. If no live path passes a non-canonical gate, hardening is zero-impact and
-should simply be done. If bio paths do, then the right fix is not a bare
-`Failure` — it is **correct semantics for `IDENTITY` and `INPUT`** plus a loud
-failure for genuinely unknown labels, which is a larger and more valuable change.
+### R0.2 Write `audit/METHOD_ACCOUNT.md`
 
-### Phase C — carried forward from Phase 1, unchanged
+**Format decision (mine, stated so it can be overruled): one checkable claim per
+line, each with a source citation `file:line`.** Not a narrative. The whole
+purpose of this document is that the author can falsify it quickly; a narrative
+account is pleasant to read and hard to check, which is the wrong trade for a
+gate. Target ≤ 120 claims.
 
-P4d (adjudicate `filterByCondition`, `findPatternIndices`,
-`inIdxProducingOutsToDecimal`), then P4e (archive the `src/causal/` island),
-P5 (add `make verify-paper` to the closure triad; add a code-conformance pass to
-the glossary gate), P6 (adopt the orphaned `T5.1.v2` debt), P7 (archive the three
-dead hardcoded-number scripts). None may start before Phase A completes.
+It must state explicitly:
+
+- what a **family** is — an arity-parametric closed form, not a table entry;
+- what a **one-set**, **base set `L`** and **offset family `Ω`** are, with **Ω
+  defined per schema** and the disconnected coordinates named as *the special
+  case that is always present*, per `GOVERNANCE/GLOSSARY.md` §1d;
+- what **deconvolution** `Dec(L,Ω)` is, and why the word is used;
+- how **description length** is charged, and **in what declared language**;
+- where **BDM** legitimately applies, and to what objects;
+- where **Shannon** is a permitted comparison baseline (as `BDM_Wrapper` labels
+  it) and where it must never appear;
+- the **ordering convention** (LSB/MSB and the `φ` bit-reversal), since every
+  index-set statement is ordering-relative.
+
+### R0.3 — the gate
+
+The author reads `METHOD_ACCOUNT.md` and confirms or corrects it. **R2b, R3 and
+R4 may not start until it passes.** This is the only defence against the failure
+mode above, because a control only ever tests the question you thought to ask.
+
+### R2a.2 — runs alongside R0, needs no theory
+
+Comparing implementations against each other is immune to the blindness. From the
+census (`audit/AUDIT03_R2_collapse/census.py`, committed `61a923f`):
+
+- **offset family — CLEARED to merge.** The three sites differ *textually*
+  (`corroboration_6node.wl` lacks the `If[Length[ws]==0, {0}, ...]` guard) but are
+  *functionally* identical: `Dot[{},{}]` is 0 in Wolfram, and over `n=1..6` with
+  every connected subset the two forms agree on **126 of 126** cases
+  (`probe_alloffsets_parity.wl`). Merge to one owner; the survivor's **name** is
+  an R2b question, because it computes the special case.
+- **gate semantics — BLOCKED.** `complexity_analysis._eval_gate` and
+  `causalbool.apply_gate` agree on **value** in all 300 cells but disagree on the
+  **call contract**: the first raises `KeyError 'pair'` for `IMPLIES` at `d=1`
+  where the second returns `1`. Reconcile the contract, and **re-run** the
+  AUDIT02 135/135 Wolfram parity claim rather than citing it, before any deletion.
+- **description length — R2b.** Its 8 sites split 4 with the in-degree field and
+  4 without; which becomes canonical *is* the `D_formula` vs `D_schema` decision.
+
+**The rule, on the face of the phase:** no copy is deleted until an elementwise
+parity run against the survivor is committed as evidence, and every collapse adds
+its symbol to `tools/check_single_engine.sh` **in the same commit**.
+
+---
+
+## Files this session will touch
+
+- **create** `audit/METHOD_ACCOUNT.md` — the deliverable.
+- **create** `audit/AUDIT03_R2_collapse/parity_offsets.md` — the R2a.2 evidence.
+- **edit** the surviving `allOffsets` owner and its two call sites; **archive**
+  the redundant definitions per the archive policy, not delete.
+- **edit** `tools/check_single_engine.sh` — add the offset-family symbol.
+- **edit** `audit/AUDIT03_PLAN.md` — mark R0.2 delivered, R2a.2 progress.
+
+Nothing in `src/Packages/`, `src/integration/` or either manuscript changes in
+R0; the reading phase produces a document, not a diff.
 
 ---
 
 ## Verification
 
 ```bash
-# A0 — Finding H probe (read-only; runs FIRST)
-#   trace data/bio/processed/*.json "gates" -> net["dynamic"] -> ApplyGate,
-#   report the gate-string distribution at the call site, and evaluate
-#   ApplyGate on each non-canonical label directly.
-#   PASS = no non-canonical label reaches ApplyGate.
-#   Any label that does => STOP, report, do not proceed to Phase A.
+# R0 has no automated test. Its gate is the author reading METHOD_ACCOUNT.md.
+# What CAN be checked is that the account does not contradict the guards:
+zsh tools/check_glossary_conformance.sh      # sec.1d must stay clean
 
-# A1 — flagship producers (run from repo root)
+# R2a.2 — parity BEFORE any deletion, and the guard AFTER it
 HOME=$HOME /Applications/Wolfram.app/Contents/MacOS/WolframKernel -script \
-  papers/method/manuscript_computational/generate_paper_outputs.wl; echo "exit=$?"   # must be 0
-HOME=$HOME .../WolframKernel -script papers/method/code/mixed_interaction_10node/mixed_interaction_10node.wl
-HOME=$HOME .../WolframKernel -script papers/method/code/mixed_interaction_10node/dynamical_landscape_10node.wl
+  audit/AUDIT03_R2_collapse/probe_alloffsets_parity.wl     # 126/126, 0 differ
+venv/bin/python audit/AUDIT03_R2_collapse/census.py
+zsh tools/check_single_engine.sh                            # must list the new symbol
+
+# the producers that consume allOffsets must be re-run after the merge
+HOME=$HOME .../WolframKernel -script papers/method/manuscript_computational/generate_paper_outputs.wl
 HOME=$HOME .../WolframKernel -script papers/method/code/corroboration_6node/corroboration_6node.wl
-venv/bin/python papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py
+HOME=$HOME .../WolframKernel -script papers/method/code/mixed_interaction_10node/mixed_interaction_10node.wl
 
-# A2 — before/after against the pre-Phase-1 tree (read-only worktree)
-git worktree add /tmp/cb-pre f17e839
-#   ... run the same five there, then diff every produced JSON/CSV elementwise
-git worktree remove /tmp/cb-pre
-
-# B1 — blast radius
-#   scratch shim over Integration`Gates`ApplyGate, then:
-zsh tests/MUnit/run-tests.sh --all
-
-# standing regression bar (must not move)
-zsh tests/MUnit/run-tests.sh --all        # OK=52 FAIL=1 TOTAL=53, sole red TopologiesTests
-(cd index-deconvolution && ../venv/bin/python -m pytest -q)   # 146
-(cd imp-prices && .venv/bin/python -m pytest -q)              # 97
-python tools/snapshot_paper_numbers.py --check                # 109 identical
-make verify-paper                                             # 3 covered, 5 pending
+# standing regression bar — must not move
+zsh tests/MUnit/run-tests.sh --all     # OK=54 FAIL=1 TOTAL=55, sole red TopologiesTests
+make closure                           # paper-number 109 identical; sync clean;
+                                       # conformance clean; single-engine clean;
+                                       # verify-paper 7 covered, 1 pending
+(cd index-deconvolution && ../venv/bin/python -m pytest -q)      # 146
+(cd imp-prices && .venv/bin/python -m pytest -q -p no:warnings)  # 97
+venv/bin/python -m pytest -q tests/analysis                      # 23
 ```
 
-**Acceptance for Phase A:** every anchor reproduced at its recorded value, and
-A2 byte-identical between `f17e839` and `HEAD`. Any deviation is reported with
-its symmetric difference and location before any further change is made.
+**Acceptance.** `METHOD_ACCOUNT.md` exists, every claim carries a `file:line`
+citation, and it is handed to the author for R0.3. The offset-family merge ships
+with its parity evidence and its guard in one commit. Every bar above unmoved.
+
+**Stop condition.** R0.3 is a hard gate. When `METHOD_ACCOUNT.md` is delivered,
+**stop and report** — do not begin R2b, R3 or R4 on my own reading of the theory.
+That is precisely what produced the three defects this audit exists to repair.
