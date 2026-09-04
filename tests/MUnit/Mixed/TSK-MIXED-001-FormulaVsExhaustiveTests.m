@@ -191,12 +191,16 @@ shannonPerNode = Hbin /@ pPerNode;
    drifted: TSK-EXPER-004's copy lacked KOFN and CANALISING branches, so 20 of
    72 (gate, d) cells disagreed with the other four. C_formula = 23 on the
    flagship is a published number, so it gets one home. *)
+(* AUDIT03 fix: the C_formula delegation added here in 019ff70 had no Get for
+   BioMetrics.m, so Integration`BioMetrics`ComputeFormulaComponents stayed
+   unevaluated and this file exported no status at all. The suite still
+   reported it green because the runner read a STALE Status.txt from an
+   earlier run -- fixed in run-tests.sh, which now clears the status first. *)
+Get["src/Packages/Integration/BioMetrics.m"];
 compressionWeight[gate_, Ic_List, params_Association:<||>] :=
   Integration`BioMetrics`FormulaComponentWeight[gate, Ic, params];
 computeCompression[cm_List, dyn_List, params_Association:<||>] :=
   Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, params];
-  Total@Table[compressionWeight[dyn[[i]], ics[[i]], Lookup[params, i, <||>]], {i, n}]
-];
 Cformula = computeCompression[cm10, dyn10, params10];
 
 (* LaTeX tables for documentation *)

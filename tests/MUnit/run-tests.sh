@@ -40,12 +40,41 @@ else
   # a SKIP_REASON.txt, which is reported below — never silent.
   SEARCH_DIRS=("$ROOT_DIR")
 fi
+# AUDIT03 — membership is DECLARED in MANIFEST.tsv, not inferred from a glob.
+#
+# The old rule was `find -name "*Tests.m"`, which silently excluded 23 of the 78
+# .m files in this tree. Ten of them were real conditional checks whose coverage
+# was simply lost; eleven export a literal "OK" and cannot fail; two are artefact
+# producers. A glob cannot tell those apart, so it collected the wrong set in
+# both directions.
+#
+# Renaming the excluded files was ruled out on evidence: TSK-ALGO-004 and
+# TSK-MIXED-001 are cited by name in both manuscripts.
+#
+# tools/check_test_manifest.sh asserts that every .m in this tree is classified
+# exactly once, so a new file is red until someone declares what it is.
+MANIFEST="$ROOT_DIR/MANIFEST.tsv"
+if [[ ! -f "$MANIFEST" ]]; then
+  echo "REFUSED: $MANIFEST is missing. Test membership is declared, not discovered."
+  exit 2
+fi
 TEST_FILES=()
-for d in $SEARCH_DIRS; do
-  if [[ -d "$d" ]]; then
-    while IFS= read -r f; do TEST_FILES+="$f"; done < <(find "$d" -type f -name "*Tests.m")
+# The loop variable is `entry`, never `path`: zsh TIES the array `path` to $PATH,
+# so `read -r kind path` destroys PATH for the remainder of the script.
+while IFS=$'\t' read -r kind entry _rest; do
+  [[ -z "$kind" || "$kind" == \#* ]] && continue
+  [[ "$kind" != "test" ]] && continue
+  [[ -n "$SECTION" && "$entry" != tests/MUnit/"$SECTION"/* ]] && continue
+  TEST_FILES+="$REPO_DIR/$entry"
+done < "$MANIFEST"
+if [[ ${#TEST_FILES[@]} -eq 0 ]]; then
+  if [[ -n "$SECTION" ]]; then
+    echo "NO_TESTS: no manifest entry of kind 'test' under section '$SECTION'"
+  else
+    echo "REFUSED: the manifest declared 0 tests. A run over zero tests is not a pass."
   fi
-done
+  exit 1
+fi
 FILTERED=()
 for f in $TEST_FILES; do
   bn=$(basename "$f")
@@ -99,6 +128,16 @@ OK=0; FAIL=0
 FAILED_NAMES=()
 for f in $FILTERED; do
   bn=$(basename "$f")
+  # AUDIT03 — clear the status BEFORE running.
+  #
+  # results/ is not cleaned between runs, so a test that crashed or exported
+  # nothing was scored by the Status.txt left behind by its LAST SUCCESSFUL run.
+  # That is how three files stayed green after a collapse in this audit left
+  # them unable to run at all: they wrote no status, and the runner read a stale
+  # pass. A missing status must read as a failure, which it can only do if the
+  # old one is gone first.
+  sp_pre=$(status_path_for "$f")
+  [[ -n "$sp_pre" && -f "$sp_pre" ]] && rm -f "$sp_pre"
   if [[ -n "$TESTMODE" ]]; then
     perl -e 'alarm shift @ARGV; exec @ARGV or die "exec failed: $!"' "$TIMEOUT_SECS" "$KERNEL" -script "$f" mode="$TESTMODE"
   else

@@ -96,11 +96,44 @@ label is not the semantics. Declared in `tests/MUnit/BASELINE.md`.
 | `buy_sell_times` / `buy_sell_occurrences`, `pearson` / `_corr` | 2 each, `index-deconvolution` levels | The level directories are deliberately self-contained experiment records; each level is a dated artefact. Collapsing them would rewrite history. |
 | `load_report_unverified` | `dossier_ledger_adjudication{,_v2}.py` | A v1/v2 pair in `imp-prices`. Whether v1 is superseded is a question for its author, not a refactor. |
 
-## Open items this census raised
+## Open items this census raised — CLOSED 2026-09-04
 
-1. **23 MUnit files never run.** The runner's `*Tests.m` glob is the cause.
-   Renaming them would make ~23 files execute at once, with unknown results —
-   that is a decision, not a cleanup.
-2. **`TSK-EXPER-004` exports `"OK"` unconditionally** — a test that cannot fail.
+1. ~~**23 MUnit files never run.**~~ **CLOSED.** Inspected surgically rather
+   than renamed en masse; the glob turned out to be the smaller half of the
+   problem. See `test_efficacy_census.py` and `tests/MUnit/BASELINE.md` v3:
+   the 23 split **10 real conditional checks / 11 that export a literal `"OK"`
+   and cannot fail / 2 artefact producers**. Renaming was ruled out on
+   evidence — `TSK-ALGO-004` and `TSK-MIXED-001` are cited by name in **both
+   manuscripts**. Membership is now declared in `tests/MUnit/MANIFEST.tsv`.
+   Suite: `OK=65 FAIL=0 TOTAL=65`.
+2. ~~**`TSK-EXPER-004` exports `"OK"` unconditionally.**~~ **Measured: it is
+   one of eleven, not one.** All eleven are quarantined in the manifest with
+   that reason, rather than collected as green results nothing can falsify.
+   The reassuring half of the same measurement: **all 55 files the runner was
+   already collecting are conditional** — the suite that ran had no fake greens.
 3. The Wolfram arm of this census is **text-based and demonstrably lossy**.
-   The guards, not the census, are the durable defence.
+   The guards, not the census, are the durable defence. Confirmed a fourth
+   time: the AST arm of the Python census reported **three** copies of the
+   repo-path helpers when there were **four** — the fourth was found by
+   searching for the body fragment `CAUSALBOOL_PAPER_ROOT`.
+
+## What the collapse itself broke, and how it was found
+
+Recorded because it is the strongest evidence for the guards, and against
+trusting a green suite.
+
+The `C_formula` collapse in `019ff70` left an **orphan tail** from the replaced
+body in four files, and omitted the `Get` for `BioMetrics.m` in three of them.
+Three of the four were collected by the runner and **still reported green**:
+the kernel prints `Syntax::sntx`, skips the malformed expression, exits 0, and
+the runner then read a **stale `Status.txt`** from the file's last successful
+run. Two independent harness defects had to line up for the breakage to be
+invisible, and they did.
+
+Both are now closed: `tools/check_wolfram_syntax.wl` asserts every Wolfram file
+parses (**152/152**), and `run-tests.sh` deletes each status file *before*
+running its test, so a missing status reads as the failure it is.
+
+The same run corrected a long-standing entry in the ledger: `TopologiesTests.m`,
+"the single owned red", was recorded as a run that *died before its export*. It
+never parsed. One surplus `]` in `progressBar`.

@@ -51,13 +51,6 @@ summaryRows2 = Flatten@Table[
   ],
   {i, Length@mixturePairs}, {j, Length@wGrid}];
 
-texRow[list_List] := StringJoin[Riffle[ToString /@ list, " & "], " \\\"]; 
-
-summaryRows = Flatten@Table[
-  Module[{pair = mixturePairs[[i]], w = wGrid[[j]], b = mixBias[0.5, mixturePairs[[i]], wGrid[[j]]], s = mixSlope[0.5, mixturePairs[[i]], wGrid[[j]]]},
-    texRow[{pair[[1]] <> "/" <> pair[[2]], NumberForm[w, {3, 2}], NumberForm[b, {5, 3}], NumberForm[s, {5, 3}]}]
-  ],
-  {i, Length@mixturePairs}, {j, Length@wGrid}];
 summaryTex = StringJoin[
   "\\begin{tabular}{lccc}\n",
   "\\toprule\n",

@@ -14,7 +14,7 @@ conf = Which[
   mode === "medium", <|"sizes" -> {8}, "seeds" -> Range[301, 303], "timeLimit" -> 240, "topos" -> {"ER","BA","WS"}|>,
   True, <|"sizes" -> {10}, "seeds" -> Range[401, 404], "timeLimit" -> 600, "topos" -> {"ER","BA","WS"}|>
 ];
-progressBar[prog_Integer, total_Integer, width_Integer:30] := Module[{ratio, filled, empty}, ratio = N[prog/total]; filled = Floor[ratio*width]; empty = width - filled; "[" <> StringRepeat["#", filled] <> StringRepeat[".", empty] <> "]"]];
+progressBar[prog_Integer, total_Integer, width_Integer:30] := Module[{ratio, filled, empty}, ratio = N[prog/total]; filled = Floor[ratio*width]; empty = width - filled; "[" <> StringRepeat["#", filled] <> StringRepeat[".", empty] <> "]"];
 validateOnce[gen_, args_List, seed_] := Module[{top, cm, dyn, params, rep, run, diffs, err, indeg, n, steps},
   top = gen @@ Append[args, seed]; cm = top["cm"]; n = Length[cm]; steps = n*2^n;
   log["Test type=" <> mode <> " | topo=" <> top["meta"]["type"] <> " | n=" <> ToString[n] <> " | est steps=" <> ToString[steps]];

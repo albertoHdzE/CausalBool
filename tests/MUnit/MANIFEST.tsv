@@ -1,0 +1,97 @@
+# tests/MUnit — the declared test manifest
+#
+# AUDIT03. The runner used to DISCOVER tests with the glob `*Tests.m`, which
+# silently excluded 23 of 78 files. Renaming them was ruled out on evidence:
+# TSK-ALGO-004 and TSK-MIXED-001 are cited by name in BOTH manuscripts.
+# Widening the glob was ruled out too: 11 of the 23 export a literal "OK"
+# and cannot fail, so collecting them would have added 11 fake greens.
+#
+# So membership is DECLARED, not inferred. A new .m file is neither included
+# nor excluded until someone classifies it, and tools/check_test_manifest.sh
+# goes red until they do -- which is what makes the 'never ran' class
+# impossible to recreate by accident.
+#
+#   test        collected and scored by run-tests.sh
+#   quarantine  excluded: the status does not depend on any computation
+#   producer    excluded: writes artefacts, exports no status
+#
+# kind	path	reason
+
+test	tests/MUnit/Algo/TSK-ALGO-001-Tests.m	
+test	tests/MUnit/Algo/TSK-ALGO-002-ImportanceSampling.m	
+test	tests/MUnit/Algo/TSK-ALGO-002-LargeSample-Tests.m	
+test	tests/MUnit/Algo/TSK-ALGO-003-SubsystemHeuristics.m	
+test	tests/MUnit/Algo/TSK-ALGO-004-ClosedFormSetAudit.m	
+producer	tests/MUnit/Algo/TSK-ALGO-PerfTable.m	no status export: an artefact producer, not a test
+quarantine	tests/MUnit/Algo/TSK-ALGO-VisualSamples.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+test	tests/MUnit/Analysis/ANDTests.m	
+test	tests/MUnit/Analysis/AnalyticVsExhaustiveQueryTests.m	
+test	tests/MUnit/Analysis/CANALISINGNetworkTests.m	
+test	tests/MUnit/Analysis/CANALISINGTests.m	
+test	tests/MUnit/Analysis/IMPLIESNetworkTests.m	
+test	tests/MUnit/Analysis/IMPLIESTests.m	
+test	tests/MUnit/Analysis/KOFNNetworkTests.m	
+test	tests/MUnit/Analysis/KOFNStrictTests.m	
+test	tests/MUnit/Analysis/KOFNTests.m	
+test	tests/MUnit/Analysis/MAJORITYTests.m	
+test	tests/MUnit/Analysis/NANDIndexTests.m	
+test	tests/MUnit/Analysis/NANDTests.m	
+test	tests/MUnit/Analysis/NIMPLIESIndexTests.m	
+test	tests/MUnit/Analysis/NORIndexTests.m	
+test	tests/MUnit/Analysis/NORTests.m	
+test	tests/MUnit/Analysis/NOTNetworkTests.m	
+test	tests/MUnit/Analysis/NOTPropertiesTests.m	
+test	tests/MUnit/Analysis/NOTTests.m	
+test	tests/MUnit/Analysis/ORIndexTests.m	
+test	tests/MUnit/Analysis/ORTests.m	
+test	tests/MUnit/Analysis/PatternQueryTests.m	
+test	tests/MUnit/Analysis/QuerySurfaceTests.m	
+test	tests/MUnit/Analysis/TSK-BIO-METRICS-001-Tests.m	
+test	tests/MUnit/Analysis/XNORIndexTests.m	
+test	tests/MUnit/Analysis/XNORTests.m	
+test	tests/MUnit/Analysis/XORIndexTests.m	
+test	tests/MUnit/Analysis/XORTests.m	
+test	tests/MUnit/Arch/TSK-ARCH-001-Tests.m	
+test	tests/MUnit/Arch/TSK-ARCH-002-Tests.m	
+test	tests/MUnit/Arch/TSK-ARCH-003-Tests.m	
+test	tests/MUnit/Arch/TSK-ARCH-004-Tests.m	
+test	tests/MUnit/Compare/TSK-COMPARE-002-PIDSynergy.m	
+test	tests/MUnit/Compare/TSK-COMPARE-003-TE-MI.m	
+producer	tests/MUnit/Compare/TSK-COMPARE-CHARTS.m	no status export: an artefact producer, not a test
+quarantine	tests/MUnit/Exper/TSK-EXPER-001-Ensembles.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+quarantine	tests/MUnit/Exper/TSK-EXPER-002-GateMixtures.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+quarantine	tests/MUnit/Exper/TSK-EXPER-002-GateMixtures2.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+quarantine	tests/MUnit/Exper/TSK-EXPER-003-UpdateRegimes.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+quarantine	tests/MUnit/Exper/TSK-EXPER-004-SubsystemSearch.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+quarantine	tests/MUnit/Exper/TSK-EXPER-005-NoiseRobustness.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+test	tests/MUnit/Exper/TopologiesTests.m	
+test	tests/MUnit/Gates/TSK-GATES-001-Tests.m	
+test	tests/MUnit/Gates/TSK-GATES-002-Tests.m	
+test	tests/MUnit/Gates/TSK-GATES-003-Tests.m	
+test	tests/MUnit/Gates/TSK-GATES-013-OneSetAllFamiliesTests.m	
+test	tests/MUnit/Gates/TSK-GATES-014-CanalisingCoordTests.m	
+test	tests/MUnit/Gates/TSK-TEST-001-Tests.m	
+test	tests/MUnit/Mixed/TSK-MIXED-001-CanalisingExceptionTests.m	
+test	tests/MUnit/Mixed/TSK-MIXED-001-Comparison.m	
+test	tests/MUnit/Mixed/TSK-MIXED-001-FormulaVsExhaustiveTests.m	
+test	tests/MUnit/Mixed/TSK-MIXED-001-OnPossibleBehaviour.m	
+test	tests/MUnit/Mixed/TSK-MIXED-001-Tests.m	
+test	tests/MUnit/Mixed/TSK-MIXED-002-Dispatch-Tests.m	
+test	tests/MUnit/Mixed/TSK-MIXED-002-Tests.m	
+test	tests/MUnit/Pattern/TSK-PATTERN-001-Tests.m	
+test	tests/MUnit/Pattern/TSK-PATTERN-002-Tests.m	
+test	tests/MUnit/Pattern/TSK-PATTERN-003-Tests.m	
+test	tests/MUnit/Pattern/TSK-PATTERN-Ordering-Invariance.m	
+quarantine	tests/MUnit/Sampling/VerificationSamples.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+quarantine	tests/MUnit/Stoch/TSK-STOCH-001-NoiseMonteCarlo.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+quarantine	tests/MUnit/Stoch/TSK-STOCH-002-NoiseCurve.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+test	tests/MUnit/Tests/TSK-TEST-001-TruthTables.m	
+quarantine	tests/MUnit/Tests/TSK-TEST-003-PerfRepertoires.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+test	tests/MUnit/Tests/TSK-TEST-004-AcceptanceFigures.m	
+test	tests/MUnit/Theory/TSK-TEST-002-PropertyTests.m	
+test	tests/MUnit/Theory/TSK-THEORY-001-Tests.m	
+test	tests/MUnit/Theory/TSK-THEORY-002-Tests.m	
+test	tests/MUnit/Theory/TSK-THEORY-003-Tests.m	
+test	tests/MUnit/Theory/TSK-THEORY-004-Tests.m	
+test	tests/MUnit/Theory/TSK-THEORY-005-Tests.m	
+test	tests/MUnit/Theory/TSK-THEORY-006-Tests.m	

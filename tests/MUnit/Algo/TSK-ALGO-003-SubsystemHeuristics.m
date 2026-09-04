@@ -15,8 +15,6 @@ compressionWeight[gate_, d_Integer] :=
   Integration`BioMetrics`FormulaComponentWeight[gate, Range[d], <||>];
 computeCompression[cm_List, dyn_List] :=
   Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, <||>];
-  Total@Table[compressionWeight[dyn[[i]], Length[ics[[i]]]], {i, n}]
-];
 
 (* Jaccard similarity over input sets to propose blocks *)
 inputSets[cm_List] := Table[Flatten@Position[cm[[i]], 1], {i, Length[cm]}];

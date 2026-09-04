@@ -43,6 +43,14 @@ do not trust `main` for current state.
 
 ### Governance
 
+**Start here: `GOVERNANCE/CORE.md`** — one owner per concept, every declared
+exception with its reason, and the guard protecting each. Under the
+`monolithic-code` law, find the owner **before** writing code, never after.
+
+Test membership is DECLARED in `tests/MUnit/MANIFEST.tsv`, not discovered by a
+glob: 65 test / 11 quarantine (they export a literal `"OK"` and cannot fail) /
+2 producer. `tools/check_test_manifest.sh` goes red on any unclassified file.
+
 Definitions: `GOVERNANCE/GLOSSARY.md` (synchronized from `series-deconvolution`; check
 with `tools/check_glossary_sync.sh`). Test truth: `tests/MUnit/BASELINE.md`.
 

@@ -20,17 +20,21 @@ regenerate-paper: verify-paper
 # Non-zero exit is expected while an owned red remains in the MUnit ledger, so
 # each member reports its own verdict rather than short-circuiting the run.
 closure:
-	@echo "── 1/6 paper-number gate (manuscript CHANGE detector, not a correctness check)"
+	@echo "── 1/8 paper-number gate (manuscript CHANGE detector, not a correctness check)"
 	-@python3 tools/snapshot_paper_numbers.py --check
-	@echo "── 2/6 GLOSSARY sync (document mirroring vs the sibling; does NOT check code)"
+	@echo "── 2/8 GLOSSARY sync (document mirroring vs the sibling; does NOT check code)"
 	-@zsh tools/check_glossary_sync.sh
-	@echo "── 3/6 GLOSSARY conformance (the code side the sync check cannot see)"
+	@echo "── 3/8 GLOSSARY conformance (the code side the sync check cannot see)"
 	-@zsh tools/check_glossary_conformance.sh
-	@echo "── 4/6 single-engine guard"
+	@echo "── 4/8 single-engine guard"
 	-@zsh tools/check_single_engine.sh
-	@echo "── 5/6 core index (every owner named in GOVERNANCE/CORE.md still exists)"
+	@echo "── 5/8 core index (every owner named in GOVERNANCE/CORE.md still exists)"
 	-@zsh tools/check_core_index.sh
-	@echo "── 6/6 paper artefacts (the only member that ties a number to its producer)"
+	@echo "── 6/8 Wolfram syntax (every .m/.wl parses; the suite could not see a syntax error)"
+	-@CB_REPO=$$PWD HOME=$$HOME /Applications/Wolfram.app/Contents/MacOS/WolframKernel -script tools/check_wolfram_syntax.wl
+	@echo "── 7/8 test manifest (every tests/MUnit file classified; no silent exclusions)"
+	-@zsh tools/check_test_manifest.sh
+	@echo "── 8/8 paper artefacts (the only member that ties a number to its producer)"
 	-@python3 tools/verify_paper_artefacts.py
 	@echo "── MUnit suite: run separately, it is slow"
 	@echo "     zsh tests/MUnit/run-tests.sh --all"

@@ -106,6 +106,8 @@ the single survivor is the wrong file.
 | `tools/verify_paper_artefacts.py` | produced values against declared expectations; every bit-count names its language and decodability proof |
 | `tools/snapshot_paper_numbers.py` | keyed by **content**, so a moved line is not reported as a changed number |
 | `tools/check_glossary_sync.sh` | `GOVERNANCE/GLOSSARY.md` against the sibling programme |
+| `tools/check_wolfram_syntax.wl` | every `.m`/`.wl` parses — the suite could not see a syntax error, and three broken files sat behind a green run |
+| `tools/check_test_manifest.sh` | every file under `tests/MUnit` is classified in `MANIFEST.tsv`; no file can be silently excluded again |
 
 **Every guard must, without exception:** refuse on empty input, print its
 denominator, exit non-zero on failure, and have been verified by planting the
