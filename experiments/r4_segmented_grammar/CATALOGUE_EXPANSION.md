@@ -156,9 +156,47 @@ Three consequences worth stating before anyone starts:
 3. ~~The 18.36 bits/node figure is an **upper bound** on the saving.~~
    **Withdrawn with the figure (R1.3).** The replacement position: the *cost* is
    known exactly (600.9 bits), the *saving* is zero on 61.7% of reachable nodes
-   and bounded by a per-in-degree clause threshold on the rest, and no net
-   figure may be quoted until `R4.1` measures what fraction of the AND/OR/NOT
-   formulas the closed form actually reproduces elementwise.
+   and bounded by a per-in-degree clause threshold on the rest.
+   **`R4.1` has now measured the rest — see below.**
+
+## R4.1 — measured (2026-09-04)
+
+`audit/AUDIT03_R4_thirteenth_family/measure_regulatory_dnf_coverage.py`.
+
+**The question as posed could not fail.** `REGULATORY_DNF` is an *unrestricted*
+disjunction of activator/inhibitor clauses (`causalbool.py:137`), so it is
+functionally complete and "what fraction does it reproduce" is 100% by
+construction — the same defect `P9` identified in the `256/256` ECA figure. It
+is measured anyway rather than argued: **2,273 of 2,273** Boolean-evaluable
+nodes reproduced cell by cell over every `2^d` input, with a negative control
+(drop one literal from the first clause) firing on **2,273 of 2,273**.
+
+**A — parse coverage is the real gate**, and it is where the corpus resists:
+
+| outcome | nodes | |
+|---|---|---|
+| Boolean-evaluable | **2,273** | 57.2% |
+| identifier not a node (`Cdc14:1`, level-indexed) | 714 | 18.0% |
+| no formula recorded | 578 | 14.5% |
+| unparsable (`GEQ`/`theta` threshold terms) | 407 | 10.2% |
+| minterms above the Quine–McCluskey cap | 5 | 0.1% |
+
+The 407 is exactly `R1.3`'s threshold count, reached by an independent route.
+
+> **Data defect found in passing: 369 nodes whose formula variables disagree
+> with the adjacency matrix.** E.g. `MODEL1411170000/GATA3` has `GATA3` in its
+> own formula — a self-loop — that `cm` does not record. Reported, not
+> silently evaluated.
+
+**B — compactness decides it.** Against `R1.3`'s threshold `s_max`, family 13 is
+cheaper than a raw table on **387 of 2,273 nodes (17.0%)** and dearer on 1,886.
+It never pays at `d ≤ 2`, where `s_max = 0`.
+
+**C — the net: `+48,517` bits** (gross `49,118`, less the `601` catalogue cost).
+
+**This supersedes the 58,217-bit figure**, which the plan forbade quoting until
+this fraction was known. The honest figure is lower, and it is concentrated in
+17% of the nodes rather than spread over all of them.
 
 ## Reproduce
 
