@@ -5,6 +5,37 @@
    Compatible with Mathematica 12+ and Wolfram Engine 13+.
    No external packages required. *)
 
+(* ── Index-set utilities ───────────────────────────────────────────────────────
+
+   AUDIT03/R2a.2 (2026-09-04). weights, allOffsets and givePlaces were defined
+   independently in THREE producer scripts. They were functionally identical --
+   verified in the kernel over n = 1..6 with every connected subset, 126 of 126
+   cases agreeing (audit/AUDIT03_R2_collapse/probe_alloffsets_parity.wl) -- but
+   textually divergent: corroboration_6node.wl lacked the empty-ws guard the
+   other two carried. Wolfram's Dot[{},{}] is 0, so that guard is cosmetic.
+   Collapsed here to one owner and guarded by tools/check_single_engine.sh, so a
+   second definition site cannot reappear silently.
+
+   CAUTION -- allOffsets computes the SPECIAL CASE, not the definition of Omega.
+   It returns the subset sums of the DISCONNECTED coordinates' bit weights.
+   Those are the don't-cares free in EVERY schema of a node, so they are always
+   present -- but Omega is NOT defined by them. Sumandos are the fillings of a
+   SCHEMA'S OWN don't-care positions, wherever they fall, INCLUDING on connected
+   inputs. Rule 110 is the witness: three inputs, all connected, yet it
+   decomposes as 01*, 10*, *10. See GOVERNANCE/GLOSSARY.md section 1d. Reading
+   this function as the definition is how that error was re-adopted four times. *)
+
+weights[n_Integer] := 2^Range[0, n - 1];
+
+allOffsets[n_Integer, connected_List] := Module[
+  {free = Complement[Range[n], connected], ws},
+  ws = weights[n][[free]];
+  If[Length[ws] == 0, {0}, Sort[(# . ws) & /@ Tuples[{0, 1}, Length[ws]]]]
+];
+
+givePlaces[locations_List, sumandos_List] :=
+  Sort@Flatten[Table[loc + sumandos, {loc, locations}]];
+
 (* ── Gate dispatch ─────────────────────────────────────────────────────────── *)
 (*
    ApplyGate[gate, inputs, params] evaluates a Boolean gate on a list of 0/1

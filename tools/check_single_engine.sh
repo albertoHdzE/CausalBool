@@ -18,28 +18,57 @@ set -u
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO" || exit 1
 
-CANONICAL="src/integration/Alpha.m"
 STATUS=0
 
-for sym in createRepertoires runDynamic; do
-  # definition sites only: "name[args] :=" at the start of a line
-  files=$(grep -rlE "^[[:space:]]*${sym}\[[^]]*\][[:space:]]*:=" \
-            --include='*.m' --include='*.wl' . 2>/dev/null \
-          | sed 's|^\./||' \
-          | grep -vE '^(archive|venv|.*/\.venv)/' \
-          | sort -u)
-  count=$(printf '%s\n' "$files" | grep -c . || true)
-  if [[ "$count" -eq 0 ]]; then
-    echo "SINGLE-ENGINE: WARN  no definition site found for ${sym}"
-    STATUS=1
-  elif [[ "$count" -eq 1 && "$files" == "$CANONICAL" ]]; then
-    echo "SINGLE-ENGINE: ok    ${sym} defined only in ${CANONICAL}"
-  else
-    echo "SINGLE-ENGINE: FAIL  ${sym} defined in ${count} files:"
-    printf '  %s\n' ${(f)files}
-    STATUS=1
-  fi
-done
+# One canonical owner per concept. AUDIT03/R2a.2 added the second group: weights,
+# allOffsets and givePlaces had three independent definitions across the producer
+# scripts. They were functionally identical (126/126 cases, verified in the kernel
+# by audit/AUDIT03_R2_collapse/probe_alloffsets_parity.wl) but textually divergent
+# -- corroboration_6node.wl lacked the empty-ws guard. Collapsed to one owner.
+#
+# audit/ is exempt: probe_alloffsets_parity.wl deliberately reproduces BOTH
+# variants side by side in order to compare them, which is the one place a second
+# definition is the point rather than the defect.
+check_owner() {
+  local canonical="$1"; shift
+  for sym in "$@"; do
+    files=$(grep -rlE "^[[:space:]]*${sym}\[[^]]*\][[:space:]]*:=" \
+              --include='*.m' --include='*.wl' . 2>/dev/null \
+            | sed 's|^\./||' \
+            | grep -vE '^(archive|venv|audit|.*/\.venv)/' \
+            | sort -u)
+    count=$(printf '%s\n' "$files" | grep -c . || true)
+    if [[ "$count" -eq 0 ]]; then
+      echo "SINGLE-ENGINE: WARN  no definition site found for ${sym}"
+      STATUS=1
+    elif [[ "$count" -eq 1 && "$files" == "$canonical" ]]; then
+      echo "SINGLE-ENGINE: ok    ${sym} defined only in ${canonical}"
+    else
+      echo "SINGLE-ENGINE: FAIL  ${sym} defined in ${count} files:"
+      printf '  %s\n' ${(f)files}
+      STATUS=1
+    fi
+  done
+}
+
+check_owner "src/integration/Alpha.m" createRepertoires runDynamic
+check_owner "papers/method/code/lib/CausalBoolCore.wl" weights allOffsets
+
+# givePlaces is DELIBERATELY not guarded, and the reason is recorded rather than
+# left for someone to rediscover. Three definition sites exist and they are not
+# one concept:
+#   papers/method/code/lib/CausalBoolCore.wl  Sort@Flatten[Table[loc + sumandos]]
+#   src/integration/Alpha.m:2732              -> unfoldLocationsAndSumandos, which
+#       computes Sort[Flatten[Table[locations[[w]] + sumandos]]] -- COMPUTATIONALLY
+#       IDENTICAL, but it lives in the engine, and CausalBoolCore.wl is standalone
+#       by design ("No external packages required"). Collapsing across that
+#       boundary would break the companion code's self-containment, which is a
+#       deliberate property, not an accident.
+#   tests/MUnit/Mixed/TSK-MIXED-001-OnPossibleBehaviour.m:28
+#       givePlaces[beh_Association] := beh["Summands"] + 1 -- a DIFFERENT function
+#       sharing the name, distinguished only by its argument pattern. Recorded as
+#       a name collision; harmless at runtime, confusing to a reader.
+# Revisit under AUDIT03/R2b if the standalone constraint is ever relaxed.
 
 if [[ "$STATUS" -eq 0 ]]; then
   echo "SINGLE-ENGINE: clean"

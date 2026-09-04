@@ -1,4 +1,10 @@
 baseDir = DirectoryName[$InputFileName];
+(* AUDIT03/R2a.2 — weights, allOffsets and givePlaces now come from the single
+   owner CausalBoolCore.wl. This script previously defined them locally, and its
+   allOffsets lacked the empty-ws guard the other two copies carried; the three
+   were verified functionally identical before the collapse (126/126 cases,
+   audit/AUDIT03_R2_collapse/probe_alloffsets_parity.wl). *)
+Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
 
 cm06 = {
   {1, 0, 0, 0, 0, 0},
@@ -10,23 +16,6 @@ cm06 = {
 };
 
 dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"};
-
-weights[n_Integer] := 2^Range[0, n - 1];
-
-(* CAUTION -- allOffsets computes the SPECIAL CASE, not the definition.
-   It returns the subset sums of the DISCONNECTED coordinates' bit weights.
-   Those are the don't-cares that are free in EVERY schema of a node, so they
-   are always present in Omega -- but Omega is NOT defined by them.
-   Sumandos are the fillings of a SCHEMA'S OWN don't-care positions, wherever
-   they fall, INCLUDING on connected inputs. Rule 110 is the witness: three
-   inputs, all connected, yet it decomposes as 01*, 10*, *10.
-   See GOVERNANCE/GLOSSARY.md section 1d. Reading this function as the
-   definition is how that error has been re-adopted four times. *)
-allOffsets[n_Integer, connected_List] := Module[
-  {free = Complement[Range[n], connected], ws},
-  ws = weights[n][[free]];
-  Sort[(# . ws) & /@ Tuples[{0, 1}, Length[ws]]]
-];
 
 onPossibleBehaviour[mechanism_List, substate_List, dynVector_List, cm_List] := Module[
   {target, desired, n, connected, decimalAnchor, sumandos},
@@ -61,8 +50,6 @@ xor06Representation[] := Module[
   sumandos = Sort[(# . {16, 32}) & /@ Tuples[{0, 1}, 2]];
   <|"DecimalRepertoire" -> baseLocations, "Sumandos" -> sumandos|>
 ];
-
-givePlaces[locations_List, sumandos_List] := Sort@Flatten[Table[loc + sumandos, {loc, locations}]];
 
 inputs06 = Reverse /@ IntegerDigits[Range[0, 2^6 - 1], 2, 6];
 
