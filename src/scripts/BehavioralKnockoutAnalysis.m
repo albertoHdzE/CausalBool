@@ -12,35 +12,9 @@ Get["Integration`BioExperiments`"];
 (* 2. Helper Functions *)
 
 (* Helper to load network with gate fix *)
-LoadJSONNetwork[path_] := Module[{json, rawNodes, rawCM, rawLogic, rawGates, n, nodeNames, cm, dynamic, params, i, name, gData, gType, gParams},
-    If[!FileExistsQ[path], Return[$Failed]];
-    json = Import[path, "RawJSON"];
-    rawNodes = json["nodes"];
-    rawCM = json["cm"];
-    rawGates = json["gates"];
-    (* AUDIT02/P8: the authoritative semantics live in "logic"; "gates" is a label. *)
-    rawLogic = Lookup[json, "logic", <||>];
-    If[!AssociationQ[rawLogic], rawLogic = <||>];
-    n = Length[rawNodes];
-    nodeNames = rawNodes;
-    cm = rawCM;
-    dynamic = Table["", {n}];
-    params = <||>;
-    Do[
-        name = nodeNames[[i]];
-        If[KeyExistsQ[rawGates, name],
-            gData = rawGates[name];
-            gType = gData["gate"];
-            gParams = gData["parameters"];
-        ,
-            gType = "Input";
-            gParams = <||>;
-        ];
-        dynamic[[i]] = gType;
-        If[Length[gParams] > 0, params[i] = gParams];
-    , {i, n}];
-    <| "name" -> json["name"], "cm" -> cm, "nodeNames" -> nodeNames, "dynamic" -> dynamic, "params" -> params, "n" -> n, "logic" -> rawLogic |>
-];
+(* AUDIT03 — delegated to the single owner, src/scripts/NetworkIO.m, which
+   carries the AUDIT02/H "logic" correction this copy lacked. *)
+Get[FileNameJoin[{DirectoryName[$InputFileName], "NetworkIO.m"}]];
 
 (* Fix for symbolic DeltaD *)
 Integration`BioMetrics`Private`encodeNodeCost[_, "Input", _, _] := 0;

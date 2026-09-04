@@ -6,34 +6,9 @@ If[!MemberQ[$Path, pkgDir], PrependTo[$Path, pkgDir]];
 Get["Integration`BioMetrics`"];
 Get["Integration`BioExperiments`"];
 
-LoadJSONNetwork[path_] := Module[{json, rawNodes, rawCM, rawGates, rawLogic, n, nodeNames, cm, dynamic, params, i, name, gData, gType, gParams},
-    If[!FileExistsQ[path], Return[$Failed]];
-    json = Import[path, "RawJSON"];
-    rawNodes = json["nodes"];
-    rawCM = json["cm"];
-    rawGates = json["gates"];
-    (* AUDIT02/H: carry the per-node Boolean formulas through. The "gates" field
-       is only a CLASSIFICATION LABEL; labels outside the twelve families used to
-       reach ApplyGate and silently evaluate to 0. The formula in "logic" is the
-       authoritative semantics and ComputeNextState now prefers it. *)
-    rawLogic = Lookup[json, "logic", <||>];
-    If[!AssociationQ[rawLogic], rawLogic = <||>];
-    n = Length[rawNodes];
-    nodeNames = rawNodes;
-    cm = rawCM;
-    dynamic = Table["", {n}];
-    params = <||>;
-    Do[
-        name = nodeNames[[i]];
-        gData = rawGates[name];
-        gType = gData["gate"];
-        gParams = gData["parameters"];
-        dynamic[[i]] = gType;
-        If[Length[gParams] > 0, params[i] = gParams];
-    , {i, n}];
-    <| "name" -> json["name"], "cm" -> cm, "nodeNames" -> nodeNames,
-       "dynamic" -> dynamic, "params" -> params, "n" -> n, "logic" -> rawLogic |>
-];
+(* AUDIT03 — delegated to the single owner, src/scripts/NetworkIO.m, which
+   carries the AUDIT02/H "logic" correction this copy lacked. *)
+Get[FileNameJoin[{DirectoryName[$InputFileName], "NetworkIO.m"}]];
 
 essPath = FileNameJoin[{currentDir, "data", "bio", "validation", "essentiality_data.csv"}];
 

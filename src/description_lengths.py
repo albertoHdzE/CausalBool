@@ -28,33 +28,35 @@ def _check_pybdm() -> None:
 
 
 # --- Variant A: index-set row-run encoding (imp-causalNet-paper semantics) ----
-
-def _runs(bits) -> int:
-    runs, prev = 0, None
-    for b in bits:
-        if b != prev:
-            runs += 1
-        prev = b
-    return runs
-
-
-def _row_cost(bits, unit: float) -> float:
-    r = _runs(bits)
-    if r <= 1:
-        return unit
-    if r <= 3:
-        return 2 * unit
-    return r * unit
-
+#
+# AUDIT03. This module REIMPLEMENTED variant A -- _runs, _row_cost and the
+# summation -- while GOVERNANCE/DESCRIPTION_LENGTHS.md declares the canonical
+# implementation to be imp-causalNet-paper's
+# causalbool_mirror.index_set_description_length. A wrapper that reimplements
+# the thing it declares canonical is the same one-concept-many-homes defect the
+# audit removed for variant B, and it is worse here because the doc named an
+# owner and the code ignored it.
+#
+# It now delegates, exactly as variant C already did. Proven equal before the
+# change rather than after: 300 random adjacency matrices at n = 1..9, zero
+# disagreements.
 
 def row_run_index_set_length(adjacency) -> float:
-    """Variant A: rows as neighbour index sets + log2(n+1) header."""
-    M = list(map(list, adjacency))
-    n = len(M)
-    if n == 0:
-        return 0.0
-    unit = math.log2(n + 1)
-    return math.log2(n + 1) + sum(_row_cost(row, unit) for row in M)
+    """Variant A: rows as neighbour index sets + log2(n+1) header.
+
+    Delegates to the declared canonical implementation. The dependency on
+    imp-causalNet-paper is deliberate and is the documented exception recorded
+    in DESCRIPTION_LENGTHS.md section 4, not an accident.
+    """
+    import sys as _sys
+    from pathlib import Path as _Path
+    _root = _Path(__file__).resolve().parents[1]
+    _p = str(_root / "imp-causalNet-paper" / "src")
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
+    import numpy as _np
+    from imp_causalnet_paper.causalbool_mirror import index_set_description_length
+    return float(index_set_description_length(_np.asarray(adjacency)))
 
 
 # --- Variant B: gate + index-set per-node (BioMetrics/pathinfo family) --------

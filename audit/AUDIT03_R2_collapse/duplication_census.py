@@ -99,6 +99,9 @@ def norm_python(fn: ast.AST) -> tuple[str, int]:
 
 
 WL_COMMENT = re.compile(r"\(\*.*?\*\)", re.S)
+# A body whose FIRST statement delegates to a package symbol is a forwarder,
+# whatever follows it in the extraction window.
+FORWARDER = re.compile(r"^\s*Integration`[A-Za-z]+`[A-Za-z][A-Za-z0-9]*\[")
 WL_DEF = re.compile(
     r"^\s*([A-Za-z][A-Za-z0-9`]*)\s*\[[^\]]*\]\s*:=", re.M)
 
@@ -135,9 +138,23 @@ def scan_wolfram():
                                                   errors="replace"))
             for m in WL_DEF.finditer(txt):
                 start = m.end()
-                end = txt.find("\n];", start)
-                end = end + 3 if end != -1 else min(len(txt), start + 1500)
+                # A body ends at "\n];" OR at the start of the NEXT definition,
+                # whichever comes first. Assuming the former alone made a
+                # one-line definition swallow everything up to the next block,
+                # which is how the post-collapse forwarders kept being reported
+                # as duplicated logic.
+                e1 = txt.find("\n];", start)
+                e1 = e1 + 3 if e1 != -1 else len(txt)
+                nxt = WL_DEF.search(txt, start)
+                e2 = nxt.start() if nxt else len(txt)
+                end = min(e1, e2, start + 1500)
                 body = " ".join(txt[start:end].split())
+                # A pure FORWARDER is not duplicated logic. After a collapse the
+                # delegating stubs are identical by construction, and reporting
+                # them would make this census cry wolf about work already done
+                # -- the same failure R6.4 fixed in the paper-number gate.
+                if FORWARDER.match(body):
+                    continue
                 if len(body) < MIN_WL_CHARS:
                     continue
                 dig = hashlib.sha1(body.encode()).hexdigest()[:16]

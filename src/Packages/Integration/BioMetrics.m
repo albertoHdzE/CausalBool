@@ -1,7 +1,44 @@
 BeginPackage["Integration`BioMetrics`"]
 ComputeDescriptionLength::usage = "ComputeDescriptionLength[net] or [cm, dyn, params] returns description length D for a Boolean network";
+ComputeFormulaComponents::usage = "ComputeFormulaComponents[cm, dyn, params] returns C_formula, the count of symbolic pieces in the closed-form index-set description of a network; FormulaComponentWeight[gate, Ic, params] is the per-node count";
+FormulaComponentWeight::usage = "FormulaComponentWeight[gate, Ic, params] counts the symbolic pieces in one node's closed-form index-set formula";
 ComputeDescriptionLengthV2::usage = "ComputeDescriptionLengthV2[net] returns structural description length D_v2 (requires motifs/hierarchy data)";
 Begin["`Private`"]
+
+(* AUDIT03 — C_formula, the symbolic component count.
+
+   This had FIVE definition sites, all in tests/, and they had DRIFTED. Four
+   were identical; TSK-EXPER-004-SubsystemSearch.m carried an older form with
+   no KOFN and no CANALISING branch and a two-argument signature, so those
+   gates fell through to the "1 + d" default. Measured in the kernel over the
+   twelve families at d = 1..6: 20 of 72 cells disagree -- IMPLIES and NIMPLIES
+   at every d except 2, KOFN and CANALISING at every d except 1.
+
+   The drift went unnoticed because TSK-EXPER-004 is one of 23 MUnit files that
+   the runner never executes: it globs "*Tests.m", and that name does not match.
+
+   C_formula = 23 on the flagship is a PUBLISHED number, so this is the owner
+   and everything else calls it. *)
+
+FormulaComponentWeight[gate_String, Ic_List, params_Association : <||>] :=
+  Module[{d = Length[Ic]},
+    Switch[gate,
+      "AND" | "OR" | "NAND" | "NOR", 1 + d,
+      "XOR" | "XNOR", 1 + 1,
+      "NOT", 1,
+      "IMPLIES" | "NIMPLIES", 1 + 2,
+      "MAJORITY", 1 + 1,
+      "KOFN", 1 + 1,
+      "CANALISING", 1 + If[KeyExistsQ[params, "canalisedOutput"], 0, 1],
+      _, 1 + d
+    ]];
+
+ComputeFormulaComponents[cm_List, dynamic_List, params_Association : <||>] :=
+  Module[{n = Length[dynamic], ics},
+    ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
+    Total@Table[
+      FormulaComponentWeight[dynamic[[i]], ics[[i]], Lookup[params, i, <||>]],
+      {i, n}]];
 gateLabels = {"AND","OR","XOR","NAND","NOR","XNOR","NOT","IMPLIES","NIMPLIES","MAJORITY","KOFN","CANALISING"};
 log2Int[x_] := N@Log[2, x];
 (* Per-node description length in the declared node language

@@ -12,18 +12,15 @@ avgSensitivityNode[cm_List, dyn_List, params_Association:<||>, i_Integer] := Mod
 
 avgSensitivity[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn]}, N@Total@Table[avgSensitivityNode[cm, dyn, params, i], {i, n}]];
 
-compressionWeight[gate_, Ic_List, params_Association:<||>] := Module[{d = Length[Ic]}, Switch[gate,
-  "AND" | "OR" | "NAND" | "NOR", 1 + d,
-  "XOR" | "XNOR", 1 + 1,
-  "NOT", 1,
-  "IMPLIES" | "NIMPLIES", 1 + 2,
-  "MAJORITY", 1 + 1,
-  "KOFN", 1 + 1,
-  "CANALISING", 1 + If[KeyExistsQ[params, "canalisedOutput"], 0, 1],
-  _, 1 + d
-]];
-
-computeCompression[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics}, ics = Table[Flatten@Position[cm[[i]], 1], {i, n}]; Total@Table[compressionWeight[dyn[[i]], ics[[i]], Lookup[params, i, <||>]], {i, n}]];
+(* AUDIT03 — delegated to the single owner, Integration`BioMetrics`.
+   C_formula had FIVE definition sites, all local to tests/, and they had
+   drifted: TSK-EXPER-004's copy lacked KOFN and CANALISING branches, so 20 of
+   72 (gate, d) cells disagreed with the other four. C_formula = 23 on the
+   flagship is a published number, so it gets one home. *)
+compressionWeight[gate_, Ic_List, params_Association:<||>] :=
+  Integration`BioMetrics`FormulaComponentWeight[gate, Ic, params];
+computeCompression[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, params];
 
 (* AUDIT03/R2b — the local cost model is gone; this delegates to the single
    owner, Integration`BioMetrics`. Two things were wrong with the copy that

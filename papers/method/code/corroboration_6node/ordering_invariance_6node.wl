@@ -1,4 +1,6 @@
 baseDir = DirectoryName[$InputFileName];
+(* AUDIT03: composedUpdate6Node now lives in the shared library. *)
+Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
 
 cm06 = {
   {1, 0, 0, 0, 0, 0},
@@ -17,16 +19,11 @@ phiSet[set_List, n_Integer] := Sort[phi[#, n] & /@ set];
 lsbInputs[n_Integer] := Reverse /@ IntegerDigits[Range[0, 2^n - 1], 2, n];
 msbInputs[n_Integer] := IntegerDigits[Range[0, 2^n - 1], 2, n];
 
-networkUpdate[input_List] := Module[
-  {y1, y2, y3, y4, y5, y6},
-  y1 = input[[1]];
-  y2 = Boole[input[[2]] == 0];
-  y3 = input[[3]];
-  y4 = Boole[input[[1]] == 0 || input[[4]] == 1];
-  y5 = Boole[input[[2]] == 1 && input[[4]] == 1];
-  y6 = Mod[input[[1]] + input[[3]] + y5, 2];
-  {y1, y2, y3, y4, y5, y6}
-];
+(* AUDIT03 — one owner for the composed 6-node update. It is COMPOSED, not
+   synchronous: node 6 takes the newly computed y5, so it differs from
+   CreateRepertoiresDispatch on 32 of 64 rows by design. See the CAUTION in
+   CausalBoolCore.wl. *)
+networkUpdate[input_List] := composedUpdate6Node[input];
 
 andLSB06 = {11, 12, 15, 16, 27, 28, 31, 32, 43, 44, 47, 48, 59, 60, 63, 64};
 xorLSB06 = {2, 4, 5, 7, 10, 11, 13, 16, 18, 20, 21, 23, 26, 27, 29, 32, 34, 36, 37, 39, 42, 43, 45, 48, 50, 52, 53, 55, 58, 59, 61, 64};

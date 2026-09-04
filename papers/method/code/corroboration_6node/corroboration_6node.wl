@@ -53,16 +53,11 @@ xor06Representation[] := Module[
 
 inputs06 = Reverse /@ IntegerDigits[Range[0, 2^6 - 1], 2, 6];
 
-networkUpdate[input_List] := Module[
-  {y1, y2, y3, y4, y5, y6},
-  y1 = input[[1]];
-  y2 = Boole[input[[2]] == 0];
-  y3 = input[[3]];
-  y4 = Boole[input[[1]] == 0 || input[[4]] == 1];
-  y5 = Boole[input[[2]] == 1 && input[[4]] == 1];
-  y6 = Mod[input[[1]] + input[[3]] + y5, 2];
-  {y1, y2, y3, y4, y5, y6}
-];
+(* AUDIT03 — one owner for the composed 6-node update. It is COMPOSED, not
+   synchronous: node 6 takes the newly computed y5, so it differs from
+   CreateRepertoiresDispatch on 32 of 64 rows by design. See the CAUTION in
+   CausalBoolCore.wl. *)
+networkUpdate[input_List] := composedUpdate6Node[input];
 
 outputs06 = networkUpdate /@ inputs06;
 

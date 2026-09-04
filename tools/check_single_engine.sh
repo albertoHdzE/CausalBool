@@ -93,6 +93,43 @@ else
   STATUS=1
 fi
 
+# AUDIT03 — C_formula, the symbolic component count. FIVE definition sites, all
+# local to tests/, and they had DRIFTED: TSK-EXPER-004's copy had no KOFN and no
+# CANALISING branch, disagreeing with the other four on 20 of 72 (gate, d) cells.
+# C_formula = 23 is a published number. Owner: Integration`BioMetrics`.
+cf_files=$(grep -rlE '^\s*compressionWeight\[[^]]*\]\s*:=\s*(Module|Switch)' \
+             --include='*.m' --include='*.wl' . 2>/dev/null \
+           | sed 's|^\./||' \
+           | grep -vE '^(archive|venv|audit)/' \
+           | sort -u)
+cf_count=$(printf '%s\n' "$cf_files" | grep -c . || true)
+if [[ "$cf_count" -eq 0 ]]; then
+  echo "SINGLE-ENGINE: ok    C_formula defined only in src/Packages/Integration/BioMetrics.m"
+else
+  echo "SINGLE-ENGINE: FAIL  C_formula has ${cf_count} local definition(s) again:"
+  printf '  %s\n' ${(f)cf_files}
+  echo "  -> delegate to Integration\`BioMetrics\`FormulaComponentWeight (AUDIT03)"
+  STATUS=1
+fi
+
+# AUDIT03 — LoadJSONNetwork, the corpus reader. It was defined identically in
+# GlobalStatsPipeline.m and GlobalValidationAnalysis.m: the only duplicated
+# Wolfram definition in PRODUCTION code, as opposed to in the 23 MUnit files the
+# runner never executes. Owner: src/scripts/NetworkIO.m.
+io_files=$(grep -rlE '^\s*LoadJSONNetwork\[[^]]*\]\s*:=' \
+             --include='*.m' --include='*.wl' . 2>/dev/null \
+           | sed 's|^\./||' \
+           | grep -vE '^(archive|venv|audit)/' \
+           | sort -u)
+io_count=$(printf '%s\n' "$io_files" | grep -c . || true)
+if [[ "$io_count" -eq 1 && "$io_files" == "src/scripts/NetworkIO.m" ]]; then
+  echo "SINGLE-ENGINE: ok    LoadJSONNetwork defined only in src/scripts/NetworkIO.m"
+else
+  echo "SINGLE-ENGINE: FAIL  LoadJSONNetwork defined in ${io_count} files:"
+  printf '  %s\n' ${(f)io_files}
+  STATUS=1
+fi
+
 # Python side. imp-pathinfo-paper is a DOCUMENTED EXCEPTION, not an oversight:
 # its mirror omits the in-degree field and its published tables depend on that,
 # so it is pinned by the T4.5 fixture (B_legacy_pathinfo_no_indegree_bits) rather

@@ -36,6 +36,35 @@ allOffsets[n_Integer, connected_List] := Module[
 givePlaces[locations_List, sumandos_List] :=
   Sort@Flatten[Table[loc + sumandos, {loc, locations}]];
 
+(* ── The 6-node flagship's COMPOSED update ─────────────────────────────────────
+
+   AUDIT03. This was defined identically in two producer scripts
+   (corroboration_6node.wl and ordering_invariance_6node.wl) and could drift
+   between them, so it gets one owner. It is named for what it is.
+
+   CAUTION -- THIS IS NOT THE SYNCHRONOUS UPDATE AND MUST NOT BE REPLACED BY
+   CreateRepertoiresDispatch. Node 6 is XOR over its connected inputs {1,3,5},
+   and this function feeds it the NEWLY COMPUTED y5 rather than the input x5.
+   That is the declared composed reading (convention D-2d), and it is the
+   quantity the flagship's "6-node flagship XOR (composed)" check verifies.
+
+   Measured, so the difference is on record rather than rediscovered: against
+   CreateRepertoiresDispatch[cm06, dyn06] on the same network, nodes 1-5 agree
+   on all 64 rows and node 6 differs on exactly 32 of 64 -- and the hand form
+   equals Mod[x1 + x3 + y5, 2] while the dispatch equals Mod[x1 + x3 + x5, 2].
+   Collapsing the two would silently change the flagship by half its rows. *)
+
+composedUpdate6Node[input_List] := Module[
+  {y1, y2, y3, y4, y5, y6},
+  y1 = input[[1]];
+  y2 = Boole[input[[2]] == 0];
+  y3 = input[[3]];
+  y4 = Boole[input[[1]] == 0 || input[[4]] == 1];
+  y5 = Boole[input[[2]] == 1 && input[[4]] == 1];
+  y6 = Mod[input[[1]] + input[[3]] + y5, 2];   (* NEW y5, not input[[5]] *)
+  {y1, y2, y3, y4, y5, y6}
+];
+
 (* ── Gate dispatch ─────────────────────────────────────────────────────────── *)
 (*
    ApplyGate[gate, inputs, params] evaluates a Boolean gate on a list of 0/1
