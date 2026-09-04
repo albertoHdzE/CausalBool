@@ -12,18 +12,22 @@ self-defeating, because a 3-input truth table costs 2³ = 8 bits and a catalogue
 of 256 costs log₂(256) = 8 bits to index. The arithmetic is right and the
 conclusion does not follow. Two assumptions were wrong, and both were hidden:
 
-**1. It assumed a uniform code over the catalogue.** Naming a gate costs
-log₂(|catalogue|) only if every family is equally likely. Real usage is nowhere
-near uniform. Measured on the 4,626-node biological corpus:
+**1. It assumed a uniform code over the catalogue.** ⚠️ **This argument is
+WITHDRAWN — see the superseding section below.** It read:
 
-```
-empirical gate entropy H(p) = 2.070 bits/node
-uniform code over the same labels = 3.170 bits/node
-```
+> Naming a gate costs log₂(|catalogue|) only if every family is equally likely.
+> Real usage is nowhere near uniform. Measured on the 4,626-node biological
+> corpus: empirical gate entropy `H(p) = 2.070` bits/node against a uniform code
+> at `3.170` bits/node. Under a frequency-weighted prefix code, adding a *rare*
+> family costs almost nothing.
 
-Under a frequency-weighted prefix code, adding a *rare* family costs almost
-nothing, while it saves the whole fallback cost every time that family occurs.
-Expansion is close to free on the naming side.
+`H(p)` is a **Shannon quantity** and this programme is algorithmic. It is also
+the wrong quantity for the question: a frequency-weighted code beats a uniform
+one only if the decoder **already holds the frequency table**, and that table is
+never transmitted — it is estimated from the very corpus being priced. Charging
+`H(p)` per node charges for a model fitted to the data and then does not pay for
+the model. The honest catalogue cost is the uniform `log₂ K`, because indexing
+`K` families costs exactly that.
 
 **2. It assumed arity 3.** That is the ECA case, and it is the degenerate one.
 Real biological in-degrees run to 7 and beyond:
@@ -39,11 +43,60 @@ mean LUT cost for a fallback node = 35.2 bits   (not 8)
 53.7% of corpus nodes (2,486 of 4,626) carry the label `CUSTOM`, which no
 canonical family names, so each falls through to a raw LUT.
 
-| | bits/node |
-|---|---|
-| current — names plus LUT fallback | **20.43** |
-| expanded — every family nameable | **2.07** |
-| saving | **18.36 bits/node**, ≈ 84,900 bits over the corpus |
+⚠️ **SUPERSEDED (AUDIT03/R1.3, 2026-09-04).** The table below is left visible
+because deleting the evidence for a withdrawn claim is worse than marking it:
+
+| | bits/node | |
+|---|---|---|
+| current — names plus LUT fallback | ~~20.43~~ | |
+| expanded — every family nameable | ~~2.07~~ | Shannon `H(p)` |
+| saving | ~~**18.36 bits/node**, ≈ 84,900 bits~~ | **do not quote** |
+
+Two faults, not one. The naming term was an entropy. And the saving was charged
+on **every** `CUSTOM` node, which assumes both that the new family reproduces
+them all (coverage = 1, still unmeasured — that is `R4.1`) and that expansion
+helps at every in-degree, which is false.
+
+### The corrected accounting — pure program length
+
+Measured by `audit/AUDIT03_R1_correct_the_record/catalogue_expansion_program_length.py`.
+No entropy appears in it. `REGULATORY_DNF` is a disjunction of
+activator/inhibitor clauses, which *is* a set of schemata, so its parameter
+field is the schema-normal-form field already owned by
+`src/description_lengths.py` — the thirteenth family needs no new cost model.
+
+**Cost, exactly known:** `log₂13 − log₂12 = 0.1155` bits/node, charged to
+**every** node because the gate field widens for all — `600.9` bits over the
+5,204-node corpus.
+
+**Saving:** unknown without the clause counts, so it is reported as a
+**threshold** rather than invented. Both forms are priced *full and in a common
+coordinate* — each pays `log₂(n+1)` for the in-degree and `log₂C(n,d)` to name
+its inputs; the raw form then pays `2^d` and the schema form pays its clauses.
+`s_max` is the largest clause count at which the schema field still wins:
+
+| d | nodes | LUT full | 1 clause | s_max |
+|---|---|---|---|---|
+| 0 | 245 | 6.0 | 8.0 | **0 — never cheaper** |
+| 1 | 1099 | 12.8 | 14.8 | **0 — never cheaper** |
+| 2 | 502 | 18.1 | 19.1 | **0 — never cheaper** |
+| 3 | 345 | 26.6 | 24.6 | 1 |
+| 4 | 276 | 36.2 | 27.2 | 1 |
+| 5 | 205 | 55.7 | 31.7 | 1 |
+| 6 | 134 | 88.8 | 33.8 | 2 |
+| 7 | 58 | 162.5 | 44.5 | 3 |
+| 8 | 73 | 284.8 | 39.8 | 7 |
+| 9 | 23 | 541.8 | 41.8 | 13 |
+| 10 | 28 | 1064.9 | 53.9 | 20 |
+| 11–13 | 4 | 2094–8223 | 30–60 | 36–186 |
+
+**On `d ≤ 2` expansion can never pay — 1,846 of 2,992 reachable nodes, 61.7%.**
+A raw table over one or two inputs is 2 or 4 bits; naming even one clause's
+coordinates in an ambient `n ≈ 30–40` costs more than listing the answers
+outright. The superseded figure charged a saving on every one of those nodes.
+
+No net figure is quoted here, and none may be, until `R4.1` measures what
+fraction of the formulas the closed form actually reproduces.
 
 The ECA question I answered is the one case where expansion genuinely buys
 nothing. It is also the least relevant: k = 3 is exactly where naming cost and
@@ -100,9 +153,11 @@ Three consequences worth stating before anyone starts:
 2. It is an explicit **author gate** under `SUCCESSOR_PLAN_R4` — catalogue
    growth requires a dated amendment with the catalogue cost paid in code — and
    it would move A3.1's pinned expressivity.
-3. The 18.36 bits/node figure is an **upper bound** on the saving. It assumes
-   the new family names the `CUSTOM` functions exactly. The honest next
-   measurement, before any claim, is what fraction of the 2,079 AND/OR/NOT
+3. ~~The 18.36 bits/node figure is an **upper bound** on the saving.~~
+   **Withdrawn with the figure (R1.3).** The replacement position: the *cost* is
+   known exactly (600.9 bits), the *saving* is zero on 61.7% of reachable nodes
+   and bounded by a per-in-degree clause threshold on the rest, and no net
+   figure may be quoted until `R4.1` measures what fraction of the AND/OR/NOT
    formulas the closed form actually reproduces elementwise.
 
 ## Reproduce

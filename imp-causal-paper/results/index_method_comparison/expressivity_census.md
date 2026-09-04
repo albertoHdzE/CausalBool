@@ -6,9 +6,29 @@ Additive to the D-7 arm, which is unmodified.
 - exact global map: **256/256** — uninformative on its own, because
   the search includes `LUT` and `REGULATORY_DNF`, which are functionally
   complete, so no rule can fail this criterion.
-- expressible inside the canonical twelve: **40/256**
-- requiring an extension family: **216/256**
-- of the ten D-7 rules, canonical-expressible: **2/10**
+- the canonical twelve suffice (every cell has a canonical option): **40/256**
+- the canonical twelve do NOT suffice: **216/256**
+- of the ten D-7 rules, canonical-sufficient: **2/10**
+
+Two further counts, because the pair above answers a DIFFERENT question
+from the pair below and reporting only one invites the two to be read as
+a disagreement (AUDIT03/R1.2):
+
+- the search USED only canonical families: **34/256**
+- the search used at least one extension family: **222/256**
+
+Both partitions are exact and both are consistent; they differ because
+`_CANONICAL_PRIORITY` can pick an extension for a cell a canonical family
+would also have named. The gap is the 6 rules 10, 12, 34, 48, 68, 80.
+
+**How to read these numbers (AUDIT03/R1.2).** None of them is a bound on
+the method. They are measured against a catalogue of twelve families that
+is *fixed by convention, not by the formalism* — the method's own position
+is that the catalogue is extensible, and `REGULATORY_DNF` is already a
+candidate thirteenth. A rule counted here as "the canonical twelve do not
+suffice" is a rule outside the CURRENT catalogue, not a rule the method
+cannot express. Quoting any of these as an expressivity limit requires
+naming the catalogue in the same sentence.
 
 Wolfram classes are given only where the repository already sourced them;
 the rest are blank rather than invented.

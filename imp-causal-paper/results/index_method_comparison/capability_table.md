@@ -52,9 +52,25 @@ form of the same problem, not a correction.
 | statistic | value |
 |---|---|
 | exact global map | 256/256 — uninformative, see above |
-| expressible within the canonical twelve | **40/256** |
-| requiring an extension family (`LUT`, `REGULATORY`, `REGULATORY_DNF`) | 216/256 |
-| of the ten D-7 rules, canonical-expressible | **2/10** |
+| the canonical twelve suffice (every cell has a canonical option) | **40/256** |
+| the canonical twelve do not suffice | 216/256 |
+| the search used only canonical families | 34/256 |
+| the search used at least one extension family | 222/256 |
+| of the ten D-7 rules, canonical-sufficient | **2/10** |
+
+The two pairs answer different questions and both partition 256 exactly
+(`40+216`, `34+222`). They differ on the six rules 10, 12, 34, 48, 68, 80, where
+`_CANONICAL_PRIORITY` picked an extension for a cell a canonical family would
+also have named. Reporting only one pair invites them to be read as a
+disagreement; they are not.
+
+**AUDIT03/R1.2 — how to read these.** None is a bound on the method. The
+denominator is a catalogue of twelve families *fixed by convention, not by the
+formalism*; the programme's own position is that the catalogue is extensible,
+and `REGULATORY_DNF` is already a candidate thirteenth. "The canonical twelve do
+not suffice" means *outside the current catalogue*, not *inexpressible*. Any of
+these numbers quoted as an expressivity limit must name the catalogue in the
+same sentence.
 
 Producer: `index_method_comparison/run_expressivity_census.py` →
 `expressivity_census.{json,md}` (full 256-row table). It is deterministic

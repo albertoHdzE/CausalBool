@@ -314,11 +314,27 @@ class GrammarCodec:
         r = BitReader(bits)
         n = decode_delta(r)
         n_seg = decode_delta(r)
-        decode_delta(r)                       # catalogue id
-        decode_delta(r)                       # granularity
+        # AUDIT03/R1.4: these two fields were read and DISCARDED, and idx_w was
+        # taken from this decoder's own catalogue. The size was therefore
+        # charged in every message and used in none, so a decoder holding a
+        # DIFFERENT catalogue would silently mis-read every mechanism index
+        # instead of refusing. The charge was right -- transmitting the size is
+        # what makes the index width derivable, and it is why the fixed-width
+        # index is legitimate -- but the implementation was not honouring it.
+        # Now the transmitted value is used, and a mismatch refuses loudly.
+        n_mech = decode_delta(r)              # catalogue size, as transmitted
+        granularity = decode_delta(r)         # granularity knob
+        if n_mech != len(self.mechanisms):
+            raise ValueError(
+                f"catalogue mismatch: message declares {n_mech} mechanisms, "
+                f"this decoder holds {len(self.mechanisms)}")
+        if granularity != self.granularity:
+            raise ValueError(
+                f"granularity mismatch: message declares {granularity}, "
+                f"this decoder is configured for {self.granularity}")
 
         n_dict = decode_delta(r) - 1
-        idx_w = self._index_width(len(self.mechanisms))
+        idx_w = self._index_width(n_mech)
         order = [r.read_raw(idx_w) for _ in range(n_dict)]
 
         ptr_w = self._index_width(max(len(order), 1)) if order else 0

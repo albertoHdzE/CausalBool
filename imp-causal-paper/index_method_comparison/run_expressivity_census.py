@@ -135,11 +135,27 @@ def main() -> int:
                    "n_ics": N_ICS, "radius": RADIUS, "seed": SEED,
                    "note": "identical to the D-7 arm, so the two share a coordinate"},
         "generated": datetime.date.today().isoformat(),
+        # AUDIT03/R1.2: the key "extension_required" previously appeared BOTH
+        # per row and in this summary with DIFFERENT meanings -- per row it is
+        # the list of extension families the search actually chose, and here it
+        # was 256 - len(canon), the count of rules the canonical twelve cannot
+        # name at all. Both were right; sharing a name was not, and it invites
+        # exactly the misreading that 216 and 222 are the same quantity in
+        # disagreement. They are two consistent partitions of two questions:
+        #     40 + 216 = 256   can the canonical twelve name every cell?
+        #     34 + 222 = 256   did the greedy search use only canonical families?
+        # The summary keys are now named for the question each answers.
         "summary": {
             "rules_total": 256,
             "exact_global_map": len(exact),
             "canonical_expressible": len(canon),
+            "canonical_insufficient": 256 - len(canon),
             "extension_required": 256 - len(canon),
+            "canonical_only_as_chosen":
+                sum(1 for r in rows if r["canonical_expressible"]
+                    and not r["extension_required"]),
+            "extension_chosen_by_search":
+                sum(1 for r in rows if r["extension_required"]),
             "d7_arm_exact": len(d7),
             "d7_arm_canonical_expressible": len(d7_canon),
             "canonical_rules": sorted(r["rule"] for r in canon),
@@ -162,9 +178,32 @@ def main() -> int:
         f"- exact global map: **{len(exact)}/256** — uninformative on its own, because",
         "  the search includes `LUT` and `REGULATORY_DNF`, which are functionally",
         "  complete, so no rule can fail this criterion.",
-        f"- expressible inside the canonical twelve: **{len(canon)}/256**",
-        f"- requiring an extension family: **{256 - len(canon)}/256**",
-        f"- of the ten D-7 rules, canonical-expressible: **{len(d7_canon)}/10**",
+        f"- the canonical twelve suffice (every cell has a canonical option):"
+        f" **{len(canon)}/256**",
+        f"- the canonical twelve do NOT suffice: **{256 - len(canon)}/256**",
+        f"- of the ten D-7 rules, canonical-sufficient: **{len(d7_canon)}/10**",
+        "",
+        "Two further counts, because the pair above answers a DIFFERENT question",
+        "from the pair below and reporting only one invites the two to be read as",
+        "a disagreement (AUDIT03/R1.2):",
+        "",
+        f"- the search USED only canonical families:"
+        f" **{sum(1 for r in rows if r['canonical_expressible'] and not r['extension_required'])}/256**",
+        f"- the search used at least one extension family:"
+        f" **{sum(1 for r in rows if r['extension_required'])}/256**",
+        "",
+        "Both partitions are exact and both are consistent; they differ because",
+        "`_CANONICAL_PRIORITY` can pick an extension for a cell a canonical family",
+        "would also have named. The gap is the 6 rules 10, 12, 34, 48, 68, 80.",
+        "",
+        "**How to read these numbers (AUDIT03/R1.2).** None of them is a bound on",
+        "the method. They are measured against a catalogue of twelve families that",
+        "is *fixed by convention, not by the formalism* — the method's own position",
+        "is that the catalogue is extensible, and `REGULATORY_DNF` is already a",
+        "candidate thirteenth. A rule counted here as \"the canonical twelve do not",
+        "suffice\" is a rule outside the CURRENT catalogue, not a rule the method",
+        "cannot express. Quoting any of these as an expressivity limit requires",
+        "naming the catalogue in the same sentence.",
         "",
         "Wolfram classes are given only where the repository already sourced them;",
         "the rest are blank rather than invented.",
