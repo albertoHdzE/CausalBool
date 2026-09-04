@@ -151,6 +151,38 @@ Then the comparison the author asked for:
   `K(output) ≤ K(mechanism) + O(1)`, so BDM exceeding `D_schema` reflects BDM's
   known block-sum overestimate, already characterised in `imp-causal-paper`.
 
+**DONE — `f9c437e`.** Measured by `audit/AUDIT03_R3_description_length/bdm_vs_dschema.py`
+at **fixed `n = 10`**, so every output object is a `1024 × 10` matrix and size is
+removed by construction rather than adjusted for.
+
+| arm | result |
+|---|---|
+| `A1` `D_schema` ↔ BDM | `r = +0.388`, `ρ = +0.424`; permutation null on the pairing (10⁴, both marginals held) `[-0.136, +0.144]`, `p = 1e-4` |
+| `A2` control `D_formula` | `r = +0.207` |
+| `A3` control `Σd` | `r = +0.245` — **the degree budget beats the catalogue measure** |
+| `A4` partial, `Σd` removed | `D_schema` `+0.311` (`p = 2e-4`); **`D_formula` `+0.020`** |
+| `A5` knobs (seeds × `dmax` 3/4/5) | `D_schema` `[+0.317, +0.430]`, `D_formula` `[+0.114, +0.207]` |
+| `A6` ordering | BDM `>` `D_schema` in **194 of 200**; six exceptions reported |
+
+`A4` is the decisive arm and it settles the promotion: **the whole of
+`D_formula`'s association with behaviour is the wiring budget.** `D_schema`
+retains signal because the catalogue charges `log2 12` for XOR and OR alike.
+
+Association is **moderate, not proportionality** (`r² ≈ 0.15`), and the papers
+say so. The flagship `BDM/D_schema = 2.49` now carries its distribution in the
+same sentence: **median `2.34`, range `0.86`–`5.03`.**
+
+> Also measured, and it constrains the claim: `D_schema` is **invariant under
+> rewiring** — 200 rewirings preserving every gate and in-degree give **one**
+> distinct value (`232.72`) while behaviour moves in a median of 1012/1024 rows.
+> `D_schema` discriminates gate **composition**, not wiring.
+
+**Carried to R2b:** the formal paper's `mechanism_vs_dataset_table` is
+machine-checked against `complexity_analysis.py`, which does not compute
+`D_schema`. Rather than place an unproduced number inside a checked block, the
+formal paper states `D_schema` in prose *outside* the block; the inventory
+wiring lands with the single owner in item 4.
+
 ### 4. R2b — collapse the description length onto one owner
 
 Unblocked now the measure is decided. Eight sites, split 4 with the in-degree
