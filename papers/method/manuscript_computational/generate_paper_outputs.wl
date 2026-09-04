@@ -232,6 +232,91 @@ mixedQueryRepresentation[nodes_List, pattern_List] := Module[
   <|"DecimalRepertoire" -> baseIndices, "Sumandos" -> sumandos|>
 ];
 
+(* ------------------------------------------------------------------ *)
+(* AUDIT03/R3.merge — the COARSE and the FINE description              *)
+(*                                                                     *)
+(* mixedQueryRepresentation above returns the COARSE form: one base    *)
+(* set L, and ONE offset family shared by every row of it, generated   *)
+(* by the coordinates outside C_q. That form is correct but it is not  *)
+(* the shortest description, because it frees a coordinate only when   *)
+(* the coordinate is free for the WHOLE query. A coordinate that is    *)
+(* free for SOME rows -- an ordinary don't-care inside C_q -- is paid  *)
+(* for once per row.                                                   *)
+(*                                                                     *)
+(* The FINE form gives each schema its own offset family, which is the *)
+(* general Dec(L, Omega): sumandos are the fillings of a schema's own  *)
+(* don't-care positions, WHEREVER THEY FALL, including on connected    *)
+(* inputs. (GOVERNANCE/GLOSSARY.md section 1d. Reading Omega as "the   *)
+(* disconnected coordinates" is exactly the error that hid this.)      *)
+(*                                                                     *)
+(* BooleanMinimize is Wolfram's own primitive, deliberately used in    *)
+(* preference to hand-rolling Quine-McCluskey here: the Python gate    *)
+(* audit/AUDIT03_R3_description_length/verify_merge.py covers the same *)
+(* six cases with an INDEPENDENT implementation (prime implicants plus *)
+(* set cover, index-deconvolution/src/deconvolution.py), so the two    *)
+(* agree or the disagreement is visible. A single shared routine could *)
+(* not have told us that.                                              *)
+(* ------------------------------------------------------------------ *)
+
+Clear[cbv];
+
+mergeSchemata[baseIndices_List, unionCoords_List, n_Integer] := Module[
+  {m = Length[unionCoords], minterms, dnf, terms},
+  If[baseIndices === {}, Return[{}]];
+  minterms = Table[
+    And @@ Table[
+      If[BitGet[j - 1, unionCoords[[i]] - 1] == 1, cbv[i], Not[cbv[i]]],
+      {i, m}],
+    {j, baseIndices}];
+  dnf = BooleanMinimize[Or @@ minterms, "DNF"];
+  Which[
+    dnf === False, {},
+    dnf === True,  {<|"activators" -> {}, "inhibitors" -> {}|>},
+    True,
+      terms = If[Head[dnf] === Or, List @@ dnf, {dnf}];
+      Table[
+        Module[{lits = If[Head[t] === And, List @@ t, {t}]},
+          <|"activators" -> Sort[unionCoords[[First[#]]] & /@
+              Select[lits, Head[#] === cbv &]],
+            "inhibitors" -> Sort[unionCoords[[First[First[#]]]] & /@
+              Select[lits, Head[#] === Not &]]|>],
+        {t, terms}]
+  ]
+];
+
+(* Each schema unfolds against ITS OWN offset family: allOffsets[n, fixed]
+   returns the subset sums over the coordinates this schema leaves free. *)
+unfoldSchema[schema_Association, n_Integer] := givePlaces[
+  {1 + Total[2^(schema["activators"] - 1)]},
+  allOffsets[n, Join[schema["activators"], schema["inhibitors"]]]];
+
+unfoldSchemata[schemata_List, n_Integer] :=
+  Sort@DeleteDuplicates@Flatten[unfoldSchema[#, n] & /@ schemata];
+
+schemaString[schema_Association, n_Integer] := StringJoin@Table[
+  Which[MemberQ[schema["activators"], c], "1",
+        MemberQ[schema["inhibitors"], c], "0",
+        True, "*"],
+  {c, n}];
+
+(* Reported per case: the fine form must cover EXACTLY the coarse form. *)
+mergeReport[label_String, res_Association, nodes_List] := Module[
+  {unionCoords, schemata, coarse, fine},
+  unionCoords = Sort@DeleteDuplicates@Flatten[ics10[[nodes]]];
+  schemata = mergeSchemata[res["DecimalRepertoire"], unionCoords, n10];
+  coarse = Sort@givePlaces[res["DecimalRepertoire"], res["Sumandos"]];
+  fine = unfoldSchemata[schemata, n10];
+  <|"case" -> label,
+    "C_q" -> unionCoords,
+    "rows" -> Length[res["DecimalRepertoire"]],
+    "schemata" -> Length[schemata],
+    "forms" -> (schemaString[#, n10] & /@ schemata),
+    "activators" -> (#["activators"] & /@ schemata),
+    "inhibitors" -> (#["inhibitors"] & /@ schemata),
+    "covered" -> Length[coarse],
+    "identical" -> (coarse === fine)|>
+];
+
 (* --- F1 --- *)
 resF1 = mixedQueryRepresentation[Range[10], {1,1,1,1,1,1,1,1,1,1}];
 gpF1 = givePlaces[resF1["DecimalRepertoire"], resF1["Sumandos"]];
@@ -300,6 +385,44 @@ Print["  Sumandos: ", resS2["Sumandos"]];
 Print["  Unfolded: ", gpS2];
 Print["  Baseline: ", blS2];
 Print["  Verified: ", vS2];
+
+(* ------------------------------------------------------------------ *)
+(* AUDIT03/R3.merge — the fine (merged) description of the same six    *)
+(* cases. Nothing about the NETWORK changes here; the answer sets are  *)
+(* identical by construction and checked to be identical elementwise.  *)
+(* Only the description gets shorter.                                  *)
+(* ------------------------------------------------------------------ *)
+
+Print["\n=== SECTION 4.1b: merged (fine) description ==="];
+
+mergeReports = {
+  mergeReport["F1", resF1, Range[10]],
+  mergeReport["F2", resF2, Range[10]],
+  mergeReport["F3", resF3, Range[10]],
+  mergeReport["F4", resF4, Range[10]],
+  mergeReport["S1", resS1, {4, 6, 7, 10}],
+  mergeReport["S2", resS2, {4, 6, 7, 8, 9, 10}]
+};
+
+Do[
+  Print["  ", r["case"], ": ", r["rows"], " rows -> ", r["schemata"],
+        " schemata, covering ", r["covered"],
+        " indices, identical: ", r["identical"]];
+  Do[Print["      ", f], {f, r["forms"]}],
+  {r, mergeReports}];
+
+Print["  TOTAL: ", Total[#["rows"] & /@ mergeReports], " rows -> ",
+      Total[#["schemata"] & /@ mergeReports], " schemata"];
+
+mergeIdenticalQ = And @@ (#["identical"] & /@ mergeReports);
+Print["  All six cover identical index sets: ", mergeIdenticalQ];
+
+Export[FileNameJoin[{DirectoryName[$InputFileName], "merged_queries.json"}],
+  <|"cases" -> mergeReports,
+    "TotalRows" -> Total[#["rows"] & /@ mergeReports],
+    "TotalSchemata" -> Total[#["schemata"] & /@ mergeReports],
+    "AllIdentical" -> mergeIdenticalQ|>,
+  "JSON"];
 
 (* ================================================================== *)
 (* SECTION 4.2 — Overlap statistics                                   *)
@@ -414,7 +537,11 @@ verificationList = <|
   "6-node flagship XOR (composed, D-2d)" -> TrueQ[verifiedComposedXOR],
   "10-node per-node" -> And @@ nodeVerification10,
   "F1" -> vF1, "F2" -> vF2, "F3" -> vF3, "F4" -> vF4,
-  "S1" -> vS1, "S2" -> vS2|>;
+  "S1" -> vS1, "S2" -> vS2,
+  (* AUDIT03/R3.merge: the merged description must cover the identical
+     index set in every case, or the shorter description is a different
+     claim about the network and not a shorter statement of the same one. *)
+  "merged == coarse (all six)" -> TrueQ[mergeIdenticalQ]|>;
 failedChecks = Keys@Select[verificationList, Not[#] &] /. Not[x_] :> x;
 Scan[Print["  ", #, ": ", verificationList[[#]]] &, Keys[verificationList]];
 If[failedChecks == {},
