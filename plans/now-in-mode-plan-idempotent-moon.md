@@ -194,6 +194,46 @@ Carried, still unfixed and recorded: `D_v2` has no decodability proof at all;
 input nodes are priced `0` in Wolfram and full cost in Python (729 nodes); the
 T4.5 parity gate cannot see Wolfram drift.
 
+**DONE — `7675b3d`.** Owners: `Integration`BioMetrics`` (Wolfram),
+`src/description_lengths.py` (Python). Three MUnit files stopped redefining the
+formula and now delegate.
+
+| site | before | after |
+|---|---|---|
+| `TSK-THEORY-002` | 42.4413 | **55.3662** (`5·log2 6`) |
+| `TSK-THEORY-004` | 28.509775 | **37.797487** (`4·log2 5`) |
+| `TSK-MIXED-001` | 135.66005207461194 | **unchanged** — the control |
+
+`TSK-THEORY-004` now equals the value `BASELINE.md` pins for
+`TSK-BIO-METRICS-001`: the cross-check that the collapse landed. Both Theory
+tests assert **inequalities**, so no verdict moved. `TSK-MIXED-001`'s copy — the
+one that superseded `101.07` by `135.66` — turned out to be **dead code, never
+called**.
+
+`D_schema` now has a producer (`schema_normal_form_length`, reusing
+`minimal_dnf`), so the **R3.a-b deferral is closed**: the formal paper's
+machine-checked artefact block carries `232.72`.
+
+> **Two gates were not watching, and neither said so.**
+> 1. The T4.5 parity gate compared two *stored* numbers, so when R3.1 changed
+>    `BioMetrics.m` the producer moved `25.9248 → 35.2125` **while the gate
+>    reported OK**. It now executes the WL producer; planting the stale value
+>    yields `WOLFRAM DRIFT`.
+> 2. `verify_paper_artefacts.py` read `checks["json_expect"]`, but every entry
+>    carries `json_expect` as a **sibling** of `checks` — so no produced JSON
+>    value had ever been compared. Had it run it would have raised anyway
+>    (`produced["D"]`). Three expectations are live for the first time.
+
+`imp-pathinfo` is a **pinned exception**: its mirror omits the field, its
+published tables depend on that, and the gate now asserts the gap is exactly
+`n·log2(n+1)`. Its 41 tests pass unchanged.
+
+**Paper impact: none to the arguments.** Every flagship anchor identical
+(`C_formula` 23, `D_formula` 135.66005, `D_schema` 232.71501, ZIP 10016,
+`H_total` 10229.61016); no manuscript quotes any value that moved. The only edit
+was a **synchronisation between the two papers** — comp's `43.0`/`44.0` →
+`43.04`/`43.96`, matching the producer and the formal table.
+
 ### 5. R1 — correct the record
 
 Falsify the MECHANICAL triage as a bounded exercise — given the claim and the
