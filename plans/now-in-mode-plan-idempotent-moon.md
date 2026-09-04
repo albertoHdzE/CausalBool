@@ -241,6 +241,35 @@ evidence, asked to **break** it. Reword the P9 census framing. **Supersede the
 18.36 bits/node figure** in `CATALOGUE_EXPANSION.md`, which is a Shannon quantity.
 Re-verify the W1.1 codec, on which I have been wrong in both directions.
 
+**DONE — `c53379b`.**
+
+- **R1.1 — the claim SURVIVES; nothing reclassified.** `5646fbd` looked
+  decisive, but its bit-anchors are in the *plan file* committed alongside; its
+  own report is counts and elementwise set comparisons. Three qualifications
+  recorded, and three classes of spurious marker named (version strings,
+  `bits[[ci]]` as a variable name, "free bits" = free *coordinates*) — an
+  unadjudicated keyword count would have "found" seven falsifications that do
+  not exist. `FALSIFICATION.md`.
+- **R1.2 — I nearly reported a false finding.** `40/216` vs `34/222` is not an
+  error: `canonical_expressible` means a canonical option *existed*, the per-row
+  `extension_required` means one was *chosen*. Two exact partitions of two
+  questions. **No number changes**, as predicted. The real defect was one key
+  name meaning two things; keys renamed, all four counts published, framing
+  reworded — the catalogue is fixed **by convention, not by the formalism**.
+- **R1.3 — `18.36 bits/node` withdrawn.** Redone in pure program length: cost
+  exact at `0.1155` bits/node (`600.9` over the corpus); saving reported as a
+  per-in-degree **threshold** `s_max`, not invented. **On `d ≤ 2` expansion can
+  never pay — 1,846 of 2,992 reachable nodes, 61.7%**, and the old figure
+  charged a saving on every one. My own first calculation was wrong too
+  (compared `2^d` against the schema form's *full* cost) and is corrected in
+  place: 82.5% → 61.7%.
+- **R1.4 — re-verification found a real defect.** The `ceil(log2 220)`
+  accusation **stays withdrawn**. But `decode()` read the transmitted catalogue
+  size and *threw it away*, deriving the width from its own catalogue — charged
+  in every message, honoured in none, so a mismatched decoder would mis-read
+  silently. Fixed. Single-bit-flip control: **177/200 → 200/200**; all 23
+  survivors had been in the header, which is how the unused fields were found.
+
 ### 6. R4.1 — the thirteenth family's gate only
 
 Measure what fraction of the 2,079 AND/OR/NOT `CUSTOM` formulas a
