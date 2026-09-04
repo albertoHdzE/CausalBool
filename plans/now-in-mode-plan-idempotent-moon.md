@@ -276,6 +276,18 @@ Measure what fraction of the 2,079 AND/OR/NOT `CUSTOM` formulas a
 `REGULATORY_DNF` closed form reproduces **elementwise**. The 58,217-bit saving is
 an upper bound and **may not be quoted until that fraction is known.**
 
+**DONE — `688cba4`.** The question as posed **could not fail**: `REGULATORY_DNF`
+is *unrestricted* DNF, hence functionally complete, so the answer is 100% by
+construction — the defect `P9` found in `256/256`. Measured anyway rather than
+argued: **2,273 of 2,273** exact cell by cell, negative control firing
+**2,273 of 2,273**.
+
+The two questions that *can* fail: **parse coverage 2,273 of 3,977 (57.2%)** —
+714 level-indexed identifiers, 578 no formula, 407 threshold (exactly `R1.3`'s
+count, by an independent route); and **compactness**, where family 13 beats a raw
+table on only **387 of 2,273 nodes (17.0%)**. Net **`+48,517` bits**, superseding
+`58,217`. Also found: **369 nodes whose formula variables disagree with `cm`**.
+
 ### 7. R6 — the remaining guards
 
 `R6.1` a suite test that fails on any entropy-derived *description length*
@@ -284,11 +296,32 @@ language and decodability proof. `R6.4` **key the paper-number gate by content,
 not line number** — it reported 91 moved entries for zero value changes, which
 trains the reader to regenerate blindly.
 
+**DONE — `98ea629`.** `R6.3` was already closed at `cbfe02a`.
+`R6.1`: 9 tests, both arms verified by planting the defect; recorded that at the
+node level the behavioural arm is **near-vacuous**, since the signature cannot
+admit an ensemble. `R6.2`: all four bit-counts declared, including the two that
+are **not** description lengths. It passed **vacuously** when first written —
+the regex missed numbers inside LaTeX math — caught by unit-testing the pattern.
+`R6.4`: 120 number-free lines inserted now gives *"64 moved, NO value changed"*
+**PASS** (128 findings under the old keying); an altered value **FAILs** with its
+multiset delta.
+
 ### 8. Housekeeping
 
 Commit and push `series-deconvolution/GLOSSARY.md` (decision D). Add the
 large-binary policy note (decision E). Update `audit/AUDIT03_PLAN.md` to match
 this file.
+
+**DONE — `3666ed5`** (sibling glossary was `677af59`). `GOVERNANCE/LARGE_BINARIES.md`
+records the measurement — working tree **88 MB**, `.git` **11 GB**, top eight
+historical blobs ~15.6 GB — and why a rewrite is refused: it invalidates every
+cited SHA. `AUDIT03_PLAN.md` reconciled with a status section.
+
+> **A new red appeared and was not one.** `OK=53 FAIL=2` with
+> `NOTNetworkTests.m -> PASS (kernel exit=139)` — the test passed, the *kernel*
+> segfaulted under contention. Verified rather than assumed: gate alone
+> `OK=3 FAIL=0`, full suite run serially `OK=54 FAIL=1`. Recorded in
+> `BASELINE.md` as a flake mode.
 
 ---
 
