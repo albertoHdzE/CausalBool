@@ -51,7 +51,29 @@
     "C_formula": 23,
     "D_schema_bits_round2": 232.72
    },
-   "note": "Values printed rounded to 2dp in .tex; JSON carries full precision. AUDIT03/R2b: D_schema added, produced by the same script via the single owner src/description_lengths.py."
+   "note": "Values printed rounded to 2dp in .tex; JSON carries full precision. AUDIT03/R2b: D_schema added, produced by the same script via the single owner src/description_lengths.py.",
+   "bit_counts": {
+    "232.72": {
+     "language": "schema normal form, catalogue-free: gamma(|S|+1) then per schema log2(n+1) + log2 C(n,k) + k",
+     "decodability": "expanding each schema's don't-cares regenerates the node's one-set ELEMENTWISE against exhaustive evaluation, 10/10 nodes; audit/AUDIT03_R3_description_length/bench_schema_normal_form.py gate B2",
+     "owner": "src/description_lengths.schema_normal_form_length"
+    },
+    "135.66": {
+     "language": "twelve-family catalogue: log2(12) + log2(n+1) + log2 C(n,d) + a per-family parameter field",
+     "decodability": "Kraft sum exactly 1 for n=1..8 WITH the in-degree field and exactly n+1 without it; round-trip over 48/119/293/715/1725/4111 descriptions with a collision control; audit/AUDIT03_R3_description_length/verify_description_length.py gates G1, G1', G2, G2'",
+     "owner": "Integration`BioMetrics`ComputeDescriptionLength"
+    },
+    "10016": {
+     "language": "NOT a description length in a declared language. zlib on the materialised output CSV, reported as a DATASET-SIDE baseline only",
+     "decodability": "n/a by construction: this is a compressed dataset, not a program. It must never be compared to a mechanism length without saying which side of the comparison it is on",
+     "owner": "papers/method/code/complexity_analysis/complexity_analysis.compute_zip_bits"
+    },
+    "10229.61": {
+     "language": "NOT a description length. Shannon content of the output table under empirical per-node frequencies; DATASET-SIDE baseline only, per AUDIT03 decision B",
+     "decodability": "n/a. An entropy is not a code length for any decoder not already given the frequency table, and that table is never transmitted",
+     "owner": "papers/method/code/complexity_analysis/complexity_analysis.compute_h_total"
+    }
+   }
   },
   {
    "id": "comp_validation_summary",

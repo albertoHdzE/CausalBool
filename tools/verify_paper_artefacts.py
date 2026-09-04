@@ -83,6 +83,45 @@ def check(art: dict) -> list[str]:
         if abs(got - want) > 1e-9:
             errs.append(f"{art['id']}: json {path}={got} != expected {want}")
 
+    # AUDIT03/R6.2 — every bit-count quoted in a .tex block must NAME its
+    # declared language and its decodability proof.
+    #
+    # A number of bits is meaningless until the language is fixed: the same
+    # network is 135.66 bits under the twelve-family catalogue and 232.72
+    # catalogue-free, and neither is "the" description length. Worse, a length
+    # in a code that is not uniquely decodable is not a length at all -- which
+    # is exactly what D was for eight implementations before R3.1/R2b, when the
+    # missing in-degree field left the per-node code with Kraft sum n+1.
+    #
+    # So the inventory must declare, for each bit-count it quotes, the language
+    # it is a length in and where the proof of decodability lives. An
+    # undeclared bit-count is an error: silence is how 101.07 and 1600 survived.
+    bit_decl = art.get("bit_counts", {})
+    if bit_decl is not None:
+        quoted = set()
+        # The number is usually inside LaTeX math and the word "bits" outside
+        # it: `\(232.72\) bits`, `$10\,016$ bits`. Allow the closing delimiter
+        # and a thin space between the two, or the count silently finds nothing
+        # and the whole check passes vacuously -- which it did on first writing.
+        BITS = re.compile(r"(\d[\d,\\\s]*(?:\.\d+)?)\s*(?:\\\)|\$)?"
+                          r"\s*(?:\\,)?\s*bits\b")
+        for m in BITS.finditer(blob):
+            quoted.add(m.group(1).replace(",", "").replace("\\,", "")
+                       .replace("\\", "").replace(" ", ""))
+        for val in sorted(quoted):
+            d = bit_decl.get(val)
+            if d is None:
+                errs.append(
+                    f"{art['id']}: bit-count '{val} bits' is quoted in the .tex "
+                    f"but not declared in artefacts.json 'bit_counts' -- name "
+                    f"its language and decodability proof (AUDIT03/R6.2)")
+                continue
+            for field in ("language", "decodability"):
+                if not d.get(field):
+                    errs.append(
+                        f"{art['id']}: bit-count '{val} bits' declares no "
+                        f"{field} (AUDIT03/R6.2)")
+
     # AUDIT02/W0.5: json_expect resolves only flat top-level keys, so it cannot
     # reach a value inside a list of case records. json_paths is additive -- it
     # leaves json_expect and every existing entry untouched -- and supports
