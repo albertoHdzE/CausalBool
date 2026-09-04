@@ -78,7 +78,18 @@ def _eval_gate(name: str, inputs: list[int], params: dict) -> int:
     if name == "NOT":
         return 1 - inputs[0]
     if name == "IMPLIES":
-        a, b = params["pair"]
+        # AUDIT03: this line used to be
+        #     a, b = params["pair"]
+        # and `a` and `b` were NEVER USED -- the return below does not mention
+        # them. It was dead code that nonetheless RAISED KeyError whenever a
+        # caller omitted "pair", which is why the gate-semantics collapse was
+        # blocked: complexity_analysis and causalbool.apply_gate agreed on all
+        # 300 values they both computed and disagreed on the CALL CONTRACT for
+        # IMPLIES at d=1. Removing it reconciles the contract and changes no
+        # value, because the antecedent is always inputs[0] and the consequent
+        # inputs[1], in the ascending order of the connected inputs, exactly as
+        # Gates.m's myImplies does. Measured: over 496 (input, pair)
+        # combinations the output never depends on "pair".
         return int((not inputs[0]) or inputs[1])
     if name == "NIMPLIES":
         return int(inputs[0] and not inputs[1])
