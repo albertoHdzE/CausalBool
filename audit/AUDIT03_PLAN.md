@@ -261,29 +261,49 @@ Only after R0.3 and R2a.
 
 Most guards now ship inside R2, one per collapsed concept. What remains:
 
-**R6.1** A suite test that fails if any description-length path computes a
-frequency-weighted or entropy-derived cost. Shannon is permitted only where the
-code already labels it a comparison baseline (as `BDM_Wrapper` correctly does).
-**R6.2** Extend `verify-paper` so every quoted bit-count names its declared
-language and its decodability proof.
+**R6.1 — DONE** (`98ea629`). `tests/analysis/test_description_length_is_algorithmic.py`,
+9 tests, two arms, each verified by planting the defect: a frequency-weighted
+code inside `graph_gate_index_length` fails 2 tests, planted entropy vocabulary
+fails 1. Recorded honestly in the file: at the NODE level the behavioural arm is
+close to **vacuous**, because `node_description_cost(n, d, gate)` cannot see an
+ensemble — its signature does not admit one.
+**R6.2 — DONE** (`98ea629`). `verify-paper` requires each quoted bit-count to
+declare its language and decodability proof. All four in
+`mechanism_vs_dataset_table` are declared, including the two that are **not**
+description lengths (`10016` zlib, `10229.61` Shannon) and are labelled so. The
+check passed VACUOUSLY when first written — the number sits inside LaTeX math and
+"bits" outside it, so the regex matched nothing — caught by unit-testing the
+pattern against the real strings before trusting it.
 **R6.3 — DONE** (`cbfe02a`). `check_glossary_conformance.sh` now enforces
 GLOSSARY §1d, verified in both directions: clean on the repaired tree, and it
 fires on a planted defect. On its first run it caught a site I had missed.
-**R6.4** The paper-number gate keys entries by **line number**, so any prose
-insertion trips it wholesale and trains the reader to regenerate without checking.
-It reported 91 moved entries today for zero value changes. Key it by content.
+**R6.4 — DONE** (`98ea629`). Entries are keyed by a digest of the line with its
+**digits masked**, so a sentence keeps its identity when it moves. Position is
+excluded from the compared payload and reported as a MOVE, which is not a
+failure; the value multiset is printed by the gate itself. Controls: 120
+number-free lines inserted gives *"138 entries, 64 moved, NO value changed"*
+PASS (128 findings under the old keying); one altered value FAILs, naming the
+entry and the multiset delta. The defect recurred twice more during this audit
+before it was fixed — 37+30 at R3.merge, 31+5 at R3.a-b, both for zero changes.
 
 ---
 
-## R7 — Repo hygiene. Independent; blocks nothing.
+## R7 — DROPPED. My premise was false.
 
 ```
-.git = 8.8 GB       data/ 828 tracked files       results/ 344
+.git = 11 GB (8.8 GB when first measured)    data/ 85 MB    results/ 3.0 MB
 ```
 
-Move `data/` and `results/` to a data store. This is the one part of the
-split proposal that is unambiguously right, and it carries none of the risk,
-because **nobody reimplements a dataset**.
+Moving `data/` and `results/` reclaims **nothing**: the working tree is 88 MB and
+the 11 GB is DepMap CSVs **in history**, already untracked today. Only a history
+rewrite reclaims it, and that **rewrites every commit SHA** — invalidating every
+SHA cited in `METHOD_ACCOUNT.md`, `BASELINE.md`, this file and a long series of
+commit messages, in a programme whose discipline is that a claim names the
+evidence that settles it. The provenance chain is worth more than the disk.
+
+Replaced by a forward-looking policy: **`GOVERNANCE/LARGE_BINARIES.md`**, which
+prevents the next 11 GB and records the conditions under which a rewrite could
+ever be done safely (a committed `old SHA -> new SHA` map, first).
 
 ---
 
@@ -315,3 +335,37 @@ definition existed, in another sub-project, and nothing forced the two to meet.
 **Split by ownership of a concept (R2), not by repository.** Once each concept has
 one implementation and a guard, extracting a package becomes mechanical — the
 boundary already exists in the code, and making it physical discovers nothing.
+
+---
+
+## Status, 2026-09-04
+
+Items 1–8 of `plans/now-in-mode-plan-idempotent-moon.md` are delivered. Commits,
+in order: `651aaa7` (R2a.2) · `4f75dfa`, `962cd6e` (R3.merge) · `f9c437e`
+(R3.a-b) · `7675b3d` (R2b) · `c53379b` (R1) · `688cba4` (R4.1) · `98ea629` (R6)
+· this commit (R8).
+
+**Five claims of mine were withdrawn on measurement**, which is the point of the
+exercise:
+
+| withdrawn | replaced by |
+|---|---|
+| "merging only shortens the description" | shorter in **2 of 6** cases; aggregate `0.85×` |
+| "two orders of magnitude" | `1.87` orders under the catalogue, `1.63` without |
+| `18.36` bits/node (Shannon-derived) | cost `600.9` bits exactly; saving **zero** on 61.7% of nodes |
+| `58,217` bits for family 13 | **`+48,517`**, concentrated in 17% of nodes |
+| R7, "move `data/` out" | premise false; policy note instead |
+
+**Three gates were passing without checking anything**, and each is now
+verified by planting the defect: the T4.5 parity gate could not see Wolfram
+drift (and had not, through a `9.29`-bit move); `verify_paper_artefacts`
+read `checks["json_expect"]` where the inventory writes `json_expect` as a
+sibling, so no JSON value had ever been compared; and the W1.1 decoder read the
+transmitted catalogue size and discarded it.
+
+**Still open, and blocked for stated reasons:** gate-semantics collapse
+(contract reconciliation, then re-run the 135/135 claim rather than cite it);
+bio regeneration (3,977 of 5,204 nodes have no derivable Boolean truth table —
+R4.1 now puts the parse-coverage figure at 2,273 of 3,977); R4.2–R4.5 (research,
+following R4.1's measurement); R5 (`Q2.2` unresolved, a measurement conflict
+rather than a decision).

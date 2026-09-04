@@ -46,6 +46,16 @@ do not trust `main` for current state.
 Definitions: `GOVERNANCE/GLOSSARY.md` (synchronized from `series-deconvolution`; check
 with `tools/check_glossary_sync.sh`). Test truth: `tests/MUnit/BASELINE.md`.
 
+Description lengths: `GOVERNANCE/DESCRIPTION_LENGTHS.md`. Variants A–E are named and
+scoped there; the owners are `src/description_lengths.py` (Python) and
+`Integration`BioMetrics`` (Wolfram), guarded by `tools/check_single_engine.sh`.
+**`D_schema` is the primary mechanism-side measure; `D_formula` is a length under
+the twelve-family catalogue.** No description length may be entropy-derived —
+enforced by `tests/analysis/test_description_length_is_algorithmic.py`.
+
+Large binaries: `GOVERNANCE/LARGE_BINARIES.md`. Nothing over 10 MB enters history;
+external datasets are ignored and reached by manifest plus fetch script.
+
 ### Python (venv-based)
 ```
 source venv/bin/activate

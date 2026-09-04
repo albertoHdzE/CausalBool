@@ -95,5 +95,14 @@ future run can be judged elementwise rather than against a stale total.
 | 2026-09-04 | **AUDIT03/R3.a-b** | **`OK=54 FAIL=1 TOTAL=55`** | MUnit ledger *unmoved*. Declared delta in the **paper-number gate**: `D_schema` becomes the primary reported measure and `D_formula` is relabelled *length under the twelve-family catalogue*, in both manuscripts. By value multiset: **31 gained, 5 lost, and the 5 losses are exactly the demoted `D_formula` ratios** — `0.234` (`D_formula/BDM`), `1.35`/`1.33` (`/ZIP`, `/H_total`) and `4.3`×4 (the old BDM factor), replaced by `2.49`, `43.0`, `44.0`. The phrase *two orders of magnitude* is withdrawn: it is `1.87` orders under the catalogue and `1.63` without it. Evidence: `audit/AUDIT03_R3_description_length/bdm_vs_dschema.py` |
 | 2026-09-04 | **AUDIT03/R2b** | **`OK=54 FAIL=1 TOTAL=55`** | ledger totals unchanged; **two pinned values move, one deliberately does not.** The eight description-length sites are collapsed onto `Integration\`BioMetrics\`` (Wolfram) and `src/description_lengths.py` (Python). `Theory/TSK-THEORY-002` `Dbits` 42.4413 → 55.3662 (`5·log2 6`) and `Theory/TSK-THEORY-004` 28.509775 → 37.797487 (`4·log2 5`); both files had lost the in-degree field, so both were pricing a code with Kraft sum `n+1`. Both tests assert **inequalities**, so no verdict moved — checked, not assumed. `TSK-THEORY-004` now reads **37.79748738387639, identical to `TSK-BIO-METRICS-001`**, which is the cross-check that the collapse landed. `Mixed/TSK-MIXED-001` is the **control**: it already had the field, so delegating must leave `D_formula` at `135.66005207461194`, and it does. Paper-number gate 136 → 138 (ratio synchronisation only: `43.0`→`43.04`, `44.0`→`43.96`, plus the formal paper's new `D_schema` row). Evidence: `GOVERNANCE/DESCRIPTION_LENGTHS.md` §1a, §2, §4a |
 
+**Known flake mode (AUDIT03, 2026-09-04).** Running the full suite *concurrently
+with* `pdflatex` and several pytest suites produced
+`FAIL: NOTNetworkTests.m -> PASS (kernel exit=139, timeout>900s?)` and a ledger
+of `OK=53 FAIL=2`. Note `-> PASS`: the test's own `Status.txt` said PASS and the
+**kernel** segfaulted. It is memory contention, not a regression — verified, not
+assumed, by re-running the gate alone (`OK=3 FAIL=0`) and then the whole suite
+with nothing else running (`OK=54 FAIL=1`). A `139` in this column means rerun
+serially before investigating anything else.
+
 `TopologiesTests.m` remains the single owned red throughout, unchanged in cause
 (no `Status.txt` exported; needs repair or an explicit `SKIP_REASON`).
