@@ -1885,7 +1885,7 @@ ZIP-compressed output size & \(10\,016\) bits
 Total Shannon content \(H_{\mathrm{total}}\) & \(10229.61\) bits
   & repertoire-scale data description under empirical output frequencies \\
 \(D_{\mathrm{formula}}/\mathrm{ZIP}\) & \(1.35\times10^{-2}\)
-  & formula two orders of magnitude smaller than compressed output storage \\
+  & formula smaller than compressed output storage by a factor of \(73.8\) \\
 \(D_{\mathrm{formula}}/H_{\mathrm{total}}\) & \(1.33\times10^{-2}\)
   & mechanism is far shorter than full repertoire-level coding \\
 \bottomrule
@@ -1898,8 +1898,21 @@ dramatically shorter generative description of that table. This comparison is in
 ZIP and Shannon entropy quantify redundancy and distributional regularity in the realised outputs;
 \(D_{\mathrm{formula}}\) quantifies structural mechanism length. The scientific point is not that
 one has found a better compressor for CSV files, but that the Boolean network admits a generative
-law whose description is shorter by two orders of magnitude than statistically encoding all realised
+law whose description is shorter by a factor of several tens than statistically encoding all realised
 states. That is causal compression in a precise, non-rhetorical sense.
+
+One qualification belongs here rather than in a footnote, because it bears on how the ratio should
+be read. \(D_{\mathrm{formula}}\) is a length under a \emph{declared catalogue} of twelve gate
+families: its first field is \(\log_2 12\), the index of a gate in a dictionary that the code never
+transmits. A catalogue-free alternative writes each node's schemata out instead of naming its gate,
+and for the same network gives \(D_{\mathrm{schema}} = 232.72\) bits against
+\(D_{\mathrm{formula}} = 135.66\). The ratio to compressed output storage is then \(43.0\) rather
+than \(73.8\)---\(1.63\) orders of magnitude rather than \(1.87\). The qualitative conclusion is
+unaffected, but the familiar phrase ``two orders of magnitude'' is not supported by the
+catalogue-free measure and is not used. The companion computational paper reports
+\(D_{\mathrm{schema}}\) as its primary measure and gives the evidence for that choice; the
+difference between the two figures is the clearest available illustration that a description length
+is a length \emph{in a language}, and never a property of the network alone.
 
 One interpretive caution follows, and it is stronger than mere insensitivity. The structural
 descriptor \(D\) is a function of \(n\), the in-degrees and the gate types alone; it never reads an
@@ -1952,7 +1965,7 @@ We have presented a causality-first index-set calculus for Boolean networks. The
 
 \emph{Compositionality.} Local one-sets compose into exact network-level predictions via Theorem~\ref{thm:canonical-reconstruction}. For mixed-gate networks, the overlap structure of queried supports compresses the effective state space from \(2^{d_q}\) to \(2^{\mu_q}\), a reduction made precise by Proposition~\ref{prop:support-locality}. The 10-node benchmark, with \(\mu_q=11\) for the full query and \(\mu_q\in\{3,4\}\) for the two subsystems, demonstrates that compositionality is not merely a theoretical property but a computationally meaningful one.
 
-\emph{Scalability.} The analytic evaluation cost is governed by the support size \(|C_q|\) rather than by the total network size \(n\), as established by Proposition~\ref{prop:support-locality} and confirmed by the resource-envelope benchmark across \(n\in\{30,60,80,200\}\). Median analytic times stay at or below roughly a millisecond throughout that range and show no growth with \(n\), and the description-length comparison (\(D_{\mathrm{formula}}=135.66\) bits against \(H_{\mathrm{total}}=10229.61\) bits) quantifies the two-orders-of-magnitude compression that the causal formulas achieve over the full realised output.
+\emph{Scalability.} The analytic evaluation cost is governed by the support size \(|C_q|\) rather than by the total network size \(n\), as established by Proposition~\ref{prop:support-locality} and confirmed by the resource-envelope benchmark across \(n\in\{30,60,80,200\}\). Median analytic times stay at or below roughly a millisecond throughout that range and show no growth with \(n\), and the description-length comparison (\(D_{\mathrm{formula}}=135.66\) bits, or \(D_{\mathrm{schema}}=232.72\) bits catalogue-free, against \(H_{\mathrm{total}}=10229.61\) bits) quantifies the compression that the causal formulas achieve over the full realised output: a factor of \(75.4\) under the catalogue and \(44.0\) without it.
 
 Exact reconstruction has been verified by exhaustive comparison at $n\leq 13$, by a stratified closed-form-set audit at $n\in\{16,20\}$, and by dispatch-consistency audits at $n\in\{20,50\}$; the scalability characterisation is confirmed by resource-envelope benchmarks at $n\leq 200$ (Section~\ref{sec:scalability}). The core scientific claim is therefore not only stated but corroborated: complex Boolean-network behaviour can be represented and reconstructed by short exact causal formulae, and the cost of that reconstruction is governed by local support size rather than global repertoire size.
 
