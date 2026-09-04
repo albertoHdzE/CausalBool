@@ -85,6 +85,14 @@ One owner; the other two import it; redundant definitions to `archive/` per poli
 not deleted. Add the symbol to `tools/check_single_engine.sh` **in the same
 commit**. Re-run the three consuming producers and diff elementwise.
 
+**DONE — `651aaa7`.** `CausalBoolCore.wl` owns `weights`, `allOffsets`,
+`givePlaces`; originals archived; all three producers re-ran with **zero
+artefact changes**; guard verified in both directions. The guard found a third
+`givePlaces` site, which was *not* collapsed and the reason recorded in-script:
+`TSK-MIXED-001:28` is a **different function sharing the name**, and
+`Alpha.m`'s is computationally identical but `CausalBoolCore.wl` is standalone
+by design.
+
 **Gate semantics stay blocked** until the call contract is reconciled
 (`KeyError 'pair'` vs `1` for `IMPLIES` at `d=1`) **and** the AUDIT02 135/135
 Wolfram claim is *re-run rather than cited*.
@@ -99,6 +107,32 @@ Measured, coverage verified identical in every case: **38 published rows → 20
 schemata.** F1–F3 `6 → 4`, F4 `6 → 2`, S2 `12 → 4`, S1 unchanged. Restate the
 tables in `comp_paper.tex` with an explicit old-vs-new note saying plainly that
 **no behaviour changes — only the description gets shorter.**
+
+**DONE — `4f75dfa`, `962cd6e`. One line of this item was wrong and is withdrawn.**
+
+Merging implemented in the WL path via `BooleanMinimize`, deliberately *not* by
+hand-rolling Quine–McCluskey, so that the Python gate stays an **independent**
+implementation. Five gates, all green: `M1` elementwise cover (symDiff 0, 6/6),
+`M2` negative control (fires 6/6), `M3` cross-language parity (form for form
+identical, 6/6), `M4` minimality (**exhaustive** minimum cover over the primes
+equals the reported size in every case — each prime is essential, so 20 is
+forced, not a greedy artefact), `M5` length.
+
+> **WITHDRAWN: "only the description gets shorter."** That sentence was written
+> from a **count**, and the claim it supports is about **length**. Priced in a
+> common coordinate — same `C_q` mask, same self-delimiting count, trit payload
+> at `log2 3`, which is the *cheaper* of the two obvious schema codes and so
+> generous to the merge — the merged form is shorter in **2 of 6** cases:
+> F1–F3 `75.0 → 78.4` bits (**longer**), S1 `27.0 → 35.2` (**longer**),
+> F4 `75.0 → 44.7`, S2 `137.0 → 78.4`; aggregate `464.0 → 393.5`, `0.85×`.
+> A minimum cover minimises the **number of schemata**; minimising bits is a
+> different objective, and the two part company when the rows saved are few and
+> the coordinates freed are fewer. The aggregate saving is real; the per-case
+> claim is not, and `comp_paper.tex` §4.1b says so explicitly.
+
+Declared delta: paper-number gate `109 → 116` entries (`BASELINE.md`). Its own
+line-keyed diff reported 37 added / 30 removed for **0 changed** — the `R6.4`
+defect; checked instead by value multiset: **17 gained, 0 lost, 0 altered.**
 
 ### 3. R3.a/b — `D_schema` primary, `D_formula` demoted, and the BDM comparison
 
