@@ -137,3 +137,45 @@ running its test, so a missing status reads as the failure it is.
 The same run corrected a long-standing entry in the ledger: `TopologiesTests.m`,
 "the single owned red", was recorded as a run that *died before its export*. It
 never parsed. One surplus `]` in `progressBar`.
+
+
+## The complementary question: dead code (2026-09-04)
+
+Duplication asks "is this defined twice". The other half of the same law is
+"is this called at all" -- an uncalled function drifts exactly as a duplicate
+does, and this audit had already tripped over two by accident (a `TSK-MIXED-001`
+copy of the description length that was never invoked, and a `pair` unpack in
+`complexity_analysis.py` that could only ever have raised).
+
+Measured by `orphan_census.py`. **The sweep over-counts references, so it
+UNDER-reports orphans: every name it prints is genuinely unreferenced, and the
+true set is larger. A floor, not a ceiling.**
+
+| arm | defined | never referenced |
+|---|---|---|
+| Python, whole programme (370 files) | 2,053 functions / 1,673 distinct names | **29 (1.7%)** |
+| Wolfram packaged core (`src/Packages/Integration`) | 38 public definitions | **4** |
+
+**Zero orphans inside a declared core owner.** That is the number that matters:
+the files `GOVERNANCE/CORE.md` names are fully live.
+
+### The one that was not merely dead
+
+`lsb_inputs` in `papers/method/code/corroboration_6node/ordering_invariance_6node.py`
+was defined and never called -- and it is the machinery for the LSB half of the
+ordering-invariance claim. The **LSB one-sets were hard-coded literals**, so only
+the MSB side was ever recomputed. The check still had teeth (a wrong literal
+would fail it), but it *asserted* half of what it could *compute*.
+
+Both sides are now derived from the same update rule under the two orderings,
+and the published literals are verified against the computed one-sets. They
+match, so no artefact moved; a planted wrong anchor exits 1. The orphan is gone
+because it is used, which is the only honest way to remove one.
+
+### Recorded, not removed
+
+`KnockoutNetworkByIndex` (`BioExperiments.m`), `LogicParseStatus` and
+`LogicVariables` (`LogicEval.m`), `SelfTestRun` (`SelfTest.m`). The last is
+worth naming: **a self-test that nothing invokes.** These are API surface, not
+proven dead, and deleting a public symbol on a grep is exactly the reasoning
+this document exists to discourage. Left for the author.
