@@ -130,6 +130,32 @@ else
   STATUS=1
 fi
 
+# AUDIT03 (monolithic-code) — repository/paper path resolution. FOUR production
+# modules defined _repo_root/_paper_root/_paper_figures_dir identically, and the
+# AST census saw only THREE: the fourth (src/stats/Bayesian_Meta_Analysis.py) was
+# found by searching for the BODY FRAGMENT below rather than for the name. They
+# had already drifted where it was least visible — _paper_figures_dir returned
+# `str` in two files and `Path` in the other two.
+#
+# Keyed on the environment-variable literal, which every copy of the concept
+# carries and nothing else in the tree does. Owner: src/causalbool_paths.py.
+#
+# workspaces/claude-nature/paper/code/ is a DECLARED EXCEPTION: a frozen Level 8
+# reproducibility artefact whose copies sit at a different depth on purpose.
+pr_files=$(grep -rl --include='*.py' 'CAUSALBOOL_PAPER_ROOT' . 2>/dev/null \
+           | sed 's|^\./||' \
+           | grep -vE '^(archive|venv|audit|workspaces|.*/\.venv|.*/venv)/' \
+           | sort -u)
+if [[ "$pr_files" == "src/causalbool_paths.py" ]]; then
+  echo "SINGLE-ENGINE: ok    paper/repo path resolution defined only in src/causalbool_paths.py"
+else
+  echo "SINGLE-ENGINE: FAIL  paper/repo path resolution defined in these files:"
+  printf '  %s\n' ${(f)pr_files}
+  echo "  -> import from src/causalbool_paths.py (AUDIT03, monolithic-code);"
+  echo "     declare any new exception in GOVERNANCE/CORE.md first"
+  STATUS=1
+fi
+
 # Python side. imp-pathinfo-paper is a DOCUMENTED EXCEPTION, not an oversight:
 # its mirror omits the in-degree field and its published tables depend on that,
 # so it is pinned by the T4.5 fixture (B_legacy_pathinfo_no_indegree_bits) rather

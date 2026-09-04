@@ -5,36 +5,24 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 from datetime import datetime
 import os
+import sys
 from pathlib import Path
 
 # Configuration
 INPUT_FILE = "results/bio/null_stats.json"
 OUTPUT_DIR = "results/stats"
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+# AUDIT03 (monolithic-code): _repo_root, _paper_root and _paper_figures_dir
+# were defined identically here and in three other production modules. One
+# owner now; parity proven over 24 of 24 comparisons before this edit
+# (audit/AUDIT03_R2_collapse/probe_paths_parity.py). Guarded by
+# tools/check_single_engine.sh.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from causalbool_paths import repo_root as _repo_root  # noqa: E402
+from causalbool_paths import paper_root as _paper_root  # noqa: E402
+from causalbool_paths import paper_figures_dir as _paper_figures_dir  # noqa: E402
 
 
-def _paper_root() -> Path:
-    env = os.getenv("CAUSALBOOL_PAPER_ROOT")
-    if env:
-        return Path(env).expanduser().resolve()
-    repo = _repo_root()
-    candidates = [
-        repo / "workspaces" / "claude-nature" / "paper",
-        repo / "workspaces" / "level8-paper" / "paper",
-        repo / "4ClaudeCode" / "claude-Nature" / "paper",
-    ]
-    for c in candidates:
-        if c.is_dir():
-            return c
-    return candidates[-1]
-
-
-def _paper_figures_dir() -> str:
-    return str(_paper_root() / "figures")
-
-
-FIGURE_DIR = os.getenv("BAYES_FIGURE_DIR", _paper_figures_dir())
+FIGURE_DIR = os.getenv("BAYES_FIGURE_DIR", str(_paper_figures_dir()))
 SEED = 42
 CHAINS = 4
 DRAWS = 5000
