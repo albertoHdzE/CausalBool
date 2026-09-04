@@ -52,11 +52,24 @@ The input repertoire is a sequence of \( 2^n \) binary vectors, ordered by their
 4 & (1, 1, 0) & 011 & 0 \\
 5 & (0, 0, 1) & 100 & 0 \\
 6 & (1, 0, 1) & 101 & 0 \\
-7 & (0, 1, 1) & 110 & 0 \\
+7 & (0, 1, 1) & 110 & 1 \\
 8 & (1, 1, 1) & 111 & 1 \\
 \end{array}
 \]
-If node 1 uses AND with inputs from nodes 2 and 3 (\( I_c = \{2, 3\} \)), the output is 1 only at index 8, where \( v_2 = v_3 = 1 \). The structure hinges on connected nodes’ contributions, forming a baseline index (the decimal anchor \( P \), GOVERNANCE/GLOSSARY.md sec.1a), while disconnected nodes (\( I_{nc} = \{1\} \)) shift this baseline.
+If node 1 uses AND with inputs from nodes 2 and 3 (\( I_c = \{2, 3\} \)), the output is 1 at indices 7 and 8, which are exactly the two indices where \( v_2 = v_3 = 1 \).
+
+\medskip
+\noindent\textbf{Correction, 2026-09-03 (AUDIT03/R0).} The index-7 entry of this
+table previously read \(0\). That value tabulated AND over \(I_c=\{1,2,3\}\), not
+over the \(I_c=\{2,3\}\) stated in the surrounding text, and it was the sole such
+entry. The error is decidable without reference to any bit-ordering convention:
+an AND over \(d\) connected inputs has one-set size exactly \(2^{\,n-d}\), because
+the \(n-d\) coordinates it never reads are free; at \(n=3,\ d=2\) that is \(2\),
+whereas the old column contained a single \(1\). A count is invariant under
+relabelling, so no ordering could reconcile it --- checked exhaustively over all
+six coordinate labellings and all three two-subsets, of which none reproduced the
+old column. The ordering used throughout is LSB-first, canonical per
+\texttt{GOVERNANCE/ORDERING.md} \S1 and stated in both manuscripts. The structure hinges on connected nodes’ contributions, forming a baseline index (the decimal anchor \( P \), GOVERNANCE/GLOSSARY.md sec.1a), while disconnected nodes (\( I_{nc} = \{1\} \)) shift this baseline.
 
 The decimal value of a vector \( v \) is:
 \[
@@ -108,17 +121,32 @@ This method uses the network’s structure to predict 1s, avoiding brute-force c
 For \( n = 3 \), node 1 with \( I_c = \{2, 3\} \) (AND):
 - \( P = 2 + 4 = 6 \), \( I_{nc} = \{1\} \), \( \Delta_{nc} = v_1 \cdot 1 \).
 - \( J_1 = 6 + 1 + 0 = 7 \) (0,1,1), \( J_1 = 6 + 1 + 1 = 8 \) (1,1,1).
-- Check: Only 8 (1,1,1) is 1, suggesting \( \Delta_{nc} \) needs constraint to match AND.
+- Check: both 7 and 8 satisfy \( v_2 = v_3 = 1 \), so \( J_1 = \{7,8\} \) is exactly
+  the AND one-set. Verified by exhaustive evaluation, 2026-09-03.
 
 For \( n = 7 \), node 4 with \( I_c = \{1, 3, 5, 7\} \):
 - \( P = 1 + 4 + 16 + 64 = 85 \), \( I_{nc} = \{2, 4, 6\} \), \( \Delta_{nc} = v_2 \cdot 2 + v_4 \cdot 8 + v_6 \cdot 32 \).
-- \( J_4 = 85 + 1 + 0 = 86 \) (0,1,1,1,1,1,0), up to \( 85 + 1 + 42 = 128 \) (1,1,1,1,1,1,1).
-- Intuitive: 1s at 86, 88, etc., align when \( \Delta_{nc} = 1, 3, 5, \dots \), reflecting valid offsets.
+- \( \Delta_{nc} \in \{0,2,8,10,32,34,40,42\} \), the subset sums of the weights
+  \( \{2,8,32\} \), so
+  \( J_4 = \{86, 88, 94, 96, 118, 120, 126, 128\} \), of size \( 2^{7-4} = 8 \).
+- Verified identical to exhaustive evaluation, 2026-09-03. (The earlier remark
+  that the ones ``align when \( \Delta_{nc} = 1, 3, 5, \dots \)'' was wrong:
+  every weight in \( I_{nc} \) is even here, so no odd offset arises.)
 
 \section{Discussion}
-The formula \( J_k = P + 1 + \Delta_{nc} \) echoes \( F = ma \), with \( P \) as the fixed mass (connected nodes’ influence) and \( \Delta_{nc} \) as the variable acceleration (disconnected nodes’ tuning). It captures causality—1s depend solely on connected nodes being 1, with disconnected nodes shifting the pattern. The intuitive examples suggest \( \Delta_{nc} \) may overgenerate (e.g., index 7 in the 3-node case), indicating a need to refine \( \Delta_{nc} \) to include only offsets that support the AND condition, a topic for future exploration.
+The formula \( J_k = P + 1 + \Delta_{nc} \) echoes \( F = ma \), with \( P \) as the fixed mass (connected nodes’ influence) and \( \Delta_{nc} \) as the variable acceleration (disconnected nodes’ tuning). It captures causality—1s depend solely on connected nodes being 1, with disconnected nodes shifting the pattern.
+
+\medskip
+\noindent\textbf{Withdrawn, 2026-09-03 (AUDIT03/R0).} This section previously
+concluded that \( \Delta_{nc} \) ``may overgenerate (e.g., index 7 in the 3-node
+case)'' and needed further constraint. It does not. That concern was an artefact
+of the single incorrect table entry corrected in Section~3, and of nothing else.
+With the entry corrected, \( J_k = P + 1 + \Delta_{nc} \) reproduces the AND
+one-set exactly, both for the 3-node example and for the 7-node example above,
+each checked against exhaustive evaluation. No refinement of \( \Delta_{nc} \) is
+required.
 
 \section{Conclusion}
-We’ve derived \( J_k = P + 1 + \Delta_{nc} \) as a non-iterative formula for AND gate 1s, grounded in intuition and structure. Validated intuitively, it offers scalability and elegance, with potential for further refinement to ensure precision across all cases.
+We’ve derived \( J_k = P + 1 + \Delta_{nc} \) as a non-iterative formula for AND gate 1s, grounded in intuition and structure. It is exact as stated: on both worked examples the formula reproduces the exhaustive AND one-set elementwise, and the family of offsets \( \Delta_{nc} \) is precisely the set of subset sums of the weights of the coordinates the gate does not read.
 
 \end{document}

@@ -135,6 +135,22 @@ row gate by gate. `method_paper.tex:945`
 family is therefore a **union of schemata**, and this is stated as such in
 `comp_paper.tex:341`.
 
+**4.6a (AUTHOR RULING, 2026-09-03 — and it is stronger than 4.6).** Holland's
+schemata are a **proper subset** of this method's results, and the reason is
+**scope, not expressiveness**:
+
+| | schemata | the rule `(L, Ω)` |
+|---|---|---|
+| answers | *"which inputs produce this specific output?"* — a **query** | the **whole system** |
+| covers | one queried event | the full possible behaviour |
+| role | scientific explanation and solidity | **the compression** |
+
+Schemata "come to scene naturally" as part of a query's answer. The
+decimals-and-sumandos pair gives **total reproduction** of the system. That
+asymmetry is why the comparison target for `(L, Ω)` is BDM — a whole-object
+complexity — and not a per-query quantity. It also disposes of my earlier framing:
+this is a load-bearing scientific claim, not an incidental reformulation.
+
 ---
 
 ## §5 Base set, offset family, deconvolution — the part I got wrong
@@ -234,12 +250,29 @@ by `|C_q|` rather than `n` is therefore a statement about **schema order**.
 to Holland's schemas"*, giving `{{1,*,1,*,1,0,1,*,*}, {1,*,1,*,1,1,1,*,*}}`.
 `Capitulo4/resultados_y_analisis.tex:782`
 
-**6.11 (observation, mine — please confirm or reject)** Those two schemata differ
-in **exactly one fixed position** (coordinate 6, `0` vs `1`), and coordinate 6 is
-*inside* the input set `{1,3,5,6,7}`. By the standard adjacency rule they merge to
-`{1,*,1,*,1,*,1,*,*}` — a single schema. **The method's own founding example
-already contains an available merge that the implementation does not take.** This
-is the gap between §6.3 and §5.5, visible in the origin document.
+**6.11 (CONFIRMED by the author, 2026-09-03 — the merge should be done)** Those
+two schemata differ in **exactly one fixed position** (coordinate 6, `0` vs `1`),
+and coordinate 6 is *inside* the input set `{1,3,5,6,7}`. Verified: the accepted
+set is a full product over coordinate 6, so it merges to `{1,*,1,*,1,*,1,*,*}` —
+2 schemata of order 5 become 1 schema of order 4, covering the identical 32
+states. **The method's own founding example contains a merge the implementation
+does not take.** This is §6.3 (coarse) meeting §5.5 (fine) in the origin document.
+
+**6.11a (blast radius, measured 2026-09-03 — AUTHOR GATE)** The merge ruling is
+not confined to the thesis example. Applied to the six published query cases of
+`comp_paper.tex`, coverage verified identical in every case:
+
+| case | published `|L|` rows | schemata after merge |
+|---|---|---|
+| F1, F2, F3 | 6 each | **4** each |
+| F4 | 6 | **2** |
+| S1 | 2 | 2 (no merge available) |
+| S2 | 12 | **4** |
+| **total** | **38** | **20** |
+
+Five of the six published `DecimalRepertoire` tables therefore move. That is a
+published-number change and is held at the author gate; nothing has been
+regenerated.
 
 ---
 
@@ -278,11 +311,41 @@ and drops distinct output states from 206 to 172 with `D` **bit-identical**.
 **7.8** The paper therefore states plainly that `D` **is not a complexity measure
 of behaviour** and cannot rank networks by what they do. `method_paper.tex:1910`
 
-**7.9 (mine, for R3)** `D_schema` — the schema-normal-form length — does read the
+**7.9 (AUTHOR RULING, 2026-09-03: adopt `D_schema`, and compare it with BDM.)**
+`D_schema` — the schema-normal-form length — does read the
 output, since it is built from the truth table. It separates an OR from an XOR of
 equal in-degree, which `D_formula` cannot, both being one catalogue entry. It is a
 legal code: Kraft exactly 1 over the `3^n` template alphabet.
 `audit/AUDIT03_R3_description_length/probe_sumandos_two_readings.py`
+
+**7.10 (what `D_schema` is NOT — the distinction the author asked about)** It is
+**not** the length in bits of the decimals and sumandos *written out as lists*.
+Measured on the 10-node benchmark:
+
+| what is transmitted | bits |
+|---|---|
+| `L` and `Ω` spelled out as decimal lists | **27,950** |
+| the raw output columns | 10,240 |
+| **`D_schema` — the schemata, i.e. the rule** | **232.72** |
+| `D_formula` (catalogue) | 135.66 |
+
+The lists are the **decompressed** form and cost 120× the rule. `D_schema` sends
+the schemata; the decoder **regenerates** the sumandos, which are never
+transmitted because they are not information.
+
+**7.11 (open, needed before any BDM claim)** `D_schema` is invariant under
+coordinate relabelling — 200 relabellings, **1 distinct value**, for OR, XOR,
+MAJORITY and KOFN — which places it in the same invariance class as BDM and makes
+the two comparable in principle. Proportionality is a **separate, untested**
+claim: one point (BDM 580.01 vs `D_schema` 232.72) is not a proportionality, and
+no ratio may be quoted until it is measured across many networks against a null.
+
+**7.12 (open design question, mine)** `D_schema` as measured sums **per node**.
+That reconstructs the whole system, but it does **not** exploit overlap: each
+node's inputs are named as a subset of `[n]` rather than of `C_q`, so the method's
+own central compression (`μ_q = 11`, `R_q = 2048` on the benchmark) is left on the
+table. No saving on the 10-node case, where `C_q = [n]`; potentially large on
+sparse networks. Raise before fixing the measure.
 
 ---
 
@@ -347,6 +410,25 @@ headed "Node 1 Output (AND)" shows output 1 **only at index 8**, which is AND ov
 against the document's own transcribed table: **row 7 is the sole disagreement**,
 and the table reproduces exactly the one-set of `Ic={1,2,3}`, namely `{8}`. The
 table is for a different `Ic` than the text.
+
+**10.1b (ordering does NOT explain it — author hypothesis tested and rejected)**
+The proposal that reading bits left-to-right rescues `Ic={2,3}` does not hold, and
+the point is decidable without any convention: an AND over `d` inputs has one-set
+size exactly `2^{n−d}`, since the `n−d` coordinates it never reads are free. At
+`n=3, d=2` that is **2**; the old column contained a single `1`. A count is
+invariant under relabelling. Checked exhaustively: **6 labellings × 3 two-subsets
+= 18 combinations, 0 reproduce the old column.**
+
+**10.1c (the author's rule, adopted)** The convention documented in both
+manuscripts prevails, and the derivation is corrected to match it. That convention
+is **LSB-first**, canonical per `GOVERNANCE/ORDERING.md §1`, stated at
+`method_paper.tex:181` and `comp_paper.tex:239`.
+
+**10.1d (the correction vindicates the 2025 derivation)** With row 7 corrected,
+`J = P + 1 + Δ_nc` with `P = 6` gives `{7,8}`, **identical** to exhaustive AND;
+and the `n=7` example gives `{86,88,94,96,118,120,126,128}`, `|J| = 2^{7−4} = 8`,
+also identical. The document's own worry that `Δ_nc` "may overgenerate" was caused
+**solely by the wrong table cell**. Corrected and withdrawn in `02_cb_and.tex`.
 
 **10.2** Consequently the document's Discussion (`:119`) invents a defect — *"`Δ_nc`
 may overgenerate (e.g. index 7)"* — that is an artefact of **10.1**, not a property
