@@ -70,6 +70,50 @@ check_owner "papers/method/code/lib/CausalBoolCore.wl" weights allOffsets
 #       a name collision; harmless at runtime, confusing to a reader.
 # Revisit under AUDIT03/R2b if the standalone constraint is ever relaxed.
 
+# AUDIT03/R2b — the per-node description length had EIGHT definition sites, four
+# of which charged the log2(n+1) in-degree field and four of which did not, so
+# "D" named two different quantities and only one of them was decodable. The
+# Wolfram copies are collapsed onto Integration`BioMetrics`; the Python side onto
+# src/description_lengths.py.
+#
+# The signature guarded is the input-set field, log2(Binomial[n, d]), which every
+# copy of the cost model carries and nothing else in the tree does.
+dl_files=$(grep -rlE 'log2Int\[Max\[1, *Binomial\[n, *d\]\]\]' \
+             --include='*.m' --include='*.wl' . 2>/dev/null \
+           | sed 's|^\./||' \
+           | grep -vE '^(archive|venv|audit)/' \
+           | sort -u)
+dl_count=$(printf '%s\n' "$dl_files" | grep -c . || true)
+if [[ "$dl_count" -eq 1 && "$dl_files" == "src/Packages/Integration/BioMetrics.m" ]]; then
+  echo "SINGLE-ENGINE: ok    per-node description length defined only in src/Packages/Integration/BioMetrics.m"
+else
+  echo "SINGLE-ENGINE: FAIL  per-node description length defined in ${dl_count} Wolfram files:"
+  printf '  %s\n' ${(f)dl_files}
+  echo "  -> collapse onto Integration\`BioMetrics\`ComputeDescriptionLength (AUDIT03/R2b)"
+  STATUS=1
+fi
+
+# Python side. imp-pathinfo-paper is a DOCUMENTED EXCEPTION, not an oversight:
+# its mirror omits the in-degree field and its published tables depend on that,
+# so it is pinned by the T4.5 fixture (B_legacy_pathinfo_no_indegree_bits) rather
+# than silently corrected. See GOVERNANCE/DESCRIPTION_LENGTHS.md.
+py_files=$(grep -rlE 'math\.log2\(len\(GATE_LABELS\)\)' \
+             --include='*.py' . 2>/dev/null \
+           | sed 's|^\./||' \
+           | grep -vE '^(archive|venv|audit|.*/\.venv|.*/venv)/' \
+           | sort -u)
+py_expected="imp-pathinfo-paper/src/imp_pathinfo/causalbool_mirror.py
+src/description_lengths.py"
+if [[ "$py_files" == "$py_expected" ]]; then
+  echo "SINGLE-ENGINE: ok    python description length: owner + 1 documented exception"
+else
+  echo "SINGLE-ENGINE: FAIL  python description-length sites changed:"
+  printf '  %s\n' ${(f)py_files}
+  echo "  -> expected exactly src/description_lengths.py plus the pinned"
+  echo "     imp-pathinfo mirror; add a new site to DESCRIPTION_LENGTHS.md first"
+  STATUS=1
+fi
+
 if [[ "$STATUS" -eq 0 ]]; then
   echo "SINGLE-ENGINE: clean"
 else

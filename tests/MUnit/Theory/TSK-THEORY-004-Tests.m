@@ -1,4 +1,5 @@
 Get["src/Packages/Integration/Gates.m"];
+Get["src/Packages/Integration/BioMetrics.m"];
 base = FileNameJoin[{"results", "tests", "theory004"}]; If[!DirectoryQ[base], CreateDirectory[base, CreateIntermediateDirectories -> True]];
 
 canonicalNode[cm_List, dyn_List, params_Association:<||>, i_Integer] := Module[{Ic}, Ic = Flatten@Position[cm[[i]], 1]; <|"gate" -> dyn[[i]], "inputs" -> Ic, "params" -> Lookup[params, i, <||>]|>];
@@ -10,12 +11,16 @@ outputsFromCanonical[canon_List, n_Integer] := Module[{cm, dyn, params, ics, inp
   Table[Integration`Gates`ApplyGate[dyn[[i]], inputs[[j, ics[[i]]]], Lookup[params, i, <||>]], {j, Length[inputs]}, {i, Length[dyn]}]
 ];
 
-gateLabels = {"AND","OR","XOR","NAND","NOR","XNOR","NOT","IMPLIES","NIMPLIES","MAJORITY","KOFN","CANALISING"};
-log2Int[x_] := N@Log[2, x];
-encodeCostBits[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics, K = Length[gateLabels]},
-  ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
-  Total@Table[Module[{d = Length[ics[[i]]], g = dyn[[i]], p = Lookup[params, i, <||>], cost = 0.0}, cost += log2Int[K]; cost += log2Int[Max[1, Binomial[n, d]]]; Switch[g, "KOFN", cost += log2Int[d + 1] + 1, "CANALISING", cost += log2Int[n] + 1 + 1, "IMPLIES" | "NIMPLIES", cost += log2Int[Max[1, d (d - 1)]], "NOT", cost += log2Int[Max[1, d]], "MAJORITY", cost += 1, "XOR" | "XNOR", cost += 1, _, cost += 1]; cost], {i, n}]
-];
+(* AUDIT03/R2b — the local cost model is gone; this delegates to the single
+   owner, Integration`BioMetrics`. Two things were wrong with the copy that
+   stood here. It duplicated a formula that four other files also carried, and
+   it LACKED the log2(n+1) in-degree field, so the code it priced had Kraft sum
+   n+1 rather than 1 and was not uniquely decodable. Delegation fixes both at
+   once and makes a future divergence impossible rather than merely unlikely.
+   The assertions below are inequalities, so the value moving by n*log2(n+1)
+   does not move the test's verdict; that was checked, not assumed. *)
+encodeCostBits[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeDescriptionLength[cm, dyn, params]["D"];
 
 cm = {{0,1,0,0},{1,0,1,0},{0,1,0,1},{0,0,1,0}};
 dyn = {"AND","OR","XOR","KOFN"};

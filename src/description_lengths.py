@@ -60,13 +60,32 @@ def row_run_index_set_length(adjacency) -> float:
 # --- Variant B: gate + index-set per-node (BioMetrics/pathinfo family) --------
 
 def node_description_cost(n: int, degree: int, gate: str,
-                          include_header: bool = False) -> float:
+                          include_header: bool = False,
+                          in_degree_field: bool = True) -> float:
     """Per-node cost. ``include_header=True`` adds the log2(n) graph header that
     imp-pathinfo's graph_description_length charges but BioMetrics' D does not
-    (V5's cross-repo nonidentity)."""
+    (V5's cross-repo nonidentity).
+
+    AUDIT03/R2b. ``in_degree_field`` charges log2(n+1) for the in-degree d, and
+    defaults to True because WITHOUT IT THIS IS NOT A DESCRIPTION LENGTH. A
+    decoder handed the code cannot know how many bits to read for the input set
+    nor how to interpret them as an index into the d-subsets of {1..n}; the
+    per-node code then has Kraft sum n+1 rather than 1, so it is not uniquely
+    decodable and prices nothing. Measured, with both negative controls, in
+    audit/AUDIT03_R3_description_length/verify_description_length.py.
+
+    ``in_degree_field=False`` reproduces the pre-AUDIT03 value and exists for
+    exactly one purpose: regenerating tables published under the old code, in
+    particular imp-pathinfo-paper's, whose mirror is a documented exception in
+    GOVERNANCE/DESCRIPTION_LENGTHS.md. It is a legacy switch, not a modelling
+    choice, and the difference it makes is pinned by the T4.5 fixture so that
+    the two cannot drift apart unnoticed.
+    """
     cost = math.log2(len(GATE_LABELS))
     if include_header:
         cost += math.log2(max(1, n))
+    if in_degree_field:
+        cost += math.log2(n + 1)
     cost += math.log2(max(1, math.comb(n, degree)))
     if gate == "KOFN":
         cost += math.log2(degree + 1) + 1
@@ -82,15 +101,62 @@ def node_description_cost(n: int, degree: int, gate: str,
 
 
 def graph_gate_index_length(degree_by_node, gates_by_node,
-                            include_header: bool = True) -> float:
+                            include_header: bool = True,
+                            in_degree_field: bool = True) -> float:
     """Variant B over {node -> (degree, gate)} maps."""
     n = len(degree_by_node)
     if n == 0:
         return 0.0
     total = math.log2(max(1, n)) if include_header else 0.0
     for v in range(n):
-        total += node_description_cost(n, degree_by_node[v], gates_by_node[v])
+        total += node_description_cost(n, degree_by_node[v], gates_by_node[v],
+                                       in_degree_field=in_degree_field)
     return total
+
+
+# --- Variant E: schema normal form, the catalogue-free length -----------------
+
+def schema_normal_form_length(truth_table, n: int) -> float:
+    """Variant E: D_schema for ONE node, in bits.
+
+    AUDIT03/R3 made this the primary mechanism-side measure and it belongs with
+    the others rather than in an audit script, so that the papers have a
+    supported producer for it. Variant B names a gate by its index in a
+    catalogue of twelve; this one transmits no catalogue at all, writing the
+    node's schemata out instead.
+
+    Code: a self-delimiting count of schemata, then per schema the number of
+    fixed coordinates, which coordinates those are, and their values.
+
+    The merge is Quine-McCluskey via ``minimal_dnf`` in
+    index-deconvolution/src/deconvolution.py -- imported, deliberately not
+    reimplemented here, since a second copy of that routine is precisely the
+    defect AUDIT03/R2 exists to remove.
+
+    ``truth_table`` is the node's LOCAL table over its d connected inputs,
+    indexed y = sum_i bit_i << i, and ``n`` is the ambient network size.
+    """
+    import sys
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    p = str(root / "index-deconvolution" / "src")
+    if p not in sys.path:
+        sys.path.insert(0, p)
+    from deconvolution import minimal_dnf
+
+    clauses = minimal_dnf(list(truth_table))
+    if not clauses:
+        return float(_gamma_len(1))
+    bits = float(_gamma_len(len(clauses) + 1))
+    for c in clauses:
+        k = len(c["activators"]) + len(c["inhibitors"])
+        bits += math.log2(n + 1) + math.log2(max(1, math.comb(n, k))) + k
+    return bits
+
+
+def _gamma_len(x: int) -> int:
+    """Elias gamma code length for x >= 1."""
+    return 2 * (x.bit_length() - 1) + 1
 
 
 # --- Variant C: mechanism DNF model cost (delegates to causalnet measure) -----

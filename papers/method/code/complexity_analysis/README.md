@@ -9,7 +9,8 @@ of the method paper (Table 2).
 | Measure | Symbol | Paper value | Formula |
 |---------|--------|-------------|---------|
 | Formula components | C_formula | 23 | structural pieces per gate (compressionWeight) |
-| Programme length | D_formula | 135.66 bits | gate + in-degree + input-set + parameter coding |
+| Programme length (primary) | D_schema | 232.72 bits | catalogue-free: the node's schemata written out |
+| Programme length (catalogue) | D_formula | 135.66 bits | gate + in-degree + input-set + parameter coding |
 | Shannon content | H_total | 10 229.61 bits | H_binary(p_overall) × 2^n × n |
 | Compressed output | ZIP_bits | see note | zlib(CSV) × 8 |
 
@@ -19,8 +20,12 @@ of the method paper (Table 2).
 python3 complexity_analysis.py
 ```
 
-No dependencies beyond the Python standard library.  Outputs
-`complexity_results.json` with all computed values.
+No third-party dependencies.  D_formula, C_formula, ZIP and H_total use only
+the standard library; D_schema delegates to the repository's single
+description-length owner, `src/description_lengths.py` (AUDIT03/R2b), which in
+turn reuses `minimal_dnf` from `index-deconvolution/`.  That intra-repository
+import is deliberate: a second copy of either routine is the defect the audit
+removed.  Outputs `complexity_results.json` with all computed values.
 
 ## Formulas
 

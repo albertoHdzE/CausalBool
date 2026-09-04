@@ -1,5 +1,6 @@
 AppendTo[$Path, "src/Packages"];
 Needs["Integration`Gates`"];
+Needs["Integration`BioMetrics`"];
 Needs["Integration`Experiments`"];
 base = FileNameJoin[{"results", "tests", "mixed001FormulaVsExhaustive"}]; If[!DirectoryQ[base], CreateDirectory[base, CreateIntermediateDirectories -> True]];
 inputsFor[n_Integer] := IntegerDigits[Range[0, 2^n - 1], 2, n];
@@ -203,35 +204,14 @@ Cformula = computeCompression[cm10, dyn10, params10];
 
 (* LaTeX tables for documentation *)
 
-gateLabels = {"AND","OR","XOR","NAND","NOR","XNOR","NOT","IMPLIES","NIMPLIES","MAJORITY","KOFN","CANALISING"};
-log2Int[x_] := N@Log[2, x];
-encodeCostBits[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics, K = Length[gateLabels]},
-  ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
-  Total@Table[
-    Module[{d = Length[ics[[i]]], g = dyn[[i]], p = Lookup[params, i, <||>], cost = 0.0},
-      cost += log2Int[K];
-      (* In-degree field: required for unique decodability. Without d the decoder
-         cannot determine the width of the input-set field, nor read it as an index
-         into the d-subsets of [n]. Added 2026-08-14; earlier revisions omitted it
-         and yielded D_formula = 101.07 bits, which was not a valid description
-         length. The corrected figure is 135.66 bits. Mirrored in
-         papers/method/code/complexity_analysis/complexity_analysis.py. *)
-      cost += log2Int[n + 1];
-      cost += log2Int[Max[1, Binomial[n, d]]];
-      Switch[g,
-        "KOFN", cost += log2Int[d + 1] + 1,
-        "CANALISING", cost += log2Int[n] + 1 + 1,
-        "IMPLIES" | "NIMPLIES", cost += log2Int[Max[1, d (d - 1)]],
-        "NOT", cost += log2Int[Max[1, d]],
-        "MAJORITY", cost += 1,
-        "XOR" | "XNOR", cost += 1,
-        _, cost += 1
-      ];
-      cost
-    ],
-    {i, n}
-  ]
-];
+(* AUDIT03/R2b — delegated to the single owner, Integration`BioMetrics`.
+   This copy was already CORRECT: it carried the log2(n+1) in-degree field, and
+   it is the site that superseded D_formula = 101.07 by 135.66. It is collapsed
+   anyway, and that makes it the control for the collapse -- a correct copy
+   replaced by the owner must leave the value bit-identical. If D_formula moves
+   here, the delegation is wrong, not the arithmetic. *)
+encodeCostBits[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeDescriptionLength[cm, dyn, params]["D"];
 
 (* Visual sampling and side-by-side comparisons *)
 SeedRandom[1234];

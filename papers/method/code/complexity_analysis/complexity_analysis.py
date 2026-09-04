@@ -272,6 +272,43 @@ def compute_d_formula(cm: list[list[int]], dyn: list[str], n: int) -> float:
 #   measurement.
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Measure 2b - D_schema: the catalogue-free description length.
+#
+# AUDIT03/R2b. D_formula above charges log2(12) to name a gate in a catalogue
+# the code never transmits. D_schema transmits no catalogue: it writes each
+# node's schemata out. R3 made it the primary mechanism-side measure, so it
+# needs a producer here rather than only in an audit script -- both manuscripts
+# quote it, and a quoted number without a producer is the defect this audit
+# exists to remove.
+#
+# The computation is DELEGATED to src/description_lengths.py, the repository's
+# single description-length owner, which in turn reuses minimal_dnf from
+# index-deconvolution. Nothing is reimplemented here; a second copy of either
+# routine is exactly what R2b removes.
+# ---------------------------------------------------------------------------
+
+def compute_d_schema(cm: list[list[int]], dyn: list[str], params: dict,
+                     n: int) -> float:
+    import sys
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[4]
+    p = str(root / "src")
+    if p not in sys.path:
+        sys.path.insert(0, p)
+    import description_lengths as dl
+
+    total = 0.0
+    for i in range(n):
+        ic = [j for j, v in enumerate(cm[i]) if v == 1]
+        d = len(ic)
+        node_params = params.get(i + 1, {})
+        tt = [_eval_gate(dyn[i], [(y >> b) & 1 for b in range(d)], node_params)
+              for y in range(2 ** d)]
+        total += dl.schema_normal_form_length(tt, n)
+    return total
+
+
 def compute_zip_bits(table: list[list[int]]) -> tuple[int, int, int]:
     """
     Returns (csv_bytes_len, compressed_bytes_len, zip_bits).
@@ -342,6 +379,9 @@ def main() -> None:
     # D_formula
     d_formula = compute_d_formula(CM10, DYN10, n)
 
+    # D_schema (AUDIT03/R3: primary measure)
+    d_schema = compute_d_schema(CM10, DYN10, PARAMS10, n)
+
     # ZIP (proper lossless compression of actual CSV)
     csv_raw_bytes, csv_compressed_bytes, zip_bits = compute_zip_bits(table)
 
@@ -351,6 +391,7 @@ def main() -> None:
     results = {
         "C_formula": c_formula,
         "D_formula_bits": round(d_formula, 5),
+        "D_schema_bits": round(d_schema, 5),
         "CSV_raw_bytes": csv_raw_bytes,
         "CSV_compressed_bytes": csv_compressed_bytes,
         "ZIP_bits": zip_bits,
@@ -359,6 +400,8 @@ def main() -> None:
         "shannonPerNode": [round(h, 13) for h in h_per_node],
         "Formula_over_ZIP": round(d_formula / zip_bits, 9),
         "Formula_over_Shannon": round(d_formula / H_total, 9),
+        "ZIP_over_Schema": round(zip_bits / d_schema, 5),
+        "Shannon_over_Schema": round(H_total / d_schema, 5),
         "note_zip": (
             "ZIP_bits is proper zlib compression of the full CSV. "
             "The manuscript value 1600 bits came from a Wolfram ZIP artefact "
@@ -372,10 +415,12 @@ def main() -> None:
     PAPER_C    = 23
     PAPER_D    = 135.66    # bits, rounded (self-delimiting; supersedes 101.07)
     PAPER_H    = 10229.61  # bits, rounded
+    PAPER_DS   = 232.72    # bits, rounded (catalogue-free; AUDIT03/R3)
 
     ok_c = (c_formula == PAPER_C)
     ok_d = (abs(d_formula - PAPER_D) < 0.01)
     ok_h = (abs(H_total  - PAPER_H)  < 0.1)
+    ok_ds = (abs(d_schema - PAPER_DS) < 0.01)
     # ZIP note: paper value (1600 bits) was an artefact; we verify the ordering
     # D_formula << zlib_zip << H_total instead.
     ok_ordering = (d_formula < zip_bits < H_total * 2)
@@ -387,6 +432,7 @@ def main() -> None:
     print()
     print(f"  C_formula   = {c_formula}          paper: {PAPER_C}  {'OK' if ok_c else 'FAIL'}")
     print(f"  D_formula   = {d_formula:.5f} bits  paper: {PAPER_D}   {'OK' if ok_d else 'FAIL'}")
+    print(f"  D_schema    = {d_schema:.5f} bits  paper: {PAPER_DS}  {'OK' if ok_ds else 'FAIL'}")
     print(f"  H_total     = {H_total:.5f} bits  paper: {PAPER_H}  {'OK' if ok_h else 'FAIL'}")
     print()
     print(f"  CSV raw     = {csv_raw_bytes} bytes")
@@ -397,7 +443,7 @@ def main() -> None:
     print(f"  D/H_total   = {results['Formula_over_Shannon']:.6f}")
     print(f"  Ordering D << zlib << H:  {'OK' if ok_ordering else 'FAIL'}")
     print()
-    all_ok = ok_c and ok_d and ok_h and ok_ordering
+    all_ok = ok_c and ok_d and ok_ds and ok_h and ok_ordering
     print(f"  Overall: {'PASS' if all_ok else 'FAIL'}")
     print("=" * 60)
 
