@@ -234,6 +234,54 @@ exists to prevent. **It is scored as failed**, and the underlying coverage gap
 is carried into Phase 3 regardless of the kill, because a mutant killed only by
 a closure gate is not a tested mutant.
 
+---
+
+## AUDIT04 Phase A — predictions for the five new `deconvolution` mutants
+
+**Registered 2026-09-05, before any of them was run.** The owner previously had
+a semantic denominator of **zero** — both its mutants were reachability probes,
+so `minimal_dnf` and `essential_variables` were declared owners whose assertion
+quality had never been measured. These five give it a denominator.
+
+The existing evidence is 23 tests in `index-deconvolution/tests/test_deconvolution.py`.
+I have deliberately **not** read their fixtures before writing the predictions
+below, because knowing which essential sets they use is exactly what would make
+prediction 5 unfalsifiable.
+
+| mutant | change | prediction |
+|---|---|---|
+| `dec-essential-invert` | `!=` → `==` in the sensitivity test | **KILLED**, high confidence |
+| `dec-essential-top` | `range(n)` → `range(n - 1)` | **KILLED**, high confidence |
+| `dec-dnf-offset` | `v == 1` → `v == 0` when collecting minterms | **KILLED**, high confidence |
+| `dec-dnf-polarity` | activators ↔ inhibitors | **KILLED**, *moderate* |
+| `dec-reduce-index` | `1 << j` → `1 << e` in `reduce_column` | **SURVIVES**, with its input named |
+
+**High confidence (1–3).** `test_essential_variables_equal_connectivity` and
+`test_disconnected_node_is_never_sensitive` assert the essential set directly, so
+inverting sensitivity returns its complement and must fail. Dropping the
+highest-indexed variable breaks any exact-recovery test whose network depends on
+it. Covering the off-set inverts every clause, and
+`test_regulatory_dnf_identification_and_reproduction` asserts reproduction.
+
+**Moderate (4).** Swapping activators and inhibitors is only observable through a
+clause carrying **both**. If the DNF tests use activator-only clauses — which is
+the common shape for regulatory logic — it survives.
+
+**Predicted to SURVIVE (5), with the failing input named in advance.**
+`reduce_column` maps original bit `e` to reduced index `j`. The mutant writes to
+`1 << e` instead of `1 << j`, so the two agree **exactly when `j == e` for every
+essential variable** — that is, whenever the essential set is contiguous from
+zero (`[0]`, `[0,1]`, `[0,1,2]`). It differs only on a non-contiguous set such as
+`essential = [0, 2]`, where the reduced table must be indexed by `1` and the
+mutant indexes by `2`, writing out of the intended slot.
+
+Small hand-built test networks almost always have contiguous essential sets. If
+it survives, the finding is that **`reduce_column` is never exercised on a
+non-contiguous essential set**, and the fix is a test with a genuine hole in the
+support — not a claim that the mutant is equivalent, because it is not.
+
+---
+
 ### What this hands to Phase 3
 
 Test targets are now chosen from evidence rather than from file size. In order:

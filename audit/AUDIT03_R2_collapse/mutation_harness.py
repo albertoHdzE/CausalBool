@@ -221,6 +221,43 @@ MUTANTS: list[Mutant] = [
            "def essential_variables(",
            "def _unused_essential_variables(",
            "python", "essential-variable detection removed"),
+
+    # AUDIT04 Phase A. Both mutants above are REACHABILITY PROBES, so the
+    # semantic denominator for this owner was ZERO and the report printed
+    # NOT MEASURED: minimal_dnf and essential_variables are declared owners in
+    # CORE.md whose assertion quality had never been tested. These five are the
+    # semantic mutants that give the owner a denominator.
+    #
+    # `apply_mutant` replaces EVERY occurrence, so each `old` below is anchored
+    # on enough context to be unique -- `y |= (1 << j)` alone appears twice, and
+    # a mutant broader than its description does not isolate what it names.
+    Mutant("dec-essential-invert", "deconvolution",
+           "index-deconvolution/src/deconvolution.py",
+           "if column[x] != column[x | bit]:",
+           "if column[x] == column[x | bit]:",
+           "python", "sensitivity inverted: essential set becomes its complement"),
+    Mutant("dec-essential-top", "deconvolution",
+           "index-deconvolution/src/deconvolution.py",
+           "    for i in range(n):\n        # Create a number",
+           "    for i in range(n - 1):\n        # Create a number",
+           "python", "highest-indexed variable can never be found essential"),
+    Mutant("dec-dnf-offset", "deconvolution",
+           "index-deconvolution/src/deconvolution.py",
+           "minterms = [y for y, v in enumerate(reduced) if v == 1]",
+           "minterms = [y for y, v in enumerate(reduced) if v == 0]",
+           "python", "DNF covers the OFF-set: the clause set is the complement"),
+    Mutant("dec-dnf-polarity", "deconvolution",
+           "index-deconvolution/src/deconvolution.py",
+           "activators = [j for j in range(m) if (mask >> j) & 1 and (b >> j) & 1]",
+           "activators = [j for j in range(m) if (mask >> j) & 1 and not ((b >> j) & 1)]",
+           "python", "activators and inhibitors swapped: every clause negated"),
+    Mutant("dec-reduce-index", "deconvolution",
+           "index-deconvolution/src/deconvolution.py",
+           "            if x & (1 << e):\n                y |= (1 << j)",
+           "            if x & (1 << e):\n                y |= (1 << e)",
+           "python", "reduced table indexed by ORIGINAL bit position, not the "
+                     "reduced one: wrong whenever the essential set is not "
+                     "contiguous from zero"),
 ]
 
 

@@ -1,212 +1,196 @@
-# AUDIT04 — a testing instrument that can fail, then 95% of `src/`
+# AUDIT04 — the golden baseline
 
 ## Context
 
-AUDIT03-C delivered CI, a closure gate that can go red, a pre-push hook, a lint
-ratchet, and 134 unit tests at a 95% floor on the declared owners. Executing it
-also found **six defects**, none of them by re-running an existing gate — every
-one came from a detection method that did not exist before:
+**The goal, in the author's words (2026-09-05): a clean scientific genesis — a
+foundation solid enough that nothing built on it is built in fear.** Weeks are
+an accepted cost. This plan is the route there, and it is deliberately *not* one
+heroic push: the instrument is armed and useful at every commit along the way.
 
-| defect | how it was found | status |
-|---|---|---|
-| MH sampler called itself adaptive above a fixed `prop_sd = [0.5, 0.5]` | triaging F841 instead of deleting it | fixed; acceptance 0.19 → 0.39–0.47, ESS σ +36%, μ unchanged |
-| `c29` Bernoulli null nested inside its own comparator in **100%** of draws | same | fixed; nesting → 0%, *r* +0.724 → −0.025 |
-| **61%** of GINML files silently binarised, 304 nodes losing level rules | same | fixed; recorded and warned |
-| `datasaurus` G4 asserted a Monte Carlo *z* to ±0.01 with SE ≈0.16 | re-running after a fix | fixed; asserts separation, not a sample value |
-| a measure labelled LZ76 that computes **LZ78** (2% agreement with its own label) | measuring two implementations rather than reading them | fixed; two names + forwarder |
-| a 4-hour measurement with no crash resilience | a reboot destroyed 10/28 mutants | fixed; per-mutant persistence |
+### What "golden" means here, operationally
 
-**The remaining problem is not defects — it is that the instrument cannot see.**
-Measured 2026-09-05:
-
-```
-coverage of the declared owners        98.56%   ← 99 statements, 2 files
-coverage reported for src/                13%   ← over 25 of 54 files
-files coverage never reports              29    ← ~4,574 non-blank lines
-src/ modules imported by no test          26 of 53
-```
-
-**Root cause, established by correlation and exact:** coverage can only enumerate
-*unexecuted* files inside importable packages. `src/data` and `src/integration`
-have `__init__.py` and are fully reported (4/4, 18/18). The seven directories
-without one — `analysis`, `complexity`, `dynamics`, `experiments`, `pipeline`,
-`scripts`, `stats` — contribute only the files a test happened to import.
-
-So **the published 13% is itself over a partial denominator**, and the true
-figure is roughly half that. A 95% floor on `src/` imposed today would be
-measured over whatever the tests already touch and **could never fail** — the
-same class as the `-@` Makefile prefixes this programme already removed.
-
-**Author decisions taken 2026-09-05:** cover **all 53 `src/` modules to a 95%
-floor**; treat the R4/R5 corpus blocker with a **diagnostic phase** (measure why,
-do not attempt to unblock).
-
-### What "clean" means here, operationally
-
-"No more errors" is not reachable and this plan does not claim it. What is
-reachable and auditable:
+"No more errors" is not reachable and this plan never claims it. Every defect in
+every pass of this audit was found by a **detection method that did not exist
+before that pass**; re-running existing gates has never once found something new.
+So the destination is defined as a property of the *instrument*, not of the code:
 
 1. every claim in a governance document has a gate;
 2. every gate has been **observed to fail** by planting its defect;
-3. the kill rate is measured, with every survivor adjudicated as coverage gap or
-   equivalent mutant;
-4. every module that produces a published number is covered to the declared
-   floor, and the floor is measured over a **complete** denominator;
-5. zero undeclared exceptions.
+3. the mutation kill rate is measured per owner, **no owner unmeasured**, every
+   survivor adjudicated as coverage gap or equivalent mutant;
+4. every module is covered to a declared floor, measured over a **complete**
+   denominator;
+5. every divergence between copies is **declared, reasoned and pinned** — zero
+   undeclared exceptions;
+6. expected values come from an **independent derivation**, never from what the
+   code currently prints.
+
+### Already landed (do not redo)
+
+| phase | result | commit |
+|---|---|---|
+| **P0 mutation** | 28/28 scored. Semantic **23/25 = 92.0 %**, unit-test **19/25 = 76.0 %**. Zero-kill owners named; both survivors adjudicated; one prediction scored **failed** | `8b8c0e3` |
+| **P1 coverage instrument** | 7 missing `__init__.py` added; report went 25 → 61 files; published 13 % was over less than half the code, true value **5.64 %**; denominator guard refuses on mismatch | earlier |
+| **P2 import safety** | 61/61 modules import-safe by static scan; module-level RNG reseeds and directory creation removed | earlier |
+| **P5 corpus diagnostic** | blocker is **917/5,204 = 17.6 %**, not 76.4 %; **1,943 of 3,977** nodes are derivable today | `601d939` |
+
+### The three facts this plan is built on
+
+```
+49 of 61 files at exactly 0% coverage      5,365 statements unchecked
+25 of 416 subproject files reach the core  6.0%
+4 of 25 semantic mutants killed ONLY by a governance gate, no unit test
+```
+
+### Author decisions, 2026-09-05
+
+- **Coverage: ratcheting floor.** Destination is 95 % on all 52 modules. The
+  floor rises as each tier lands and **never falls**, so CI distinguishes a
+  regression from unfinished work on every day of the build.
+- **Core loading: guard new code, declare and pin existing divergences.** This is
+  what the `monolithic-code` collapse protocol prescribes — non-zero elementwise
+  disagreement means *two concepts*, not a collapse. `imp-pathinfo`'s mirror
+  omits the in-degree field because it must reproduce someone else's published
+  tables; that is **fidelity, not drift**, and collapsing it would make the
+  replication unfaithful. Published numbers do not move.
+- **`requests`: install and pin**, network mocked in tests.
 
 ---
 
-## Phases, in execution order
+## Phase A — close the holes the mutation run actually found
 
-### Phase 0 — land the mutation result *(blocking input; ~3h, already running)*
+*Small, bounded, highest evidence-to-effort ratio. Nothing here is guesswork:
+every target is a measured gap.*
 
-Finish AUDIT03-C item 7 against `c9bc412`. Nothing in Phase 3 may start before
-this, because the harness records **which tests caught each mutant**
-(`killed_by`), and that is the only evidence-based way to choose test targets.
-Choosing them any other way is guessing, which is the error this whole audit has
-been removing.
+| target | defect to catch | current |
+|---|---|---|
+| `NetworkIO` | `io-drop-logic`: loader reads the classification **label**, not the authoritative `logic` formula | **zero kills of any kind** |
+| `deconvolution` | no semantic mutants exist at all — add them **first**, then the tests that kill them | **NOT MEASURED** |
+| `CausalBoolCore` | `core-alloffsets`, `core-composed-y5`, `core-applygate-default` | 0/3 by unit test |
+| `causalbool_paths` | `py-paths-root`: start path under `tests/`, which holds `results/` but not `src/` | killed by closure gate only |
+| `BioMetrics` | `cformula-kofn`: nothing pins an **absolute** `C_formula` for KOFN | survivor |
 
-- Kill rate per owner **with its denominator**; owners with **zero** kills named.
-- Every survivor adjudicated against the predictions registered **in advance** in
-  commit `8888376` — including `py-paths-root`, predicted to survive as a real
-  coverage gap in tests I wrote, with its failing input named (`tests/` holds
-  `results/` but not `src/`).
-- The three **reachability probes** reported separately and excluded from the
-  headline rate.
-- Write `audit/AUDIT03_R2_collapse/MUTATION.md` results section; update
-  `BASELINE.md` and `VERIFICATION.md` §5.
+`NetworkIO`, `CausalBoolCore` and `BioMetrics` are Wolfram owners, so their tests
+are MUnit; `causalbool_paths` and `deconvolution` are pytest. Both suites are in
+scope.
 
-### Phase 1 — make the instrument able to fail *(before any test is written)*
+**Exit criterion:** re-run the harness; the **unit-test** kill rate must rise
+from `19/25`, and no owner may remain `NOT MEASURED`. Report before and after.
 
-1. Add `__init__.py` to the seven non-package directories under `src/`. Verify no
-   import breaks: the suites resolve modules via `sys.path.insert(0, ROOT/"src")`
-   and import as `complexity.Trajectory_LZ`, which a real package still satisfies.
-2. Re-measure. Expect the report to jump from 25 to **54 files** and the
-   percentage to **fall**. Record the corrected baseline.
-3. **Correct `VERIFICATION.md`**: the committed `13%` is over 25 of 54 files and
-   must be restated with its true denominator.
-4. **A denominator guard.** `tools/check_verification_numbers.py` gains a check
-   that the number of files in the coverage report equals the number of `.py`
-   files on disk under `src/`, and **refuses** when they differ. Without it, a
-   future directory added without `__init__.py` silently leaves the measurement
-   again. Verified by planting: remove one `__init__.py`, watch it go red.
+## Phase B — coverage, tier by tier, floor ratcheting
 
-### Phase 2 — importability, measured not assumed
+**Tier 1 — 25 modules, 4,036 statements, on a published-number path**
+(they write to `results/` or `figures/`). Largest: `DepMap_Validation` (916),
+`Cancer_Corruption` (377), `bio_D_experiment` (322), `grn_data_pipeline` (247).
 
-Seven of the 29 invisible modules have no `__main__` guard. Having a guard is not
-the same as being side-effect-free on import: check each by importing it in a
-subprocess and asserting it neither runs work nor writes to `results/`.
-Files that do are refactored so the top-level body moves into a function behind
-a guard. This is a prerequisite for testing them at all.
+**Tier 2 — 24 modules, 1,329 statements**, everything else.
 
-### Phase 3 — tests, in evidence order
+**The rule that makes the floor mean something:** every expected value is derived
+from an **independent source** — a cost model written out in the test, a
+published algorithm, a hand-computed case — and never from current output. A test
+asserting current behaviour raises coverage and measures nothing. Not
+hypothetical: the existing Lev4 LZ test asserts only `simple < periodic < random`,
+which holds for **both** LZ76 and LZ78, so it passed while validating the wrong
+measure. Pattern to follow: `tests/analysis/test_description_lengths_values.py`.
 
-**Priority is set by consequence, not by file size.** 16 of the 29 invisible
-modules write to `results/` or `figures/` — they are on a published-number path.
-They come first; the rest follow.
+Where a module's correct output is a scientific judgement rather than a value
+(scrapers, figure generation, orchestration), the test asserts **contracts** —
+schema, invariants, refusal on bad input, determinism under a fixed seed. **Any
+module receiving only contract tests is declared as such in `VERIFICATION.md`
+with its reason**, so "covered" never silently means "executed".
 
-**The rule that makes the 95% floor mean something:** every expected value must be
-derived from an **independent source** — a cost model written in the test, a
-published algorithm, a hand-computed case — and never from what the code
-currently prints. A test that asserts current behaviour raises coverage and
-measures nothing. This is not hypothetical: the existing Lev4 LZ test asserts
-only `simple < periodic < random`, which holds for **both** LZ76 and LZ78, so it
-passed while validating the wrong measure.
+Each tier lands in its own commit with its own measured floor.
 
-Reuse the pattern already established in `tests/analysis/test_description_lengths_values.py`:
-the expected cost model is written out in the test file, independently of
-`src/description_lengths.py`, then compared.
+## Phase C — the architecture guard
 
-Where a module's correct output is a scientific judgement rather than an
-assertion (scrapers, figure generation), the test asserts **contracts** —
-schema, invariants, refusal on bad input, determinism under a fixed seed — not
-values. Any module where even that is not meaningful is **declared** in
-`VERIFICATION.md` with its reason rather than given a vacuous test.
+**Q1 owner:** none exists — `check_single_engine.sh` guards *named owners*, not
+*consumers of owners*. **Q3:** this is a genuinely new concept (does each package
+reach an owner?), so a new file is justified: `tools/check_core_loading.py`.
 
-### Phase 4 — prove the new tests bite
+**Granularity is the whole design.** A package-level guard would pass **7 of 8**
+packages and be near-vacuous — the comfortable-denominator failure this audit
+keeps removing. The guard therefore works at **file** granularity: it finds files
+implementing a core concept **by body fragment**, and requires each to import the
+owner or appear in the exception ledger with a reason.
 
-Extend the mutant catalogue in `audit/AUDIT03_R2_collapse/mutation_harness.py`
-to the newly covered modules, weighted toward the 16 on a published-number path.
-A module at 95% coverage whose mutants all survive has tests that execute code
-without checking it, and that must be visible.
+Every declared exception must carry an **elementwise measurement** of its
+divergence from the owner, with the disagreement count printed — declaring a
+divergence deliberate without measuring it is assertion, not evidence.
 
-Report the kill rate before and after Phase 3 on the same catalogue.
+Prints the file count as its denominator; refuses on zero; verified by planting a
+mirror.
 
-### Phase 5 — R4/R5 diagnostic *(measurement only, no fix attempted)*
+## Phase D — prove the new tests bite
 
-`3,977 of 5,204` corpus nodes (76.4%) carry a label outside the twelve families,
-their formulas being multi-valued threshold expressions recorded unevaluable at
-AUDIT02/H. Characterise, do not repair:
+Extend the mutant catalogue to the newly covered modules, weighted to Tier 1.
+**A module at 95 % coverage whose mutants all survive has tests that execute code
+without checking it, and that must be visible.** Report the kill rate before and
+after Phase B on the same catalogue, with survivors adjudicated and predictions
+registered **before** the run.
 
-- breakdown by **source format** (SBML / GINML / BNet / Cell Collective) and by
-  declared gate label;
-- how many are the **GINML multi-valued** nodes this audit just surfaced
-  (582 nodes, 108 files, 304 losing level rules) — i.e. how much of the blocker
-  is the binarisation defect rather than a genuinely new gate family;
-- how many fall under the proposed thirteenth family `REGULATORY_DNF`
-  (2,079 of 2,486 of the `CUSTOM` set).
+## Phase E — genesis
 
-Output: `audit/AUDIT04_corpus_diagnostic/FINDING.md` with counts and their
-denominators. **No description length is recomputed and no bio number is
-regenerated** — the author gate on R4 stands.
-
-### Phase 6 — ledger and ratchet
-
-`VERIFICATION.md`, `CORE.md`, `BASELINE.md` updated with every moved number and
-its cause. The coverage floor becomes a ratchet on the **complete** denominator.
-`CLAUDE.md` gains the new commands.
+`VERIFICATION.md`, `CORE.md`, `BASELINE.md` carry every moved number with its
+cause. The floor is locked at its final value. `CLAUDE.md` gains the new
+commands. **The result is tagged** — that tag is the genesis commit, and it is
+the first state in this repository where every one of the six properties above
+holds simultaneously.
 
 ---
 
 ## Critical files
 
-- `.coveragerc`, `pytest.ini` — scope and floor; the floor moves only after
-  Phase 1 makes the denominator complete.
-- `src/{analysis,complexity,dynamics,experiments,pipeline,scripts,stats}/__init__.py`
-  — new, seven files, the whole reason the instrument is blind.
-- `tools/check_verification_numbers.py` — enrich with the denominator guard
-  (**do not** write a second gate; this is the owner of "the document matches its
-  tools").
-- `audit/AUDIT03_R2_collapse/mutation_harness.py` — extend the catalogue.
-- `tests/analysis/` — new tests follow `test_description_lengths_values.py`.
-- `GOVERNANCE/VERIFICATION.md`, `GOVERNANCE/CORE.md`, `tests/MUnit/BASELINE.md`.
+- `.coveragerc` — `source` moves from the two owner import-names to `src/`;
+  `fail_under` becomes the ratchet.
+- `tools/check_coverage_ratchet.py` — **new owner**: global floor plus a per-file
+  95 % floor for every module in a completed tier. `fail_under` is global only, so
+  a global pass can hide a module at 0 %; that is exactly what this prevents.
+- `tools/check_core_loading.py` — new, Phase C.
+- `audit/AUDIT03_R2_collapse/mutation_harness.py` — extend the catalogue
+  (enrich the owner; `--report` already exists there).
+- `tests/analysis/`, `tests/MUnit/` — new tests; Wolfram gaps need MUnit.
+- `requirements.txt` — pin `requests`.
+- `GOVERNANCE/{VERIFICATION,CORE}.md`, `tests/MUnit/BASELINE.md`, `CLAUDE.md`.
 
 ## Verification
 
 ```bash
-# Phase 1 — the instrument, before anything is written
-venv/bin/python -m pytest -q tests/analysis --cov=src --cov-report=term
-#   files reported must be 54, not 25; the percentage must FALL
-zsh tools/run_closure.sh pure                 # denominator guard included
-#   plant: delete one __init__.py -> the guard must go red
-
-# Phase 3/4 — do the tests bite?
+# Phase A — did the holes close?
 venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py --all --resume
-#   kill rate per owner, with denominators; zero-kill owners named
+venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py --report
+#   unit-test kill rate must exceed 19/25; no owner may read NOT MEASURED
+
+# Phase B — per tier
+venv/bin/python -m pytest -q tests/ --cov=src --cov-report=term
+venv/bin/python tools/check_coverage_ratchet.py     # global + per-file floors
+#   plant: drop one test from a completed tier -> must go red
+
+# Phase C
+venv/bin/python tools/check_core_loading.py         # prints its file denominator
+#   plant: add a mirror of a core concept -> must go red
 
 # standing bars, unmoved
-make ci-local                                  # closure-wolfram + 69 MUnit
-venv/bin/ruff check --output-format=concise .  # enforced set clean
-make test-subprojects                          # 28 / 97 / 47 / 41
+zsh tools/run_closure.sh pure                       # 9/9
+make ci-local                                       # closure-wolfram + MUnit
+venv/bin/ruff check --output-format=concise .       # enforced set clean
+make test-subprojects                               # 28 / 97 / 47 / 41
 ```
 
-**Rules that hold throughout** (carried forward):
+**Rules that hold throughout.** Every gate refuses on empty input and prints its
+denominator. Every new gate is verified by planting its defect **in the same
+commit**. No number enters a document without its reference distribution in the
+same sentence, and none is typed by hand where a tool can produce it. Expected
+values come from an independent derivation. Archives under `doc/` and
+`workspaces/` are not rewritten. **No Claude co-authorship in any commit.**
 
-- Every gate **refuses on empty input** and **prints its denominator**.
-- Every new gate is verified by **planting the defect** in the same commit.
-- No number enters a document without its reference distribution in the same
-  sentence; no number is typed by hand where a tool can produce it.
-- Expected values come from an independent derivation, never from current output.
-- Archives under `doc/` and `workspaces/` are **not** rewritten.
-- No Claude co-authorship in any commit.
+**Acceptance.** All 52 modules at the 95 % floor over a complete 61-file
+denominator, or every shortfall declared with its reason; mutation kill rate
+reported per owner with **no owner unmeasured**; every subproject file
+implementing a core concept either imports the owner or is a declared, measured,
+pinned exception; every governance claim gated by a tool observed to fail.
 
-**Acceptance.** Coverage measured over **54 of 54** files with a guard that
-refuses a partial denominator; 95% floor met on that complete denominator or
-every shortfall declared with its reason; a kill rate reported per owner before
-and after the new tests, with survivors adjudicated; the corpus blocker
-characterised with counts and denominators.
-
-**Stop conditions.** No attempt to unblock R4/R5 — diagnosis only. No
-regeneration of bio numbers. No producer wiring for the 29 uncovered manuscript
-tables. No rewriting of `doc/` or `workspaces/` archives. No style lint beyond
-the enforced `F` set.
+**Stop conditions.** No attempt to unblock R4/R5 — diagnosis only, the author
+gate stands. No regeneration of bio numbers. No producer wiring for the 29
+uncovered manuscript tables. No rewriting of `doc/` or `workspaces/` archives. No
+style lint beyond the enforced `F` set. **No collapse of a divergence that has
+not first been measured elementwise.**

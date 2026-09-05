@@ -73,6 +73,98 @@ def test_repo_root_hardcoded_parents_two_would_have_been_wrong():
     assert cp.repo_root(one_level_down) == ROOT
 
 
+# ── BOTH markers, not either: the AUDIT04 mutation gap ──────────────────────
+#
+# AUDIT04 Phase A. The mutant `py-paths-root` loosens the ancestor test from
+# "holds src/ AND results/" to OR, and it was PRE-REGISTERED to survive: the
+# tests above pass start paths only under src/ and tools/, neither of which
+# holds either marker, so none of them can tell the two rules apart.
+#
+# It was killed -- but by `closure:wolfram` alone, with ZERO pytest kills. A
+# mutant caught only by a governance gate is not a tested mutant, so the gap is
+# real and these are the tests that close it.
+#
+# The expected values below come from the CONTRACT in the docstring ("the
+# nearest ancestor holding both src/ and results/"), not from running the code.
+
+def test_an_ancestor_with_only_results_is_not_the_root(tmp_path):
+    """`results/` alone must NOT satisfy the rule.
+
+    This is the exact shape that exists in this repository: `tests/` holds
+    `results/` and no `src/`. Under OR it would be returned as the root and
+    every consumer would build paths one level too deep.
+    """
+    proj = tmp_path / "proj"
+    (proj / "results").mkdir(parents=True)
+    (proj / "deep" / "deeper").mkdir(parents=True)
+    assert cp.repo_root(proj / "deep" / "deeper" / "x.py") != proj
+
+
+def test_an_ancestor_with_only_src_is_not_the_root(tmp_path):
+    """The mirror case: `src/` alone must not satisfy it either."""
+    proj = tmp_path / "proj"
+    (proj / "src").mkdir(parents=True)
+    (proj / "deep").mkdir(parents=True)
+    assert cp.repo_root(proj / "deep" / "x.py") != proj
+
+
+def test_an_ancestor_with_both_markers_is_the_root(tmp_path):
+    """The positive half. Without it the two tests above would pass for a
+    function that never returns anything."""
+    proj = tmp_path / "proj"
+    (proj / "src").mkdir(parents=True)
+    (proj / "results").mkdir(parents=True)
+    (proj / "a" / "b").mkdir(parents=True)
+    assert cp.repo_root(proj / "a" / "b" / "x.py") == proj
+
+
+def test_nearest_ancestor_wins_over_a_higher_one(tmp_path):
+    """"Nearest" is load-bearing: an outer directory also carrying both markers
+    must not win over an inner one."""
+    outer = tmp_path / "outer"
+    (outer / "src").mkdir(parents=True)
+    (outer / "results").mkdir(parents=True)
+    inner = outer / "sub" / "inner"
+    (inner / "src").mkdir(parents=True)
+    (inner / "results").mkdir(parents=True)
+    assert cp.repo_root(inner / "deep.py") == inner
+
+
+def test_a_start_under_tests_returns_the_repository_not_tests():
+    """The real-repository instance of the same defect, named in advance.
+
+    `tests/` carries `results/` but no `src/`, so OR returns `tests/` here.
+    """
+    assert not (ROOT / "tests" / "src").is_dir()
+    assert (ROOT / "tests" / "results").is_dir(), \
+        "precondition: this test is only meaningful while tests/results exists"
+    assert cp.repo_root(Path(__file__)) == ROOT
+
+
+def test_a_self_contained_subproject_is_its_own_root():
+    """Not a defect -- a consequence of the contract, pinned so it stays visible.
+
+    `index-deconvolution/` carries both markers, so it IS the nearest ancestor
+    holding both and is returned as the root for files inside it. Any consumer
+    living there resolves to the subproject, not to the repository.
+    """
+    sub = ROOT / "index-deconvolution"
+    if not ((sub / "src").is_dir() and (sub / "results").is_dir()):
+        pytest.skip("LOUD SKIP: index-deconvolution no longer carries both markers")
+    assert cp.repo_root(sub / "src" / "deconvolution.py") == sub
+
+
+def test_falls_back_when_no_ancestor_carries_both(tmp_path):
+    """The final `return` -- reached only when the walk finds nothing.
+
+    It must return this repository rather than raising or returning the walk's
+    last element, because callers build paths from the result unconditionally.
+    """
+    lonely = tmp_path / "nothing" / "here"
+    lonely.mkdir(parents=True)
+    assert cp.repo_root(lonely / "x.py") == ROOT
+
+
 # ── paper_root ──────────────────────────────────────────────────────────────
 
 def test_paper_root_is_under_the_repo_by_default():
