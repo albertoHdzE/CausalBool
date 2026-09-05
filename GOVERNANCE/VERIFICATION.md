@@ -85,7 +85,7 @@ hides the one that matters.
 > about whether the assertions are any good. The mutation harness is what
 > measures that.
 
-### This table now checks itself — for 5 of its 9 numbers
+### This page now checks itself — for 7 of its 11 numbers
 
 The header above claims none of these figures is typed by hand. **That sentence
 was false when it was written:** the `check_core_index.sh` row read `36 / 36`
@@ -93,18 +93,27 @@ while the guard itself printed `40 / 40`. Nothing compared the page to the tools
 it cites, so a governance document about verification was the least verified
 artefact in the repository.
 
-`tools/check_verification_numbers.py` (pure tier) parses this section and
-re-derives each claim from the tool named beside it. Of the **9 numeric rows in
-the table above** it checks **5** and **names the 4 it does not** — MUnit,
-coverage, the Wolfram parse and the manuscript snapshot are wolfram-tier or
-expensive, so they are declared unchecked rather than quietly skipped. Verified
-in all three states: a planted `36 / 36` exits `1`, an unparseable table exits
+`tools/check_verification_numbers.py` (pure tier) parses **§3 and §4** and
+re-derives each claim from the tool named beside it. Of the **11 numeric rows**
+it checks **7** and **names the 4 it does not** — MUnit, coverage, the Wolfram
+parse and the manuscript snapshot are wolfram-tier or expensive, so they are
+declared unchecked rather than quietly skipped. Verified in all three states: a
+planted wrong figure exits `1` printing both values, an unparseable table exits
 `2`, clean exits `0`.
 
-It has already earned its place twice. It rejected the stale `36 / 36`, and when
-this gate was itself added to `CORE.md` the owner count moved to `41` and the
-page went red until it was corrected — which is precisely the drift that had
-been invisible.
+It has already earned its place three times, and every one was a number in this
+very document:
+
+1. the stale `36 / 36` owner count, against a guard printing `40 / 40`;
+2. adding this gate to `CORE.md` moved that count to `41`, and the page went red
+   until corrected;
+3. **§4's lint debt read `176 / 47 / 47` against a measured `213 / 67 / 40`** —
+   because the first version of the gate parsed only §3, leaving the page's own
+   *"where verification is thin"* table as the part with no verification on it.
+
+The third is the instructive one. A gate whose scope is narrower than the
+document it guards will always leave a comfortable corner, and the corner it
+left was the table that admits weakness.
 
 Absent subproject virtualenvs report **UNKNOWN**, never a pass — the same
 three-state discipline as the glossary sync.
@@ -116,10 +125,37 @@ three-state discipline as the glossary sync.
 | gap | measured | why it is open |
 |---|---|---|
 | **Manuscript tables with a producer wired** | **5 of 34 (15 %)** | The gate's old summary read *"7 covered, 1 pending"*, which invites 88 %. The pending entry was an unenumerated catch-all. Wiring the remaining 29 is research-shaped: some have no producer at all. |
-| **Lint hygiene debt** | F401 **176** · F541 **47** · F841 **47** | Declared in `ruff.toml`, not hidden. Turning 270 findings red would block every push. Several need adjudication rather than deletion. |
+| **Lint hygiene debt** | F401 **213** · F541 **67** · F841 **40** | Declared in `ruff.toml`, not hidden, and now **checked** — these read 176/47/47 and had drifted unnoticed, because the first version of the gate parsed only §3. Several need adjudication rather than deletion. |
 | **`Trajectory_LZ.py` `k_max`** | initialised, never used | The function cites Kaspar & Schuster (1987), whose formulation *does* use it. This is a valid simplified variant, but deleting the variable would erase the signal that it diverges from its own citation. **A scientific question, not a lint one.** |
 | **Mutation kill rate** | in progress | See §5. |
+| **GINML multi-valued nodes** | **582 / 5882 nodes (9.9 %)**, in **108 / 178 files**, of which **304** lose level rules | Binarised to the `val="1"` rule. No longer silent: `GINMLParser` records `node_max_values`, `is_multivalued` and `discarded_value_rules`, and warns once per file. Whether these models belong in a Boolean corpus at all is a scientific question, not a parsing one. |
 | **Bio regeneration, R4.2–R4.5, R5** | blocked | 3,977 of 5,204 corpus nodes have no derivable Boolean truth table; `Q2.2` is an unresolved measurement conflict. |
+
+### Declared deltas from the AUDIT03-C defect triage
+
+Three defects were found by triaging `ruff F841` rather than deleting it — an
+unused variable was, in each case, the only visible trace of a dropped result.
+All three are fixed; the numbers they moved are recorded here so that a reader
+meeting an older figure knows it was changed deliberately.
+
+| what was wrong | measured effect | conclusion changed? |
+|---|---|---|
+| `Bayesian_Meta_Analysis.py` called itself adaptive above a fixed `prop_sd = [0.5, 0.5]` | acceptance **0.19 → 0.39–0.47** (optimum ≈0.44); ESS *σ* **2289 → 3104 (+36 %)**; *μ* **1.713 → 1.713** | **no** — HDI narrowed from `[1.280, 2.151]` to `[1.297, 2.132]` |
+| `c29_density_matched_null.py` re-seeded inside the `k` loop | Bernoulli null: k=17 draw nested in k=23 in **100 % of draws**, *r* = **+0.724** → **0 %**, *r* = −0.025. Exact-*k* samplers measurably unaffected (2.11 shared edges vs **2.15** expected) | **no** — Bernoulli share 72.1 → 70.9 %, all verdicts held |
+| `GINMLParser.py` discarded `maxvalue` | see the row above | not yet assessed |
+
+**The old HDI `[+1.280, +2.151]` is still quoted in three files under `doc/`**
+(`finalpaper/together_full.tex`, `finalpaper/sections/results_structural.tex`,
+`newIntPaper/bioProcessLev3.tex`). Those are provenance archives under the
+policy in `CLAUDE.md` and are **deliberately not rewritten** — an archive edited
+to match a later run stops being provenance. The active manuscripts under
+`papers/method/` do not quote this quantity.
+
+One gate was also fixed rather than a defect: `datasaurus_gates_c18_c29.py` G4
+asserted a Monte Carlo `z` to **±0.01** while declaring a sampling SE of ~0.16
+three lines above, so an honest re-run turned it red. It now asserts the
+*separation* the claim rests on — triangular null within 1.5 of zero, every
+density-matched null beyond −2.0 (worst −2.41).
 
 ---
 

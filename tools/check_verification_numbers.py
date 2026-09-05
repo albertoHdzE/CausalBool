@@ -47,7 +47,19 @@ CHECKERS: dict[str, str] = {
     "Owners named in": "core_index",
     "Test files classified": "test_manifest",
     "Replication packages": "collect_subprojects",
+    # Section 4 rows. The lint debt was recorded as 176/47/47 and had drifted to
+    # 213/67/40 unnoticed, because the first version of this gate parsed only
+    # section 3 -- the page's own "where verification is thin" table was the
+    # part with no verification on it.
+    "Lint hygiene debt": "lint_debt",
+    "Manuscript tables with a producer wired": "table_coverage",
 }
+
+# Rows carrying SEVERAL bold figures rather than one. Everywhere else only the
+# first bold group is read, because the coverage row's second group is a
+# threshold ("fails below **95 %**") and asserting a measurement against a
+# threshold is how a gate ends up checking the wrong thing.
+MULTI_BOLD = {"Lint hygiene debt"}
 
 SUBPROJECTS = [
     "imp-causal-paper",
@@ -112,6 +124,35 @@ def collect_subprojects() -> tuple[list[int] | None, str]:
     return counts, "pytest --collect-only in each replication package"
 
 
+def lint_debt() -> tuple[list[int] | None, str]:
+    """Counts for the three DECLARED-DEBT pyflakes rules, in doc order."""
+    rc, out = run([str(ROOT / "venv/bin/ruff"), "check", "--select", "F",
+                   "--output-format", "concise", "."], ROOT)
+    counts = {"F401": 0, "F541": 0, "F841": 0}
+    for ln in out.splitlines():
+        m = re.search(r"\s(F\d+)\s", ln)
+        if m and m.group(1) in counts:
+            counts[m.group(1)] += 1
+    if sum(counts.values()) == 0:
+        # Either the debt is genuinely cleared or ruff did not run. Those are
+        # different, and a gate must not treat "no output" as "nothing wrong".
+        return None, "UNKNOWN: ruff reported no F401/F541/F841 at all"
+    return [counts["F401"], counts["F541"], counts["F841"]], "ruff check --select F"
+
+
+def table_coverage() -> tuple[list[int] | None, str]:
+    rc, out = run([str(ROOT / "venv/bin/python"),
+                   str(ROOT / "tools/enumerate_paper_tables.py")], ROOT)
+    m = re.search(r"COVERED\s+(\d+)/(\d+)", out)
+    if not m:
+        return None, "UNKNOWN: enumerate_paper_tables.py printed no fraction"
+    cov, tot = int(m.group(1)), int(m.group(2))
+    # The doc writes this as "5 of 34 (15 %)", so the percentage is part of the
+    # claim and is checked too -- a right fraction with a wrong percentage
+    # beside it is still a document that misleads.
+    return [cov, tot, round(100 * cov / tot)], "enumerate_paper_tables.py"
+
+
 def core_index() -> tuple[list[int] | None, str]:
     rc, out = run(["zsh", str(ROOT / "tools/check_core_index.sh")], ROOT)
     m = re.search(r"(\d+)\s*/\s*(\d+)\s+paths", out)
@@ -131,7 +172,11 @@ def test_manifest() -> tuple[list[int] | None, str]:
 # ── the document side ───────────────────────────────────────────────────────
 
 ROW = re.compile(r"^\|(?P<label>[^|]+)\|(?P<claim>[^|]+)\|(?P<gate>[^|]*)\|\s*$")
-BOLD_NUM = re.compile(r"\*\*([\d\s/.,%]+)\*\*")
+# Any bold run. It used to be numeric-only, which silently skipped the table
+# coverage row ("**5 of 34 (15 %)**") because of the word "of". A bold run with
+# no digits in it yields no claim and is dropped below, so widening this cannot
+# invent claims -- it only stops the gate quietly ignoring rows it cannot parse.
+BOLD_NUM = re.compile(r"\*\*([^*]+)\*\*")
 
 
 def parse_claims(text: str) -> list[tuple[str, list[float], str]]:
@@ -146,7 +191,7 @@ def parse_claims(text: str) -> list[tuple[str, list[float], str]]:
     in_section = False
     for ln in text.splitlines():
         if ln.startswith("## "):
-            in_section = ln.startswith("## 3.")
+            in_section = ln.startswith("## 3.") or ln.startswith("## 4.")
             continue
         if not in_section:
             continue
@@ -154,13 +199,18 @@ def parse_claims(text: str) -> list[tuple[str, list[float], str]]:
         if not m:
             continue
         label = m.group("label").strip()
-        if label.startswith("---") or label.lower() == "what":
+        if label.startswith("---") or label.lower() in ("what", "gap"):
             continue
-        b = BOLD_NUM.search(m.group("claim"))
-        if not b:
+        claim = m.group("claim")
+        groups = BOLD_NUM.findall(claim)
+        if not groups:
             continue
-        nums = [float(x) for x in re.findall(r"\d+(?:\.\d+)?", b.group(1))]
-        out.append((label, nums, m.group("claim").strip()))
+        wanted = groups if any(k in label for k in MULTI_BOLD) else groups[:1]
+        nums = [float(x) for g in wanted
+                for x in re.findall(r"\d+(?:\.\d+)?", g)]
+        if not nums:
+            continue
+        out.append((label, nums, claim.strip()))
     return out
 
 
@@ -198,7 +248,7 @@ def main() -> int:
 
     total = len(claims)
     print(f"\nVERIFICATION-NUMBERS: checked {checked} of {total} numeric claims "
-          f"in VERIFICATION.md section 3.")
+          f"in VERIFICATION.md sections 3 and 4.")
     if unchecked:
         print("  NOT CHECKED HERE (wolfram tier or no cheap producer):")
         for u in unchecked:
