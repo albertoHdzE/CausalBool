@@ -60,12 +60,12 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | what | measured | gate |
 |---|---|---|
 | MUnit suite | **69 / 69**, 0 failures | `make suite` |
-| `tests/analysis` | **134** tests | CI asserts the count |
+| `tests/analysis` | **141** tests | CI asserts the count |
 | Owner line+branch coverage | **98.56 %** | fails below **95 %** |
 | `index-deconvolution` | **146** tests | CI asserts the count |
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
 | Wolfram files that parse | **153 / 153** | `check_wolfram_syntax.wl` |
-| Test files classified | **82 / 82** (69 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
+| Test files classified | **83 / 83** (70 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
 | Owners named in `CORE.md` that exist | **46 / 46** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
 | Lint, enforced rules | **clean** | `ruff check` |
