@@ -448,7 +448,7 @@ def main() -> None:
     print()
     print(f"  CSV raw     = {csv_raw_bytes} bytes")
     print(f"  zlib compr  = {csv_compressed_bytes} bytes = {zip_bits} bits")
-    print(f"  (paper ZIP  = 200 bytes = 1600 bits  [Wolfram artefact, see note])")
+    print("  (paper ZIP  = 200 bytes = 1600 bits  [Wolfram artefact, see note])")
     print()
     print(f"  D/zlib      = {results['Formula_over_ZIP']:.5f}")
     print(f"  D/H_total   = {results['Formula_over_Shannon']:.6f}")

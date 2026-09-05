@@ -82,7 +82,7 @@ def score_network(frame, columns, quiet, label):
     if not quiet:
         a, c = alg_gate, alg_cpt
         print(f"  {label}   ({len(columns)} binary nodes)")
-        print(f"    ALGORITHMIC (BDM model + data)")
+        print("    ALGORITHMIC (BDM model + data)")
         print(f"      gate network  {a['total_bits']:9.2f} = struct {a['structure_bdm']:7.2f}"
               f" + tables {a['table_bdm']:7.2f} + data {a['data_bits']:8.2f}")
         print(f"      CPT network   {c['total_bits']:9.2f} = struct {c['structure_bdm']:7.2f}"

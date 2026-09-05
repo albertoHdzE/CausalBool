@@ -125,7 +125,7 @@ def run(sizes=(7, 8, 9, 10), seeds_per_size=50):
     print(f"connectivity recovered exactly    : {100 * summary['connectivity_exact_rate']:.2f}% of nodes")
     print(f"gate function recovered exactly   : {100 * summary['gate_function_correct_rate']:.2f}% of nodes")
     print(f"ambiguity class size histogram    : {dict(sorted(ambiguity_hist.items()))}")
-    print(f"written: results/exp02_exact_recovery_summary.json (+ records)")
+    print("written: results/exp02_exact_recovery_summary.json (+ records)")
     return summary
 
 

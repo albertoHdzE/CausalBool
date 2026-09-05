@@ -320,9 +320,9 @@ def main() -> int:
     exact = sum(1 for r in ok if r.get("elementwise_exact"))
     ctrl = [r for r in ok if "control_fires" in r]
     fired = sum(1 for r in ctrl if r["control_fires"])
-    print(f"  REGULATORY_DNF reproduces the parsed truth table exactly:")
+    print("  REGULATORY_DNF reproduces the parsed truth table exactly:")
     print(f"    {exact} of {len(ok)} nodes, cell by cell over every 2^d input")
-    print(f"  NEGATIVE CONTROL, one literal dropped from the first clause:")
+    print("  NEGATIVE CONTROL, one literal dropped from the first clause:")
     print(f"    gate detected the change in {fired} of {len(ctrl)} nodes")
     if exact != len(ok):
         print("    ^ NOT 100%: functional completeness is violated somewhere,")

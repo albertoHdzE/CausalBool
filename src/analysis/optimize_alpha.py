@@ -61,7 +61,7 @@ def optimize_alpha(csv_path, output_dir):
         except:
             aucs.append(0.5)
             
-    print(f"Optimization Results:")
+    print("Optimization Results:")
     print(f"  Best Alpha (Z-score weighting): {best_alpha:.2f}")
     print(f"  Best AUC: {best_auc:.4f}")
     

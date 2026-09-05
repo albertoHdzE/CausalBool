@@ -119,7 +119,7 @@ try:
                 continue
             seen.add(key)
             print(f"      {g_} d={d_}: A={str(a_)[:46]} | B={str(bb_)[:46]}")
-    print(f"    complexity_analysis._eval_gate  vs  causalbool.apply_gate")
+    print("    complexity_analysis._eval_gate  vs  causalbool.apply_gate")
     print(f"    {cells} cells compared, {len(diffs)} disagree on VALUE, "
           f"{len(errs)} on the CALL CONTRACT")
     for x in diffs[:12]:

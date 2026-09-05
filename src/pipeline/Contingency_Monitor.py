@@ -113,7 +113,7 @@ class ContingencyMonitor:
     def _generate_report(metrics, action, reasons):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         lines = [
-            f"# Contingency Monitor Report",
+            "# Contingency Monitor Report",
             f"**Date:** {timestamp}",
             f"**Action:** {action}",
             f"**Description:** {ContingencyMonitor.ACTIONS.get(action, 'Unknown')}",

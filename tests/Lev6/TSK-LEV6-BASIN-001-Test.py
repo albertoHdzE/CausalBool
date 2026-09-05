@@ -56,7 +56,7 @@ class TestLevel6Basin(unittest.TestCase):
         # Run small sample for speed
         res = estimator.estimate_entropy(samples=50, max_steps=100, window_size=10)
         
-        print(f"\nBasin Entropy Test Results:")
+        print("\nBasin Entropy Test Results:")
         print(f"  Entropy: {res['entropy']:.4f}")
         print(f"  Num Attractors: {res['num_attractors']}")
         print(f"  Basin Sizes: {res['basin_sizes']}")

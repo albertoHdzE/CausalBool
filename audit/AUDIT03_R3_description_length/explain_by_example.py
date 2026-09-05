@@ -149,7 +149,7 @@ print(f"   {'TOTAL CAKE EATEN':<50}{running:>13.6f}   <- exactly 1")
 print("\n   Now delete field 2 and eat again:")
 print(f"   {'TOTAL CAKE EATEN without the in-degree field':<50}"
       f"{kraft_sum(n, False):>13.6f}   <- 3 cakes")
-print(f"""
+print("""
    3 cakes, for a 2-node network. And 3 = n + 1 = the number of possible
    in-degrees (0, 1, 2). That is not a coincidence and it is not a metaphor:
    we ate the cake once for d=0, once for d=1 and once for d=2, because we

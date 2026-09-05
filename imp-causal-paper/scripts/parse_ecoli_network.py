@@ -77,7 +77,7 @@ def main(confidence: str = "C") -> None:
     with open(adj_path, "w") as f:
         f.write("# RegulonDB 14.5 E. coli TF->gene network\n")
         f.write(f"# Confidence filter: {confidence}\n")
-        f.write(f"# Downloaded: 2026-07-03\n")
+        f.write("# Downloaded: 2026-07-03\n")
         f.write("# Columns: tf_name\tgene_name\tfunction\tconfidence\n")
         for u, v, d in sorted(G.edges(data=True)):
             f.write(f"{u}\t{v}\t{d.get('function','')}\t{d.get('confidence','')}\n")

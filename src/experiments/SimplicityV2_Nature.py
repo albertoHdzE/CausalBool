@@ -67,7 +67,7 @@ def main():
         nodes = net_data.get('nodes', [])
         
         if not nodes:
-            print(f"   [Skipping] No nodes found.")
+            print("   [Skipping] No nodes found.")
             continue
             
         # Prefer using CM (Adjacency Matrix) directly
@@ -85,7 +85,7 @@ def main():
                 adj = adjacency_from_edges(nodes, edges)
                 num_edges = len(edges)
             else:
-                print(f"   [Error] No valid CM or Edges list found.")
+                print("   [Error] No valid CM or Edges list found.")
                 continue
         
         # Calculate D_v2 (Structural Complexity)

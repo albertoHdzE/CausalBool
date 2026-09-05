@@ -321,7 +321,7 @@ def main():
 
             t_stat, p_val = stats.ttest_rel(results_df["D_tumor"], results_df["D_normal"])
             corr, p_corr = stats.pearsonr(results_df["Delta_D"], results_df["mutation_count"])
-            print(f"\nStatistical Summary:")
+            print("\nStatistical Summary:")
             print(f"  Mean D_normal: {results_df['D_normal'].mean():.2f}")
             print(f"  Mean D_tumor:  {results_df['D_tumor'].mean():.2f}")
             print(f"  Mean Delta_D:  {results_df['Delta_D'].mean():.2f}")
@@ -447,7 +447,7 @@ def main():
 
         if len(normals) >= 2 and len(tumors) >= 2:
             t_stat, p_val = stats.ttest_ind(normals, tumors, equal_var=False)
-            print(f"\nStatistical Summary:")
+            print("\nStatistical Summary:")
             print(f"  Mean D_normal: {normals.mean():.2f}")
             print(f"  Mean D_tumor:  {tumors.mean():.2f}")
             print(f"  Welch t-test:  t={t_stat:.2f}, p={p_val:.2e}")
@@ -518,7 +518,7 @@ def main():
     print(f"[{datetime.now()}] Results saved to {results_path}")
 
     t_stat, p_val = stats.ttest_rel(results_df["D_normal"], results_df["D_tumor"])
-    print(f"\nStatistical Summary:")
+    print("\nStatistical Summary:")
     print(f"  Mean D_normal: {results_df['D_normal'].mean():.2f}")
     print(f"  Mean D_tumor:  {results_df['D_tumor'].mean():.2f}")
     print(f"  Mean Delta_D:  {results_df['Delta_D'].mean():.2f}")

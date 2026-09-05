@@ -128,7 +128,7 @@ def run_experiment():
         print(f"Processing {filename}...")
         
         if not os.path.exists(os.path.join(data_dir, filename)):
-            print(f"  Skipping (not found)")
+            print("  Skipping (not found)")
             continue
             
         try:

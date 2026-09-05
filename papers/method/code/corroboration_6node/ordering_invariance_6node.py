@@ -99,7 +99,7 @@ def main() -> None:
     session_lines = [
         "In := phi06[j_] := 1 + FromDigits[Reverse[IntegerDigits[j - 1, 2, 6]], 2]",
         f"In := andLSB06 = {wl_list(and_lsb)}",
-        f"In := andPhi06 = Sort[phi06 /@ andLSB06]",
+        "In := andPhi06 = Sort[phi06 /@ andLSB06]",
         f"In := andMSB06 = {wl_list(and_msb)}",
         "",
         "(* Transported AND one-set under MSB ordering *)",
@@ -112,7 +112,7 @@ def main() -> None:
         f"Out = {verified_and}",
         "",
         f"In := xorLSB06 = {wl_list(xor_lsb)}",
-        f"In := xorPhi06 = Sort[phi06 /@ xorLSB06]",
+        "In := xorPhi06 = Sort[phi06 /@ xorLSB06]",
         f"In := xorMSB06 = {wl_list(xor_msb)}",
         "",
         "(* Transported XOR one-set under MSB ordering *)",

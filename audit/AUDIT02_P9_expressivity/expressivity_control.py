@@ -30,7 +30,7 @@ for r in range(256):
 json.dump(out, open('/tmp/cb_expressivity_control.json','w'), indent=1)
 ex=[o for o in out if o['exact']]
 print()
-print(f"ALL 256 ECA RULES, identical pipeline/knobs/seeds")
+print("ALL 256 ECA RULES, identical pipeline/knobs/seeds")
 print(f"  exact global-map recovery : {len(ex)}/256")
 print(f"  the 10 chosen rules       : {sum(1 for o in out if o['rule'] in RULES and o['exact'])}/10")
 fam=collections.Counter(tuple(o['gates']) for o in ex)

@@ -277,10 +277,10 @@ def main() -> int:
 
     part("A6 — THE ORDERING CLAIM, CHECKED DIRECTLY")
     viol = int(np.sum(m["D_schema"] >= m["BDM"]))
-    print(f"  For a deterministic system K(output) <= K(mechanism) + O(1), so")
-    print(f"  BDM -- an estimate of the behaviour's algorithmic content -- is")
-    print(f"  expected to EXCEED D_schema, the overshoot being BDM's known")
-    print(f"  block-sum overestimate rather than a defect of either.")
+    print("  For a deterministic system K(output) <= K(mechanism) + O(1), so")
+    print("  BDM -- an estimate of the behaviour's algorithmic content -- is")
+    print("  expected to EXCEED D_schema, the overshoot being BDM's known")
+    print("  block-sum overestimate rather than a defect of either.")
     print(f"  networks with D_schema >= BDM: {viol} of {COUNT}")
     ratio = m["BDM"] / m["D_schema"]
     print(f"  BDM / D_schema: median {np.median(ratio):.2f}, "

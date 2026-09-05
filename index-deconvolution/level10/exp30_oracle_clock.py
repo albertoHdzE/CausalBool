@@ -201,8 +201,8 @@ def run(quiet: bool = False) -> dict:
               f"{b['mean_fano_alpha_null']:.3f}; OOS Hawkes beats Poisson by "
               f"{b['mean_oos_gain_per_event']:+.3f} nats/event "
               f"({b['n_oos_positive']}/{len(rows)} positive).")
-        print(f"      (This confirms bitacora 20 on the oracle-relabelled set: "
-              f"oracle ~ pivots, so the oracle clock is the same self-exciting fractal.)\n")
+        print("      (This confirms bitacora 20 on the oracle-relabelled set: "
+              "oracle ~ pivots, so the oracle clock is the same self-exciting fractal.)\n")
 
         g = out["gbm_control"]
         print(f"   GBM control: oracle-clock branching {g['mean_branching']:.3f}, "

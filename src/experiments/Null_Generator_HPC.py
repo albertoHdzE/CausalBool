@@ -239,7 +239,7 @@ def main():
     
     args = parser.parse_args()
 
-    print(f"=== Phase 3: Massive Null Model Generation ===")
+    print("=== Phase 3: Massive Null Model Generation ===")
     print(f"Configuration: Max Networks={args.networks}, Nulls={args.nulls}, Time Limit={args.time_limit}s")
     
     results = process_networks(
