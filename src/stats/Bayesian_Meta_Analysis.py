@@ -17,9 +17,10 @@ OUTPUT_DIR = "results/stats"
 # (audit/AUDIT03_R2_collapse/probe_paths_parity.py). Guarded by
 # tools/check_single_engine.sh.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from causalbool_paths import repo_root as _repo_root  # noqa: E402
-from causalbool_paths import paper_root as _paper_root  # noqa: E402
 from causalbool_paths import paper_figures_dir as _paper_figures_dir  # noqa: E402
+# repo_root and paper_root were imported here too and never used -- residue of
+# the collapse, which replaced three local definitions with three imports rather
+# than with the one this module actually calls.
 
 
 FIGURE_DIR = os.getenv("BAYES_FIGURE_DIR", str(_paper_figures_dir()))
@@ -93,10 +94,30 @@ def metropolis_sampler(y, draws=5000, tune=1000, chains=4, initial_params=None):
         
         chain_samples = np.zeros((draws + tune, 2))
         accepted = 0
+        accepted_sampling = 0   # counted only after tuning, so the reported
+                                # rate describes the chain that was kept
         
-        # Proposal width (tuned manually or adaptive)
-        # Simple adaptive: standard deviation of recent samples
-        prop_sd = [0.5, 0.5] 
+        # AUDIT03-C. This read "Simple adaptive: standard deviation of recent
+        # samples" above a fixed literal that was never reassigned. The block
+        # below labelled "Adaptation during tuning" computed an acceptance rate
+        # and discarded it, with its only print commented out -- which is why
+        # ruff F841 was the thing that found this. The sampler was a FIXED-scale
+        # random walk describing itself as adaptive.
+        #
+        # Measured before the fix: acceptance 0.18-0.20 across four chains,
+        # against the ~0.44 optimum for a 2-parameter random-walk Metropolis
+        # (Roberts, Gelman & Gilks 1997). Convergence was never in doubt --
+        # R-hat 1.0014/1.0003 -- so this was an efficiency defect, not a wrong
+        # posterior. The proposal was simply too wide.
+        #
+        # Adaptation runs during TUNING ONLY and is frozen before the retained
+        # draws begin. Adapting while sampling would make the chain
+        # non-Markovian and void the stationary distribution, which is the
+        # standard trap here.
+        prop_sd = np.array([0.5, 0.5])
+        target_acc = 0.44
+        adapt_every = 100
+        accepted_window = 0
         
         for i in range(draws + tune):
             # Propose new mu
@@ -117,15 +138,28 @@ def metropolis_sampler(y, draws=5000, tune=1000, chains=4, initial_params=None):
                     current_sigma = prop_sigma
                     current_logprob = prop_logprob
                     accepted += 1
-            
+                    accepted_window += 1
+                    if i >= tune:
+                        accepted_sampling += 1
+
             chain_samples[i] = [current_mu, current_sigma]
-            
-            # Adaptation during tuning
-            if i < tune and i % 100 == 0 and i > 0:
-                acc_rate = accepted / (i + 1)
-                # print(f"    Step {i}: Acceptance Rate {acc_rate:.2f}")
-        
-        print(f"  Chain {chain+1} finished. Acceptance Rate: {accepted/(draws+tune):.2f}")
+
+            # Adaptation during tuning, then frozen.
+            if i < tune and i % adapt_every == 0 and i > 0:
+                window_rate = accepted_window / adapt_every
+                # Multiplicative Robbins-Monro style step on the log scale:
+                # above target -> widen, below target -> narrow. Bounded so a
+                # pathological window cannot collapse or explode the proposal.
+                prop_sd = prop_sd * float(np.clip(
+                    np.exp(window_rate - target_acc), 0.8, 1.25))
+                prop_sd = np.clip(prop_sd, 1e-3, 1e3)
+                accepted_window = 0
+
+        acc_sampling = accepted_sampling / draws
+        print(f"  Chain {chain+1} finished. Acceptance Rate: "
+              f"{accepted/(draws+tune):.2f} overall, {acc_sampling:.2f} on the "
+              f"retained draws (target {target_acc}); "
+              f"final proposal sd [{prop_sd[0]:.3f}, {prop_sd[1]:.3f}]")
         traces.append(chain_samples[tune:])
         
     return np.array(traces)
@@ -225,7 +259,8 @@ def plot_results(traces, y_data):
     
     # Generate predictive samples
     x_range = np.linspace(min(y_data)-5, max(y_data)+5, 100)
-    ppc_samples = []
+    # (An empty `ppc_samples` list was collected here and never appended to or
+    # read. The check itself is real -- 100 posterior draws are plotted below.)
     for _ in range(100):
         idx = np.random.randint(len(flat_mu))
         m = flat_mu[idx]
