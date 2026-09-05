@@ -77,6 +77,15 @@ sharing code.
 | all description-length variants A–E, `bdm_2d`, the `pybdm` pin | `src/description_lengths.py` |
 | repository / paper / figures path resolution | `src/causalbool_paths.py` |
 | index-set deconvolution, `minimal_dnf` (Quine–McCluskey) | `index-deconvolution/src/deconvolution.py` |
+| **LZ76** complexity (Kaspar & Schuster) | `src/complexity/Trajectory_LZ.py` |
+| **LZ78** phrase-dictionary size | `src/complexity/Scaling_LZ_Tools.py` (`compute_lz78_dictionary_size`) |
+
+> **These two are deliberately NOT one owner.** Both were labelled "LZ76,
+> Kaspar & Schuster (1987)"; measured over 300 random strings they agree with
+> each other on **10** and with the published LZ76 on **255** and **6**
+> respectively. Non-zero elementwise disagreement means two concepts, so the
+> rule in §6 step 3 applies: give them two names rather than collapse them.
+> `compute_lz_complexity` survives as a forwarder, verified identical on 300/300.
 
 ### Declared Python exceptions
 

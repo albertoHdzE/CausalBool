@@ -79,53 +79,43 @@ class ComplexityScaler:
         }
 
     @staticmethod
-    def compute_lz_complexity(binary_string):
+    def compute_lz78_dictionary_size(binary_string):
         """
-        Computes Lempel-Ziv Complexity (LZ76) of a binary string.
-        Implementation based on Kaspar and Schuster (1987).
+        Number of phrases in the LZ78 parse of a binary string.
+
+        The string is read left to right and cut whenever the phrase under
+        construction has not been seen before; the return value is the size of
+        the resulting phrase dictionary.
+
+        THIS IS NOT LZ76, AND IT IS NOT KASPAR & SCHUSTER (1987), both of which
+        this function's docstring previously claimed. AUDIT03-C measured the
+        difference rather than assuming it:
+
+          against the published Kaspar-Schuster LZ76   6 / 300 random strings
+          against src/complexity/Trajectory_LZ.py     10 / 300 random strings
+
+        The structured cases show why the two are not interchangeable. For
+        "0" * 32, LZ76 returns 2 -- the phrases "0" and "000...0" -- whereas the
+        LZ78 parse returns 7, because it must cut a new phrase every time the
+        run lengthens. LZ78 dictionary size on a constant string grows like
+        sqrt(n); LZ76 does not grow at all.
+
+        Both are legitimate complexity measures. They are DIFFERENT measures,
+        so under the monolithic-code law they get two names rather than one
+        owner: 2 per cent elementwise agreement is not drift between copies, it
+        is two concepts wearing one label.
+
+        What was actually here before: an abandoned Kaspar-Schuster attempt.
+        The loop it opened contained `pass` followed by
+        `break  # Re-implementing below`, so it never executed a single
+        iteration, and `l` and `k_max` were its leftovers -- not, as I first
+        recorded them, markers of a deliberately simplified variant.
         """
         s = binary_string
         n = len(s)
         if n == 0:
             return 0
-            
-        # AUDIT03-C. `l` and `k_max` are initialised and never read. Both are
-        # load-bearing in the Kaspar & Schuster (1987) formulation this cites,
-        # so their absence marks a SIMPLIFIED VARIANT of the published
-        # algorithm, not a typo. They are kept, with this note, because deleting
-        # them would erase the only evidence that the implementation diverges
-        # from its own citation.
-        #
-        # This is the SECOND file in which the same divergence appears -- see
-        # src/complexity/Trajectory_LZ.py:26 -- and there are three files in
-        # src/ carrying LZ code (also src/pipeline/Contingency_Monitor.py).
-        # Whether they are one concept with one owner is an open question
-        # recorded in GOVERNANCE/VERIFICATION.md, and a scientific one, not a
-        # lint one.
-        c = 1
-        l = 1        # noqa: F841 - see above; divergence marker, not dead code
-        i = 0
-        k = 1
-        k_max = 1    # noqa: F841 - see above
-        
-        while True:
-            if c + i + k > n: # Check bounds
-                break
-                
-            # Look for s[i+k-1] in s[l+k-1]
-            # Wait, standard Kaspar-Schuster algo:
-            # Let S be the string.
-            # c: complexity counter
-            # i: index of current position
-            # l: length of current substring
-            pass
-            # Let's use a simpler Pythonic set-based approach for LZ76 (dictionary size)
-            # or exact Kaspar-Schuster.
-            break # Re-implementing below
-        
-        # Simplified LZ76 (Vocabulary Size)
-        # Parse s into phrases such that each phrase is the shortest substring 
-        # not seen before.
+
         phrases = set()
         i = 0
         current_phrase = ""
@@ -138,15 +128,34 @@ class ComplexityScaler:
                 current_phrase = ""
             i += 1
             
-        # Normalization (optional, but raw LZ is count)
         return count
 
     @staticmethod
+    def compute_lz_complexity(binary_string):
+        """DEPRECATED forwarder to compute_lz78_dictionary_size.
+
+        Kept rather than deleted, per the collapse protocol in
+        GOVERNANCE/CORE.md section 6: a forwarder preserves the provenance of
+        every result already produced under the old name. The name is retained
+        only for compatibility -- it is misleading, because what it returns is
+        an LZ78 dictionary size and not an LZ76 complexity.
+
+        For LZ76 use src/complexity/Trajectory_LZ.py, which agrees with the
+        published Kaspar-Schuster algorithm on 255 of 300 random strings.
+        """
+        return ComplexityScaler.compute_lz78_dictionary_size(binary_string)
+
+    @staticmethod
     def normalized_lz(binary_string):
-        """Returns LZ complexity normalized by n/log2(n)"""
+        """LZ78 dictionary size normalised by n/log2(n).
+
+        The normalisation is the right one for this quantity -- an LZ78
+        dictionary over a binary alphabet also grows as n/log2(n) for a random
+        string -- so the divisor survives the relabelling above unchanged.
+        """
         n = len(binary_string)
         if n < 2: return 0
-        lz = ComplexityScaler.compute_lz_complexity(binary_string)
+        lz = ComplexityScaler.compute_lz78_dictionary_size(binary_string)
         norm = n / np.log2(n)
         return lz / norm
 

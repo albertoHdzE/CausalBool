@@ -66,7 +66,7 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
 | Wolfram files that parse | **153 / 153** | `check_wolfram_syntax.wl` |
 | Test files classified | **82 / 82** (69 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
-| Owners named in `CORE.md` that exist | **41 / 41** | `check_core_index.sh` |
+| Owners named in `CORE.md` that exist | **43 / 43** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
 | Lint, enforced rules | **clean** | `ruff check` |
 
@@ -127,7 +127,7 @@ three-state discipline as the glossary sync.
 | **Manuscript tables with a producer wired** | **5 of 34 (15 %)** | The gate's old summary read *"7 covered, 1 pending"*, which invites 88 %. The pending entry was an unenumerated catch-all. Wiring the remaining 29 is research-shaped: some have no producer at all. |
 | **Lint hygiene debt** | enforced **0** · exempted-path residue F401 **152** · F841 **32** | **No longer debt: F401, F541 and F841 are now ENFORCED**, so a new one fails CI. F541 went 67 → 0 everywhere; F401 and F841 → 0 in every production path. The residue sits only in paths exempted **by name with a reason** in `ruff.toml`. The two figures are separate on purpose — reporting only "enforced 0" would hide the residue, which is how the old declared debt drifted 176/47/47 → 213/67/40 unseen. |
 | **Where the remaining 154 F401 live** | replication packages **85** · `index-deconvolution/level*` **33** · `tests/` Lev4–7 runners **12** · `audit/` scripts **9** · frozen `workspaces/` **6** · `doc/` archives **6** · `experiments/` **3** | Every one is a replication package with its own pinned environment, a **dated experiment record**, or a provenance archive. Editing those rewrites history rather than fixing code, which is why they are declared instead of cleared. |
-| **`Trajectory_LZ.py` `k_max`** | initialised, never used | The function cites Kaspar & Schuster (1987), whose formulation *does* use it. This is a valid simplified variant, but deleting the variable would erase the signal that it diverges from its own citation. **A scientific question, not a lint one.** |
+| ~~**`Trajectory_LZ.py` `k_max`**~~ **RESOLVED — and it was the other file that was wrong** | `Trajectory_LZ` agrees with published LZ76 on **255/300**; `Scaling_LZ_Tools` on **6/300** | See below. The unused `k_max` was a real signal, but it pointed at a different defect from the one I first recorded. |
 | **Mutation kill rate** | in progress | See §5. |
 | **GINML multi-valued nodes** | **582 / 5882 nodes (9.9 %)**, in **108 / 178 files**, of which **304** lose level rules | Binarised to the `val="1"` rule. No longer silent: `GINMLParser` records `node_max_values`, `is_multivalued` and `discarded_value_rules`, and warns once per file. Whether these models belong in a Boolean corpus at all is a scientific question, not a parsing one. |
 | **Bio regeneration, R4.2–R4.5, R5** | blocked | 3,977 of 5,204 corpus nodes have no derivable Boolean truth table; `Q2.2` is an unresolved measurement conflict. |
@@ -151,6 +151,43 @@ meeting an older figure knows it was changed deliberately.
 policy in `CLAUDE.md` and are **deliberately not rewritten** — an archive edited
 to match a later run stops being provenance. The active manuscripts under
 `papers/method/` do not quote this quantity.
+
+### Two measures wearing one label (AUDIT03-C)
+
+Chasing the unused `k_max` led to a second LZ implementation and then to a
+mislabelled measure. Measured over 300 random binary strings of length 8–80,
+against the published Kaspar & Schuster (1987) LZ76:
+
+| implementation | agrees with LZ76 | what it actually computes |
+|---|---|---|
+| `src/complexity/Trajectory_LZ.py` | **255 / 300** | LZ76. All 45 misses are **exactly +1**, never another value — the trailing-phrase convention, which differs between published implementations. Structured cases agree exactly. |
+| `src/complexity/Scaling_LZ_Tools.py` | **6 / 300** | **LZ78 phrase-dictionary size**, while its docstring claimed LZ76 and cited Kaspar & Schuster. |
+
+The two agree with each other on **10 / 300**. The diagnostic case: for `"0"*32`
+LZ76 returns **2** and the LZ78 parse returns **7**, because a constant string
+forces a new phrase every time the run lengthens — LZ78 dictionary size grows
+like √n there, LZ76 does not grow at all.
+
+What was in `Scaling_LZ_Tools` was **an abandoned attempt, not a variant**: the
+Kaspar–Schuster loop it opened contained `pass` followed by
+`break  # Re-implementing below`, so it never executed one iteration, and `l`
+and `k_max` were its leftovers. **My first record of this was wrong** — I called
+both files "simplified variants of the same algorithm"; they are two different
+measures, and only one file was mislabelled.
+
+Resolved under the `monolithic-code` law rather than by collapsing: 2 %
+elementwise agreement is not drift between copies, it is **two concepts wearing
+one label**, so they get two names. `compute_lz78_dictionary_size` is the honest
+name; `compute_lz_complexity` remains as a **forwarder** (verified identical on
+300/300) so the provenance of earlier results survives.
+
+**Impact is small, and stated rather than implied.** `compute_scaling_exponent`
+— the only path into the Nature-track experiment — does **not** use LZ at all;
+it uses `UniversalDv2Encoder`. The mislabelled function's sole consumer is one
+Lev4 test, which asserts only the ordering *simple < periodic < random*. That
+ordering holds for both measures, **so the test passes either way and could
+never have detected the mislabel** — a weak assertion validating the wrong
+quantity. No published number is affected.
 
 One gate was also fixed rather than a defect: `datasaurus_gates_c18_c29.py` G4
 asserted a Monte Carlo `z` to **±0.01** while declaring a sampling SE of ~0.16
