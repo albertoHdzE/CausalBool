@@ -190,16 +190,26 @@ future run can be judged elementwise rather than against a stale total.
 | 2026-09-04 | **AUDIT03/R3.a-b** | **`OK=54 FAIL=1 TOTAL=55`** | MUnit ledger *unmoved*. Declared delta in the **paper-number gate**: `D_schema` becomes the primary reported measure and `D_formula` is relabelled *length under the twelve-family catalogue*, in both manuscripts. By value multiset: **31 gained, 5 lost, and the 5 losses are exactly the demoted `D_formula` ratios** — `0.234` (`D_formula/BDM`), `1.35`/`1.33` (`/ZIP`, `/H_total`) and `4.3`×4 (the old BDM factor), replaced by `2.49`, `43.0`, `44.0`. The phrase *two orders of magnitude* is withdrawn: it is `1.87` orders under the catalogue and `1.63` without it. Evidence: `audit/AUDIT03_R3_description_length/bdm_vs_dschema.py` |
 | 2026-09-04 | **AUDIT03/R2b** | **`OK=54 FAIL=1 TOTAL=55`** | ledger totals unchanged; **two pinned values move, one deliberately does not.** The eight description-length sites are collapsed onto `Integration\`BioMetrics\`` (Wolfram) and `src/description_lengths.py` (Python). `Theory/TSK-THEORY-002` `Dbits` 42.4413 → 55.3662 (`5·log2 6`) and `Theory/TSK-THEORY-004` 28.509775 → 37.797487 (`4·log2 5`); both files had lost the in-degree field, so both were pricing a code with Kraft sum `n+1`. Both tests assert **inequalities**, so no verdict moved — checked, not assumed. `TSK-THEORY-004` now reads **37.79748738387639, identical to `TSK-BIO-METRICS-001`**, which is the cross-check that the collapse landed. `Mixed/TSK-MIXED-001` is the **control**: it already had the field, so delegating must leave `D_formula` at `135.66005207461194`, and it does. Paper-number gate 136 → 138 (ratio synchronisation only: `43.0`→`43.04`, `44.0`→`43.96`, plus the formal paper's new `D_schema` row). Evidence: `GOVERNANCE/DESCRIPTION_LENGTHS.md` §1a, §2, §4a |
 
+| 2026-09-04 | **AUDIT03-C** | **`OK=69 FAIL=0 TOTAL=69`** | **The total moves for a declared reason: membership is now DECLARED in `MANIFEST.tsv` (82 files = 69 test + 13 producer + 0 quarantine) rather than discovered by a `*Tests.m` glob that excluded 23 of 78 files.** No verdict was flipped to reach `FAIL=0`; `TopologiesTests.m` was repaired (one surplus `]`, see below) and the previously-unexecuted files were classified, not silenced. Declared value deltas in this pass, none of which moved a conclusion: `Bayesian_Meta_Analysis` acceptance 0.19 → 0.39–0.47 with ESS *σ* 2289 → 3104 and *μ* unchanged at 1.713 (95% HDI [1.280, 2.151] → [1.297, 2.132]); `c29_density_matched_null` Bernoulli share 72.1 → 70.9 % after its two nulls stopped sharing a stream (nesting 100 % → 0 %, draw-wise *r* +0.724 → −0.025). Evidence: `GOVERNANCE/VERIFICATION.md` §4 |
 | 2026-09-04 | **AUDIT03 duplication collapse** | **`OK=54 FAIL=1 TOTAL=55`** | ledger unchanged; **two declared behavioural corrections, both outside the running suite.** (1) `C_formula` had **six** definition sites and two had drifted (`TSK-EXPER-004`, `TSK-ALGO-003`: no `KOFN`, no `CANALISING`, both falling to `1+d`, **20 of 72 `(gate,d)` cells disagreeing**). Collapsed onto `Integration\`BioMetrics\`FormulaComponentWeight`; the two drifted files' numbers move, which is the correction — neither is executed by the runner. The published `C_formula = 23` is reproduced and `theory002`'s `C -> 11.` is unchanged. (2) `LoadJSONNetwork` had **five** definition sites; two read only the `gates` **classification label** while two carried the AUDIT02/H `logic` correction. The **superset** is now the owner (`src/scripts/NetworkIO.m`), so `GlobalStatsPipeline.m` and `GlobalValidationAnalysis.m` are **corrected**, not merely deduplicated: 234/234 networks load, 0 failures, and **5,354 of 6,581 nodes (81.4%)** carry a label outside the twelve families. Evidence: `audit/AUDIT03_R2_collapse/DUPLICATION.md` |
 
-**Coverage gap found 2026-09-04, not yet closed.** `run-tests.sh` globs
-`*Tests.m`, so **23 of 78 MUnit files never execute** — every `TSK-EXPER-*`, both
-`TSK-STOCH-*`, three `TSK-COMPARE-*`, `TSK-PATTERN-Ordering-Invariance.m` and
-others. `TSK-ALGO-004-ClosedFormSetAudit.m` is among them but *is* run by
-`verify-paper` as an artefact producer. `TSK-EXPER-004` additionally exports
-`Status "OK"` unconditionally. Renaming them would bring ~23 files into the
-suite at once with unknown results, so it is a decision rather than a cleanup.
-Full list: `audit/AUDIT03_R2_collapse/DUPLICATION.md`.
+~~**Coverage gap found 2026-09-04, not yet closed.** `run-tests.sh` globs
+`*Tests.m`, so **23 of 78 MUnit files never execute**…~~
+
+**CLOSED 2026-09-04 (AUDIT03-B/C).** Membership is no longer *discovered* by a
+glob; it is **declared** in `tests/MUnit/MANIFEST.tsv`, which covers all of
+`tests/` rather than only `tests/MUnit`:
+
+```
+82 files  =  69 test  +  13 producer  +  0 quarantine
+```
+
+`tools/check_test_manifest.sh` goes red on any unclassified file, so nothing can
+be silently excluded again. The 13 producers are **declared, not hidden**: they
+generate artefacts for `doc/` and the paper gates rather than asserting, and two
+of them (`TSK-ALGO-PerfTable`, `TSK-COMPARE-CHARTS`) were slated for archiving
+in the plan until the evidence refused it — both are second-stage
+post-processors with live consumers, so they were reclassified, not removed.
 
 **Known flake mode (AUDIT03, 2026-09-04).** Running the full suite *concurrently
 with* `pdflatex` and several pytest suites produced
@@ -217,3 +227,71 @@ serially before investigating anything else.
 did not "die before the export", it never parsed at all. A surplus `]` in
 `progressBar`. It is now green, and `tools/check_wolfram_syntax.wl` is in
 `make closure` so a non-parsing file cannot sit behind a green suite again.
+
+---
+
+## The CI split, and what a green badge does not mean (AUDIT03-C)
+
+GitHub-hosted runners have **no licensed WolframKernel**, so roughly half this
+programme's verification cannot run in CI. Pretending otherwise would be worse
+than having no CI at all, so the split is explicit and CI says so in its own
+output.
+
+| tier | members | in CI |
+|---|---|---|
+| **pure** | paper-number gate · GLOSSARY sync · GLOSSARY conformance · single-engine guard · core index · test manifest · table coverage · verification numbers | **yes** |
+| **wolfram** | `.m`/`.wl` syntax (153 files) · paper artefacts · cross-language parity (135/135) · description-length parity | **no** |
+| **suite** | these 69 MUnit tests | **no** |
+
+`make ci-local` runs exactly what CI cannot, and the pre-push hook
+(`make hooks`) refuses a push whose Wolfram tier or MUnit suite is red. Bypass
+with `--no-verify`, which prints what went unchecked.
+
+**`make closure` used to be unable to fail.** Every member was invoked with a
+`-@` recipe prefix, which tells make to ignore the error, so the target exited
+`0` even if all nine members failed; one member piped into `head`, so its status
+was `head`'s. `tools/run_closure.sh` replaced it and is verified in all three
+states — planted failure → exit 1, absent sibling → `UNKNOWN` reported as
+unknown, clean → 0.
+
+### Selective running
+
+Membership is declared, so selection is too:
+
+```
+make sections                       # the 12 MUnit sections
+make suite-section S=Gates          # one section
+make suite-section S=Analysis G=NOT # one gate within a section
+make test-python K=<expr>           # a -k expression over tests/analysis
+```
+
+`suite-section` **refuses** on an empty `S` rather than passing `--section ""`
+through and reporting success over zero tests.
+
+**What selection still is not.** Section names are a proxy for impact, not a
+measurement of it. The owner→test map is being measured by the mutation harness,
+which records for each mutant the exact tests that caught it.
+
+## Mutation status (AUDIT03-C, in progress)
+
+`audit/AUDIT03_R2_collapse/mutation_harness.py` plants 28 declared mutants
+across the owners in `GOVERNANCE/CORE.md` and reports how many the verification
+set kills. **Predictions were registered before the rate was known** (commit
+`8888376`), because adjudicating a survivor after seeing it is how "equivalent
+mutant" becomes unfalsifiable.
+
+Partial evidence so far, from a run lost to a reboot at 10/28 — every mutant
+scored was **KILLED**, by 6 to 17 tests each. That run is **not** a result: it
+measured `5b51a46`, and only complete runs are cited. The current run measures
+`c9bc412`.
+
+**A run lost is a defect in the harness, not bad luck.** Results were written
+once at the end, so a reboot four hours in destroyed everything. Results are now
+written after every mutant with a `complete` flag, keyed to `head_sha`, and
+`--resume` reuses prior work only on an exact sha match — results for different
+code are not results for this code.
+
+**Three of the 28 are reachability probes**, not semantic mutants: they rename a
+public function away, so a kill proves only that something imports it. They are
+reported separately and **excluded from the headline rate**, because folding
+trivially-killable mutants into a score is how a mutation number gets inflated.

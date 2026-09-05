@@ -217,3 +217,38 @@ byte-identical. Guarded by the `myAnd` body signature in
 
 > **A self-test that mis-evaluates three quarters of the catalogue is worse than
 > no self-test, because its name invites trust.**
+
+---
+
+## The stale-artefact class, reintroduced by the tool built to detect it (AUDIT03-C, 2026-09-04)
+
+This audit spent a pass removing a specific defect: `results/` was never cleared
+between runs, so a test that crashed or exported nothing was scored by the
+`Status.txt` left behind by its **last successful run**. That is how three files
+stayed green after a collapse had left them unable to parse at all.
+
+Then I reintroduced it myself. Running a mutation by hand, I restored the
+mutated `Gates.m` but **not the artefacts it had produced**, leaving five
+`Status.txt` files reading `FAIL` and a rollup of `OK=64 FAIL=5 TOTAL=69` in the
+working tree. Committing that would have recorded a **false red baseline** —
+the mirror image of the false green the pass had just removed.
+
+**Why it is recorded here rather than quietly fixed.** It is a fresh instance of
+the class this document exists to track, and its cause is instructive: the tool
+built to test whether the suite catches defects was itself capable of leaving
+defects behind. A harness that mutates a repository must not run *in* that
+repository.
+
+Design consequences, each now enforced in `mutation_harness.py`:
+
+| the failure | what it forced |
+|---|---|
+| artefacts left behind by a hand-run mutation | the harness runs in a **git worktree**; the working tree is never touched, and the worktree is dropped on exit including on interrupt |
+| a run started while the fix for a baseline failure sat uncommitted | `assert_head_matches_working_tree()` **refuses** — the worktree is built from HEAD, so measuring HEAD while the disk differs describes code that no longer exists |
+| a kernel segfault under memory pressure counted as a kill | `FAIL: X -> PASS (kernel exit=139)` is filtered; note `-> PASS`, the test passed and the kernel died. Counting it would inflate the one number the harness exists to get right |
+| routing each mutant to the tier of its own language | removed entirely. It produced a **false coverage gap**: four Python mutants "survived" because the gate that guards them executes a Wolfram producer and therefore sits in the other tier |
+| a reboot four hours into a run destroying all ten completed mutants | results written after **every** mutant, with a `complete` flag and a `head_sha`, and `--resume` that reuses prior work only on an exact sha match |
+
+> **The rule the incident yields: a tool that can leave residue must be run
+> somewhere residue does not matter.** Isolation was not fastidiousness; it was
+> the only thing that would have prevented a false ledger entry.
