@@ -16,8 +16,11 @@ from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
 
 PROCESSED_DIR = Path(__file__).resolve().parents[2] / "data" / "bio" / "processed"
 RESULTS_DIR   = Path(__file__).resolve().parents[2] / "results" / "bio"
-RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 NULL_STATS_FILE = RESULTS_DIR / "null_stats.json"
+
+# AUDIT04 Phase 2: RESULTS_DIR.mkdir() ran here, at module level, so importing
+# this module created results/bio/ as a side effect. Deferred to the point of
+# writing, where it belongs.
 
 class TimeoutException(Exception):
     pass
@@ -110,6 +113,8 @@ def load_existing_results() -> List[Dict[str, Any]]:
     return []
 
 def save_results(results: List[Dict[str, Any]]):
+    # Created here rather than at import; see the note beside RESULTS_DIR.
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     # Atomic write to avoid corruption
     temp_file = NULL_STATS_FILE.with_suffix(".tmp")
     with open(temp_file, "w") as f:
@@ -259,6 +264,9 @@ def main():
             "z_deg_mean": float(np.mean(z_deg)) if z_deg else 0.0,
             "z_gate_mean": float(np.mean(z_gate)) if z_gate else 0.0
         }
+        # The module-level mkdir was removed (it ran on import); every write
+        # site must now guarantee the directory itself.
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         with open(RESULTS_DIR / "null_summary.json", "w") as f:
             json.dump(summary, f, indent=2)
         print(f"Global Z means: ER={summary['z_er_mean']:.3f}, DEG={summary['z_deg_mean']:.3f}, GATE={summary['z_gate_mean']:.3f}")

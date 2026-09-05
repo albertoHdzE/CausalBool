@@ -119,6 +119,7 @@ the single survivor is the wrong file.
 | `tools/check_wolfram_syntax.wl` | every `.m`/`.wl` parses — the suite could not see a syntax error, and three broken files sat behind a green run |
 | `tools/check_test_manifest.sh` | every file under `tests/` is classified in `MANIFEST.tsv`; no file can be silently excluded again |
 | `tools/enumerate_paper_tables.py` | the honest table-coverage fraction of the active manuscripts (measured **5/34**, not the 7/8 the old summary implied) |
+| `tools/check_import_safety.py` | no module under `src/` does work when imported — two reseeded the **global** RNG on import (measured: a caller seeding 12345 got a different stream purely from the import) and two created output directories. A necessary-not-sufficient static screen, and it says so |
 | `tools/check_verification_numbers.py` | `VERIFICATION.md` against the **live output of the tools it names** — the page claimed `36/36` owners while its own guard printed `40/40`. Distinct from `snapshot_paper_numbers.py`, which detects *change* against a stored baseline and would have passed the stale claim forever |
 | `tools/run_closure.sh` | runs every gate and **can actually fail** — the Makefile's `-@` prefixes meant `make closure` exited 0 even if all members failed |
 | `.github/workflows/ci.yml` | the pure tier on every push; states plainly that the Wolfram tier is **not** covered |

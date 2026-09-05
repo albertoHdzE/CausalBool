@@ -35,7 +35,7 @@ would be worse than not having CI at all.
 
 | tier | members | runs in CI |
 |---|---|---|
-| **pure** | paper-number gate · GLOSSARY sync · GLOSSARY conformance · single-engine guard · core index · test manifest · table coverage · **verification numbers** | **yes** |
+| **pure** | paper-number gate · GLOSSARY sync · GLOSSARY conformance · single-engine guard · core index · test manifest · table coverage · **verification numbers** · **import safety** | **yes** |
 | **wolfram** | `.m`/`.wl` syntax (153 files) · paper artefacts (executes producers) · cross-language parity (135/135) · description-length parity | **no** |
 | **suite** | 69 MUnit tests | **no** |
 
@@ -66,7 +66,7 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
 | Wolfram files that parse | **153 / 153** | `check_wolfram_syntax.wl` |
 | Test files classified | **82 / 82** (69 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
-| Owners named in `CORE.md` that exist | **43 / 43** | `check_core_index.sh` |
+| Owners named in `CORE.md` that exist | **44 / 44** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
 | Lint, enforced rules | **clean** | `ruff check` |
 
@@ -127,6 +127,7 @@ three-state discipline as the glossary sync.
 | **Manuscript tables with a producer wired** | **5 of 34 (15 %)** | The gate's old summary read *"7 covered, 1 pending"*, which invites 88 %. The pending entry was an unenumerated catch-all. Wiring the remaining 29 is research-shaped: some have no producer at all. |
 | **Lint hygiene debt** | enforced **0** · exempted-path residue F401 **152** · F841 **32** | **No longer debt: F401, F541 and F841 are now ENFORCED**, so a new one fails CI. F541 went 67 → 0 everywhere; F401 and F841 → 0 in every production path. The residue sits only in paths exempted **by name with a reason** in `ruff.toml`. The two figures are separate on purpose — reporting only "enforced 0" would hide the residue, which is how the old declared debt drifted 176/47/47 → 213/67/40 unseen. |
 | **Coverage of `src/` as a whole** | **6 %** over **61** files — 5,699 statements, 5,374 missed; 26 of 53 modules are imported by no test at all | The 98.56 % in §3 is real but covers **99 statements in two files**. This row exists so the scoped figure can never be read as the unscoped one. **This figure was first published as 13 % and was wrong** — coverage only enumerates unexecuted files inside importable packages, and seven directories under `src/` had no `__init__.py`, so the report covered **25 of 54** files. With the markers added it covers **61 of 61** and the true figure is **6 %**. The gate now **fails** (not "unknown") when report and disk disagree: a percentage over a partial denominator is not unknown, it is wrong. |
+| **Modules that cannot be imported in the declared environment** | **3 of 53** — `BulkScraper`, `CurateNatureDataset`, `grn_data_pipeline` | All three need `requests`, which `requirements.txt` deliberately does **not** pin because they are orphaned scrapers reaching external services. They therefore sit at 0 % and no test can reach them until that is resolved — a Phase 3 decision, recorded here rather than discovered later. |
 | **Where the remaining 154 F401 live** | replication packages **85** · `index-deconvolution/level*` **33** · `tests/` Lev4–7 runners **12** · `audit/` scripts **9** · frozen `workspaces/` **6** · `doc/` archives **6** · `experiments/` **3** | Every one is a replication package with its own pinned environment, a **dated experiment record**, or a provenance archive. Editing those rewrites history rather than fixing code, which is why they are declared instead of cleared. |
 | ~~**`Trajectory_LZ.py` `k_max`**~~ **RESOLVED — and it was the other file that was wrong** | `Trajectory_LZ` agrees with published LZ76 on **255/300**; `Scaling_LZ_Tools` on **6/300** | See below. The unused `k_max` was a real signal, but it pointed at a different defect from the one I first recorded. |
 | **Mutation kill rate** | in progress | See §5. |

@@ -74,6 +74,11 @@ run_pure() {
   # sentence "none of these numbers is typed by hand" was itself typed by hand.
   run_member pure "verification numbers (VERIFICATION.md against the tools it cites)" \
     venv/bin/python tools/check_verification_numbers.py
+  # AUDIT04 Phase 2: importing a module must not DO anything. Two modules
+  # reseeded the global RNG on import and two created directories, so a test
+  # that merely imported them changed the process it ran in.
+  run_member pure "import safety (no module does work when imported)" \
+    venv/bin/python tools/check_import_safety.py
 }
 
 # ── WOLFRAM TIER — needs a licensed local kernel; NOT run by CI ──────────────

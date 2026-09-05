@@ -36,9 +36,18 @@ TCGA_SWEEP_THRESHOLDS = os.getenv("TCGA_SWEEP_THRESHOLDS", "")
 TCGA_COUNTS_ROOT = os.getenv("TCGA_COUNTS_ROOT", "data/cancer/tcga_paired")
 TCGA_BASE_NETWORK_PATH = os.getenv("TCGA_BASE_NETWORK_PATH", "data/bio/processed/egfr_signaling.json")
 
-# Ensure directories
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(FIGURE_DIR, exist_ok=True)
+# AUDIT04 Phase 2: these two makedirs ran at module level, so merely importing
+# this module created results/ and figures/ directories as a side effect. A test
+# that imports it would leave those directories behind -- the stale-artefact
+# class this programme has already been bitten by. They now run inside main(),
+# where the output is actually about to be written.
+
+
+def ensure_output_dirs():
+    """Create the output directories. Called by main(), never by import."""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(FIGURE_DIR, exist_ok=True)
+
 
 def load_network(path):
     with open(path, 'r') as f:
@@ -117,6 +126,7 @@ def _mutate_cm(base_cm: np.ndarray, nodes: list, diff: pd.Series, thr: float) ->
     return cm, int(mutated)
 
 def main():
+    ensure_output_dirs()
     print(f"[{datetime.now()}] Starting Cancer Corruption Analysis...")
     results = []
     plot_prefix = os.path.splitext(str(OUTPUT_BASENAME))[0]

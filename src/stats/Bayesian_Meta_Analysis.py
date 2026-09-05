@@ -29,7 +29,16 @@ CHAINS = 4
 DRAWS = 5000
 TUNE = 1000
 
-np.random.seed(SEED)
+# AUDIT04 Phase 2: `np.random.seed(SEED)` used to run HERE, at module level, so
+# merely importing this module overwrote the global numpy seed of whatever
+# imported it. Measured: a caller that seeded 12345 and drew three numbers got
+# [0.929616, 0.316376, 0.183919] without the import and
+# [0.374540, 0.950714, 0.731994] with it -- the import alone changed the
+# caller's random stream. In a test suite that makes results depend on IMPORT
+# ORDER, which is the least debuggable kind of non-determinism.
+#
+# Seeding now happens inside main(), so running the script is unchanged and
+# importing it is inert.
 
 def load_data(filepath):
     print(f"[{datetime.now()}] Loading data from {filepath}...")
@@ -275,6 +284,9 @@ def plot_results(traces, y_data):
     print(f"[{datetime.now()}] Saved PPC plot.")
 
 def main():
+    # Seeded here, not at module level -- see the note beside SEED above.
+    np.random.seed(SEED)
+
     # Load Data
     z_scores, networks = load_data(INPUT_FILE)
     
