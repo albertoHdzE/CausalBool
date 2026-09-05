@@ -60,7 +60,14 @@ CHECKERS: dict[str, str] = {
 # first bold group is read, because the coverage row's second group is a
 # threshold ("fails below **95 %**") and asserting a measurement against a
 # threshold is how a gate ends up checking the wrong thing.
-MULTI_BOLD = {"Lint hygiene debt"}
+MULTI_BOLD = {"Lint hygiene debt", "Coverage of `src/` as a whole"}
+
+# A checker may return this prefix in its `how` string to mean "the measurement
+# itself is invalid", which is a FAILURE and not an UNKNOWN. UNKNOWN is for a
+# thing this repository cannot know -- an absent sibling repository, an absent
+# WolframKernel. A coverage percentage computed over a partial denominator is
+# not unknown, it is wrong, and it must go red.
+FATAL = "REFUSED:"
 
 SUBPROJECTS = [
     "imp-causal-paper",
@@ -179,11 +186,22 @@ def table_coverage() -> tuple[list[int] | None, str]:
 
 
 def src_coverage() -> tuple[list[int] | None, str]:
-    """Whole-of-src coverage: REPORTED, never gated.
+    """Whole-of-src coverage: REPORTED, never gated -- but its DENOMINATOR is.
 
-    Gating at 13 per cent would be theatre. The number exists so the scoped
-    98.56 per cent in section 3 -- which covers 99 statements in two files --
-    can never be mistaken for the coverage of the programme.
+    Gating the percentage at 5 per cent would be theatre. The number exists so
+    the scoped 98.56 per cent in section 3 -- which covers 99 statements in two
+    files -- can never be mistaken for the coverage of the programme.
+
+    THE DENOMINATOR IS THE PART THAT MUST NOT DRIFT. AUDIT04 Phase 1: coverage
+    can only enumerate files it has not executed when they sit inside an
+    importable package. Seven directories under src/ had no __init__.py, so the
+    report covered 25 of 54 files and the published figure was 13 per cent over
+    less than half the code. With the markers in place the same command reports
+    61 of 61 files and 5 per cent.
+
+    A percentage over a partial denominator is worse than no percentage, so this
+    REFUSES when the report and the disk disagree rather than returning a
+    prettier number. That is the failure mode the seven missing markers were.
     """
     rc, out = run([str(ROOT / "venv/bin/python"), "-m", "pytest", "-q",
                    "tests/analysis", "--cov=src", "--cov-report=term",
@@ -192,8 +210,16 @@ def src_coverage() -> tuple[list[int] | None, str]:
     m = re.search(r"^TOTAL\s+(\d+)\s+(\d+)\s+\d+\s+\d+\s+(\d+)%", out, re.M)
     if not m:
         return None, "UNKNOWN: no TOTAL line from coverage"
-    pct = int(m.group(3))
-    return [pct], "pytest --cov=src"
+
+    reported = len(re.findall(r"^src/\S+\.py\s", out, re.M))
+    on_disk = sum(1 for p in (ROOT / "src").rglob("*.py")
+                  if "external" not in p.parts and "__pycache__" not in p.parts)
+    if reported != on_disk:
+        return None, (f"REFUSED: coverage reports {reported} files but {on_disk} "
+                      f"exist under src/. A directory without __init__.py is "
+                      f"invisible to coverage, so the percentage would be "
+                      f"computed over a partial denominator.")
+    return [int(m.group(3)), on_disk], "pytest --cov=src (denominator checked)"
 
 
 def core_index() -> tuple[list[int] | None, str]:
@@ -280,7 +306,10 @@ def main() -> int:
             continue
         got, how = globals()[fn_name]()
         if got is None:
-            unknown.append(f"{label}: {how}")
+            if how.startswith(FATAL):
+                bad.append(f"{label}\n      {how}")
+            else:
+                unknown.append(f"{label}: {how}")
             continue
         checked += 1
         want = [int(x) for x in nums]
