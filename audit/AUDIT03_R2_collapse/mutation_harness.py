@@ -341,12 +341,62 @@ def apply_mutant(m: Mutant, wt: Path) -> int:
     return n
 
 
+def head_sha() -> str:
+    rc, out = sh(["git", "rev-parse", "HEAD"], ROOT)
+    return out.strip()
+
+
+def write_results(selected: list[Mutant], sha: str, complete: bool) -> None:
+    """Persist after EVERY mutant, not once at the end.
+
+    AUDIT03-C, added after losing a run. The machine rebooted four hours into a
+    28-mutant run; /tmp was cleared, taking the log with it, and because results
+    were written only on completion, all ten finished mutants were gone. A
+    measurement that costs four hours must survive a power cut, and the fix is
+    four lines. `complete` records whether the file describes a finished run, so
+    a partial file can never be mistaken for a final rate.
+    """
+    scored = [m for m in selected if m.result in ("KILLED", "SURVIVED")]
+    killed = [m for m in scored if m.result == "KILLED"]
+    RESULTS.write_text(json.dumps(
+        {"head_sha": sha, "complete": complete,
+         "n_selected": len(selected), "n_scored": len(scored),
+         "n_killed": len(killed),
+         "n_survived": len(scored) - len(killed),
+         "n_not_applied": sum(1 for m in selected if m.result == "NOT-APPLIED"),
+         "mutants": [{"id": m.mid, "owner": m.owner, "tier": m.tier,
+                      "result": m.result, "killed_by": m.killed_by,
+                      "seconds": round(m.seconds, 1), "note": m.note}
+                     for m in selected]}, indent=2))
+
+
+def load_previous(sha: str) -> dict[str, dict]:
+    """Already-scored mutants from a previous run of the SAME commit.
+
+    Keyed on the sha because a result for different code is not a result for
+    this one. A mismatch discards everything rather than silently mixing two
+    measurements.
+    """
+    if not RESULTS.exists():
+        return {}
+    try:
+        d = json.loads(RESULTS.read_text())
+    except Exception:
+        return {}
+    if d.get("head_sha") != sha:
+        return {}
+    return {m["id"]: m for m in d.get("mutants", [])
+            if m.get("result") in ("KILLED", "SURVIVED", "NOT-APPLIED")}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--only", default=None, help="owner substring")
     ap.add_argument("--smoke", type=int, default=0)
+    ap.add_argument("--resume", action="store_true",
+                    help="skip mutants already scored for this exact HEAD")
     a = ap.parse_args()
 
     if a.list:
@@ -370,35 +420,64 @@ def main() -> int:
     print("Isolated in a git worktree; the working tree is never touched.\n")
 
     assert_head_matches_working_tree()
+    sha = head_sha()
+    print(f"HEAD: {sha[:12]}")
+
+    done: dict[str, dict] = {}
+    if a.resume:
+        done = load_previous(sha)
+        if done:
+            print(f"RESUMING: {len(done)} mutant(s) already scored for this "
+                  f"exact commit; they will not be re-run.")
+            for m in selected:
+                if m.mid in done:
+                    p = done[m.mid]
+                    m.result, m.killed_by = p["result"], p["killed_by"]
+                    m.seconds = p.get("seconds", 0.0)
+        else:
+            print("RESUMING: nothing reusable (no prior file, or it was for a "
+                  "different commit -- results for other code are not results "
+                  "for this one).")
+
+    todo = [m for m in selected if not m.result]
+    if not todo:
+        print("Every selected mutant is already scored for this commit.")
+        write_results(selected, sha, complete=True)
+        return 0
+
     wt = make_worktree()
     try:
-        # Baseline: the tier must be GREEN before any mutant, or a "kill" would
-        # merely be the pre-existing red.
-        for tier in sorted({m.tier for m in selected}):
-            green, fails = run_tier(tier, wt)
-            print(f"baseline {tier}: {'GREEN' if green else 'RED ' + str(fails)}")
-            if not green:
-                print("REFUSED: baseline is not green; every mutant would score "
-                      "as killed for the wrong reason.")
-                return 2
+        # Baseline ONCE. This used to loop over the tier labels and so ran the
+        # whole verification set twice, ~28 minutes for an identical answer,
+        # because run_tier stopped routing by tier when the routing bias was
+        # removed and this loop was not updated with it.
+        green, fails = run_tier("all", wt)
+        print(f"baseline: {'GREEN' if green else 'RED ' + str(fails)}")
+        if not green:
+            print("REFUSED: baseline is not green; every mutant would score "
+                  "as killed for the wrong reason.")
+            return 2
         print()
 
-        for i, m in enumerate(selected, 1):
+        for i, m in enumerate(todo, 1):
             sh(["git", "checkout", "--", "."], wt)
             sh(["git", "clean", "-fd", "results", "figures"], wt)
             hits = apply_mutant(m, wt)
             if hits == 0:
                 m.result = "NOT-APPLIED"
-                print(f"[{i}/{len(selected)}] {m.mid}: NOT APPLIED "
+                print(f"[{i}/{len(todo)}] {m.mid}: NOT APPLIED "
                       f"(pattern absent) -- excluded from the denominator")
+                write_results(selected, sha, complete=False)
                 continue
             t0 = time.time()
             green, fails = run_tier(m.tier, wt)
             m.seconds = time.time() - t0
             m.killed_by = fails
             m.result = "SURVIVED" if green else "KILLED"
-            print(f"[{i}/{len(selected)}] {m.owner}/{m.mid}: {m.result} "
-                  f"({len(fails)} test(s), {m.seconds:.0f}s)")
+            print(f"[{i}/{len(todo)}] {m.owner}/{m.mid}: {m.result} "
+                  f"({len(fails)} test(s), {m.seconds:.0f}s)", flush=True)
+            # Persist immediately: a reboot must cost one mutant, not the run.
+            write_results(selected, sha, complete=False)
     finally:
         sh(["git", "checkout", "--", "."], wt)
         drop_worktree()
@@ -425,15 +504,8 @@ def main() -> int:
         for m in survived:
             print(f"  {m.owner}/{m.mid}\n      {m.note}")
 
-    RESULTS.write_text(json.dumps(
-        {"n_selected": len(selected), "n_scored": len(scored),
-         "n_killed": len(killed), "n_survived": len(survived),
-         "n_not_applied": len(notapp),
-         "mutants": [{"id": m.mid, "owner": m.owner, "tier": m.tier,
-                      "result": m.result, "killed_by": m.killed_by,
-                      "seconds": round(m.seconds, 1), "note": m.note}
-                     for m in selected]}, indent=2))
-    print(f"\nwritten: {RESULTS.relative_to(ROOT)}")
+    write_results(selected, sha, complete=True)
+    print(f"\nwritten: {RESULTS.relative_to(ROOT)}  (complete, HEAD {sha[:12]})")
     return 0
 
 
