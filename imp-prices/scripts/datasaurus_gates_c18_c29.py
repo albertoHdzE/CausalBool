@@ -87,10 +87,14 @@ def gate_g1_dev21(path):
 
 def gate_g1_dev22(path):
     """Null distributions with the observed anchors marked on the same axis."""
-    rng17 = np.random.default_rng(42)
-    m17 = sample_exact_k(rng17, OFFDIAG, 17, 4000)
-    rng23 = np.random.default_rng(42)
-    m23 = sample_exact_k(rng23, OFFDIAG, 23, 4000)
+    # AUDIT03-C: keyed on (42, k) to match the owner,
+    # experiments/c29_density_matched_null.py. Both k previously used the bare
+    # seed 42. For exact-k sampling that was measurably harmless (2.11 shared
+    # edges per draw against 2.15 expected under independence), but the same
+    # pattern in the owner's Bernoulli sampler nested the two nulls in 100% of
+    # draws, so no sampler here is left depending on that accident.
+    m17 = sample_exact_k(np.random.default_rng([42, 17]), OFFDIAG, 17, 4000)
+    m23 = sample_exact_k(np.random.default_rng([42, 23]), OFFDIAG, 23, 4000)
     v17 = np.array([bdm_bits(m) for m in m17])
     v23 = np.array([bdm_bits(m) for m in m23])
     fig, ax = plt.subplots(figsize=(9.5, 4.5))
@@ -146,8 +150,6 @@ def main():
     check("G1", "DEV-2.2 render exists: null histograms with observed anchors",
           os.path.exists(n_path), n_path)
 
-    prim17 = C29["samplers"]["k=17"]["offdiag_182"]
-    prim23 = C29["samplers"]["k=23"]["offdiag_182"]
     share_ok = all(abs(C29["primary_vs_prose"][k]["recomputed"]
                        - C29["primary_vs_prose"][k]["prose"]) > 0 for k in
                    ("mean_17", "mean_23"))
@@ -156,7 +158,14 @@ def main():
     check("G2", "common coordinate held (shape AND density matched); moments are "
                 "CLOSE-not-equal and are REPORTED as such, never rounded into agreement",
           share_ok,
-          "primary null means 188.58/212.26 vs prose 189.39/214.83 - published as "
+          # AUDIT03-C: read from the artefact, never retyped. This string held
+          # "188.58/212.26" as a literal and went stale the moment the null was
+          # re-run -- a gate quoting a number it had not measured.
+          f"primary null means "
+          f"{C29['primary_vs_prose']['mean_17']['recomputed']}/"
+          f"{C29['primary_vs_prose']['mean_23']['recomputed']} vs prose "
+          f"{C29['primary_vs_prose']['mean_17']['prose']}/"
+          f"{C29['primary_vs_prose']['mean_23']['prose']} - published as "
           "DIVERGENT/CLOSE in results/c29_density_matched_null.json, not silently "
           "matched")
 
@@ -166,13 +175,25 @@ def main():
           "sampling SE makes the prose-vs-recomputed gap (~2.6 bits) real, not "
           "noise; documented in DEV-2.2 entry")
 
-    scoped = (C29["conclusion_robustness"][0]["z_gate"], )
     tri = [r for r in C29["conclusion_robustness"] if r["sampler"] == "upper_tri_91"][0]
     check("G4", "robustness claim SCOPED to matched conventions (triangular/DAG "
                 "null breaks the ~3sigma reading and is excluded with that stated)",
-          abs(tri["z_gate"] + 0.75) < 0.01 and robust,
-          f"matched samplers: z_gate in [-3.35,-2.40], share 66-72%; triangular "
-          f"z_gate={tri['z_gate']} shown in artifact and excluded from the claim's scope")
+          # AUDIT03-C. This asserted abs(tri z_gate + 0.75) < 0.01 -- a Monte
+          # Carlo quantity pinned to two decimals, with a tolerance TIGHTER than
+          # the ~0.16-bit sampling SE that G3 declares three lines above. A
+          # legitimate re-run moved it to -0.76 and the gate went red without
+          # anything scientific having changed. What the claim actually rests on
+          # is SEPARATION: the triangular null sits near zero while every
+          # density-matched null sits beyond -2. That is what is asserted now,
+          # and both bounds are interior, not knife-edges.
+          abs(tri["z_gate"]) < 1.5
+          and max(r["z_gate"] for r in C29["conclusion_robustness"]
+                  if r["sampler"] != "upper_tri_91") < -2.0
+          and robust,
+          f"matched samplers: z_gate all < -2.0 (worst "
+          f"{max(r['z_gate'] for r in C29['conclusion_robustness'] if r['sampler'] != 'upper_tri_91')}), "
+          f"share 66-72%; triangular z_gate={tri['z_gate']} is within 1.5 of zero, "
+          f"shown in artifact and excluded from the claim's scope")
 
     out = dict(date="2026-08-24", task="AUDIT01 ratification of DEV-2.1/DEV-2.2",
                verdict=("ALL GATES PASS" if all(c["result"] == "PASS"

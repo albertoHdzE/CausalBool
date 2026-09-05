@@ -1,11 +1,17 @@
 {
   "config": {
     "draws_per_null": 20000,
-    "seed": 42,
     "shape": [
       14,
       14
     ],
+    "seed_scheme": "default_rng([sampler_seed, k]) -- one independent stream per (sampler, k)",
+    "sampler_seeds": {
+      "offdiag_182": 42,
+      "diag196": 43,
+      "upper_tri_91": 44,
+      "bernoulli_p_matched": 45
+    },
     "primary_sampler": "exact-k uniform over 182 off-diagonal cells"
   },
   "observed": {
@@ -28,121 +34,121 @@
   "samplers": {
     "k=17": {
       "offdiag_182": {
-        "mean": 188.58,
-        "sd": 22.54,
+        "mean": 188.69,
+        "sd": 22.45,
         "n": 20000
       },
       "diag196": {
-        "mean": 190.44,
-        "sd": 22.05,
+        "mean": 190.16,
+        "sd": 22.12,
         "n": 20000
       },
       "upper_tri_91": {
         "mean": 153.32,
-        "sd": 18.14,
+        "sd": 18.04,
         "n": 20000
       },
       "bernoulli_p_matched": {
-        "mean": 187.25,
-        "sd": 29.43,
+        "mean": 187.49,
+        "sd": 29.26,
         "n": 20000,
-        "mean_edges_actual": 17.02
+        "mean_edges_actual": 17.01
       }
     },
     "k=23": {
       "offdiag_182": {
-        "mean": 212.26,
-        "sd": 17.78,
+        "mean": 212.34,
+        "sd": 17.53,
         "n": 20000
       },
       "diag196": {
-        "mean": 213.66,
-        "sd": 17.09,
+        "mean": 213.51,
+        "sd": 17.13,
         "n": 20000
       },
       "upper_tri_91": {
-        "mean": 168.4,
-        "sd": 16.04,
+        "mean": 168.46,
+        "sd": 15.84,
         "n": 20000
       },
       "bernoulli_p_matched": {
-        "mean": 211.1,
-        "sd": 22.73,
+        "mean": 210.93,
+        "sd": 22.58,
         "n": 20000,
-        "mean_edges_actual": 23.03
+        "mean_edges_actual": 22.94
       }
     }
   },
   "primary_vs_prose": {
     "mean_17": {
       "prose": 189.39,
-      "recomputed": 188.58,
+      "recomputed": 188.69,
       "verdict": "CLOSE"
     },
     "sd_17": {
       "prose": 22.75,
-      "recomputed": 22.54,
+      "recomputed": 22.45,
       "verdict": "CLOSE"
     },
     "mean_23": {
       "prose": 214.83,
-      "recomputed": 212.26,
+      "recomputed": 212.34,
       "verdict": "CLOSE"
     },
     "sd_23": {
       "prose": 17.4,
-      "recomputed": 17.78,
+      "recomputed": 17.53,
       "verdict": "CLOSE"
     },
     "density_share_bits": {
       "prose": 21.82,
-      "recomputed": 23.68,
+      "recomputed": 23.65,
       "verdict": "DIVERGENT"
     },
     "z_gate": {
       "prose": -3.35,
-      "recomputed": -3.14,
+      "recomputed": -3.19,
       "verdict": "DIVERGENT"
     },
     "z_cpt": {
       "prose": -2.9,
-      "recomputed": -2.89,
+      "recomputed": -2.91,
       "verdict": "CLOSE"
     },
     "density_share_pct": {
       "prose": 66.0,
-      "recomputed": 71.6,
+      "recomputed": 71.5,
       "verdict": "DIVERGENT"
     }
   },
   "conclusion_robustness": [
     {
       "sampler": "offdiag_182",
-      "share_bits": 23.68,
-      "share_pct": 71.6,
-      "z_gate": -3.14,
-      "z_cpt": -2.89
+      "share_bits": 23.65,
+      "share_pct": 71.5,
+      "z_gate": -3.19,
+      "z_cpt": -2.91
     },
     {
       "sampler": "diag196",
-      "share_bits": 23.22,
-      "share_pct": 70.2,
-      "z_gate": -3.35,
-      "z_cpt": -3.04
+      "share_bits": 23.35,
+      "share_pct": 70.6,
+      "z_gate": -3.33,
+      "z_cpt": -3.02
     },
     {
       "sampler": "upper_tri_91",
-      "share_bits": 15.08,
-      "share_pct": 45.6,
-      "z_gate": -0.75,
-      "z_cpt": -1.65
+      "share_bits": 15.14,
+      "share_pct": 45.8,
+      "z_gate": -0.76,
+      "z_cpt": -1.66
     },
     {
       "sampler": "bernoulli_p_matched",
-      "share_bits": 23.85,
-      "share_pct": 72.1,
-      "z_gate": -2.4,
-      "z_cpt": -2.17
+      "share_bits": 23.44,
+      "share_pct": 70.9,
+      "z_gate": -2.41,
+      "z_cpt": -2.19
     }
   ],
   "verdict": "DIVERGENT: mean_17, sd_17, mean_23, sd_23, density_share_bits, z_gate, z_cpt, density_share_pct (see AUDIT_FIXING_PLAN_01 Appendix D DEV-2.2)"
