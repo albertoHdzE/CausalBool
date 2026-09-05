@@ -39,28 +39,58 @@ exclude = [
 #   * audit/AUDIT02_Q1_reproducibility/sweep_jobs.py obtained its `run` helper by
 #     exec-ing /tmp/q1_sweep.py, a temp file long gone -- an audit harness that
 #     could not run at all, and would have reported WILL-NOT-RUN for every job.
-select = ["F821", "F811", "F632", "F502", "F522", "F524", "F702"]
-
-# MEASURED DEBT, declared rather than hidden. Counted 2026-09-04 over 370 files:
 #
-#   F401 unused import ................ 218
-#   F541 f-string without placeholders . 67
-#   F841 unused local variable ......... 47   (11 in owner paths)
+# AUDIT03-C, second pass: F401, F541 and F841 are now ENFORCED as well. They
+# were declared debt at 218/67/47 (a count which had itself drifted -- the real
+# figures were 213/67/47). The debt was then triaged rather than deleted, which
+# is what turned it into three scientific findings; see GOVERNANCE/VERIFICATION.md.
 #
-# Not enabled yet, and NOT because they do not matter -- F841 is the same shape
-# as the dead `a, b = params["pair"]` unpack this audit removed. They are held
-# back because turning 332 findings red would block every push, and because
-# several need adjudication rather than deletion. One is already known:
+#   F541  67 -> 0 everywhere. All were stray f prefixes on literal headers.
+#   F841  47 -> 0 in every production path.
+#   F401 213 -> 0 in every production path (154 remain, all in the paths
+#              exempted below by name).
 #
-#   src/complexity/Trajectory_LZ.py:26  `k_max` is initialised and never used.
-#   The function cites Kaspar & Schuster (1987), whose formulation DOES use it.
-#   This implementation is a valid simplified variant, but deleting the variable
-#   would erase the signal that it diverges from its own citation. That is a
-#   scientific question, not a lint one, and it is recorded as an open item.
-#
-# Clearing this debt is a declared later pass, not a silent ignore.
+# THIS IS THE RATCHET, and it matters more than any single fix. A NEW unused
+# import or dropped local in src/, tools/, papers/ or index-deconvolution/src/
+# now fails CI, so the debt cannot grow back while the historical records stay
+# readable. Exemptions are per PATH with a stated reason, never a rule-level
+# blanket ignore -- a blanket ignore is how 270 became 330 unnoticed.
+select = ["F821", "F811", "F632", "F502", "F522", "F524", "F702",
+          "F401", "F541", "F841"]
 
 [lint.per-file-ignores]
+# ── The declared F401/F841 exemptions, each with its reason ─────────────────
+#
+# Everything below is a DATED RECORD or a SEPARATELY PINNED ENVIRONMENT. Editing
+# them would rewrite history rather than fix code, which is the project's
+# standing archive policy (CLAUDE.md). They are listed by path so that adding a
+# new one is a visible, reviewable act.
+#
+# The four replication packages carry their own venv, their own pinned
+# requirements and their own suites (28/97/47/41). Their imports answer to those
+# environments, not to this repository's lint.
+"imp-causal-paper/**" = ["F401", "F841"]
+"imp-causalNet-paper/**" = ["F401", "F841"]
+"imp-pathinfo-paper/**" = ["F401", "F841"]
+"imp-prices/**" = ["F401", "F841"]
+# Each level* directory is a dated experiment record for the order-discovery
+# programme; collapsing or tidying them rewrites the record.
+"index-deconvolution/level*/**" = ["F401", "F841"]
+"index-deconvolution/notebooks/**" = ["F401", "F841"]
+"index-deconvolution/crosscheck/**" = ["F401", "F841"]
+"index-deconvolution/experiments/**" = ["F401", "F841"]
+# Frozen Level 8 reproducibility artefact.
+"workspaces/**" = ["F401", "F841"]
+# Provenance archives: doc/newIntPaper and doc/finalpaper (CLAUDE.md).
+"doc/**" = ["F401", "F841"]
+# One-off audit scripts, kept as the evidence for their own findings.
+"audit/**" = ["F401", "F841"]
+# Level 4-7 validation campaign runners, written per campaign.
+"tests/Lev*/**" = ["F401", "F841"]
+"tests/Bio/**" = ["F401", "F841"]
+"tests/Nature/**" = ["F401", "F841"]
+"experiments/**" = ["F401", "F841"]
+
 # Star-imports in notebooks-turned-scripts would otherwise mask F401/F403.
 "**/notebooks/*.py" = ["F403", "F405"]
 # Re-importing in a later cell is a deliberate notebook idiom: cells are run

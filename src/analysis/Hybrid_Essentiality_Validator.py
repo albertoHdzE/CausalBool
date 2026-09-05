@@ -3,7 +3,6 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score
 
 # Add src to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

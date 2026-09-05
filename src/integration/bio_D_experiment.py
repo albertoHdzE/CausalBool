@@ -418,7 +418,10 @@ def generate_repertoire_for_network(net):
     fall back to the label, surfacing rather than being fabricated.
     """
     nodes = net["nodes"]
-    cm = net["cm"]
+    # Not read, but the subscript asserts the key is present, so a network
+    # missing its connectivity matrix fails here rather than much later with a
+    # confusing error. Kept deliberately.
+    cm = net["cm"]    # noqa: F841
     gates = net["gates"]
     logic = net.get("logic") or {}
     n = len(nodes)

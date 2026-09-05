@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from causalbool import Network, apply_gate, truth_table, repertoire, node_output_column
 from deconvolution import (
-    essential_variables, reduce_column, identify_gate,
+    essential_variables, identify_gate,
     deconvolve, verify,
 )
 from network_generator import random_network

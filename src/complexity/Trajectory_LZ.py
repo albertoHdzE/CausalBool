@@ -1,5 +1,4 @@
 import numpy as np
-import math
 
 class TrajectoryLZ:
     """
@@ -23,7 +22,12 @@ class TrajectoryLZ:
         i = 0
         c = 1
         k = 1
-        k_max = 1
+        # AUDIT03-C: initialised and never read. k_max IS used in the Kaspar &
+        # Schuster (1987) formulation this function cites, so it marks a
+        # simplified variant rather than a typo, and deleting it would erase the
+        # only trace of that divergence. The same marker appears in
+        # src/complexity/Scaling_LZ_Tools.py; see GOVERNANCE/VERIFICATION.md.
+        k_max = 1    # noqa: F841 - divergence marker, not dead code
         
         while True:
             if i + k > n:

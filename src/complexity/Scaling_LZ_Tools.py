@@ -1,7 +1,6 @@
 
 import numpy as np
 from scipy import stats
-import math
 import sys
 import os
 
@@ -90,11 +89,24 @@ class ComplexityScaler:
         if n == 0:
             return 0
             
+        # AUDIT03-C. `l` and `k_max` are initialised and never read. Both are
+        # load-bearing in the Kaspar & Schuster (1987) formulation this cites,
+        # so their absence marks a SIMPLIFIED VARIANT of the published
+        # algorithm, not a typo. They are kept, with this note, because deleting
+        # them would erase the only evidence that the implementation diverges
+        # from its own citation.
+        #
+        # This is the SECOND file in which the same divergence appears -- see
+        # src/complexity/Trajectory_LZ.py:26 -- and there are three files in
+        # src/ carrying LZ code (also src/pipeline/Contingency_Monitor.py).
+        # Whether they are one concept with one owner is an open question
+        # recorded in GOVERNANCE/VERIFICATION.md, and a scientific one, not a
+        # lint one.
         c = 1
-        l = 1
+        l = 1        # noqa: F841 - see above; divergence marker, not dead code
         i = 0
         k = 1
-        k_max = 1
+        k_max = 1    # noqa: F841 - see above
         
         while True:
             if c + i + k > n: # Check bounds

@@ -1,5 +1,4 @@
 import requests
-import json
 import time
 import sys
 # AUDIT03-C: `zipfile` and `io` are used at line ~183 to open a downloaded
@@ -10,7 +9,6 @@ import sys
 import io
 import zipfile
 from pathlib import Path
-from typing import Dict, List, Any, Optional
 
 # Add src to path to import integration modules
 sys.path.append(str(Path(__file__).resolve().parent.parent))

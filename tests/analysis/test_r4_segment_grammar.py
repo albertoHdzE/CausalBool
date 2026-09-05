@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.join(ROOT, "src", "analysis"))
 
 from r4_segment_grammar import (  # noqa: E402
-    BitReader, BitWriter, Components, GrammarCodec, KraftViolation, Segment,
+    BitReader, BitWriter, GrammarCodec, KraftViolation, Segment,
     decode_delta, decode_gamma, elias_delta, elias_gamma, is_prefix_free,
     kraft_sum, load_catalogue,
 )

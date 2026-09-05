@@ -28,7 +28,6 @@ All gate semantics are taken verbatim from ``src/Packages/Integration/Gates.m``.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable
 
 # ---------------------------------------------------------------------------
 # Gate semantics (verbatim from Gates.m)

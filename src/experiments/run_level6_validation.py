@@ -1,7 +1,6 @@
 import os
 import sys
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from datetime import datetime
@@ -11,7 +10,6 @@ import json
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from integration.Basin_Encoder import BasinEncoder
-from analysis.Hybrid_Essentiality_Validator import HybridEssentialityValidator # We can reuse logic or copy
 
 class BasinValidator:
     def __init__(self, data_dir, metadata_path):

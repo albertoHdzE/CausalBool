@@ -1,6 +1,5 @@
 
 import gzip
-import sys
 
 def check_gzip(s):
     # Assume ASCII '0'/'1' encoding as that's standard for string compression tests

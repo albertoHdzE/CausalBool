@@ -2,12 +2,9 @@
 import os
 import sys
 import json
-import re
-import glob
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import networkx as nx
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -22,8 +19,6 @@ from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
 # (audit/AUDIT03_R2_collapse/probe_paths_parity.py). Guarded by
 # tools/check_single_engine.sh.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from causalbool_paths import repo_root as _repo_root  # noqa: E402
-from causalbool_paths import paper_root as _paper_root  # noqa: E402
 from causalbool_paths import paper_figures_dir as _paper_figures_dir  # noqa: E402
 
 
@@ -104,7 +99,7 @@ class BioNetworkOverlay:
                     return state[node_map.get(logic_str, 0)] # Fallback
                     
                 return eval(logic_str, {"__builtins__": {}}, local_ctx)
-            except Exception as e:
+            except Exception:
                 # print(f"Error evaluating logic '{logic_str}': {e}")
                 return 0
                 

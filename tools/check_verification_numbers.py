@@ -124,20 +124,44 @@ def collect_subprojects() -> tuple[list[int] | None, str]:
     return counts, "pytest --collect-only in each replication package"
 
 
-def lint_debt() -> tuple[list[int] | None, str]:
-    """Counts for the three DECLARED-DEBT pyflakes rules, in doc order."""
+def _ruff_f_counts(extra: list[str]) -> tuple[dict[str, int] | None, str]:
+    """Pyflakes counts, or None if ruff did not actually run.
+
+    "Zero findings" and "ruff never ran" both produce no finding lines, and they
+    are opposite facts. Distinguished by ruff's own summary line: a real clean
+    run says "All checks passed!". Without this the gate reported UNKNOWN the
+    moment the debt was genuinely cleared.
+    """
     rc, out = run([str(ROOT / "venv/bin/ruff"), "check", "--select", "F",
-                   "--output-format", "concise", "."], ROOT)
+                   "--output-format", "concise", *extra, "."], ROOT)
     counts = {"F401": 0, "F541": 0, "F841": 0}
     for ln in out.splitlines():
         m = re.search(r"\s(F\d+)\s", ln)
         if m and m.group(1) in counts:
             counts[m.group(1)] += 1
-    if sum(counts.values()) == 0:
-        # Either the debt is genuinely cleared or ruff did not run. Those are
-        # different, and a gate must not treat "no output" as "nothing wrong".
-        return None, "UNKNOWN: ruff reported no F401/F541/F841 at all"
-    return [counts["F401"], counts["F541"], counts["F841"]], "ruff check --select F"
+    if sum(counts.values()) == 0 and "All checks passed" not in out:
+        return None, "UNKNOWN: ruff produced neither findings nor a clean verdict"
+    return counts, "ruff check --select F"
+
+
+def lint_debt() -> tuple[list[int] | None, str]:
+    """[enforced total, F401 in exempted paths, F841 in exempted paths].
+
+    Two different quantities, and the document states both. The first is what
+    CI enforces; the second is the historical residue sitting in the paths named
+    by ruff.toml's per-file-ignores -- replication packages, dated experiment
+    records and provenance archives. Reporting only the first would let the
+    residue vanish from view, which is precisely the "declared debt" that had
+    already drifted 176/47/47 -> 213/67/40 unnoticed.
+    """
+    enforced, how = _ruff_f_counts([])
+    if enforced is None:
+        return None, how
+    residue, how2 = _ruff_f_counts(["--config", "lint.per-file-ignores={}"])
+    if residue is None:
+        return None, how2
+    return ([sum(enforced.values()), residue["F401"], residue["F841"]],
+            "ruff, enforced set and again with per-file-ignores disabled")
 
 
 def table_coverage() -> tuple[list[int] | None, str]:

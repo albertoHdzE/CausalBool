@@ -145,7 +145,7 @@ def main():
                 
                 adj_null = nx.to_numpy_array(G_swap)
                 
-            except Exception as e:
+            except Exception:
                 # Fallback to Erdos-Renyi if degree preserving fails hard (should not happen often)
                 adj_null = np.random.randint(0, 2, adj.shape)
             
