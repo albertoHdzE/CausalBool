@@ -179,3 +179,41 @@ because it is used, which is the only honest way to remove one.
 worth naming: **a self-test that nothing invokes.** These are API surface, not
 proven dead, and deleting a public symbol on a grep is exactly the reasoning
 this document exists to discourage. Left for the author.
+
+
+## The fourth engine (AUDIT03-B, 2026-09-04)
+
+`src/Packages/Integration/SelfTest.m` carried its own `myAnd`, `myOr`, `myXor`,
+`allPosibleInputsReverse` and `runNetwork` — **a private reimplementation of the
+gate semantics**, advertised in `README.md` as one of the core packages, invoked
+by nothing, and never once compared to `Integration\`Gates\`ApplyGate`.
+
+**Both censuses missed it, and the reason is structural.** The AST arm is
+Python-only. The Wolfram arm matches normalised *text*, so definitions that are
+one line long and carry *different names* (`myAnd`, not `compressionWeight`) do
+not collide with anything. It was found by reading the **orphan** list — the
+complementary question — which is the fifth time in this audit that something
+other than the hash census found the copy that mattered.
+
+Measured before touching it (`probe_selftest_parity.wl`):
+
+| arm | result |
+|---|---|
+| `myAnd`/`myOr`/`myXor` vs `ApplyGate` | **378/378** agree (arities 1..6, all rows) |
+| `allPosibleInputsReverse` vs LSB-first | **8/8** agree (n = 1..8) |
+| `runNetwork` vs `CreateRepertoiresDispatch` | **992/992** rows agree (AND/OR/XOR) |
+| the **nine** families it does not implement | **17 of 36 rows silently wrong, 9 of 9 families** |
+
+So it was an exact copy of the part it implemented — drift-free, hence a
+collapse — and a **reduced engine** for the rest, with a `True -> 0`
+fallthrough. That is precisely the defect AUDIT02/P1 removed from
+`CausalBoolCore.wl`, where a missing `CANALISING` branch made a `CANALISING`
+node return `0` unnoticed.
+
+Collapsed onto the owners; `SelfTestRun` now returns a verdict against a
+predicate written independently of the engine, and its artefacts are
+byte-identical. Guarded by the `myAnd` body signature in
+`tools/check_single_engine.sh`, verified by planting a copy.
+
+> **A self-test that mis-evaluates three quarters of the catalogue is worse than
+> no self-test, because its name invites trust.**

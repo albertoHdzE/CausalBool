@@ -54,10 +54,18 @@ Print["Total Entries: ", rows];
 Print["Valid Files:   ", validFiles];
 Print["Missing Files: ", Length[missingFiles]];
 
-If[Length[missingFiles] == 0 && validFiles >= 20,
-    Print[">> STATUS: PASSED"];
-    Exit[0];
-,
-    Print[">> STATUS: FAILED"];
-    Exit[1];
-];
+dataOK = (Length[missingFiles] == 0 && validFiles >= 20);
+
+(* AUDIT03-B. This file had a real verdict and NO STATUS EXPORT, so the runner
+   could not score it -- and it sits outside tests/MUnit, so the manifest guard
+   could not see it either. It has therefore never run in any suite. Both are
+   fixed: it exports the verdict it already computes, and it is declared in
+   tests/MUnit/MANIFEST.tsv. *)
+statusBase = FileNameJoin[{"results", "tests", "nature_lev3_data"}];
+If[!DirectoryQ[statusBase],
+   CreateDirectory[statusBase, CreateIntermediateDirectories -> True]];
+Export[FileNameJoin[{statusBase, "Status.txt"}],
+       {If[TrueQ[dataOK], "OK", "FAIL"], DateString[]}, "Text"];
+
+Print[If[TrueQ[dataOK], ">> STATUS: PASSED", ">> STATUS: FAILED"]];
+If[!TrueQ[dataOK], Exit[1]];

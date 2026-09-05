@@ -63,6 +63,55 @@ recursion, deduped.
 > and `tools/check_wolfram_syntax.wl` now asserts **152/152** Wolfram files parse
 > — a check the suite structurally could not perform.
 
+> ## v4 — AUDIT03-B, 2026-09-04. DECLARED DELTA: `TOTAL 65 → 69`, `FAIL 0`
+>
+> ```
+> OK=69 FAIL=0 TOTAL=69
+> ```
+>
+> **A fourth engine.** `src/Packages/Integration/SelfTest.m` carried its own
+> `myAnd`, `myOr`, `myXor`, `allPosibleInputsReverse` and `runNetwork`, was
+> advertised in `README.md` as a **core package**, and was invoked by nothing.
+> Both censuses missed it: the AST arm is Python-only and the Wolfram arm matches
+> normalised *text*, so one-line definitions under different names are invisible.
+> It was found by reading the orphan list.
+>
+> Measured before touching it (`probe_selftest_parity.wl`): on the three families
+> it implemented it was an **exact** copy — `378/378` primitive rows, `992/992`
+> network rows, `8/8` enumerations. But its `Which` fell through to `True -> 0`,
+> so the other **nine families evaluated silently to zero**: 17 of 36 rows wrong,
+> no message, 9 of 9 families. That is the defect AUDIT02/P1 removed from
+> `CausalBoolCore.wl`. Collapsed onto the owners; artefacts byte-identical.
+>
+> **Quarantine is now empty.** The 11 files that exported a literal `"OK"` were
+> adjudicated on measured evidence rather than promoted or deleted:
+> `VerificationSamples.m` — the **only one referenced by an active manuscript** —
+> gained a predicate comparing every sampled row against the closed form
+> (`20/20`), and its negative control was observed to fail. The other ten feed
+> `doc/finalpaper` and `doc/newIntPaper` **only** (measured: zero active hits) and
+> are now labelled `producer`, which is what they are.
+>
+> **`TSK-ALGO-PerfTable.m` and `TSK-COMPARE-CHARTS.m` were not archived.** The
+> plan proposed it; the evidence refused. They are second-stage post-processors
+> that read `Metrics.json`/`Summary.json` and emit `Performance.tex`/`Charts.tex`
+> for the archive documents. Reclassified, not removed.
+>
+> **An entire second suite was invisible.** The manifest scanned only
+> `tests/MUnit`, so `tests/SelfTest.m`, `tests/MasterRunner.m` (a **third test
+> runner**, Nature Level 3) and two `tests/Nature` tests were never classified and
+> never run. The scan now covers all of `tests/`. The two Nature tests had real
+> verdicts and no status export; they now export it and pass. `MasterRunner.m`
+> stays a `producer` — promoting a runner inside a runner is not a test.
+>
+> Manifest: **82 files, 69 test / 0 quarantine / 13 producer.**
+>
+> **Two harness traps, both self-inflicted and both recorded.** `run-tests.sh`
+> derives a status path by **grepping the test's source, comments included**: a
+> three-element `FileNameJoin` is read as a *directory*, and quoting that same
+> shape in a comment reproduces the fault. `SelfTest.m` reported
+> `NO STATUS EXPORTED` while its status file sat on disk. The contiguous
+> three-segment form under `results/tests/` is the working convention.
+
 ## What each closure gate proves — and what it does not (AUDIT02/P5.1)
 
 Added after an audit found the close-out sequence treating a change-detector as

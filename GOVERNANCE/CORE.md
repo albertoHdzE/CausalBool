@@ -41,6 +41,7 @@ by searching for a distinctive **body fragment** rather than for the name.
 |---|---|
 | repertoire construction, one-step dynamics (`createRepertoires`, `runDynamic`) | `src/integration/Alpha.m` |
 | gate semantics, truth tables, dispatch for the twelve families (`ApplyGate`, `IndexSet`) | `src/Packages/Integration/Gates.m` |
+| end-to-end smoke check of the packaged core (`SelfTestRun`) | `src/Packages/Integration/SelfTest.m` — **delegates**; it was a fourth private engine until AUDIT03-B |
 | index-set algebra: complement, union, intersection, `Phi` bit-reversal, bands | `src/Packages/Integration/IndexAlgebra.m` |
 | description length `D`, `D_v2`, `C_formula` (`ComputeDescriptionLength`, `FormulaComponentWeight`, `ComputeFormulaComponents`) | `src/Packages/Integration/BioMetrics.m` |
 | corpus reader `LoadJSONNetwork` | `src/scripts/NetworkIO.m` |
@@ -107,7 +108,8 @@ the single survivor is the wrong file.
 | `tools/snapshot_paper_numbers.py` | keyed by **content**, so a moved line is not reported as a changed number |
 | `tools/check_glossary_sync.sh` | `GOVERNANCE/GLOSSARY.md` against the sibling programme |
 | `tools/check_wolfram_syntax.wl` | every `.m`/`.wl` parses — the suite could not see a syntax error, and three broken files sat behind a green run |
-| `tools/check_test_manifest.sh` | every file under `tests/MUnit` is classified in `MANIFEST.tsv`; no file can be silently excluded again |
+| `tools/check_test_manifest.sh` | every file under `tests/` is classified in `MANIFEST.tsv`; no file can be silently excluded again |
+| `tools/enumerate_paper_tables.py` | the honest table-coverage fraction of the active manuscripts (measured **5/34**, not the 7/8 the old summary implied) |
 
 **Every guard must, without exception:** refuse on empty input, print its
 denominator, exit non-zero on failure, and have been verified by planting the

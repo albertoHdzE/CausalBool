@@ -189,8 +189,29 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print(f"\nVERIFY-PAPER OK ({len(inv['covered'])} covered, "
-          f"{len(inv['pending'])} pending with reasons)")
+    # AUDIT03-B — report the DENOMINATOR, not just the numerator.
+    #
+    # This line used to read "7 covered, 1 pending with reasons", which invites
+    # the reading 7/8. The pending entry was an unenumerated catch-all
+    # ("remaining appendix/expansion tables") while the two active manuscripts
+    # carry 34 number-bearing tables. Measured coverage was 5 of 34.
+    #
+    # The gate itself was never wrong: what it checks, it checks properly. The
+    # summary line was.
+    cov_path = ROOT / "papers/method/artifact_baseline/table_coverage.json"
+    tail = ""
+    if cov_path.exists():
+        cov = json.loads(cov_path.read_text())
+        n, k = cov["n_numeric"], cov["n_covered"]
+        tail = (f"\n  TABLE COVERAGE of the active manuscripts: {k}/{n} "
+                f"({100 * k / max(1, n):.0f}%) lie inside a verified block."
+                f"\n  Regenerate with: venv/bin/python tools/enumerate_paper_tables.py")
+    else:
+        tail = ("\n  TABLE COVERAGE unmeasured — run "
+                "tools/enumerate_paper_tables.py")
+
+    print(f"\nVERIFY-PAPER OK ({len(inv['covered'])} artefact groups covered, "
+          f"{len(inv['pending'])} pending with reasons){tail}")
     return 0
 
 

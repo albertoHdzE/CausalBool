@@ -26,10 +26,14 @@ MANIFEST="tests/MUnit/MANIFEST.tsv"
 
 [[ -f "$MANIFEST" ]] || { echo "TEST-MANIFEST: REFUSED  $MANIFEST is missing"; exit 2; }
 
-on_disk=$(find tests/MUnit -type f -name '*.m' ! -name 'RunTests.m' | sed 's|^\./||' | sort)
+# AUDIT03-B: the scan covers the WHOLE tests/ tree, not just tests/MUnit.
+# Restricting it to MUnit is how tests/SelfTest.m, tests/MasterRunner.m and the
+# two tests/Nature Level-3 tests stayed invisible -- an entire second suite,
+# with its own runner, that no command in the repository invoked.
+on_disk=$(find tests -type f -name '*.m' ! -name 'RunTests.m' | sed 's|^\./||' | sort)
 n_disk=$(printf '%s\n' "$on_disk" | grep -c . || true)
 if [[ "$n_disk" -eq 0 ]]; then
-  echo "TEST-MANIFEST: REFUSED  found 0 .m files under tests/MUnit."
+  echo "TEST-MANIFEST: REFUSED  found 0 .m files under tests/."
   echo "  A pass over zero files is not a pass."
   exit 2
 fi

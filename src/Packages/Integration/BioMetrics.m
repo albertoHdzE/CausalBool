@@ -57,6 +57,31 @@ log2Int[x_] := N@Log[2, x];
    D_formula = 101.07 by 135.66) and TSK-MIXED-001's encodeCostBits.
    Proof: audit/AUDIT03_R3_description_length/verify_description_length.py. *)
 encodeNodeCost[cmRow_List, gate_String, nodeParams_Association, n_Integer] := Module[{ic, d, k, cost},
+
+(* AUDIT03-B — the IMPLIES/NIMPLIES field, and why it is NOT being changed.
+
+   log2(d(d-1)) charges for an ORDERED pair. The engine cannot express one:
+   every caller hands ApplyGate the connected inputs already SORTED
+   (input[[Sort[Flatten[Position[cm[[node]], 1]]]]]) and the semantics read
+   inputs[[1]] -> inputs[[2]], so the antecedent is ALWAYS the lower-indexed
+   node. Measured at n = 4: 6 wirings, 6 distinct behaviours, 12 ordered pairs
+   priced, and all 6 swapped behaviours unreachable. Half the messages the code
+   prices name behaviours the engine cannot produce.
+
+   The cost consequence is ZERO, everywhere, and this was measured rather than
+   assumed. IMPLIES is binary, so d = 2 always and log2(d(d-1)) = log2 2 = 1 --
+   identical to the default branch every other gate pays. The 10-node flagship
+   is 135.66005 bits with the field and 135.66005 without; the Kraft sum over
+   expressible node-codes is 0.2815 either way; and the bio corpus contains
+   ZERO IMPLIES/NIMPLIES nodes (2,486 CUSTOM, 762 IDENTITY, 538 CANALISING,
+   327 AND, 280 OR, 151 INPUT, 53 NOT, 26 NOR, 3 NAND).
+
+   So the expression stays as published. What is added is the assertion that
+   makes the unreachable case loud instead of silently paying a phantom field:
+   an IMPLIES node with d != 2 is a wiring error, not a costing question. *)
+
+ComputeDescriptionLength::impliesarity = "AUDIT03-B: `1` node has in-degree `2`, but IMPLIES/NIMPLIES are binary and the engine reads inputs[[1]] -> inputs[[2]] over the SORTED connected set. Refusing to price a gate the dispatcher cannot evaluate.";
+
   ic = Flatten@Position[cmRow, 1];
   d = Length[ic];
   k = Length[gateLabels];
@@ -67,7 +92,9 @@ encodeNodeCost[cmRow_List, gate_String, nodeParams_Association, n_Integer] := Mo
   cost += Switch[gate,
     "KOFN", log2Int[d + 1] + 1,
     "CANALISING", log2Int[n] + 1 + 1,
-    "IMPLIES" | "NIMPLIES", log2Int[Max[1, d (d - 1)]],
+    "IMPLIES" | "NIMPLIES",
+      (If[d =!= 2, Message[ComputeDescriptionLength::impliesarity, gate, d]];
+       log2Int[Max[1, d (d - 1)]]),
     "NOT", log2Int[Max[1, d]],
     "MAJORITY", 1,
     "XOR" | "XNOR", 1,
@@ -99,7 +126,9 @@ encodeNodeLogicCost[cmRow_List, gate_String, nodeParams_Association, n_Integer] 
   cost += Switch[gate,
     "KOFN", log2Int[d + 1] + 1,
     "CANALISING", log2Int[n] + 1 + 1,
-    "IMPLIES" | "NIMPLIES", log2Int[Max[1, d (d - 1)]],
+    "IMPLIES" | "NIMPLIES",
+      (If[d =!= 2, Message[ComputeDescriptionLength::impliesarity, gate, d]];
+       log2Int[Max[1, d (d - 1)]]),
     "NOT", log2Int[Max[1, d]],
     "MAJORITY", 1,
     "XOR" | "XNOR", 1,

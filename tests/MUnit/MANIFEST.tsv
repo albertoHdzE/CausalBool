@@ -1,19 +1,27 @@
-# tests/MUnit — the declared test manifest
+# tests/ — the declared test manifest
 #
-# AUDIT03. The runner used to DISCOVER tests with the glob `*Tests.m`, which
-# silently excluded 23 of 78 files. Renaming them was ruled out on evidence:
-# TSK-ALGO-004 and TSK-MIXED-001 are cited by name in BOTH manuscripts.
-# Widening the glob was ruled out too: 11 of the 23 export a literal "OK"
-# and cannot fail, so collecting them would have added 11 fake greens.
+# AUDIT03 / AUDIT03-B. The runner used to DISCOVER tests with the glob
+# `tests/MUnit/**/*Tests.m`, which was wrong in three ways at once:
 #
-# So membership is DECLARED, not inferred. A new .m file is neither included
-# nor excluded until someone classifies it, and tools/check_test_manifest.sh
-# goes red until they do -- which is what makes the 'never ran' class
-# impossible to recreate by accident.
+#   1. it excluded 23 of the 78 .m files under tests/MUnit;
+#   2. it never looked outside tests/MUnit at all, so tests/SelfTest.m,
+#      tests/MasterRunner.m and the two tests/Nature Level-3 tests were
+#      invisible -- an ENTIRE SECOND SUITE, with its own runner, that no
+#      command in the repository invoked;
+#   3. a glob cannot tell a test from a producer, so widening it would have
+#      collected files that export a literal "OK" and cannot fail.
+#
+# Renaming was ruled out on evidence: TSK-ALGO-004 and TSK-MIXED-001 are cited
+# by name in BOTH manuscripts.
+#
+# Membership is therefore DECLARED. A new .m file is neither included nor
+# excluded until someone classifies it, and tools/check_test_manifest.sh goes
+# red until they do -- which is what makes the "never ran" class impossible to
+# recreate by accident.
 #
 #   test        collected and scored by run-tests.sh
 #   quarantine  excluded: the status does not depend on any computation
-#   producer    excluded: writes artefacts, exports no status
+#   producer    excluded: writes artefacts, exports no verdict
 #
 # kind	path	reason
 
@@ -22,8 +30,8 @@ test	tests/MUnit/Algo/TSK-ALGO-002-ImportanceSampling.m
 test	tests/MUnit/Algo/TSK-ALGO-002-LargeSample-Tests.m	
 test	tests/MUnit/Algo/TSK-ALGO-003-SubsystemHeuristics.m	
 test	tests/MUnit/Algo/TSK-ALGO-004-ClosedFormSetAudit.m	
-producer	tests/MUnit/Algo/TSK-ALGO-PerfTable.m	no status export: an artefact producer, not a test
-quarantine	tests/MUnit/Algo/TSK-ALGO-VisualSamples.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+producer	tests/MUnit/Algo/TSK-ALGO-PerfTable.m	SECOND-STAGE post-processor: reads results/tests/algo001/Metrics.json and emits Performance.tex, which doc/finalpaper and doc/newIntPaper consume. NOT dead -- the plan proposed archiving it and the evidence said otherwise
+producer	tests/MUnit/Algo/TSK-ALGO-VisualSamples.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
 test	tests/MUnit/Analysis/ANDTests.m	
 test	tests/MUnit/Analysis/AnalyticVsExhaustiveQueryTests.m	
 test	tests/MUnit/Analysis/CANALISINGNetworkTests.m	
@@ -57,13 +65,13 @@ test	tests/MUnit/Arch/TSK-ARCH-003-Tests.m
 test	tests/MUnit/Arch/TSK-ARCH-004-Tests.m	
 test	tests/MUnit/Compare/TSK-COMPARE-002-PIDSynergy.m	
 test	tests/MUnit/Compare/TSK-COMPARE-003-TE-MI.m	
-producer	tests/MUnit/Compare/TSK-COMPARE-CHARTS.m	no status export: an artefact producer, not a test
-quarantine	tests/MUnit/Exper/TSK-EXPER-001-Ensembles.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
-quarantine	tests/MUnit/Exper/TSK-EXPER-002-GateMixtures.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
-quarantine	tests/MUnit/Exper/TSK-EXPER-002-GateMixtures2.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
-quarantine	tests/MUnit/Exper/TSK-EXPER-003-UpdateRegimes.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
-quarantine	tests/MUnit/Exper/TSK-EXPER-004-SubsystemSearch.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
-quarantine	tests/MUnit/Exper/TSK-EXPER-005-NoiseRobustness.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+producer	tests/MUnit/Compare/TSK-COMPARE-CHARTS.m	SECOND-STAGE post-processor: reads compare002/compare003 Summary.json and emits Charts.tex for the archive documents. NOT dead, same as PerfTable
+producer	tests/MUnit/Exper/TSK-EXPER-001-Ensembles.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
+producer	tests/MUnit/Exper/TSK-EXPER-002-GateMixtures.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
+producer	tests/MUnit/Exper/TSK-EXPER-002-GateMixtures2.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
+producer	tests/MUnit/Exper/TSK-EXPER-003-UpdateRegimes.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
+producer	tests/MUnit/Exper/TSK-EXPER-004-SubsystemSearch.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
+producer	tests/MUnit/Exper/TSK-EXPER-005-NoiseRobustness.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
 test	tests/MUnit/Exper/TopologiesTests.m	
 test	tests/MUnit/Gates/TSK-GATES-001-Tests.m	
 test	tests/MUnit/Gates/TSK-GATES-002-Tests.m	
@@ -82,11 +90,11 @@ test	tests/MUnit/Pattern/TSK-PATTERN-001-Tests.m
 test	tests/MUnit/Pattern/TSK-PATTERN-002-Tests.m	
 test	tests/MUnit/Pattern/TSK-PATTERN-003-Tests.m	
 test	tests/MUnit/Pattern/TSK-PATTERN-Ordering-Invariance.m	
-quarantine	tests/MUnit/Sampling/VerificationSamples.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
-quarantine	tests/MUnit/Stoch/TSK-STOCH-001-NoiseMonteCarlo.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
-quarantine	tests/MUnit/Stoch/TSK-STOCH-002-NoiseCurve.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+test	tests/MUnit/Sampling/VerificationSamples.m	
+producer	tests/MUnit/Stoch/TSK-STOCH-001-NoiseMonteCarlo.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
+producer	tests/MUnit/Stoch/TSK-STOCH-002-NoiseCurve.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
 test	tests/MUnit/Tests/TSK-TEST-001-TruthTables.m	
-quarantine	tests/MUnit/Tests/TSK-TEST-003-PerfRepertoires.m	cannot fail: exports the literal "OK" regardless of any computation; give it a predicate to promote it to test
+producer	tests/MUnit/Tests/TSK-TEST-003-PerfRepertoires.m	artefact producer for the historical archives; its output is consumed by doc/finalpaper and doc/newIntPaper only, NOT by either active manuscript (measured 2026-09-04)
 test	tests/MUnit/Tests/TSK-TEST-004-AcceptanceFigures.m	
 test	tests/MUnit/Theory/TSK-TEST-002-PropertyTests.m	
 test	tests/MUnit/Theory/TSK-THEORY-001-Tests.m	
@@ -95,3 +103,7 @@ test	tests/MUnit/Theory/TSK-THEORY-003-Tests.m
 test	tests/MUnit/Theory/TSK-THEORY-004-Tests.m	
 test	tests/MUnit/Theory/TSK-THEORY-005-Tests.m	
 test	tests/MUnit/Theory/TSK-THEORY-006-Tests.m	
+producer	tests/MasterRunner.m	a THIRD test runner (Nature Level 3), invoked by no script, Makefile target or gate. Kept as a producer rather than promoted: promoting a runner inside a runner is not a test. Recorded as an open item
+test	tests/Nature/TSK-NATURE-LEV3-DATA-002-Test.m	
+test	tests/Nature/TSK-NATURE-LEV3-SETUP-002-Test.m	
+test	tests/SelfTest.m	

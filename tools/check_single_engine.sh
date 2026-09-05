@@ -130,6 +130,37 @@ else
   STATUS=1
 fi
 
+# AUDIT03-B — THE GATE SEMANTICS THEMSELVES.
+#
+# src/Packages/Integration/SelfTest.m was a FOURTH ENGINE: its own myAnd, myOr,
+# myXor and runNetwork, advertised in README.md as a core package, invoked by
+# nothing, and never once compared to Integration`Gates`ApplyGate.
+#
+# Measured before the collapse (probe_selftest_parity.wl): on the three families
+# it implemented it was an EXACT copy -- 378/378 primitive rows, 992/992 network
+# rows. But runNetwork's Which fell through to `True -> 0`, so the other NINE
+# families evaluated SILENTLY to zero: 17 of 36 rows wrong, no message, 9 of 9
+# families. A self-test that mis-evaluates three quarters of the catalogue is
+# worse than none, because its name invites trust.
+#
+# Keyed on the body of myAnd, which every copy of the semantics carries and
+# nothing else in the tree does. Gates.m owns it inside its Private context.
+gs_files=$(grep -rlE 'myAnd\[list_\][[:space:]]*:=[[:space:]]*If\[Count\[list, *0\] *== *0' \
+             --include='*.m' --include='*.wl' . 2>/dev/null \
+           | sed 's|^\./||' \
+           | grep -vE '^(archive|venv|audit|.*/\.venv)/' \
+           | sort -u)
+gs_count=$(printf '%s\n' "$gs_files" | grep -c . || true)
+if [[ "$gs_count" -eq 1 && "$gs_files" == "src/Packages/Integration/Gates.m" ]]; then
+  echo "SINGLE-ENGINE: ok    gate semantics defined only in src/Packages/Integration/Gates.m"
+else
+  echo "SINGLE-ENGINE: FAIL  gate semantics defined in ${gs_count} files:"
+  printf '  %s\n' ${(f)gs_files}
+  echo "  -> call Integration\`Gates\`ApplyGate (AUDIT03-B). A private copy of the"
+  echo "     semantics is how nine families came to evaluate silently to 0."
+  STATUS=1
+fi
+
 # AUDIT03 (monolithic-code) — repository/paper path resolution. FOUR production
 # modules defined _repo_root/_paper_root/_paper_figures_dir identically, and the
 # AST census saw only THREE: the fourth (src/stats/Bayesian_Meta_Analysis.py) was

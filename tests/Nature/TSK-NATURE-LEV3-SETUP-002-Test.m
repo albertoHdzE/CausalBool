@@ -25,12 +25,23 @@ If[Integration`BioBridgeV2`VerifyBridge[],
 adj = {{0, 1, 0, 0}, {1, 0, 1, 0}, {0, 1, 0, 1}, {0, 0, 1, 0}}; (* Simple Line Graph *)
 res = Integration`BioBridgeV2`UniversalDv2[adj];
 
-If[AssociationQ[res] && KeyExistsQ[res, "dv2"],
+lineGraphOK = AssociationQ[res] && KeyExistsQ[res, "dv2"];
+If[lineGraphOK,
     Print[">> Compute Line Graph: PASSED. D_v2 = ", res["dv2"]],
-    Print[">> Compute Line Graph: FAILED."];
-    Exit[1];
-];
+    Print[">> Compute Line Graph: FAILED."]];
+
+(* AUDIT03-B. This file had a real verdict and NO STATUS EXPORT, so the runner
+   could not score it -- and it sits outside tests/MUnit, so the manifest guard
+   could not see it either. It has therefore never run in any suite. Both are
+   fixed: it exports the verdict it already computes, and it is declared in
+   tests/MUnit/MANIFEST.tsv. *)
+statusBase = FileNameJoin[{"results", "tests", "nature_lev3_setup"}];
+If[!DirectoryQ[statusBase],
+   CreateDirectory[statusBase, CreateIntermediateDirectories -> True]];
+Export[FileNameJoin[{statusBase, "Status.txt"}],
+       {If[TrueQ[lineGraphOK], "OK", "FAIL"], DateString[]}, "Text"];
 
 Print["------------------------------------------------"];
-Print["   ALL TESTS PASSED"];
+Print[If[TrueQ[lineGraphOK], "   ALL TESTS PASSED", "   FAILED"]];
 Print["------------------------------------------------"];
+If[!TrueQ[lineGraphOK], Exit[1]];
