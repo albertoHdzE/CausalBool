@@ -206,7 +206,9 @@ def test_ca_named_gate_identities():
 
 
 def test_regulatory_gate_identity_and_forward():
-    from causalbool import truth_table, apply_gate
+    # AUDIT03-C: the local `from causalbool import truth_table, apply_gate` was
+    # removed -- both names are already bound at module scope (line 13), so the
+    # re-import shadowed them with themselves. Flagged by ruff F811.
     # a AND NOT b AND c over three inputs: single satisfying assignment a=1,b=0,c=1.
     tt = truth_table("REGULATORY", 3, {"activators": [0, 2]})
     assert sum(tt) == 1

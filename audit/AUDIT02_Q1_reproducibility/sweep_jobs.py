@@ -1,6 +1,31 @@
-import os, sys, json, subprocess, hashlib
-sys.path.insert(0,'/tmp'); 
-exec(open('/tmp/q1_sweep.py').read().split('JOBS = []')[0])
+"""AUDIT02/Q1 job list — a second JOBS set for the reproducibility sweep.
+
+AUDIT03-C. This file was UNRUNNABLE and had been for some time. It obtained its
+`run` helper by exec-ing /tmp/q1_sweep.py:
+
+    sys.path.insert(0,'/tmp')
+    exec(open('/tmp/q1_sweep.py').read().split('JOBS = []')[0])
+
+That temp file is long gone, so the script raised FileNotFoundError at line 3 and
+`ruff --select F` flagged the consequence statically as F821 (undefined name
+`run`). Worse, had the exec merely produced nothing, every job would have been
+recorded as "ERR name 'run' is not defined" and reported WILL-NOT-RUN -- a
+harness confidently reporting a result it never computed, which is the exact
+class of defect this audit exists to remove.
+
+The helper it was copying already lives in the sibling sweep_harness.py, which
+defines sh/committed_files/snap/elementwise_diff/json_diff/run and guards its own
+main loop with __name__ == "__main__". It now imports from that owner. One
+concept, one home.
+"""
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from sweep_harness import run  # noqa: E402  (path must be set first)
 
 JOBS = [
  ("causalNet/export_notebook_results", ".venv/bin/python scripts/export_notebook_results.py",

@@ -2,7 +2,7 @@
 # One command; no GUI dependencies beyond the pinned WolframKernel path.
 KERNEL := /Applications/Wolfram.app/Contents/MacOS/WolframKernel
 
-.PHONY: verify-paper regenerate-paper closure
+.PHONY: verify-paper regenerate-paper closure closure-pure closure-wolfram ci-local suite hooks lint
 
 verify-paper:
 	python3 tools/verify_paper_artefacts.py
@@ -10,33 +10,39 @@ verify-paper:
 regenerate-paper: verify-paper
 	@echo "all artefacts regenerated and verified"
 
-# AUDIT02/P5.1 — the closure set, run as one command.
+# AUDIT03-C — the closure set now DELEGATES to tools/run_closure.sh.
 #
-# It is a QUARTET, not a triad. verify-paper is the only member that reconciles a
-# manuscript number against a producer, and it was previously left out of the
-# close-out sequence; check-single-engine is new in AUDIT02/P4e. What each member
-# does and does NOT prove is documented in tests/MUnit/BASELINE.md.
+# It used to be a list of `-@` recipe lines. The `-` prefix tells make to ignore
+# the error, so `make closure` exited 0 EVEN IF ALL NINE MEMBERS FAILED, and one
+# member piped into `head` so its status was head's. A green `make closure` meant
+# nothing, and putting it in CI would have produced a permanently green badge.
 #
-# Non-zero exit is expected while an owned red remains in the MUnit ledger, so
-# each member reports its own verdict rather than short-circuiting the run.
+# The `-` prefix did buy one real property -- a single red must not hide the
+# other eight -- and run_closure.sh keeps it by running every member, recording
+# each verdict, and failing at the end.
+#
+# The tiers exist because the Wolfram members need a licensed local kernel that
+# GitHub-hosted runners do not have. CI runs `closure-pure` and says plainly
+# that it is not the whole story; the pre-push hook (make hooks) is what stops
+# the Wolfram tier being silently skipped.
+
+closure-pure:
+	@zsh tools/run_closure.sh pure
+
+closure-wolfram:
+	@zsh tools/run_closure.sh wolfram
+
 closure:
-	@echo "── 1/9 paper-number gate (manuscript CHANGE detector, not a correctness check)"
-	-@python3 tools/snapshot_paper_numbers.py --check
-	@echo "── 2/9 GLOSSARY sync (document mirroring vs the sibling; does NOT check code)"
-	-@zsh tools/check_glossary_sync.sh
-	@echo "── 3/9 GLOSSARY conformance (the code side the sync check cannot see)"
-	-@zsh tools/check_glossary_conformance.sh
-	@echo "── 4/9 single-engine guard"
-	-@zsh tools/check_single_engine.sh
-	@echo "── 5/9 core index (every owner named in GOVERNANCE/CORE.md still exists)"
-	-@zsh tools/check_core_index.sh
-	@echo "── 6/9 Wolfram syntax (every .m/.wl parses; the suite could not see a syntax error)"
-	-@CB_REPO=$$PWD HOME=$$HOME /Applications/Wolfram.app/Contents/MacOS/WolframKernel -script tools/check_wolfram_syntax.wl
-	@echo "── 7/9 test manifest (every tests/ file classified; no silent exclusions)"
-	-@zsh tools/check_test_manifest.sh
-	@echo "── 8/9 table coverage (how much of the manuscripts a producer is wired to)"
-	-@venv/bin/python tools/enumerate_paper_tables.py | head -8
-	@echo "── 9/9 paper artefacts (the only member that ties a number to its producer)"
-	-@python3 tools/verify_paper_artefacts.py
-	@echo "── MUnit suite: run separately, it is slow"
-	@echo "     zsh tests/MUnit/run-tests.sh --all"
+	@zsh tools/run_closure.sh all
+
+suite:
+	@zsh tests/MUnit/run-tests.sh --all
+
+# What a developer must run before pushing: everything CI cannot.
+ci-local: closure-wolfram suite
+
+hooks:
+	@zsh tools/install_hooks.sh
+
+lint:
+	@venv/bin/ruff check --output-format=concise .

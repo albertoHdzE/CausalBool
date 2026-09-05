@@ -1,0 +1,70 @@
+# CausalBool — lint configuration.
+#
+# AUDIT03-C. 370 Python files had never been linted. Enabling a full ruleset
+# would bury real defects under thousands of style findings, so this starts at
+# the pyflakes family ONLY -- the rules that catch bugs rather than opinions:
+#
+#   F821  undefined name          F401  unused import
+#   F841  unused local variable   F811  redefinition of unused name
+#   F632  `is` with a literal     F502/F522  bad format usage
+#
+# F821 is the class that would have caught `a, b = params["pair"]` -- a dead
+# unpack that could only ever raise -- by machine, instead of by my reading it.
+#
+# Style rules (E/W) are enabled only once F is clean, and are out of scope for
+# this pass. Widening the selection is a deliberate act, not a default.
+
+target-version = "py313"
+line-length = 100
+
+exclude = [
+    "venv", ".venv", "archive", "node_modules",
+    "src/external/ccapi",      # vendored third party: a dependency boundary
+    "imp-prices/vendor",       # vendored, pinned byte-identical
+    "**/reference",            # the ORIGINAL AUTHORS' code in each replication
+    "**/site-packages",
+]
+
+[lint]
+# ENFORCED: the rules that catch bugs rather than opinions. All clean as of
+# 2026-09-04, so CI can go red on a regression rather than on a backlog.
+#
+#   F821 undefined name        F811 redefinition of unused name
+#   F632 `is` with a literal   F502/F522/F524 bad format usage
+#   F702 misplaced control flow
+#
+# These found two real defects on their first run:
+#   * src/integration/BulkScraper.py used `zipfile` and `io` without importing
+#     them, so that branch could only ever raise NameError;
+#   * audit/AUDIT02_Q1_reproducibility/sweep_jobs.py obtained its `run` helper by
+#     exec-ing /tmp/q1_sweep.py, a temp file long gone -- an audit harness that
+#     could not run at all, and would have reported WILL-NOT-RUN for every job.
+select = ["F821", "F811", "F632", "F502", "F522", "F524", "F702"]
+
+# MEASURED DEBT, declared rather than hidden. Counted 2026-09-04 over 370 files:
+#
+#   F401 unused import ................ 218
+#   F541 f-string without placeholders . 67
+#   F841 unused local variable ......... 47   (11 in owner paths)
+#
+# Not enabled yet, and NOT because they do not matter -- F841 is the same shape
+# as the dead `a, b = params["pair"]` unpack this audit removed. They are held
+# back because turning 332 findings red would block every push, and because
+# several need adjudication rather than deletion. One is already known:
+#
+#   src/complexity/Trajectory_LZ.py:26  `k_max` is initialised and never used.
+#   The function cites Kaspar & Schuster (1987), whose formulation DOES use it.
+#   This implementation is a valid simplified variant, but deleting the variable
+#   would erase the signal that it diverges from its own citation. That is a
+#   scientific question, not a lint one, and it is recorded as an open item.
+#
+# Clearing this debt is a declared later pass, not a silent ignore.
+
+[lint.per-file-ignores]
+# Star-imports in notebooks-turned-scripts would otherwise mask F401/F403.
+"**/notebooks/*.py" = ["F403", "F405"]
+# Re-importing in a later cell is a deliberate notebook idiom: cells are run
+# independently and out of order, so a cell that assumes nothing about earlier
+# state is MORE reproducible, not less. F811 is a defect in a module and a
+# feature in a notebook.
+"**/*.ipynb" = ["F811"]

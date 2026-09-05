@@ -1,0 +1,46 @@
+#!/usr/bin/env zsh
+# AUDIT03-C — the Wolfram tier cannot be silently skipped.
+#
+# CI runs only the PURE tier: GitHub-hosted runners have no licensed
+# WolframKernel, so `check_wolfram_syntax.wl`, `verify_paper_artefacts.py` (it
+# shells out to producer_cmd), the two parity gates and the whole 69-test MUnit
+# suite are invisible to it. A green badge would therefore certify roughly half
+# the programme while looking like all of it.
+#
+# This hook is the other half. It runs `make ci-local` before every push.
+#
+# Bypass with `git push --no-verify` when you must -- and it prints exactly what
+# went unchecked, so the bypass is a recorded decision rather than a silent one.
+#
+# Installed by tools/install_hooks.sh via core.hooksPath, because .git/hooks is
+# not version-controlled and a hook nobody can install is a hook nobody has.
+
+set -u
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO" || exit 1
+
+if [[ -n "${CAUSALBOOL_SKIP_PREPUSH:-}" ]]; then
+  echo "pre-push: SKIPPED by CAUSALBOOL_SKIP_PREPUSH."
+  echo "  Unchecked: Wolfram syntax, paper artefacts, both parity gates, 69 MUnit tests."
+  exit 0
+fi
+
+KERNEL=/Applications/Wolfram.app/Contents/MacOS/WolframKernel
+if [[ ! -x "$KERNEL" ]]; then
+  echo "pre-push: REFUSED to certify — no WolframKernel at $KERNEL."
+  echo "  This machine cannot run the tier CI does not cover. Push with"
+  echo "  --no-verify only if you accept that nothing checked it."
+  exit 1
+fi
+
+echo "pre-push: running the tier CI cannot (make ci-local). This is slow by design."
+if make ci-local; then
+  echo "pre-push: Wolfram tier and MUnit suite green."
+  exit 0
+fi
+
+echo ""
+echo "pre-push: REFUSED. The Wolfram tier or the MUnit suite is red."
+echo "  CI would NOT have caught this: it runs the pure tier only."
+echo "  Override with: git push --no-verify"
+exit 1

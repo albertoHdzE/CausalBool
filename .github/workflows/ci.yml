@@ -1,0 +1,133 @@
+# CausalBool CI — the PURE tier only.
+#
+# AUDIT03-C. Before this file there was no CI at all: every guard in the
+# programme ran only when someone remembered to run it, and a guard nobody runs
+# is a comment.
+#
+# WHAT THIS DOES NOT COVER, stated here rather than discovered later.
+# GitHub-hosted runners have no licensed WolframKernel, so this workflow cannot
+# run:
+#   * tools/check_wolfram_syntax.wl        (153 files must parse)
+#   * tools/verify_paper_artefacts.py      (shells out to producer_cmd)
+#   * tools/run_crosscheck_parity.sh       (the 135/135 cross-language parity)
+#   * tools/test_description_length_parity.py
+#   * the 69-test MUnit suite
+#
+# That is roughly half the programme's verification. The pre-push hook
+# (tools/install_hooks.sh) runs exactly that half locally. A green badge here
+# means the pure tier passed -- nothing more, and the summary job says so.
+#
+# Every job asserts an EXPECTED COUNT. A suite that collects zero tests must
+# fail, not pass silently: that is the same law the gates follow, and this
+# programme has been bitten by a harness reporting success over zero cases.
+
+name: CI (pure tier)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  gates:
+    name: closure (pure tier)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+      - name: venv shim
+        # run_closure.sh calls venv/bin/python, matching the author's layout.
+        run: |
+          mkdir -p venv/bin
+          ln -sf "$(which python)" venv/bin/python
+      - name: Run the pure closure tier
+        # GLOSSARY sync exits 2 (SYNC-UNKNOWN) here because the sibling
+        # repository series-deconvolution is not checked out. run_closure.sh
+        # reports that as UNKNOWN and does NOT fold it into a pass.
+        run: zsh tools/run_closure.sh pure || bash tools/run_closure.sh pure
+      - name: Wolfram tier NOT covered
+        run: |
+          echo "::warning::CI ran the PURE tier only. The Wolfram tier and the" \
+               "69-test MUnit suite were NOT run. Enforced locally by the" \
+               "pre-push hook (tools/install_hooks.sh)."
+
+  tests:
+    name: pytest (root + index-deconvolution)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+      - name: tests/analysis  (expected 32)
+        run: |
+          python -m pytest -q tests/analysis --tb=short | tee /tmp/a.txt
+          grep -qE '\b32 passed' /tmp/a.txt || { echo "EXPECTED 32 passed"; exit 1; }
+      - name: index-deconvolution  (expected 146)
+        working-directory: index-deconvolution
+        run: |
+          python -m pytest -q --tb=short | tee /tmp/b.txt
+          grep -qE '\b146 passed' /tmp/b.txt || { echo "EXPECTED 146 passed"; exit 1; }
+
+  subprojects:
+    name: ${{ matrix.pkg }}  (expected ${{ matrix.expected }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pkg: imp-causal-paper
+            expected: 28
+          - pkg: imp-prices
+            expected: 97
+          - pkg: imp-causalNet-paper
+            expected: 47
+          - pkg: imp-pathinfo-paper
+            expected: 41
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install the subproject
+        working-directory: ${{ matrix.pkg }}
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -e . || pip install .
+          pip install pytest
+      - name: Run  (expected ${{ matrix.expected }})
+        working-directory: ${{ matrix.pkg }}
+        run: |
+          python -m pytest -q -p no:warnings --tb=short | tee /tmp/r.txt
+          grep -qE "\b${{ matrix.expected }} passed" /tmp/r.txt \
+            || { echo "EXPECTED ${{ matrix.expected }} passed"; exit 1; }
+
+  lint:
+    name: ruff (correctness rules)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: ruff check
+        run: ruff check --output-format=concise .

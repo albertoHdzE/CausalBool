@@ -1,222 +1,259 @@
-# AUDIT03-B — surgical cleaning after the core collapse
+# AUDIT03-C — make the gates run without me, and measure whether they bite
 
 ## Context
 
-The previous phase (items 1–8, commits `651aaa7` … `2e6f1ba`) is **complete**.
-It established one owner per concept (`GOVERNANCE/CORE.md`), installed the
-`monolithic-code` law, declared test membership in `tests/MUnit/MANIFEST.tsv`,
-and took the suite from `OK=54 FAIL=1 TOTAL=55` to **`OK=65 FAIL=0 TOTAL=65`**.
+Four audit passes built a defensible **structure**: one owner per concept
+(`GOVERNANCE/CORE.md`), guards that fire, declared test membership
+(`tests/MUnit/MANIFEST.tsv`), `OK=69 FAIL=0 TOTAL=69`, closure at 9 members.
 
-That work also produced an honest list of what it did **not** clean, and this
-phase closes the tractable part of that list. Two author decisions taken
-2026-09-04 scope it:
+The **process** around it does not exist. Measured on 2026-09-04:
 
-- **Quarantine:** paper-facing first, the rest reclassified honestly. No fake
-  promotions.
-- **Paper coverage:** measure and enumerate only. No producer wiring this pass.
+- **No CI.** There is no `.github/` directory at all. Every gate runs only when
+  I remember to run it. A guard nobody runs is a comment.
+- **`make closure` cannot be a CI gate as written.** Every member is invoked
+  with a `-@` prefix, which tells make to ignore the error, so **the target
+  exits 0 even if all nine members fail**. The rationale for that prefix — "a
+  non-zero exit is expected while an owned red remains in the MUnit ledger" — is
+  obsolete: the ledger is `FAIL=0`.
+- **No dependency manifest at root.** Only the four subprojects have one, so CI
+  cannot install reproducibly. Local interpreter is Python 3.13.12, 76 packages.
+- **No linter or type config anywhere** — no `ruff.toml`, `setup.cfg`,
+  `mypy.ini`, `pyproject.toml`, `.pre-commit-config.yaml`.
+- **Two gates sit outside closure**: `tools/run_crosscheck_parity.sh` (the
+  135/135) and `tools/test_description_length_parity.py`.
+- **Test quality is unmeasured.** One hand-run mutant (`MAJORITY` tie threshold,
+  `Floor[d/2]+1` → `Ceiling[d/2]`) was caught by **5 tests across 4 sections**.
+  That is a spot check, not a kill rate.
 
-### The finding that reorders the phase
+### The residue that must be cleared first
 
-`src/Packages/Integration/SelfTest.m` is **a fourth engine**. It carries private
-reimplementations of the gate semantics — `myAnd`, `myOr`, `myXor`,
-`allPosibleInputsReverse`, `runNetwork` — never checked against
-`Integration`Gates`ApplyGate`. It is advertised in `README.md:68` as one of the
-**core packages**, and `SelfTestRun` is invoked by nothing. Its only caller,
-`tests/SelfTest.m`, lives outside `tests/MUnit`, so it is not in the manifest,
-is not run by the suite, and exports `{"OK", DateString[]}` **unconditionally**.
+The working tree carries **77 modified files**, and they are not all noise:
 
-Both censuses missed it: the AST arm is Python-only, and the Wolfram arm matches
-normalised text, so single-line definitions under *different names* are
-invisible to it. This is the fourth time a guard or a body-fragment search has
-beaten a hash-based census in this audit, and it is the strongest remaining
-argument for the `monolithic-code` pre-flight.
+- **52 of 77** differ only in timing, memory or dates — covered by the existing
+  volatility exclusion (`BASELINE.md` AC-0.2a), whose standing rule is *revert
+  rather than commit noise*.
+- **The remaining 25 are the mutation experiment's output.** Five status files
+  read `FAIL` (`algo004closedformsetaudit`, `analysis_analyticvsexhaustive`,
+  `analysis_majority`, `gates013onesetallfamilies`, `mixed001FormulaVsExhaustive`)
+  and `results/tests/runall/Status.txt` reads `OK=64 FAIL=5 TOTAL=69`.
+
+**My mutation run restored `Gates.m` but not the artefacts.** That is exactly the
+stale-artefact class this audit spent a pass fixing, reintroduced by the tool
+built to test for it. Committing this would record a false red baseline.
+
+**Design consequence, and the reason it leads the plan:** the mutation harness
+must run in an **isolated git worktree**, never in the working tree. A worktree
+shares the 11 GB object store, so it is cheap.
+
+### Decisions taken 2026-09-04
+
+- **Wolfram tier stays local.** CI covers the pure tier; the Wolfram tier gets a
+  `make ci-local` target and a **pre-push hook** so it cannot be silently
+  skipped.
+- **Mutation harness: ~40 mutants, broad sweep**, run overnight.
+- **Scope: CI + mutation + lint + the two orphaned gates**, plus the tree. The
+  29 uncovered manuscript tables are explicitly **out**.
 
 ---
 
 ## The pass, in execution order
 
-### 1. The fourth engine — `SelfTest.m`
+### 1. Clear the mutation residue — before anything else
 
-**Measure before touching.** Run `myAnd`/`myOr`/`myXor` and `runNetwork` against
-`Integration`Gates`ApplyGate` and `Integration`Experiments`CreateRepertoiresDispatch`
-elementwise, over every arity 1..6 and every connected subset — the same shape as
-`audit/AUDIT03_R2_collapse/probe_alloffsets_parity.wl`. Print the denominator.
+Re-run the full suite to regenerate artefacts from unmutated sources. Assert
+`OK=69 FAIL=0 TOTAL=69` and that **no status file reads `FAIL`**. Then apply the
+standing policy: revert files whose only diff is timing/memory/date, and inspect
+any residual non-volatile diff individually before it is committed.
 
-Then adjudicate on the evidence, not in advance:
+Do not proceed to any other item until the tree is clean and the rollup is green.
 
-- **agree everywhere** → drift. Delegate to the owner, keep `SelfTestRun` as a
-  thin smoke check, archive nothing silently.
-- **disagree anywhere** → **stop**, report which cells and why, and do not
-  collapse. Two concepts need two names (the `composedUpdate6Node` precedent,
-  where 32 of 64 rows differed *correctly*).
+### 2. `make closure` must be able to fail
 
-`allPosibleInputsReverse` is additionally duplicated with `src/integration/Alpha.m`
-and carries a typo in its name; resolve it under the same rule.
+Replace the error-swallowing recipe with one that runs every member, prints
+every verdict, and **exits non-zero if any member failed**. Each member must
+still report independently — the point of the `-` prefix was that one red should
+not hide the other eight, and that property is kept by collecting statuses and
+failing at the end.
 
-Correct `README.md:68`, which advertises `SelfTest.m` as a core package that
-nothing runs. Add `tests/SelfTest.m` to the manifest with its true kind — it
-exports a literal status, so it is `quarantine` until it has a predicate, or
-`test` once step 2's pattern is applied to it.
+Split the target so CI can address the tiers separately:
 
-**Guard:** extend `tools/check_single_engine.sh` with the gate-semantics body
-signature (`Count[list, 0] == 0` / `Mod[Total[list], 2]`), so a fifth private
-copy of AND/OR/XOR cannot appear silently. Verify by planting a copy.
+- `make closure-pure` — the 7 members needing no Wolfram
+- `make closure-wolfram` — `check_wolfram_syntax.wl`, `verify_paper_artefacts.py`
+  (it shells out to `producer_cmd`), plus the two orphaned gates
+- `make closure` — both, unchanged in meaning for local use
+- `make ci-local` — `closure-wolfram` + the MUnit suite
 
-### 2. `VerificationSamples.m` — a real predicate, then promotion
+**Verify by planting a failure** in one member and confirming each target's exit
+code moves. A gate aggregator that cannot go red is the defect being fixed.
 
-Measured: of the eleven quarantined files, **this is the only one whose output is
-referenced by an active manuscript** (`papers/method/manuscript_formal/method_paper.tex`;
-the other ten appear only in `doc/newIntPaper/` and `doc/finalpaper/`, which
-`CLAUDE.md` declares provenance archives).
+`tools/check_glossary_sync.sh` exits **2 (SYNC-UNKNOWN)** when the sibling repo
+is absent, which is correct refusal behaviour and is what CI will see. CI must
+report SYNC-UNKNOWN **as unknown**, never fold it into a pass.
 
-It computes truth tables for **XOR/XNOR, KOFN k=2, CANALISING case A and
-IMPLIES** and exports them as "samples" **without checking a single row**. These
-are the most load-bearing objects in the programme.
+### 3. Root dependency manifest
 
-Add the predicate that was always available: compare every sampled row against
-the closed form stated independently of `Gates.m` —
-`XOR = Mod[Total, 2]`, `XNOR = 1 - Mod[Total, 2]`,
-`KOFN = Boole[Count[·,1] >= k]`, `IMPLIES = Boole[a == 0 || b == 1]`,
-`CANALISING` per `GOVERNANCE/GLOSSARY.md` (the non-canalised branch is `Or`, not
-a constant). Export `If[allOK, "OK", "FAIL"]`, promote to `test` in the manifest.
+Add a pinned `requirements.txt` (runtime) and `requirements-dev.txt` (pytest,
+ruff) generated from the working venv, with `pybdm==0.1.0` honoured as the
+already-declared pin in `src/description_lengths.py`. Confirm a clean
+`python -m venv` + install reproduces the root pytest result (**32**) and
+index-deconvolution (**146**).
 
-**Negative control, run and observed:** perturb one truth-table row and confirm
-the file goes red. A predicate that has not been seen to fail is decoration.
+### 4. CI — the pure tier
 
-### 3. The other ten — honest reclassification, not promotion
+`.github/workflows/ci.yml`, Python 3.13, triggered on push and pull request:
 
-They are artefact producers for the historical archives. Reclassify each in
-`MANIFEST.tsv` as `producer` with the *measured* reason — which `doc/` file
-consumes it — rather than leaving them under a quarantine label that implies
-they are tests awaiting repair. Nothing is promoted, nothing is deleted, and the
-manifest stops overstating the tree.
+| job | contents |
+|---|---|
+| `gates` | `make closure-pure`; glossary sync reported as SYNC-UNKNOWN with its reason |
+| `tests` | root `tests/analysis` (32) and `index-deconvolution` (146) |
+| `subprojects` | matrix over the four replication packages, each with its own manifest — expected **28 / 97 / 47 / 41** |
+| `lint` | `ruff check` (see item 6) |
 
-### 4. Two files invoked by nothing at all
+Every job asserts an expected count, so a suite that collects **zero** tests
+fails instead of passing silently — the same law the gates already follow.
 
-`tests/MUnit/Algo/TSK-ALGO-PerfTable.m` and
-`tests/MUnit/Compare/TSK-COMPARE-CHARTS.m` export no status and are referenced by
-**no** script, Makefile target or gate. Confirm with a second search on a body
-fragment, then move to `archive/` per repository policy — preserved, not deleted.
+CI must **not** run the Wolfram tier and must **say so in its summary**, so a
+green badge cannot be mistaken for full coverage.
 
-### 5. `verify-paper` — enumerate the coverage honestly
+### 5. The Wolfram tier cannot be silently skipped
 
-`papers/method/artifact_baseline/artefacts.json` declares **7 covered, 1
-pending**, but the pending entry is a catch-all — *"remaining appendix/expansion
-tables"* — with no enumeration, while the two active manuscripts carry **34
-`tabular` environments** (21 formal, 13 computational). The gate's output reads
-like `7/8` and is not.
+`tools/install_hooks.sh` sets `core.hooksPath` to a tracked `githooks/`
+directory (`.git/hooks` is not version-controlled) and installs a **pre-push**
+hook running `make ci-local`. The hook must be bypassable with an explicit
+`--no-verify` and must print what it skipped when bypassed.
 
-Replace the catch-all with a per-table inventory: every number-bearing table in
-both active manuscripts, listed `COVERED` (naming its producer) or `UNCOVERED`
-(with the reason). Report the honest fraction in the gate's summary line. This
-is **measurement, not wiring** — no producer is built this pass, and the
-resulting number is expected to be materially worse than `7/8`, which is the
-point.
+Fold `run_crosscheck_parity.sh` and `test_description_length_parity.py` into
+`closure-wolfram`. Both exist and neither has ever been run by a routine command.
 
-### 6. Orphans — adjudicated, not deleted on a grep
+### 6. Lint — correctness rules first, style deferred
 
-29 Python (18 in active paths) and 4 Wolfram, from
-`audit/AUDIT03_R2_collapse/orphan_census.py`. Label each **dead** / **public API**
-/ **capability awaiting use**, with evidence. Delete only where dead is proven;
-record the rest.
+370 Python files have never been linted, so a full ruleset would produce an
+unusable wall of style findings. Enable the **pyflakes (`F`) family only** to
+begin with: undefined names, unused imports, f-strings without placeholders,
+redefinitions. These are the rules that catch *bugs* — `F821` is the class that
+would have caught the dead `a, b = params["pair"]` unpack by machine rather than
+by my reading it.
 
-Two are already understood and go in the ledger rather than the bin:
+**Report the finding count with its denominator before fixing anything.** Fix
+genuine defects; for anything intentional, add a scoped `noqa` with a reason,
+never a blanket ignore. Style rules (`E`/`W`) are enabled only after `F` is
+clean, and are out of scope for this pass.
 
-- `posterior_probabilities` (`imp-prices/.../belief_network.py`) — the module
-  scores hard argmax labels, so calibrated posteriors are unused. **A capability
-  the protocol has not yet called for**, not a defect; it means no calibration
-  claim has been made.
-- `compute_d_bdm_correlation`, `generate_bio_repertoires`
-  (`src/integration/bio_D_experiment.py`) — inspect against the description-length
-  owner before judging; that file is named in `GOVERNANCE/CORE.md`'s neighbourhood.
+### 7. The mutation harness — the measurement that matters
 
-State again, in the output, that the census **under-reports**: it over-counts
-references by design, so the printed set is a floor.
+`audit/AUDIT03_R2_collapse/mutation_harness.py`. Not a rewrite: it reuses the
+existing suite runners and the isolation lesson from item 1.
 
-### 7. Two small, real defects
+**Design constraints, each from a defect already seen in this programme:**
 
-- **`src/data/` has no `__init__.py`**, so `src/analysis/Cancer_Corruption.py`
-  cannot be imported at all (verified pre-existing against the unmodified file
-  via `git show`). Fix, then confirm the module imports.
-- **`D_formula` IMPLIES/NIMPLIES** — the `log2(d(d-1))` field prices an ordered
-  pair the engine cannot choose (the caller always sorts, so the antecedent is
-  always the lower index). Measured: the cost difference is **0.00000 bits**
-  everywhere (`log2 2 = 1`, identical to the default branch) and the corpus has
-  **zero** IMPLIES/NIMPLIES nodes, so no published number moves. Add the comment
-  and a `d == 2` assertion so a `d=3` node fails loudly instead of paying a
-  phantom field. **No formula change.**
+- **Runs in a `git worktree`**, so a mutant cannot leave residue in the working
+  tree. Cleaned up on exit including on interrupt.
+- **The mutant catalogue is declared in the file**, one to several per owner in
+  `GOVERNANCE/CORE.md` — gate semantics, index algebra, description length,
+  `C_formula`, corpus loader, offsets, deconvolution, paths — plus boundary and
+  off-by-one cases. Target ≈40.
+- **Each mutant is verified to apply.** A mutation that silently fails to patch
+  its target would be scored as "killed by nothing" and inflate the rate; the
+  harness refuses on a no-op patch.
+- **Each mutant is routed to the full tier that could catch it** — MUnit for
+  Wolfram owners, the whole pytest set for Python owners. Not a hand-picked
+  subset, which would bias the result toward a kill.
+- **Prints the denominator**: `killed/total`, per owner, and never a bare
+  percentage.
 
-### 8. Ledger and guards
+**Survivors are adjudicated, not counted.** A surviving mutant is either a
+**coverage gap** or an **equivalent mutant** that changes nothing observable —
+these are not the same finding and conflating them is the classic mutation-score
+error. Every survivor is inspected and labelled in `MUTATION.md`, with the
+owners that have **zero** kills named explicitly, since those are the real
+result.
 
-Declare every delta in `tests/MUnit/BASELINE.md` with its cause. Update
-`GOVERNANCE/CORE.md` (any new owner, any new exception), `MANIFEST.tsv`, and
-`audit/AUDIT03_R2_collapse/DUPLICATION.md`. Add step 1's guard and step 5's
-coverage line to `make closure`.
+Expected cost ≈3.5 h (Wolfram mutants dominate at ~8 min each); run in the
+background.
+
+### 8. Ledger
+
+`tests/MUnit/BASELINE.md` gains the kill rate and the CI split. `CORE.md` gains
+the CI/hook entries in its guard table and `check_core_index.sh` must stay green.
+`DUPLICATION.md` records the mutation-residue incident, since it is a fresh
+instance of the stale-artefact class and was caused by my own tool.
 
 ---
 
 ## Critical files
 
-- `src/Packages/Integration/SelfTest.m`, `tests/SelfTest.m`, `README.md:68` — the
-  fourth engine.
-- `src/Packages/Integration/Gates.m` — the owner it must be measured against.
-- `tests/MUnit/Sampling/VerificationSamples.m` — the predicate.
-- `tests/MUnit/MANIFEST.tsv`, `tools/check_test_manifest.sh` — reclassification.
-- `papers/method/artifact_baseline/artefacts.json`, `tools/verify_paper_artefacts.py`
-  — coverage enumeration.
-- `audit/AUDIT03_R2_collapse/orphan_census.py` — reuse; do not rewrite.
-- `tools/check_single_engine.sh` — one added signature.
-- `src/data/__init__.py`, `src/Packages/Integration/BioMetrics.m`,
-  `src/description_lengths.py` — step 7.
+- `Makefile` — the `-@` recipe prefixes; new `closure-pure` / `closure-wolfram` /
+  `ci-local` targets.
+- `.github/workflows/ci.yml`, `requirements.txt`, `requirements-dev.txt`,
+  `ruff.toml` — all new.
+- `githooks/pre-push`, `tools/install_hooks.sh` — new; `core.hooksPath`.
+- `audit/AUDIT03_R2_collapse/mutation_harness.py`, `MUTATION.md` — new.
+- `tools/check_glossary_sync.sh` — unchanged; its exit 2 is *correct* and CI must
+  honour it.
+- `tests/MUnit/BASELINE.md`, `GOVERNANCE/CORE.md`,
+  `audit/AUDIT03_R2_collapse/DUPLICATION.md` — the ledger.
 
-Reuse, do not reimplement: `probe_alloffsets_parity.wl` (parity shape),
-`duplication_census.py`, `orphan_census.py`, `test_efficacy_census.py`.
+Reuse, do not reimplement: `tests/MUnit/run-tests.sh` (suite), the nine closure
+members, `orphan_census.py` / `duplication_census.py` / `test_efficacy_census.py`
+(census shape and the refuse-on-empty pattern).
 
 ## Verification
 
 ```bash
-# 1. the fourth engine — parity BEFORE any collapse, denominator printed
-HOME=$HOME .../WolframKernel -script audit/AUDIT03_R2_collapse/probe_selftest_parity.wl
-zsh tools/check_single_engine.sh                 # new gate-semantics signature listed
+# 1. tree — the gating step
+zsh tests/MUnit/run-tests.sh --all            # OK=69 FAIL=0 TOTAL=69
+grep -rl . results/tests/*/Status.txt | xargs -n1 head -1 | sort -u   # no FAIL
+git status --short | wc -l                    # only volatile files remain, then reverted
 
-# 2. the predicate must be SEEN to fail
-zsh tests/MUnit/run-tests.sh --section Sampling  # OK=1 FAIL=0
-#    then perturb one truth-table row -> must go red, and be restored
+# 2. closure must be able to fail — verified by planting, not asserted
+make closure-pure   ; echo $?                 # 0
+make closure        ; echo $?                 # 0
+#   plant a failure in one member -> each affected target must exit non-zero
 
-# 5. coverage, reported as a fraction with its denominator
-python3 tools/verify_paper_artefacts.py          # per-table COVERED/UNCOVERED
+# 3-4. reproducible install, then the pure tier exactly as CI runs it
+python3 -m venv /tmp/ci-probe && /tmp/ci-probe/bin/pip install -r requirements.txt -r requirements-dev.txt
+/tmp/ci-probe/bin/python -m pytest -q tests/analysis          # 32
+(cd index-deconvolution && /tmp/ci-probe/bin/python -m pytest -q)   # 146
 
-# standing bars — must not move except where a delta is declared
-zsh tests/MUnit/run-tests.sh --all               # >= OK=66 FAIL=0 (Sampling promoted)
-make closure                                     # 8 members, all green
-venv/bin/python -m pytest -q tests/analysis      # 32
-(cd index-deconvolution && ../venv/bin/python -m pytest -q)          # 146
+# 5. the hook must actually fire
+zsh tools/install_hooks.sh && git config core.hooksPath       # githooks
+#   a push with a failing Wolfram tier must be refused
+
+# 6. lint — count first, fix second
+venv/bin/ruff check --select F --output-format=concise . | wc -l
+
+# 7. mutation — isolated, with its denominator
+venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py --all
+git worktree list                             # must be back to one entry
+git status --short | wc -l                    # must be 0 — no residue
+
+# standing bars, unmoved
+make ci-local                                 # closure-wolfram + MUnit
 for d in imp-causal-paper imp-prices imp-causalNet-paper imp-pathinfo-paper; do
-  (cd $d && .venv/bin/python -m pytest -q -p no:warnings); done      # 28 / 97 / 47 / 41
-(cd papers/method/manuscript_formal && pdflatex -halt-on-error method_paper.tex)
-(cd papers/method/manuscript_computational && pdflatex -halt-on-error comp_paper.tex)
+  (cd $d && .venv/bin/python -m pytest -q -p no:warnings); done   # 28 / 97 / 47 / 41
 ```
 
-**Rules that hold throughout** (unchanged from the previous phase):
+**Rules that hold throughout** (carried forward):
 
-- **No copy is deleted** before an elementwise parity run against the survivor is
-  committed as evidence; every collapse ships its guard in the same commit.
-- **Promote the superset**, never the first copy found — a deficient copy was
-  promoted once in this audit and had to be corrected.
-- **Non-zero disagreement means stop**, not collapse. Two concepts need two names.
-- **Every gate refuses on empty input and prints its denominator.**
-- **Every intended delta declared** in `BASELINE.md` with its cause.
+- **Every gate refuses on empty input and prints its denominator.** A suite that
+  collects zero tests fails; `SYNC-UNKNOWN` is reported as unknown, never as a
+  pass.
+- **Every new gate is verified by planting the defect** and observing it fail, in
+  the same commit.
 - **No number enters a document without its reference distribution in the same
-  sentence.**
+  sentence** — the kill rate carries its denominator and its survivor
+  adjudication.
+- **Revert noise rather than commit it**; declare every intended delta in
+  `BASELINE.md` with its cause.
 - **No Claude co-authorship in any commit.**
 
-**Acceptance.** The fourth engine measured and adjudicated with evidence;
-`VerificationSamples.m` carrying a predicate whose negative control was observed
-to fire; the manifest describing the tree truthfully; `verify-paper` reporting an
-honest coverage fraction rather than a catch-all; orphans labelled with evidence;
-both small defects closed; every bar unmoved or its delta declared.
+**Acceptance.** Tree clean and green with the mutation residue gone; `make
+closure` demonstrably able to fail; a reproducible install; CI running the pure
+tier on every push and stating plainly that the Wolfram tier is not covered; the
+pre-push hook refusing a push whose Wolfram tier is red; `ruff --select F` clean
+or every remaining finding justified in place; a kill rate reported per owner
+with survivors adjudicated as gap-or-equivalent and zero-kill owners named.
 
-**Stop conditions.** No producer wiring for uncovered tables (decision: measure
-only). No promotion of the ten archive-facing producers. Bio regeneration does
-not start (blocked behind R4). R4.2–R4.5 do not start. R5 does not start
-(`Q2.2` unresolved).
+**Stop conditions.** No producer wiring for the 29 uncovered manuscript tables.
+No style-rule lint beyond `F`. Bio regeneration does not start (blocked behind
+R4). R4.2–R4.5 do not start. R5 does not start (`Q2.2` unresolved).

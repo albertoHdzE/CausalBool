@@ -2,6 +2,13 @@ import requests
 import json
 import time
 import sys
+# AUDIT03-C: `zipfile` and `io` are used at line ~183 to open a downloaded
+# archive and were NEVER IMPORTED, so that branch could only ever raise
+# NameError. Found by `ruff --select F821`, not by reading -- this file's entry
+# points are orphans (audit/AUDIT03_R2_collapse/ORPHANS.md), so no test reaches
+# the branch and nothing went red.
+import io
+import zipfile
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
@@ -12,9 +19,7 @@ from integration.grn_data_pipeline import GRNLoader
 from integration.SBMLParser import SBMLParser
 from integration.BNetParser import BNetParser
 from integration.GINMLParser import GINMLParser
-from integration.grn_data_pipeline import GRNLoader
 import networkx as nx
-import json
 
 class BulkScraper:
     def __init__(self, base_dir=None):
