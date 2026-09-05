@@ -280,6 +280,52 @@ it survives, the finding is that **`reduce_column` is never exercised on a
 non-contiguous essential set**, and the fix is a test with a genuine hole in the
 support — not a claim that the mutant is equivalent, because it is not.
 
+### Result — `deconvolution` goes from NOT MEASURED to 5/5
+
+Measured 2026-09-05 against the owner's own suite
+(`index-deconvolution/tests/`, 23 tests). These are **targeted** runs, not full
+harness runs: a kill by a subset of the suite is still a kill, but the
+per-instrument attribution comes from the full run at the close of Phase A.
+
+| mutant | predicted | actual | killed by |
+|---|---|---|---|
+| `dec-essential-invert` | KILLED | **KILLED** | 8 tests |
+| `dec-essential-top` | KILLED | **KILLED** | 6 tests |
+| `dec-dnf-offset` | KILLED | **KILLED** | 2 tests |
+| `dec-dnf-polarity` | KILLED (moderate) | **KILLED** | 1 test |
+| `dec-reduce-index` | **SURVIVES** | **KILLED** | 6 tests |
+
+**Four predictions held. The fifth failed, and the reason is the useful part.**
+
+I predicted `dec-reduce-index` would survive because it is inert whenever the
+essential set is contiguous from zero, and I assumed the fixtures would be small
+hand-built networks with sets like `[0, 1]`. They are not. It was killed by:
+
+```
+test_exact_recovery_random_symmetric
+test_exact_recovery_random_full
+test_biological_networks_exact_recovery
+test_reachable_state_correlation_can_hide_inputs
+test_verify_forward_is_independent_and_exact
+test_connectivity_recovered_exactly
+```
+
+**Random and biological networks have holes in their support; hand-built ones do
+not.** The suite is stronger than I predicted precisely because it does not rely
+on hand-built cases. That is a property worth naming, because the obvious way to
+write a fixture — construct a small network by hand — would have left this exact
+mutant alive and the gap invisible.
+
+`dec-dnf-polarity`, the one I was least sure of, was killed by a single test.
+One test is a thin margin: deleting
+`test_regulatory_dnf_identification_and_reproduction` would leave clause polarity
+entirely unchecked. Recorded here rather than fixed, since the owner now has a
+denominator and Phase D is where thin margins are widened.
+
+**No new tests were required for this owner.** The gap was in the *catalogue*,
+not in the suite: the tests existed and were good, and nothing had ever asked
+them a semantic question.
+
 ---
 
 ### What this hands to Phase 3
