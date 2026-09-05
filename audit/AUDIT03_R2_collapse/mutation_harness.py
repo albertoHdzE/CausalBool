@@ -229,6 +229,33 @@ def sh(cmd: list[str] | str, cwd: Path, timeout: int = 1800) -> tuple[int, str]:
     return r.returncode, (r.stdout + r.stderr)
 
 
+def assert_head_matches_working_tree() -> None:
+    """Refuse if the working tree has uncommitted changes.
+
+    AUDIT03-C, added after I wasted a run. The worktree is created from HEAD, so
+    the code under test is the COMMITTED code -- but I started a run with the
+    fix for a baseline failure still uncommitted in the working tree. The
+    harness dutifully built a worktree without it, and would have spent five
+    hours to conclude, correctly, that the baseline was red.
+
+    Measuring HEAD is the right choice: a kill rate should describe what is
+    committed, not what happens to be on disk. But then the harness must say so
+    rather than let the two silently differ.
+    """
+    rc, out = sh(["git", "status", "--porcelain"], ROOT)
+    dirty = [ln for ln in out.splitlines() if ln.strip()]
+    if dirty:
+        print("REFUSED: the working tree has uncommitted changes, and this "
+              "harness measures HEAD.")
+        print("  The result would describe code you have already changed:")
+        for ln in dirty[:10]:
+            print("   ", ln)
+        if len(dirty) > 10:
+            print(f"    ... and {len(dirty) - 10} more")
+        print("  Commit (or stash) first, then re-run.")
+        raise SystemExit(2)
+
+
 def make_worktree() -> Path:
     if WORKTREE.exists():
         sh(["git", "worktree", "remove", "--force", str(WORKTREE)], ROOT)
@@ -342,6 +369,7 @@ def main() -> int:
           f"{sum(1 for m in selected if m.tier == 'python')} python")
     print("Isolated in a git worktree; the working tree is never touched.\n")
 
+    assert_head_matches_working_tree()
     wt = make_worktree()
     try:
         # Baseline: the tier must be GREEN before any mutant, or a "kill" would
