@@ -50,6 +50,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import shutil
 import subprocess
@@ -389,15 +390,112 @@ def load_previous(sha: str) -> dict[str, dict]:
             if m.get("result") in ("KILLED", "SURVIVED", "NOT-APPLIED")}
 
 
+def is_probe(m: Mutant) -> bool:
+    """A reachability probe renames a public function away.
+
+    DERIVED from the catalogue rather than hand-listed, so a probe added later
+    cannot desynchronise from the exclusion list and quietly inflate the rate.
+    """
+    return m.old.startswith("def ") and "_unused_" in m.new
+
+
+def real_killers(killed_by: list[str]) -> list[str]:
+    """Killers, excluding tests the baseline already showed to be flaky.
+
+    `len(killed_by)` includes FLAKE-IGNORED entries, so printing it produced
+    lines reading `SURVIVED (3 test(s))`. The VERDICT was never computed from
+    that count -- only the printed line was wrong -- but a report must not
+    reproduce the same confusion.
+    """
+    return [k for k in killed_by if not str(k).startswith("FLAKE")]
+
+
+def report() -> int:
+    """Kill rate with its denominator, per owner, by instrument.
+
+    A single headline rate hides the thing worth knowing: WHICH instrument
+    caught each mutant. A mutant killed only by a closure gate is not evidence
+    that the test suite checks the answer -- it is evidence that the programme
+    notices, which is a weaker claim and a different one.
+    """
+    if not RESULTS.exists():
+        print(f"REFUSED: no results at {RESULTS}. Run --all first.")
+        return 2
+    d = json.loads(RESULTS.read_text())
+    if not d.get("mutants"):
+        print("REFUSED: 0 mutants in the results file. A rate over nothing is not a rate.")
+        return 2
+    if not d.get("complete"):
+        print(f"REFUSED: results are PARTIAL ({d.get('n_scored')}/{d.get('n_selected')} "
+              "scored). A partial file must never be quoted as a final rate.")
+        return 2
+
+    probe_ids = {m.mid for m in MUTANTS if is_probe(m)}
+    rows = [m for m in d["mutants"] if m.get("result") in ("KILLED", "SURVIVED")]
+    sem = [m for m in rows if m["id"] not in probe_ids]
+    pro = [m for m in rows if m["id"] in probe_ids]
+
+    def instr(m):
+        c = collections.Counter(str(k).split(":")[0] for k in real_killers(m["killed_by"]))
+        return c.get("munit", 0), c.get("pytest", 0), c.get("closure", 0)
+
+    unit_killed = [m for m in sem if sum(instr(m)[:2]) > 0]
+    closure_only = [m for m in sem
+                    if m["result"] == "KILLED" and sum(instr(m)[:2]) == 0]
+
+    print(f"Mutation report — HEAD {d['head_sha'][:12]}, complete={d['complete']}")
+    print(f"catalogue: {len(rows)} scored = {len(sem)} semantic + {len(pro)} "
+          f"reachability probe(s)\n")
+    k = sum(1 for m in sem if m["result"] == "KILLED")
+    print(f"  SEMANTIC kill rate      {k}/{len(sem)} = {100*k/len(sem):.1f}%")
+    print(f"  UNIT-TEST kill rate     {len(unit_killed)}/{len(sem)} = "
+          f"{100*len(unit_killed)/len(sem):.1f}%   (MUnit or pytest caught it)")
+    kp = sum(1 for m in pro if m["result"] == "KILLED")
+    print(f"  probes (excluded)       {kp}/{len(pro)}   a kill proves only that "
+          "something imports the owner\n")
+
+    print(f"  {'owner':<22}{'killed':<10}{'semantic':<10}{'unit-killed':<13}verdict")
+    for owner in sorted({m["owner"] for m in rows}):
+        o = [m for m in rows if m["owner"] == owner]
+        os_ = [m for m in o if m["id"] not in probe_ids]
+        ok = sum(1 for m in o if m["result"] == "KILLED")
+        ou = sum(1 for m in os_ if sum(instr(m)[:2]) > 0)
+        # The unit-killed column is scored over the SEMANTIC subset only. An
+        # owner probed but never mutated semantically has denominator 0, which
+        # is "not measured" -- it must not read as a zero-kill finding.
+        v = "ZERO unit-test kills" if os_ and ou == 0 else (
+            "probes only — NOT MEASURED" if not os_ else "")
+        print(f"  {owner:<22}{f'{ok}/{len(o)}':<10}{len(os_):<10}"
+              f"{f'{ou}/{len(os_)}' if os_ else '—':<13}{v}")
+
+    if closure_only:
+        print(f"\n  killed ONLY by a governance gate — {len(closure_only)} of "
+              f"{len(sem)} semantic mutants:")
+        for m in closure_only:
+            print(f"    {m['id']:<26}{m['note'][:58]}")
+
+    surv = [m for m in rows if m["result"] == "SURVIVED"]
+    print(f"\n  SURVIVORS — {len(surv)}. Each is a coverage gap OR an equivalent "
+          "mutant; adjudicate, do not score.")
+    for m in surv:
+        print(f"    {m['id']:<26}{m['note'][:58]}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--all", action="store_true")
+    ap.add_argument("--report", action="store_true",
+                    help="rates and per-owner table from the persisted results")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--only", default=None, help="owner substring")
     ap.add_argument("--smoke", type=int, default=0)
     ap.add_argument("--resume", action="store_true",
                     help="skip mutants already scored for this exact HEAD")
     a = ap.parse_args()
+
+    if a.report:
+        return report()
 
     if a.list:
         print(f"{len(MUTANTS)} mutants across "

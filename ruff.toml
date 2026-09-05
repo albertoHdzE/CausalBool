@@ -20,7 +20,6 @@ line-length = 100
 exclude = [
     "venv", ".venv", "archive", "node_modules",
     "src/external/ccapi",      # vendored third party: a dependency boundary
-    "imp-prices/vendor",       # vendored, pinned byte-identical
     "**/reference",            # the ORIGINAL AUTHORS' code in each replication
     "**/site-packages",
 ]
@@ -72,7 +71,20 @@ select = ["F821", "F811", "F632", "F502", "F522", "F524", "F702",
 "imp-causal-paper/**" = ["F401", "F841"]
 "imp-causalNet-paper/**" = ["F401", "F841"]
 "imp-pathinfo-paper/**" = ["F401", "F841"]
-"imp-prices/**" = ["F401", "F841"]
+# imp-prices is listed by SUBDIRECTORY, not as `imp-prices/**`, so that
+# `imp-prices/vendor/` is deliberately NOT exempt. That tree is pinned
+# byte-identical to `index-deconvolution/src/`, and its canonical side IS
+# linted. An exemption covering one side of a pinned pair is a defect in the
+# pin: on 2026-09-05 an F401 sweep removed an unused import from the canonical,
+# the exempt vendor copy kept it, and the pin broke with nobody editing the
+# vendored file and nobody intending a change. Both files are clean under the
+# full enforced set, so the exemption was never needed in the first place.
+"imp-prices/scripts/**" = ["F401", "F841"]
+"imp-prices/notebooks/**" = ["F401", "F841"]
+"imp-prices/tests/**" = ["F401", "F841"]
+"imp-prices/experiments/**" = ["F401", "F841"]
+"imp-prices/src/**" = ["F401", "F841"]
+"imp-prices/doc/**" = ["F401", "F841"]
 # Each level* directory is a dated experiment record for the order-discovery
 # programme; collapsing or tidying them rewrites the record.
 "index-deconvolution/level*/**" = ["F401", "F841"]

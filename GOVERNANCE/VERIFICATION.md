@@ -66,7 +66,7 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
 | Wolfram files that parse | **153 / 153** | `check_wolfram_syntax.wl` |
 | Test files classified | **82 / 82** (69 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
-| Owners named in `CORE.md` that exist | **44 / 44** | `check_core_index.sh` |
+| Owners named in `CORE.md` that exist | **46 / 46** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
 | Lint, enforced rules | **clean** | `ruff check` |
 
@@ -227,9 +227,51 @@ Design constraints, each earned from a defect already seen here:
 - **Survivors are adjudicated, never scored.** A survivor is a **coverage gap**
   or an **equivalent mutant**; conflating them is the classic error.
 
-**Known result so far:** one hand-run mutant (`MAJORITY` tie threshold, breaking
-declared convention D-3) was killed by **5 tests across 4 sections**. The full
-rate lands in `mutation_results.json` and `BASELINE.md`.
+### The result, 2026-09-05 — and why one rate is not enough
+
+The full run completed, `28/28` scored against `c9bc412`. Regenerate with
+`venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py --report`, which
+refuses on an absent, empty or incomplete results file.
+
+| rate | value |
+|---|---|
+| **semantic kill rate** (headline; 3 reachability probes excluded) | **23/25 = 92.0%** |
+| **unit-test kill rate** (of those, caught by an MUnit or pytest test) | **19/25 = 76.0%** |
+
+**The 16-point gap is the finding.** Four semantic mutants were killed *only* by
+a governance gate, with no unit test detecting them. A closure-gate kill means
+the programme notices; it does not mean the suite checks the answer, and a
+single `92%` would have merged those two claims.
+
+Three owners, named as the plan requires:
+
+- **`NetworkIO` — zero kills of any kind.** Its mutant makes the corpus loader
+  read the classification **label** instead of the authoritative formula, and
+  nothing caught it. This is the AUDIT02/H defect that two of five collapsed
+  copies carried; the owner was fixed, the test that would keep it fixed was
+  never written. **The AUDIT04 Phase 5 diagnostic reached the same defect
+  independently**, measuring that 1,943 of 3,977 corpus nodes were recorded as
+  having no derivable truth table when they have one, precisely because a label
+  was read as a statement about evaluability.
+- **`CausalBoolCore` — zero unit-test kills**, 3/3 caught by the cross-language
+  parity gate alone. Its self-containment is a declared exception in `CORE.md`
+  justified by exactly that parity, so the exception is holding as declared —
+  but nothing else watches it, and that cost is now measured rather than assumed.
+- **`deconvolution` — not measured.** Both its mutants are reachability probes,
+  so its semantic denominator is **zero**. `minimal_dnf` and
+  `essential_variables` are declared owners and no mutant has ever tested
+  whether the suite checks their answers. The reporter prints `NOT MEASURED`
+  rather than `0/0`, because a zero denominator reading as a clean sheet is the
+  vacuous pass this page exists to prevent.
+
+Both survivors are adjudicated **coverage gaps, not equivalent mutants**, in
+`audit/AUDIT03_R2_collapse/MUTATION.md`, together with one **failed**
+pre-registered prediction (`py-paths-root` was predicted to survive and was
+killed — by a closure gate only, so the coverage gap it named is still real and
+is carried forward regardless of the kill).
+
+**Earlier, superseded:** one hand-run mutant (`MAJORITY` tie threshold, breaking
+declared convention D-3) killed by 5 tests across 4 sections.
 
 ### What the harness found before it ran a single mutant
 

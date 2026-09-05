@@ -54,6 +54,12 @@ CHECKERS: dict[str, str] = {
     "Lint hygiene debt": "lint_debt",
     "Manuscript tables with a producer wired": "table_coverage",
     "Coverage of `src/` as a whole": "src_coverage",
+    # Section 5. Added 2026-09-05 with the mutation result: the moment a rate is
+    # written onto this page it becomes a claim, and every claim needs a gate.
+    # Both rates are checked, not just the headline -- the whole point of the
+    # pair is that quoting only the 92% would merge two different statements.
+    "semantic kill rate": "mutation_semantic",
+    "unit-test kill rate": "mutation_unit",
 }
 
 # Rows carrying SEVERAL bold figures rather than one. Everywhere else only the
@@ -222,6 +228,40 @@ def src_coverage() -> tuple[list[int] | None, str]:
     return [int(m.group(3)), on_disk], "pytest --cov=src (denominator checked)"
 
 
+def _mutation_report() -> tuple[str | None, str]:
+    """Live output of the harness's own reporter.
+
+    Not a re-read of mutation_results.json: the reporter REFUSES on a partial or
+    empty run, and routing through it means this gate inherits that refusal
+    instead of re-implementing it. Enriching the owner rather than duplicating
+    its logic -- `monolithic-code` Q3.
+    """
+    rc, out = run([str(ROOT / "venv/bin/python"),
+                   str(ROOT / "audit/AUDIT03_R2_collapse/mutation_harness.py"),
+                   "--report"], ROOT)
+    if rc != 0:
+        return None, f"UNKNOWN: mutation reporter refused (rc={rc})"
+    return out, "mutation_harness.py --report"
+
+
+def _mutation_rate(kind: str) -> tuple[list[float] | None, str]:
+    out, how = _mutation_report()
+    if out is None:
+        return None, how
+    m = re.search(rf"{kind}\s+kill rate\s+(\d+)/(\d+) = ([\d.]+)%", out, re.I)
+    if not m:
+        return None, f"UNKNOWN: reporter printed no {kind} rate"
+    return [float(m.group(1)), float(m.group(2)), float(m.group(3))], how
+
+
+def mutation_semantic() -> tuple[list[float] | None, str]:
+    return _mutation_rate("SEMANTIC")
+
+
+def mutation_unit() -> tuple[list[float] | None, str]:
+    return _mutation_rate("UNIT-TEST")
+
+
 def core_index() -> tuple[list[int] | None, str]:
     rc, out = run(["zsh", str(ROOT / "tools/check_core_index.sh")], ROOT)
     m = re.search(r"(\d+)\s*/\s*(\d+)\s+paths", out)
@@ -240,7 +280,10 @@ def test_manifest() -> tuple[list[int] | None, str]:
 
 # ── the document side ───────────────────────────────────────────────────────
 
-ROW = re.compile(r"^\|(?P<label>[^|]+)\|(?P<claim>[^|]+)\|(?P<gate>[^|]*)\|\s*$")
+# The third cell is optional: section 5's rate table is two columns, and a row
+# regex that silently skips it would let a rate onto the page ungated -- the
+# exact class of hole this file was written to close.
+ROW = re.compile(r"^\|(?P<label>[^|]+)\|(?P<claim>[^|]+)\|(?:(?P<gate>[^|]*)\|)?\s*$")
 # Any bold run. It used to be numeric-only, which silently skipped the table
 # coverage row ("**5 of 34 (15 %)**") because of the word "of". A bold run with
 # no digits in it yields no claim and is dropped below, so widening this cannot
@@ -260,7 +303,7 @@ def parse_claims(text: str) -> list[tuple[str, list[float], str]]:
     in_section = False
     for ln in text.splitlines():
         if ln.startswith("## "):
-            in_section = ln.startswith("## 3.") or ln.startswith("## 4.")
+            in_section = ln.startswith(("## 3.", "## 4.", "## 5."))
             continue
         if not in_section:
             continue
@@ -312,15 +355,18 @@ def main() -> int:
                 unknown.append(f"{label}: {how}")
             continue
         checked += 1
-        want = [int(x) for x in nums]
-        if got != want:
+        # Compared as FLOATS. `int(x)` was truncating, so a document claiming
+        # 92.4% would have matched a tool printing 92.0%. Integer claims still
+        # compare equal against integer results (92 == 92.0).
+        want = nums
+        if [float(x) for x in got] != want:
             bad.append(f"{label}\n      document says {want}\n      {how} says {got}")
         else:
             print(f"  OK   {label}: {got}  ({how})")
 
     total = len(claims)
     print(f"\nVERIFICATION-NUMBERS: checked {checked} of {total} numeric claims "
-          f"in VERIFICATION.md sections 3 and 4.")
+          f"in VERIFICATION.md sections 3, 4 and 5.")
     if unchecked:
         print("  NOT CHECKED HERE (wolfram tier or no cheap producer):")
         for u in unchecked:

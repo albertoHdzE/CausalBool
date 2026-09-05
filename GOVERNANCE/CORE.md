@@ -96,7 +96,7 @@ sharing code.
 | `workspaces/claude-nature/paper/code/` path helpers | frozen Level 8 reproducibility artefact, at a different directory depth | not edited; excluded by the guard with this reason inline |
 | `index-deconvolution/level*/` helpers | each level is a **dated experiment record**; collapsing rewrites history | left as-is, recorded in `DUPLICATION.md` |
 | `index-deconvolution/crosscheck/` vs `index-deconvolution/experiments/DemoLibrary.wl` | the cross-check must be **independent** of what it checks — that independence is what makes 135/135 mean anything | deliberate; exempt in the guard |
-| `imp-prices/vendor` | two-copies rule, pinned byte-identical | vendored boundary |
+| `imp-prices/vendor` | two-copies rule, pinned byte-identical to `index-deconvolution/src/` | `imp-prices/tests/test_vendor_parity.py`, an md5 gate in CI that **loudly skips** rather than passing if the canonical is absent |
 | `src/external/ccapi` | vendored third party | dependency boundary, never modified |
 
 ---
@@ -125,11 +125,38 @@ the single survivor is the wrong file.
 | `.github/workflows/ci.yml` | the pure tier on every push; states plainly that the Wolfram tier is **not** covered |
 | `githooks/pre-push` (via `tools/install_hooks.sh`) | refuses a push whose Wolfram tier or MUnit suite is red |
 | `.coveragerc` + `pytest.ini` | owner coverage floor, **95%** (measured 98.56%) |
-| `audit/AUDIT03_R2_collapse/mutation_harness.py` | whether the suite can actually catch a defect, not merely run |
+| `audit/AUDIT03_R2_collapse/mutation_harness.py` | whether the suite can actually catch a defect, not merely run. Measured `23/25` semantic kills but only `19/25` by a unit test — four mutants were caught by a governance gate alone. `NetworkIO` has **zero** kills, `CausalBoolCore` zero *unit-test* kills, and `deconvolution` is **not measured** (probes only). `--report` refuses on a partial run |
 
 **Every guard must, without exception:** refuse on empty input, print its
 denominator, exit non-zero on failure, and have been verified by planting the
 defect and watching it fail.
+
+### An exemption on one side of a pinned pair is a defect in the pin
+
+Drift is normally assumed to arrive as a fix applied to one copy and not the
+other. **It also arrives as a policy exemption applied asymmetrically**, and
+that route is invisible because nobody edits the copy at all.
+
+Measured here on 2026-09-05. `imp-prices/vendor` is pinned byte-identical to
+`index-deconvolution/src`, and the pin has a gate. But `ruff.toml` excluded the
+vendored side from lint while the canonical side was linted, so when the
+AUDIT03-C F401 sweep removed an unused `from typing import Callable` from the
+canonical, the exempt copy kept it. **The pin broke with no edit to the vendored
+file, no semantic change and no intent**, and stayed broken because the pin's
+own gate was not re-run after the sweep.
+
+Two rules follow, both now in force:
+
+1. **A per-file exemption — lint, formatter, type checker, coverage — covers
+   every copy of a pinned pair, or none of them.** `imp-prices` is therefore
+   listed in `ruff.toml` by subdirectory rather than by a single wildcard, so
+   that the vendored tree is deliberately *not* exempt. Both files are clean
+   under the full enforced set, so the exemption was never needed.
+2. **Any sweep that edits many files re-runs the gate of every pinned pair it
+   touches, in the same commit.**
+
+Verified by planting: reintroducing the unused import into the vendored copy now
+turns `ruff check` red, where previously it was invisible.
 
 ---
 

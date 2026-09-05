@@ -1,10 +1,15 @@
 # Mutation testing — does green mean anything?
 
-**Measured against commit `5b51a46`** (the worktree the harness checked out;
-later commits on `fixing` are not in the measurement).
-**Harness:** `audit/AUDIT03_R2_collapse/mutation_harness.py`.
+**Predictions registered against `5b51a46`; results measured against `c9bc412`**
+— the run was restarted after a reboot, and the discrepancy is declared in the
+Results section rather than reconciled.
+**Harness:** `audit/AUDIT03_R2_collapse/mutation_harness.py` (`--report`).
 **Status of this file:** predictions registered **2026-09-04, before the run
-finished**. Results are appended below, not written over the predictions.
+finished**. Results appended **2026-09-05**, not written over the predictions.
+
+> **Headline: semantic kill rate `23/25` = 92.0 %. Unit-test kill rate
+> `19/25` = 76.0 %.** Two owners have zero unit-test kills and one is not
+> measured at all. The gap between those two rates is the point of this file.
 
 ---
 
@@ -107,6 +112,136 @@ matters.
 
 ## Results
 
-*Appended when the run completes: kill rate per owner with its denominator,
-every survivor adjudicated as gap or equivalent, and every owner with zero kills
-named explicitly.*
+**Run completed 2026-09-05, `28/28` scored, `complete=true`.**
+Regenerate every number below with:
+
+```
+venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py --report
+```
+
+That reporter is part of the harness, not a second script, and it **refuses**
+on an absent results file, an empty mutant list, or a run marked
+`complete=false` — a partial file must never be quotable as a final rate. All
+three refusals were verified by planting them.
+
+### A commit discrepancy, declared rather than reconciled
+
+**The predictions above were registered against `5b51a46`. This run measured
+`c9bc412`.** The reboot that destroyed the first attempt also forced the
+re-run onto a later commit. The intervening commits did not touch any mutated
+owner, but the predictions were not written against this exact tree and the
+record should say so rather than quietly align the two.
+
+### The rate, with its denominator
+
+| rate | value | what it means |
+|---|---|---|
+| **semantic** | **23/25 = 92.0 %** | the headline: mutants that change an answer |
+| **unit-test** | **19/25 = 76.0 %** | of those, how many an MUnit or pytest test caught |
+| probes | 3/3 | excluded; a kill proves only that something imports the owner |
+
+**The 16-point gap between those two rows is the finding of this exercise.**
+Four semantic mutants were killed *only* by a governance gate (`closure:wolfram`),
+with no MUnit and no pytest test detecting them. A kill by a closure gate means
+the programme notices; it does not mean the suite checks the answer. Those are
+different claims and a single 92 % would have merged them.
+
+### Per owner
+
+| owner | killed | semantic | unit-killed | verdict |
+|---|---|---|---|---|
+| `Gates` | 11/11 | 11 | **11/11** | the strongest layer in the repository |
+| `description_lengths` | 5/5 | 4 | 4/4 | |
+| `IndexAlgebra` | 1/1 | 1 | 1/1 | |
+| `BioMetrics` | 2/3 | 3 | 2/3 | one survivor |
+| `causalbool_paths` | 2/2 | 2 | 1/2 | |
+| `CausalBoolCore` | 3/3 | 3 | **0/3** | **zero unit-test kills** |
+| `NetworkIO` | 0/1 | 1 | **0/1** | **zero kills of any kind** |
+| `deconvolution` | 2/2 | **0** | — | **not measured: probes only** |
+
+Three owners need naming explicitly, as the plan requires:
+
+**`NetworkIO` — zero kills of any kind.** Its single mutant survived everything.
+
+**`CausalBoolCore` — zero unit-test kills.** All three of its mutants were caught
+solely by the cross-language parity gate. This is the standalone companion core,
+whose self-containment is a *declared exception* in `GOVERNANCE/CORE.md` and
+whose stated justification is precisely that parity keeps it honest rather than
+shared code. **So the exception is holding exactly as declared** — but nothing
+else is watching it, and if the parity gate were ever skipped the owner would be
+undefended. That is the cost of the exception, now measured rather than assumed.
+
+**`deconvolution` — not measured.** Both its mutants are reachability probes, so
+its semantic denominator is zero. `minimal_dnf` and `essential_variables` are
+declared owners in `CORE.md` and **no mutant has ever tested whether the suite
+checks their answers.** The reporter prints `NOT MEASURED` rather than `0/0`,
+because a zero denominator reading as a clean sheet is the vacuous pass this
+programme keeps removing. Phase 4 must add semantic mutants here first.
+
+### Survivors, adjudicated
+
+Both are **coverage gaps**. Neither is an equivalent mutant, and in both cases
+that is decidable without appeal to intuition, because each mutant reproduces a
+defect this programme has already measured in the wild.
+
+**`io-drop-logic` — coverage gap, and the most consequential result here.**
+The mutant makes the corpus loader read the classification **label** instead of
+the authoritative `logic` formula. It is not equivalent: it changes what is
+loaded for the entire corpus.
+
+Its significance is that **a second instrument, built for a different purpose,
+independently found the same defect this week.** The AUDIT04 Phase 5 diagnostic
+established that reading the label as a statement about evaluability is exactly
+why **1,943 of 3,977** corpus nodes were recorded as having no derivable truth
+table when they have one. Phase 5 showed the defect had happened; the mutation
+run adds what Phase 5 could not — **nothing in the suite would catch it being
+reintroduced.**
+
+`CORE.md` already records that two of the five collapsed `LoadJSONNetwork`
+copies carried this defect. The owner was fixed; the *test* that would keep it
+fixed was never written.
+
+**`cformula-kofn` — coverage gap.** The mutant reverts the `KOFN` branch of
+`C_formula` to the drifted `1+d` form found in two copies during the AUDIT03
+collapse. It produces a different number, so it is observable in principle.
+
+The pre-registered prediction paired it with `dl-binomial-off` and named the
+finding in advance: *if these survive, nothing pins an absolute description
+length, only relative Wolfram↔Python agreement.* **The pair split** —
+`dl-binomial-off` was killed, `cformula-kofn` survived — which is a sharper
+result than either outcome alone: the gap is not general to description length,
+it is specific to the `KOFN` branch.
+
+### Predictions, scored honestly
+
+| prediction | outcome |
+|---|---|
+| 21 semantic mutants killed, high confidence | **held** |
+| `dl-binomial-off`, `core-alloffsets`, `core-applygate-default` killed, moderate | **held** — all three killed |
+| `cformula-kofn` may survive, with its finding named | **held** |
+| **`py-paths-root` will SURVIVE as a coverage gap** | **FAILED — it was killed** |
+
+**The failed prediction, and why the substance of it still stands.**
+`py-paths-root` was killed by `closure:wolfram` and by **nothing else** — zero
+pytest kills. The prediction claimed the unit tests would not catch it, and
+*that claim was correct*: `test_repo_root_is_depth_independent` still never
+parametrises over an ancestor carrying exactly one marker, and the gap in tests
+I wrote is still there. What the prediction got wrong is the outcome, because I
+did not account for a governance gate counting as a kill.
+
+Recording it as "held" would be the exact after-the-fact reasoning this file
+exists to prevent. **It is scored as failed**, and the underlying coverage gap
+is carried into Phase 3 regardless of the kill, because a mutant killed only by
+a closure gate is not a tested mutant.
+
+### What this hands to Phase 3
+
+Test targets are now chosen from evidence rather than from file size. In order:
+
+1. `NetworkIO` — a test that fails when the loader reads the label (the only
+   zero-kill owner, and the defect is already documented twice).
+2. `deconvolution` — semantic mutants first, since its assertion quality is
+   currently unmeasured, then tests to kill them.
+3. `CausalBoolCore` — unit tests that do not depend on the parity gate running.
+4. `causalbool_paths` — the `py-paths-root` case: a start path under `tests/`.
+5. `BioMetrics` — a test pinning an **absolute** `C_formula` for `KOFN`.

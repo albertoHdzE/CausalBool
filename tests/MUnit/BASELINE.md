@@ -272,7 +272,40 @@ through and reporting success over zero tests.
 measurement of it. The owner→test map is being measured by the mutation harness,
 which records for each mutant the exact tests that caught it.
 
-## Mutation status (AUDIT03-C, in progress)
+## Mutation result (AUDIT03-C item 7 — COMPLETE, 2026-09-05)
+
+**`28/28` scored against `c9bc412`, `complete=true`.** Regenerate with
+`venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py --report`.
+
+| rate | value |
+|---|---|
+| semantic kill rate (3 reachability probes excluded) | **23/25 = 92.0 %** |
+| unit-test kill rate (caught by an MUnit or pytest test) | **19/25 = 76.0 %** |
+
+**Four semantic mutants were killed only by a governance gate**, with no unit
+test detecting them: `core-alloffsets`, `core-composed-y5`,
+`core-applygate-default` and `py-paths-root`. A closure-gate kill means the
+programme notices, not that the suite checks the answer.
+
+**Owners requiring a declared entry here:**
+
+- **`NetworkIO` — zero kills.** `io-drop-logic` survived everything. It makes
+  the corpus loader read the classification label instead of the authoritative
+  formula: the AUDIT02/H defect two of five collapsed copies carried. AUDIT04
+  Phase 5 reached the same defect independently from the corpus side.
+- **`CausalBoolCore` — zero unit-test kills** (3/3 via the parity gate only).
+- **`deconvolution` — not measured**: both mutants are probes, so its semantic
+  denominator is zero. Reported as `NOT MEASURED`, never as `0/0`.
+
+**Survivors:** `io-drop-logic` and `cformula-kofn`, both adjudicated **coverage
+gaps** in `audit/AUDIT03_R2_collapse/MUTATION.md`.
+
+**One pre-registered prediction FAILED:** `py-paths-root` was predicted to
+survive and was killed — by a closure gate only, so the coverage gap it named is
+still real and is carried into AUDIT04 Phase 3 regardless of the kill. It is
+recorded as failed rather than reconciled.
+
+## How that result was reached (AUDIT03-C, method notes)
 
 `audit/AUDIT03_R2_collapse/mutation_harness.py` plants 28 declared mutants
 across the owners in `GOVERNANCE/CORE.md` and reports how many the verification
@@ -280,10 +313,11 @@ set kills. **Predictions were registered before the rate was known** (commit
 `8888376`), because adjudicating a survivor after seeing it is how "equivalent
 mutant" becomes unfalsifiable.
 
-Partial evidence so far, from a run lost to a reboot at 10/28 — every mutant
-scored was **KILLED**, by 6 to 17 tests each. That run is **not** a result: it
-measured `5b51a46`, and only complete runs are cited. The current run measures
-`c9bc412`.
+An earlier run was lost to a reboot at 10/28. That run is **not** a result: it
+measured `5b51a46`, and only complete runs are cited. **The predictions were
+therefore registered against `5b51a46` while the result measures `c9bc412`** —
+a discrepancy declared in `MUTATION.md` rather than reconciled, since the
+predictions were not written against the tree that was measured.
 
 **A run lost is a defect in the harness, not bad luck.** Results were written
 once at the end, so a reboot four hours in destroyed everything. Results are now
