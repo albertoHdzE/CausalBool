@@ -53,6 +53,7 @@ CHECKERS: dict[str, str] = {
     # part with no verification on it.
     "Lint hygiene debt": "lint_debt",
     "Manuscript tables with a producer wired": "table_coverage",
+    "Coverage of `src/` as a whole": "src_coverage",
 }
 
 # Rows carrying SEVERAL bold figures rather than one. Everywhere else only the
@@ -175,6 +176,24 @@ def table_coverage() -> tuple[list[int] | None, str]:
     # claim and is checked too -- a right fraction with a wrong percentage
     # beside it is still a document that misleads.
     return [cov, tot, round(100 * cov / tot)], "enumerate_paper_tables.py"
+
+
+def src_coverage() -> tuple[list[int] | None, str]:
+    """Whole-of-src coverage: REPORTED, never gated.
+
+    Gating at 13 per cent would be theatre. The number exists so the scoped
+    98.56 per cent in section 3 -- which covers 99 statements in two files --
+    can never be mistaken for the coverage of the programme.
+    """
+    rc, out = run([str(ROOT / "venv/bin/python"), "-m", "pytest", "-q",
+                   "tests/analysis", "--cov=src", "--cov-report=term",
+                   "--cov-fail-under=0", "--tb=no", "-p", "no:cacheprovider"],
+                  ROOT)
+    m = re.search(r"^TOTAL\s+(\d+)\s+(\d+)\s+\d+\s+\d+\s+(\d+)%", out, re.M)
+    if not m:
+        return None, "UNKNOWN: no TOTAL line from coverage"
+    pct = int(m.group(3))
+    return [pct], "pytest --cov=src"
 
 
 def core_index() -> tuple[list[int] | None, str]:
