@@ -110,6 +110,11 @@ the single survivor is the wrong file.
 | `tools/check_wolfram_syntax.wl` | every `.m`/`.wl` parses — the suite could not see a syntax error, and three broken files sat behind a green run |
 | `tools/check_test_manifest.sh` | every file under `tests/` is classified in `MANIFEST.tsv`; no file can be silently excluded again |
 | `tools/enumerate_paper_tables.py` | the honest table-coverage fraction of the active manuscripts (measured **5/34**, not the 7/8 the old summary implied) |
+| `tools/run_closure.sh` | runs every gate and **can actually fail** — the Makefile's `-@` prefixes meant `make closure` exited 0 even if all members failed |
+| `.github/workflows/ci.yml` | the pure tier on every push; states plainly that the Wolfram tier is **not** covered |
+| `githooks/pre-push` (via `tools/install_hooks.sh`) | refuses a push whose Wolfram tier or MUnit suite is red |
+| `.coveragerc` + `pytest.ini` | owner coverage floor, **95%** (measured 98.56%) |
+| `audit/AUDIT03_R2_collapse/mutation_harness.py` | whether the suite can actually catch a defect, not merely run |
 
 **Every guard must, without exception:** refuse on empty input, print its
 denominator, exit non-zero on failure, and have been verified by planting the
@@ -150,6 +155,8 @@ pre-flight, and they are not rhetorical.
 ---
 
 ## Related
+
+**`GOVERNANCE/VERIFICATION.md` — what is verified, how, and how well, with every number regenerable by `make ci-local`.**
 
 `GOVERNANCE/DESCRIPTION_LENGTHS.md` (variants A–E and their owners) ·
 `GOVERNANCE/GLOSSARY.md` (definitions) ·
