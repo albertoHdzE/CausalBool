@@ -69,6 +69,11 @@ run_pure() {
   # No pipe. The previous `| head -8` returned head's status, not the script's.
   run_member pure "table coverage (how much of the manuscripts a producer is wired to)" \
     venv/bin/python tools/enumerate_paper_tables.py
+  # AUDIT03-C: the governance page claimed 36/36 owners while its own guard
+  # printed 40/40. Nothing compared the page to the tools it names, so the
+  # sentence "none of these numbers is typed by hand" was itself typed by hand.
+  run_member pure "verification numbers (VERIFICATION.md against the tools it cites)" \
+    venv/bin/python tools/check_verification_numbers.py
 }
 
 # ── WOLFRAM TIER — needs a licensed local kernel; NOT run by CI ──────────────

@@ -35,7 +35,7 @@ would be worse than not having CI at all.
 
 | tier | members | runs in CI |
 |---|---|---|
-| **pure** | paper-number gate · GLOSSARY sync · GLOSSARY conformance · single-engine guard · core index · test manifest · table coverage | **yes** |
+| **pure** | paper-number gate · GLOSSARY sync · GLOSSARY conformance · single-engine guard · core index · test manifest · table coverage · **verification numbers** | **yes** |
 | **wolfram** | `.m`/`.wl` syntax (153 files) · paper artefacts (executes producers) · cross-language parity (135/135) · description-length parity | **no** |
 | **suite** | 69 MUnit tests | **no** |
 
@@ -66,7 +66,7 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
 | Wolfram files that parse | **153 / 153** | `check_wolfram_syntax.wl` |
 | Test files classified | **82 / 82** (69 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
-| Owners named in `CORE.md` that exist | **36 / 36** | `check_core_index.sh` |
+| Owners named in `CORE.md` that exist | **41 / 41** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
 | Lint, enforced rules | **clean** | `ruff check` |
 
@@ -84,6 +84,30 @@ hides the one that matters.
 > **Coverage is a floor, not a goal.** 100 % of lines executed says nothing
 > about whether the assertions are any good. The mutation harness is what
 > measures that.
+
+### This table now checks itself — for 5 of its 9 numbers
+
+The header above claims none of these figures is typed by hand. **That sentence
+was false when it was written:** the `check_core_index.sh` row read `36 / 36`
+while the guard itself printed `40 / 40`. Nothing compared the page to the tools
+it cites, so a governance document about verification was the least verified
+artefact in the repository.
+
+`tools/check_verification_numbers.py` (pure tier) parses this section and
+re-derives each claim from the tool named beside it. Of the **9 numeric rows in
+the table above** it checks **5** and **names the 4 it does not** — MUnit,
+coverage, the Wolfram parse and the manuscript snapshot are wolfram-tier or
+expensive, so they are declared unchecked rather than quietly skipped. Verified
+in all three states: a planted `36 / 36` exits `1`, an unparseable table exits
+`2`, clean exits `0`.
+
+It has already earned its place twice. It rejected the stale `36 / 36`, and when
+this gate was itself added to `CORE.md` the owner count moved to `41` and the
+page went red until it was corrected — which is precisely the drift that had
+been invisible.
+
+Absent subproject virtualenvs report **UNKNOWN**, never a pass — the same
+three-state discipline as the glossary sync.
 
 ---
 
