@@ -1,0 +1,33 @@
+# Coverage settings for the DECLARED PYTHON OWNERS (GOVERNANCE/CORE.md §3).
+#
+# Scope is deliberately the owners, not the whole tree: a repository-wide
+# percentage averaged over 370 files -- scrapers, one-off analyses, frozen
+# workspaces -- would be a number that moves for reasons nobody cares about and
+# hides the one that matters.
+
+[run]
+branch = True
+# NOTE: these are IMPORT names, not file paths. Both owners are imported as
+# top-level modules via a sys.path insert to src/, so a path-shaped `source`
+# matches nothing and coverage reports 0% -- which then fails the threshold for
+# the wrong reason. Caught while wiring this gate.
+source =
+    description_lengths
+    causalbool_paths
+omit =
+    */venv/*
+    */.venv/*
+    */archive/*
+    */reference/*
+
+[report]
+show_missing = True
+skip_covered = False
+# Measured 2026-09-04 after AUDIT03-C added 102 tests: 99%.
+# The floor sits just below, so a real regression fails and ordinary drift does
+# not. Raising it is a deliberate act.
+fail_under = 95
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:

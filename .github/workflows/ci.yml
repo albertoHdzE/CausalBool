@@ -74,10 +74,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt -r requirements-dev.txt
-      - name: tests/analysis  (expected 32)
+      - name: tests/analysis with coverage gate  (expected 134, >=95% of the owners)
+        # The count is asserted so a collection failure cannot pass as a green
+        # run, and the coverage floor stops an owner silently losing its tests.
         run: |
-          python -m pytest -q tests/analysis --tb=short | tee /tmp/a.txt
-          grep -qE '\b32 passed' /tmp/a.txt || { echo "EXPECTED 32 passed"; exit 1; }
+          python -m pytest -q tests/analysis --cov --cov-config=.coveragerc --tb=short | tee /tmp/a.txt
+          grep -qE '\b134 passed' /tmp/a.txt || { echo "EXPECTED 134 passed"; exit 1; }
       - name: index-deconvolution  (expected 146)
         working-directory: index-deconvolution
         run: |

@@ -176,7 +176,14 @@ def bdm_2d(array, below_floor: str = "none") -> float | None:
     """pybdm BDM of a 2-D binary array.
 
     below_floor:
-      "none"       -> compute for any shape (caller checks size itself);
+      "none"       -> do not intercept; the caller checks size itself.
+                      AUDIT03-C: this does NOT mean "always returns a number".
+                      pybdm refuses a block smaller than its own 4x4 partition
+                      and raises "Computed BDM is 0, dataset may have incorrect
+                      dimensions". The previous wording, "compute for any
+                      shape", was false and would have sent a caller who read it
+                      into an unhandled exception. Pinned by
+                      tests/analysis/test_description_lengths_values.py;
       "pathinfo"   -> return None when any dimension < 4 atoms (the historical
                       imp-pathinfo behaviour, preserved verbatim);
       "raise"      -> raise ValueError below the floor.
