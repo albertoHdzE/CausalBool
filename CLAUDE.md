@@ -53,7 +53,7 @@ exception with its reason, and the guard protecting each. Under the
 
 Test membership is DECLARED in `tests/MUnit/MANIFEST.tsv`, not discovered by a
 glob, and the manifest covers **all of `tests/`**, not just `tests/MUnit`:
-**83 files — 70 test / 13 producer / 0 quarantine**.
+**84 files — 71 test / 13 producer / 0 quarantine**.
 `tools/check_test_manifest.sh` goes red on any unclassified file.
 
 Definitions: `GOVERNANCE/GLOSSARY.md` (synchronized from `series-deconvolution`; check
