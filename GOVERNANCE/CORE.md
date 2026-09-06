@@ -116,7 +116,8 @@ the same independence that makes the 135/135 cross-check mean anything.
 | site | reason | how it is pinned |
 |---|---|---|
 | `tests/MUnit/Analysis/ANDTests.m`, `ORTests.m`, `AnalyticVsExhaustiveQueryTests.m`, `tests/MUnit/Theory/TSK-THEORY-005-Tests.m` | each defines a private `phi[j_, n_]` and compares it against `Integration\`Gates\`IndexSetNetwork`; importing `IndexAlgebra\`Phi` would make the test a tautology | the file's own equality assertion — it fails if the private transport and the owner disagree |
-| `tests/MUnit/Exper/TSK-EXPER-002-GateMixtures.m`, `TSK-EXPER-002-GateMixtures2.m`, `TSK-EXPER-005-NoiseRobustness.m` | **declared, not defended.** Artefact producers for `doc/finalpaper` and `doc/newIntPaper`; the archive policy forbids rewriting them | **no pin** — a private gate evaluator feeds archived figures and nothing checks it. Recorded as accepted exposure in `VERIFICATION.md` |
+| `tests/MUnit/Exper/TSK-EXPER-002-GateMixtures.m`, `TSK-EXPER-002-GateMixtures2.m` | **not a mirror — a guard false positive.** These hold closed-form bias and slope formulae (`andBias[p_] := p^2`, `xorSlope[p_] := 2 - 4 p`), not gate application. The detector fires on gate names beside a `:=`. All seven biases and six slopes re-derived by hand and correct | no pin needed; the concept is not owned by `Gates.m` |
+| `tests/MUnit/Exper/TSK-EXPER-005-NoiseRobustness.m` | **declared, not defended, but measured.** A genuine private `applyGate` Switch. Frozen archive producer; the archive policy forbids rewriting it | **no pin.** Measured 2026-09-05: **0 disagreements over 34 cases** against the owner at the arities used. **Latent condition:** `"MAJORITY", Boole[Total[xs] >= 2]` hardcodes the arity-3 threshold, so it diverges at any wider arity — at 5 inputs `{1,1,0,0,0}` gives 1 where the owner gives 0. Accepted exposure, recorded in `VERIFICATION.md` |
 
 ---
 
