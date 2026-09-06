@@ -285,6 +285,56 @@ def has_definition_site(stripped_content: str, concept: str) -> bool:
     return has_def_marker
 
 
+# ---------------------------------------------------------------------------
+# Anchored Python fragments (AUDIT04-D, 2026-09-06).
+#
+# The previous Python rules matched BARE ENGLISH WORDS. `offset_subsetsum` fired
+# on `range(n)` plus "free" or "subset" or "sum" occurring anywhere in code, and
+# `gate_dispatch` on the three string literals "AND"/"OR"/"XOR" plus `def `
+# anywhere. Measured against five snippets that cannot implement the concepts,
+# THREE were accused -- a function named `probe_no_free_lunch`, a counter named
+# `connectivity_subset`, and a loop printing the word "free".
+#
+# The consequence was not a nuisance, it was an invalid measurement: 7 of the
+# guard's 9 accusations were false, and the "80 matched / 51 owner-referencing"
+# denominators quoted in VERIFICATION.md were soup. Planting had shown the guard
+# COULD catch a mirror; nothing had shown that a match MEANT one. Sensitivity was
+# measured, specificity assumed.
+#
+# Each rule below now requires TWO INDEPENDENT STRUCTURAL SIGNALS of the actual
+# mechanism, and the control corpus at the foot of this file re-measures both
+# directions on every run.
+# ---------------------------------------------------------------------------
+
+# Weight list for the offset family, as a WORD -- not the "ws" inside "rows".
+_WL_WEIGHTS = re.compile(r"\bws\b|\bweights\b")
+
+# Free coordinates as a set difference against the connected/support set.
+_PY_FREE_COORDS = re.compile(
+    r"set\(range\([^)]*\)\)\s*-\s*set\(|"
+    r"for\s+\w+\s+in\s+range\([^)]*\)\s+if\s+\w+\s+not\s+in\s+"
+    r"(?:connected|support|ic|essential|fixed)\b",
+)
+# Subset-sum accumulation over 1<<j weights: the powerset sum, not any sum.
+_PY_SUBSET_SUM = re.compile(
+    r"1\s*<<\s*\w+.*?(?:\|=|\bsums\b|combinations\(|powerset)|"
+    r"(?:\|=|\bsums\b)\s*.*?1\s*<<\s*\w+",
+    re.DOTALL,
+)
+# A dispatch KEYED on a gate name, not a mere mention of one.
+_PY_GATE_DISPATCH = re.compile(
+    r"(?:gate|kind|family|op|name)\s*==\s*[\"']AND[\"']|"
+    r"[\"']AND[\"']\s*:\s*(?:lambda|operator\.|\w+\s*,|\()",
+)
+# The 2^n table plus per-row bit extraction plus an output container.
+_PY_REPERTOIRE_TABLE = re.compile(r"range\(\s*2\s*\*\*")
+_PY_REPERTOIRE_BITS = re.compile(r"\(\s*\w+\s*>>\s*\w+\s*\)\s*&\s*1|format\(\s*\w+\s*,[^)]*b[\"']")
+_PY_REPERTOIRE_OUT = re.compile(r"(?:np\.empty|np\.zeros)\(\s*2\s*\*\*|\w+\[\s*\w+\s*\]\s*=\s*")
+# Bit reversal used as an index transport: reverse the digits, read back base 2.
+_PY_PHI = re.compile(r"int\([^)]*,\s*2\s*\)")
+_PY_PHI_REV = re.compile(r"\[::-1\]|reversed\(")
+
+
 def detect_concepts(content: str) -> list[tuple[str, str]]:
     # FIRST: strip comments and docstrings so prose references are ignored.
     # AUDIT04 review: this result was computed into a local named `stripped` and
@@ -298,32 +348,26 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     # Detected ONLY from body fragments: Complement over Range/subsets,
     # subset-sum expressions, weights/subsets computation.
     # No name-based matching (spreadFamily, allOffsets, givePlaces removed).
+    # `"ws" in content` matched the word ROWS -- six times in CADetailLibrary.wl,
+    # which was enough to accuse it. Word-boundary anchored.
     if ("free = Complement[Range[n], connected]" in content or
-        ("free = Complement[Range" in content and ("ws" in content or "weights" in content))):
+        ("free = Complement[Range" in content and _WL_WEIGHTS.search(content))):
         matched.append(("offset_subsetsum",
                         "body fragment: Complement over connected + weights/subsets"))
-    # Python equivalent: set difference over connected + subset construction.
-    elif ("set(range" in content or "range(n)" in content) and ("subset" in content.lower() or
-          "subset-sum" in content.lower() or "subset construction" in content.lower() or
-          "subset" in content.lower() and ("Complement" in content or "connected" in content)):
+    # Python equivalent. BOTH signals required: the free-coordinate set
+    # difference AND the powerset-sum accumulation over 1<<j weights. Either
+    # alone is ordinary Python that says nothing about this concept.
+    elif _PY_FREE_COORDS.search(content) and _PY_SUBSET_SUM.search(content):
         matched.append(("offset_subsetsum",
-                        "body fragment: Python subset-sum over free coordinates"))
-    # Python equivalent: set difference over connected + subset construction
-    # (catches Python mirrors like qWidenSet that use range/subset logic).
-    # Python equivalent: set difference over connected + subset/sum construction.
-    elif (("set(range" in content or "range(n)" in content) and
-          ("subset" in content.lower() or "subset-sum" in content.lower() or
-           "subset construction" in content.lower() or
-           ("free" in content.lower() and ("subset" in content.lower() or "sum" in content.lower() or "weights" in content.lower())))):
-        matched.append(("offset_subsetsum",
-                        "body fragment: Python subset-sum over free coordinates"))
+                        "body fragment: Python free-coordinate set difference "
+                        "+ powerset sum over 1<<j weights"))
     elif "sumandos" in content and ("Tuples[{0, 1}" in content or "Subsets[" in content):
         matched.append(("offset_subsetsum",
                         "body fragment: sumandos + subset construction"))
     elif "allOffsets[" in content and ("Module[{free" in content or "free =" in content):
         matched.append(("offset_subsetsum",
                         "body fragment: allOffsets definition site"))
-    elif ("free = Complement[Range" in content and ("ws" in content or "weights" in content)):
+    elif ("free = Complement[Range" in content and _WL_WEIGHTS.search(content)):
         matched.append(("offset_subsetsum",
                         "body fragment: Complement + weights/subset"))
 
@@ -341,11 +385,19 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     # mirrors like qRunGate with different names but same mechanism.
     gate_catalogue_present = ('"AND"' in content and '"OR"' in content and '"XOR"' in content)
     if gate_catalogue_present:
-        # A definition site (`:=` or `def `) combined with gate-family references
-        # indicates a genuine dispatch implementation, not just a call.
-        if ':=' in content or 'def ' in content:
+        # Wolfram definition sites keep the `:=` marker. For Python, `def `
+        # anywhere was near-vacuous: any test that NAMES three gates and defines
+        # a function was accused. `imp-prices/tests/test_gate_network.py` was
+        # flagged for `assert ("AND", (0,0,0,1)) in tables` -- hand-written
+        # expected tables, which are the PIN, not a mirror. Forwarding those to
+        # the owner would have made the test assert `owner === owner`.
+        # A dispatch must be KEYED on the gate name to count.
+        if ':=' in content:
             matched.append(("gate_dispatch",
-                            "body fragment: partial gate catalogue + definition site"))
+                            "body fragment: gate catalogue + Wolfram definition site"))
+        elif _PY_GATE_DISPATCH.search(content):
+            matched.append(("gate_dispatch",
+                            "body fragment: Python dispatch keyed on a gate name"))
         # If no definition site but catalogue present — consumer reference,
         # not an implementation; evaluation loop skips reporting for .wl/.m
         # files that load Integration packages.
@@ -393,23 +445,29 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     elif ("CreateRepertoires" in content and "Repertoire" in content):
         matched.append(("repertoire",
                         "body fragment: CreateRepertoires reference"))
-    # Python equivalent: full 2^n input-output association (catches qBuild mirror).
-    elif (("2 **" in content or "2^n" in content) and
-          ("inputs" in content or "outputs" in content) and
-          ("range(2" in content or "range(2 **" in content)):
+    # Python equivalent. THREE signals: the 2^n enumeration, per-row bit
+    # extraction, and an output container indexed by the row. The old rule asked
+    # for `2 **` plus the WORD "inputs" or "outputs" plus `range(2`, which fires
+    # on any loop over a power of two in a file that mentions inputs.
+    elif (_PY_REPERTOIRE_TABLE.search(content)
+          and _PY_REPERTOIRE_BITS.search(content)
+          and _PY_REPERTOIRE_OUT.search(content)):
         matched.append(("repertoire",
-                        "body fragment: Python 2^n input-output association (repertoire)"))
+                        "body fragment: Python 2^n enumeration + bit extraction "
+                        "+ indexed output container"))
     # --- 5. Phi bit-reversal ordering ---
     # Includes Python equivalents: reversed binary digits mapped via int/reversed.
     if ("Reverse[IntegerDigits[" in content and
         "FromDigits[Reverse[IntegerDigits" in content):
         matched.append(("phi_bitreverse",
                         "body fragment: Reverse[IntegerDigits ... FromDigits mapping"))
-    # Python equivalent: reversed binary digits through int/reversed/zfill.
-    elif ("reversed" in content or "Reverse" in content) and ("str(bin" in content or
-          "bin(" in content or "zfill" in content):
+    # Python equivalent. The transport is: reverse the digits, then READ THEM
+    # BACK IN BASE 2. The old rule asked for the word "reversed" plus `bin(`
+    # anywhere, which fires on any code that reverses a list and formats a
+    # number in binary for display.
+    elif _PY_PHI.search(content) and _PY_PHI_REV.search(content):
         matched.append(("phi_bitreverse",
-                        "body fragment: Python bit-reversal transport"))
+                        "body fragment: Python digit reversal read back in base 2"))
     elif '"Phi"' in content and ("Reverse[IntegerDigits" in content or "FromDigits" in content):
         matched.append(("phi_bitreverse",
                         "body fragment: Phi with bit-reversal transport"))
@@ -512,7 +570,132 @@ def references_owner(content: str, concept: str, rel_path: str = "") -> bool:
 # 6. Main census and guard logic.
 # ------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# The detector's own control corpus (AUDIT04-D).
+#
+# This runs on EVERY invocation, before any file is scanned, and the guard
+# REFUSES (exit 2) if either direction fails. That placement is the point: the
+# previous detector was verified once, by planting, and its specificity was never
+# measured at all. A control that lives in a commit message protects nothing; a
+# control that runs before the scan makes "80 matched" mean something every time
+# the number is produced.
+#
+# NEGATIVE: code that cannot implement the concept. Each of the first three was
+# accused by the old rules, taken verbatim from real files in this repository.
+# POSITIVE: the mechanism itself. Without these, anchoring the fragments could
+# silently trade a false-positive problem for a false-negative one, which is
+# worse because it is invisible.
+# ---------------------------------------------------------------------------
+
+NEGATIVE_CONTROLS: list[tuple[str, str]] = [
+    ("a probe named 'no free lunch'",
+     "def probe_no_free_lunch():\n"
+     "    total = sum(x for x in range(n))\n"
+     "    return total\n"),
+    ("a counter named connectivity_subset",
+     "connectivity_subset = 0\n"
+     "for k in range(n):\n"
+     "    disconnected = set(range(n)) - true_ic\n"
+     "    connectivity_subset += 1\n"),
+    ("printing the word 'free'",
+     "for i in range(n):\n"
+     "    print(f\"free {i}\")\n"
+     "z = sum([1])\n"),
+    ("a test asserting hand-written gate tables",
+     "def test_catalogue():\n"
+     "    assert (\"AND\", (0, 0, 0, 1)) in tables\n"
+     "    assert (\"OR\", (0, 1, 1, 1)) in tables\n"
+     "    assert (\"XOR\", (0, 1, 1, 0)) in tables\n"),
+    ("gate names listed in a refusal assertion",
+     "def test_refuses():\n"
+     "    assert result.get(\"gate\") not in (\"AND\", \"OR\", \"XOR\", \"NOT\")\n"),
+    ("enumerating Boolean functions for symmetry orbits",
+     "def classes(perms):\n"
+     "    seen, out = set(), []\n"
+     "    for n in range(256):\n"
+     "        o = orbit(n, perms)\n"
+     "    return {\"raw_truth_table_bits\": 2 ** k}\n"),
+    ("a Wolfram module whose only 'ws' is the word rows",
+     "CBTable[dec_] := Module[{rows},\n"
+     "  free = Complement[Range[n], fixed];\n"
+     "  rows = Table[{k, d[\"gate\"]}, {k, 1, n}];\n"
+     "  Grid[rows]];\n"),
+    ("reversing a list and printing binary",
+     "def show(xs):\n"
+     "    for x in reversed(xs):\n"
+     "        print(bin(x))\n"),
+]
+
+POSITIVE_CONTROLS: list[tuple[str, str, str]] = [
+    ("offset family by powerset sum", "offset_subsetsum",
+     "def omega(n, connected):\n"
+     "    free = [j for j in range(n) if j not in connected]\n"
+     "    weights = [1 << j for j in free]\n"
+     "    sums = {0}\n"
+     "    for w in weights:\n"
+     "        sums |= {s + w for s in sums}\n"
+     "    return sorted(sums)\n"),
+    ("gate dispatch keyed on the name", "gate_dispatch",
+     "def run(gate, xs):\n"
+     "    if gate == \"AND\":\n"
+     "        return all(xs)\n"
+     "    if gate == \"OR\":\n"
+     "        return any(xs)\n"
+     "    if gate == \"XOR\":\n"
+     "        return sum(xs) % 2\n"),
+    ("repertoire over the 2^n table", "repertoire",
+     "def build(n, f):\n"
+     "    F = np.empty(2 ** n, dtype=np.int64)\n"
+     "    for x in range(2 ** n):\n"
+     "        v = [(x >> i) & 1 for i in range(n)]\n"
+     "        F[x] = f(v)\n"
+     "    return F\n"),
+    ("phi bit-reversal transport", "phi_bitreverse",
+     "def phi(x, n):\n"
+     "    bits = format(x, f\"0{n}b\")\n"
+     "    return int(bits[::-1], 2)\n"),
+]
+
+
+def run_detector_controls() -> tuple[bool, list[str]]:
+    """Re-measure the detector in BOTH directions. Returns (ok, report lines)."""
+    lines: list[str] = []
+    false_positives: list[str] = []
+    for label, src in NEGATIVE_CONTROLS:
+        hits = detect_concepts(src)
+        if hits:
+            false_positives.append(f"{label} -> {[c for c, _ in hits]}")
+    false_negatives: list[str] = []
+    for label, concept, src in POSITIVE_CONTROLS:
+        hits = [c for c, _ in detect_concepts(src)]
+        if concept not in hits:
+            false_negatives.append(f"{label} -> expected {concept}, got {hits or 'nothing'}")
+
+    lines.append(
+        f"CHECK-CORE-LOADING: detector controls — "
+        f"{len(NEGATIVE_CONTROLS) - len(false_positives)}/{len(NEGATIVE_CONTROLS)} "
+        f"negative (must NOT match), "
+        f"{len(POSITIVE_CONTROLS) - len(false_negatives)}/{len(POSITIVE_CONTROLS)} "
+        f"positive (must match)"
+    )
+    for fp in false_positives:
+        lines.append(f"    FALSE POSITIVE  {fp}")
+    for fn in false_negatives:
+        lines.append(f"    FALSE NEGATIVE  {fn}")
+    return (not false_positives and not false_negatives), lines
+
+
 def main() -> int:
+    ok, control_lines = run_detector_controls()
+    for line in control_lines:
+        print(line)
+    if not ok:
+        print("CHECK-CORE-LOADING: REFUSED  the detector fails its own control "
+              "corpus, so no count it produces is evidence.")
+        print("  A match that does not mean what it claims is worse than no "
+              "guard: it puts a number on a page.")
+        return 2
+
     # Collect files.
     scanned_files = []
     for d in SCAN_DIRS:
