@@ -163,9 +163,27 @@ for f in $FILTERED; do
     echo "FAIL: $bn -> $verdict$kmsg"
   fi
 done
-SUMMARY_DIR="$REPO_DIR/results/tests/runall"
+# AUDIT04 — the rollup file must not be writable by a run that is not a rollup.
+#
+# Until now every invocation wrote results/tests/runall/Status.txt, so
+# `--section Compare` (2 tests) overwrote the record of `--all` (69 tests) and
+# left a TRACKED file whose name claims a denominator it does not have. Two
+# documents cite that file as the whole-suite rollup, so the overwrite silently
+# rewrote the evidence they rest on. This is the comfortable-denominator defect
+# this audit exists to remove, sitting inside the runner itself.
+#
+# A partial run now writes its OWN file and states its scope on the line; only a
+# full run may touch the rollup.
+if [[ -n "$SECTION" ]]; then
+  SCOPE="section:$SECTION"
+  [[ -n "$GATE" ]] && SCOPE="$SCOPE gate:$GATE"
+  SUMMARY_DIR="$REPO_DIR/results/tests/section-$SECTION${GATE:+-$GATE}"
+else
+  SCOPE="all"
+  SUMMARY_DIR="$REPO_DIR/results/tests/runall"
+fi
 mkdir -p "$SUMMARY_DIR"
-echo "OK=$OK FAIL=$FAIL TOTAL=$((${#FILTERED[@]}))" | tee "$SUMMARY_DIR/Status.txt"
+echo "OK=$OK FAIL=$FAIL TOTAL=$((${#FILTERED[@]})) SCOPE=$SCOPE" | tee "$SUMMARY_DIR/Status.txt"
 if [[ ${#FAILED_NAMES[@]} -gt 0 ]]; then
   printf 'TRUE DETAIL: FAILED=%s\n' "${(j:, :)FAILED_NAMES}" | tee -a "$SUMMARY_DIR/Status.txt"
 fi
