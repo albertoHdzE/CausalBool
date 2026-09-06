@@ -53,6 +53,13 @@ OWNER_PATHS = {
         "src/integration/Alpha.m",
         "src/Packages/Integration/Alpha.m",
         "src/Packages/Integration/Experiments.m",
+        # AUDIT04-D: `repertoire` listed only Wolfram owners, so no Python file
+        # could ever satisfy the guard for it -- every Python 2^n enumeration was
+        # unfixable BY CONSTRUCTION, and two were reported as violations with no
+        # action available. index-deconvolution/src/causalbool.py is the Python
+        # forward model, proven equal to CausalBoolCore.wl on 45/45 cases, so it
+        # is the Python owner and was simply never declared as one.
+        "index-deconvolution/src/causalbool.py",
     ],
     "gate_dispatch": [
         "src/Packages/Integration/Gates.m",
@@ -88,6 +95,29 @@ OWNER_PATHS = {
 
 EXCEPTIONS = [
     # Pre-existing declared exceptions (§5)
+    # AUDIT04-D. The pin above is itself flagged, and correctly: it writes the
+    # parameter payload out independently instead of importing it. That is the
+    # SAME adjudication as the MUnit phi tests -- a test validating an owner must
+    # not compute its expected value WITH that owner, or it asserts
+    # owner === owner. The independent derivation is the point, and the file's
+    # own assertion is what fails when the two drift.
+    ("imp-pathinfo-paper/tests/test_replication.py",
+     "the independent derivation IS the pin; importing the owner's parameter "
+     "payload would make the assertion a tautology",
+     "the file's own equality assertion"),
+    # AUDIT04-D. method_comparison.py already IMPORTS node_description_cost from
+    # the package's own declared mirror; what it also holds is
+    # wiring_description_length, the INDEX-SET TERM ALONE. Measured elementwise
+    # before declaring anything: 45 of 45 (n, degree, gate) cases disagree, and
+    # the gap is exactly log2(12) for naming the gate plus the gate's parameter
+    # payload. Non-zero disagreement means two concepts, not a collapse -- and
+    # they already carry two names. The pin is a test, not this sentence.
+    ("imp-pathinfo-paper/src/imp_pathinfo/method_comparison.py",
+     "wiring_description_length is the index-set term alone, deliberately without "
+     "the gate name or its parameters; the full cost is imported from the owner",
+     "imp-pathinfo-paper tests/test_replication.py::"
+     "test_wiring_term_is_not_the_full_node_cost_and_the_gap_is_exact -- 45/45 "
+     "disagree and the gap is asserted exactly; red if either drifts"),
     ("imp-pathinfo-paper/src/imp_pathinfo/causalbool_mirror.py",
      "omits the in-degree field; its published tables depend on that",
      "T4.5 fixture asserts the gap is exactly n·log2(n+1)"),
@@ -323,8 +353,9 @@ _PY_SUBSET_SUM = re.compile(
 )
 # A dispatch KEYED on a gate name, not a mere mention of one.
 _PY_GATE_DISPATCH = re.compile(
-    r"(?:gate|kind|family|op|name)\s*==\s*[\"']AND[\"']|"
-    r"[\"']AND[\"']\s*:\s*(?:lambda|operator\.|\w+\s*,|\()",
+    r"(?:gate|kind|family|op|name)\s*==\s*[\"'](?:AND|and)[\"']|"
+    r"[\"'](?:AND|and)[\"']\s*:\s*(?:lambda|operator\.|\w+\s*,|\()",
+    re.IGNORECASE,
 )
 # The 2^n table plus per-row bit extraction plus an output container.
 _PY_REPERTOIRE_TABLE = re.compile(r"range\(\s*2\s*\*\*")
@@ -383,7 +414,12 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
                         "body fragment: Which/Switch over 12 gate catalogue"))
     # Partial catalogue (3+ gate families) with definition site: catches
     # mirrors like qRunGate with different names but same mechanism.
-    gate_catalogue_present = ('"AND"' in content and '"OR"' in content and '"XOR"' in content)
+    # AUDIT04-D: this required UPPERCASE quoted names, so
+    # imp-causal-paper/boolean_network.py -- a real dispatch on "and"/"or"/"xor"
+    # -- was never even considered. Anchoring against false positives had
+    # introduced a false negative, which is why the positive controls exist.
+    _lower = content.lower()
+    gate_catalogue_present = ('"and"' in _lower and '"or"' in _lower and '"xor"' in _lower)
     if gate_catalogue_present:
         # Wolfram definition sites keep the `:=` marker. For Python, `def `
         # anywhere was near-vacuous: any test that NAMES three gates and defines
@@ -498,6 +534,12 @@ def references_owner(content: str, concept: str, rel_path: str = "") -> bool:
             "Get[\"src/Packages/Integration/Experiments.m\"",
             "Needs[\"Integration`Alpha\"]", "Needs[\"Integration`Alpha`\"]",
             "import Alpha",  # module-level import, never the string "repertoire"
+            # The Python side of the same owner. `load_root_modules` is the
+            # declared accessor in the replication packages: it puts
+            # index-deconvolution/src on sys.path and imports causalbool, so a
+            # file calling it IS reaching the owner, one level of indirection
+            # away. Without this the guard demanded that Python import a .m file.
+            "import causalbool", "from causalbool import", "load_root_modules",
         ],
         "gate_dispatch": [
             "Get[\"src/Packages/Integration/Gates.m\"", "Get['src/Packages/Integration/Gates.m",
@@ -643,6 +685,14 @@ POSITIVE_CONTROLS: list[tuple[str, str, str]] = [
      "        return any(xs)\n"
      "    if gate == \"XOR\":\n"
      "        return sum(xs) % 2\n"),
+    ("gate dispatch keyed on a LOWERCASE name", "gate_dispatch",
+     "def boolean_operator(name):\n"
+     "    if name == \"and\":\n"
+     "        return lambda v: int(np.all(v))\n"
+     "    if name == \"or\":\n"
+     "        return lambda v: int(np.any(v))\n"
+     "    if name == \"xor\":\n"
+     "        return lambda v: int(np.bitwise_xor.reduce(v))\n"),
     ("repertoire over the 2^n table", "repertoire",
      "def build(n, f):\n"
      "    F = np.empty(2 ** n, dtype=np.int64)\n"
