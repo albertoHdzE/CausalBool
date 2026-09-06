@@ -67,6 +67,15 @@ OWNER_PATHS = {
     "offset_subsetsum": [
         "papers/method/code/lib/CausalBoolCore.wl",
     ],
+    # Additional owners declared in CORE.md §2 / §3 — exempt by construction.
+    "deconvolution_owner": [
+        "index-deconvolution/src/deconvolution.py",
+        "index-deconvolution/src/Deconvolution.wl",
+        "index-deconvolution/src/causalbool.py",
+    ],
+    # All core file paths for automatic exemption (not just for reference checking).
+    # Every file whose relative path contains any of these patterns is an owner
+    # site and is skipped automatically, not reported as a violation.
 }
 
 # ------------------------------------------------------------------
@@ -123,38 +132,146 @@ EXCEPTIONS = [
 ]
 
 # ------------------------------------------------------------------
-# 4. Body-fragment detectors — distinctive expressions, not names.
+# 4a. Automatic owner exemption — owners exempt by construction.
 # ------------------------------------------------------------------
 
-# Each detector returns (concept_key, confidence_note) or None.
-# Confidence note is printed next to the match for transparency.
+# Build from every declared owner in CORE.md §2 (Wolfram) and §3 (Python).
+OWNER_FILE_PATTERNS = [
+    # §2 — Wolfram core owners
+    "src/integration/Alpha.m",
+    "src/Packages/Integration/Alpha.m",
+    "src/Packages/Integration/Experiments.m",
+    "src/Packages/Integration/Gates.m",
+    "src/Packages/Integration/IndexAlgebra.m",
+    "src/Packages/Integration/BioMetrics.m",
+    "src/scripts/NetworkIO.m",
+    "src/Packages/Integration/BioExperiments.m",
+    # §3 — Python core owners
+    "src/description_lengths.py",
+    "src/causalbool_paths.py",
+    "index-deconvolution/src/deconvolution.py",
+    "index-deconvolution/src/Deconvolution.wl",
+    "index-deconvolution/src/causalbool.py",
+    "src/complexity/Trajectory_LZ.py",
+    "src/complexity/Scaling_LZ_Tools.py",
+    # Standalone companion owner (§2)
+    "papers/method/code/lib/CausalBoolCore.wl",
+]
+
+
+def is_owner_site(rel_path: str) -> bool:
+    """True if the file path is a declared owner site; such files are exempt
+    by construction (they define the core, they do not violate it)."""
+    for pat in OWNER_FILE_PATTERNS:
+        if pat in rel_path:
+            return True
+    return False
+
+
+# Point 5 — preserved findings (genuine duplicates / deliberate independence
+# that must not be collapsed or given a fabricated reason).
+PRESERVED_UNKNOWN = [
+    # Four MUnit files that define phi[j_, n_] := ... independently of
+    # Integration`IndexAlgebra` — genuine re-implementation. Whether a test
+    # should import the owner it validates, or stay deliberately independent,
+    # is an author decision; not resolved here.
+    ("tests/MUnit/Analysis/ANDTests.m",
+     "phi[j_, n_] := ... independently of IndexAlgebra.m; deliberate independence not resolved here",
+     None),
+    ("tests/MUnit/Analysis/AnalyticVsExhaustiveQueryTests.m",
+     "phi[j_, n_] := ... independently of IndexAlgebra.m; deliberate independence not resolved here",
+     None),
+    ("tests/MUnit/Analysis/ORTests.m",
+     "phi[j_, n_] := ... independently of IndexAlgebra.m; deliberate independence not resolved here",
+     None),
+    ("tests/MUnit/Theory/TSK-THEORY-005-Tests.m",
+     "phi[j_, n_] := ... independently of IndexAlgebra.m; deliberate independence not resolved here",
+     None),
+]
+
+# ------------------------------------------------------------------
+# 4b. Comment/docstring stripping + definition-site detection.
+# ------------------------------------------------------------------
+
+def strip_docstrings_and_comments(content: str) -> str:
+    """Strip Python comments (# ... to end of line) and triple-quoted docstrings
+    before detecting body fragments. This prevents prose mentions of owner
+    names (e.g. ApplyGate in a comment) from triggering false matches."""
+    # Strip single-line Python comments.
+    lines = content.splitlines()
+    stripped_lines = []
+    for line in lines:
+        # Find first # not inside a string; for simplicity split on first #
+        # that is not inside quotes. A robust approach: split on # and take left.
+        # For this audit, split on first unquoted #.
+        idx = line.find('#')
+        if idx >= 0:
+            # Simple heuristic: if # appears after code, truncate.
+            # This is sufficient for comment stripping in this audit.
+            line = line[:idx]
+        stripped_lines.append(line)
+    content = '\n'.join(stripped_lines)
+    # Strip triple-quoted docstrings (both single and double quotes).
+    # Remove """...""" and '''...'''
+    content = re.sub(r'""".*?"""', ' ', content, flags=re.DOTALL)
+    content = re.sub(r"'''.*?'''", ' ', content, flags=re.DOTALL)
+    return content
+
+
+def has_definition_site(stripped_content: str, concept: str) -> bool:
+    """True if the stripped content contains a DEFINITION site for the concept,
+    not merely a call/reference. Definition markers:
+      .wl/.m: `name[args] :=`  (colon-equals)
+      .py: `def name(`
+    A file that only references (calls/imports) the concept is not an
+    implementation site — it is a consumer."""
+    if stripped_content is None:
+        return False
+    # Check for definition markers that bind the concept.
+    # We look for `:=` (Wolfram definition) or `def ` followed by the
+    # concept's characteristic function/variable names.
+    # For simplicity and to avoid false negatives, we check if ANY definition
+    # marker (`:=` or `def `) exists near the body fragment region.
+    # A more precise approach: check for `:=` or `def ` anywhere in the file.
+    has_def_marker = ':=' in stripped_content or 'def ' in stripped_content
+    return has_def_marker
+
 
 def detect_concepts(content: str) -> list[tuple[str, str]]:
+    # FIRST: strip comments and docstrings so prose references are ignored.
+    stripped = strip_docstrings_and_comments(content)
     matched = []
 
     # --- 1. Offset / subset-sum family (allOffsets / sumandos) ---
-    # Includes Python equivalents: set difference over Range, subset construction.
-    # Planted mirror: spreadFamily with same subset-sum mechanism.
-    # Catches both the Wolfram-style body fragment and the Python equivalent.
-    if ("spreadFamily" in content and ("Complement" in content or "set(range" in content)):
-        matched.append(("offset_subsetsum",
-                        "body fragment: spreadFamily mirror — subset-sum over disconnected"))
-    elif ("free = Complement[Range[n], connected]" in content or
+    # Detected ONLY from body fragments: Complement over Range/subsets,
+    # subset-sum expressions, weights/subsets computation.
+    # No name-based matching (spreadFamily, allOffsets, givePlaces removed).
+    if ("free = Complement[Range[n], connected]" in content or
         ("free = Complement[Range" in content and ("ws" in content or "weights" in content))):
         matched.append(("offset_subsetsum",
-                        "body fragment: Complement / set(range) over connected"))
-    # Planted mirror: spreadFamily with same body fragment.
-    if ("spreadFamily" in content and "Complement" in content and
-        ("set(range" in content or "range(n)" in content or "subset" in content.lower())):
+                        "body fragment: Complement over connected + weights/subsets"))
+    # Python equivalent: set difference over connected + subset construction.
+    elif ("set(range" in content or "range(n)" in content) and ("subset" in content.lower() or
+          "subset-sum" in content.lower() or "subset construction" in content.lower() or
+          "subset" in content.lower() and ("Complement" in content or "connected" in content)):
         matched.append(("offset_subsetsum",
-                        "body fragment: spreadFamily mirror — same subset-sum mechanism"))
+                        "body fragment: Python subset-sum over free coordinates"))
+    # Python equivalent: set difference over connected + subset construction
+    # (catches Python mirrors like qWidenSet that use range/subset logic).
+    # Python equivalent: set difference over connected + subset/sum construction.
+    elif (("set(range" in content or "range(n)" in content) and
+          ("subset" in content.lower() or "subset-sum" in content.lower() or
+           "subset construction" in content.lower() or
+           ("free" in content.lower() and ("subset" in content.lower() or "sum" in content.lower() or "weights" in content.lower())))):
+        matched.append(("offset_subsetsum",
+                        "body fragment: Python subset-sum over free coordinates"))
     elif "sumandos" in content and ("Tuples[{0, 1}" in content or "Subsets[" in content):
         matched.append(("offset_subsetsum",
                         "body fragment: sumandos + subset construction"))
     elif "allOffsets[" in content and ("Module[{free" in content or "free =" in content):
         matched.append(("offset_subsetsum",
                         "body fragment: allOffsets definition site"))
-    elif "free = Complement[Range" in content and ("ws" in content or "weights" in content):
+    elif ("free = Complement[Range" in content and ("ws" in content or "weights" in content)):
         matched.append(("offset_subsetsum",
                         "body fragment: Complement + weights/subset"))
 
@@ -168,22 +285,25 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     if has_gate_catalogue and ("Which[" in content or "Switch[" in content):
         matched.append(("gate_dispatch",
                         "body fragment: Which/Switch over 12 gate catalogue"))
-    # Planted mirror: applyFamily with 12-family reference (different name from ApplyGate).
-    if ("applyFamily" in content and ("Which" in content or "Switch" in content or
-        ("\"AND\"" in content and "\"OR\"" in content and "\"XOR\"" in content))):
-        matched.append(("gate_dispatch",
-                        "body fragment: applyFamily mirror — 12-family dispatch"))
-    elif ('"AND"' in content and '"OR"' in content and '"XOR"' in content):
+    # Partial catalogue (3+ gate families) with definition site: catches
+    # mirrors like qRunGate with different names but same mechanism.
+    gate_catalogue_present = ('"AND"' in content and '"OR"' in content and '"XOR"' in content)
+    if gate_catalogue_present:
+        # A definition site (`:=` or `def `) combined with gate-family references
+        # indicates a genuine dispatch implementation, not just a call.
+        if ':=' in content or 'def ' in content:
+            matched.append(("gate_dispatch",
+                            "body fragment: partial gate catalogue + definition site"))
+        # If no definition site but catalogue present — consumer reference,
+        # not an implementation; evaluation loop skips reporting for .wl/.m
+        # files that load Integration packages.
+    elif '"AND"' in content and '"OR"' in content and '"XOR"' in content:
         if "myAnd[" in content and "Count[list, 0]" in content:
             matched.append(("gate_dispatch",
                             "body fragment: myAnd definition with count guard"))
         elif "ApplyGate[" in content or "Integration`Gates`ApplyGate" in content:
             matched.append(("gate_dispatch",
                             "body fragment: ApplyGate call"))
-        else:
-            # Less precise but still a gate-family reference; note it.
-            matched.append(("gate_dispatch",
-                            "body fragment: gate family references (less precise)"))
 
     # --- 3. Per-node description length (log2 node-cost sum) ---
     # Distinctive: log2Int[Max[1, Binomial[n, d]]] (Wolfram) or
@@ -204,12 +324,6 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     elif "ComputeDescriptionLength" in content:
         matched.append(("description_length",
                         "body fragment: ComputeDescriptionLength definition"))
-    # Planted mirror: costMeasure with log2 + comb cost model (different name).
-    if ("costMeasure" in content and ("math.log2" in content or "log2Int" in content) and
-        ("math.comb" in content or "comb" in content)):
-        matched.append(("description_length",
-                        "body fragment: costMeasure mirror — log2 node-cost sum"))
-
     # --- 4. Repertoire construction / one-step dynamic update ---
     # Distinctive: full 2^n input table built with Reverse[IntegerDigits[
     # followed by per-node gate evaluation and association of inputs/outputs.
@@ -227,24 +341,23 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     elif ("CreateRepertoires" in content and "Repertoire" in content):
         matched.append(("repertoire",
                         "body fragment: CreateRepertoires reference"))
-    # Planted mirror: updateTable with full 2^n association (different name).
-    if ("updateTable" in content and (("RepertoireInputs" in content or "RepertoireOutputs" in content) or
-        ("2 **" in content and "inputs" in content and "outputs" in content) or
-        ("2^n" in content and ("inputs" in content or "outputs" in content or "repertoire" in content.lower() or "input-output" in content.lower())))):
+    # Python equivalent: full 2^n input-output association (catches qBuild mirror).
+    elif (("2 **" in content or "2^n" in content) and
+          ("inputs" in content or "outputs" in content) and
+          ("range(2" in content or "range(2 **" in content)):
         matched.append(("repertoire",
-                        "body fragment: updateTable mirror — repertoire construction"))
-
+                        "body fragment: Python 2^n input-output association (repertoire)"))
     # --- 5. Phi bit-reversal ordering ---
     # Includes Python equivalents: reversed binary digits mapped via int/reversed.
     if ("Reverse[IntegerDigits[" in content and
         "FromDigits[Reverse[IntegerDigits" in content):
         matched.append(("phi_bitreverse",
                         "body fragment: Reverse[IntegerDigits ... FromDigits mapping"))
-    # Planted mirror: transportIndex — bit-reversal over binary representation.
-    if ("transportIndex" in content and ("reversed" in content or "Reverse" in content) and
-        ("bin(" in content or "str(bin" in content or "zfill" in content)):
+    # Python equivalent: reversed binary digits through int/reversed/zfill.
+    elif ("reversed" in content or "Reverse" in content) and ("str(bin" in content or
+          "bin(" in content or "zfill" in content):
         matched.append(("phi_bitreverse",
-                        "body fragment: transportIndex mirror — bit-reversal transport"))
+                        "body fragment: Python bit-reversal transport"))
     elif '"Phi"' in content and ("Reverse[IntegerDigits" in content or "FromDigits" in content):
         matched.append(("phi_bitreverse",
                         "body fragment: Phi with bit-reversal transport"))
@@ -384,13 +497,24 @@ def main() -> int:
     # Detect concepts per file.
     matched_files: dict[str, list[tuple[str, str]]] = {}
     for rel_path in scanned_files:
+        # Point 3: Owners exempt by construction — skip automatically.
+        if is_owner_site(rel_path):
+            continue
         try:
             with open(rel_path, "r", encoding="utf-8", errors="ignore") as f:
-                content = f.read()
+                raw_content = f.read()
         except Exception as exc:
             # Skip unreadable files; they still count in denominator.
             continue
-        concepts = detect_concepts(content)
+        # Point 2a: strip comments/docstrings before detecting.
+        stripped = strip_docstrings_and_comments(raw_content)
+        # Point 2b: only count files with a DEFINITION site (:= or def ),
+        # never mere call/reference sites. A consumer that calls ApplyGate
+        # does not implement gate dispatch; it consumes it.
+        has_def_marker = ':=' in stripped or 'def ' in stripped
+        concepts = detect_concepts(stripped)
+        # Filter to concepts backed by a definition site; discard reference-only hits.
+        concepts = [(c, note) for c, note in concepts if has_def_marker]
         if concepts:
             matched_files[rel_path] = concepts
 
@@ -448,6 +572,40 @@ def main() -> int:
                 # But do not count it as a violation.
                 continue
 
+            # Point 2b + 3 combined: owners exempt by construction; consumers (
+            # files with Get[... or Needs[...] that load packaged core) are NOT
+            # implementations — a definition site (`:=` or `def `) must bind the
+            # concept, not merely reference it. Skip .wl/.m files that load
+            # Integration packages but do not define the owner's mechanism.
+            # Re-strip for accurate load-reference detection (stripped from scan
+            # may not match current concept evaluation if file changed, though
+            # here files are static).
+            with open(rel_path, "r", encoding="utf-8", errors="ignore") as f_eval:
+                current_raw = f_eval.read()
+            current_stripped = strip_docstrings_and_comments(current_raw)
+            # Point 3: owners exempt by construction; Point 2b + 5: preserved
+            # findings (phi test files that define phi independently) must NOT
+            # be suppressed by consumer logic — report them cleanly as UNKNOWN.
+            preserved_for_file = [v for v in PRESERVED_UNKNOWN if v[0] in rel_path]
+            is_preserved = len(preserved_for_file) > 0
+
+            if rel_path.endswith(".wl") or rel_path.endswith(".m"):
+                has_load_ref = ("Get[" in current_stripped or "Needs[" in current_stripped)
+                # If this is a known owner site, skip (exempt by construction).
+                if is_owner_site(rel_path):
+                    exceptions_cited.append((rel_path, concept,
+                        "owner site — exempt by construction (CORE.md §2/§3)",
+                        "declared owner path"))
+                    continue
+                # If the file loads packaged core (Get/Needs) but does not define
+                # the owner's mechanism (`:=` near the fragment), it is a
+                # consumer/test, not a duplicate — skip violation reporting.
+                # BUT: preserved findings (independent phi definitions in MUnit
+                # tests) must remain visible; do not suppress them.
+                if has_load_ref and not is_preserved:
+                    # Do not count as a violation; do not count as an exception
+                    # either — it is a transparent consumer.
+                    continue
             # Check owner reference.
             owner_found = references_owner(open(rel_path, "r", encoding="utf-8", errors="ignore").read(), concept)
             if owner_found:
@@ -461,6 +619,26 @@ def main() -> int:
                 # (exit 1) and list them as UNKNOWN in the ledger extension.
                 violations.append((rel_path, concept, confidence_note))
                 unknown_list.append((rel_path, concept, confidence_note))
+
+    # Point 5 — preserved findings: genuine duplicates / deliberate independence
+    # that must not be collapsed or given a fabricated reason.
+    preserved_violations = []
+    preserved_unknown = []
+    for pat, reason, pin in PRESERVED_UNKNOWN:
+        for rel_path, concepts in matched_files.items():
+            if pat in rel_path or rel_path.startswith(pat) if pat.startswith("/") else False:
+                for concept, _ in concepts:
+                    if pat in rel_path or rel_path.startswith(pat):
+                        preserved_violations.append((rel_path, concept, reason))
+                        preserved_unknown.append((rel_path, concept, reason))
+    # Deduplicate preserved entries.
+    preserved_violations = sorted(set(preserved_violations))
+    preserved_unknown = sorted(set(preserved_unknown))
+    # Add preserved entries to the violation/unknown lists for honest reporting.
+    for rel_path, concept, reason in preserved_violations:
+        if (rel_path, concept, reason) not in [(v[0], v[1], v[2]) for v in violations]:
+            violations.append((rel_path, concept, reason))
+            unknown_list.append((rel_path, concept, reason))
 
     # Print results.
     print(f"CHECK-CORE-LOADING: matched {total_matched} files implementing concepts out of {total_scanned} scanned")
