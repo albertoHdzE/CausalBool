@@ -129,6 +129,54 @@ EXCEPTIONS = [
      "standalone companion code; self-contained by design (" +
      "No external packages required); must not load packaged core",
      "135/135 cross-language parity run (run_crosscheck_parity.sh)"),
+    # AUDIT04 Phase C. The PYTHON half of the same companion. run_crosscheck_parity.sh
+    # pins CausalBoolCore.wl and nothing else, so these two carried the identical
+    # divergence with none of the identical defence while feeding published numbers.
+    ("papers/method/code/complexity_analysis/complexity_analysis.py",
+     "companion must run from a clean checkout, so it may not import the packaged "
+     "core -- the same reason CausalBoolCore.wl is exempt",
+     "tests/analysis/test_companion_python_parity.py: 0 disagreements over 310 "
+     "(gate, input) cases against the owner, 16/16 repertoire rows"),
+    ("papers/method/code/worked_example_7node/worked_example_7node.py",
+     "same reason; the offset family is rebuilt in Python for the reader",
+     "tests/analysis/test_companion_python_parity.py: exact subset-sum set over "
+     "every connected set for n = 3..7, plus the empty-free-set guard"),
+    # AUDIT04 Phase C. A test that validates an owner must not compute its expected
+    # value WITH that owner, or it asserts owner === owner. Here the private copy IS
+    # the independent derivation and the file compares it against the owner, so the
+    # assertion is the pin: it goes red the moment the two diverge.
+    ("tests/MUnit/Analysis/ANDTests.m",
+     "private phi is the independent derivation, compared against IndexSetNetwork",
+     "the file's own equality assertion"),
+    ("tests/MUnit/Analysis/ORTests.m",
+     "private phi is the independent derivation, compared against IndexSetNetwork",
+     "the file's own equality assertion"),
+    ("tests/MUnit/Analysis/AnalyticVsExhaustiveQueryTests.m",
+     "private phi is the independent derivation, compared against the analytic set",
+     "the file's own equality assertion"),
+    ("tests/MUnit/Theory/TSK-THEORY-005-Tests.m",
+     "private phi is the independent derivation, compared against the analytic set",
+     "the file's own equality assertion"),
+    # DECLARED, NOT DEFENDED. Artefact producers for doc/finalpaper and
+    # doc/newIntPaper; the archive policy forbids rewriting them. A private gate
+    # evaluator feeds archived figures and nothing checks it. This is accepted
+    # exposure, recorded as such -- NOT a clean pass.
+    ("tests/MUnit/Exper/TSK-EXPER-002-GateMixtures.m",
+     "frozen archive producer; archive policy forbids rewriting",
+     None),
+    ("tests/MUnit/Exper/TSK-EXPER-002-GateMixtures2.m",
+     "frozen archive producer; archive policy forbids rewriting",
+     None),
+    ("tests/MUnit/Exper/TSK-EXPER-005-NoiseRobustness.m",
+     "frozen archive producer; archive policy forbids rewriting",
+     None),
+    # The fixture that pins the companion necessarily contains an independent
+    # derivation of the offset family -- that derivation is the whole point, and
+    # importing the owner would make it assert owner === owner.
+    ("tests/analysis/test_companion_python_parity.py",
+     "the independent derivation IS the pin for the companion; importing the "
+     "owner would make the assertion a tautology",
+     "the file's own equality assertion against the companion"),
 ]
 
 # ------------------------------------------------------------------
@@ -239,7 +287,11 @@ def has_definition_site(stripped_content: str, concept: str) -> bool:
 
 def detect_concepts(content: str) -> list[tuple[str, str]]:
     # FIRST: strip comments and docstrings so prose references are ignored.
-    stripped = strip_docstrings_and_comments(content)
+    # AUDIT04 review: this result was computed into a local named `stripped` and
+    # then never read -- every detector below still tested the RAW content, so
+    # the stripping was dead and a file could be flagged for a concept it only
+    # mentions in a comment. Rebound onto `content` so it actually applies.
+    content = strip_docstrings_and_comments(content)
     matched = []
 
     # --- 1. Offset / subset-sum family (allOffsets / sumandos) ---
@@ -503,7 +555,7 @@ def main() -> int:
         try:
             with open(rel_path, "r", encoding="utf-8", errors="ignore") as f:
                 raw_content = f.read()
-        except Exception as exc:
+        except OSError:
             # Skip unreadable files; they still count in denominator.
             continue
         # Point 2a: strip comments/docstrings before detecting.
@@ -655,18 +707,28 @@ def main() -> int:
     files_matched = total_matched
     files_violated = len(set(rel_path for rel_path, _, _ in violations))
     files_excepted = len(set(rel_path for rel_path, _, _, _ in exceptions_cited))
-    files_owner_ref = files_matched - files_violated - files_excepted
+    # AUDIT04 review: this count was computed and never printed, and the plain
+    # subtraction was wrong anyway -- a file may be excepted for one concept and
+    # violating for another, so the two sets overlap. Derived from set difference.
+    files_accounted = set(rel_path for rel_path, _, _ in violations) | set(
+        rel_path for rel_path, _, _, _ in exceptions_cited)
+    files_owner_ref = files_matched - len(files_accounted)
     print(f"  matched pair count (file-concept pairs): {matched_pair_count}")
     print(f"  exception pairs: {exception_pair_count}")
     print(f"  owner-reference pairs: {owner_pair_count}")
     print(f"  violation pairs (no owner, not excepted): {violation_pair_count}")
-    print(f"  distinct files with violations: {files_violated}")
+    print(f"  distinct files: {files_matched} matched, {files_excepted} excepted, "
+          f"{files_owner_ref} referencing an owner, {files_violated} violating")
     for rel_path, concept, note in sorted(violations):
         print(f"    VIOLATION  {rel_path} [{concept}] — {note}")
 
     # Final verdict.
     if violations:
-        print(f"CHECK-CORE-LOADING: FAIL  {len(violations)} file(s) implement a core concept without loading its owner and without a declared exception")
+        # len(violations) counts file-concept PAIRS, not files; the two differ
+        # whenever one file mirrors more than one concept. Both are printed.
+        print(f"CHECK-CORE-LOADING: FAIL  {len(violations)} file-concept pair(s) "
+              f"across {files_violated} file(s) implement a core concept without "
+              f"loading its owner and without a declared exception")
         # Print UNKNOWN list clearly.
         if unknown_list:
             print("CHECK-CORE-LOADING: UNKNOWN ledger entries (need reason + pin):")

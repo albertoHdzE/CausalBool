@@ -102,6 +102,21 @@ sharing code.
 | `papers/method/code/corroboration_6node/ordering_invariance_6node.py` | **UNKNOWN** — divergence reason not determined; ordering-invariance corroboration script does not load the core owner | **no pin** — must be reviewed |
 | `papers/method/code/mixed_interaction_10node/dynamical_landscape_10node.py` | **UNKNOWN** — divergence reason not determined; landscape-analysis script defines its own gate-family list | **no pin** — must be reviewed |
 | `papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py` | **UNKNOWN** — divergence reason not determined; scalability-analysis script defines its own gate-catalogue | **no pin** — must be reviewed |
+| `papers/method/code/complexity_analysis/complexity_analysis.py` | the companion must run from a clean checkout, so it may not import the packaged core — the same reason `CausalBoolCore.wl` is exempt | `tests/analysis/test_companion_python_parity.py`: `_eval_gate` equals the owner on **0 disagreements over 310 (gate, input) cases**, `build_output_table` on 16/16 rows |
+| `papers/method/code/worked_example_7node/worked_example_7node.py` | same reason; the offset family is rebuilt in Python for the reader | same fixture: Ω is the exact subset-sum set over **every connected set for n = 3…7**, plus the empty-free-set guard |
+
+### Declared exceptions in the test suites
+
+A test that validates an owner must not compute its expected value **with** that
+owner, or it asserts `owner === owner`. Where the private copy is the
+independent derivation and the assertion compares it against the owner, the
+**assertion is the pin**: the test goes red the moment the two diverge. This is
+the same independence that makes the 135/135 cross-check mean anything.
+
+| site | reason | how it is pinned |
+|---|---|---|
+| `tests/MUnit/Analysis/ANDTests.m`, `ORTests.m`, `AnalyticVsExhaustiveQueryTests.m`, `tests/MUnit/Theory/TSK-THEORY-005-Tests.m` | each defines a private `phi[j_, n_]` and compares it against `Integration\`Gates\`IndexSetNetwork`; importing `IndexAlgebra\`Phi` would make the test a tautology | the file's own equality assertion — it fails if the private transport and the owner disagree |
+| `tests/MUnit/Exper/TSK-EXPER-002-GateMixtures.m`, `TSK-EXPER-002-GateMixtures2.m`, `TSK-EXPER-005-NoiseRobustness.m` | **declared, not defended.** Artefact producers for `doc/finalpaper` and `doc/newIntPaper`; the archive policy forbids rewriting them | **no pin** — a private gate evaluator feeds archived figures and nothing checks it. Recorded as accepted exposure in `VERIFICATION.md` |
 
 ---
 

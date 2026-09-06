@@ -4,17 +4,16 @@ EnsureDir[path_] := If[!DirectoryQ[path], CreateDirectory[path, CreateIntermedia
 base = FileNameJoin[{"results", "tests", "compare003"}];
 EnsureDir[base];
 
+Needs["Integration`Gates`"];
+
 gates = {"AND","OR","XOR","XNOR","NAND","NOR"};
 
-apply2[gate_, x_, y_] := Switch[gate,
-  "AND", If[x == 1 && y == 1, 1, 0],
-  "OR", If[x == 1 || y == 1, 1, 0],
-  "XOR", If[Mod[x + y, 2] == 1, 1, 0],
-  "XNOR", If[Mod[x + y, 2] == 0, 1, 0],
-  "NAND", If[x == 1 && y == 1, 0, 1],
-  "NOR", If[x == 1 || y == 1, 0, 1],
-  _, 0
-];
+(* AUDIT04 Phase C -- see TSK-COMPARE-002 for the full reasoning. This file
+   measures transfer entropy and mutual information OVER gate distributions; it
+   does not test gate semantics, so its private six-family Switch was unchecked
+   machinery. Forwarded to the owner; the silent `_, 0` fallback is dropped in
+   favour of ApplyGate's refusal. *)
+apply2[gate_, x_, y_] := Integration`Gates`ApplyGate[gate, {x, y}, <||>];
 
 triples = Tuples[{0, 1}, 2];
 
