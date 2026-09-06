@@ -1,5 +1,8 @@
 global_floor = 5.6977559607
 # Measured from: venv/bin/python -m pytest -q tests/analysis/ --cov=src --cov-report=json
+# Verified by planting (AUDIT04-P4f): delete DL tests -> RED (description_lengths
+# drops to 0.00%, below floor 98.10%); restore -> GREEN; raise global floor
+# to 99.99% with module at 0% -> RED. The floor RATCHES: it may rise, never fall.
 # Date: 2026-09-05. The floor RATCHES: it may rise, never fall.
 # A module whose coverage drops below its recorded floor is a regression.
 
