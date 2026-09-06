@@ -60,13 +60,13 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | what | measured | gate |
 |---|---|---|
 | MUnit suite | **69 / 69**, 0 failures | `make suite` |
-| `tests/analysis` | **141** tests | CI asserts the count |
+| `tests/analysis` | **149** tests | CI asserts the count |
 | Owner line+branch coverage | **98.56 %** | fails below **95 %** |
 | `index-deconvolution` | **146** tests | CI asserts the count |
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
 | Wolfram files that parse | **153 / 153** | `check_wolfram_syntax.wl` |
 | Test files classified | **85 / 85** (72 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
-| Owners named in `CORE.md` that exist | **46 / 46** | `check_core_index.sh` |
+| Owners named in `CORE.md` that exist | **57 / 57** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
 | Lint, enforced rules | **clean** | `ruff check` |
 
@@ -131,6 +131,9 @@ three-state discipline as the glossary sync.
 | **Where the remaining 154 F401 live** | replication packages **85** · `index-deconvolution/level*` **33** · `tests/` Lev4–7 runners **12** · `audit/` scripts **9** · frozen `workspaces/` **6** · `doc/` archives **6** · `experiments/` **3** | Every one is a replication package with its own pinned environment, a **dated experiment record**, or a provenance archive. Editing those rewrites history rather than fixing code, which is why they are declared instead of cleared. |
 | ~~**`Trajectory_LZ.py` `k_max`**~~ **RESOLVED — and it was the other file that was wrong** | `Trajectory_LZ` agrees with published LZ76 on **255/300**; `Scaling_LZ_Tools` on **6/300** | See below. The unused `k_max` was a real signal, but it pointed at a different defect from the one I first recorded. |
 | **Mutation kill rate** | in progress | See §5. |
+| **Files implementing an owned concept without loading the owner** | **8 file-concept pairs across 7 files**, over a denominator of **409 scanned / 80 matched** | `tools/check_core_loading.py` (AUDIT04 Phase C), keyed on body fragments so a renamed copy is still caught, and verified by planting one mirror per concept under names chosen after the detector was written. The seven are `imp-pathinfo-paper/.../method_comparison.py`, `imp-prices/tests/test_gate_network.py`, four under `index-deconvolution/experiments/` and one under `experiments/r4_segmented_grammar/`. They are **UNKNOWN with no invented reason and no invented pin** — replication fidelity and dated experiment records are author decisions, not the guard's. The gate is therefore **red by design** and cannot join `make ci-local` until they are adjudicated. |
+| **An owned concept mirrored in a frozen archive producer** | `TSK-EXPER-005-NoiseRobustness.m`: **0 disagreements over 34 cases**, measured 2026-09-05 | **Accepted exposure, not a clean pass.** Its private `applyGate` agrees with the owner today at the arities used, and nothing keeps it agreeing: the archive policy forbids editing the file, so there is no pin. One latent condition is already visible — `"MAJORITY", Boole[Total[xs] >= 2]` hardcodes the arity-3 threshold, so at 5 inputs `{1,1,0,0,0}` returns 1 where the owner returns 0. Harmless while the file only uses arity 3; wrong the moment it does not. |
+| **Modules with a declared coverage floor** | **2 of 61** — 59 carry **no floor at all** | `tools/check_coverage_ratchet.py` (AUDIT04-P4f) enforces a global floor and a per-module floor together, because `fail_under` is global only and a global pass hides a module at 0 %. The ratchet is seeded at today's measurement (**global 5.69 %**), so it catches regression from day one while Phase B raises it tier by tier. Verified by planting: hiding the description-length tests drops that module to 58.67 % and fails BOTH floors; restoring returns it to green. The **59 unfloored modules are printed on every run** — the guard states the size of its own gap rather than reporting `2 measured`. |
 | **GINML multi-valued nodes** | **582 / 5882 nodes (9.9 %)**, in **108 / 178 files**, of which **304** lose level rules | Binarised to the `val="1"` rule. No longer silent: `GINMLParser` records `node_max_values`, `is_multivalued` and `discarded_value_rules`, and warns once per file. Whether these models belong in a Boolean corpus at all is a scientific question, not a parsing one. |
 | **Bio regeneration, R4.2–R4.5, R5** | blocked, but **`917 / 5,204` = 17.6 %**, not the 76.4 % previously recorded | The aggregate `3,977 of 5,204` reproduces exactly, but **48.9 % of those nodes are derivable today** — 1,181 truth tables were built by evaluation and 762 are `y = x`. The genuine blocker splits cleanly by source: **510 multi-valued, all GINML** (the binarisation defect fixed in AUDIT03-C) and **407 free-threshold, all BioModels**. Two more findings were not being counted at all: 578 nodes absent from `gates`, and 294 whose formula names variables outside their own `inputs`. Producer and full decomposition: `audit/AUDIT04_corpus_diagnostic/`. `Q2.2` remains an unresolved measurement conflict. |
 

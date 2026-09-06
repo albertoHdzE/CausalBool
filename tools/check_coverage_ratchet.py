@@ -20,8 +20,6 @@
 from __future__ import annotations
 
 import json
-import os
-import re
 import sys
 from pathlib import Path
 
@@ -181,15 +179,24 @@ def main() -> int:
             below_floor_modules.append(file_path_in_coverage)
 
     # Print denominator clearly: modules declared, modules measured, global figure.
+    #
+    # AUDIT04 review: "N modules measured" originally counted only the DECLARED
+    # floors, so a report covering 61 files printed "2 modules measured" and the
+    # 59 with no floor at all were invisible. That is the comfortable denominator
+    # this guard exists to remove, reappearing inside the guard itself. The
+    # unfloored count is now printed on every run, so the size of the gap between
+    # what is measured and what is DEFENDED can never be read off as zero.
     modules_declared = len(module_floors)
-    modules_measured = len(measured_modules)
-    print(f"CHECK-COVERAGE-RATCHET: denominator — {modules_measured} modules measured, "
-          f"{modules_declared} declared floors, global figure {measured_global:.2f}%")
+    modules_in_report = len(files)
+    unfloored = modules_in_report - modules_declared
+    print(f"CHECK-COVERAGE-RATCHET: denominator — {modules_in_report} modules in the "
+          f"report, {modules_declared} with a declared floor, {unfloored} with NO "
+          f"floor, global figure {measured_global:.2f}%")
     if global_floor is not None:
         print(f"  declared global floor: {global_floor:.2f}%")
         print(f"  measured global figure: {measured_global:.2f}%")
     else:
-        print(f"  declared global floor: none declared")
+        print("  declared global floor: none declared")
     print(f"  modules below floor: {len(below_floor_modules)}")
     for mod in sorted(below_floor_modules):
         floor_text = f" (floor: {module_floors.get(mod, 'N/A'):.2f}%)" if mod in module_floors else ""
