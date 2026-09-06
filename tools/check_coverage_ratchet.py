@@ -153,6 +153,29 @@ def load_coverage() -> dict:
 
 
 def compute_global_figure(data: dict) -> float:
+    """The global figure, read from the SAME field the per-module floors use.
+
+    AUDIT04-D: this was the module-level `percent_covered` bug over again, one
+    level up and still live after that fix. The per-module floors and
+    `module_percent` both read coverage.json's `percent_covered`, which with
+    branch coverage enabled is a LINE-AND-BRANCH figure -- (605 + 224) of
+    (5704 + 1798) = 11.05 %. This function instead recomputed
+    covered_lines / num_statements = 605 / 5704 = 10.61 %, a statements-only
+    figure under the same name.
+
+    So a global floor seeded from the report was unmeetable the moment it was
+    written, by 0.44 points, and the guard would have reported a regression that
+    had not happened -- the identical failure, and the identical cost, as the
+    one recorded in `module_percent` above. Fixing one instance of a duplicated
+    definition is not fixing the duplication.
+
+    One definition now, and it is the reported one. Falls back to the summed
+    form only when `totals` is absent, so an older report still yields a number
+    rather than a silent zero.
+    """
+    totals = data.get("totals", {})
+    if "percent_covered" in totals:
+        return float(totals["percent_covered"])
     files = data.get("files", {})
     total_statements = 0
     covered_statements = 0

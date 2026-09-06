@@ -1,4 +1,4 @@
-global_floor = 9.18
+global_floor = 11.05
 # Measured from pure tier: source venv/bin/activate && python -m pytest -q tests/analysis/
 # --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
 # Includes 4 new contract tests for corpus parsers.
@@ -10,22 +10,36 @@ global_floor = 9.18
 # TRIPWIRE, not a ratchet -- it fires on jitter nobody can act on. All floored
 # DOWN to two decimals, which still catches a real regression.
 #
-# WHAT A FLOOR HERE DOES NOT MEAN. Three of the four parser floors rest on
-# tests that DO NOT BITE, measured by planting on 2026-09-05:
-#   SBMLParser   truncated to a single node   -> all tests still pass
-#   GINMLParser  every edge dropped           -> all tests still pass
-#   LogicParser  input bit ordering reversed  -> all tests still pass
-#   BNetParser   last node dropped            -> CAUGHT
-# The coverage is real; the verification is not. See VERIFICATION.md section 4.
-# Verified by planting (captured in commit message):
-#   Skip DL tests -> RED (description_lengths measured: 0.00%, below floor 98.10%).
-#   Restore full suite -> GREEN (description_lengths measured: 98.10%, above floor).
-#   Raise global floor to aspirational 99.99% with module broken -> RED.
+# WHAT A FLOOR HERE MEANS, AS OF 2026-09-06. All four parser floors now rest on
+# tests that BITE. Re-measured by planting the same three defects that used to
+# leave the suite green, plus one more:
+#   SBMLParser   truncated to a single node        -> RED (1 test)
+#   GINMLParser  every edge dropped                -> RED (1 test)
+#   LogicParser  input bit ordering reversed       -> RED (3 tests)
+#   LogicParser  functional-mode NOT inverted      -> RED (1 test)
+#   BNetParser   last node dropped                 -> RED (unchanged, already bit)
+# Restored -> GREEN, with no diff left in src/.
+#
+# Two corrections were needed to get there, and both were errors in the earlier
+# prescription rather than in the parsers:
+#   * "make `>= 1` an exact count" was NOT enough. The SBML fixture held ONE
+#     node, so `== 1` also survives truncation-to-one-node. The FIXTURE had to
+#     grow first; assertions over a fixture that small cannot bite whatever they
+#     say.
+#   * "LogicParser needs an ASYMMETRIC gate" was wrong. Bit reversal keeps each
+#     row internally consistent and only permutes row ORDER, and
+#     classify_truth_table recomputes from the input columns it is handed, so the
+#     label is invariant: 'A AND NOT B' reads CANALISING with and without the
+#     defect. Only an ELEMENTWISE assertion on the input enumeration catches it.
+#
+# Earlier ratchet planting, still valid:
+#   Skip DL tests -> RED (description_lengths measured: 0.00%, below floor).
+#   Restore full suite -> GREEN. Aspirational global floor 99.99% -> RED.
 
 [module_floors]
 "src/causalbool_paths.py" = 100.00
 "src/description_lengths.py" = 98.09
 "src/integration/BNetParser.py" = 86.79
-"src/integration/GINMLParser.py" = 49.52
-"src/integration/LogicParser.py" = 43.50
-"src/integration/SBMLParser.py" = 43.93
+"src/integration/GINMLParser.py" = 84.76
+"src/integration/LogicParser.py" = 77.92
+"src/integration/SBMLParser.py" = 57.19
