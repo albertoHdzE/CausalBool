@@ -60,7 +60,7 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | what | measured | gate |
 |---|---|---|
 | MUnit suite | **69 / 69**, 0 failures | `make suite` |
-| `tests/analysis` | **149** tests | CI asserts the count |
+| `tests/analysis` | **163** tests | CI asserts the count |
 | Owner line+branch coverage | **98.56 %** | fails below **95 %** |
 | `index-deconvolution` | **146** tests | CI asserts the count |
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
