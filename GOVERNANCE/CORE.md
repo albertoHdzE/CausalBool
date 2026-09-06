@@ -98,6 +98,10 @@ sharing code.
 | `index-deconvolution/crosscheck/` vs `index-deconvolution/experiments/DemoLibrary.wl` | the cross-check must be **independent** of what it checks — that independence is what makes 135/135 mean anything | deliberate; exempt in the guard |
 | `imp-prices/vendor` | two-copies rule, pinned byte-identical to `index-deconvolution/src/` | `imp-prices/tests/test_vendor_parity.py`, an md5 gate in CI that **loudly skips** rather than passing if the canonical is absent |
 | `src/external/ccapi` | vendored third party | dependency boundary, never modified |
+| `papers/method/code/complexity_analysis/bdm_comparison.py` | manuscript analysis script for Section 4.2; uses its own gate-catalogue and `D_formula` computation for manuscript tables; not a reusable module | recorded in GOVERNANCE/CORE.md; file not edited independently of manuscript assembly |
+| `papers/method/code/corroboration_6node/ordering_invariance_6node.py` | paper analysis script for ordering-invariance corroboration; part of the corroboration_6node package whose .wl companion loads `CausalBoolCore.wl`; not a reusable module | recorded in GOVERNANCE/CORE.md; file not edited independently |
+| `papers/method/code/mixed_interaction_10node/dynamical_landscape_10node.py` | paper landscape-analysis script; uses its own gate-family list and repertoire logic for manuscript figures | recorded in GOVERNANCE/CORE.md; file not edited independently |
+| `papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py` | manuscript scalability-analysis script; defines its own gate-catalogue for throughput measurement | recorded in GOVERNANCE/CORE.md; file not edited independently |
 
 ---
 
