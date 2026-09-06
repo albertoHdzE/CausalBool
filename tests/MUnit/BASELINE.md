@@ -63,6 +63,46 @@ recursion, deduped.
 > and `tools/check_wolfram_syntax.wl` now asserts **152/152** Wolfram files parse
 > — a check the suite structurally could not perform.
 
+> ## v5 — AUDIT04, 2026-09-06. DECLARED DELTA: `TOTAL 69 → 72`, `FAIL 0`
+>
+> ```
+> OK=72 FAIL=0 TOTAL=72 SCOPE=all
+> ```
+>
+> **The three added tests are Phase A's, and the ledger simply had not caught up:**
+> `Arch/TSK-ARCH-005-NetworkIOContract.m` (`5f42b3e`),
+> `Arch/TSK-ARCH-006-CausalBoolCoreContract.m` (`f2c2f77`) and
+> `Analysis/TSK-BIO-METRICS-002-AbsoluteKOFN.m` (`61ca2f8`). No verdict moved and
+> no test was retired; 72 is the count `MANIFEST.tsv` has declared since `61ca2f8`.
+>
+> **What is disclosed here is not the delta but why nobody saw it.** The rollup
+> `results/tests/runall/Status.txt` is tracked and cited as the whole-suite record,
+> yet `run-tests.sh` wrote it on *every* invocation, so any `--section` run
+> overwrote it and no full run had regenerated it since Phase A began. Two
+> consequences were live simultaneously:
+>
+> 1. the rollup read `TOTAL=69` against a manifest declaring **72**, so three
+>    tests were uncounted and the number still looked like a pass;
+> 2. `results/tests/arch6/Status.txt` was committed reading **`FAIL`** while the
+>    same rollup read `FAIL=0`. `f2c2f77`'s message states *"OK on restore"*, and
+>    this run confirms the test does pass — so the **claim was true and the
+>    artefact was the one left behind by the last planted mutant**, committed in
+>    place of the restored run.
+>
+> Neither was found by a gate. Both are now gated: partial runs write
+> `results/tests/section-<S>/Status.txt` and every status line carries `SCOPE=`,
+> and `tools/check_test_manifest.sh` — previously classification-only — now also
+> requires `TOTAL == ` the declared `test` count, `SCOPE=all`, and **no status
+> artefact reading `FAIL` while the rollup reads `FAIL=0`** (80 artefacts scanned,
+> 0 contradicting). Verified by planting all four defects: each goes red alone,
+> green on restore.
+>
+> The only other deltas in this run are wall-clock: **290 `timeSec`, 120
+> `wall_time_seconds`, 48 median/max wall-time, 32 baseline/predictive timings, 8
+> `timeTruth`, 8 `timeApply`, 8 `setMaterialisationSeconds`, 2 `baselineMem`
+> (2020488 → 2020496 bytes)** and 2 timestamps. Grouped by JSON key over the whole
+> diff, **every changed key is a timing or a date** — no scientific value moved.
+
 > ## v4 — AUDIT03-B, 2026-09-04. DECLARED DELTA: `TOTAL 65 → 69`, `FAIL 0`
 >
 > ```
@@ -183,6 +223,7 @@ future run can be judged elementwise rather than against a stale total.
 
 | date | task | ledger after | change |
 |---|---|---|---|
+| 2026-09-06 | **AUDIT04** | **`OK=72 FAIL=0 TOTAL=72 SCOPE=all`** | **The total moves to the count the manifest has declared since `61ca2f8`; the ledger, not the suite, was behind.** The three tests are Phase A's `TSK-ARCH-005`, `TSK-ARCH-006` and `TSK-BIO-METRICS-002`. No verdict was flipped and none retired. The disclosure is the *cause*: `run-tests.sh` wrote the tracked rollup on every invocation, so a `--section` run overwrote the whole-suite record, and no full run had regenerated it since Phase A began. That hid two things at once — `TOTAL=69` against a manifest of **72**, and `results/tests/arch6/Status.txt` committed reading **`FAIL`** while the rollup read `FAIL=0` (a planted-mutant artefact committed in place of the restored run; `f2c2f77`'s "OK on restore" was true, and this run confirms it). Both now gated in `tools/check_test_manifest.sh`, which was classification-only and now also requires `TOTAL ==` declared, `SCOPE=all`, and zero contradicting artefacts over **80 scanned**; all four defects planted, each red alone, green on restore. Every other changed key in the run is a timing or a date — no scientific value moved. Evidence: `GOVERNANCE/VERIFICATION.md` §4 |
 | 2026-09-02 | AUDIT02 (P4a–P8, dev R4/W0.3 test fixes) | `OK=53 FAIL=1 TOTAL=54` | three reds retired by the developer's own test fixes (`anaIdx_k1` parsed as `Pattern`; `Or`/`And` over integers staying symbolic; `$VersionString` not a builtin) plus new query-surface, analytic-vs-exhaustive and pattern-query suites |
 | 2026-09-02 | **AUDIT02/W0.2** | **`OK=54 FAIL=1 TOTAL=55`** | adds `Mixed/TSK-MIXED-001-CanalisingExceptionTests.m`, closing the last F36 exception (ORDERING §4). +1 OK, +1 TOTAL, no red moved |
 | 2026-09-03 | **AUDIT03/R3.1** | **`OK=54 FAIL=1 TOTAL=55`** | ledger totals unchanged; one pinned *value* moves. `BioMetrics.m encodeNodeCost` now charges the `log2(n+1)` in-degree field, without which the per-node code has Kraft sum `n+1` and is not decodable. `Analysis/TSK-BIO-METRICS-001` expectation 28.509775004326936 → 37.79748738387639, a delta of exactly `4·log2 5`. The test went red on the old value before it was updated, which is the evidence that it is live. Proof, four-way parity over 572 cells, and both negative controls: `audit/AUDIT03_R3_description_length/FINDING.md` |

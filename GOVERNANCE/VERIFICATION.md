@@ -59,12 +59,12 @@ repository is absent. That is correct refusal, and it is what CI sees.
 
 | what | measured | gate |
 |---|---|---|
-| MUnit suite | **69 / 69**, 0 failures | `make suite` |
+| MUnit suite | **72 / 72**, 0 failures | `make suite`, claim gated by the tracked `SCOPE=all` rollup |
 | `tests/analysis` | **163** tests | CI asserts the count |
 | Owner line+branch coverage | **98.56 %** | fails below **95 %** |
 | `index-deconvolution` | **146** tests | CI asserts the count |
 | Replication packages | **28 / 97 / 47 / 41** | CI matrix, each count asserted |
-| Wolfram files that parse | **153 / 153** | `check_wolfram_syntax.wl` |
+| Wolfram files that parse | **156 / 156** | `check_wolfram_syntax.wl` |
 | Test files classified | **85 / 85** (72 test, 13 producer, 0 quarantine) | `check_test_manifest.sh` |
 | Owners named in `CORE.md` that exist | **57 / 57** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
@@ -85,7 +85,7 @@ hides the one that matters.
 > about whether the assertions are any good. The mutation harness is what
 > measures that.
 
-### This page now checks itself — for 7 of its 11 numbers
+### This page now checks itself — for 12 of its 29 numbers
 
 The header above claims none of these figures is typed by hand. **That sentence
 was false when it was written:** the `check_core_index.sh` row read `36 / 36`
@@ -93,15 +93,13 @@ while the guard itself printed `40 / 40`. Nothing compared the page to the tools
 it cites, so a governance document about verification was the least verified
 artefact in the repository.
 
-`tools/check_verification_numbers.py` (pure tier) parses **§3 and §4** and
-re-derives each claim from the tool named beside it. Of the **11 numeric rows**
-it checks **7** and **names the 4 it does not** — MUnit, coverage, the Wolfram
-parse and the manuscript snapshot are wolfram-tier or expensive, so they are
-declared unchecked rather than quietly skipped. Verified in all three states: a
-planted wrong figure exits `1` printing both values, an unparseable table exits
-`2`, clean exits `0`.
+`tools/check_verification_numbers.py` (pure tier) parses **§3, §4 and §5** and
+re-derives each claim from the tool named beside it. Of the **29 numeric rows**
+it checks **12** and **names the 17 it does not**, so they are declared unchecked
+rather than quietly skipped. Verified in all three states: a planted wrong figure
+exits `1` printing both values, an unparseable table exits `2`, clean exits `0`.
 
-It has already earned its place three times, and every one was a number in this
+It has already earned its place five times, and every one was a number in this
 very document:
 
 1. the stale `36 / 36` owner count, against a guard printing `40 / 40`;
@@ -109,11 +107,21 @@ very document:
    until corrected;
 3. **§4's lint debt read `176 / 47 / 47` against a measured `213 / 67 / 40`** —
    because the first version of the gate parsed only §3, leaving the page's own
-   *"where verification is thin"* table as the part with no verification on it.
+   *"where verification is thin"* table as the part with no verification on it;
+4. **the MUnit row read `69 / 69` against a manifest declaring `72`** — it was on
+   the unchecked list because *running* the suite needs a WolframKernel, and
+   nobody noticed that checking the *claim* needs only the tracked rollup;
+5. **§4's coverage-floor row read `2 of 61` against a floor file holding `6`** —
+   its producer had printed the pair on every run since the day it landed.
 
-The third is the instructive one. A gate whose scope is narrower than the
-document it guards will always leave a comfortable corner, and the corner it
-left was the table that admits weakness.
+The third is instructive about scope: a gate narrower than the document it guards
+always leaves a comfortable corner, and the corner it left was the table that
+admits weakness. **The fourth and fifth are instructive about something worse.**
+Both numbers were on the NOT-CHECKED list, and the list is not a neutral record
+of cost — it is a register of the numbers most likely to be wrong, because it is
+exactly the set nothing re-derives. Naming an unchecked number is honest but it
+is not protective, and the 17 still on that list should be read as *17 claims
+that have no evidence today*, not as 17 acceptable exceptions.
 
 Absent subproject virtualenvs report **UNKNOWN**, never a pass — the same
 three-state discipline as the glossary sync.
@@ -133,7 +141,7 @@ three-state discipline as the glossary sync.
 | **Mutation kill rate** | in progress | See §5. |
 | **Files implementing an owned concept without loading the owner** | **8 file-concept pairs across 7 files**, over a denominator of **409 scanned / 80 matched** | `tools/check_core_loading.py` (AUDIT04 Phase C), keyed on body fragments so a renamed copy is still caught, and verified by planting one mirror per concept under names chosen after the detector was written. The seven are `imp-pathinfo-paper/.../method_comparison.py`, `imp-prices/tests/test_gate_network.py`, four under `index-deconvolution/experiments/` and one under `experiments/r4_segmented_grammar/`. They are **UNKNOWN with no invented reason and no invented pin** — replication fidelity and dated experiment records are author decisions, not the guard's. The gate is therefore **red by design** and cannot join `make ci-local` until they are adjudicated. |
 | **An owned concept mirrored in a frozen archive producer** | `TSK-EXPER-005-NoiseRobustness.m`: **0 disagreements over 34 cases**, measured 2026-09-05 | **Accepted exposure, not a clean pass.** Its private `applyGate` agrees with the owner today at the arities used, and nothing keeps it agreeing: the archive policy forbids editing the file, so there is no pin. One latent condition is already visible — `"MAJORITY", Boole[Total[xs] >= 2]` hardcodes the arity-3 threshold, so at 5 inputs `{1,1,0,0,0}` returns 1 where the owner returns 0. Harmless while the file only uses arity 3; wrong the moment it does not. |
-| **Modules with a declared coverage floor** | **2 of 61** — 59 carry **no floor at all** | `tools/check_coverage_ratchet.py` (AUDIT04-P4f) enforces a global floor and a per-module floor together, because `fail_under` is global only and a global pass hides a module at 0 %. The ratchet is seeded at today's measurement (**global 5.69 %**), so it catches regression from day one while Phase B raises it tier by tier. Verified by planting: hiding the description-length tests drops that module to 58.67 % and fails BOTH floors; restoring returns it to green. The **59 unfloored modules are printed on every run** — the guard states the size of its own gap rather than reporting `2 measured`. |
+| **Modules with a declared coverage floor** | **6 of 61** — 55 carry no floor at all | `tools/check_coverage_ratchet.py` (AUDIT04-P4f) enforces a global floor and a per-module floor together, because `fail_under` is global only and a global pass hides a module at 0 %. The ratchet is seeded at the current measurement (global floor 9.18 %, measured 9.19 %), so it catches regression from day one while Phase B raises it tier by tier. Verified by planting: hiding the description-length tests drops that module to 0 % and fails BOTH floors; restoring returns it to green. The unfloored modules are printed on every run — the guard states the size of its own gap rather than reporting `6 measured`. **This row itself was stale (`2 of 61`) until AUDIT04 gated it**, which is the same failure it describes: a number with no producer drifts, and this page's own NOT-CHECKED list is where that happens. |
 | **Coverage that is not verification** | **3 of 4** parser modules with a declared floor have tests that **do not bite** | Measured by planting, 2026-09-05, one realistic defect per parser. `SBMLParser` **truncated to a single node** — all tests pass, because the contract asserts `len(result["nodes"]) >= 1`, a lower bound that cannot detect node loss. `GINMLParser` with **every edge dropped** — all tests pass, because the fixture contains no edges and `edges` is only checked for being a list. `LogicParser` with the **input bit ordering reversed** — all tests pass, because its fixtures are `AND` and `NOT`, symmetric and single-input respectively, so neither can see an ordering defect in an ordering-aware programme. Only `BNetParser` caught its plant. The floors are honest measurements of executed lines and **must not be read as verification**; Phase D exists to keep this visible. The same shape as the KOFN `d = 1` blind spot: a small symmetric fixture is blind to exactly the defects that matter. |
 | **GINML multi-valued nodes** | **582 / 5882 nodes (9.9 %)**, in **108 / 178 files**, of which **304** lose level rules | Binarised to the `val="1"` rule. No longer silent: `GINMLParser` records `node_max_values`, `is_multivalued` and `discarded_value_rules`, and warns once per file. Whether these models belong in a Boolean corpus at all is a scientific question, not a parsing one. |
 | **Bio regeneration, R4.2–R4.5, R5** | blocked, but **`917 / 5,204` = 17.6 %**, not the 76.4 % previously recorded | The aggregate `3,977 of 5,204` reproduces exactly, but **48.9 % of those nodes are derivable today** — 1,181 truth tables were built by evaluation and 762 are `y = x`. The genuine blocker splits cleanly by source: **510 multi-valued, all GINML** (the binarisation defect fixed in AUDIT03-C) and **407 free-threshold, all BioModels**. Two more findings were not being counted at all: 578 nodes absent from `gates`, and 294 whose formula names variables outside their own `inputs`. Producer and full decomposition: `audit/AUDIT04_corpus_diagnostic/`. `Q2.2` remains an unresolved measurement conflict. |

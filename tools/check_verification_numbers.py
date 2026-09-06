@@ -46,6 +46,14 @@ CHECKERS: dict[str, str] = {
     "index-deconvolution": "collect_deconv",
     "Owners named in": "core_index",
     "Test files classified": "test_manifest",
+    # AUDIT04: moved off the NOT CHECKED list. Running the suite needs a kernel;
+    # checking the CLAIM only needs the tracked rollup, and while it was unwatched
+    # it drifted to 69/69 against a manifest declaring 72.
+    "MUnit suite": "munit_rollup",
+    # AUDIT04: same lesson, same week. This row read "2 of 61" while the floor
+    # file held 6 entries. Its producer already printed the pair on every run;
+    # nothing was reading it.
+    "Modules with a declared coverage floor": "coverage_floors",
     "Replication packages": "collect_subprojects",
     # Section 4 rows. The lint debt was recorded as 176/47/47 and had drifted to
     # 213/67/40 unnoticed, because the first version of this gate parsed only
@@ -276,6 +284,57 @@ def test_manifest() -> tuple[list[int] | None, str]:
     if not m:
         return None, "UNKNOWN: check_test_manifest.sh printed no denominator"
     return [int(m.group(1)), int(m.group(2))], "check_test_manifest.sh"
+
+
+def coverage_floors() -> tuple[list[int] | None, str]:
+    """How many modules carry a declared coverage floor, out of the report total.
+
+    The ratchet has printed this pair on every run since it landed; the document
+    still said "2 of 61" once the floor file had grown to 6. Reading the guard's
+    own denominator line is the whole fix.
+
+    A missing or stale coverage.json makes the ratchet REFUSE, and that refusal
+    must read as UNKNOWN rather than as agreement -- a floor count taken from a
+    report that describes a tree which no longer exists is not a measurement.
+    """
+    rc, out = run([str(ROOT / "venv/bin/python"),
+                   str(ROOT / "tools/check_coverage_ratchet.py")], ROOT)
+    m = re.search(r"(\d+) modules in the report, (\d+) with a declared floor", out)
+    if not m:
+        return None, "UNKNOWN: check_coverage_ratchet.py printed no denominator"
+    return [int(m.group(2)), int(m.group(1))], "check_coverage_ratchet.py"
+
+
+def munit_rollup() -> tuple[list[int] | None, str]:
+    """The MUnit suite count, read from the TRACKED rollup artefact.
+
+    AUDIT04: this row was on the NOT CHECKED list because running the suite needs
+    a WolframKernel, and it went stale exactly as an unwatched number does -- the
+    page read 69/69 while the manifest had declared 72 since `61ca2f8`.
+
+    But the CLAIM does not need a kernel to check; only the RUN does. The rollup
+    is a tracked text file, so this reads it and check_test_manifest.sh separately
+    forces it to be a full run whose TOTAL equals the declared test count. The
+    two together mean a stale page and a stale rollup cannot agree with each
+    other by both being wrong.
+
+    A rollup with no SCOPE=all is UNKNOWN, not a pass: a partial run's TOTAL is
+    a real number measured over the wrong denominator, which is the failure mode
+    this whole page exists to make impossible.
+    """
+    rollup = ROOT / "results/tests/runall/Status.txt"
+    if not rollup.exists():
+        return None, "UNKNOWN: results/tests/runall/Status.txt is absent"
+    line = rollup.read_text(errors="ignore").splitlines()[0]
+    m = re.search(r"OK=(\d+)\s+FAIL=(\d+)\s+TOTAL=(\d+)", line)
+    if not m:
+        return None, f"UNKNOWN: rollup line is unparseable: {line!r}"
+    if "SCOPE=all" not in line:
+        return None, f"UNKNOWN: rollup is not a full run: {line!r}"
+    ok, fail, total = (int(m.group(i)) for i in (1, 2, 3))
+    if fail != 0:
+        return None, f"{FATAL} rollup records {fail} failing test(s): {line!r}"
+    return [ok, total], "results/tests/runall/Status.txt (SCOPE=all)"
 
 
 # ── the document side ───────────────────────────────────────────────────────
