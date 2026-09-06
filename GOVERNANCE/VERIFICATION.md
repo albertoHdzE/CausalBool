@@ -233,21 +233,46 @@ Design constraints, each earned from a defect already seen here:
 
 ### The result, 2026-09-05 — and why one rate is not enough
 
-The full run completed, `28/28` scored against `c9bc412`. Regenerate with
+Two runs, and the second is the one that matters. Regenerate with
 `venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py --report`, which
 refuses on an absent, empty or incomplete results file.
 
-| rate | value |
-|---|---|
-| **semantic kill rate** (headline; 3 reachability probes excluded) | **23/25 = 92.0%** |
-| **unit-test kill rate** (of those, caught by an MUnit or pytest test) | **19/25 = 76.0%** |
+| rate | value at `f2c2f77` | was, at `c9bc412` |
+|---|---|---|
+| **semantic kill rate** (headline; reachability probes excluded) | **30/30 = 100.0%** | 23/25 = 92.0% |
+| **unit-test kill rate** (of those, caught by an MUnit or pytest test) | **30/30 = 100.0%** | 19/25 = 76.0% |
 
-**The 16-point gap is the finding.** Four semantic mutants were killed *only* by
-a governance gate, with no unit test detecting them. A closure-gate kill means
-the programme notices; it does not mean the suite checks the answer, and a
-single `92%` would have merged those two claims.
+**READ THE DENOMINATOR BEFORE READING THE RATE.** The catalogue grew from 25
+semantic mutants to 30 because Phase A *added five*, for `deconvolution`, which
+previously had none at all. So `100%` is scored over a catalogue extended by the
+person who knew where the gaps were. That was the plan's instruction, not a
+liberty, but it makes the two columns not like-for-like and the honest
+comparison is the narrower one: **on the original 25, the unit-test rate moved
+19/25 -> 25/25.** Five mutants that no test could see now have tests that kill
+them, and the five new ones were killed on their first run.
 
-Three owners, named as the plan requires:
+**The 16-point gap was the finding, and it is closed.** Four semantic mutants
+were previously killed *only* by a governance gate, with no unit test detecting
+them; a closure-gate kill means the programme notices, not that the suite checks
+the answer. Every owner is now unit-killed and **no owner reads `NOT MEASURED`**.
+
+What `100%` does NOT mean: that the code is correct, or that the suite would
+catch a defect nobody thought to write as a mutant. It means every defect in
+this catalogue is caught by a test rather than by a gate. The catalogue is the
+measure, and it is 33 mutants over 8 owners — not the space of possible defects.
+
+| owner | killed | semantic | unit-killed |
+|---|---|---|---|
+| `Gates` | 11/11 | 11 | 11/11 |
+| `deconvolution` | 7/7 | 5 | 5/5 |
+| `description_lengths` | 5/5 | 4 | 4/4 |
+| `BioMetrics` | 3/3 | 3 | 3/3 |
+| `CausalBoolCore` | 3/3 | 3 | 3/3 |
+| `causalbool_paths` | 2/2 | 2 | 2/2 |
+| `IndexAlgebra` | 1/1 | 1 | 1/1 |
+| `NetworkIO` | 1/1 | 1 | 1/1 |
+
+The three owners the FIRST run named, and what closed each:
 
 - **`NetworkIO` — zero kills of any kind.** Its mutant makes the corpus loader
   read the classification **label** instead of the authoritative formula, and

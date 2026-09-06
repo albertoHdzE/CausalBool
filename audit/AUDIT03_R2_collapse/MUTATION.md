@@ -339,3 +339,56 @@ Test targets are now chosen from evidence rather than from file size. In order:
 3. `CausalBoolCore` — unit tests that do not depend on the parity gate running.
 4. `causalbool_paths` — the `py-paths-root` case: a start path under `tests/`.
 5. `BioMetrics` — a test pinning an **absolute** `C_formula` for `KOFN`.
+
+
+---
+
+## Run 2 — `f2c2f77`, 2026-09-05. Every hole closed.
+
+    KILL RATE: 33/33
+    SEMANTIC   30/30 = 100.0%      (was 23/25 = 92.0% at c9bc412)
+    UNIT-TEST  30/30 = 100.0%      (was 19/25 = 76.0%)
+    probes      3/3, excluded from both rates
+
+    BioMetrics 3/3 · CausalBoolCore 3/3 · Gates 11/11 · IndexAlgebra 1/1
+    NetworkIO 1/1 · causalbool_paths 2/2 · deconvolution 7/7 (5 semantic)
+    description_lengths 5/5 (4 semantic)
+
+### The denominator moved, and that must be said before the rate is
+
+The catalogue went 25 semantic -> 30 because Phase A **added five**, for
+`deconvolution`, which had none. A rate scored over a catalogue extended by the
+person who knew where the gaps were is not comparable to the one before it. The
+honest, like-for-like statement is:
+
+    on the ORIGINAL 25 semantic mutants, the unit-test rate moved 19/25 -> 25/25
+
+and the five new `deconvolution` mutants were killed on their first run.
+
+### What closed each of the three named owners
+
+| owner | before | what closed it |
+|---|---|---|
+| `NetworkIO` | zero kills of any kind | `TSK-ARCH-005-NetworkIOContract.m` — 8 hermetic assertions on `LoadJSONNetwork`, fixture built in-test so it asserts the loader's contract rather than the corpus contents |
+| `CausalBoolCore` | 3/3 by the parity gate, 0 by unit test | `TSK-ARCH-006-CausalBoolCoreContract.m` — needs no Python side, so the owner is defended even if parity is skipped or refuses |
+| `deconvolution` | **NOT MEASURED** (probes only) | 5 semantic mutants written first, then the tests; 5/5 killed |
+| `BioMetrics` (survivor) | `cformula-kofn` alive | `TSK-BIO-METRICS-002-AbsoluteKOFN.m` — pins an **absolute** description length; the d=1 blind spot documented in the suite |
+| `causalbool_paths` (survivor) | killed by `closure:wolfram` only | 7 tests in `test_causalbool_paths.py`; 0 -> 3 pytest kills |
+
+### Predictions, scored
+
+One registered prediction FAILED. `dec-reduce-index` was predicted to SURVIVE on
+the reasoning that it is inert whenever the essential set is contiguous from
+zero, and that fixtures would be small hand-built networks. It was KILLED by
+`test_exact_recovery_random_symmetric`, `test_exact_recovery_random_full` and
+`test_biological_networks_exact_recovery`, among others. Random and biological
+networks have holes in their support; hand-built ones do not. **The obvious way
+to write that fixture would have left the mutant alive and the gap invisible.**
+
+### What 100% does not mean
+
+That the code is correct, or that the suite would catch a defect nobody thought
+to write as a mutant. It means every defect **in this catalogue** is caught by a
+test rather than by a gate. The catalogue is the measure: 33 mutants, 8 owners.
+Phase D extends it to the newly covered modules, and the parser contract tests
+already show why that matters — three of four do not catch a planted defect.

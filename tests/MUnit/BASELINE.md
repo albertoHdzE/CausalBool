@@ -329,3 +329,19 @@ code are not results for this code.
 public function away, so a kill proves only that something imports it. They are
 reported separately and **excluded from the headline rate**, because folding
 trivially-killable mutants into a score is how a mutation number gets inflated.
+
+
+## Mutation result, run 2 — `f2c2f77`, 2026-09-05
+
+`33/33` killed. Semantic `30/30 = 100.0%`, unit-test `30/30 = 100.0%`, up from
+`23/25` and `19/25` at `c9bc412`. **No owner reads `NOT MEASURED`.**
+
+The catalogue grew 25 -> 30 semantic in the same phase, so the rates are not
+like-for-like; on the original 25 the unit-test rate moved `19/25 -> 25/25`.
+Full account, including one failed pre-registered prediction:
+`audit/AUDIT03_R2_collapse/MUTATION.md`.
+
+New tests that closed the gaps: `TSK-ARCH-005-NetworkIOContract.m`,
+`TSK-ARCH-006-CausalBoolCoreContract.m`,
+`TSK-BIO-METRICS-002-AbsoluteKOFN.m`, and 7 added to
+`tests/analysis/test_causalbool_paths.py`.

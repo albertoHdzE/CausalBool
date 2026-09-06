@@ -1,9 +1,9 @@
 {
   "head_sha": "f2c2f773562f8832240c43e56a630ddfdc7aa2ce",
-  "complete": false,
+  "complete": true,
   "n_selected": 33,
-  "n_scored": 10,
-  "n_killed": 10,
+  "n_scored": 33,
+  "n_killed": 33,
   "n_survived": 0,
   "n_not_applied": 0,
   "mutants": [
@@ -210,207 +210,296 @@
       "id": "gates-canalising-branch",
       "owner": "Gates",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:TSK-ALGO-004-ClosedFormSetAudit.m",
+        "munit:TSK-GATES-001-Tests.m",
+        "munit:TSK-GATES-014-CanalisingCoordTests.m",
+        "munit:TSK-MIXED-001-CanalisingExceptionTests.m",
+        "munit:VerificationSamples.m",
+        "closure:wolfram"
+      ],
+      "seconds": 505.5,
       "note": "CANALISING non-canalised branch becomes a constant 0 -- the AUDIT02/P1 defect, reintroduced"
     },
     {
       "id": "dl-drop-indegree",
       "owner": "BioMetrics",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:TSK-BIO-METRICS-001-Tests.m",
+        "munit:TSK-BIO-METRICS-002-AbsoluteKOFN.m",
+        "closure:wolfram"
+      ],
+      "seconds": 523.1,
       "note": "D_formula loses the log2(n+1) in-degree field -- the very field AUDIT03/R2b restored to make it decodable"
     },
     {
       "id": "dl-binomial-off",
       "owner": "BioMetrics",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:TSK-BIO-METRICS-001-Tests.m",
+        "munit:TSK-BIO-METRICS-002-AbsoluteKOFN.m",
+        "closure:pure",
+        "closure:wolfram"
+      ],
+      "seconds": 512.2,
       "note": "input-set field off by one inside the log"
     },
     {
       "id": "cformula-kofn",
       "owner": "BioMetrics",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:TSK-BIO-METRICS-002-AbsoluteKOFN.m"
+      ],
+      "seconds": 503.0,
       "note": "C_formula KOFN branch reverts to the drifted 1+d form found in two copies during the AUDIT03 collapse"
     },
     {
       "id": "phi-no-reverse",
       "owner": "IndexAlgebra",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:PatternQueryTests.m",
+        "munit:TSK-TEST-002-PropertyTests.m",
+        "closure:wolfram"
+      ],
+      "seconds": 508.1,
       "note": "Phi bit-reversal dropped: LSB/MSB ordering silently swapped"
     },
     {
       "id": "core-alloffsets",
       "owner": "CausalBoolCore",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:TSK-ARCH-006-CausalBoolCoreContract.m",
+        "FLAKE-IGNORED:TSK-THEORY-005-Tests.m",
+        "closure:wolfram"
+      ],
+      "seconds": 508.7,
       "note": "allOffsets drops one free coordinate: the offset family halves"
     },
     {
       "id": "core-composed-y5",
       "owner": "CausalBoolCore",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:TSK-ARCH-006-CausalBoolCoreContract.m",
+        "closure:wolfram"
+      ],
+      "seconds": 506.4,
       "note": "the composed 6-node update becomes the synchronous one -- differs on exactly 32 of 64 rows, measured in AUDIT03"
     },
     {
       "id": "core-applygate-default",
       "owner": "CausalBoolCore",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "FLAKE-IGNORED:PatternQueryTests.m",
+        "munit:TSK-ARCH-006-CausalBoolCoreContract.m",
+        "FLAKE-IGNORED:TSK-COMPARE-003-TE-MI.m",
+        "closure:wolfram"
+      ],
+      "seconds": 512.1,
       "note": "companion-code NOT becomes identity: readers reproducing the paper get a different engine"
     },
     {
       "id": "io-drop-logic",
       "owner": "NetworkIO",
       "tier": "wolfram",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "munit:TSK-ARCH-005-NetworkIOContract.m"
+      ],
+      "seconds": 524.2,
       "note": "corpus loader reads the classification LABEL instead of the authoritative formula -- the AUDIT02/H defect that two of five copies still carried"
     },
     {
       "id": "py-dl-gate-label",
       "owner": "description_lengths",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:tests/analysis",
+        "closure:pure",
+        "closure:wolfram"
+      ],
+      "seconds": 523.5,
       "note": "catalogue size off by one: eleven families priced, twelve used"
     },
     {
       "id": "py-dl-indegree",
       "owner": "description_lengths",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:tests/analysis",
+        "closure:wolfram"
+      ],
+      "seconds": 518.8,
       "note": "in-degree field cannot encode d=0; Kraft sum breaks"
     },
     {
       "id": "py-dl-comb",
       "owner": "description_lengths",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "FLAKE-IGNORED:TSK-MIXED-001-Tests.m",
+        "FLAKE-IGNORED:TSK-THEORY-001-Tests.m",
+        "pytest:tests/analysis",
+        "closure:wolfram"
+      ],
+      "seconds": 519.2,
       "note": "input-set field prices the wrong subset size"
     },
     {
       "id": "py-dl-kofn",
       "owner": "description_lengths",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "FLAKE-IGNORED:TSK-ALGO-002-LargeSample-Tests.m",
+        "FLAKE-IGNORED:TSK-MIXED-001-Comparison.m",
+        "pytest:tests/analysis",
+        "closure:wolfram"
+      ],
+      "seconds": 524.6,
       "note": "KOFN loses its strict-policy bit"
     },
     {
       "id": "py-dl-schema",
       "owner": "description_lengths",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "FLAKE-IGNORED:TSK-BIO-METRICS-001-Tests.m",
+        "FLAKE-IGNORED:TSK-GATES-001-Tests.m",
+        "pytest:tests/analysis",
+        "closure:pure",
+        "closure:wolfram"
+      ],
+      "seconds": 516.7,
       "note": "D_schema producer renamed away: the primary measure vanishes"
     },
     {
       "id": "py-paths-root",
       "owner": "causalbool_paths",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "FLAKE-IGNORED:TSK-ARCH-002-Tests.m",
+        "pytest:tests/analysis"
+      ],
+      "seconds": 511.0,
       "note": "repo-root detection loosened: matches the wrong ancestor"
     },
     {
       "id": "py-paths-figures",
       "owner": "causalbool_paths",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:tests/analysis"
+      ],
+      "seconds": 511.5,
       "note": "figures directory collapses onto the paper root"
     },
     {
       "id": "py-dnf-minimal",
       "owner": "deconvolution",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:tests/analysis",
+        "pytest:index-deconvolution",
+        "closure:pure",
+        "closure:wolfram"
+      ],
+      "seconds": 500.8,
       "note": "Quine-McCluskey owner renamed away"
     },
     {
       "id": "py-essential-vars",
       "owner": "deconvolution",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:tests/analysis",
+        "pytest:index-deconvolution",
+        "closure:pure",
+        "closure:wolfram"
+      ],
+      "seconds": 490.9,
       "note": "essential-variable detection removed"
     },
     {
       "id": "dec-essential-invert",
       "owner": "deconvolution",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:tests/analysis",
+        "pytest:index-deconvolution"
+      ],
+      "seconds": 499.0,
       "note": "sensitivity inverted: essential set becomes its complement"
     },
     {
       "id": "dec-essential-top",
       "owner": "deconvolution",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:tests/analysis",
+        "pytest:index-deconvolution",
+        "closure:wolfram"
+      ],
+      "seconds": 494.1,
       "note": "highest-indexed variable can never be found essential"
     },
     {
       "id": "dec-dnf-offset",
       "owner": "deconvolution",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:index-deconvolution",
+        "closure:wolfram"
+      ],
+      "seconds": 502.7,
       "note": "DNF covers the OFF-set: the clause set is the complement"
     },
     {
       "id": "dec-dnf-polarity",
       "owner": "deconvolution",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:index-deconvolution",
+        "closure:wolfram"
+      ],
+      "seconds": 498.1,
       "note": "activators and inhibitors swapped: every clause negated"
     },
     {
       "id": "dec-reduce-index",
       "owner": "deconvolution",
       "tier": "python",
-      "result": "",
-      "killed_by": [],
-      "seconds": 0.0,
+      "result": "KILLED",
+      "killed_by": [
+        "pytest:index-deconvolution"
+      ],
+      "seconds": 495.9,
       "note": "reduced table indexed by ORIGINAL bit position, not the reduced one: wrong whenever the essential set is not contiguous from zero"
     }
   ]
