@@ -111,6 +111,15 @@ status_path_for() {
   print -r -- "$REPO_DIR/${dir}/${fname}"
 }
 
+# AUDIT04-D: the sentinel lives beside the status file, so the same resolution
+# serves both and they cannot drift to different directories.
+done_path_for() {
+  local sp
+  sp=$(status_path_for "$1") || return 1
+  [[ -z "$sp" ]] && return 1
+  print -r -- "${sp:h}/Done.txt"
+}
+
 classify_status() {
   local sp="$1" first
   if [[ ! -f "$sp" ]]; then
@@ -126,6 +135,7 @@ classify_status() {
 
 OK=0; FAIL=0
 FAILED_NAMES=()
+CRASHED_NAMES=()
 for f in $FILTERED; do
   bn=$(basename "$f")
   # AUDIT03 — clear the status BEFORE running.
@@ -138,6 +148,9 @@ for f in $FILTERED; do
   # old one is gone first.
   sp_pre=$(status_path_for "$f")
   [[ -n "$sp_pre" && -f "$sp_pre" ]] && rm -f "$sp_pre"
+  # AUDIT04-D: the completion sentinel is cleared on the same principle.
+  done_pre=$(done_path_for "$f")
+  [[ -n "$done_pre" && -f "$done_pre" ]] && rm -f "$done_pre"
   if [[ -n "$TESTMODE" ]]; then
     perl -e 'alarm shift @ARGV; exec @ARGV or die "exec failed: $!"' "$TIMEOUT_SECS" "$KERNEL" -script "$f" mode="$TESTMODE"
   else
@@ -154,9 +167,37 @@ for f in $FILTERED; do
   else
     verdict="$(classify_status "$sp")"
   fi
-  if [[ "$verdict" == "PASS" && $rc -eq 0 ]]; then
+  # AUDIT04-D: three-way judgement, because a non-zero kernel exit was conflating
+  # two different events and blocking roughly one push in three.
+  #
+  # Measured 2026-09-06: 3 crashes in ~9 full-suite runs, on THREE DIFFERENT
+  # tests (TSK-ARCH-006, NANDTests, TSK-GATES-001), with and without competing
+  # load, each clean 3/3 standalone, and in every case the test had already
+  # written OK. The kernel dies at SHUTDOWN, after the verdict.
+  #
+  # A fresh verdict alone does not prove completion -- Status.txt is followed by
+  # further exports in most tests, so a kernel dying between them leaves a
+  # plausible OK beside incomplete artefacts. The sentinel does prove it: it is
+  # deleted before the run and written as the test's LAST expression, so its
+  # presence means every line above it evaluated.
+  #
+  # The sentinel is therefore REQUIRED in all cases, not only on a crash. That
+  # also closes the older AUDIT03 hole from the other side: a kernel that skips a
+  # malformed expression and exits 0 now fails here, where before it was scored
+  # by whatever status happened to be on disk.
+  dp=$(done_path_for "$f")
+  if [[ -z "$dp" || ! -f "$dp" ]]; then
+    FAIL=$((FAIL+1))
+    FAILED_NAMES+=("$bn")
+    echo "FAIL: $bn -> $verdict$kmsg [NO COMPLETION SENTINEL: the test did not reach its last line]"
+  elif [[ "$verdict" == "PASS" && $rc -eq 0 ]]; then
     OK=$((OK+1))
     echo "OK: $bn"
+  elif [[ "$verdict" == "PASS" && $rc -ne 0 ]]; then
+    # Verdict written, sentinel written, kernel died on the way out.
+    OK=$((OK+1))
+    CRASHED_NAMES+=("$bn (exit $rc)")
+    echo "OK: $bn  [KERNEL CRASHED AFTER COMPLETING, exit=$rc -- counted as a pass because the completion sentinel is present; recorded, not hidden]"
   else
     FAIL=$((FAIL+1))
     FAILED_NAMES+=("$bn")
@@ -184,6 +225,9 @@ else
 fi
 mkdir -p "$SUMMARY_DIR"
 echo "OK=$OK FAIL=$FAIL TOTAL=$((${#FILTERED[@]})) SCOPE=$SCOPE" | tee "$SUMMARY_DIR/Status.txt"
+if [[ ${#CRASHED_NAMES[@]} -gt 0 ]]; then
+  printf 'KERNEL CRASHED AFTER COMPLETING (counted as passes, sentinel present): %s\n' "${(j:, :)CRASHED_NAMES}" | tee -a "$SUMMARY_DIR/Status.txt"
+fi
 if [[ ${#FAILED_NAMES[@]} -gt 0 ]]; then
   printf 'TRUE DETAIL: FAILED=%s\n' "${(j:, :)FAILED_NAMES}" | tee -a "$SUMMARY_DIR/Status.txt"
 fi

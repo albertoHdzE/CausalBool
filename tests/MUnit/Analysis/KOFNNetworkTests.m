@@ -17,3 +17,13 @@ Export[FileNameJoin[{base, "IndexSetNetwork_n4_Ic2_4_empirical_k1.csv"}], empIdx
 Export[FileNameJoin[{base, "IndexSetNetwork_n4_Ic2_4_empirical_k2.csv"}], empIdxK2, "CSV"];
 Export[FileNameJoin[{base, "Status_network.txt"}], {If[okNet, "OK", "FAIL"], DateString[]}, "Text"];
 Association["Status" -> If[okNet, "OK", "FAIL"], "ResultsPath" -> base]
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

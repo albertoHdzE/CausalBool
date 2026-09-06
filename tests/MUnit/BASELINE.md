@@ -96,13 +96,15 @@ recursion, deduped.
 > artefact and **cannot be told apart from the artefact alone**. Two hypotheses,
 > one observation each; the record now says so.
 >
-> **The flake itself, measured rather than characterised:** `TSK-ARCH-006` is
-> **5 clean of 6 runs** — full suite 07:19 OK, full suite 07:36 **SIGSEGV under
-> concurrent load**, standalone ×3 OK, full suite 07:46 OK with nothing competing.
-> Nothing in the test is heavy (`Tuples[{0, 1}, 6]` is 64 rows), so this reads as
-> environmental rather than scientific, and it is recorded as OPEN, not explained.
-> It also means the suite is not reproducible under load, which is a property of
-> this repository that was not previously written down anywhere.
+> **The flake, after two wrong readings of my own — see the AUDIT04-D row.**
+> I first attributed it to `TSK-ARCH-006` on a single observation, then to
+> concurrent load. Both are withdrawn: `NANDTests.m` and `TSK-GATES-001` crashed
+> the same way afterwards, one of them with nothing else running. It is a kernel
+> **shutdown** crash landing on a random test in roughly one full-suite run in
+> three, and in every case the test had already written its verdict. Resolved by
+> a completion sentinel written as each test's last expression; the two-hypothesis
+> reading of (2) above still stands, because a crash and a planting leftover leave
+> the same artefact.
 >
 > Neither was found by a gate. Both are now gated: partial runs write
 > `results/tests/section-<S>/Status.txt` and every status line carries `SCOPE=`,
@@ -238,6 +240,7 @@ future run can be judged elementwise rather than against a stale total.
 
 | date | task | ledger after | change |
 |---|---|---|---|
+| 2026-09-06 | **AUDIT04-D** | **`OK=72 FAIL=0 TOTAL=72 SCOPE=all`** | **Ledger unchanged; the RULE that produces it changed.** The kernel was crashing with exit 139 on a random test in roughly one full-suite run in three — `TSK-ARCH-006`, `NANDTests.m` and `TSK-GATES-001` observed, each clean 3/3 standalone, with and without competing load, and **in every case the test had already written its verdict**. The runner failed the test, correctly, because it could not tell a shutdown crash from a mid-run one; the effect was that a third of pushes were refused and the documented escape was `--no-verify`. A fresh `Status.txt` is NOT sufficient evidence of completion, because further exports follow it in most tests. Every test therefore now writes a **completion sentinel as its final expression**, which the runner deletes before each run; its presence proves every line above it evaluated. The sentinel is required **regardless of exit code**, which also closes the AUDIT03 defect from the other side. Planted all three ways: death before the sentinel → FAIL; death after → OK with a loud notice recorded in the rollup; missing sentinel on exit 0 → FAIL. Evidence: `GOVERNANCE/VERIFICATION.md` §4 |
 | 2026-09-06 | **AUDIT04** | **`OK=72 FAIL=0 TOTAL=72 SCOPE=all`** | **The total moves to the count the manifest has declared since `61ca2f8`; the ledger, not the suite, was behind.** The three tests are Phase A's `TSK-ARCH-005`, `TSK-ARCH-006` and `TSK-BIO-METRICS-002`. No verdict was flipped and none retired. The disclosure is the *cause*: `run-tests.sh` wrote the tracked rollup on every invocation, so a `--section` run overwrote the whole-suite record, and no full run had regenerated it since Phase A began. That hid two things at once — `TOTAL=69` against a manifest of **72**, and `results/tests/arch6/Status.txt` committed reading **`FAIL`** while the rollup read `FAIL=0` (cause NOT settled: a planting leftover and a crash leave the same artefact, and `TSK-ARCH-006` has since been seen to SIGSEGV under load — **5 clean of 6 runs**, recorded OPEN). Both now gated in `tools/check_test_manifest.sh`, which was classification-only and now also requires `TOTAL ==` declared, `SCOPE=all`, and zero contradicting artefacts over **80 scanned**; all four defects planted, each red alone, green on restore. Every other changed key in the run is a timing or a date — no scientific value moved. Evidence: `GOVERNANCE/VERIFICATION.md` §4 |
 | 2026-09-02 | AUDIT02 (P4a–P8, dev R4/W0.3 test fixes) | `OK=53 FAIL=1 TOTAL=54` | three reds retired by the developer's own test fixes (`anaIdx_k1` parsed as `Pattern`; `Or`/`And` over integers staying symbolic; `$VersionString` not a builtin) plus new query-surface, analytic-vs-exhaustive and pattern-query suites |
 | 2026-09-02 | **AUDIT02/W0.2** | **`OK=54 FAIL=1 TOTAL=55`** | adds `Mixed/TSK-MIXED-001-CanalisingExceptionTests.m`, closing the last F36 exception (ORDERING §4). +1 OK, +1 TOTAL, no red moved |
