@@ -1,6 +1,5 @@
 """Contract test for SBMLParser (AUDIT04-P4g)."""
 
-import pytest
 from pathlib import Path
 from src.integration.SBMLParser import SBMLParser
 

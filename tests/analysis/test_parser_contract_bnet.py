@@ -1,6 +1,5 @@
 """Contract test for BNetParser (AUDIT04-P4g)."""
 
-import pytest
 from src.integration.BNetParser import BNetParser
 
 

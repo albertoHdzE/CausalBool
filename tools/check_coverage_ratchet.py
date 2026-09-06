@@ -100,9 +100,51 @@ def load_floors() -> tuple[float | None, dict[str, float]]:
     return None, {}
 
 
+def newest_source_mtime() -> float:
+    """The most recent modification time across the measured sources and tests."""
+    newest = 0.0
+    for root in ("src", "tests/analysis"):
+        for path in Path(root).rglob("*.py"):
+            newest = max(newest, path.stat().st_mtime)
+    return newest
+
+
+def coverage_is_stale() -> bool:
+    """A report older than the code it measures describes a tree that no longer
+    exists.
+
+    AUDIT04 review: this check did not exist, and it cost a false red within an
+    hour of the guard landing. A stale coverage.json left behind by an unrelated
+    run reported BNetParser at 82.93 % against its floor of 86.79 %; regenerating
+    gave exactly 86.79 %. A gate that reads a stale artefact reports a regression
+    that never happened, which is the fastest way to teach people to ignore it.
+    """
+    report = Path(COVERAGE_FILE)
+    return report.exists() and report.stat().st_mtime < newest_source_mtime()
+
+
+def module_percent(summary: dict) -> float:
+    """The module's coverage, read from the SAME field the floor file was seeded
+    from.
+
+    AUDIT04 review: the floors were seeded from coverage.json's own
+    `percent_covered` (BNetParser 86.79 %) while this guard recomputed
+    covered_lines / num_statements (82.93 %). Two definitions of one quantity,
+    so the floor was unmeetable the moment it was written and the gate was red
+    on a tree with no regression in it. One definition now, and it is the
+    reported one.
+    """
+    if "percent_covered" in summary:
+        return float(summary["percent_covered"])
+    total = summary.get("num_statements", 0)
+    return (summary.get("covered_lines", 0) / total * 100.0) if total > 0 else 0.0
+
+
 def load_coverage() -> dict:
     if not Path(COVERAGE_FILE).exists():
         return {}
+    if coverage_is_stale():
+        return {"__stale__": True}
     with open(COVERAGE_FILE, "r", encoding="utf-8", errors="ignore") as f:
         try:
             return json.load(f)
@@ -134,6 +176,12 @@ def main() -> int:
 
     # Must refuse if coverage report is missing (stale or never produced).
     coverage_data = load_coverage()
+    if coverage_data.get("__stale__"):
+        print("CHECK-COVERAGE-RATCHET: FAIL  coverage report is OLDER than the code "
+              "it measures — it describes a tree that no longer exists")
+        print("  regenerate: venv/bin/python -m pytest -q tests/analysis/ "
+              "--cov=src --cov-report=json")
+        return 1
     if not coverage_data or "files" not in coverage_data:
         print("CHECK-COVERAGE-RATCHET: FAIL  coverage report missing, stale, or measures zero modules")
         print(f"  expected: {COVERAGE_FILE}")
@@ -159,9 +207,7 @@ def main() -> int:
         pct = 0.0
         if file_path_in_coverage in files:
             summary = files[file_path_in_coverage].get("summary", {})
-            covered = summary.get("covered_lines", 0)
-            total = summary.get("num_statements", 0)
-            pct = (covered / total * 100.0) if total > 0 else 0.0
+            pct = module_percent(summary)
         else:
             # Try matching by basename or by stripping .py extension.
             basename = Path(file_path_in_coverage).name
@@ -169,10 +215,7 @@ def main() -> int:
                 f_basename = Path(f_path).name
                 # Try exact basename match or basename without extension.
                 if basename == f_basename or basename.replace(".py", "") == f_basename.replace(".py", ""):
-                    summary = info.get("summary", {})
-                    covered = summary.get("covered_lines", 0)
-                    total = summary.get("num_statements", 0)
-                    pct = (covered / total * 100.0) if total > 0 else 0.0
+                    pct = module_percent(info.get("summary", {}))
                     break
         measured_modules[file_path_in_coverage] = pct
         if pct < floor_val:

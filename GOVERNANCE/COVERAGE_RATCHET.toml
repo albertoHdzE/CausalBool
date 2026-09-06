@@ -1,19 +1,31 @@
-global_floor = 9.186536
+global_floor = 9.18
 # Measured from pure tier: source venv/bin/activate && python -m pytest -q tests/analysis/
 # --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
 # Includes 4 new contract tests for corpus parsers.
 # The floor RATCHES: it may rise, never fall. A module whose coverage drops
 # below its recorded floor is a regression (exit 1), even when global figure is fine.
 # Date: 2026-09-05.
+# AUDIT04 review: every floor here was seeded at full float precision
+# (98.0952380952381, 86.79245283018868, ...). A floor at that precision is a
+# TRIPWIRE, not a ratchet -- it fires on jitter nobody can act on. All floored
+# DOWN to two decimals, which still catches a real regression.
+#
+# WHAT A FLOOR HERE DOES NOT MEAN. Three of the four parser floors rest on
+# tests that DO NOT BITE, measured by planting on 2026-09-05:
+#   SBMLParser   truncated to a single node   -> all tests still pass
+#   GINMLParser  every edge dropped           -> all tests still pass
+#   LogicParser  input bit ordering reversed  -> all tests still pass
+#   BNetParser   last node dropped            -> CAUGHT
+# The coverage is real; the verification is not. See VERIFICATION.md section 4.
 # Verified by planting (captured in commit message):
 #   Skip DL tests -> RED (description_lengths measured: 0.00%, below floor 98.10%).
 #   Restore full suite -> GREEN (description_lengths measured: 98.10%, above floor).
 #   Raise global floor to aspirational 99.99% with module broken -> RED.
 
 [module_floors]
-"src/causalbool_paths.py" = 100.0
-"src/description_lengths.py" = 98.0952380952381
-"src/integration/BNetParser.py" = 86.79245283018868
-"src/integration/GINMLParser.py" = 49.523809523809526
-"src/integration/LogicParser.py" = 43.506493506493506
-"src/integration/SBMLParser.py" = 43.93939393939394
+"src/causalbool_paths.py" = 100.00
+"src/description_lengths.py" = 98.09
+"src/integration/BNetParser.py" = 86.79
+"src/integration/GINMLParser.py" = 49.52
+"src/integration/LogicParser.py" = 43.50
+"src/integration/SBMLParser.py" = 43.93

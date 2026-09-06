@@ -1,6 +1,5 @@
 """Contract test for LogicParser (AUDIT04-P4g)."""
 
-import pytest
 import numpy as np
 from src.integration.LogicParser import LogicParser
 
