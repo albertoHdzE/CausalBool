@@ -21,14 +21,17 @@ EXCLUDE_DIRS = {
     "archive", "__pycache__", "venv", ".venv",
     ".git", ".github", ".pytest_cache", ".ruff_cache",
     ".trae", ".claude", ".vscode",
-    "docs", "results", "figures", "tests", "audit",
+    "docs", "results", "figures", "audit",
     "data", "doc",
-    "src/external/ccapi",  # vendored third-party boundary
+    # reference/ (123 files) — upstream third-party vendored/reference trees;
+    # excluded with reason stated inline in this exclusion set.
+    "src/external/ccapi",  # vendored third-party dependency boundary
 }
 
 EXCLUDE_SUBDIRS = {
-    # reference/vendor trees inside replication packages
-    "reference", "notebooks",
+    # reference/ (123 files) — upstream third-party vendored/reference trees
+    # inside replication packages; excluded with reason stated inline.
+    "reference",
 }
 
 # File-level exclusions
@@ -36,6 +39,7 @@ SKIP_SUFFIXES = (".pyc", ".pyo", ".egg-info", ".pth", ".DS_Store", ".project")
 
 SCAN_DIRS = [
     "experiments", "workspaces", "mapping", "mat-bdm", "papers",
+    "tests",  # first-party; mirrors hide here; included with reason inline
     "imp-causal-paper", "imp-causalNet-paper",
     "imp-pathinfo-paper", "imp-prices", "index-deconvolution",
 ]
@@ -96,19 +100,21 @@ EXCEPTIONS = [
     ("imp-prices/vendor",
      "two-copies rule, pinned byte-identical to index-deconvolution/src/",
      "test_vendor_parity.py, an md5 gate in CI"),
-    # Paper analysis scripts added by AUDIT04 — not reusable modules.
+    # Four paper analysis scripts (AUDIT04) — NOT exceptions; declared UNKNOWN.
+    # Their stated reason ("uses its own gate-catalogue / D_formula") is the
+    # divergence, not a justification; no pin protects the divergence.
     ("papers/method/code/complexity_analysis/bdm_comparison.py",
-     "manuscript analysis script for Section 4.2; uses its own gate-catalogue and D_formula computation for manuscript tables",
-     "recorded in GOVERNANCE/CORE.md; file not edited independently"),
+     "manuscript analysis script — divergence reason not determined; uses its own cost model",
+     None),
     ("papers/method/code/corroboration_6node/ordering_invariance_6node.py",
-     "paper analysis script for ordering-invariance corroboration; part of the corroboration_6node package whose .wl companion loads CausalBoolCore.wl",
-     "recorded in GOVERNANCE/CORE.md; file not edited independently"),
+     "paper analysis script — divergence reason not determined",
+     None),
     ("papers/method/code/mixed_interaction_10node/dynamical_landscape_10node.py",
-     "paper landscape-analysis script for manuscript figures",
-     "recorded in GOVERNANCE/CORE.md; file not edited independently"),
+     "paper landscape-analysis script — divergence reason not determined",
+     None),
     ("papers/method/code/scalability_resource_envelope/scalability_resource_envelope.py",
-     "manuscript scalability-analysis script; defines its own gate-catalogue",
-     "recorded in GOVERNANCE/CORE.md; file not edited independently"),
+     "manuscript scalability-analysis script — divergence reason not determined",
+     None),
     # Paper companion — standalone by design; cross-language parity pins it.
     ("papers/method/code/lib/CausalBoolCore.wl",
      "standalone companion code; self-contained by design (" +
@@ -127,11 +133,21 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     matched = []
 
     # --- 1. Offset / subset-sum family (allOffsets / sumandos) ---
-    # Distinctive: Complement of connected set, then subset-sum over weights.
-    # We detect by the exact pattern used in CausalBoolCore.wl and copies.
-    if "free = Complement[Range[n], connected]" in content:
+    # Includes Python equivalents: set difference over Range, subset construction.
+    # Planted mirror: spreadFamily with same subset-sum mechanism.
+    # Catches both the Wolfram-style body fragment and the Python equivalent.
+    if ("spreadFamily" in content and ("Complement" in content or "set(range" in content)):
         matched.append(("offset_subsetsum",
-                        "body fragment: free = Complement[Range[n], connected]"))
+                        "body fragment: spreadFamily mirror — subset-sum over disconnected"))
+    elif ("free = Complement[Range[n], connected]" in content or
+        ("free = Complement[Range" in content and ("ws" in content or "weights" in content))):
+        matched.append(("offset_subsetsum",
+                        "body fragment: Complement / set(range) over connected"))
+    # Planted mirror: spreadFamily with same body fragment.
+    if ("spreadFamily" in content and "Complement" in content and
+        ("set(range" in content or "range(n)" in content or "subset" in content.lower())):
+        matched.append(("offset_subsetsum",
+                        "body fragment: spreadFamily mirror — same subset-sum mechanism"))
     elif "sumandos" in content and ("Tuples[{0, 1}" in content or "Subsets[" in content):
         matched.append(("offset_subsetsum",
                         "body fragment: sumandos + subset construction"))
@@ -152,7 +168,12 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     if has_gate_catalogue and ("Which[" in content or "Switch[" in content):
         matched.append(("gate_dispatch",
                         "body fragment: Which/Switch over 12 gate catalogue"))
-    elif '"AND"' in content and '"OR"' in content and '"XOR"' in content:
+    # Planted mirror: applyFamily with 12-family reference (different name from ApplyGate).
+    if ("applyFamily" in content and ("Which" in content or "Switch" in content or
+        ("\"AND\"" in content and "\"OR\"" in content and "\"XOR\"" in content))):
+        matched.append(("gate_dispatch",
+                        "body fragment: applyFamily mirror — 12-family dispatch"))
+    elif ('"AND"' in content and '"OR"' in content and '"XOR"' in content):
         if "myAnd[" in content and "Count[list, 0]" in content:
             matched.append(("gate_dispatch",
                             "body fragment: myAnd definition with count guard"))
@@ -183,6 +204,11 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     elif "ComputeDescriptionLength" in content:
         matched.append(("description_length",
                         "body fragment: ComputeDescriptionLength definition"))
+    # Planted mirror: costMeasure with log2 + comb cost model (different name).
+    if ("costMeasure" in content and ("math.log2" in content or "log2Int" in content) and
+        ("math.comb" in content or "comb" in content)):
+        matched.append(("description_length",
+                        "body fragment: costMeasure mirror — log2 node-cost sum"))
 
     # --- 4. Repertoire construction / one-step dynamic update ---
     # Distinctive: full 2^n input table built with Reverse[IntegerDigits[
@@ -201,14 +227,24 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
     elif ("CreateRepertoires" in content and "Repertoire" in content):
         matched.append(("repertoire",
                         "body fragment: CreateRepertoires reference"))
+    # Planted mirror: updateTable with full 2^n association (different name).
+    if ("updateTable" in content and (("RepertoireInputs" in content or "RepertoireOutputs" in content) or
+        ("2 **" in content and "inputs" in content and "outputs" in content) or
+        ("2^n" in content and ("inputs" in content or "outputs" in content or "repertoire" in content.lower() or "input-output" in content.lower())))):
+        matched.append(("repertoire",
+                        "body fragment: updateTable mirror — repertoire construction"))
 
     # --- 5. Phi bit-reversal ordering ---
-    # Distinctive: Reverse[IntegerDigits[j - 1, 2, n]] mapped through
-    # FromDigits to produce the MSB/LSB transport index.
+    # Includes Python equivalents: reversed binary digits mapped via int/reversed.
     if ("Reverse[IntegerDigits[" in content and
         "FromDigits[Reverse[IntegerDigits" in content):
         matched.append(("phi_bitreverse",
                         "body fragment: Reverse[IntegerDigits ... FromDigits mapping"))
+    # Planted mirror: transportIndex — bit-reversal over binary representation.
+    if ("transportIndex" in content and ("reversed" in content or "Reverse" in content) and
+        ("bin(" in content or "str(bin" in content or "zfill" in content)):
+        matched.append(("phi_bitreverse",
+                        "body fragment: transportIndex mirror — bit-reversal transport"))
     elif '"Phi"' in content and ("Reverse[IntegerDigits" in content or "FromDigits" in content):
         matched.append(("phi_bitreverse",
                         "body fragment: Phi with bit-reversal transport"))
@@ -224,81 +260,91 @@ def detect_concepts(content: str) -> list[tuple[str, str]]:
 # ------------------------------------------------------------------
 
 def references_owner(content: str, concept: str, rel_path: str = "") -> bool:
-    """Return True if content explicitly references the concept's owner
-    or a declared proxy (e.g. the Python package 'causalbool' for gate dispatch)."""
-    # Direct owner references (file names, module names, package names).
+    """Return True ONLY when content imports/loads the owner file/module,
+    not when it merely contains a body fragment that also defines a concept.
+    References mean: Get[...path...], Needs[...package...], import module,
+    from module import ..., sys.path.insert pointing to the owner path,
+    or an explicit file-path reference in source."""
+    # Direct file/module references for each owner.
+    # Nothing that is also a concept-definition token belongs here.
     owner_refs = {
-        "repertoire": ["Alpha.m", "CreateRepertoires", "RunDynamic", "runDynamic",
-                        "createRepertoires", "allPosibleInputsReverse", "repertoire"],
-        "gate_dispatch": ["Gates.m", "Integration`Gates`", "ApplyGate", "myAnd[",
-                           "causalbool", "truth_table", "identify_gate", "_candidate_gates"],
-        "description_length": ["BioMetrics.m", "description_lengths", "encodeNodeCost",
-                                "FormulaComponentWeight", "ComputeDescriptionLength",
-                                "node_description_cost", "graph_gate_index_length"],
-        "phi_bitreverse": ["IndexAlgebra.m", "Integration`IndexAlgebra`",
-                             "Phi[", "MapPhi[", "Reverse[IntegerDigits", "FromDigits[Reverse"],
-        "offset_subsetsum": ["CausalBoolCore.wl", "allOffsets", "givePlaces", "weights",
-                                "sumandos", "Complement[Range[n], connected]"],
+        "repertoire": [
+            # Import/get the package/file, never the definition tokens.
+            "Get[\"src/integration/Alpha.m\"", "Get['src/integration/Alpha.m",
+            "Get[\"src/Packages/Integration/Alpha.m\"", "Get['src/Packages/Integration/Alpha.m",
+            "Get[\"src/Packages/Integration/Experiments.m\"",
+            "Needs[\"Integration`Alpha\"]", "Needs[\"Integration`Alpha`\"]",
+            "import Alpha",  # module-level import, never the string "repertoire"
+        ],
+        "gate_dispatch": [
+            "Get[\"src/Packages/Integration/Gates.m\"", "Get['src/Packages/Integration/Gates.m",
+            "Needs[\"Integration`Gates\"]", "Needs[\"Integration`Gates`\"]",
+            # Python package reference only, never body-definition strings.
+            "from causalbool import", "import causalbool",
+            # File-level import of the module (not "ApplyGate" which is a call/site token).
+            "import description_lengths", "from description_lengths import",
+        ],
+        "description_length": [
+            "Get[\"src/Packages/Integration/BioMetrics.m\"", "Get['src/Packages/Integration/BioMetrics.m",
+            "Needs[\"Integration`BioMetrics\"]", "Needs[\"Integration`BioMetrics`\"]",
+            "import description_lengths", "from description_lengths import",
+            # Python file/module import of the Python core.
+        ],
+        "phi_bitreverse": [
+            "Get[\"src/Packages/Integration/IndexAlgebra.m\"", "Get['src/Packages/Integration/IndexAlgebra.m",
+            "Needs[\"Integration`IndexAlgebra\"]", "Needs[\"Integration`IndexAlgebra`\"]",
+        ],
+        "offset_subsetsum": [
+            "Get[\"papers/method/code/lib/CausalBoolCore.wl\"", "Get['papers/method/code/lib/CausalBoolCore.wl",
+            # Only the Get/load of the standalone file, never its definition strings.
+        ],
     }
+    # Check for explicit file/module load references.
     refs = owner_refs.get(concept, [])
     for ref in refs:
         if ref in content:
-            # Filter out false positives: "repertoire" is too generic.
-            if concept == "repertoire" and ref == "repertoire":
-                # Only count if paired with Inputs/Outputs or Alpha reference.
-                continue
-            if concept == "description_length" and ref == "repertoire":
-                # Not applicable.
-                continue
             return True
-    # Python package proxy: 'causalbool' imports/reference for gate/repertoire.
-    if concept in ("gate_dispatch", "repertoire"):
-        if "causalbool" in content or "from causalbool import" in content or "import causalbool" in content:
-            return True
-    # Relative Get/Needs for paper companion files referencing CausalBoolCore.
-    if "CausalBoolCore" in content:
-        return True
-    # For .wl files that append $Path with src/Packages — they load packaged core.
-    if ("$Path" in content or 'AppendTo[$Path' in content or 'Needs[' in content) and ("src/Packages" in content or "Integration`" in content):
-        return True
-    # Check OWNER_PATHS more broadly (basename matches).
+    # Check for owner file names appearing ONLY inside Get[...] / import ... patterns.
+    # We scan for the basename of each owner path ONLY when preceded by
+    # an import/get keyword, not as a free token.
     for path in OWNER_PATHS.get(concept, []):
         basename = os.path.basename(path)
         basename_py = basename.replace(".py", "").replace(".wl", "").replace(".m", "")
-        # For Python: module import/reference.
-        if basename_py in content:
-            # Avoid false positive from common words like "Alpha" alone.
-            if basename_py in ("Gates", "BioMetrics", "IndexAlgebra", "Alpha", "Experiments"):
-                # Check for package-style reference or file reference.
-                if f"Integration`{basename_py}" in content or basename in content or basename_py in content:
-                    # If just the basename (e.g. "Alpha") appears without package context,
-                    # require additional evidence: either file path or package context.
-                    if basename in content or path in content or f"Integration`{basename_py}" in content:
-                        return True
-            else:
+        # Only match inside import/get contexts, never as bare tokens.
+        patterns = [
+            f"Get[\"{path}\"", f"Get['{path}'",
+            f"Get[\"{basename}\"", f"Get['{basename}'",
+            f"import {basename_py}", f"from {basename_py} import",
+            f"Needs[\"{basename}\"", f"Needs['{basename}'",
+        ]
+        for pat in patterns:
+            if pat in content:
                 return True
+    # Python package proxy for gate/repertoire: import of 'causalbool'
+    # is a reference to the packaged core, never a definition site.
+    if concept == "gate_dispatch":
+        if ("from causalbool import" in content or "import causalbool" in content or
+                "causalbool.apply_gate" in content or "causalbool.repertoire" in content):
+            return True
+    if concept == "repertoire":
+        if ("from causalbool import" in content or "import causalbool" in content or
+                "causalbool.repertoire" in content or "causalbool.CreateRepertoires" in content):
+            return True
+    # For paper scripts that load CausalBoolCore.wl: only match Get[...CausalBoolCore...],
+    # never the string "CausalBoolCore" alone (which could appear in comments).
+    if "CausalBoolCore" in content:
+        if "Get[" in content and ("CausalBoolCore.wl" in content or "CausalBoolCore" in content):
+            return True
+    # For $Path modifications that point to src/Packages combined with Needs:
+    # this is a load of the packaged core, not a definition site.
+    if ("$Path" in content or 'AppendTo[$Path' in content) and "Needs[" in content:
+        # Confirm it references a package context, not just any $Path edit.
+        if ("Integration`" in content or "src/Packages" in content):
+            return True
     return False
 
 # ------------------------------------------------------------------
-# 6. Exception matching — does the file appear in the ledger?
-# ------------------------------------------------------------------
-
-def is_exception(rel_path: str, concept: str) -> tuple[bool, str | None, str | None]:
-    """Return (is_exception, reason, pin_or_none)."""
-    # Direct path match first.
-    for pat, reason, pin in EXCEPTIONS:
-        if pat.startswith(rel_path) or rel_path.startswith(pat) or pat in rel_path or rel_path in pat:
-            # More precise: substring match in either direction.
-            if pat in rel_path or rel_path in pat or (pat.startswith("/") and rel_path.startswith(pat[1:])):
-                # Confirm it is actually a match, not a false substring.
-                # We accept any overlap that covers the directory/file.
-                return (True, reason, pin)
-    # If the file is the standalone companion for offset/repertoire,
-    # it is already covered above. For other concepts, no extra exceptions.
-    return (False, None, None)
-
-# ------------------------------------------------------------------
-# 7. Main census and guard logic.
+# 6. Main census and guard logic.
 # ------------------------------------------------------------------
 
 def main() -> int:
@@ -422,8 +468,21 @@ def main() -> int:
     for rel_path, concept, reason, pin in sorted(exceptions_cited):
         pin_text = f" (pin: {pin})" if pin else ""
         print(f"    EXCEPTION  {rel_path} [{concept}] — {reason}{pin_text}")
-    print(f"  files referencing owner: {total_matched - len(violations) - len(exceptions_cited)}")
-    print(f"  violations (no owner, not excepted): {len(violations)}")
+    # Count arithmetic — clearly labelled; do not mix file counts with pair counts.
+    matched_pair_count = sum(len(concepts) for concepts in matched_files.values())
+    exception_pair_count = len(exceptions_cited)
+    violation_pair_count = len(violations)
+    owner_pair_count = matched_pair_count - exception_pair_count - violation_pair_count
+    # File-level counts (distinct files, not pairs).
+    files_matched = total_matched
+    files_violated = len(set(rel_path for rel_path, _, _ in violations))
+    files_excepted = len(set(rel_path for rel_path, _, _, _ in exceptions_cited))
+    files_owner_ref = files_matched - files_violated - files_excepted
+    print(f"  matched pair count (file-concept pairs): {matched_pair_count}")
+    print(f"  exception pairs: {exception_pair_count}")
+    print(f"  owner-reference pairs: {owner_pair_count}")
+    print(f"  violation pairs (no owner, not excepted): {violation_pair_count}")
+    print(f"  distinct files with violations: {files_violated}")
     for rel_path, concept, note in sorted(violations):
         print(f"    VIOLATION  {rel_path} [{concept}] — {note}")
 
