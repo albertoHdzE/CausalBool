@@ -100,50 +100,28 @@ OWNER_PATHS = {
 
 EXCEPTIONS = [
     # Pre-existing declared exceptions (§5)
-    # AUDIT04-D, found the moment src/ entered the scan. MEASURED, not assumed,
-    # and recorded as UNKNOWN because the resolution is an architectural decision
-    # for the author rather than a fact the guard can settle.
+    # AUDIT04-D. src/ entered the scan and produced three findings. All three
+    # were MEASURED first, and the measurements decided what happened:
     #
-    #   src/integration/LogicParser.py [gate_dispatch]
-    #     _standard_gate_outputs vs the owner: 0 disagreements of 180 rows.
-    #     Zero is drift, so this wants collapsing -- but there is NO Python gate
-    #     owner inside src/. The only `def apply_gate` under src/ is in
-    #     bio_D_experiment.py, an experiment module that is not a declared owner.
-    #     The Python owner is index-deconvolution/src/causalbool.py, and the
-    #     precedent for src/ importing it exists in a DECLARED owner already:
-    #     src/description_lengths.py imports minimal_dnf from
-    #     index-deconvolution/src/deconvolution.py, with the reason written out.
-    #     Extending that precedent is the author's call, not the guard's.
+    #   bio_D_experiment.encode_node_cost     0 of 180 -> drift, COLLAPSED onto
+    #                                         src/description_lengths.py
+    #   LogicParser._standard_gate_outputs    0 of 180 -> drift, COLLAPSED onto
+    #                                         index-deconvolution/src/causalbool.py
+    #   phase_transition_experiment.step     27 of 124 -> TWO CONCEPTS. AND, OR
+    #     and XOR agreed exactly and are delegated; the 27 were all the gate this
+    #     module called "CANALISING", which hard-codes "the first input decides"
+    #     against an owner taking canalisingIndex/Value/Output. Renamed
+    #     FIRST_INPUT_DOMINATES, behaviour-preserving (verified 0 disagreements
+    #     over 640 evaluations, which matters because its figures live in the
+    #     doc/newIntPaper archive and must not move).
     #
-    #   src/integration/bio_D_experiment.py [description_length]
-    #     encode_node_cost vs src/description_lengths.node_description_cost:
-    #     0 disagreements of 180 (n, degree, gate) cases. Pure drift, and nothing
-    #     guarded it -- the AUDIT03/R3.1 note in that same file records that it
-    #     HAS drifted before, when the in-degree field was missing and every
-    #     DeltaD was a difference of two invalid lengths.
-    #     Its [gate_dispatch] and [repertoire] flags are NOT yet measured.
+    # The cross-package import that made the second and third possible is an
+    # author decision of 2026-09-06, extending the precedent already set inside
+    # a DECLARED owner: src/description_lengths.py imports minimal_dnf from
+    # index-deconvolution/src/deconvolution.py.
     #
-    #   src/integration/phase_transition_experiment.py [gate_dispatch]
-    #     step() vs the owner: 27 disagreements of 124 cases. ALL of them are
-    #     CANALISING -- AND, OR and XOR agree exactly. The private version is
-    #     self-describedly a "simplified canalising" (first input decides),
-    #     whereas the owner takes canalisingIndex, canalisingValue and
-    #     canalisedOutput. Non-zero disagreement means TWO CONCEPTS, so this one
-    #     must be renamed or given the owner's parameters, never silently
-    #     collapsed. It also carries an `else: res = 0` fallback, the silent zero
-    #     AUDIT02/P1 recorded as indistinguishable from a legitimate FALSE.
-    ("src/integration/LogicParser.py",
-     "0 of 180 disagreements with the owner; collapsing needs a declared Python "
-     "gate owner reachable from src/, which is an architectural decision",
-     None),
-    ("src/integration/bio_D_experiment.py",
-     "encode_node_cost measured 0 of 180 against src/description_lengths.py; "
-     "gate_dispatch and repertoire not yet measured",
-     None),
-    ("src/integration/phase_transition_experiment.py",
-     "27 of 124 disagreements, all CANALISING: a different function, not drift; "
-     "two concepts need two names",
-     None),
+    # All three are pinned by tests/analysis/test_src_owner_delegation.py, so
+    # none is an exception any more and none is listed here.
     # AUDIT04-D. The pin above is itself flagged, and correctly: it writes the
     # parameter payload out independently instead of importing it. That is the
     # SAME adjudication as the MUnit phi tests -- a test validating an owner must
@@ -595,8 +573,14 @@ def references_owner(content: str, concept: str, rel_path: str = "") -> bool:
             "Needs[\"Integration`Gates\"]", "Needs[\"Integration`Gates`\"]",
             # Python package reference only, never body-definition strings.
             "from causalbool import", "import causalbool",
-            # File-level import of the module (not "ApplyGate" which is a call/site token).
-            "import description_lengths", "from description_lengths import",
+            # AUDIT04-D: `import description_lengths` used to be listed here.
+            # That is the DESCRIPTION-LENGTH owner, not the gate owner, so any
+            # file importing it was credited with reaching a concept it had not
+            # touched. It hid a real mirror within minutes of being exercised:
+            # collapsing bio_D_experiment's cost function onto
+            # src/description_lengths.py silently cleared that same file's
+            # gate_dispatch flag, which was still a private 12-family catalogue.
+            # A cross-concept credit is not a reference.
         ],
         "description_length": [
             "Get[\"src/Packages/Integration/BioMetrics.m\"", "Get['src/Packages/Integration/BioMetrics.m",

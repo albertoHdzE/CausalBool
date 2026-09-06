@@ -1,4 +1,4 @@
-global_floor = 11.05
+global_floor = 12.63
 # Measured from pure tier: source venv/bin/activate && python -m pytest -q tests/analysis/
 # --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
 # Includes 4 new contract tests for corpus parsers.
@@ -36,10 +36,31 @@ global_floor = 11.05
 #   Skip DL tests -> RED (description_lengths measured: 0.00%, below floor).
 #   Restore full suite -> GREEN. Aspirational global floor 99.99% -> RED.
 
+# ONE FLOOR WENT DOWN, AND THAT IS DECLARED RATHER THAN ABSORBED (AUDIT04-D).
+# src/integration/LogicParser.py: 77.92 -> 75.67. It is NOT a regression, and
+# the absolute figures are why:
+#
+#            statements  covered  missing  percent
+#   before          114       93       21    77.92
+#   after           116       94       22    75.67
+#
+# COVERED LINES WENT UP, 93 -> 94. The module gained two statements when its
+# private six-family catalogue was collapsed onto the owner, one of them the
+# `raise FileNotFoundError` guard in the owner accessor, which is unreachable in
+# a normal checkout. The percentage fell because the DENOMINATOR grew.
+#
+# The design point this exposes: a PERCENTAGE floor is not refactor-invariant, so
+# a ratchet built on it can be lowered by an improvement and raised by deleting
+# tested code. A covered-statement floor would be invariant under both. That is
+# recorded as an open weakness of this file rather than fixed here, because
+# changing the ratchet's unit is a governance change, not a tidy-up.
+
 [module_floors]
 "src/causalbool_paths.py" = 100.00
 "src/description_lengths.py" = 98.09
 "src/integration/BNetParser.py" = 86.79
 "src/integration/GINMLParser.py" = 84.76
-"src/integration/LogicParser.py" = 77.92
+"src/integration/LogicParser.py" = 75.67
 "src/integration/SBMLParser.py" = 57.19
+"src/integration/bio_D_experiment.py" = 12.86
+"src/integration/phase_transition_experiment.py" = 43.70

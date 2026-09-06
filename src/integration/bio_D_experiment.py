@@ -3,17 +3,30 @@ import re
 import math
 import random
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 
-try:
-    from integration.BDM_Wrapper import BDMWrapper
-except ModuleNotFoundError:
-    src_dir = Path(__file__).resolve().parents[1]
-    if str(src_dir) not in sys.path:
-        sys.path.append(str(src_dir))
-    from integration.BDM_Wrapper import BDMWrapper
+# AUDIT04-D: src/ is placed on sys.path here once, and BOTH the BDM wrapper and
+# the description-length owner are reached through it. A second path insertion
+# for the owner would be a second way to find one thing.
+_SRC_DIR = Path(__file__).resolve().parents[1]
+if str(_SRC_DIR) not in sys.path:
+    sys.path.append(str(_SRC_DIR))
+
+from integration.BDM_Wrapper import BDMWrapper
+
+
+@lru_cache(maxsize=1)
+def _gate_owner():
+    """The declared Python owner of gate semantics (author decision 2026-09-06)."""
+    _idsrc = _SRC_DIR.parent / "index-deconvolution" / "src"
+    if str(_idsrc) not in sys.path:
+        sys.path.insert(0, str(_idsrc))
+    import causalbool
+
+    return causalbool
 
 
 GATE_LABELS = [
@@ -39,47 +52,26 @@ def log2_int(x: int) -> float:
 
 
 def encode_node_cost(cm_row, gate: str, n: int) -> float:
-    """Per-node description length in bits, in the declared node language
+    """Per-node description length in bits, delegated to the declared owner.
 
-        (gate type, in-degree, input set, gate parameters)
+    AUDIT04-D. This used to carry its own copy of the cost model. Measured
+    elementwise against ``src/description_lengths.node_description_cost`` before
+    anything moved: **0 disagreements over 180 (n, degree, gate) cases**. Zero is
+    drift, not a second concept, so it is collapsed rather than declared.
 
-    read in that order.  Each field is a uniform index into an alphabet whose
-    size is fixed by the fields already read, so the code is sequentially
-    decodable and its Kraft sum over the whole description space is exactly 1.
+    Nothing was guarding it, and that is not hypothetical. The AUDIT03/R3.1 note
+    this docstring replaces records that the copy HAD drifted before: the
+    ``log2(n + 1)`` in-degree field was absent, so a decoder could not know how
+    wide the input-set field was, the Kraft sum was ``n + 1`` rather than 1, and
+    every DeltaD built from it was a difference of two invalid lengths. It was
+    corrected by hand then, and nothing would have caught it happening again.
 
-    AUDIT03/R3.1 (2026-09-03): the in-degree field ``log2(n + 1)`` was absent
-    here.  Without it a decoder cannot know how wide the input-set field is, nor
-    read it as an index into the d-subsets of [n]; the Kraft sum is then n + 1,
-    so the quantity was not a description length at all and every DeltaD built
-    from it was a difference of two invalid lengths.  Restored to match
-    papers/method/code/complexity_analysis/complexity_analysis.py, which is the
-    authority (it is the field that superseded D_formula = 101.07 by 135.66).
-    Proof and cross-implementation check:
-    audit/AUDIT03_R3_description_length/verify_description_length.py.
+    The signature keeps ``cm_row`` because callers pass a connectivity row; the
+    owner takes the degree, which is that row's sum.
     """
-    d = int(sum(cm_row))
-    k = len(GATE_LABELS)
-    cost = 0.0
-    cost += log2_int(k)
-    cost += log2_int(n + 1)                     # in-degree d, required for decodability
-    if 0 <= d <= n:
-        binom = math.comb(n, d)
-    else:
-        binom = 1
-    cost += log2_int(max(1, binom))
-    if gate == "KOFN":
-        cost += log2_int(d + 1) + 1.0
-    elif gate == "CANALISING":
-        cost += log2_int(n) + 2.0
-    elif gate == "IMPLIES" or gate == "NIMPLIES":
-        cost += log2_int(max(1, d * (d - 1)))
-    elif gate == "NOT":
-        cost += log2_int(max(1, d))
-    elif gate in ("MAJORITY", "XOR", "XNOR"):
-        cost += 1.0
-    else:
-        cost += 1.0
-    return cost
+    from description_lengths import node_description_cost
+
+    return node_description_cost(n, int(sum(cm_row)), gate)
 
 
 def compute_description_length(cm, dynamic):
@@ -350,58 +342,34 @@ def evaluate_logic(expr: str, state: dict):
 
 
 def apply_gate(gate: str, inputs, params):
-    if gate == "INPUT":
-        return inputs[0] if len(inputs) > 0 else 0
-    if gate == "IDENTITY":
-        return inputs[0] if len(inputs) > 0 else 0
-    if gate == "NOT":
-        return 0 if inputs[0] == 1 else 1
-    if gate == "AND":
-        return 1 if all(inputs) else 0
-    if gate == "OR":
-        return 1 if any(inputs) else 0
-    # AUDIT02/P8: the remaining six canonical families were MISSING and fell
-    # through to "return 0" silently. Transcribed from
-    # src/Packages/Integration/Gates.m:8-35, the canonical engine.
-    if gate == "NAND":
-        return 0 if all(inputs) else 1
-    if gate == "NOR":
-        return 0 if any(inputs) else 1
-    if gate == "XOR":
-        return sum(inputs) % 2
-    if gate == "XNOR":
-        return 1 - (sum(inputs) % 2)
-    if gate == "IMPLIES":
-        return 1 if (inputs[0] == 0 or inputs[1] == 1) else 0
-    if gate == "NIMPLIES":
-        return 1 if (inputs[0] == 1 and inputs[1] == 0) else 0
-    if gate == "MAJORITY":
-        d = len(inputs)
-        at_or_above = params.get("tiePolicy", "strict") == "atOrAbove"
-        threshold = -(-d // 2) if at_or_above else d // 2 + 1
-        return 1 if inputs.count(1) >= threshold else 0
-    if gate == "KOFN":
-        k = params.get("k", 1)
-        if params.get("strict", False):
-            return 1 if inputs.count(1) > k else 0
-        return 1 if inputs.count(1) >= k else 0
-    if gate == "CANALISING":
-        # AUDIT02/P8: two divergences from Gates.m myCanalising, both corrected.
-        #   canalisedOutput defaulted to 1 here and to 0 in the engine;
-        #   the non-canalised branch excluded the canalising index, whereas the
-        #   engine is myOr over ALL inputs.
-        idx = params.get("canalisingIndex", 1) - 1
-        val = params.get("canalisingValue", 1)
-        out = params.get("canalisedOutput", 0)
-        if 0 <= idx < len(inputs) and inputs[idx] == val:
-            return out
-        return 1 if any(inputs) else 0
-    # AUDIT02/P8: fail loudly. "return 0" here silently fabricated a value for
-    # every unrecognised label, CUSTOM above all.
-    raise ValueError(
-        f"apply_gate: unsupported gate {gate!r}. CUSTOM nodes carry their Boolean "
-        f"formula in the network's 'logic' field and must be evaluated from it."
-    )
+    """Evaluate a gate. The twelve families are delegated to the owner.
+
+    AUDIT04-D. This carried its own copy of the twelve-family catalogue.
+    Measured elementwise against ``index-deconvolution/src/causalbool.apply_gate``
+    before anything moved: **0 disagreements over 168 (gate, input) cases**.
+    Zero is drift, so the twelve are delegated rather than declared.
+
+    It was the only ``def apply_gate`` under ``src/`` -- an experiment module
+    serving as the de facto gate owner for the whole source tree, with nothing
+    guarding it. It was briefly INVISIBLE to the guard as well: crediting this
+    file for importing ``description_lengths`` cleared its gate flag, because the
+    ledger listed the description-length owner among the gate owner's references.
+    That cross-concept credit is now removed.
+
+    INPUT and IDENTITY are NOT delegated and are not gate families. They are
+    corpus sentinels meaning "this node holds its value", particular to the
+    biological networks this module reads, and the owner has no such notion.
+    Keeping only what is particular here is the rule; inventing them in the owner
+    would put a corpus artefact into the gate catalogue.
+    """
+    if gate in ("INPUT", "IDENTITY"):
+        if not inputs:
+            # AUDIT02/P1: the caller already handles the empty case by holding
+            # the node's value, so reaching here means the caller changed. A
+            # silent 0 would be indistinguishable from a legitimate FALSE.
+            raise ValueError(f"{gate} with no inputs must be resolved by the caller")
+        return inputs[0]
+    return int(_gate_owner().apply_gate(gate, list(inputs), params or {}))
 
 
 def generate_repertoire_for_network(net):

@@ -1,7 +1,36 @@
 import re
+import sys
+from functools import lru_cache
+from pathlib import Path
 from typing import List, Dict, Any
 
 import numpy as np
+
+
+@lru_cache(maxsize=1)
+def _gate_owner():
+    """The declared Python owner of gate semantics.
+
+    AUDIT04-D. There is no gate dispatcher inside ``src/``: the only
+    ``def apply_gate`` under it lived in an experiment module that is not a
+    declared owner. The owner is ``index-deconvolution/src/causalbool.py``, the
+    Python forward model proven equal to ``CausalBoolCore.wl`` on 45/45 cases.
+
+    The precedent for ``src/`` reaching it was already set inside a DECLARED
+    owner: ``src/description_lengths.py`` imports ``minimal_dnf`` from
+    ``index-deconvolution/src/deconvolution.py``, with the reason written out --
+    "a second copy of that routine is precisely the defect AUDIT03/R2 exists to
+    remove". Author decision, 2026-09-06, extends that to the gate catalogue.
+    """
+    root = Path(__file__).resolve().parents[2]
+    src = root / "index-deconvolution" / "src"
+    if not src.is_dir():
+        raise FileNotFoundError(f"expected the root index-set sources at {src}")
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+    import causalbool
+
+    return causalbool
 
 
 class LogicParser:
@@ -199,20 +228,25 @@ class LogicParser:
 
     @staticmethod
     def _standard_gate_outputs(name: str, inputs: np.ndarray) -> np.ndarray:
-        x = inputs.astype(int)
-        if name == "AND":
-            return np.all(x == 1, axis=1).astype(int)
-        if name == "OR":
-            return np.any(x == 1, axis=1).astype(int)
-        if name == "XOR":
-            return (np.sum(x == 1, axis=1) % 2).astype(int)
-        if name == "NAND":
-            return 1 - LogicParser._standard_gate_outputs("AND", x)
-        if name == "NOR":
-            return 1 - LogicParser._standard_gate_outputs("OR", x)
-        if name == "XNOR":
-            return 1 - LogicParser._standard_gate_outputs("XOR", x)
-        raise ValueError(f"Unsupported standard gate '{name}'.")
+        """Reference outputs for a gate family, taken from the declared owner.
+
+        AUDIT04-D. This carried its own six-family catalogue. Measured
+        elementwise against the owner before anything moved: **0 disagreements
+        over 180 rows** across arities 1 to 4 and all six families. Zero is
+        drift, not a second concept, so it is collapsed.
+
+        Why the reference may come from the owner without circularity: the
+        truth table being classified is produced by EVALUATING A RULE STRING,
+        and the reference is produced by the gate semantics. Those are two
+        independent sources, so comparing them is a real test rather than
+        ``owner === owner``.
+        """
+        causalbool = _gate_owner()
+        x = np.asarray(inputs).astype(int)
+        return np.array(
+            [causalbool.apply_gate(name, [int(b) for b in row], {}) for row in x],
+            dtype=int,
+        )
 
 
 __all__ = ["LogicParser"]

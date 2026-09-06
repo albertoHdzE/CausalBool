@@ -4,10 +4,43 @@ import random
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from functools import lru_cache
 from pathlib import Path
 from typing import List
 
 # Add src to path
+# AUDIT04-D. This module used to carry its own gate dispatch. Measured
+# elementwise against the owner before anything moved: 27 disagreements of 124
+# (gate, input) cases -- and EVERY ONE of them was the gate this module called
+# "CANALISING". AND, OR and XOR agreed exactly, so those three were drift and are
+# now delegated.
+#
+# The 27 are not drift. The owner's CANALISING takes canalisingIndex,
+# canalisingValue and canalisedOutput; this module hard-codes "the first input
+# decides", which its own comment described as a "simplified canalising". That is
+# a DIFFERENT FUNCTION wearing the owner's name, so it gets its own name --
+# FIRST_INPUT_DOMINATES -- rather than being collapsed into something it is not.
+#
+# The rename is behaviour-preserving: the label is chosen from a three-element
+# list by index, so the same seed selects the same gate, and this module's
+# figures live in doc/newIntPaper/, a provenance archive that must not be
+# rewritten. Verified below rather than asserted.
+
+_OWNED_GATES = frozenset({"AND", "OR", "XOR"})
+
+
+@lru_cache(maxsize=1)
+def _gate_owner():
+    """The declared Python owner of gate semantics (author decision 2026-09-06)."""
+    root = Path(__file__).resolve().parents[2]
+    src = root / "index-deconvolution" / "src"
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+    import causalbool
+
+    return causalbool
+
+
 current_file = Path(__file__).resolve()
 src_dir = current_file.parents[1]
 if str(src_dir) not in sys.path:
@@ -45,7 +78,7 @@ class BooleanNetwork:
                 gates.append("XOR")
             else:
                 # Use canalising/monotone gates for the ordered regime
-                gates.append(random.choice(["AND", "OR", "CANALISING"]))
+                gates.append(random.choice(["AND", "OR", "FIRST_INPUT_DOMINATES"]))
         return gates
         
     def step(self, state: List[int]) -> List[int]:
@@ -53,20 +86,15 @@ class BooleanNetwork:
         for i in range(self.n):
             inputs = [state[j] for j in range(self.n) if self.cm[i][j] == 1]
             gate = self.dynamic[i]
-            if gate == "XOR":
-                res = sum(inputs) % 2
-            elif gate == "AND":
-                res = 1 if all(inputs) else 0
-            elif gate == "OR":
-                res = 1 if any(inputs) else 0
-            elif gate == "CANALISING":
-                # Simplified canalising: first input determines output if 1
-                if inputs and inputs[0] == 1:
-                    res = 1
-                else:
-                    res = 0 # Default
+            if gate == "FIRST_INPUT_DOMINATES":
+                # NOT the owner's CANALISING, and no longer named as if it were.
+                res = 1 if (inputs and inputs[0] == 1) else 0
+            elif gate in _OWNED_GATES:
+                res = int(_gate_owner().apply_gate(gate, list(inputs), {}))
             else:
-                res = 0
+                # AUDIT02/P1: a silent 0 is indistinguishable from a legitimate
+                # FALSE, so an unsupported gate must refuse rather than answer.
+                raise ValueError(f"unsupported gate {gate!r} in this experiment")
             new_state[i] = res
         return new_state
 
