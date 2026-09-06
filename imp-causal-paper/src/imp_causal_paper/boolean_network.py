@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
 from typing import Callable
 
 import networkx as nx
@@ -10,14 +13,55 @@ import pandas as pd
 BooleanRule = Callable[[np.ndarray], int]
 
 
+@lru_cache(maxsize=1)
+def _root_forward_model():
+    """Import the root project's index-set forward model.
+
+    AUDIT04-D (root repository). This module used to carry its own gate
+    semantics. Measured elementwise against the owner before anything moved:
+    the transition map agreed on 72 of 72 rows, and the gate dispatch on 92 of
+    93 (gate, input) cases. The single disagreement was the EMPTY input set,
+    where this module returned 0 and the owner returns 1 -- the empty
+    conjunction is vacuously true.
+
+    Zero disagreement is drift, not a second concept, so the copy is collapsed
+    onto the owner rather than declared. The one disagreement was a defect, not
+    a deliberate divergence: ``if values.size else 0`` returned 0 for EVERY
+    empty fold, and happened to be right for ``or`` and ``xor`` only because
+    their identity element is also 0. It would have been wrong for NAND and NOR
+    (identity 1) the moment either was added.
+
+    The case is live rather than theoretical. Of the 855 perturbed networks the
+    experiment scripts build by removing edges, 80 (9.4 per cent) contain a node
+    left with no inputs, and ``and`` is in the operator sweep.
+    """
+    src = Path(__file__).resolve().parents[3] / 'index-deconvolution' / 'src'
+    if not src.is_dir():
+        raise FileNotFoundError(f'expected the root index-set sources at {src}')
+    if str(src) not in sys.path:
+        sys.path.insert(0, str(src))
+    import causalbool  # noqa: E402
+
+    return causalbool
+
+
+#: The root owner's family name for each operator this module exposes.
+_GATE_NAMES = {"and": "AND", "or": "OR", "xor": "XOR"}
+
+
 def boolean_operator(name: str) -> BooleanRule:
-    if name == "and":
-        return lambda values: int(np.all(values)) if values.size else 0
-    if name == "or":
-        return lambda values: int(np.any(values)) if values.size else 0
-    if name == "xor":
-        return lambda values: int(np.bitwise_xor.reduce(values)) if values.size else 0
-    raise ValueError("name must be one of: and, or, xor")
+    """Return the gate as a callable, dispatched by the ROOT owner.
+
+    The three families keep their lowercase names here because the scripts and
+    figures are keyed on them; only the semantics are delegated.
+    """
+    if name not in _GATE_NAMES:
+        raise ValueError("name must be one of: and, or, xor")
+    gate = _GATE_NAMES[name]
+    causalbool = _root_forward_model()
+    return lambda values: int(
+        causalbool.apply_gate(gate, [int(v) for v in np.asarray(values).ravel()], {})
+    )
 
 
 @dataclass

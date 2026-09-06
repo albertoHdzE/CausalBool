@@ -79,6 +79,18 @@ run_pure() {
   # that merely imported them changed the process it ran in.
   run_member pure "import safety (no module does work when imported)" \
     venv/bin/python tools/check_import_safety.py
+  # AUDIT04-D: joins the closure only now that it is green AND its matches mean
+  # something. It was red by design while 8 accusations awaited adjudication,
+  # and 7 of those turned out to be its own false positives -- a guard admitted
+  # on the strength of an unmeasured detector would have put a number on a page.
+  # It ships a control corpus that runs before every scan and exits 2 rather
+  # than emit a count it cannot stand behind.
+  run_member pure "core loading (every file implementing an owned concept reaches its owner)" \
+    venv/bin/python tools/check_core_loading.py
+  # AUDIT04-D: the ratchet guards a floor that RISES and never falls, per module
+  # and globally. It needs a fresh coverage.json and refuses on a stale one.
+  run_member pure "coverage ratchet (per-module and global floors; refuses on a stale report)" \
+    venv/bin/python tools/check_coverage_ratchet.py
 }
 
 # ── WOLFRAM TIER — needs a licensed local kernel; NOT run by CI ──────────────
