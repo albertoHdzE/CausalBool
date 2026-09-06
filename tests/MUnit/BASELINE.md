@@ -85,9 +85,24 @@ recursion, deduped.
 >    tests were uncounted and the number still looked like a pass;
 > 2. `results/tests/arch6/Status.txt` was committed reading **`FAIL`** while the
 >    same rollup read `FAIL=0`. `f2c2f77`'s message states *"OK on restore"*, and
->    this run confirms the test does pass — so the **claim was true and the
->    artefact was the one left behind by the last planted mutant**, committed in
->    place of the restored run.
+>    the test does pass on a clean run.
+>
+> **The first published reading of (2) was over-confident and is withdrawn.** It
+> said the artefact "was the one left behind by the last planted mutant". That is
+> still the likelier explanation, but it is not the only one: on the very next
+> full run `TSK-ARCH-006` took the kernel down with **exit 139 (SIGSEGV)** while
+> other jobs were running, writing `OK` and then crashing. A crash leaves whatever
+> was last written, so a stale `FAIL` and a planting leftover produce the same
+> artefact and **cannot be told apart from the artefact alone**. Two hypotheses,
+> one observation each; the record now says so.
+>
+> **The flake itself, measured rather than characterised:** `TSK-ARCH-006` is
+> **5 clean of 6 runs** — full suite 07:19 OK, full suite 07:36 **SIGSEGV under
+> concurrent load**, standalone ×3 OK, full suite 07:46 OK with nothing competing.
+> Nothing in the test is heavy (`Tuples[{0, 1}, 6]` is 64 rows), so this reads as
+> environmental rather than scientific, and it is recorded as OPEN, not explained.
+> It also means the suite is not reproducible under load, which is a property of
+> this repository that was not previously written down anywhere.
 >
 > Neither was found by a gate. Both are now gated: partial runs write
 > `results/tests/section-<S>/Status.txt` and every status line carries `SCOPE=`,
@@ -223,7 +238,7 @@ future run can be judged elementwise rather than against a stale total.
 
 | date | task | ledger after | change |
 |---|---|---|---|
-| 2026-09-06 | **AUDIT04** | **`OK=72 FAIL=0 TOTAL=72 SCOPE=all`** | **The total moves to the count the manifest has declared since `61ca2f8`; the ledger, not the suite, was behind.** The three tests are Phase A's `TSK-ARCH-005`, `TSK-ARCH-006` and `TSK-BIO-METRICS-002`. No verdict was flipped and none retired. The disclosure is the *cause*: `run-tests.sh` wrote the tracked rollup on every invocation, so a `--section` run overwrote the whole-suite record, and no full run had regenerated it since Phase A began. That hid two things at once — `TOTAL=69` against a manifest of **72**, and `results/tests/arch6/Status.txt` committed reading **`FAIL`** while the rollup read `FAIL=0` (a planted-mutant artefact committed in place of the restored run; `f2c2f77`'s "OK on restore" was true, and this run confirms it). Both now gated in `tools/check_test_manifest.sh`, which was classification-only and now also requires `TOTAL ==` declared, `SCOPE=all`, and zero contradicting artefacts over **80 scanned**; all four defects planted, each red alone, green on restore. Every other changed key in the run is a timing or a date — no scientific value moved. Evidence: `GOVERNANCE/VERIFICATION.md` §4 |
+| 2026-09-06 | **AUDIT04** | **`OK=72 FAIL=0 TOTAL=72 SCOPE=all`** | **The total moves to the count the manifest has declared since `61ca2f8`; the ledger, not the suite, was behind.** The three tests are Phase A's `TSK-ARCH-005`, `TSK-ARCH-006` and `TSK-BIO-METRICS-002`. No verdict was flipped and none retired. The disclosure is the *cause*: `run-tests.sh` wrote the tracked rollup on every invocation, so a `--section` run overwrote the whole-suite record, and no full run had regenerated it since Phase A began. That hid two things at once — `TOTAL=69` against a manifest of **72**, and `results/tests/arch6/Status.txt` committed reading **`FAIL`** while the rollup read `FAIL=0` (cause NOT settled: a planting leftover and a crash leave the same artefact, and `TSK-ARCH-006` has since been seen to SIGSEGV under load — **5 clean of 6 runs**, recorded OPEN). Both now gated in `tools/check_test_manifest.sh`, which was classification-only and now also requires `TOTAL ==` declared, `SCOPE=all`, and zero contradicting artefacts over **80 scanned**; all four defects planted, each red alone, green on restore. Every other changed key in the run is a timing or a date — no scientific value moved. Evidence: `GOVERNANCE/VERIFICATION.md` §4 |
 | 2026-09-02 | AUDIT02 (P4a–P8, dev R4/W0.3 test fixes) | `OK=53 FAIL=1 TOTAL=54` | three reds retired by the developer's own test fixes (`anaIdx_k1` parsed as `Pattern`; `Or`/`And` over integers staying symbolic; `$VersionString` not a builtin) plus new query-surface, analytic-vs-exhaustive and pattern-query suites |
 | 2026-09-02 | **AUDIT02/W0.2** | **`OK=54 FAIL=1 TOTAL=55`** | adds `Mixed/TSK-MIXED-001-CanalisingExceptionTests.m`, closing the last F36 exception (ORDERING §4). +1 OK, +1 TOTAL, no red moved |
 | 2026-09-03 | **AUDIT03/R3.1** | **`OK=54 FAIL=1 TOTAL=55`** | ledger totals unchanged; one pinned *value* moves. `BioMetrics.m encodeNodeCost` now charges the `log2(n+1)` in-degree field, without which the per-node code has Kraft sum `n+1` and is not decodable. `Analysis/TSK-BIO-METRICS-001` expectation 28.509775004326936 → 37.79748738387639, a delta of exactly `4·log2 5`. The test went red on the old value before it was updated, which is the evidence that it is live. Proof, four-way parity over 572 cells, and both negative controls: `audit/AUDIT03_R3_description_length/FINDING.md` |
