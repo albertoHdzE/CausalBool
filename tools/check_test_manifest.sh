@@ -151,6 +151,43 @@ fi
 # must be three views of one state.
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+# AUDIT04-E — the RUNNER'S SELECTION, checked without running the suite.
+#
+# When the manifest became bilingual, run-tests.sh kept taking every entry of
+# kind `test` and fed 24 Python files to the WolframKernel: OK=72 FAIL=24
+# TOTAL=96. The pre-push hook refused, so the gate worked -- but the only thing
+# that could contradict the runner was a ROLLUP, and a rollup costs a 40-minute
+# suite run. That is far too slow to be the first line of defence.
+#
+# `run-tests.sh --list` prints the selection and executes nothing, so the
+# comparison costs a second. It asks the RUNNER rather than re-deriving the
+# filter here, because a second copy of the selection rule would agree with the
+# first only until one of them changed.
+# ------------------------------------------------------------------
+RUNNER="tests/MUnit/run-tests.sh"
+if [[ ! -f "$RUNNER" ]]; then
+  echo "TEST-MANIFEST: FAIL  the runner $RUNNER is missing"
+  STATUS=1
+else
+  sel=$(zsh "$RUNNER" --all --list 2>/dev/null | sort)
+  n_sel=$(printf '%s\n' "$sel" | grep -c . || true)
+  n_sel_py=$(printf '%s\n' "$sel" | grep -c '\.py$' || true)
+  if [[ "$n_sel" -eq 0 ]]; then
+    echo "TEST-MANIFEST: FAIL  the runner selected 0 files. A run over zero tests is not a pass."
+    STATUS=1
+  elif [[ "$n_sel_py" -gt 0 ]]; then
+    echo "TEST-MANIFEST: FAIL  the WOLFRAM runner selected ${n_sel_py} Python file(s)."
+    echo "  The manifest is bilingual; each runner must take only what it can execute."
+    STATUS=1
+  elif [[ "$n_sel" -ne "$n_test_m" ]]; then
+    echo "TEST-MANIFEST: FAIL  the runner would run ${n_sel} files, the manifest declares ${n_test_m} Wolfram tests"
+    STATUS=1
+  else
+    echo "TEST-MANIFEST: runner selection agrees — ${n_sel} Wolfram files, 0 Python"
+  fi
+fi
+
 ROLLUP="results/tests/runall/Status.txt"
 if [[ ! -f "$ROLLUP" ]]; then
   echo "TEST-MANIFEST: FAIL  the rollup $ROLLUP is missing"

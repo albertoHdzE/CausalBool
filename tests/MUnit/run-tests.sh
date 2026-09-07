@@ -13,6 +13,7 @@ GATE=""
 MODE="all"
 TESTMODE=""
 TIMEOUT_SECS=900
+LIST_ONLY=0
 while (( "$#" )); do
   case "$1" in
     --section)
@@ -25,6 +26,15 @@ while (( "$#" )); do
       TESTMODE="$2"; shift 2;;
     --timeout)
       TIMEOUT_SECS="$2"; shift 2;;
+    # AUDIT04-E: print the selection and exit, executing nothing.
+    #
+    # The bilingual-manifest defect reached a push because the only thing that
+    # could contradict the runner's selection was a rollup, and a rollup costs a
+    # 40-minute suite run. tools/check_test_manifest.sh calls this instead, so
+    # the SELECTION is checked against the manifest in under a second, by asking
+    # the runner rather than by re-implementing its filter in a second place.
+    --list)
+      LIST_ONLY=1; shift;;
     *)
       shift;;
   esac
@@ -64,6 +74,19 @@ TEST_FILES=()
 while IFS=$'\t' read -r kind entry _rest; do
   [[ -z "$kind" || "$kind" == \#* ]] && continue
   [[ "$kind" != "test" ]] && continue
+  # AUDIT04-E: THIS RUNNER IS THE WOLFRAM RUNNER, so it takes the Wolfram half
+  # of the manifest and nothing else.
+  #
+  # The manifest became bilingual on 2026-09-07, and this loop did not. It fed
+  # 24 Python files to the WolframKernel, which reported `Syntax::sntx: Invalid
+  # syntax` on each and scored them FAIL -- OK=72 FAIL=24 TOTAL=96. The pre-push
+  # hook refused the push, which is the gate working: the defect was caught by
+  # the tier CI cannot run, exactly where it was supposed to be caught.
+  #
+  # The Python half is run by pytest, whose membership comes from the same
+  # manifest via the root conftest.py. One declaration, two runners, and each
+  # runner takes only what it can execute.
+  [[ "$entry" != *.m ]] && continue
   [[ -n "$SECTION" && "$entry" != tests/MUnit/"$SECTION"/* ]] && continue
   TEST_FILES+="$REPO_DIR/$entry"
 done < "$MANIFEST"
@@ -86,6 +109,15 @@ for f in $TEST_FILES; do
   fi
   FILTERED+="$f"
 done
+# AUDIT04-E: --list reports the SELECTION and executes nothing. Placed after
+# FILTERED so it reports what would actually run, not an earlier approximation.
+if [[ "$LIST_ONLY" -eq 1 ]]; then
+  for f in $FILTERED; do
+    print -r -- "${f#$REPO_DIR/}"
+  done
+  echo "SELECTED=${#FILTERED[@]}" >&2
+  exit 0
+fi
 if [[ ${#FILTERED[@]} -eq 0 ]]; then
   echo "NO_TESTS"; exit 1
 fi
