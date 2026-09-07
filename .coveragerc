@@ -1,19 +1,25 @@
-# Coverage settings for the DECLARED PYTHON OWNERS (GOVERNANCE/CORE.md §3).
+# Coverage settings for src/ (AUDIT04 Phase B).
 #
-# Scope is deliberately the owners, not the whole tree: a repository-wide
-# percentage averaged over 370 files -- scrapers, one-off analyses, frozen
-# workspaces -- would be a number that moves for reasons nobody cares about and
-# hides the one that matters.
+# WAS: `source` listed the two declared Python owners only
+# (description_lengths, causalbool_paths). The reasoning given was that a
+# repository-wide percentage would move for reasons nobody cares about. That
+# reasoning was sound about the WHOLE TREE and wrong about src/: scoping to two
+# files out of 52 meant the gate could read 99% while 42 modules sat at exactly
+# 0%, which is the comfortable-denominator failure this audit keeps removing.
+#
+# Scope is now src/ -- the code this repository owns -- and the floor is per
+# module as well as global, so a single module losing its tests cannot hide
+# behind an average.
 
 [run]
 branch = True
-# NOTE: these are IMPORT names, not file paths. Both owners are imported as
-# top-level modules via a sys.path insert to src/, so a path-shaped `source`
-# matches nothing and coverage reports 0% -- which then fails the threshold for
-# the wrong reason. Caught while wiring this gate.
+# Path-shaped now that the root conftest.py puts both `src` and the repo root on
+# sys.path, so files are attributed consistently however they were imported.
+# The earlier note here is still worth keeping: `source` entries were IMPORT
+# names, and a path-shaped entry matched nothing and reported 0%, failing the
+# threshold for the wrong reason.
 source =
-    description_lengths
-    causalbool_paths
+    src
 omit =
     */venv/*
     */.venv/*
@@ -23,10 +29,19 @@ omit =
 [report]
 show_missing = True
 skip_covered = False
-# Measured 2026-09-04 after AUDIT03-C added 102 tests: 99%.
-# The floor sits just below, so a real regression fails and ordinary drift does
-# not. Raising it is a deliberate act.
-fail_under = 95
+# `fail_under` is DELIBERATELY ABSENT (AUDIT04 plan, "Critical files").
+#
+# It used to read 95, which was true of the two-owner scope above and would be
+# false and permanently red against src/. More importantly it made TWO owners
+# for one concept -- a global number here, per-module floors in
+# GOVERNANCE/COVERAGE_RATCHET.toml -- and coverage's own `fail_under` is global
+# only, so it cannot express "no module may fall below its own floor" and a
+# global pass could hide a module at 0%.
+#
+# The single owner of every floor is now tools/check_coverage_ratchet.py, which
+# reads COVERAGE_RATCHET.toml, refuses on a stale report, and runs as a member
+# of the pure closure tier. A bare `pytest --cov` therefore reports and does not
+# judge; the gate judges.
 exclude_lines =
     pragma: no cover
     raise NotImplementedError

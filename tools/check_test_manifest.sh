@@ -30,11 +30,27 @@ MANIFEST="tests/MUnit/MANIFEST.tsv"
 # Restricting it to MUnit is how tests/SelfTest.m, tests/MasterRunner.m and the
 # two tests/Nature Level-3 tests stayed invisible -- an entire second suite,
 # with its own runner, that no command in the repository invoked.
-on_disk=$(find tests -type f -name '*.m' ! -name 'RunTests.m' | sed 's|^\./||' | sort)
+#
+# AUDIT04-E: ...and it covers BOTH LANGUAGES. Until 2026-09-07 this line read
+# `-name '*.m'`, so the denominator was 85 Wolfram files and the 24 Python test
+# files under tests/ were declared by nothing -- while CLAUDE.md, CORE.md and
+# VERIFICATION.md ("85 / 85") all stated the manifest covered ALL of tests/.
+# The lint ledger in VERIFICATION.md had even counted "tests/ Lev4-7 runners 12"
+# for F401 purposes, so one ledger knew about files the other could not see.
+# That is the same invisible class as 2020's `*Tests.m` glob, one language over.
+on_disk=$(find tests -type f \( -name '*.m' -o -name '*.py' \) \
+            ! -name 'RunTests.m' ! -path '*__pycache__*' | sed 's|^\./||' | sort)
 n_disk=$(printf '%s\n' "$on_disk" | grep -c . || true)
+n_disk_m=$(printf '%s\n' "$on_disk" | grep -c '\.m$' || true)
+n_disk_py=$(printf '%s\n' "$on_disk" | grep -c '\.py$' || true)
 if [[ "$n_disk" -eq 0 ]]; then
-  echo "TEST-MANIFEST: REFUSED  found 0 .m files under tests/."
+  echo "TEST-MANIFEST: REFUSED  found 0 test files under tests/."
   echo "  A pass over zero files is not a pass."
+  exit 2
+fi
+if [[ "$n_disk_m" -eq 0 || "$n_disk_py" -eq 0 ]]; then
+  echo "TEST-MANIFEST: REFUSED  one language scanned 0 files (.m=$n_disk_m, .py=$n_disk_py)."
+  echo "  A per-language zero is how the Python half stayed invisible; refuse rather than pass."
   exit 2
 fi
 
@@ -91,10 +107,23 @@ n_test=$(awk -F'\t' '$1=="test"{c++} END{print c+0}' "$MANIFEST")
 n_quar=$(awk -F'\t' '$1=="quarantine"{c++} END{print c+0}' "$MANIFEST")
 n_prod=$(awk -F'\t' '$1=="producer"{c++} END{print c+0}' "$MANIFEST")
 
+# Split by language. The rollup below is written by the WOLFRAM runner, so it
+# must be compared against the Wolfram test count alone -- comparing it against
+# a mixed total would go red for the wrong reason the moment a Python test is
+# declared, and "the gate is red so loosen the gate" is how gates die.
+n_test_m=$(awk -F'\t'  '$1=="test" && $2 ~ /\.m$/  {c++} END{print c+0}' "$MANIFEST")
+n_test_py=$(awk -F'\t' '$1=="test" && $2 ~ /\.py$/ {c++} END{print c+0}' "$MANIFEST")
+
 echo "TEST-MANIFEST: ${n_decl}/${n_disk} files classified — ${n_test} test, ${n_quar} quarantine, ${n_prod} producer"
+echo "TEST-MANIFEST: by language — ${n_disk_m} Wolfram (${n_test_m} test), ${n_disk_py} Python (${n_test_py} test)"
 if [[ "$n_quar" -gt 0 ]]; then
-  echo "TEST-MANIFEST: note — ${n_quar} quarantined file(s) export a literal status and cannot fail."
-  echo "  They are excluded ON PURPOSE. Give one a predicate to promote it to 'test'."
+  # AUDIT04-E: this note used to say quarantined files "export a literal status
+  # and cannot fail", which was true of the Wolfram quarantines it was written
+  # for. Every quarantine entry today is Python and RED or blocked, so the old
+  # wording would have described a failing test as an inert one.
+  echo "TEST-MANIFEST: note — ${n_quar} quarantined file(s), excluded ON PURPOSE with a reason each."
+  echo "  Quarantine never means passing. Read the reason column: some are RED"
+  echo "  against real code and are carried as open items in GOVERNANCE/VERIFICATION.md."
 fi
 
 # ------------------------------------------------------------------
@@ -145,13 +174,13 @@ else
   elif [[ -z "$r_total" ]]; then
     echo "TEST-MANIFEST: FAIL  the rollup has no TOTAL= field: '$rollup_line'"
     STATUS=1
-  elif [[ "$r_total" -ne "$n_test" ]]; then
-    echo "TEST-MANIFEST: FAIL  the runner scored ${r_total} tests, the manifest declares ${n_test}"
+  elif [[ "$r_total" -ne "$n_test_m" ]]; then
+    echo "TEST-MANIFEST: FAIL  the runner scored ${r_total} tests, the manifest declares ${n_test_m} Wolfram tests"
     echo "  A declared test that never ran is exactly the invisible class this manifest exists to end."
     echo "  Regenerate with: zsh tests/MUnit/run-tests.sh --all"
     STATUS=1
   else
-    echo "TEST-MANIFEST: rollup agrees — ${r_total} scored / ${n_test} declared, SCOPE=${r_scope}"
+    echo "TEST-MANIFEST: rollup agrees — ${r_total} scored / ${n_test_m} declared Wolfram, SCOPE=${r_scope}"
   fi
 
   # Verdict artefacts must not contradict the rollup. Scanned over EVERY status
@@ -183,5 +212,50 @@ else
     echo "TEST-MANIFEST: verdict artefacts consistent — ${n_status} scanned, 0 contradict the rollup"
   fi
 fi
+# ------------------------------------------------------------------
+# AUDIT04-E — the Python analogue of the rollup check.
+#
+# Declaring a Python file `test` must mean pytest COLLECTS it. Both halves of
+# that could fail silently before: pytest.ini set `testpaths = tests/analysis`,
+# and the TSK-...-Test.py naming matches neither `test_*.py` nor `*_test.py`, so
+# pointing pytest at the other directories collected ZERO while every command
+# still reported a pass. Comparing the two numbers is what makes "declared"
+# and "ran" one statement instead of two.
+#
+# conftest.py builds its collect_ignore FROM this manifest, so a file declared
+# quarantine or producer cannot be collected and a file declared test cannot be
+# skipped -- there is no second list to drift.
+# ------------------------------------------------------------------
+PY=venv/bin/python
+if [[ ! -x "$PY" ]]; then
+  echo "TEST-MANIFEST: SKIPPED python collection check — no $PY"
+  echo "  This is a REPORTED gap, not a pass: create the venv to close it."
+else
+  collected=$("$PY" -m pytest --collect-only -q -p no:cacheprovider 2>/dev/null \
+              | sed -n 's|^\(tests/[^:]*\.py\)::.*|\1|p' | sort -u)
+  n_coll=$(printf '%s\n' "$collected" | grep -c . || true)
+  if [[ "$n_coll" -eq 0 ]]; then
+    echo "TEST-MANIFEST: FAIL  pytest collected 0 files under tests/."
+    echo "  A suite that collects nothing reports a pass; that is the defect this closes."
+    STATUS=1
+  else
+    declared_py=$(grep -v '^[[:space:]]*#' "$MANIFEST" | awk -F'\t' '$1=="test" && $2 ~ /\.py$/ {print $2}' | sort -u)
+    only_declared=$(comm -23 <(printf '%s\n' "$declared_py") <(printf '%s\n' "$collected"))
+    only_collected=$(comm -13 <(printf '%s\n' "$declared_py") <(printf '%s\n' "$collected"))
+    if [[ -n "$only_declared" ]]; then
+      echo "TEST-MANIFEST: FAIL  declared 'test' but NOT collected by pytest:"
+      printf '  %s\n' ${(f)only_declared}
+      STATUS=1
+    fi
+    if [[ -n "$only_collected" ]]; then
+      echo "TEST-MANIFEST: FAIL  collected by pytest but NOT declared 'test':"
+      printf '  %s\n' ${(f)only_collected}
+      STATUS=1
+    fi
+    [[ -z "$only_declared$only_collected" ]] && \
+      echo "TEST-MANIFEST: pytest agrees — ${n_coll} files collected / ${n_test_py} declared Python"
+  fi
+fi
+
 [[ "$STATUS" -eq 0 ]] || echo "TEST-MANIFEST: the manifest does not account for the tree"
 exit $STATUS

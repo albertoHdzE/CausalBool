@@ -110,3 +110,71 @@ producer	tests/MasterRunner.m	a THIRD test runner (Nature Level 3), invoked by n
 test	tests/Nature/TSK-NATURE-LEV3-DATA-002-Test.m	
 test	tests/Nature/TSK-NATURE-LEV3-SETUP-002-Test.m	
 test	tests/SelfTest.m	
+
+# ---------------------------------------------------------------------------
+# AUDIT04-E — THE PYTHON HALF, WHICH THIS MANIFEST DID NOT COVER.
+#
+# The header above says membership is DECLARED rather than discovered. That was
+# true only of Wolfram: tools/check_test_manifest.sh scanned `-name '*.m'`, so
+# the denominator was 85 .m files and 24 .py files under tests/ were declared by
+# nothing. Three governance documents nevertheless stated the manifest covered
+# ALL of tests/ (CLAUDE.md, GOVERNANCE/CORE.md, VERIFICATION.md "85 / 85").
+#
+# They were also RUN by nothing. pytest.ini set `testpaths = tests/analysis`, and
+# every pytest invocation in the Makefile and in CI names tests/analysis,
+# index-deconvolution, or the four replication packages. On top of that the
+# TSK-...-Test.py naming matches neither `test_*.py` nor `*_test.py`, so even
+# pointing pytest at these directories collected ZERO.
+#
+# Each file was therefore RUN individually on 2026-09-07 to classify it by
+# measurement rather than by reading it:
+#
+#     16 test        44 tests pass
+#      2 producer    scripts: report by exit code or write artefacts, 0 asserts
+#      6 quarantine  4 environment, 2 genuine behavioural disagreements
+#
+# The two RED files are NOT environment problems and are recorded as open items
+# in GOVERNANCE/VERIFICATION.md rather than papered over. Quarantine here means
+# "excluded on purpose, with the measured reason attached" -- never "passing".
+# ---------------------------------------------------------------------------
+
+test	tests/Bio/TSK-BIO-SETUP-001-Test.py	
+test	tests/Bio/TSK-BIO-SETUP-002-Test.py	
+test	tests/Lev4/TSK-LEV4-FOUNDATION-001-Test.py	
+test	tests/Lev4/TSK-LEV4-FOUNDATION-002-Test.py	
+test	tests/Lev4/TSK-LEV4-VALIDATION-001-Test.py	
+test	tests/Lev5/TSK-LEV5-DYNAMICS-001-Test.py	
+test	tests/Lev5/TSK-LEV5-HYBRID-001-Test.py	
+test	tests/Lev5/TSK-LEV5-REVALIDATION-001-Test.py	
+test	tests/Lev6/TSK-LEV6-BASIN-001-Test.py	
+test	tests/Lev7/TSK-LEV7-FIDELITY-001-Test.py	
+test	tests/Nature/TSK-NATURE-LEV3-DATA-003-Test.py	
+test	tests/Nature/TSK-NATURE-LEV3-PHASE4-Integration-Test.py	
+test	tests/Nature/TSK-NATURE-LEV3-STATS-001-Test.py	
+quarantine	tests/Nature/TSK-NATURE-LEV3-TRADEOFF-001-Test.py	RED once it reaches the real module. It was GREEN only because its sys.path walked three levels up from a two-level directory, so the import always failed and a try/except installed a mock scoring genes by delta_d*0.7+degree*0.3 -- a formula written in the test file. Path and fallback fixed; the real EssentialityPredictor.__init__ requires data_dir and metadata_path, which the test does not supply (2 failed). Open item
+quarantine	tests/Nature/TSK-NATURE-LEV3-TRADEOFF-002-Test.py	RED once it reaches the real module, for the same reason as TRADEOFF-001: a three-level path from a two-level directory sent every import to the except branch and a forty-line mock with a hard-coded d_struct=100 stood in for src/analysis/Phase_Transition.py. Path and fallback fixed; the real run_sweep returns a DataFrame where the test indexes results[0] as a list of dicts (1 failed, 1 passed). Open item
+test	tests/Nature/TSK-NATURE-SETUP-001-Test.py	
+producer	tests/Nature/TSK-NATURE-LEV3-DATA-001-Test.py	a SCRIPT, not a test: 0 assertions, reports by sys.exit(0/1), and pytest scores its success exit as a FAILURE (SystemExit: 0). Shares a basename with tests/TSK-NATURE-LEV3-DATA-001-Test.py, which is a different implementation of the same DATA-001 check; excluding it also removes the pytest basename collision
+producer	tests/Nature/TSK-NATURE-LEV3-SETUP-001-Test.py	collects ZERO tests: no TestCase and no test_ function. It writes results/lev3/setup001.json plus a status file and prints PASS/FAIL, so it is a producer whose verdict no gate reads. Recorded as an open item
+quarantine	tests/Bio/TSK-BIO-DATA-001-Test.py	ModuleNotFoundError: requests. Deliberately unpinned (see requirements.txt): it is imported only by BulkScraper and grn_data_pipeline, whose entry points are orphans reaching external services
+quarantine	tests/Bio/TSK-BIO-DATA-002-Test.py	ModuleNotFoundError: requests. Same unpinned dependency as TSK-BIO-DATA-001
+quarantine	tests/TSK-NATURE-LEV3-DATA-001-Test.py	ModuleNotFoundError: requests, via integration.grn_data_pipeline.GRNLoader. Also duplicates the basename of tests/Nature/TSK-NATURE-LEV3-DATA-001-Test.py while implementing the DATA-001 check differently -- a two-copies-one-concept item recorded in GOVERNANCE/CORE.md
+quarantine	tests/Nature/TSK-NATURE-LEV3-CANCER-002-Test.py	RED: sklearn raises ValueError 'Expected n_neighbors < n_samples_fit, but n_neighbors = 3, n_samples_fit = 3'. The fixture supplies 3 samples and the code asks for 3 neighbours, so the imputation path cannot execute at this fixture size. Open item
+quarantine	tests/Lev4/TSK-LEV4-INTEGRATION-001-Test.py	RED, and NOT an environment fault: src/pipeline/Contingency_Monitor.py returns PUBLISH_EMERGENCE where the test expects PIVOT_CELL once and CONTINUE twice (3 failed, 2 passed). Either the decision policy moved without the test, or the monitor is wrong; that is a scientific adjudication, so it is declared rather than silently retuned. Open item
+quarantine	tests/Nature/TSK-NATURE-SETUP-002-Test.py	RED, and NOT an environment fault: HierarchyEncoder test_pure_dag asserts a pure DAG costs 0 for its feedback term and measures 4.754887502163468 bits (1 failed, 2 passed). Open item
+
+# tests/analysis — the pure tier, the only Python directory any command ran
+# before AUDIT04-E. Declared here for the same reason as everything above: the
+# manifest is the denominator, so a directory that happens to be wired into
+# pytest.ini today must still be declared, or the next reshuffle makes it
+# invisible without anything going red.
+test	tests/analysis/test_causalbool_paths.py	
+test	tests/analysis/test_companion_python_parity.py	
+test	tests/analysis/test_description_length_is_algorithmic.py	
+test	tests/analysis/test_description_lengths_values.py	
+test	tests/analysis/test_parser_contract_bnet.py	
+test	tests/analysis/test_parser_contract_ginml.py	
+test	tests/analysis/test_parser_contract_logic.py	
+test	tests/analysis/test_parser_contract_sbml.py	
+test	tests/analysis/test_r4_segment_grammar.py	
+test	tests/analysis/test_src_owner_delegation.py	

@@ -137,7 +137,7 @@ the single survivor is the wrong file.
 | `tools/snapshot_paper_numbers.py` | keyed by **content**, so a moved line is not reported as a changed number |
 | `tools/check_glossary_sync.sh` | `GOVERNANCE/GLOSSARY.md` against the sibling programme |
 | `tools/check_wolfram_syntax.wl` | every `.m`/`.wl` parses — the suite could not see a syntax error, and three broken files sat behind a green run |
-| `tools/check_test_manifest.sh` | every file under `tests/` is classified in `MANIFEST.tsv`; no file can be silently excluded again |
+| `tools/check_test_manifest.sh` | every `.m` **and `.py`** file under `tests/` is classified in `MANIFEST.tsv`, and every declared Python test is actually collected by pytest; refuses if either language scans zero files. **This row claimed "every file" from AUDIT03-B until 2026-09-07 while the scan was `-name '*.m'`, hiding 34 Python files** |
 | `tools/enumerate_paper_tables.py` | the honest table-coverage fraction of the active manuscripts (measured **5/34**, not the 7/8 the old summary implied) |
 | `tools/check_import_safety.py` | no module under `src/` does work when imported — two reseeded the **global** RNG on import (measured: a caller seeding 12345 got a different stream purely from the import) and two created output directories. A necessary-not-sufficient static screen, and it says so |
 | `tools/check_verification_numbers.py` | `VERIFICATION.md` against the **live output of the tools it names** — the page claimed `36/36` owners while its own guard printed `40/40`. Distinct from `snapshot_paper_numbers.py`, which detects *change* against a stored baseline and would have passed the stale claim forever |

@@ -1,4 +1,4 @@
-global_floor = 12.63
+global_floor = 29.89
 # Measured from pure tier: source venv/bin/activate && python -m pytest -q tests/analysis/
 # --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
 # Includes 4 new contract tests for corpus parsers.
@@ -55,12 +55,54 @@ global_floor = 12.63
 # recorded as an open weakness of this file rather than fixed here, because
 # changing the ratchet's unit is a governance change, not a tidy-up.
 
+# ---------------------------------------------------------------------------
+# AUDIT04-E, 2026-09-07. THE FLOOR MOVED 12.63 -> 29.89, AND NOT ONE TEST WAS
+# WRITTEN TO MOVE IT.
+#
+# The coverage command was `pytest tests/analysis --cov`. 24 further Python test
+# files under tests/Bio, tests/Lev4-7 and tests/Nature were declared by nothing
+# and run by nothing, so the 17.26 points they already exercised were never
+# counted. Making them run is what moved the number; the tests predate this
+# commit. Reading this as new work would be reading it wrong.
+#
+#   modules with statements        52
+#   at exactly 0%                  42  ->  25
+#   declared Python tests          179 ->  211 collected
+#
+# `.coveragerc` also changed scope in the same commit: `source` was the two
+# owner import-names, so the old gate could read 99% while 42 modules sat at 0%.
+# It is now `src`, and `fail_under` has been REMOVED from that file so this one
+# is the single owner of every floor.
+#
+# 19 module floors added, 0 raised. A floor is the measured value floored
+# to two decimals, never the aspirational one.
+# ---------------------------------------------------------------------------
+
 [module_floors]
+"src/analysis/Cancer_Corruption.py" = 8.42
+"src/analysis/DepMap_Validation.py" = 30.59
+"src/analysis/Hybrid_Essentiality_Validator.py" = 82.41
+"src/analysis/r4_segment_grammar.py" = 92.25
 "src/causalbool_paths.py" = 100.00
+"src/complexity/Attractor_Classifier.py" = 93.54
+"src/complexity/Basin_Entropy.py" = 97.50
+"src/complexity/Scaling_LZ_Tools.py" = 77.21
+"src/complexity/Trajectory_LZ.py" = 61.29
+"src/data/cancer_network_builder.py" = 42.60
 "src/description_lengths.py" = 98.09
+"src/dynamics/Boolean_Dynamics.py" = 85.34
+"src/experiments/Null_Generator_HPC.py" = 31.96
+"src/integration/BDM_Wrapper.py" = 71.42
 "src/integration/BNetParser.py" = 86.79
+"src/integration/Basin_Encoder.py" = 90.47
+"src/integration/BioBridge.py" = 67.74
 "src/integration/GINMLParser.py" = 84.76
+"src/integration/Hybrid_Encoder.py" = 72.58
 "src/integration/LogicParser.py" = 75.67
+"src/integration/MotifEncoder.py" = 88.60
 "src/integration/SBMLParser.py" = 57.19
+"src/integration/Universal_D_v2_Encoder.py" = 97.26
 "src/integration/bio_D_experiment.py" = 12.86
 "src/integration/phase_transition_experiment.py" = 43.70
+"src/stats/Bayes_Factor_Calculator.py" = 78.43
+"src/stats/Mutual_Information_Analyzer.py" = 77.27

@@ -89,11 +89,18 @@ suite-section:
 	else \
 	  zsh tests/MUnit/run-tests.sh --section $(S); fi
 
+# AUDIT04-E: no longer `tests/analysis` only. That path was the entire Python
+# suite as far as this Makefile, CI and the coverage gate were concerned, while
+# 24 declared-by-nothing files under tests/Bio, tests/Lev4-7 and tests/Nature ran
+# in no command at all. pytest.ini now names every directory holding a declared
+# test and conftest.py takes membership from tests/MUnit/MANIFEST.tsv, so the
+# bare invocation IS the declared suite.
 test-python:
 	@if [ -n "$(K)" ]; then \
-	  venv/bin/python -m pytest -q tests/analysis -k "$(K)" --tb=short; \
+	  venv/bin/python -m pytest -q -k "$(K)" --tb=short; \
 	else \
-	  venv/bin/python -m pytest -q tests/analysis --cov --cov-config=.coveragerc --tb=short; fi
+	  venv/bin/python -m pytest -q --cov --cov-config=.coveragerc --cov-report=json --tb=short; \
+	  venv/bin/python tools/check_coverage_ratchet.py; fi
 
 test-deconv:
 	@cd index-deconvolution && ../venv/bin/python -m pytest -q --tb=short

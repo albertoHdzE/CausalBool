@@ -42,7 +42,11 @@ DOC = ROOT / "GOVERNANCE" / "VERIFICATION.md"
 # as a parse failure, not silently skipped -- a renamed row must not be able to
 # disable its own check.
 CHECKERS: dict[str, str] = {
-    "tests/analysis": "collect_root",
+    # AUDIT04-E: was keyed on "tests/analysis", which was the whole Python suite
+    # as far as every command was concerned while 24 declared-by-nothing files ran
+    # nowhere. Both numbers are checked -- the test count AND the file count --
+    # because a suite can lose an entire file and keep a plausible test count.
+    "Declared Python suite": "collect_root",
     "index-deconvolution": "collect_deconv",
     "Owners named in": "core_index",
     "Test files classified": "test_manifest",
@@ -74,7 +78,11 @@ CHECKERS: dict[str, str] = {
 # first bold group is read, because the coverage row's second group is a
 # threshold ("fails below **95 %**") and asserting a measurement against a
 # threshold is how a gate ends up checking the wrong thing.
-MULTI_BOLD = {"Lint hygiene debt", "Coverage of `src/` as a whole"}
+MULTI_BOLD = {"Lint hygiene debt", "Coverage of `src/` as a whole",
+              # AUDIT04-E: tests AND files. A suite that silently stops
+              # collecting a whole file keeps a plausible test count, which is
+              # how 24 files went unrun without any number looking wrong.
+              "Declared Python suite"}
 
 # A checker may return this prefix in its `how` string to mean "the measurement
 # itself is invalid", which is a FAILURE and not an UNKNOWN. UNKNOWN is for a
@@ -124,8 +132,24 @@ def collected(cwd: Path, py: Path, target: str | None = None) -> int | None:
 # ── the individual regenerations ────────────────────────────────────────────
 
 def collect_root() -> tuple[list[int] | None, str]:
-    n = collected(ROOT, ROOT / "venv/bin/python", "tests/analysis")
-    return ([n] if n is not None else None), "pytest --collect-only tests/analysis"
+    """Test count AND file count for the declared Python suite.
+
+    No path argument: pytest.ini names the directories and conftest.py takes
+    membership from tests/MUnit/MANIFEST.tsv, so this is the declared suite by
+    construction rather than by a path repeated in four places.
+
+    The FILE count is checked as well as the test count because they fail
+    differently. A whole file can stop being collected -- which is precisely what
+    happened to 24 of them -- while the test count still looks like a number
+    somebody chose.
+    """
+    n = collected(ROOT, ROOT / "venv/bin/python", None)
+    rc, out = run([str(ROOT / "venv/bin/python"), "-m", "pytest",
+                   "--collect-only", "-q", "-p", "no:cacheprovider"], ROOT)
+    files = {m for m in re.findall(r"^(tests/\S+\.py)::", out, re.M)}
+    if n is None or not files:
+        return None, "UNKNOWN: pytest collected nothing"
+    return [n, len(files)], "pytest --collect-only (declared suite)"
 
 
 def collect_deconv() -> tuple[list[int] | None, str]:
@@ -216,24 +240,50 @@ def src_coverage() -> tuple[list[int] | None, str]:
     A percentage over a partial denominator is worse than no percentage, so this
     REFUSES when the report and the disk disagree rather than returning a
     prettier number. That is the failure mode the seven missing markers were.
-    """
-    rc, out = run([str(ROOT / "venv/bin/python"), "-m", "pytest", "-q",
-                   "tests/analysis", "--cov=src", "--cov-report=term",
-                   "--cov-fail-under=0", "--tb=no", "-p", "no:cacheprovider"],
-                  ROOT)
-    m = re.search(r"^TOTAL\s+(\d+)\s+(\d+)\s+\d+\s+\d+\s+(\d+)%", out, re.M)
-    if not m:
-        return None, "UNKNOWN: no TOTAL line from coverage"
 
-    reported = len(re.findall(r"^src/\S+\.py\s", out, re.M))
+    AUDIT04-E: the command ran `tests/analysis` and so measured 12.63 per cent
+    while the DECLARED suite measured 29.90. The denominator of FILES was being
+    guarded carefully and the denominator of TESTS was not guarded at all, which
+    is the same defect one level up. There is no path argument now: pytest.ini
+    names the directories and conftest.py takes membership from the manifest.
+
+    Reads coverage.json rather than the terminal TOTAL line, because that line
+    rounds to whole per cent and the row states two decimals. The report goes to
+    a TEMPORARY file: the repository's coverage.json belongs to the ratchet gate,
+    which refuses on a stale one, and two gates writing one artefact is how a
+    later run silently grades an earlier run's numbers.
+    """
+    import json
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        jpath = Path(td) / "cov.json"
+        rc, out = run([str(ROOT / "venv/bin/python"), "-m", "pytest", "-q",
+                       "--cov=src", "--cov-report=term",
+                       f"--cov-report=json:{jpath}",
+                       "--cov-fail-under=0", "--tb=no", "-p", "no:cacheprovider"],
+                      ROOT)
+        if not jpath.is_file():
+            return None, "UNKNOWN: coverage wrote no JSON report"
+        data = json.loads(jpath.read_text())
+
+    files = data.get("files", {})
+    if not files:
+        return None, "REFUSED: coverage report contains 0 files"
+
     on_disk = sum(1 for p in (ROOT / "src").rglob("*.py")
                   if "external" not in p.parts and "__pycache__" not in p.parts)
-    if reported != on_disk:
-        return None, (f"REFUSED: coverage reports {reported} files but {on_disk} "
+    if len(files) != on_disk:
+        return None, (f"REFUSED: coverage reports {len(files)} files but {on_disk} "
                       f"exist under src/. A directory without __init__.py is "
                       f"invisible to coverage, so the percentage would be "
                       f"computed over a partial denominator.")
-    return [int(m.group(3)), on_disk], "pytest --cov=src (denominator checked)"
+
+    with_stmts = [f for f, v in files.items() if v["summary"]["num_statements"] > 0]
+    at_zero = [f for f in with_stmts if files[f]["summary"]["percent_covered"] == 0]
+    pct = round(data["totals"]["percent_covered"], 2)
+    return ([pct, on_disk, len(at_zero), len(with_stmts)],
+            "pytest --cov=src over the declared suite (denominator checked)")
 
 
 def _mutation_report() -> tuple[str | None, str]:

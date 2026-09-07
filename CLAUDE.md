@@ -52,9 +52,21 @@ exception with its reason, and the guard protecting each. Under the
 `monolithic-code` law, find the owner **before** writing code, never after.
 
 Test membership is DECLARED in `tests/MUnit/MANIFEST.tsv`, not discovered by a
-glob, and the manifest covers **all of `tests/`**, not just `tests/MUnit`:
-**85 files — 72 test / 13 producer / 0 quarantine**.
-`tools/check_test_manifest.sh` goes red on any unclassified file.
+glob, and the manifest covers **all of `tests/` in both languages**:
+**119 files — 85 Wolfram + 34 Python — 96 test / 15 producer / 8 quarantine**.
+`tools/check_test_manifest.sh` goes red on any unclassified file and **refuses
+(exit 2) if either language scans zero files**.
+
+> This paragraph said "all of `tests/`" from AUDIT03-B until 2026-09-07 while the
+> guard scanned `-name '*.m'` and the count read **85 / 85**. The 34 Python test
+> files were declared by nothing and run by nothing. Quarantine entries are RED
+> or blocked, never passing — read their reasons in `GOVERNANCE/VERIFICATION.md`.
+
+The Python suite is `venv/bin/python -m pytest` with no path argument: `pytest.ini`
+names every directory holding a declared test, and the root `conftest.py` builds
+`collect_ignore` from the manifest, so **declared and collected are one statement**.
+`conftest.py` also puts `src/` first on `sys.path`, because a `.pth` file in this
+venv injects two sibling repositories and one name (`data`) collides.
 
 Definitions: `GOVERNANCE/GLOSSARY.md` (synchronized from `series-deconvolution`; check
 with `tools/check_glossary_sync.sh`). Test truth: `tests/MUnit/BASELINE.md`.

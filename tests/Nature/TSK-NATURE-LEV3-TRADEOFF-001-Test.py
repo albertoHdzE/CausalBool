@@ -1,52 +1,22 @@
 import unittest
 import numpy as np
-import pandas as pd
-from sklearn.metrics import roc_auc_score
-import sys
-import os
 
-# Add src to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src')))
-
-# Mocking the module if it doesn't exist yet
-try:
-    from analysis.Essentiality_Prediction_v3 import EssentialityPredictor
-except ImportError:
-    # Create a dummy class for testing structure before implementation
-    class EssentialityPredictor:
-        def __init__(self, data_path=None):
-            self.data = None
-            
-        def load_data(self, networks):
-            # Simulate data loading
-            rows = []
-            for net in networks:
-                for gene in net['genes']:
-                    rows.append({
-                        'network': net['name'],
-                        'gene': gene['name'],
-                        'delta_d': gene['delta_d'],
-                        'delta_k': gene['delta_k'],
-                        'degree': gene['degree'],
-                        'betweenness': gene['betweenness'],
-                        'is_essential': gene['is_essential']
-                    })
-            self.data = pd.DataFrame(rows)
-            return self.data
-            
-        def run_cv(self, k=5):
-            # Simulate CV results
-            # For the test, we'll just return a high AUC if the data is good
-            if self.data is None:
-                return 0.0
-                
-            # Simple logistic regression or similar would go here
-            # For mock, we calculate a score based on delta_d + degree
-            y_true = self.data['is_essential']
-            # Synthetic score: essential genes have higher delta_d and degree
-            y_scores = self.data['delta_d'] * 0.7 + self.data['degree'] * 0.3
-            
-            return roc_auc_score(y_true, y_scores)
+# AUDIT04-E. The same pair of defects as TSK-NATURE-LEV3-TRADEOFF-002, and here
+# the circularity is sharper.
+#
+# The path walked up THREE levels from tests/Nature, which is two levels below
+# the root, so it resolved outside this repository and the import below ALWAYS
+# raised ImportError. The `except` branch then supplied a mock
+# `EssentialityPredictor` whose `run_cv` scored genes by
+# `delta_d * 0.7 + degree * 0.3` -- a formula written in this test file. So
+# `test_prediction_performance` asserted that a high AUC comes out of an
+# expression chosen, in the same file, to produce one. It was not a weak test of
+# src/analysis/Essentiality_Prediction_v3.py; it was not a test of it at all,
+# which is why coverage reported that module at 0%.
+#
+# The fallback is deleted rather than repaired, so an ImportError is now an
+# error. sys.path is set once by the root conftest.py.
+from analysis.Essentiality_Prediction_v3 import EssentialityPredictor
 
 class TestEssentialityPrediction(unittest.TestCase):
     def setUp(self):

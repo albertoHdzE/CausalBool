@@ -74,12 +74,22 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt -r requirements-dev.txt
-      - name: tests/analysis with coverage gate  (expected 134, >=95% of the owners)
-        # The count is asserted so a collection failure cannot pass as a green
-        # run, and the coverage floor stops an owner silently losing its tests.
+      - name: declared Python suite with the coverage ratchet  (expected 211)
+        # The count is asserted so a collection failure cannot pass as a green run.
+        #
+        # AUDIT04-E: this step ran `tests/analysis` and asserted 134. That was the
+        # whole Python suite as far as CI was concerned, while 24 declared-by-nothing
+        # files under tests/Bio, tests/Lev4-7 and tests/Nature ran nowhere at all.
+        # No path argument now: pytest.ini names the directories and conftest.py
+        # takes membership from tests/MUnit/MANIFEST.tsv.
+        #
+        # The floor is no longer coverage's own `fail_under` -- that is global only,
+        # so a global pass can hide a module at 0%. check_coverage_ratchet.py owns
+        # every floor, global and per module.
         run: |
-          python -m pytest -q tests/analysis --cov --cov-config=.coveragerc --tb=short | tee /tmp/a.txt
-          grep -qE '\b134 passed' /tmp/a.txt || { echo "EXPECTED 134 passed"; exit 1; }
+          python -m pytest -q --cov --cov-config=.coveragerc --cov-report=json --tb=short | tee /tmp/a.txt
+          grep -qE '\b211 passed' /tmp/a.txt || { echo "EXPECTED 211 passed"; exit 1; }
+          python tools/check_coverage_ratchet.py
       - name: index-deconvolution  (expected 146)
         working-directory: index-deconvolution
         run: |
