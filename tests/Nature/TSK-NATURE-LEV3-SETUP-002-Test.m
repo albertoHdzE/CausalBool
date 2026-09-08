@@ -35,12 +35,49 @@ If[Integration`BioBridgeV2`VerifyBridge[],
    89.7 / 156.7 / 162.6 at n=16). So the 4-node case is kept as an explicit
    FLOOR check, and a 6-node case is added that the measure can actually fail. *)
 
-adjSmall = {{0, 1, 0, 0}, {1, 0, 1, 0}, {0, 1, 0, 1}, {0, 0, 1, 0}}; (* n=4: the degenerate floor *)
+(* AUDIT04-E. THE DEGENERACY DOCUMENTED ABOVE IS GONE, AND THIS CHECK IS
+   INVERTED TO PIN THAT.
+
+   Everything above describes the RETIRED Shannon block encoder, whose smallest
+   block was 4x4 -- so at n=4 there was exactly one block, unique/total = 1/1,
+   and the cost was log2(1) = 0 for a complete graph, an empty graph and a line
+   graph alike. The old assertion required that zero. It was honest about a real
+   blind spot, and it also meant the suite would have gone RED if the blind spot
+   were ever fixed.
+
+   D_v2 now forwards to the index-set program length (author directive
+   2026-09-07: no Shannon quantity may be one of our complexity measures). A
+   program length is never zero for a graph with edges -- writing the graph down
+   costs bits at every size -- so n=4 now returns 30.1851 rather than 0.
+
+   The check therefore becomes the OPPOSITE and is strictly stronger: n=4 must
+   be POSITIVE, and the three 4-node graphs the old measure could not tell apart
+   must now receive THREE DIFFERENT lengths. A measure that cannot discriminate
+   at its own smallest size is not measuring at that size. *)
+
+adjSmall = {{0, 1, 0, 0}, {1, 0, 1, 0}, {0, 1, 0, 1}, {0, 0, 1, 0}};   (* n=4 line *)
+adjFull  = {{0, 1, 1, 1}, {1, 0, 1, 1}, {1, 1, 0, 1}, {1, 1, 1, 0}};   (* n=4 complete *)
+adjEmpty = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};   (* n=4 empty *)
+
 resSmall = Integration`BioBridgeV2`UniversalDv2[adjSmall];
-floorIsZero = AssociationQ[resSmall] && KeyExistsQ[resSmall, "dv2"] &&
-              TrueQ[resSmall["dv2"] == 0];
-Print[">> n=4 floor (D_v2 must be 0, one 4x4 block): ",
-      If[floorIsZero, "PASSED", "FAILED -- D_v2 = " <> ToString[resSmall["dv2"]]]];
+resFull  = Integration`BioBridgeV2`UniversalDv2[adjFull];
+resEmpty = Integration`BioBridgeV2`UniversalDv2[adjEmpty];
+
+n4Positive = AssociationQ[resSmall] && KeyExistsQ[resSmall, "dv2"] &&
+             NumericQ[resSmall["dv2"]] && TrueQ[resSmall["dv2"] > 0];
+
+n4Discriminates = NumericQ[resFull["dv2"]] && NumericQ[resEmpty["dv2"]] &&
+                  Length[DeleteDuplicates[
+                    {resSmall["dv2"], resFull["dv2"], resEmpty["dv2"]}]] == 3;
+
+floorOK = n4Positive && n4Discriminates;
+
+Print[">> n=4 is POSITIVE (was structurally 0 under the retired encoder): ",
+      If[n4Positive, "PASSED -- D_v2 = " <> ToString[resSmall["dv2"]],
+                     "FAILED -- D_v2 = " <> ToString[resSmall["dv2"]]]];
+Print[">> n=4 DISCRIMINATES line/complete/empty (all 0 under the retired one): ",
+      If[n4Discriminates, "PASSED", "FAILED"],
+      " -- ", ToString[{resSmall["dv2"], resFull["dv2"], resEmpty["dv2"]}]];
 
 adj = {{0, 1, 0, 0, 0, 1}, {1, 0, 1, 0, 0, 0}, {0, 1, 0, 1, 0, 0},
        {0, 0, 1, 0, 1, 0}, {0, 0, 0, 1, 0, 1}, {1, 0, 0, 0, 1, 0}};  (* n=6 ring *)
@@ -48,7 +85,7 @@ res = Integration`BioBridgeV2`UniversalDv2[adj];
 
 (* n=6 must produce a POSITIVE length. A key check alone would pass on 0. *)
 lineGraphOK = AssociationQ[res] && KeyExistsQ[res, "dv2"] &&
-              NumericQ[res["dv2"]] && TrueQ[res["dv2"] > 0] && floorIsZero;
+              NumericQ[res["dv2"]] && TrueQ[res["dv2"] > 0] && floorOK;
 If[lineGraphOK,
     Print[">> Compute Line Graph: PASSED. D_v2 = ", res["dv2"]],
     Print[">> Compute Line Graph: FAILED."]];

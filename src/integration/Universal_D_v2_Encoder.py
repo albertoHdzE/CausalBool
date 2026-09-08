@@ -80,6 +80,20 @@ class UniversalDv2Encoder:
         # Imported here rather than at module scope: description_lengths reaches
         # into a sibling package on first use, and this module is imported by
         # scripts that must stay import-safe (AUDIT04 P2).
+        #
+        # The repo root is put on sys.path EXPLICITLY rather than relying on
+        # `from src...` resolving. A bare `from src.description_lengths import`
+        # works under pytest, because the root conftest.py puts the root on
+        # sys.path -- and fails everywhere else. It failed in exactly one place:
+        # TSK-NATURE-LEV3-SETUP-002 is a Wolfram test that shells out to Python
+        # through BioBridgeV2, where no conftest runs, and the whole MUnit suite
+        # went red with `ModuleNotFoundError: No module named 'src'`. The pure
+        # tier was 11/11 green throughout; only the pre-push Wolfram tier saw it.
+        import sys as _sys
+        from pathlib import Path as _Path
+        _root = str(_Path(__file__).resolve().parents[2])
+        if _root not in _sys.path:
+            _sys.path.insert(0, _root)
         from src.description_lengths import row_run_index_set_length
 
         bits = float(row_run_index_set_length(self.cm))

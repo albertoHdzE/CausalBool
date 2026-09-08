@@ -1,4 +1,4 @@
-global_floor = 29.04
+global_floor = 29.12
 # Measured from pure tier: source venv/bin/activate && python -m pytest -q tests/analysis/
 # --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
 # Includes 4 new contract tests for corpus parsers.
@@ -104,6 +104,24 @@ global_floor = 29.04
 # an earlier pass of mine did before the ratchet caught it.
 # ---------------------------------------------------------------------------
 
+# ONE MORE DECLARED DROP, AND COVERAGE IS UNDERSTATING IT (AUDIT04-E).
+# src/integration/Universal_D_v2_Encoder.py: 100.00 -> 90.47, one line, 18/19.
+#
+# The uncovered line is `sys.path.insert(0, _root)` inside the forwarder. It
+# runs only when the repo root is NOT already importable -- and the root
+# conftest.py always makes it importable under pytest, so the branch is
+# unreachable in this harness BY CONSTRUCTION.
+#
+# It is not untested. It is the line that fixed the Wolfram bridge failure
+# (ModuleNotFoundError: No module named 'src', which took the whole MUnit suite
+# red while the pure tier stayed green), and
+# test_the_forwarder_works_without_a_conftest exercises it in a SUBPROCESS with
+# src on the path and the root off it -- the bridge condition exactly. Coverage
+# does not attribute child processes, so the line reads missing.
+#
+# Declared rather than papered over with a pragma: a pragma would hide the fact
+# that the harness cannot see this line, which is the thing worth knowing.
+
 [module_floors]
 "src/analysis/Cancer_Corruption.py" = 8.42
 "src/analysis/DepMap_Validation.py" = 30.51
@@ -127,7 +145,7 @@ global_floor = 29.04
 "src/integration/LogicParser.py" = 75.67
 "src/integration/MotifEncoder.py" = 89.70
 "src/integration/SBMLParser.py" = 57.19
-"src/integration/Universal_D_v2_Encoder.py" = 100.00
+"src/integration/Universal_D_v2_Encoder.py" = 90.47
 "src/integration/bio_D_experiment.py" = 12.86
 "src/integration/phase_transition_experiment.py" = 43.70
 "src/stats/Bayes_Factor_Calculator.py" = 78.43

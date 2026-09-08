@@ -216,6 +216,68 @@ def test_random_is_not_simpler_than_a_chain(name):
     )
 
 
+def test_the_scaling_exponent_refuses_rather_than_returning_zero():
+    """AUDIT02/P1: a silent 0.0 is indistinguishable from a real measurement.
+
+    The block-size sweep D(b) ~ b^alpha is meaningful only for a
+    block-decomposed measure. With D_v2 forwarding to a program length there is
+    no block size, so every point returned the same value and the fitted slope
+    was exactly 0.0 for every network -- measured Alpha(Rand) 0.0000 and
+    Alpha(Struct) 0.0000. Zero is a legitimate scaling exponent, so returning it
+    would put a fabricated measurement into a tracked artefact.
+
+    Both refusal paths are pinned: the standalone marker and the live call site.
+    """
+    from src.complexity.Scaling_LZ_Tools import ComplexityScaler
+    from src.integration.Universal_D_v2_Encoder import scaling_exponent_unavailable
+
+    with pytest.raises(NotImplementedError, match="block"):
+        scaling_exponent_unavailable(np.zeros((6, 6), dtype=int))
+
+    with pytest.raises(NotImplementedError, match="block size"):
+        ComplexityScaler.compute_scaling_exponent(np.zeros((8, 8), dtype=int))
+
+
+def test_the_forwarder_works_without_a_conftest():
+    """The bridge condition, in a SUBPROCESS, because pytest cannot reproduce it.
+
+    The forwarder does `from src.description_lengths import ...`, which needs the
+    repo root on sys.path. Under pytest the root conftest.py always puts it
+    there, so the guarding branch never executes and the dependency is invisible.
+    Everywhere else it is not there.
+
+    It failed in exactly one place: TSK-NATURE-LEV3-SETUP-002 is a Wolfram test
+    that shells out to Python through BioBridgeV2, where no conftest runs. The
+    whole MUnit suite went red with `ModuleNotFoundError: No module named 'src'`
+    while the pure tier stayed 11/11 green, and only the pre-push Wolfram tier
+    caught it.
+
+    A subprocess with `src` on the path but NOT the root is that condition
+    exactly, so this pins the fix rather than the environment that hides it.
+    """
+    import subprocess
+    import textwrap
+
+    code = textwrap.dedent(f"""
+        import sys
+        sys.path.insert(0, {str(ROOT / 'src')!r})
+        assert {str(ROOT)!r} not in sys.path, "the root must NOT be importable here"
+        import numpy as np
+        from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
+        m = np.zeros((6, 6), dtype=int)
+        m[0, 1] = m[1, 2] = m[2, 3] = 1
+        r = UniversalDv2Encoder(m).compute()
+        assert r["measure"] == "index_set_program_length", r
+        assert r["dv2"] > 0, r
+        print("OK", r["dv2"])
+    """)
+    proc = subprocess.run([sys.executable, "-c", code], capture_output=True,
+                          text=True, cwd="/tmp")
+    assert proc.returncode == 0, (
+        f"the forwarder does not work without a conftest:\n{proc.stderr[-1500:]}")
+    assert proc.stdout.startswith("OK"), proc.stdout
+
+
 def test_arm2_can_fail():
     """CONTROL for arm 2: the retired Shannon encoder must FAIL this property.
 

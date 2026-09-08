@@ -12,7 +12,9 @@ from integration.HierarchyEncoder import HierarchyEncoder
 from integration.MotifEncoder import MotifEncoder
 from pipeline.Contingency_Monitor import ContingencyMonitor
 from stats.Bayes_Factor_Calculator import BayesFactorCalculator
-from complexity.Scaling_LZ_Tools import ComplexityScaler
+# ComplexityScaler no longer imported: its only use here was
+# compute_scaling_exponent, retired in AUDIT04-E (a program length has no
+# block size, so D(b) ~ b^alpha is not a question this measure can answer).
 
 def load_network(filepath):
     with open(filepath, 'r') as f:
@@ -103,14 +105,21 @@ def main():
         D_v2 = min(L_hier, L_motif)
         encoding_type = "Hierarchy" if L_hier < L_motif else "Motif"
         
-        # Compute Scaling Exponent for Bio (Level 4 Check)
-        scaling_res = ComplexityScaler.compute_scaling_exponent(adj)
-        alpha_bio = scaling_res['alpha'] if scaling_res else 0.0
+        # AUDIT04-E: the Level-4 scaling exponent is GONE, not zero.
+        #
+        # It fitted D(b) ~ b^alpha over block sizes, which is meaningful only for
+        # a block-decomposed measure. D_v2 was retired to the index-set program
+        # length, which has no block size, so the sweep returned Alpha 0.0000 for
+        # every network and compute_scaling_exponent now raises.
+        #
+        # `None` rather than 0.0 on purpose: 0.0 is a legitimate value of a
+        # scaling exponent, so writing it here would put a fabricated
+        # measurement into a tracked artefact. None says "not measured".
+        alpha_bio = None
 
         # 3. Generate Null Models
         n_nulls = 10
         null_Dv2_scores = []
-        null_alphas = []
         
         # Degree-preserving randomization
         # Using networkx directed_edge_swap is robust but slow for many swaps.
@@ -154,11 +163,10 @@ def main():
             m_null = MotifEncoder(adj_null).run()['total_cost']
             null_Dv2_scores.append(min(h_null, m_null))
             
-            # Compute Scaling for Null
-            s_res = ComplexityScaler.compute_scaling_exponent(adj_null)
-            if s_res:
-                null_alphas.append(s_res['alpha'])
-            
+            # AUDIT04-E: no scaling exponent for the nulls either, same reason.
+            # null_alphas stays empty and the summary below reports it as
+            # unavailable rather than averaging an empty list to 0.0.
+
         print(" Done.")
         
         # 4. Compute Z-Score
@@ -175,13 +183,15 @@ def main():
         avg_bdm = bdm_info.get('avg_bdm', 0)
         category = bdm_info.get('category', 'Unknown')
 
-        # Scaling Stats
-        null_alpha_mean = np.mean(null_alphas) if null_alphas else 0.0
-        alpha_diff = abs(alpha_bio - null_alpha_mean)
-        
+        # Scaling stats: UNAVAILABLE, not zero (AUDIT04-E). `np.mean([])` would
+        # have produced 0.0 with a RuntimeWarning and written it to a tracked
+        # artefact as though it were measured.
+        alpha_diff = None
+
         print(f"   D_v2: {D_v2:.2f} ({encoding_type}) | BDM: {avg_bdm:.2f}")
         print(f"   Null Mean: {mu_null:.2f} | Z-Score: {z_score:.2f}")
-        print(f"   Alpha(Bio): {alpha_bio:.2f} | Alpha(Null): {null_alpha_mean:.2f} | Diff: {alpha_diff:.2f}")
+        print("   Alpha: NOT MEASURED — the block-size scaling exponent does not "
+              "exist for a program length (AUDIT04-E)")
         
         results.append({
             "network": net_name,
@@ -229,8 +239,12 @@ def main():
     # AER: Efficiency Ratio (Null / Bio) -> If > 1.0, Bio is simpler (more efficient)
     aer = mean_d_null / mean_d_bio if mean_d_bio > 0 else 1.0
     
-    # Scaling Diff
-    mean_alpha_diff = np.mean([r['alpha_diff'] for r in results])
+    # Scaling Diff — AUDIT04-E: every per-network alpha_diff is now None, so
+    # there is nothing to average. Reported as None so ContingencyMonitor
+    # receives "not measured" rather than a fabricated 0.0 that its
+    # decision matrix would read as a real scaling agreement.
+    alphas = [r['alpha_diff'] for r in results if r['alpha_diff'] is not None]
+    mean_alpha_diff = float(np.mean(alphas)) if alphas else None
     
     # Bayes Factor: Test if Z-scores come from N(0,1) (Null Hypothesis)
     # H0: Z ~ N(0,1) (Bio is Random)

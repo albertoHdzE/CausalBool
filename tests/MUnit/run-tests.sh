@@ -247,10 +247,22 @@ done
 #
 # A partial run now writes its OWN file and states its scope on the line; only a
 # full run may touch the rollup.
-if [[ -n "$SECTION" ]]; then
-  SCOPE="section:$SECTION"
+# AUDIT04-E: the condition is "did ANY filter apply", not "was a SECTION given".
+#
+# This tested `-n "$SECTION"` alone, so `--gate X` WITHOUT `--section` fell to
+# the else branch and a one-test run wrote `OK=1 FAIL=0 TOTAL=1 SCOPE=all` into
+# the tracked whole-suite rollup -- claiming to be a full run. Found by doing
+# exactly that while verifying one test, and it took the manifest guard and the
+# verification-numbers gate red with it.
+#
+# This is the SAME defect the block was written to close, surviving in the GATE
+# dimension because the fix enumerated one filter instead of asking whether the
+# selection was complete.
+if [[ -n "$SECTION" || -n "$GATE" ]]; then
+  SCOPE="partial"
+  [[ -n "$SECTION" ]] && SCOPE="$SCOPE section:$SECTION"
   [[ -n "$GATE" ]] && SCOPE="$SCOPE gate:$GATE"
-  SUMMARY_DIR="$REPO_DIR/results/tests/section-$SECTION${GATE:+-$GATE}"
+  SUMMARY_DIR="$REPO_DIR/results/tests/section-${SECTION:-any}${GATE:+-$GATE}"
 else
   SCOPE="all"
   SUMMARY_DIR="$REPO_DIR/results/tests/runall"
