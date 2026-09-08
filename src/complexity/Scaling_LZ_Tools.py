@@ -37,7 +37,29 @@ class ComplexityScaler:
                 'details': dict       # D values for each b
             }
         """
-        if UniversalDv2Encoder is None:
+        # AUDIT04-E: this sweep does not survive the retirement of the Shannon
+        # block encoder, and it must say so rather than return a number.
+        #
+        # It fitted D(b) ~ b^alpha by varying `block_sizes`. That question is
+        # meaningful only for a BLOCK-DECOMPOSED measure. D_v2 now forwards to
+        # the index-set program length, which has no block size, so every point
+        # in the sweep returns the same value and the fitted slope is exactly
+        # 0.0 for EVERY network -- measured: Alpha(Rand) 0.0000,
+        # Alpha(Struct) 0.0000.
+        #
+        # Returning 0.0 would be indistinguishable from a real measurement of
+        # zero scaling, which is the silent-zero defect AUDIT02/P1 removed
+        # elsewhere. BDM is already block-decomposed and is the natural owner if
+        # a scale-dependent algorithmic measure is wanted.
+        raise NotImplementedError(
+            "compute_scaling_exponent measured D(b) ~ b^alpha over block sizes. "
+            "D_v2 was retired in AUDIT04-E and now forwards to the index-set "
+            "program length, which has no block size, so this sweep returns "
+            "slope 0.0 for every network. Use BDM for a block-decomposed "
+            "algorithmic measure."
+        )
+
+        if UniversalDv2Encoder is None:  # pragma: no cover - unreachable, kept for provenance
             raise ImportError("UniversalDv2Encoder not found in src/integration")
 
         d_values = []

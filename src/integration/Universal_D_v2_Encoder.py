@@ -1,61 +1,115 @@
+"""D_v2 -- RETIRED AS A MEASURE. Forwards to the index-set program length.
+
+AUDIT04-E, author directive 2026-09-07: this programme is ALGORITHMIC
+(Kolmogorov/AID). No Shannon quantity may serve as one of our complexity
+measures. The two comparison measures are the INDEX-SET PROGRAM LENGTH (ours)
+and BDM. Shannon quantities survive only as explicitly labelled statistical
+BASELINES that our measure is compared against -- H_total and ZIP in comp_paper
+Table 2 -- never as a measure of ours.
+
+WHAT THIS FILE USED TO COMPUTE, AND WHY IT HAD TO GO
+
+    p = ones / size
+    h = -(p*log2(p) + (1-p)*log2(1-p))      # Shannon binary entropy
+    return h * size
+
+plus `_block_key = (size, ones)`, which keyed every block by its DENSITY and
+discarded the arrangement. Binary entropy is MAXIMISED at density one half and
+minimised at the extremes, which is the reverse of what a program length does.
+The consequence was measured on 2026-09-07 rather than argued -- 200 random
+12-node networks, each carrying exactly the 11 edges of a 12-node chain, asking
+how often each measure calls the RANDOM graph simpler-or-equal than the chain:
+
+    D_v2 (this file, as it was)     195 / 200   97.5 %
+    BDM                               0 / 200    0.0 %
+    index-set program length         14 / 200    7.0 %
+
+A measure that ranks a random graph as simpler than a chain in 97.5 per cent of
+draws is not mis-tuned, it is inverted. Every claim of the form "the real
+network is simpler than its randomised nulls" computed through this file was
+reading the opposite of what it stated. It also assigned IDENTICAL lengths to a
+network and its transpose (difference exactly 0.0), so "the hub drives everyone"
+and "everyone drives the hub" scored the same in a causality-first programme.
+
+WHY A FORWARDER RATHER THAN A DELETION
+
+Thirteen production files call this encoder, including DepMap_Validation,
+Cancer_Corruption, KRB_Corruption_Anchors and Null_Generator_HPC. Under the
+collapse protocol in GOVERNANCE/CORE.md section 6 a forwarder preserves the
+provenance of every result already produced under the old name, and it moves all
+thirteen consumers with ONE change site instead of thirteen that can drift apart.
+
+`row_run_index_set_length` takes an adjacency matrix and nothing else -- the same
+signature this encoder was always called with -- so the substitution is exact at
+every call site. The OWNER is src/description_lengths.py; nothing is
+reimplemented here.
+
+THE NUMBERS MOVE, AND THAT IS THE POINT. Over 210 corpus networks the median
+goes 106.32 -> 334.43 bits. No number in either active manuscript is affected:
+D_v2 appears in neither `method_paper.tex` nor `comp_paper.tex`, only in
+results/bio/simplicity_v2_real.json and results/lev3/setup001.json.
+
+Guarded by tests/analysis/test_complexity_measures_are_algorithmic.py, which
+fails any measure that ranks random above structured.
+"""
+from __future__ import annotations
+
+from typing import Any, Dict, List
+
 import numpy as np
-import math
-from typing import Dict, Any, List, Tuple
+
 
 class UniversalDv2Encoder:
-    def __init__(self, adjacency_matrix: np.ndarray, block_sizes: List[int] | None = None, stride: int = 1):
+    """Adjacency -> index-set program length in bits.
+
+    The class name and the ``dv2`` result key are retained so existing callers
+    and stored artefacts keep resolving; the QUANTITY is now algorithmic.
+    """
+
+    def __init__(self, adjacency_matrix, block_sizes: List[int] | None = None,
+                 stride: int = 1):
         self.cm = np.array(adjacency_matrix).astype(int)
         self.n = self.cm.shape[0]
-        self.stride = max(1, int(stride))
-        self.block_sizes = block_sizes if block_sizes is not None else [4, 5, 6]
-
-    def _extract_blocks(self, b: int) -> List[np.ndarray]:
-        m = self.cm
-        n = self.n
-        blocks = []
-        pad = (b - (n % b)) % b
-        if pad > 0:
-            m = np.pad(m, ((0, pad), (0, pad)), mode="constant", constant_values=0)
-            n = m.shape[0]
-        for i in range(0, n - b + 1, self.stride):
-            for j in range(0, n - b + 1, self.stride):
-                blocks.append(m[i:i + b, j:j + b])
-        return blocks
-
-    def _block_key(self, block: np.ndarray) -> Tuple[int, int]:
-        ones = int(block.sum())
-        size = block.size
-        return (size, ones)
-
-    def _block_complexity(self, block: np.ndarray) -> float:
-        size = block.size
-        ones = int(block.sum())
-        p = ones / max(1, size)
-        if p == 0.0 or p == 1.0:
-            h = 0.0
-        else:
-            h = -(p * math.log2(p) + (1 - p) * math.log2(1 - p))
-        return h * size
+        # Retained only to keep the old signature callable. A program length has
+        # no block decomposition, so a caller that VARIES these is asking a
+        # question this measure cannot answer -- see compute().
+        self.block_sizes = block_sizes
+        self.stride = stride
 
     def compute(self) -> Dict[str, Any]:
-        dv2 = 0.0
-        detail = {}
-        for b in self.block_sizes:
-            blocks = self._extract_blocks(b)
-            counts: Dict[Tuple[int, int], int] = {}
-            base: Dict[Tuple[int, int], float] = {}
-            for blk in blocks:
-                k = self._block_key(blk)
-                counts[k] = counts.get(k, 0) + 1
-            for k in counts.keys():
-                size, ones = k
-                blk = np.ones((int(math.sqrt(size)), int(math.sqrt(size))), dtype=int)
-                if ones == 0:
-                    blk[:] = 0
-                base[k] = self._block_complexity(blk)
-            total = 0.0
-            for k, c in counts.items():
-                total += base[k] + math.log2(c)
-            dv2 += total
-            detail[f"b{b}"] = {"unique_blocks": len(counts), "total_blocks": len(blocks), "cost": total}
-        return {"dv2": dv2, "detail": detail, "n": self.n, "blocks": self.block_sizes}
+        # Imported here rather than at module scope: description_lengths reaches
+        # into a sibling package on first use, and this module is imported by
+        # scripts that must stay import-safe (AUDIT04 P2).
+        from src.description_lengths import row_run_index_set_length
+
+        bits = float(row_run_index_set_length(self.cm))
+        return {
+            "dv2": bits,
+            "measure": "index_set_program_length",
+            "n": self.n,
+            "detail": {
+                "note": "D_v2 retired 2026-09-07; this is the index-set program "
+                        "length in bits, owned by src/description_lengths.py",
+            },
+            "blocks": None,
+        }
+
+
+def scaling_exponent_unavailable(*_args, **_kwargs):
+    """The block-size sweep D(b) ~ b^alpha does not survive the change.
+
+    ComplexityScaler.compute_scaling_exponent varied `block_sizes` and fitted a
+    power law to the resulting D values. That question is meaningful only for a
+    BLOCK-DECOMPOSED measure; a program length has no block size, so every point
+    in the sweep would now return the same number and the fitted slope would be
+    0.0 for every network.
+
+    Refusing is the AUDIT02/P1 rule: a silent 0.0 is indistinguishable from a
+    real measurement of zero scaling. If a scale-dependent algorithmic measure
+    is wanted, BDM is already block-decomposed and is the natural owner.
+    """
+    raise NotImplementedError(
+        "D(b) ~ b^alpha was a property of the retired Shannon block encoder. "
+        "A program length has no block size, so this sweep would return slope "
+        "0.0 for every network. Use BDM if a block-decomposed measure is needed."
+    )

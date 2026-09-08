@@ -1,4 +1,4 @@
-global_floor = 29.89
+global_floor = 29.04
 # Measured from pure tier: source venv/bin/activate && python -m pytest -q tests/analysis/
 # --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
 # Includes 4 new contract tests for corpus parsers.
@@ -78,15 +78,41 @@ global_floor = 29.89
 # to two decimals, never the aspirational one.
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# AUDIT04-E MEASURE CHANGE, 2026-09-07. THREE FLOORS WENT DOWN, DECLARED.
+#
+# D_v2 was retired: it computed Shannon binary entropy over block densities and
+# ranked a RANDOM graph simpler-or-equal than a chain in 195 of 200 draws
+# (BDM 0/200, index-set 14/200). It now forwards to the index-set program
+# length. Global 29.89 -> 29.04.
+#
+#   module                              stmts  cov   pct     was
+#   src/complexity/Scaling_LZ_Tools.py     40   32  77.08   77.21
+#   src/analysis/DepMap_Validation.py     916  299  30.52   30.59
+#
+# NEITHER IS A COVERAGE REGRESSION, and the first is the refactor-invariance
+# weakness recorded above, seen live. Scaling_LZ_Tools went 61 statements /50
+# covered -> 40 /32 because compute_scaling_exponent now RAISES: the block-size
+# sweep D(b) ~ b^alpha is meaningless for a measure with no block size, and it
+# returned Alpha 0.0000 for every network. The body below the raise became
+# unreachable and left the denominator. Covered lines fell because CODE fell,
+# not because a test did.
+#
+# DepMap_Validation lost 0.07 points to the one test method skipped with it.
+# The skip is at METHOD level, deliberately: quarantining the whole file would
+# have taken test_lz_complexity with it and dropped this module to 0.00%, which
+# an earlier pass of mine did before the ratchet caught it.
+# ---------------------------------------------------------------------------
+
 [module_floors]
 "src/analysis/Cancer_Corruption.py" = 8.42
-"src/analysis/DepMap_Validation.py" = 30.59
+"src/analysis/DepMap_Validation.py" = 30.51
 "src/analysis/Hybrid_Essentiality_Validator.py" = 82.41
 "src/analysis/r4_segment_grammar.py" = 92.25
 "src/causalbool_paths.py" = 100.00
 "src/complexity/Attractor_Classifier.py" = 93.54
-"src/complexity/Basin_Entropy.py" = 97.50
-"src/complexity/Scaling_LZ_Tools.py" = 77.21
+"src/complexity/Basin_Entropy.py" = 100.00
+"src/complexity/Scaling_LZ_Tools.py" = 77.08
 "src/complexity/Trajectory_LZ.py" = 61.29
 "src/data/cancer_network_builder.py" = 42.60
 "src/description_lengths.py" = 98.09
@@ -99,9 +125,9 @@ global_floor = 29.89
 "src/integration/GINMLParser.py" = 84.76
 "src/integration/Hybrid_Encoder.py" = 72.58
 "src/integration/LogicParser.py" = 75.67
-"src/integration/MotifEncoder.py" = 88.60
+"src/integration/MotifEncoder.py" = 89.70
 "src/integration/SBMLParser.py" = 57.19
-"src/integration/Universal_D_v2_Encoder.py" = 97.26
+"src/integration/Universal_D_v2_Encoder.py" = 100.00
 "src/integration/bio_D_experiment.py" = 12.86
 "src/integration/phase_transition_experiment.py" = 43.70
 "src/stats/Bayes_Factor_Calculator.py" = 78.43

@@ -35,6 +35,17 @@ class TestComplexityScaler(unittest.TestCase):
         
         print(f"LZ(Simple): {lz_simple}, LZ(Periodic): {lz_periodic}, LZ(Random): {lz_random}")
 
+    @unittest.skip(
+        "AUDIT04-E: the question this asks ceased to exist. It fitted the "
+        "block-size scaling exponent D(b) ~ b^alpha, which is meaningful only "
+        "for a block-decomposed measure. D_v2 was retired to the index-set "
+        "program length, which has no block size, so the sweep returned "
+        "Alpha(Rand) 0.0000 and Alpha(Struct) 0.0000 -- identical for every "
+        "network. compute_scaling_exponent now raises rather than returning a "
+        "silent 0.0. Skipped at METHOD level, not by quarantining the file: "
+        "test_lz_complexity below is unaffected and is this module's only "
+        "coverage. Use BDM if a block-decomposed algorithmic measure is wanted."
+    )
     def test_scaling_exponent_differentiation(self):
         """Test that Scaling Exponent differs between Random and Structured"""
         # Random Matrix 32x32
