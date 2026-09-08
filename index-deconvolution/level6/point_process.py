@@ -1,6 +1,6 @@
 """point_process.py  (Level 6)
 
-Treat the pivot times as a point process and measure how its events cluster along
+Treat the financial pivot times as a point process and measure how its events cluster along
 the index, across scales.
 
 The central object is the Fano factor F(T) = Var[N_T] / Mean[N_T], the

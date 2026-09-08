@@ -59,6 +59,22 @@ PATTERNS: dict[str, re.Pattern] = {
         r"log2?\s*\(\s*(?:math\.)?comb\s*\(|log2?\s*\(\s*(?:math\.)?factorial\s*\("),
     # frequency tables feeding a length
     "frequency_table": re.compile(r"\bCounter\s*\(|\.value_counts\s*\(", re.I),
+    # AUDIT04-F: a RECALL hole, found by hand rather than by this census.
+    #
+    # src/stats/Mutual_Information_Analyzer.py computes Shannon mutual
+    # information through sklearn and converts nats to bits, and every pattern
+    # above missed it: there is no p*log p, no frequency table, no probability
+    # normalisation anywhere in the file, because the estimator hides all of it
+    # behind a library call. The census reported 83 sites over 628 files and was
+    # blind to a quantity feeding a live decision branch
+    # (Contingency_Monitor's switch to cell lines, via DepMap_Validation).
+    #
+    # A shape-based scan sees only the shapes it was taught. Library estimators
+    # are a shape too, and this is the one that was missing.
+    "library_entropy_estimator": re.compile(
+        r"\bmutual_info_(?:regression|classif|score)\s*\(|"
+        r"\bfrom\s+sklearn[\w.]*\s+import\s+[^\n]*mutual_info|"
+        r"\b(?:differential_entropy|mutual_info_score)\s*\(", re.I),
 }
 
 # Where a hit lives decides what to do about it, not whether it is a hit.

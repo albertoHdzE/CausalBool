@@ -1,6 +1,6 @@
 """exp17_fractal_dimension.py  (Level 5)
 
-The pivot-count scaling law N(theta) ~ theta**(-D) and its exponent D, the
+The financial pivot-count scaling law N(theta) ~ theta**(-D) and its exponent D, the
 representation-free self-similarity dimension of the salient points.
 
 D is read as minus the slope of log N against log theta over a geometric grid of

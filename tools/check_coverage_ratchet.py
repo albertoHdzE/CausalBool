@@ -13,7 +13,16 @@
 # even when the global figure is fine.
 #
 # Pure tier only — no Wolfram kernel required:
-#   source venv/bin/activate && python -m pytest -q tests/analysis/ --cov=src --cov-report=json
+#   source venv/bin/activate && python -m pytest -q --cov=src --cov-report=json
+#
+# NOTE THE ABSENT PATH ARGUMENT, corrected 2026-09-07 (AUDIT04-F). This line
+# used to read `pytest -q tests/analysis/ --cov=src`, and anyone following the
+# instruction produced a report over roughly one tenth of the declared suite:
+# global coverage read 13.97 % against a floor of 29.12 %, and 18 modules came
+# back UNMEASURED rather than measured-at-zero. The guard that exists to stop a
+# comfortable denominator was printing one in its own regeneration hint. The
+# declared suite is defined by pytest.ini plus conftest.py's collect_ignore, so
+# `pytest` with NO path is the only command that reproduces it.
 #
 # British English; no contractions.
 
@@ -202,7 +211,9 @@ def main() -> int:
     if coverage_data.get("__stale__"):
         print("CHECK-COVERAGE-RATCHET: FAIL  coverage report is OLDER than the code "
               "it measures — it describes a tree that no longer exists")
-        print("  regenerate: venv/bin/python -m pytest -q tests/analysis/ "
+        # No path argument: the declared suite is pytest.ini plus conftest.py's
+        # collect_ignore, and any narrower command reports a partial denominator.
+        print("  regenerate: venv/bin/python -m pytest -q "
               "--cov=src --cov-report=json")
         return 1
     if not coverage_data or "files" not in coverage_data:

@@ -14,7 +14,7 @@ already established predict what it must find:
 
 So Fourier should split the series into an incompressible white part (the returns) and
 a structured red part (the clock) -- confirming, in a second language, the same split
-the pivot analysis found, and offering no periodic component to trade.
+the financial pivot analysis found, and offering no periodic component to trade.
 
 Standard library only: an iterative radix-2 Cooley-Tukey FFT, a Welch-averaged
 periodogram, and a log-log slope for the 1/f fit.

@@ -103,6 +103,27 @@ def compute_dv2(cm: np.ndarray) -> float:
     res = enc.compute()
     return float(res["dv2"])
 
+
+def compute_both(cm: np.ndarray) -> Dict[str, float | None]:
+    """Both comparison measures for one adjacency matrix, side by side.
+
+    AUDIT04-F. The author's directive of 2026-09-07 names TWO measures, the
+    index-set program length and BDM, and decision #96 forbids combining them
+    into one number. So this returns both under their own names and every
+    downstream statistic is computed twice, once per measure.
+
+    The reason is measured rather than procedural: at n = 16, against 20 random
+    matrices of identical edge count, the index-set length calls a checkerboard
+    1050.5 bits versus 563.9 for random and column stripes 1050.5 versus 568.4,
+    while BDM calls them 34.3 versus 489.9 and 34.2 versus 485.2. On the sparse
+    families this experiment actually meets the index-set length is the better
+    behaved of the two on a chain (random simpler in 14/200 draws, BDM 0/200).
+    Neither dominates, so neither decides alone.
+    """
+    enc = UniversalDv2Encoder(cm)
+    res = enc.compute()
+    return {"index_set": float(res["index_set_bits"]), "bdm": res["bdm"]}
+
 def load_existing_results() -> List[Dict[str, Any]]:
     if NULL_STATS_FILE.exists():
         try:
@@ -175,11 +196,12 @@ def process_networks(
 
             print(f"[{len(results)+1}] Processing {name}: n={n}, E={int(cm.sum())}")
             
-            D_bio = compute_dv2(cm)
-            null_scores_er   = []
-            null_scores_deg  = []
-            null_scores_gate = []
-            
+            bio = compute_both(cm)
+            D_bio = bio["index_set"]
+            null_scores: Dict[str, Dict[str, List[float]]] = {
+                m: {"er": [], "deg": [], "gate": []} for m in ("index_set", "bdm")
+            }
+
             for k in range(nulls_per_type):
                 # Check time limit inside inner loop for very slow networks
                 if time_limit_sec and (time.time() - start_time > time_limit_sec):
@@ -188,14 +210,16 @@ def process_networks(
                 s = None if seed is None else seed + k
                 # ER edge-shuffle
                 cm_er   = er_edge_shuffle(cm, allow_self_loops=allow_self_loops, seed=s)
-                null_scores_er.append(compute_dv2(cm_er))
                 # Degree-preserving
                 cm_deg  = degree_preserving_swap(cm, nswap_factor=10, seed=s)
-                null_scores_deg.append(compute_dv2(cm_deg))
                 # Gate-preserving (fanout)
                 cm_gate = gate_preserving_fanout(cm, seed=s)
-                null_scores_gate.append(compute_dv2(cm_gate))
-            
+                for kind, cm_null in (("er", cm_er), ("deg", cm_deg), ("gate", cm_gate)):
+                    both = compute_both(cm_null)
+                    for m in ("index_set", "bdm"):
+                        if both[m] is not None:
+                            null_scores[m][kind].append(float(both[m]))
+
             # AUDIT04-E, author directive 2026-09-07: the z-score is replaced.
             #
             # It was `(mu - x) / sd`, which rescales a quantity in BITS by the
@@ -240,10 +264,11 @@ def process_networks(
                     "median_null": float(np.median(xs)),
                 }
 
-            sep_er   = separation(D_bio, null_scores_er)
-            sep_deg  = separation(D_bio, null_scores_deg)
-            sep_gate = separation(D_bio, null_scores_gate)
-
+            # AUDIT04-F: the separation is computed ONCE PER MEASURE. The top
+            # level keys (`er`/`deg`/`gate`) keep carrying the index-set result
+            # so that artefacts and readers written before this change resolve
+            # unchanged; `bdm` holds the same three separations computed from
+            # BDM, and nothing merges the two.
             entry = {
                 "network": name,
                 "nodes": len(nodes),
@@ -251,10 +276,22 @@ def process_networks(
                 "E": int(cm.sum()),
                 "D_bio": D_bio,
                 "measure": "index_set_program_length",
+                "measures": ["index_set_program_length", "bdm"],
+                "D_bio_bdm": bio["bdm"],
                 "nulls_per_type": nulls_per_type,
-                "er": sep_er, "deg": sep_deg, "gate": sep_gate,
                 "timestamp": time.time()
             }
+            for kind in ("er", "deg", "gate"):
+                entry[kind] = separation(D_bio, null_scores["index_set"][kind])
+            if bio["bdm"] is None:
+                entry["bdm"] = None
+                entry["bdm_unavailable"] = (
+                    f"n={n} is below pybdm's 4x4 partition floor; unmeasured, not zero")
+            else:
+                entry["bdm"] = {
+                    kind: separation(float(bio["bdm"]), null_scores["bdm"][kind])
+                    for kind in ("er", "deg", "gate")
+                }
             results.append(entry)
             save_results(results) # Checkpoint after each network
             count += 1
@@ -297,35 +334,67 @@ def main():
         # large the typical advantage is in bits; `separating` counts how many
         # networks beat EVERY null outright, which is the claim itself rather
         # than a proxy for it.
-        def _col(kind: str, field: str) -> List[float]:
-            return [r[kind][field] for r in results if kind in r]
+        def _col(kind: str, field: str, measure: str = "index_set") -> List[float]:
+            if measure == "index_set":
+                return [r[kind][field] for r in results if kind in r]
+            return [r["bdm"][kind][field] for r in results
+                    if isinstance(r.get("bdm"), dict) and kind in r["bdm"]]
 
-        summary: Dict[str, Any] = {
-            "count": len(results),
-            "measure": "index_set_program_length",
-            "comparison": "gap_bits = D(best null) - D(bio); exceed = #{null <= bio}/n",
-        }
-        for kind in ("er", "deg", "gate"):
-            gaps = _col(kind, "gap_bits")
-            exc = _col(kind, "exceed")
-            summary[kind] = {
+        def _block(kind: str, measure: str) -> Dict[str, Any]:
+            gaps = _col(kind, "gap_bits", measure)
+            exc = _col(kind, "exceed", measure)
+            return {
                 "median_gap_bits": float(np.median(gaps)) if gaps else None,
                 "min_gap_bits": float(min(gaps)) if gaps else None,
                 "separating_at_exceed_0": sum(1 for e in exc if e == 0.0),
                 "separating_at_exceed_lt_0.05": sum(1 for e in exc if e < 0.05),
                 "n": len(gaps),
             }
+
+        summary: Dict[str, Any] = {
+            "count": len(results),
+            "measure": "index_set_program_length",
+            "measures": ["index_set_program_length", "bdm"],
+            "comparison": "gap_bits = D(best null) - D(bio); exceed = #{null <= bio}/n",
+        }
+        for kind in ("er", "deg", "gate"):
+            summary[kind] = _block(kind, "index_set")
+        # AUDIT04-F: BDM's own summary, under its own key. Two measures reported,
+        # never averaged; where they disagree the disagreement is the result.
+        summary["bdm"] = {kind: _block(kind, "bdm") for kind in ("er", "deg", "gate")}
+        summary["agreement"] = {
+            kind: {
+                "both_separate": sum(
+                    1 for r in results
+                    if kind in r and isinstance(r.get("bdm"), dict)
+                    and r[kind]["exceed"] < 0.05 and r["bdm"][kind]["exceed"] < 0.05),
+                "disagree": sum(
+                    1 for r in results
+                    if kind in r and isinstance(r.get("bdm"), dict)
+                    and (r[kind]["exceed"] < 0.05) != (r["bdm"][kind]["exceed"] < 0.05)),
+                "n": sum(1 for r in results
+                         if kind in r and isinstance(r.get("bdm"), dict)),
+            }
+            for kind in ("er", "deg", "gate")
+        }
         # The module-level mkdir was removed (it ran on import); every write
         # site must now guarantee the directory itself.
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         with open(RESULTS_DIR / "null_summary.json", "w") as f:
             json.dump(summary, f, indent=2)
+        for measure in ("index_set", "bdm"):
+            print(f"  -- {measure} --")
+            for kind in ("er", "deg", "gate"):
+                s = summary[kind] if measure == "index_set" else summary["bdm"][kind]
+                if s["n"]:
+                    print(f"  {kind:5s} median gap {s['median_gap_bits']:8.2f} bits · "
+                          f"worst {s['min_gap_bits']:8.2f} · "
+                          f"beats EVERY null {s['separating_at_exceed_0']}/{s['n']}")
         for kind in ("er", "deg", "gate"):
-            s = summary[kind]
-            if s["n"]:
-                print(f"  {kind:5s} median gap {s['median_gap_bits']:8.2f} bits · "
-                      f"worst {s['min_gap_bits']:8.2f} · "
-                      f"beats EVERY null {s['separating_at_exceed_0']}/{s['n']}")
+            a = summary["agreement"][kind]
+            if a["n"]:
+                print(f"  {kind:5s} both measures separate {a['both_separate']}/{a['n']} · "
+                      f"they DISAGREE on {a['disagree']}/{a['n']}")
 
 if __name__ == "__main__":
     main()

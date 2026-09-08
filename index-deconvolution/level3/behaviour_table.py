@@ -3,11 +3,20 @@
 Gate-agnostic behaviour-table analysis: given a binary output pattern, describe
 HOW its information is distributed, without assuming any generating gate.  This is
 the computational form of the behaviour-table method of the UNAM thesis
-(doc/Tesis-UNAM, chapter 4): find the pivots (the invariant place-value
-structure), the FREE COORDINATES (the offset dimension), and the schema (clause)
-structure that tiles the one-set, and measure how much the pattern compresses.
+(doc/Tesis-UNAM, chapter 4): find the ESSENTIAL VARIABLES (the invariant
+place-value structure), the FREE COORDINATES (the offset dimension), and the
+schema (clause) structure that tiles the one-set, and measure how much the
+pattern compresses.
 
-NOTE (GLOSSARY sec.1d, 2026-09-03): the free coordinates are NOT "the sumandos".
+TWO NOTES, both author rulings, both previously violated by this file.
+
+GLOSSARY sec.1e (2026-09-07): the essential variables are NOT what the retired
+word named. That word is a finance term and denotes nothing in this method. This
+module used it in its own dict key, ``pivots_essential_bits`` -- and a wrong
+identifier is a definition that cannot be argued with, which is why the ruling
+had to be made three times before it took.
+
+GLOSSARY sec.1d (2026-09-03): the free coordinates are NOT "the sumandos".
 The sumandos of a schema are the fillings of its own don't-care positions,
 wherever they fall -- including don't-cares on CONNECTED inputs, which is where
 all of Rule 110's live. See free_coordinates() below.
@@ -18,7 +27,8 @@ generated) compresses; a random pattern does not.  This module is the foundation
 for expressing patterns with no gate name, and eventually for synthesising more
 general rules than Boolean gates.
 
-Reuses only the pivot and schema primitives of Level 1; it does not modify them.
+Reuses only the essential-variable and schema primitives of Level 1; it does not
+modify them.
 """
 
 from __future__ import annotations
@@ -73,8 +83,9 @@ def sumando_bits(column, n):
 def behaviour_decomposition(column, n):
     """Full gate-agnostic behaviour table for a 2**n pattern.
 
-    Returns the pivots (essential bits), the FREE COORDINATES (the insensitive
-    bits), the schema clauses that tile the reduced one-set, and a compression
+    Returns the ESSENTIAL VARIABLES (the sensitive bits), the FREE COORDINATES
+    (the insensitive bits), the schema clauses that tile the reduced one-set,
+    and a compression
     figure: how many of the pattern's ones each schema accounts for.  A
     structured pattern has few schemata each covering many ones; a random
     pattern needs about one schema per one.
@@ -92,6 +103,10 @@ def behaviour_decomposition(column, n):
     return {
         "n": n,
         "one_set_size": sum(column),
+        "essential_variables": ess,
+        # deprecated key, kept so Level-3 experiments and stored artefacts
+        # resolve; the name is wrong for the reason in this module's docstring
+        # (GLOSSARY sec.1e -- *pivot* is a finance term)
         "pivots_essential_bits": ess,
         "free_coordinates": free_coordinates(column, n),
         # deprecated key, kept so Level-3 experiments and stored artefacts resolve

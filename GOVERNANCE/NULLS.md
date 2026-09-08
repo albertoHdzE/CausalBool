@@ -45,8 +45,8 @@ enumerated before the draw.
 
 ## §3 Case study 2 — series-deconvolution B1: codeword-syntax null
 
-- **Claim under test:** pivot-decoder scores on integer sequences reflect
-  discovered structure.
+- **Claim under test:** decoder scores on integer sequences reflect
+  discovered structure. *(GLOSSARY §1e — this line read "pivot-decoder" until 2026-09-07; the word is retired, and the decoder here is the sibling's codeword decoder.)*
 - **Reversal:** the surrogate draw destroyed **codeword syntax** — the code-side
   framing bits added by the encoder/pipeline — rather than data structure. Scores
   of −22 to −34 against syntax-destroying surrogates measure the pipeline's own

@@ -2,7 +2,7 @@
 
 One recursion deeper: the clock of the clock.
 
-The base clock is the pivot point process of the sequence.  Its activity signal
+The base clock is the financial pivot point process of the sequence.  Its activity signal
 (the windowed pivot count) is itself a series; its salient turns mark the onset and
 end of high- and low-activity regimes.  Finding the pivots of the activity signal
 gives a meta-clock, and asking whether the meta-clock clusters the way the base

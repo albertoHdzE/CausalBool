@@ -9,7 +9,7 @@ Questions from the assessor, answered by experiment and counterexample:
       AND under a particular network configuration?
   Q2  How is the number of inputs (arity) of a node found, and can it be wrong?
 
-The pivotal distinction is the set of observed input combinations.  Over the
+The decisive distinction is the set of observed input combinations.  Over the
 exhaustive repertoire every combination appears, so identification is exact and
 confusion is impossible beyond genuine functional equalities.  Over the reachable
 states of a running network, inputs can be correlated, and then both the gate and

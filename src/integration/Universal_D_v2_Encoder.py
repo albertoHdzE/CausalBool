@@ -94,16 +94,58 @@ class UniversalDv2Encoder:
         _root = str(_Path(__file__).resolve().parents[2])
         if _root not in _sys.path:
             _sys.path.insert(0, _root)
-        from src.description_lengths import row_run_index_set_length
+        from src.description_lengths import bdm_2d, row_run_index_set_length
 
         bits = float(row_run_index_set_length(self.cm))
+
+        # AUDIT04-F: BOTH comparison measures are reported, never combined.
+        #
+        # The author's directive of 2026-09-07 names two measures -- the
+        # index-set program length and BDM -- and decision #96 forbids folding
+        # two measures into one number with a selector bit. So they travel side
+        # by side under their own names and every consumer sees both.
+        #
+        # This is not decoration. Measured 2026-09-07 at n = 16, structured
+        # matrix against 20 random matrices of IDENTICAL edge count, the
+        # index-set length calls a perfect checkerboard 1050.5 bits against
+        # 563.9 for random, and column stripes 1050.5 against 568.4 -- it ranks
+        # both periodic objects as roughly twice as complex as noise. BDM gets
+        # both right (34.3 vs 489.9; 34.2 vs 485.2). The cause is structural
+        # rather than a tuning error: the index-set code is a RUN-LENGTH code
+        # over each row, and an alternating row costs n/2 runs, its maximum.
+        # On the families that matter here the ordering is the other way round
+        # -- on a 12-node chain against 200 random graphs with 11 edges, the
+        # index-set length calls random simpler in 14/200 and BDM in 0/200 --
+        # so neither measure is dropped and neither is trusted alone.
+        #
+        # bdm_2d refuses below its 4x4 partition floor rather than returning a
+        # silent zero, and that refusal is surfaced as None with its reason,
+        # because a network too small to measure must not read as "0 bits".
+        bdm: float | None
+        bdm_note = None
+        if self.n < 4:
+            bdm = None
+            bdm_note = (f"BDM undefined for n={self.n}: pybdm's 2-D partition is "
+                        f"4x4 and refuses smaller input. Not zero, unmeasured.")
+        else:
+            bdm = float(bdm_2d(self.cm, below_floor="raise"))
+
         return {
+            # Retained key. It carries the index-set length, which is what the
+            # thirteen existing callers and the stored artefacts expect to find
+            # under this name.
             "dv2": bits,
+            "index_set_bits": bits,
+            "bdm": bdm,
             "measure": "index_set_program_length",
+            "measures": ("index_set_program_length", "bdm"),
             "n": self.n,
             "detail": {
-                "note": "D_v2 retired 2026-09-07; this is the index-set program "
-                        "length in bits, owned by src/description_lengths.py",
+                "note": "D_v2 retired 2026-09-07; `dv2` and `index_set_bits` are "
+                        "the index-set program length in bits, owned by "
+                        "src/description_lengths.py. `bdm` is the second "
+                        "comparison measure and is reported, never combined.",
+                "bdm_note": bdm_note,
             },
             "blocks": None,
         }

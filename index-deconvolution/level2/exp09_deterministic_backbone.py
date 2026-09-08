@@ -1,7 +1,7 @@
 """exp09_deterministic_backbone.py  (Level 2)
 
 Test whether a binarised market series has a deterministic backbone: schemata
-(pivots) committed on training data that keep predicting out of sample.  Compared
+(financial pivots) committed on training data that keep predicting out of sample.  Compared
 against a time-shuffle control (temporal structure destroyed) and a deterministic
 cellular-automaton control (which must be fully covered at perfect purity).
 

@@ -2,15 +2,15 @@
 
    Detailed comparison helpers for the cellular-automaton notebook: render the
    recovered network (connectivity matrix and gates), express each cell's rule in
-   index-set pivot/sumandos form, and compare the original space-time pattern with
+   index-set decimal-anchor/sumandos form, and compare the original space-time pattern with
    the reconstructed evolution, highlighting matching rows and their indices.
 
    Depends on CausalBoolCore.wl, Deconvolution.wl, CADeconvolution.wl and
    CADemoLibrary.wl.
 *)
 
-(* One cell's rule as a union of pivot-shifted cosets (activator/inhibitor
-   clauses).  For each clause: pivot = decimal of the activator cells; the free
+(* One cell's rule as a union of anchor-shifted cosets (activator/inhibitor
+   clauses).  For each clause: decimalAnchor = decimal of the activator cells; the free
    cells (sumandos) are all cells the clause does not fix. *)
 CBRuleDescription[dec_, k_] := Module[
   {rep, support, m, n, reduced, clauses, descs},
@@ -20,13 +20,13 @@ CBRuleDescription[dec_, k_] := Module[
   n = dec["n"]; reduced = rep["reduced"];
   clauses = If[m == 0, {}, CBRegulatoryDNFClauses[reduced, m]];
   descs = Function[cl,
-     Module[{actCells, inhCells, fixed, free, pivot},
+     Module[{actCells, inhCells, fixed, free, decimalAnchor},
       actCells = support[[# + 1]] & /@ cl["activators"];
       inhCells = support[[# + 1]] & /@ cl["inhibitors"];
       fixed = Join[actCells, inhCells];
       free = Complement[Range[n], fixed];
-      pivot = Total[2^(# - 1) & /@ actCells];
-      <|"activators" -> actCells, "inhibitors" -> inhCells, "pivot" -> pivot,
+      decimalAnchor = Total[2^(# - 1) & /@ actCells];
+      <|"activators" -> actCells, "inhibitors" -> inhCells, "decimalAnchor" -> decimalAnchor,
         "free" -> free, "cosetSize" -> 2^Length[free]|>]] /@ clauses;
   <|"node" -> k, "gate" -> rep["canonical"][[1]], "support" -> support,
     "oneSetSize" -> Total[reduced]*2^(n - m), "clauses" -> descs|>];
@@ -41,11 +41,11 @@ CBNetworkTable[dec_] := Module[{rows},
     Style[#, Bold] & /@ {"cell", "gate", "inputs", "|one-set|", "clauses"}],
    Frame -> All, Alignment -> Left]];
 
-(* Print the index-set rule of one cell in pivot/sumandos language. *)
+(* Print the index-set rule of one cell in decimal-anchor/sumandos language. *)
 CBPrintRule[dec_, k_] := Module[{d = CBRuleDescription[dec, k]},
   Print["cell ", k, ": gate ", d["gate"], ", inputs ", d["support"],
     ", one-set size ", d["oneSetSize"]];
-  Do[Print["   clause: pivot = ", cl["pivot"],
+  Do[Print["   clause: decimal anchor = ", cl["decimalAnchor"],
      " (activators ", cl["activators"], ", inhibitors ", cl["inhibitors"],
      "), sumandos over free cells ", cl["free"],
      " -> coset size ", cl["cosetSize"]],

@@ -7,7 +7,7 @@ sequence and rebuild it.  This preserves the marginal distribution of increments
 (the fat tails) exactly and destroys only their temporal order, so any structure
 that is stronger on the real series than on this null is temporal, not a mechanical
 consequence of the marginal.  It is the correct control for a construction (the
-directional-change pivots) whose statistics are sensitive to the increment
+directional-change financial pivots) whose statistics are sensitive to the increment
 distribution.
 """
 

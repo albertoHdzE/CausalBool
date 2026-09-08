@@ -45,8 +45,8 @@ class TestContingencyMonitor(unittest.TestCase):
         res = ContingencyMonitor.evaluate_checkpoint(metrics)
         self.assertEqual(res['action_code'], "CONTINUE")
 
-    def test_failure_to_separate_triggers_pivot(self):
-        """20% of nulls at least as short as Bio -> PIVOT_HYBRID."""
+    def test_failure_to_separate_triggers_hybrid_switch(self):
+        """20% of nulls at least as short as Bio -> SWITCH_TO_HYBRID_ENCODING."""
         metrics = {
             'gap_bits_deg': 0.5, 'exceed_deg': 0.20,
             'bayes_factor_01': 0.5,
@@ -54,11 +54,55 @@ class TestContingencyMonitor(unittest.TestCase):
             'aer': 1.0
         }
         res = ContingencyMonitor.evaluate_checkpoint(metrics)
-        self.assertEqual(res['action_code'], "PIVOT_HYBRID")
+        self.assertEqual(res['action_code'], "SWITCH_TO_HYBRID_ENCODING")
         self.assertIn("failure to separate", res['reason'])
 
+    def test_disagreeing_measures_yield_undecided_rather_than_a_verdict(self):
+        """AUDIT04-F: neither comparison measure may falsify the programme alone.
+
+        Measured 2026-09-07, the two disagree on real families: at n = 16 against
+        random matrices of identical edge count, the index-set length ranks a
+        checkerboard at 1050.5 bits against 563.9 for random -- it calls the
+        structured object twice as complex as noise -- where BDM gives 34.3
+        against 489.9; and on a 12-node chain against 200 random graphs with 11
+        edges, the index-set length calls random simpler in 14/200 and BDM in
+        0/200. Each is right where the other is wrong, so a disagreement is
+        information and must be reported, not resolved.
+        """
+        metrics = {
+            'gap_bits_deg': 40.0, 'exceed_deg': 0.0,      # index-set: supports
+            'gap_bits_bdm': -3.0, 'exceed_bdm': 0.9,      # BDM: falsifies
+            'bayes_factor_01': 0.01, 'rho_depmap': 0.6, 'aer': 1.5,
+        }
+        res = ContingencyMonitor.evaluate_checkpoint(metrics)
+        self.assertEqual(res['action_code'], "UNDECIDED")
+        self.assertIn("disagree", res['reason'])
+        # Both numbers must appear, so a reader can see WHICH disagreed and by how much.
+        self.assertIn("40.00", res['reason'])
+        self.assertIn("-3.00", res['reason'])
+
+    def test_agreeing_measures_still_decide(self):
+        """The agreement rule must not deadlock the monitor."""
+        metrics = {
+            'gap_bits_deg': 0.5, 'exceed_deg': 0.20,
+            'gap_bits_bdm': 0.5, 'exceed_bdm': 0.20,
+            'bayes_factor_01': 0.5, 'rho_depmap': 0.6, 'aer': 1.0,
+        }
+        res = ContingencyMonitor.evaluate_checkpoint(metrics)
+        self.assertEqual(res['action_code'], "SWITCH_TO_HYBRID_ENCODING")
+
+    def test_absent_bdm_says_so_instead_of_pretending_to_two_measures(self):
+        """Below pybdm's 4x4 floor there is no BDM, and the report must admit it."""
+        metrics = {
+            'gap_bits_deg': 0.5, 'exceed_deg': 0.20,
+            'bayes_factor_01': 0.5, 'rho_depmap': 0.6, 'aer': 1.0,
+        }
+        res = ContingencyMonitor.evaluate_checkpoint(metrics)
+        self.assertEqual(res['action_code'], "SWITCH_TO_HYBRID_ENCODING")
+        self.assertIn("BDM unavailable", res['reason'])
+
     def test_clinical_weakness(self):
-        """Test low correlation triggers Cell Line pivot"""
+        """Test low correlation triggers the switch to cell lines"""
         metrics = {
             'gap_bits_deg': 40.0, 'exceed_deg': 0.0,
             'bayes_factor_01': 0.01,
@@ -67,10 +111,10 @@ class TestContingencyMonitor(unittest.TestCase):
             'aer': 1.5
         }
         res = ContingencyMonitor.evaluate_checkpoint(metrics)
-        self.assertEqual(res['action_code'], "PIVOT_CELL")
+        self.assertEqual(res['action_code'], "SWITCH_TO_CELL_LINES")
 
     def test_nonlinear_rescue(self):
-        """Test low Rho but high MI prevents pivot"""
+        """Test low Rho but high MI prevents the switch"""
         metrics = {
             'gap_bits_deg': 40.0, 'exceed_deg': 0.0,
             'bayes_factor_01': 0.01,

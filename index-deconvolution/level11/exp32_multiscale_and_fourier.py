@@ -7,7 +7,7 @@ FOURIER -- does splitting the series into sinusoids isolate the structure?
   log-frequency; 0 = white/noise, negative = red/long-memory) of three signals:
     * daily log-returns          -- expected white (no linear predictability),
     * absolute returns (vol)     -- expected red  (volatility long-memory),
-    * the pivot activity clock   -- expected red  (the fractal clock).
+    * the financial pivot activity clock   -- expected red  (the fractal clock).
   If returns are white and the clock is red, Fourier confirms, in a second language,
   the same split the pivots found: noise in the values, structure in the timing -- and
   offers no periodic line to trade. Controls: white noise (~0) and a random walk (~-2).

@@ -16,9 +16,25 @@ class ContingencyMonitor:
     ACTIONS = {
         "CONTINUE": "Signal is robust. Continue Phase 3.",
         "ITERATE": "Signal is noisy ($0.2 < \\rho < 0.4$). Increase N and refine features.",
-        "PIVOT_HYBRID": "Theoretical Falsification (>= 5% of nulls as short as Bio, or Bio not shorter than the best null, or $BF_{01} > 10$). Pivot to Hybrid Encoding.",
-        "PIVOT_CELL": "Clinical Weakness ($\\rho < 0.2$ and $MI \\approx 0$). Switch to Cell Lines.",
-        "PUBLISH_EMERGENCE": "High Complexity but High Efficiency ($AER > 1.0$). Publish 'Edge of Chaos' finding."
+        "SWITCH_TO_HYBRID_ENCODING": "Theoretical Falsification (>= 5% of nulls as short as Bio, or Bio not shorter than the best null, or $BF_{01} > 10$). Switch to Hybrid Encoding.",
+        "SWITCH_TO_CELL_LINES": "Clinical Weakness ($\\rho < 0.2$ and $MI \\approx 0$). Switch to Cell Lines.",
+        "PUBLISH_EMERGENCE": "High Complexity but High Efficiency ($AER > 1.0$). Publish 'Edge of Chaos' finding.",
+        "UNDECIDED": "The two comparison measures disagree on falsification. No action, because a single measure must not decide this on its own."
+    }
+
+    # AUDIT04-F, GLOSSARY sec.1e (author ruling 2026-09-07). These action codes
+    # carried the retired word. GLOSSARY sec.8 had checked them in context,
+    # ruled them ordinary English, and kept them, on the argument that adopting
+    # a two-word technical term for the finance sense frees the bare word. That
+    # argument is sound in principle and failed three times in practice, each
+    # failure costing an adjudication of which sense was meant. The word is now
+    # retired outright; these names say what they do and need no adjudication.
+    #
+    # Stored artefacts written under the old codes are NOT rewritten:
+    # results/bio/Contingency_Report.md is regenerated, and doc/ is an archive.
+    RETIRED_ACTION_CODES = {
+        "PIVOT_HYBRID": "SWITCH_TO_HYBRID_ENCODING",
+        "PIVOT_CELL": "SWITCH_TO_CELL_LINES",
     }
 
     @staticmethod
@@ -64,7 +80,7 @@ class ContingencyMonitor:
         #
         # `z_score_deg` is still accepted so stored artefacts written before this
         # change keep resolving, but it is NOT used for the decision -- a value
-        # computed from the retired measure must not steer a pivot.
+        # computed from the retired measure must not steer a redirection.
         gap = metrics.get('gap_bits_deg')
         exceed = metrics.get('exceed_deg')
         bf01 = metrics.get('bayes_factor_01', 0.0)
@@ -88,34 +104,69 @@ class ContingencyMonitor:
         # got wrong on the degenerate and heavy-tailed nulls.
         #
         # REFUSES on absent inputs. The old code defaulted z to -999.0, which
-        # silently satisfied `z < 2.0` and would have pivoted the whole project
+        # silently satisfied `z < 2.0` and would have redirected the whole project
         # on a missing measurement.
         if gap is None or exceed is None:
             raise ValueError(
                 "evaluate_checkpoint needs gap_bits_deg and exceed_deg "
                 "(AUDIT04-E). The z-score they replace was computed from the "
-                "retired Shannon measure; defaulting either would decide a "
-                "pivot from an absent measurement."
+                "retired Shannon measure; defaulting either would redirect the "
+                "whole programme from an absent measurement."
             )
 
+        # AUDIT04-F: the falsification verdict now requires the TWO comparison
+        # measures to agree, and reports UNDECIDED when they do not.
+        #
+        # `gap`/`exceed` come from the index-set program length; `gap_bits_bdm`/
+        # `exceed_bdm` from BDM. Neither dominates the other, and that is
+        # measured rather than assumed: at n = 16 against random matrices of
+        # identical edge count, the index-set length ranks a checkerboard
+        # (1050.5 bits) and column stripes (1050.5) as roughly twice as complex
+        # as noise (563.9, 568.4), where BDM ranks both correctly (34.3 vs
+        # 489.9; 34.2 vs 485.2); on a 12-node chain against 200 random graphs
+        # with 11 edges the index-set length calls random simpler in 14/200 and
+        # BDM in 0/200. A measure that is right on one family and wrong on
+        # another must not falsify a programme by itself.
+        #
+        # The BDM pair is OPTIONAL, because networks below pybdm's 4x4 partition
+        # floor have no BDM at all. Absent, the index-set verdict stands alone
+        # and says so; present and disagreeing, the answer is UNDECIDED.
+        gap_bdm = metrics.get('gap_bits_bdm')
+        exceed_bdm = metrics.get('exceed_bdm')
+
+        def _falsified(g, e):
+            return e >= 0.05 or g <= 0.0
+
+        falsified_index = _falsified(gap, exceed)
+        if gap_bdm is not None and exceed_bdm is not None:
+            falsified_bdm = _falsified(gap_bdm, exceed_bdm)
+            if falsified_index != falsified_bdm:
+                return ContingencyMonitor._undecided(
+                    metrics, gap, exceed, gap_bdm, exceed_bdm,
+                    falsified_index, falsified_bdm)
+        else:
+            reasons.append(
+                "BDM unavailable for this network (below the 4x4 partition "
+                "floor); the verdict rests on the index-set length alone.")
+
         if exceed >= 0.05:
-            action = "PIVOT_HYBRID"
+            action = "SWITCH_TO_HYBRID_ENCODING"
             reasons.append(
                 f"{exceed:.1%} of nulls are as short as Bio or shorter (>= 5%): "
                 f"failure to separate Bio from Null.")
         elif gap <= 0.0:
-            action = "PIVOT_HYBRID"
+            action = "SWITCH_TO_HYBRID_ENCODING"
             reasons.append(
                 f"Bio is not shorter than the best null (gap {gap:.2f} bits): "
                 f"failure to separate.")
         elif bf01 > 10.0:
-            action = "PIVOT_HYBRID"
+            action = "SWITCH_TO_HYBRID_ENCODING"
             reasons.append(f"Bayes Factor BF01 ({bf01:.2f}) > 10 strongly favors Null Model.")
 
-        # 2. Check Clinical Relevance (if not already pivoting)
+        # 2. Check Clinical Relevance (if not already redirecting)
         if action == "CONTINUE":
             if rho < 0.2 and mi < 0.1:
-                action = "PIVOT_CELL"
+                action = "SWITCH_TO_CELL_LINES"
                 reasons.append(f"Weak Correlation (rho={rho:.2f}) and No MI ({mi:.2f} bits).")
             elif 0.2 <= rho < 0.4:
                 # Check MI for rescue
@@ -137,7 +188,7 @@ class ContingencyMonitor:
         # to separate on program LENGTH yet is still algorithmically efficient
         # (AER > 1.1), that is a finding rather than a falsification -- the
         # structure is near the boundary, not absent.
-        if action == "PIVOT_HYBRID":
+        if action == "SWITCH_TO_HYBRID_ENCODING":
             if aer > 1.1:
                 action = "PUBLISH_EMERGENCE"
                 reasons.append(
@@ -155,6 +206,30 @@ class ContingencyMonitor:
         }
 
     @staticmethod
+    def _undecided(metrics, gap, exceed, gap_bdm, exceed_bdm,
+                   falsified_index, falsified_bdm):
+        """The two measures disagree, so no action is taken and both are quoted.
+
+        Reporting the disagreement is the point. Silently resolving it to one
+        measure is what the retired ``z = -999.0`` default already did once: it
+        satisfied ``z < 2.0`` from an absent measurement and would have redirected
+        the whole project.
+        """
+        reasons = [
+            f"Index-set program length {'falsifies' if falsified_index else 'supports'} "
+            f"(gap {gap:.2f} bits, {exceed:.1%} of nulls at least as short); "
+            f"BDM {'falsifies' if falsified_bdm else 'supports'} "
+            f"(gap {gap_bdm:.2f} bits, {exceed_bdm:.1%} of nulls at least as short). "
+            f"The two comparison measures disagree, so the verdict is withheld."
+        ]
+        report = ContingencyMonitor._generate_report(metrics, "UNDECIDED", reasons)
+        return {
+            'action_code': "UNDECIDED",
+            'reason': "; ".join(reasons),
+            'report_content': report,
+        }
+
+    @staticmethod
     def _generate_report(metrics, action, reasons):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         lines = [
@@ -164,8 +239,10 @@ class ContingencyMonitor:
             f"**Description:** {ContingencyMonitor.ACTIONS.get(action, 'Unknown')}",
             "",
             "## Metrics",
-            f"- Gap vs best null (Deg): {metrics.get('gap_bits_deg', 'N/A')} bits",
-            f"- Nulls at least as short (Deg): {metrics.get('exceed_deg', 'N/A')}",
+            f"- Gap vs best null (Deg, index-set): {metrics.get('gap_bits_deg', 'N/A')} bits",
+            f"- Nulls at least as short (Deg, index-set): {metrics.get('exceed_deg', 'N/A')}",
+            f"- Gap vs best null (Deg, BDM): {metrics.get('gap_bits_bdm', 'N/A')} bits",
+            f"- Nulls at least as short (Deg, BDM): {metrics.get('exceed_bdm', 'N/A')}",
             f"- Bayes Factor 01: {metrics.get('bayes_factor_01', 'N/A')}",
             f"- DepMap Rho: {metrics.get('rho_depmap', 'N/A')}",
             f"- DepMap MI (bits): {metrics.get('mi_depmap_bits', 'N/A')}",

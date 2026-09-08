@@ -1,14 +1,22 @@
-"""exp01_pivots_sumandos.py
+"""exp01_connected_inputs_and_sumandos.py
 
 Empirical verification of the structural fact stated in the formal manuscript:
-connected inputs are the pivot coordinates; disconnected inputs are FREE
-coordinates.
+the ESSENTIAL VARIABLES of a node's output column are exactly its CONNECTED
+INPUTS, and every disconnected input is a FREE coordinate.
 
-THE FILENAME IS A KNOWN SOURCE OF CONFUSION (GLOSSARY sec.1d/2 item 5): it names
-a SET beside an ENCODING, and reading it as a partition is how a lossless
-factorisation got mistaken for a lossy one. What this experiment verifies is the
-insensitivity of disconnected inputs -- NOT a definition of the sumandos, which
-are the fillings of a schema's own don't-care positions wherever they fall.
+RENAMED 2026-09-07 (GLOSSARY sec.1e, author ruling). The old name was
+``exp01_pivots_sumandos.py``, and sec.1c quoted that filename verbatim as a
+source of confusion -- it named a SET beside an ENCODING, and reading it as a
+partition is how a lossless factorisation got mistaken for a lossy one -- while
+leaving the file on disk for another fortnight. Two rulings now apply:
+
+  sec.1e: *pivot* is a FINANCE term. It names nothing inside this method. The
+  method's objects are connected inputs, essential variables, decimal anchor,
+  decimal family, free coordinates and sumandos.
+
+  sec.1d: the sumandos of a schema are the fillings of its OWN don't-care
+  positions, wherever they fall -- so this experiment verifies the insensitivity
+  of disconnected inputs and is NOT a definition of the sumandos.
 
 Operationally, for every node of every generated network we check:
 
@@ -16,7 +24,7 @@ Operationally, for every node of every generated network we check:
       output column (it is a FREE coordinate; free coordinates are among every
       schema's don't-cares, but they do not define the sumandos);
   (b) the set of sensitive inputs recovered by single-bit perturbation equals
-      the true connected set (the pivots), for non-degenerate gates.
+      the true connected set, for non-degenerate gates.
 
 A single counterexample to (a) would refute the factorisation on which the
 deconvolution rests.  The experiment aggregates over many seeds and network
@@ -74,7 +82,7 @@ def run(sizes=(7, 8, 9, 10), seeds_per_size=50):
                     d["dropped_input"] += 1
 
     summary = {
-        "experiment": "pivots_vs_sumandos",
+        "experiment": "connected_inputs_vs_sumandos",
         "sizes": list(sizes),
         "seeds_per_size": seeds_per_size,
         "total_nodes": total_nodes,
@@ -88,11 +96,11 @@ def run(sizes=(7, 8, 9, 10), seeds_per_size=50):
     }
 
     os.makedirs(RESULTS_DIR, exist_ok=True)
-    path = os.path.join(RESULTS_DIR, "exp01_pivots_sumandos.json")
+    path = os.path.join(RESULTS_DIR, "exp01_connected_inputs_and_sumandos.json")
     with open(path, "w") as f:
         json.dump(summary, f, indent=2)
 
-    print("=== Experiment 1: pivots vs sumandos ===")
+    print("=== Experiment 1: connected inputs vs sumandos ===")
     print(f"total nodes examined              : {total_nodes}")
     print(f"disconnected always insensitive   : {disconnected_insensitive_ok}/{total_nodes}"
           f" ({100 * summary['disconnected_insensitive_rate']:.2f}%)")

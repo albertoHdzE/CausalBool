@@ -1,4 +1,27 @@
 
+"""Mutual information as a DEPENDENCE STATISTIC, never as a complexity measure.
+
+AUDIT04-F, and this module needs the label because it is Shannon and it survived
+the sweep that removed Shannon from our measures.
+
+The author's directive of 2026-09-07 forbids any Shannon quantity from serving
+as one of our complexity measures; the two comparison measures are the index-set
+program length and BDM. Mutual information here is neither. It measures the
+DEPENDENCE BETWEEN TWO VARIABLES -- a complexity score and a clinical outcome --
+in exactly the role a Pearson correlation plays, and it sits beside `pearson_rho`
+in the returned dict for that reason. Nothing here measures the complexity of
+anything. So it falls under the same rule as H_total and ZIP: a labelled
+statistic, permitted, and never quoted as a measure of ours.
+
+WHY THE LABEL IS LOAD-BEARING. This file was invisible to
+audit/AUDIT04_E_measures/census_shannon.py until 2026-09-07. That census works
+by SHAPE -- p*log p, frequency tables, probability normalisation -- and none of
+those shapes appears here, because the Kraskov estimator hides all of them
+behind a library call. The census reported 86 sites over 628 files while missing
+a Shannon quantity that feeds a live decision branch: `mi_depmap_bits` reaches
+Contingency_Monitor through DepMap_Validation and helps decide the switch to
+cell lines. A `library_entropy_estimator` detector now catches it.
+"""
 import numpy as np
 from sklearn.feature_selection import mutual_info_regression, mutual_info_classif
 from scipy import stats
@@ -8,6 +31,8 @@ class MutualInformationAnalyzer:
     Computes Mutual Information (MI) to detect non-linear dependencies
     that Pearson correlation might miss.
     Uses Kraskov et al. (KSG) estimator via scikit-learn.
+
+    This is a STATISTIC, not a measure of complexity -- see the module docstring.
     """
 
     @staticmethod
@@ -61,6 +86,11 @@ class MutualInformationAnalyzer:
         interpretation = MutualInformationAnalyzer._interpret(mi_bits, rho)
         
         return {
+            # Declared in the payload, not only in the docstring, so a consumer
+            # reading this dict cannot mistake it for one of our two measures.
+            'kind': 'statistic',
+            'quantity': 'shannon_mutual_information_ksg',
+            'is_complexity_measure': False,
             'MI_nats': mi_nats,
             'MI_bits': mi_bits,
             'pearson_rho': rho,

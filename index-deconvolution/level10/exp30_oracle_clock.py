@@ -1,7 +1,7 @@
 """exp30_oracle_clock.py  (Level 10)
 
 The oracle / perfect-trader behaviour table, and the theorem that its action points
-are the directional-change pivots at a cost-set threshold.
+are the directional-change financial pivots at a cost-set threshold.
 
 Four results, each against the return-shuffle null (and a GBM instrument check):
 

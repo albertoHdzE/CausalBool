@@ -137,7 +137,7 @@ def apply_gate(gate: str, inputs: list[int], params: dict | None = None) -> int:
         # Disjunction of regulatory clauses.  The node fires iff any clause is
         # satisfied; a clause requires its activators to be 1 and its inhibitors
         # to be 0 (variables in neither are don't-care).  The one-set is the
-        # union of the clauses' pivot-shifted cosets.  Represents any regulatory
+        # union of the clauses' anchor-shifted cosets.  Represents any regulatory
         # function as a compact activation logic.
         for clause in p["clauses"]:
             ok = True

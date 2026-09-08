@@ -44,15 +44,23 @@ from causalbool import Network, apply_gate, truth_table, repertoire
 # ---------------------------------------------------------------------------
 # Step 1 - essential-variable detection (connected vs free coordinates)
 #
-# TWO terminology rulings apply here, and this comment used to state the first
-# while contradicting the second.
+# THREE terminology rulings apply here, and this comment has stated each of them
+# only after contradicting it.
 #
-# GLOSSARY sec.1c -- the complement of the PIVOT COORDINATES is the FREE
-# COORDINATES, *not* the sumandos.  Pairing "pivots vs sumandos" puts a set
-# opposite an encoding.  It also wrongly suggests a lossy split: this
-# factorisation is EXACT, Dec(L,S) = {l+s} rebuilds the repertoire, so there is
-# no residual here.  pivot/residual is the lossy pair and belongs to causal
-# reachability, not to this method.
+# GLOSSARY sec.1e, AUTHOR RULING 2026-09-07 -- *PIVOT* IS A FINANCE TERM.  It
+# names a specific kind of set there, and it names NOTHING in this method.  This
+# comment block itself said "the complement of the PIVOT COORDINATES", which is
+# how the word kept its foothold: sec.1c withdrew the pairing and left the word.
+# The method's six objects are CONNECTED INPUTS, ESSENTIAL VARIABLES, DECIMAL
+# ANCHOR, DECIMAL FAMILY, FREE COORDINATES and SUMANDOS.  One of those six is
+# always the word wanted; the seventh does not exist.
+#
+# GLOSSARY sec.1c -- the complement of the CONNECTED INPUTS is the FREE
+# COORDINATES, *not* the sumandos, which are the free coordinates' ENCODING and
+# stand parallel to the decimal anchor.  Setting a set opposite an encoding also
+# wrongly suggests a lossy split: this factorisation is EXACT, Dec(L,S) = {l+s}
+# rebuilds the repertoire, so there is no residual here.  pivot/residual is the
+# lossy pair and belongs to causal reachability, not to this method.
 #
 # GLOSSARY sec.1d, AUTHOR RULING 2026-09-03 -- SUMANDOS ARE NOT "THE
 # DISCONNECTED COORDINATES", and this file previously said they were, twice.
@@ -88,9 +96,13 @@ def essential_variables(column: list[int], n: int) -> list[int]:
     """Return the ascending list of bit positions on which ``column`` depends.
 
     Bit ``i`` is essential iff there exists an input ``x`` with
-    ``column[x] != column[x ^ (1 << i)]``.  These are exactly the connected
-    inputs -- the PIVOT COORDINATES.  The remaining bits are the FREE
-    COORDINATES.
+    ``column[x] != column[x ^ (1 << i)]``.  These are exactly the CONNECTED
+    INPUTS, and they are what this method calls the node's ESSENTIAL VARIABLES.
+    The remaining bits are the FREE COORDINATES.
+
+    Neither set is "the pivot coordinates" (GLOSSARY sec.1e, author ruling
+    2026-09-07): *pivot* is a finance term and names nothing here.  This
+    docstring used to say it did.
 
     THE FREE COORDINATES ARE NOT "THE SUMANDOS" (GLOSSARY sec.1d, author ruling
     2026-09-03).  This docstring used to end "their subset sums are the

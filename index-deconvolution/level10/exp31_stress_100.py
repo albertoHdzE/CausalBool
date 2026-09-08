@@ -12,7 +12,7 @@ Four honest verdicts:
      geometry.  Reported as such.
 
   2. The one real market claim -- the clock self-excites.  Branching ratio of the
-     oracle/pivot clock vs its return-shuffle, fraction of the 100 that are clearly
+     oracle/financial pivot clock vs its return-shuffle, fraction of the 100 that are clearly
      self-exciting, and the out-of-sample Hawkes-beats-Poisson fraction with a
      sign-test.  This is the load-bearing result; everything else is inherited or
      geometric.

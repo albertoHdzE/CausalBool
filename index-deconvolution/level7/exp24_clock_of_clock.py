@@ -2,7 +2,7 @@
 
 Does the clustering repeat one recursion deeper -- are there bursts of bursts?
 
-For each series: the base clock is the pivot point process of the values, with Fano
+For each series: the base clock is the financial pivot point process of the values, with Fano
 exponent alpha_base (Level 6).  Its activity signal is formed, and the meta-clock is
 the pivot point process of that activity signal, with Fano exponent alpha_meta.  If
 alpha_meta is positive and comparable to alpha_base, the clustering is self-similar

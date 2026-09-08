@@ -172,7 +172,7 @@ def main() -> None:
     print("  generative rule — the offset family factorises:")
     print(f"    Omega = {fmt_factors(factors)}")
     print(f"    one-set = L (+) Omega,  L = {L}")
-    print(f"    {rule_tokens} tokens: one pivot and {len(D)} free weights.")
+    print(f"    {rule_tokens} tokens: one decimal anchor and {len(D)} free weights.")
     print("    Each free coordinate contributes an independent binary choice, so the")
     print("    activation pattern recurs at every partial sum of the free weights.")
     print("    That recursion is the self-similarity; the flat form destroys it.")

@@ -211,6 +211,52 @@ def test_the_forbidden_definition_is_not_written_anywhere_we_own():
     )
 
 
+# ---------------------------------------------------------------------------
+# ARM 3 — *pivot* is a finance term (GLOSSARY sec.1e, author ruling 2026-09-07)
+# ---------------------------------------------------------------------------
+#
+# This is a FORWARDER, not a second scanner. The owner of the terminology
+# conformance concept already exists -- tools/check_glossary_conformance.sh --
+# and it already scans both languages, carries the exception ledger, prints its
+# denominator and refuses on zero. Re-implementing that scan here would be the
+# one-concept-many-homes defect this audit removes; the shell script runs in the
+# closure, and this makes it run in pytest as well.
+#
+# The owner had the very defect it exists to catch: until 2026-09-07 its header
+# read that "pivot" in its financial sense "is confined to the
+# index-deconvolution and imp-prices programmes, which are excluded below", and
+# its scope was two Wolfram directories. The Python side of the Boolean method
+# lives in index-deconvolution, so the guard exempted by name the tree that
+# still held the defect, and reported clean.
+
+def test_the_conformance_owner_is_green():
+    import subprocess
+    proc = subprocess.run(["zsh", str(ROOT / "tools" / "check_glossary_conformance.sh")],
+                          capture_output=True, text=True, cwd=str(ROOT))
+    assert proc.returncode == 0, (
+        "tools/check_glossary_conformance.sh is not green. It owns GLOSSARY "
+        "sec.1d and sec.1e for both languages.\n" + proc.stdout + proc.stderr)
+    # It must print its denominator, because a scan that says "clean" over zero
+    # files is the failure this audit keeps removing.
+    assert "over " in proc.stdout and "files in the method trees" in proc.stdout, (
+        "the conformance owner reported clean without printing its "
+        "denominator:\n" + proc.stdout)
+
+
+def test_the_method_vocabulary_is_the_six_names():
+    """The positive statement, so the guard cannot push people into saying nothing.
+
+    GLOSSARY sec.1e replaces one banned word with six precise ones. A guard that
+    only forbids leaves a writer with no vocabulary, and the way this confusion
+    survived five settlements was people reaching for the nearest available word.
+    """
+    six = {"connected inputs", "essential variables", "decimal anchor",
+           "decimal family", "free coordinates", "sumandos"}
+    glossary = (ROOT / "GOVERNANCE" / "GLOSSARY.md").read_text().lower()
+    missing = {name for name in six if name not in glossary}
+    assert not missing, f"GLOSSARY does not define {missing}; sec.1e names all six"
+
+
 @pytest.mark.parametrize("text,should_fire", [
     ("their subset sums are the sumandos", True),
     ("the sumandos are the disconnected coordinates", True),

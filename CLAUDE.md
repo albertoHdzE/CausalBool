@@ -53,7 +53,7 @@ exception with its reason, and the guard protecting each. Under the
 
 Test membership is DECLARED in `tests/MUnit/MANIFEST.tsv`, not discovered by a
 glob, and the manifest covers **all of `tests/` in both languages**:
-**119 files — 85 Wolfram + 34 Python — 96 test / 15 producer / 8 quarantine**.
+**121 files — 85 Wolfram + 36 Python — 100 test / 15 producer / 6 quarantine**.
 `tools/check_test_manifest.sh` goes red on any unclassified file and **refuses
 (exit 2) if either language scans zero files**.
 

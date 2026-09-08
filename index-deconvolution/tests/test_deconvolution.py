@@ -39,7 +39,7 @@ def test_gate_truth_tables():
 
 
 # ---------------------------------------------------------------------------
-# Pivots vs sumandos: essential variables equal connected inputs
+# Connected inputs vs sumandos: essential variables equal connected inputs
 # ---------------------------------------------------------------------------
 
 def test_essential_variables_equal_connectivity():

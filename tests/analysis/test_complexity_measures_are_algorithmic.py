@@ -216,6 +216,236 @@ def test_random_is_not_simpler_than_a_chain(name):
     )
 
 
+# --- the structured families, and where each measure fails on them ----------
+#
+# AUDIT04-F. The chain test above uses one structured object. That is one
+# family, and a measure can pass it while inverting on another -- which is
+# exactly what happens. Measured 2026-09-07 at n = 16 against 20 random matrices
+# of IDENTICAL edge count (structured bits / random-mean bits):
+#
+#   family              index-set          BDM
+#   checkerboard        1050.5 / 563.9     34.3 / 489.9
+#   column stripes      1050.5 / 568.4     34.2 / 485.2
+#   two diagonal blocks  134.9 / 555.1     50.0 / 485.3
+#   band, in-degree 4    134.9 / 439.8     85.3 / 444.7
+#   band, in-degree 8    134.9 / 566.7    108.3 / 488.4
+#
+# The index-set length INVERTS on the first two. That is not a tuning error: it
+# is a run-length code over each row's neighbour index set, and an alternating
+# row costs n/2 runs, its maximum, while its algorithmic content is nearly nil.
+#
+# THIS TEST IS WRITTEN TO THE MEASUREMENT, NOT TO A PASS. The two known
+# inversions are declared below with their reason, and the test fails if a
+# declared inversion silently disappears as well as if a new one appears. A
+# guard that hides a known failure is worse than no guard, because it converts
+# a documented limitation into an invisible one.
+
+def _checkerboard(n):
+    return np.fromfunction(lambda i, j: ((i + j) % 2 == 0).astype(int), (n, n), dtype=int)
+
+
+def _column_stripes(n):
+    return np.tile(np.array([1, 0] * (n // 2)), (n, 1))
+
+
+def _two_blocks(n):
+    h = n // 2
+    return np.block([[np.ones((h, h), int), np.zeros((h, h), int)],
+                     [np.zeros((h, h), int), np.ones((h, h), int)]])
+
+
+def _band(n, k):
+    m = np.zeros((n, n), dtype=int)
+    for i in range(n):
+        for j in range(k):
+            m[i, (i + j) % n] = 1
+    return m
+
+
+FAMILIES = {
+    "checkerboard": lambda n: _checkerboard(n),
+    "column_stripes": lambda n: _column_stripes(n),
+    "two_blocks": lambda n: _two_blocks(n),
+    "band_k4": lambda n: _band(n, 4),
+    "band_k8": lambda n: _band(n, 8),
+}
+
+# Declared, reasoned exceptions: (measure, family) pairs known to invert.
+DECLARED_INVERSIONS = {
+    ("index_set", "checkerboard"):
+        "run-length code over rows; an alternating row costs n/2 runs, its "
+        "maximum. Measured 1050.5 bits against 563.9 for random of equal density.",
+    ("index_set", "column_stripes"):
+        "same cause as checkerboard: every row alternates, so every row is "
+        "priced at the code's worst case. Measured 1050.5 against 568.4.",
+}
+
+
+@pytest.mark.parametrize("family", sorted(FAMILIES))
+@pytest.mark.parametrize("measure", ["index_set", "bdm"])
+def test_structured_families_against_matched_random(measure, family):
+    n, trials = 16, 20
+    rng = np.random.default_rng(1)
+    a = FAMILIES[family](n)
+    edges = int(a.sum())
+    fn = MEASURES[measure]
+    ref = fn(a)
+    randoms = [fn(_random_with_same_edges(n, edges, rng)) for _ in range(trials)]
+    mean_random = float(np.mean(randoms))
+    inverted = ref >= mean_random
+    declared = (measure, family) in DECLARED_INVERSIONS
+
+    if declared:
+        assert inverted, (
+            f"{measure} on {family} was DECLARED to invert, and it no longer "
+            f"does ({ref:.1f} bits vs {mean_random:.1f} for matched random). "
+            f"That is good news, but the declaration in DECLARED_INVERSIONS and "
+            f"in Universal_D_v2_Encoder is now stale and must be removed in the "
+            f"same commit as the fix.\nReason on record: "
+            f"{DECLARED_INVERSIONS[(measure, family)]}")
+    else:
+        assert not inverted, (
+            f"{measure} ranked the structured family '{family}' at {ref:.1f} "
+            f"bits against {mean_random:.1f} for random matrices of IDENTICAL "
+            f"edge count ({edges} edges, n={n}) -- it calls the structured "
+            f"object at least as complex as noise. This is a NEW inversion: it "
+            f"is not in DECLARED_INVERSIONS.")
+
+
+def test_schema_length_is_blind_to_rewiring_so_cannot_serve_the_null_test():
+    """Sigma_v D_schema is EXACTLY invariant under degree-preserving rewiring.
+
+    AUDIT04-F, and this is the fact that decides the forwarder's target. Our
+    per-node measure, schema_normal_form_length (Variant E in
+    src/description_lengths.py), prices a node from (n, gate, in-degree) alone:
+    a self-delimiting clause count, then per clause log2(n+1) + log2(C(n,k)) + k.
+    None of those terms reads WHICH coordinates are involved. The null this
+    experiment uses -- Null_Generator_HPC.degree_preserving_swap -- preserves
+    in-degree by construction.
+
+    So the real network and every one of its degree-preserving nulls get the
+    same number, and the difference is not small, it is zero. Our mechanism-side
+    measure cannot answer a wiring question. That is not a weakness in the
+    measure; a wiring question is simply not what it measures, which is why the
+    encoder reports BDM alongside it rather than repointing at D_schema.
+
+    Written as a test so that nobody repoints it in six months.
+    """
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+    from experiments.Null_Generator_HPC import degree_preserving_swap
+
+    from src.description_lengths import schema_normal_form_length
+
+    def sigma_d_schema(adj, gates):
+        """Sigma_v D_schema for a network, from its wiring and its gates.
+
+        Each node's LOCAL truth table is built from its gate and its actual
+        in-degree, which is the only thing the measure can see.
+        """
+        n = adj.shape[0]
+        total = 0.0
+        for v in range(n):
+            d = int(adj[:, v].sum())
+            if d == 0:
+                continue
+            if gates[v] == "OR":
+                tt = [1 if x else 0 for x in range(2 ** d)]
+            else:
+                tt = [bin(x).count("1") % 2 for x in range(2 ** d)]
+            total += schema_normal_form_length(tt, n)
+        return total
+
+    n = 10
+    rng = np.random.default_rng(3)
+    adj = np.zeros((n, n), dtype=int)
+    for j in range(n):
+        for i in rng.choice([k for k in range(n) if k != j], 3, replace=False):
+            adj[i, j] = 1
+    gates = ["OR" if v % 2 else "XOR" for v in range(n)]
+
+    rewired = degree_preserving_swap(adj, nswap_factor=10, seed=7)
+    assert not np.array_equal(adj, rewired), (
+        "the null did not actually rewire anything, so the invariance below "
+        "would be vacuous")
+    assert (adj.sum(axis=0) == rewired.sum(axis=0)).all(), (
+        "degree_preserving_swap did not preserve in-degrees; the claim under "
+        "test depends on it doing so")
+
+    before = sigma_d_schema(adj, gates)
+    after = sigma_d_schema(rewired, gates)
+    assert after == before, (
+        f"Sigma_v D_schema moved under a degree-preserving rewiring "
+        f"({before:.4f} -> {after:.4f} bits). It should be EXACTLY invariant: "
+        f"the measure reads (n, gate, in-degree) and the null preserves all "
+        f"three. If this ever fails, the measure has gained a wiring-sensitive "
+        f"term and the reasoning that kept it out of the null experiment must "
+        f"be revisited.")
+    assert before > 0.0
+
+    n = 8
+    or3 = [1 if x else 0 for x in range(2 ** 3)]
+    xor3 = [bin(x).count("1") % 2 for x in range(2 ** 3)]
+
+    # And the discriminating half: it DOES separate different mechanisms, so the
+    # invariance above is specific to rewiring, not general blindness.
+    assert schema_normal_form_length(xor3, n) > schema_normal_form_length(or3, n), (
+        "D_schema must still separate XOR from OR at equal in-degree -- that "
+        "separation is the whole point of GLOSSARY sec.1d. If this fails the "
+        "measure has collapsed to the narrow reading of the sumandos.")
+
+
+def test_the_encoder_reports_both_measures_and_never_merges_them():
+    """AUDIT04-F. Two named measures side by side, per the author's directive.
+
+    Decision #96 forbids folding two measures into one number with a selector
+    bit, so the assertion is not merely that both keys exist -- it is that the
+    retained `dv2` key still carries the INDEX-SET value unchanged, so the
+    thirteen existing callers and every stored artefact keep resolving.
+    """
+    chain = _chain(12)
+    res = UniversalDv2Encoder(chain).compute()
+
+    assert res["dv2"] == res["index_set_bits"], (
+        "`dv2` must keep carrying the index-set length; thirteen callers and "
+        "the stored artefacts read that key")
+    assert res["dv2"] == pytest.approx(row_run_index_set_length(chain))
+    assert res["bdm"] == pytest.approx(_bdm_2d(chain))
+    assert set(res["measures"]) == {"index_set_program_length", "bdm"}
+    # The two must be genuinely different numbers, or "reporting both" is theatre.
+    assert res["bdm"] != pytest.approx(res["index_set_bits"])
+
+
+def test_bdm_below_its_partition_floor_is_none_and_says_why_not_zero():
+    """A network too small to measure must not read as `0 bits`.
+
+    pybdm's 2-D partition is 4x4 and refuses smaller input. AUDIT02/P1: a silent
+    zero is indistinguishable from a real measurement of zero, and here it would
+    make the smallest networks look like the simplest possible ones.
+    """
+    tiny = np.array([[0, 1], [1, 0]])
+    res = UniversalDv2Encoder(tiny).compute()
+    assert res["bdm"] is None
+    assert res["dv2"] > 0.0, "the index-set length has no such floor"
+    note = res["detail"]["bdm_note"]
+    assert note and "not zero" in note.lower() and "4x4" in note.lower()
+
+
+def test_compute_both_agrees_with_the_encoder_it_delegates_to():
+    """The null generator's pair helper must not be a second implementation."""
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "src"))
+    from experiments.Null_Generator_HPC import compute_both
+
+    a = _chain(12)
+    both = compute_both(a)
+    res = UniversalDv2Encoder(a).compute()
+    assert both["index_set"] == pytest.approx(res["index_set_bits"])
+    assert both["bdm"] == pytest.approx(res["bdm"])
+
+
 def test_the_scaling_exponent_refuses_rather_than_returning_zero():
     """AUDIT02/P1: a silent 0.0 is indistinguishable from a real measurement.
 
@@ -327,7 +557,7 @@ def test_the_separation_operator_beats_the_z_score_it_replaced():
 def test_the_monitor_refuses_a_missing_separation():
     """The old default was z = -999.0, which silently satisfied `z < 2.0`.
 
-    A pivot decided from an absent measurement is worse than a crash, because
+    A redirection decided from an absent measurement is worse than a crash, because
     it looks like a decision.
     """
     from src.pipeline.Contingency_Monitor import ContingencyMonitor

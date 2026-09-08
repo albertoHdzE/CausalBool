@@ -1,6 +1,6 @@
 """occurrence_geometry.py  (Level 5)
 
-The behaviour table of the representation-free pivots: the arithmetic of where the
+The behaviour table of the representation-free financial pivots: the arithmetic of where the
 salient points occur along time and value.
 
 Three process columns, each a named, closed-form quantity:

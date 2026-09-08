@@ -90,7 +90,8 @@ def probe_perturbation_witnesses():
             print(f"  bit {i}: NEVER changes output -> disconnected (a FREE coordinate)")
         else:
             print(f"  bit {i}: input {witness:05b} vs {witness | bit:05b} flips output "
-                  f"{column[witness]}->{column[witness | bit]} -> connected (a pivot)")
+                  f"{column[witness]}->{column[witness | bit]} -> connected "
+                  f"(an ESSENTIAL VARIABLE)")
     return ess == [1, 2, 3]
 
 

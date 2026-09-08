@@ -45,7 +45,7 @@ CBRegulatoryDNFClauses[reduced_, m_] := Module[
       <|"activators" -> Sort[acts], "inhibitors" -> Sort[inhs]|>]], terms];
   clauses];
 
-(* --- essential variables (pivots vs sumandos) ---
+(* --- essential variables (connected inputs vs sumandos) ---
    Sorted 1-based node positions on which an output column of length 2^n depends. *)
 EssentialVariables[column_List, n_Integer] := Module[{ess = {}, bit, sensitive, x},
   Do[
@@ -106,7 +106,7 @@ IdentifyGate[reduced_List] := Module[
     activators = Select[Range[0, m - 1], BitAnd[ystar, 2^#] > 0 &];
     AppendTo[matches, {"REGULATORY", <|"activators" -> activators, "arity" -> m|>}]]];
   (* Regulatory disjunctive normal form: minimal DNF cover of the on-set,
-     expressed as a union of activator/inhibitor clauses (pivot-shifted cosets).
+     expressed as a union of activator/inhibitor clauses (anchor-shifted cosets).
      Named only when it genuinely compresses and the arity is small. *)
   If[1 < Total[reduced] < Length[reduced] && m <= 12,
    Module[{clauses, params, tt},

@@ -5,7 +5,7 @@ Is the clock monofractal or multifractal?
 One Hurst exponent describes a process whose scaling is uniform.  Many natural
 activity processes are richer: different moments scale with different exponents, so
 a spectrum h(q) is needed.  Using multifractal detrended fluctuation analysis on
-the inter-pivot waiting-time sequence (the clock's own intervals, which have a good
+the inter-financial pivot waiting-time sequence (the clock's own intervals, which have a good
 dynamic range), we estimate h(q) for a range of positive moment orders q and report
 the width h(q_min) - h(q_max).  Small q weights small fluctuations, large q the
 large ones; a decreasing h(q) means large bursts scale differently from calm

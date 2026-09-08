@@ -7,7 +7,7 @@ ACTIONS carry a timing pattern. Three parts, each against the return-shuffle nul
      forced alternation: its conditional entropy is ~0 bits. The information is all in
      the timing. We show the two entropies side by side.
 
-  2. Two clocks, not one (the new object). Split the pivot clock into the BUY clock
+  2. Two clocks, not one (the new object). Split the financial pivot clock into the BUY clock
      (troughs) and the SELL clock (peaks). Are they equally self-exciting? Is one more
      predictable out of sample than the other? This is the direct test of 'do buy and
      sell have their own frequency/pattern'.

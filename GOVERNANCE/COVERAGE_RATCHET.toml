@@ -1,6 +1,12 @@
-global_floor = 29.12
-# Measured from pure tier: source venv/bin/activate && python -m pytest -q tests/analysis/
+global_floor = 31.35
+# Measured from pure tier: source venv/bin/activate && python -m pytest -q
 # --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
+#
+# NOTE THE ABSENT PATH ARGUMENT (corrected 2026-09-07, AUDIT04-F). This line
+# read `pytest -q tests/analysis/ --cov=src`, and following it produced a report
+# over about a tenth of the declared suite: global 13.97% against a floor of
+# 29.12%, with 18 modules coming back UNMEASURED rather than measured. The file
+# that records the floors was prescribing a partial denominator.
 # Includes 4 new contract tests for corpus parsers.
 # The floor RATCHES: it may rise, never fall. A module whose coverage drops
 # below its recorded floor is a regression (exit 1), even when global figure is fine.
@@ -142,7 +148,9 @@ global_floor = 29.12
 "src/data/cancer_network_builder.py" = 42.60
 "src/description_lengths.py" = 98.09
 "src/dynamics/Boolean_Dynamics.py" = 85.34
-"src/experiments/Null_Generator_HPC.py" = 30.04
+"src/integration/HierarchyEncoder.py" = 93.33
+"src/experiments/Null_Generator_HPC.py" = 32.47
+"src/pipeline/Contingency_Monitor.py" = 88.17
 "src/integration/BDM_Wrapper.py" = 71.42
 "src/integration/BNetParser.py" = 86.79
 "src/integration/Basin_Encoder.py" = 90.47
@@ -152,7 +160,7 @@ global_floor = 29.12
 "src/integration/LogicParser.py" = 75.67
 "src/integration/MotifEncoder.py" = 89.70
 "src/integration/SBMLParser.py" = 57.19
-"src/integration/Universal_D_v2_Encoder.py" = 90.47
+"src/integration/Universal_D_v2_Encoder.py" = 92.85
 "src/integration/bio_D_experiment.py" = 12.86
 "src/integration/phase_transition_experiment.py" = 43.70
 "src/stats/Bayes_Factor_Calculator.py" = 78.43

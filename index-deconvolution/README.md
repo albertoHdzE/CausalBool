@@ -50,7 +50,7 @@ See `bitacora/` for the full scientific logbook:
       Deconvolution.wl       Wolfram port of the deconvolution (with REGULATORY gate)
       CADeconvolution.wl     Wolfram port of the CA deconvolution
     experiments/
-      exp01_pivots_sumandos.py   verifies the pivots/sumandos factorisation
+      exp01_connected_inputs_and_sumandos.py   verifies the factorisation
       exp02_exact_recovery.py    main result: exact recovery over a batch
       exp03_ca_to_network.py     cellular automaton to network, exact global map
       exp04_biological.py        real gene-regulatory networks, round-trip exactness certificate
@@ -79,7 +79,7 @@ Tests:
 
 Experiments (write JSON to `results/`):
 
-    python experiments/exp01_pivots_sumandos.py
+    python experiments/exp01_connected_inputs_and_sumandos.py
     python experiments/exp02_exact_recovery.py
 
 Wolfram equivalence cross-check (proves the Python forward model equals
@@ -129,9 +129,11 @@ Regenerate and verify (paths via environment variables), for example:
 - Unit tests: 11 / 11 pass (network and cellular-automaton cases).
 - Exact repertoire reproduction: 200 / 200 networks (sizes 7 to 10, full 12-gate
   family).
-- Free-coordinate insensitivity (experiment `exp01_pivots_sumandos.py` — the
-  filename names a set and an encoding side by side, per GLOSSARY §1c):
-  disconnected nodes never sensitive across 1700 nodes (100%).
+- Free-coordinate insensitivity (experiment
+  `exp01_connected_inputs_and_sumandos.py`, renamed from `exp01_pivots_sumandos.py`
+  on 2026-09-07 — the old name set a set beside an encoding per GLOSSARY §1c, and
+  used a finance term for a method object per §1e): disconnected nodes never
+  sensitive across 1700 nodes (100%).
 - Functional connectivity recovered exactly for all gates except degenerate
   CANALISING parameterisations (which are functionally independent of a declared
   input; the deconvolution correctly recovers the smaller functional set).

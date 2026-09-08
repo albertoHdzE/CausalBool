@@ -9,7 +9,7 @@ buy twice in a row; every buy is followed by a sell and vice versa. So the *orde
 the action symbols is forced -- B, S, B, S, ... -- and carries essentially zero
 information. All of the content is in the *run-lengths between actions*, which is the
 clock. This module makes that split explicit and then does the genuinely new thing the
-idea suggests: it decomposes the single pivot clock into two interleaved clocks,
+idea suggests: it decomposes the single financial pivot clock into two interleaved clocks,
 
     the BUY clock  = the trough pivots  (kind -1): when the perfect entry arrives,
     the SELL clock = the peak pivots    (kind +1): when the perfect exit arrives,

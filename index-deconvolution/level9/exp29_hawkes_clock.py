@@ -2,7 +2,7 @@
 
 A three-number generative program for the clock, and how self-exciting it is.
 
-For each instrument the pivot times are fitted with an exponential Hawkes process
+For each instrument the financial pivot times are fitted with an exponential Hawkes process
 (mu, alpha, beta). Four questions, each against the return-shuffle null:
 
   1. Self-excitation. Is the branching ratio n = alpha/beta well above the shuffle's

@@ -4,7 +4,7 @@ The clock as a synthetic gate-network: matching the occurrence set to the fracta
 of the original method.
 
 The original index-set method reads a gate's output as an occurrence set with an exact
-behaviour formula: a pivot plus an offset family (AND), or a band-union (OR), over the
+behaviour formula: a financial pivot plus an offset family (AND), or a band-union (OR), over the
 dyadically-ordered exhaustive repertoire. The self-similarity there is deterministic and
 comes from the NESTED dyadic structure -- node i ticks at 2^i, each scale nested inside
 the next -- which the behaviour table exposes as a constant (n+1)/n ratio column and a
