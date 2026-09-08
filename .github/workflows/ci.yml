@@ -74,7 +74,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt -r requirements-dev.txt
-      - name: declared Python suite with the coverage ratchet  (expected 225 collected: 224 pass, 1 declared skip)
+      - name: declared Python suite with the coverage ratchet  (expected 237 collected: 236 pass, 1 declared skip)
         # The count is asserted so a collection failure cannot pass as a green run.
         #
         # AUDIT04-E: this step ran `tests/analysis` and asserted 134. That was the
@@ -88,8 +88,8 @@ jobs:
         # every floor, global and per module.
         run: |
           python -m pytest -q --cov --cov-config=.coveragerc --cov-report=json --tb=short | tee /tmp/a.txt
-          grep -qE '\b224 passed, 1 skipped' /tmp/a.txt \
-            || { echo "EXPECTED '224 passed, 1 skipped' (225 collected)"; exit 1; }
+          grep -qE '\b236 passed, 1 skipped' /tmp/a.txt \
+            || { echo "EXPECTED '236 passed, 1 skipped' (237 collected)"; exit 1; }
           python tools/check_coverage_ratchet.py
       - name: index-deconvolution  (expected 146)
         working-directory: index-deconvolution

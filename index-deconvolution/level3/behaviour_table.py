@@ -4,8 +4,13 @@ Gate-agnostic behaviour-table analysis: given a binary output pattern, describe
 HOW its information is distributed, without assuming any generating gate.  This is
 the computational form of the behaviour-table method of the UNAM thesis
 (doc/Tesis-UNAM, chapter 4): find the pivots (the invariant place-value
-structure), the sumandos (the free offset dimension), and the schema (clause)
+structure), the FREE COORDINATES (the offset dimension), and the schema (clause)
 structure that tiles the one-set, and measure how much the pattern compresses.
+
+NOTE (GLOSSARY sec.1d, 2026-09-03): the free coordinates are NOT "the sumandos".
+The sumandos of a schema are the fillings of its own don't-care positions,
+wherever they fall -- including don't-cares on CONNECTED inputs, which is where
+all of Rule 110's live. See free_coordinates() below.
 
 The naming of a gate is deliberately not attempted here.  The object recovered is
 the information-distribution structure itself.  A structured pattern (however
@@ -31,25 +36,50 @@ def decimal_repertoire(column):
     return [i for i, v in enumerate(column) if v == 1]
 
 
-def sumando_bits(column, n):
-    """Bit positions that never change the output: the free offset dimension.
+def free_coordinates(column, n):
+    """Bit positions that never change the output: the FREE COORDINATES.
 
-    These are the complement of the essential variables; flipping a sumando bit
-    leaves the pattern invariant, so the one-set is a union of translates of the
-    subcube they span.
+    These are the complement of the essential variables; flipping one leaves the
+    pattern invariant, so the one-set is a union of translates of the subcube
+    they span.
+
+    THIS FUNCTION WAS CALLED ``sumando_bits`` AND THAT NAME WAS THE ERROR
+    (GLOSSARY sec.1d, author ruling 2026-09-03). It computes the complement of
+    the essential variables, which is the free coordinates -- not the sumandos.
+
+      Definition. The sumandos of a schema are the fillings of ITS OWN
+      DON'T-CARE positions, wherever those positions fall.
+
+    The two coincide only in the special case where a schema's don't-cares are
+    exactly the disconnected inputs. Rule 110 is the standing counterexample:
+    all three inputs are connected, so this function returns [] -- yet the
+    correct reading gives three schemata (01*, 10*, *10) whose don't-cares all
+    sit on CONNECTED inputs. Naming this ``sumando_bits`` is precisely how the
+    implementation detail became the definition, five times over.
     """
     ess = set(essential_variables(column, n))
     return [i for i in range(n) if i not in ess]
 
 
+def sumando_bits(column, n):
+    """DEPRECATED name for :func:`free_coordinates`. Do not use in new code.
+
+    Kept as a forwarder rather than deleted so stored artefacts and the Level-3
+    experiments keep resolving; the name is wrong for the reason given above.
+    """
+    return free_coordinates(column, n)
+
+
 def behaviour_decomposition(column, n):
     """Full gate-agnostic behaviour table for a 2**n pattern.
 
-    Returns the pivots (essential bits), the sumandos (free bits), the schema
-    clauses that tile the reduced one-set, and a compression figure: how many of
-    the pattern's ones each schema accounts for.  A structured pattern has few
-    schemata each covering many ones; a random pattern needs about one schema per
-    one.
+    Returns the pivots (essential bits), the FREE COORDINATES (the insensitive
+    bits), the schema clauses that tile the reduced one-set, and a compression
+    figure: how many of the pattern's ones each schema accounts for.  A
+    structured pattern has few schemata each covering many ones; a random
+    pattern needs about one schema per one.
+
+    The second item is NOT "the sumandos" -- see :func:`free_coordinates`.
     """
     ess = essential_variables(column, n)
     reduced = reduce_column(column, n, ess)
@@ -58,12 +88,14 @@ def behaviour_decomposition(column, n):
         [] if ones_reduced == 0 else [{"activators": ess_i, "inhibitors": []}
                                       for ess_i in [[]]])
     n_clauses = max(1, len(clauses)) if ones_reduced else 0
-    one_set_full = ones_reduced * (2 ** len(sumando_bits(column, n)))
+    one_set_full = ones_reduced * (2 ** len(free_coordinates(column, n)))
     return {
         "n": n,
         "one_set_size": sum(column),
         "pivots_essential_bits": ess,
-        "sumando_bits": sumando_bits(column, n),
+        "free_coordinates": free_coordinates(column, n),
+        # deprecated key, kept so Level-3 experiments and stored artefacts resolve
+        "sumando_bits": free_coordinates(column, n),
         "num_schemata": n_clauses,
         "ones_per_schema": (one_set_full / n_clauses) if n_clauses else 0.0,
         "schemata": clauses,

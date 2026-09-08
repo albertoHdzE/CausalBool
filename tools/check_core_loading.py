@@ -234,6 +234,16 @@ EXCEPTIONS = [
      "the independent derivation IS the pin for the companion; importing the "
      "owner would make the assertion a tautology",
      "the file's own equality assertion against the companion"),
+    # Same principle, different subject. This file guards the DEFINITION of the
+    # sumandos (GLOSSARY sec.1d), and Rule 110 is its counterexample. The truth
+    # table is written out from the Wolfram rule number rather than imported,
+    # because a test that builds its counterexample with the module it is
+    # guarding cannot detect that module changing underneath it.
+    ("tests/analysis/test_sumandos_definition.py",
+     "the counterexample must be independent of the module under guard; "
+     "building Rule 110 from causalbool would make it assert owner === owner",
+     "the file's own Rule 110 assertions: 3 connected inputs, 0 free "
+     "coordinates, 5 minterms compressing to 3 schemata"),
 ]
 
 # ------------------------------------------------------------------

@@ -1,12 +1,20 @@
 """exp01_pivots_sumandos.py
 
 Empirical verification of the structural fact stated in the formal manuscript:
-connected nodes act as pivots, disconnected nodes as sumandos.
+connected inputs are the pivot coordinates; disconnected inputs are FREE
+coordinates.
+
+THE FILENAME IS A KNOWN SOURCE OF CONFUSION (GLOSSARY sec.1d/2 item 5): it names
+a SET beside an ENCODING, and reading it as a partition is how a lossless
+factorisation got mistaken for a lossy one. What this experiment verifies is the
+insensitivity of disconnected inputs -- NOT a definition of the sumandos, which
+are the fillings of a schema's own don't-care positions wherever they fall.
 
 Operationally, for every node of every generated network we check:
 
   (a) every disconnected input is insensitive: flipping it never changes the
-      output column (it lies in the free offset dimension - a sumando);
+      output column (it is a FREE coordinate; free coordinates are among every
+      schema's don't-cares, but they do not define the sumandos);
   (b) the set of sensitive inputs recovered by single-bit perturbation equals
       the true connected set (the pivots), for non-degenerate gates.
 

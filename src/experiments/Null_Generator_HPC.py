@@ -196,26 +196,63 @@ def process_networks(
                 cm_gate = gate_preserving_fanout(cm, seed=s)
                 null_scores_gate.append(compute_dv2(cm_gate))
             
-            def zscore(x: float, xs: List[float]) -> Tuple[float, float, float]:
-                mu = float(np.mean(xs))
-                sd = float(np.std(xs)) if len(xs) > 1 else 0.0
-                z  = (mu - x) / sd if sd > 0 else 0.0
-                return z, mu, sd
-            
-            z_er,  mu_er,  sd_er  = zscore(D_bio, null_scores_er)
-            z_deg, mu_deg, sd_deg = zscore(D_bio, null_scores_deg)
-            z_gate,mu_gate,sd_gate= zscore(D_bio, null_scores_gate)
-            
+            # AUDIT04-E, author directive 2026-09-07: the z-score is replaced.
+            #
+            # It was `(mu - x) / sd`, which rescales a quantity in BITS by the
+            # standard deviation of an ensemble. That is a distributional
+            # summary wrapped around an algorithmic length, and it destroys
+            # information the length already carries. Measured on three nulls
+            # where bio beats 0 of 1000 in EVERY case -- identical evidence:
+            #
+            #   gaussian null       z = 5.07  pass      gap  8.8 bits  rank 0/1000
+            #   DEGENERATE null     z = 0.00  FALSIFY   gap 50.0 bits  rank 0/1000
+            #   heavy-tailed null   z = 0.31  FALSIFY   gap 20.0 bits  rank 0/1000
+            #
+            # The degenerate case is the old code's own `if sd > 0 else 0.0`
+            # branch: every null 50 bits LONGER than bio, and it returned "no
+            # evidence". The fat tail inflates sd and falsifies a real result.
+            # The gap and the rank are unmoved by either.
+            #
+            # WHAT REPLACES IT, all algorithmic or distribution-free:
+            #
+            #   gap       D(best null) - D(bio), in bits. The WORST-CASE
+            #             advantage: how much shorter bio is than the single
+            #             best null, not than their average. By the coding
+            #             theorem m(x) ~ 2^-K(x), a gap of g bits IS a
+            #             likelihood ratio of 2^g under the universal
+            #             distribution -- a per-instance statement needing no
+            #             ensemble shape.
+            #   exceed    #{null <= bio} / n. Distribution-free: the exact
+            #             permutation-test tail, valid whatever the null looks
+            #             like.
+            #   best/med  order statistics, for scale. No mean, no sd.
+            def separation(x: float, xs: List[float]) -> Dict[str, float]:
+                if not xs:
+                    raise ValueError(
+                        "separation over an EMPTY null ensemble. A comparison "
+                        "against nothing is not a pass."
+                    )
+                beaten = sum(1 for v in xs if v <= x)
+                return {
+                    "gap_bits": float(min(xs) - x),
+                    "exceed": beaten / len(xs),
+                    "best_null": float(min(xs)),
+                    "median_null": float(np.median(xs)),
+                }
+
+            sep_er   = separation(D_bio, null_scores_er)
+            sep_deg  = separation(D_bio, null_scores_deg)
+            sep_gate = separation(D_bio, null_scores_gate)
+
             entry = {
                 "network": name,
                 "nodes": len(nodes),
                 "n": n,
                 "E": int(cm.sum()),
                 "D_bio": D_bio,
+                "measure": "index_set_program_length",
                 "nulls_per_type": nulls_per_type,
-                "z_er": z_er,   "mu_er": mu_er,   "sd_er": sd_er,
-                "z_deg": z_deg, "mu_deg": mu_deg, "sd_deg": sd_deg,
-                "z_gate": z_gate,"mu_gate":mu_gate,"sd_gate":sd_gate,
+                "er": sep_er, "deg": sep_deg, "gate": sep_gate,
                 "timestamp": time.time()
             }
             results.append(entry)
@@ -255,21 +292,40 @@ def main():
     
     # Global summary
     if results:
-        z_er   = [r["z_er"] for r in results]
-        z_deg  = [r["z_deg"] for r in results]
-        z_gate = [r["z_gate"] for r in results]
-        summary = {
+        # AUDIT04-E: summarised by ORDER STATISTICS and a count, not by a mean.
+        # A mean of z-scores was a summary of a summary. The median gap says how
+        # large the typical advantage is in bits; `separating` counts how many
+        # networks beat EVERY null outright, which is the claim itself rather
+        # than a proxy for it.
+        def _col(kind: str, field: str) -> List[float]:
+            return [r[kind][field] for r in results if kind in r]
+
+        summary: Dict[str, Any] = {
             "count": len(results),
-            "z_er_mean": float(np.mean(z_er)) if z_er else 0.0,
-            "z_deg_mean": float(np.mean(z_deg)) if z_deg else 0.0,
-            "z_gate_mean": float(np.mean(z_gate)) if z_gate else 0.0
+            "measure": "index_set_program_length",
+            "comparison": "gap_bits = D(best null) - D(bio); exceed = #{null <= bio}/n",
         }
+        for kind in ("er", "deg", "gate"):
+            gaps = _col(kind, "gap_bits")
+            exc = _col(kind, "exceed")
+            summary[kind] = {
+                "median_gap_bits": float(np.median(gaps)) if gaps else None,
+                "min_gap_bits": float(min(gaps)) if gaps else None,
+                "separating_at_exceed_0": sum(1 for e in exc if e == 0.0),
+                "separating_at_exceed_lt_0.05": sum(1 for e in exc if e < 0.05),
+                "n": len(gaps),
+            }
         # The module-level mkdir was removed (it ran on import); every write
         # site must now guarantee the directory itself.
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         with open(RESULTS_DIR / "null_summary.json", "w") as f:
             json.dump(summary, f, indent=2)
-        print(f"Global Z means: ER={summary['z_er_mean']:.3f}, DEG={summary['z_deg_mean']:.3f}, GATE={summary['z_gate_mean']:.3f}")
+        for kind in ("er", "deg", "gate"):
+            s = summary[kind]
+            if s["n"]:
+                print(f"  {kind:5s} median gap {s['median_gap_bits']:8.2f} bits · "
+                      f"worst {s['min_gap_bits']:8.2f} · "
+                      f"beats EVERY null {s['separating_at_exceed_0']}/{s['n']}")
 
 if __name__ == "__main__":
     main()

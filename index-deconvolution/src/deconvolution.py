@@ -9,11 +9,15 @@ then names ``f`` with the canonical CausalBool gate family.
 
 Method (see ``bitacora/01_deconvolution_method_design.md`` for the full
 derivation).  The forward CausalBool transform factorises over nodes: output
-column ``k`` is a function of the connected inputs only, with the disconnected
-nodes contributing only the free offset dimension, whose decimal encoding is
-the "sumandos".  Therefore
-deconvolution factorises into independent per-column problems, each solved
-exactly by:
+column ``k`` is a function of the connected inputs only, so deconvolution
+factorises into independent per-column problems, each solved exactly by:
+
+(This sentence used to add "with the disconnected nodes contributing only the
+free offset dimension, whose decimal encoding is the sumandos".  Removed: it
+defines the sumandos by the disconnected coordinates, which GLOSSARY sec.1d
+forbids -- see the ruling quoted at Step 1 below.  The factorisation over
+connected inputs is true and is what this module does; the claim about what the
+sumandos ARE is the part that was wrong.)
 
   1. Essential-variable detection by single-bit perturbation.  Bit ``i`` is a
      connected input of node ``k`` iff flipping bit ``i`` of some input changes
@@ -40,13 +44,44 @@ from causalbool import Network, apply_gate, truth_table, repertoire
 # ---------------------------------------------------------------------------
 # Step 1 - essential-variable detection (connected vs free coordinates)
 #
-# Terminology, GOVERNANCE/GLOSSARY.md sec.1c (in-repo synchronized copy; canonical at ../series-deconvolution): the complement of the PIVOT COORDINATES is the
-# FREE COORDINATES, *not* the sumandos.  Each side has its own decimal encoding --
-# connected -> decimal anchor, free -> sumandos -- so pairing "pivots vs sumandos"
-# puts a set opposite an encoding.  It also wrongly suggests a lossy split: this
-# factorisation is EXACT, Dec(L,S) = {l+s} rebuilds the repertoire, so there is no
-# residual here.  pivot/residual is the lossy pair, and it belongs to causal
+# TWO terminology rulings apply here, and this comment used to state the first
+# while contradicting the second.
+#
+# GLOSSARY sec.1c -- the complement of the PIVOT COORDINATES is the FREE
+# COORDINATES, *not* the sumandos.  Pairing "pivots vs sumandos" puts a set
+# opposite an encoding.  It also wrongly suggests a lossy split: this
+# factorisation is EXACT, Dec(L,S) = {l+s} rebuilds the repertoire, so there is
+# no residual here.  pivot/residual is the lossy pair and belongs to causal
 # reachability, not to this method.
+#
+# GLOSSARY sec.1d, AUTHOR RULING 2026-09-03 -- SUMANDOS ARE NOT "THE
+# DISCONNECTED COORDINATES", and this file previously said they were, twice.
+#
+#   Definition.  The sumandos of a schema are the fillings of ITS OWN DON'T-CARE
+#   POSITIONS, wherever those positions fall.  Omega is the offset family they
+#   generate.
+#
+# The disconnected coordinates are free in every schema and are the special case
+# always present -- but the special case may be ILLUSTRATED, never DEFINED AS the
+# general object.  RULE 110 is the standing counterexample: three inputs, ALL
+# THREE CONNECTED.  Under the narrow reading its free coordinates are empty, so
+# Omega = {0}, there is no compression and L must list all five minterms.  Under
+# the correct reading it is three schemata -- 01*, 10*, *10 -- and every one of
+# their don't-cares sits ON A CONNECTED INPUT.  The narrow reading cannot express
+# the right one.
+#
+# This is quantitative, not terminological.  The narrow reading sees compression
+# only from disconnected coordinates, so it cannot tell an OR from an XOR of the
+# same in-degree -- both are "one gate with n-d free coordinates".  The general
+# reading separates them exactly: an OR of in-degree 10 covers 1023 minterms with
+# 10 schemata, an XOR of in-degree 10 covers 512 minterms and needs 512, because
+# none of its minterms merge.  A measure blind to that is not measuring the
+# object, and reading the method this way makes it look trivial when it is not.
+#
+# Settled and re-adopted FIVE times as of 2026-09-07.  The cause is always the
+# same: a reader meets a helper that computes Complement[Range[n], connected] and
+# promotes that implementation detail into the definition.  Guarded now by
+# tests/analysis/test_sumandos_definition.py.
 # ---------------------------------------------------------------------------
 
 def essential_variables(column: list[int], n: int) -> list[int]:
@@ -55,9 +90,16 @@ def essential_variables(column: list[int], n: int) -> list[int]:
     Bit ``i`` is essential iff there exists an input ``x`` with
     ``column[x] != column[x ^ (1 << i)]``.  These are exactly the connected
     inputs -- the PIVOT COORDINATES.  The remaining bits are the FREE
-    COORDINATES; their subset sums are the sumandos.  (The sumandos are the
-    free coordinates' decimal *encoding*, not the coordinates themselves --
-    GOVERNANCE/GLOSSARY.md sec.1c.)
+    COORDINATES.
+
+    THE FREE COORDINATES ARE NOT "THE SUMANDOS" (GLOSSARY sec.1d, author ruling
+    2026-09-03).  This docstring used to end "their subset sums are the
+    sumandos", which defines the general object by its special case.  The
+    sumandos of a schema are the fillings of that schema's own don't-care
+    positions, wherever those positions fall -- INCLUDING don't-cares on
+    connected inputs, which is where all of Rule 110's live.  The disconnected
+    coordinates are free in every schema and so are always among them; that is
+    an illustration of the definition, not the definition.
     """
     if len(column) != 2 ** n:
         raise ValueError("column length must be 2**n")

@@ -16,7 +16,7 @@ class ContingencyMonitor:
     ACTIONS = {
         "CONTINUE": "Signal is robust. Continue Phase 3.",
         "ITERATE": "Signal is noisy ($0.2 < \\rho < 0.4$). Increase N and refine features.",
-        "PIVOT_HYBRID": "Theoretical Falsification ($Z < 2.0$ or $BF_{01} > 10$). Pivot to Hybrid Encoding.",
+        "PIVOT_HYBRID": "Theoretical Falsification (>= 5% of nulls as short as Bio, or Bio not shorter than the best null, or $BF_{01} > 10$). Pivot to Hybrid Encoding.",
         "PIVOT_CELL": "Clinical Weakness ($\\rho < 0.2$ and $MI \\approx 0$). Switch to Cell Lines.",
         "PUBLISH_EMERGENCE": "High Complexity but High Efficiency ($AER > 1.0$). Publish 'Edge of Chaos' finding."
     }
@@ -28,7 +28,8 @@ class ContingencyMonitor:
         
         Args:
             metrics (dict): {
-                'z_score_deg': float,
+                'gap_bits_deg': float,   # D(best null) - D(bio), in bits
+                'exceed_deg': float,     # #{null <= bio} / n, in [0, 1]
                 'bayes_factor_01': float,
                 'rho_depmap': float,
                 'mi_depmap_bits': float,
@@ -44,7 +45,28 @@ class ContingencyMonitor:
                 'report_path': str
             }
         """
-        z = metrics.get('z_score_deg', -999.0)
+        # AUDIT04-E, author directive 2026-09-07: the z-score is replaced by an
+        # algorithmic gap and a distribution-free rank.
+        #
+        # The falsification branch below read `z < 2.0`, where z was
+        # (mean_null - D_bio)/sd_null. Two defects rode on that. The measure
+        # underneath it was Shannon (D_v2, retired: it ranked a random graph
+        # simpler than a chain in 195 of 200 draws), and the OPERATOR discarded
+        # the bits: on three nulls where bio beat 0 of 1000 in every case, z
+        # said 5.07 / 0.00 / 0.31 and would have falsified two of them.
+        #
+        # Now:
+        #   gap_bits_deg  D(best null) - D(bio). Positive means bio is shorter
+        #                 than the single best null. By the coding theorem a gap
+        #                 of g bits is a likelihood ratio of 2^g under the
+        #                 universal distribution.
+        #   exceed_deg    #{null <= bio}/n, the exact permutation tail.
+        #
+        # `z_score_deg` is still accepted so stored artefacts written before this
+        # change keep resolving, but it is NOT used for the decision -- a value
+        # computed from the retired measure must not steer a pivot.
+        gap = metrics.get('gap_bits_deg')
+        exceed = metrics.get('exceed_deg')
         bf01 = metrics.get('bayes_factor_01', 0.0)
         rho = metrics.get('rho_depmap', 0.0)
         mi = metrics.get('mi_depmap_bits', 0.0)
@@ -53,15 +75,39 @@ class ContingencyMonitor:
         action = "CONTINUE"
         reasons = []
 
-        # 1. Check Falsification (Universality)
-        # Z-score > -2.0 means D_bio is close to D_rand (Not simple).
-        # Note: Z = (Mean_Rand - D_bio) / Std_Rand.
-        # If D_bio << Mean_Rand, Z is positive (e.g. +5).
-        # If D_bio approx Mean_Rand, Z approx 0.
-        # So Z < 2.0 is indeed "Failure to separate".
-        if z < 2.0:
+        # 1. Falsification: did the real network separate from its nulls?
+        #
+        # TWO conditions, because they fail differently. `exceed` says whether
+        # bio beat the ensemble at all; `gap` says by how much. A result can
+        # clear the rank while being one bit shorter, and a large gap means
+        # nothing if part of the ensemble is shorter still.
+        #
+        # exceed >= 0.05 is the distribution-free analogue of the old two-sigma
+        # threshold, and it is EXACT rather than approximate: it assumes nothing
+        # about the ensemble's shape, which is precisely what the old operator
+        # got wrong on the degenerate and heavy-tailed nulls.
+        #
+        # REFUSES on absent inputs. The old code defaulted z to -999.0, which
+        # silently satisfied `z < 2.0` and would have pivoted the whole project
+        # on a missing measurement.
+        if gap is None or exceed is None:
+            raise ValueError(
+                "evaluate_checkpoint needs gap_bits_deg and exceed_deg "
+                "(AUDIT04-E). The z-score they replace was computed from the "
+                "retired Shannon measure; defaulting either would decide a "
+                "pivot from an absent measurement."
+            )
+
+        if exceed >= 0.05:
             action = "PIVOT_HYBRID"
-            reasons.append(f"Z-Score ({z:.2f}) < 2.0 indicates failure to separate Bio from Null.")
+            reasons.append(
+                f"{exceed:.1%} of nulls are as short as Bio or shorter (>= 5%): "
+                f"failure to separate Bio from Null.")
+        elif gap <= 0.0:
+            action = "PIVOT_HYBRID"
+            reasons.append(
+                f"Bio is not shorter than the best null (gap {gap:.2f} bits): "
+                f"failure to separate.")
         elif bf01 > 10.0:
             action = "PIVOT_HYBRID"
             reasons.append(f"Bayes Factor BF01 ({bf01:.2f}) > 10 strongly favors Null Model.")
@@ -80,24 +126,24 @@ class ContingencyMonitor:
                     action = "ITERATE"
                     reasons.append(f"Marginal Correlation (rho={rho:.2f}). Iterate and refine.")
 
-        # 3. Check Emergence (Rescue Clause)
-        # If we decided to Pivot due to Z-score, check if it's actually Criticality
+        # 3. Emergence (rescue clause)
+        #
+        # The block this replaces was eleven lines of the author reasoning aloud
+        # about the z-score's sign and reaching no conclusion ("Wait, if Z >
+        # -2.0...", "Let's assume...", "Or maybe checking Lempel-Ziv?"). None of
+        # it survives the operator it was reasoning about.
+        #
+        # The claim underneath is clear enough on its own: if the network failed
+        # to separate on program LENGTH yet is still algorithmically efficient
+        # (AER > 1.1), that is a finding rather than a falsification -- the
+        # structure is near the boundary, not absent.
         if action == "PIVOT_HYBRID":
-            # If D_bio is high (Z > -2.0) BUT AER > 1.0?
-            # Wait, if Z > -2.0, D_bio approx D_rand. So AER approx 1.0.
-            # If AER is significantly > 1.0 (e.g. 1.2), then Z would be negative (D_bio < D_rand).
-            # So Z > -2.0 implies AER <= 1.0 approx?
-            # "High Complexity but High Efficiency" -> Maybe D is high but... 
-            # If AER > 1.0, Bio is simpler.
-            # Let's assume Emergence means AER is maintained despite high D?
-            # Or maybe checking Lempel-Ziv?
-            # "Criticality Check: D_bio High but AER > 1.0"
-            # If AER > 1.0, D_bio < D_rand. Z < 0.
-            # Maybe the threshold for Z is strict (-2.0 is 95%).
-            # If Z = -1.5 (Failure by strict standards), but AER = 1.1 (still simpler).
             if aer > 1.1:
                 action = "PUBLISH_EMERGENCE"
-                reasons.append(f"Z-Score ({z:.2f}) is weak, but AER ({aer:.2f}) > 1.1 suggests Edge of Chaos efficiency.")
+                reasons.append(
+                    f"Separation is weak (gap {gap:.2f} bits, {exceed:.1%} of "
+                    f"nulls at least as short), but AER ({aer:.2f}) > 1.1 "
+                    f"suggests Edge of Chaos efficiency.")
 
         # Generate Report
         report = ContingencyMonitor._generate_report(metrics, action, reasons)
@@ -118,7 +164,8 @@ class ContingencyMonitor:
             f"**Description:** {ContingencyMonitor.ACTIONS.get(action, 'Unknown')}",
             "",
             "## Metrics",
-            f"- Z-Score (Deg): {metrics.get('z_score_deg', 'N/A')}",
+            f"- Gap vs best null (Deg): {metrics.get('gap_bits_deg', 'N/A')} bits",
+            f"- Nulls at least as short (Deg): {metrics.get('exceed_deg', 'N/A')}",
             f"- Bayes Factor 01: {metrics.get('bayes_factor_01', 'N/A')}",
             f"- DepMap Rho: {metrics.get('rho_depmap', 'N/A')}",
             f"- DepMap MI (bits): {metrics.get('mi_depmap_bits', 'N/A')}",

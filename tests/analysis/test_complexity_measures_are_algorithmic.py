@@ -278,6 +278,64 @@ def test_the_forwarder_works_without_a_conftest():
     assert proc.stdout.startswith("OK"), proc.stdout
 
 
+def test_the_separation_operator_beats_the_z_score_it_replaced():
+    """ARM 3 — the COMPARISON operator, not the measure (AUDIT04-E).
+
+    A z-score rescales a quantity in BITS by the standard deviation of an
+    ensemble, which is a distributional summary wrapped around an algorithmic
+    length. Three nulls where bio beats 0 of 1000 in every case -- identical
+    evidence -- and the z-score falsifies two of them:
+
+        gaussian        z 5.07  pass       gap  8.8 bits   rank 0/1000
+        DEGENERATE      z 0.00  FALSIFY    gap 50.0 bits   rank 0/1000
+        heavy-tailed    z 0.31  FALSIFY    gap 20.0 bits   rank 0/1000
+
+    The degenerate case is the old code's own `if sd > 0 else 0.0` branch:
+    every null 50 bits LONGER than bio, reported as no evidence. This pins that
+    the replacement does not repeat it.
+    """
+    def zscore(x, xs):                       # the retired operator, verbatim
+        mu = float(np.mean(xs))
+        sd = float(np.std(xs)) if len(xs) > 1 else 0.0
+        return (mu - x) / sd if sd > 0 else 0.0
+
+    def gap_and_rank(x, xs):
+        return min(xs) - x, sum(1 for v in xs if v <= x) / len(xs)
+
+    rng = np.random.default_rng(0)
+    cases = {
+        "gaussian": list(rng.normal(160, 8, 1000)),
+        "degenerate": [170.0] * 1000,
+        "heavy_tailed": list(140 + rng.pareto(1.2, 1000) * 12),
+    }
+    bio = 120.0
+    z_falsified, sep_falsified = 0, 0
+    for xs in cases.values():
+        gap, exceed = gap_and_rank(bio, xs)
+        assert exceed == 0.0, "fixture broken: bio must beat every null"
+        assert gap > 0.0
+        z_falsified += int(zscore(bio, xs) < 2.0)          # old rule
+        sep_falsified += int(exceed >= 0.05 or gap <= 0.0)  # new rule
+
+    assert sep_falsified == 0, (
+        "the replacement falsified a case where bio beat every null")
+    assert z_falsified == 2, (
+        "the z-score no longer fails these cases, so this control has stopped "
+        f"discriminating (got {z_falsified}, expected 2)")
+
+
+def test_the_monitor_refuses_a_missing_separation():
+    """The old default was z = -999.0, which silently satisfied `z < 2.0`.
+
+    A pivot decided from an absent measurement is worse than a crash, because
+    it looks like a decision.
+    """
+    from src.pipeline.Contingency_Monitor import ContingencyMonitor
+
+    with pytest.raises(ValueError, match="gap_bits_deg"):
+        ContingencyMonitor.evaluate_checkpoint({"aer": 1.5, "rho_depmap": 0.6})
+
+
 def test_arm2_can_fail():
     """CONTROL for arm 2: the retired Shannon encoder must FAIL this property.
 

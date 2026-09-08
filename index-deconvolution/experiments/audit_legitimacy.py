@@ -87,7 +87,7 @@ def probe_perturbation_witnesses():
                 witness = x
                 break
         if witness is None:
-            print(f"  bit {i}: NEVER changes output -> disconnected (a sumando)")
+            print(f"  bit {i}: NEVER changes output -> disconnected (a FREE coordinate)")
         else:
             print(f"  bit {i}: input {witness:05b} vs {witness | bit:05b} flips output "
                   f"{column[witness]}->{column[witness | bit]} -> connected (a pivot)")
