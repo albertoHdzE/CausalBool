@@ -104,6 +104,39 @@ def compute_dv2(cm: np.ndarray) -> float:
     return float(res["dv2"])
 
 
+def separation(x: float, xs: List[float]) -> Dict[str, float]:
+    """How far a value beats an ensemble, in bits and in rank. No mean, no sd.
+
+    Promoted from a closure inside `process_networks` on 2026-09-07 (AUDIT04-F)
+    because SimplicityV2_Nature needs the same operator and was still computing
+    a z-score. Two homes for one comparison is the defect the audit removes, so
+    there is one definition and the other module imports it.
+
+    gap_bits   min(nulls) - x. The WORST-CASE advantage: how much shorter the
+               real object is than the single best null, not than their average.
+               By the coding theorem m(x) ~ 2^-K(x), a gap of g bits IS a
+               likelihood ratio of 2^g under the universal distribution, which
+               is a per-instance statement needing no ensemble shape.
+    exceed     #{null <= x}/n, the exact permutation tail, valid whatever the
+               null looks like.
+    best/med   order statistics, for scale.
+
+    REFUSES on an empty ensemble: a comparison against nothing is not a pass.
+    """
+    if not xs:
+        raise ValueError(
+            "separation over an EMPTY null ensemble. A comparison "
+            "against nothing is not a pass."
+        )
+    beaten = sum(1 for v in xs if v <= x)
+    return {
+        "gap_bits": float(min(xs) - x),
+        "exceed": beaten / len(xs),
+        "best_null": float(min(xs)),
+        "median_null": float(np.median(xs)),
+    }
+
+
 def compute_both(cm: np.ndarray) -> Dict[str, float | None]:
     """Both comparison measures for one adjacency matrix, side by side.
 
@@ -250,20 +283,6 @@ def process_networks(
             #             permutation-test tail, valid whatever the null looks
             #             like.
             #   best/med  order statistics, for scale. No mean, no sd.
-            def separation(x: float, xs: List[float]) -> Dict[str, float]:
-                if not xs:
-                    raise ValueError(
-                        "separation over an EMPTY null ensemble. A comparison "
-                        "against nothing is not a pass."
-                    )
-                beaten = sum(1 for v in xs if v <= x)
-                return {
-                    "gap_bits": float(min(xs) - x),
-                    "exceed": beaten / len(xs),
-                    "best_null": float(min(xs)),
-                    "median_null": float(np.median(xs)),
-                }
-
             # AUDIT04-F: the separation is computed ONCE PER MEASURE. The top
             # level keys (`er`/`deg`/`gate`) keep carrying the index-set result
             # so that artefacts and readers written before this change resolve

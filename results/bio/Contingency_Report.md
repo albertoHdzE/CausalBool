@@ -1,14 +1,17 @@
 # Contingency Monitor Report
-**Date:** 2026-02-08 09:49:02
-**Action:** PIVOT_HYBRID
-**Description:** Theoretical Falsification ($Z > -2.0$ or $BF_{01} > 10$). Pivot to Hybrid Encoding.
+**Date:** 2026-09-07 22:19:15
+**Action:** SWITCH_TO_HYBRID_ENCODING
+**Description:** Theoretical Falsification (>= 5% of nulls as short as Bio, or Bio not shorter than the best null, or $BF_{01} > 10$). Switch to Hybrid Encoding.
 
 ## Metrics
-- Z-Score (Deg): -0.12154360321011509
-- Bayes Factor 01: 3.190161415948205e-05
+- Gap vs best null (Deg, index-set): -15.568668693380499 bits
+- Nulls at least as short (Deg, index-set): 0.65
+- Gap vs best null (Deg, BDM): -3.605328244133588 bits
+- Nulls at least as short (Deg, BDM): 0.3
+- Bayes Factor 01: 19.80347187082095
 - DepMap Rho: -0.16789004352535233
 - DepMap MI (bits): 0.0
-- AER: 1.0016644021627161
+- AER: 1.0276501345458557
 
 ## Decision Logic
-- Z-Score (-0.12) > -2.0 indicates failure to separate Bio from Null.
+- 65.0% of nulls are as short as Bio or shorter (>= 5%): failure to separate Bio from Null.
