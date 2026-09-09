@@ -38,8 +38,22 @@ Both are canonical, with distinct scopes — regenerate their numbers via
 
 ### Branch status
 
-Live branch: **`clean`**. `main` is stale by policy until plan task T0.4 retags it;
-do not trust `main` for current state.
+Live branch: **`fixing`** (AUDIT04-H, anchor `fc003f8` of 2026-09-08). `main` is
+stale by policy until plan task T0.4 retags it; do not trust `main` for current
+state. The `clean` branch holds the scientific work up to `b839bfd` (Level 9)
+and is not where verification is currently done.
+
+### Plan lineage (added AUDIT04-H, 2026-09-08)
+
+`AUDIT_FIXING_PLAN_01.md` closed at its own close-out entry (line 1775,
+*"This plan now holds NO open items"*) and handed authority to
+`SUCCESSOR_PLAN_R4.md`. Of the successor, **Wave 0** — ORDERING §7 migration
+and F36 exception coverage — is **open and out of scope for AUDIT04**; no
+AUDIT04 task inherits it. The current governing plan for the remainder of
+AUDIT04 is `plans/AUDIT04-H_comparator_measures_and_lifecycle.md`, which
+supersedes `plans/AUDIT04-G_stall_and_completion.md`. Plan G is kept on disk
+as provenance and is not executed; a supersession header at its top names
+the three statements that were measurably out of date at handover.
 
 ### Governance
 
@@ -123,7 +137,9 @@ Python tests and validation campaigns live under `tests/Bio/`, `tests/Lev4/`–`
 
 The canonical entry layer for paper-oriented work:
 - `papers/common/` — shared scientific base; points to canonical upstream sources
-- `papers/method/` — first paper track: formal method, gate formulae, validation. Active manuscript at `papers/method/manuscript/method_paper.tex`
+- `papers/method/` — first paper track: formal method, gate formulae, validation. Two active manuscripts (D-4):
+  - `papers/method/manuscript_formal/method_paper.tex` — theory/method paper.
+  - `papers/method/manuscript_computational/comp_paper.tex` — computational/validation paper (its output generator is `generate_paper_outputs.wl`, which exits non-zero on any failed verification).
 - `papers/method/derivations/` — LaTeX derivation documents per gate
 - `papers/method/code/` — reproducible computation packages (corroboration_6node, mixed_interaction_10node, scalability)
 - `papers/nature/` — Nature-oriented track entrypoint

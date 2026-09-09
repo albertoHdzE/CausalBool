@@ -447,6 +447,38 @@ def real_killers(killed_by: list[str]) -> list[str]:
     return [k for k in killed_by if not str(k).startswith("FLAKE")]
 
 
+def current_head_sha() -> str:
+    """The SHA the working tree is at, by the repository's own git.
+
+    A report printed against a stored `head_sha` that no longer matches the
+    tree is the failure mode that landed in `8b8c0e3` ↔ `fc003f8`: the
+    catalogue grew, the rate jumped from 23/25 to 30/30, and the file did
+    not say so. AUDIT04-H task H0.2 makes the drift observable in --report.
+    """
+    out = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT, capture_output=True, text=True, check=True,
+    )
+    return out.stdout.strip()
+
+
+def commits_behind(stored_sha: str, head_sha: str) -> int:
+    """The number of commits between the stored run and the current HEAD.
+
+    Negative results (the stored run is AHEAD of HEAD, i.e. a rewind) are
+    reported as `0`; the staleness line still says `results are current at
+    <sha>` because the recorded measurement is still the one to trust, just
+    not against a SHA the tree no longer holds. A rewind should be loud in a
+    different place, not here.
+    """
+    out = subprocess.run(
+        ["git", "rev-list", "--count", f"{stored_sha}..{head_sha}"],
+        cwd=ROOT, capture_output=True, text=True, check=True,
+    )
+    n = int(out.stdout.strip())
+    return max(n, 0)
+
+
 def report() -> int:
     """Kill rate with its denominator, per owner, by instrument.
 
@@ -466,6 +498,22 @@ def report() -> int:
         print(f"REFUSED: results are PARTIAL ({d.get('n_scored')}/{d.get('n_selected')} "
               "scored). A partial file must never be quoted as a final rate.")
         return 2
+
+    # AUDIT04-H task H0.2 — the staleness contract. The first line printed
+    # is ALWAYS a comparison of the stored `head_sha` against the current
+    # HEAD. The line is not a footnote: --report's headline rate below is
+    # valid only when this line says so, and the report must not silently
+    # print a stale rate. The pre-existing SHA check in `load_previous` at
+    # the resume path is unchanged; this is a separate consumer (the human
+    # reading --report) and is enriched, not duplicated.
+    stored = d.get("head_sha", "")
+    head = current_head_sha()
+    if stored == head:
+        print(f"results are current at {stored}")
+    else:
+        n = commits_behind(stored, head)
+        print(f"WARNING: results recorded at {stored}, HEAD is {head}, "
+              f"{n} commits behind")
 
     probe_ids = {m.mid for m in MUTANTS if is_probe(m)}
     rows = [m for m in d["mutants"] if m.get("result") in ("KILLED", "SURVIVED")]

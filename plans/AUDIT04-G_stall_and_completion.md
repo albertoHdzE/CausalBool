@@ -1,6 +1,32 @@
 # AUDIT04-G — the intermittent stall, the SIGSEGV, and the completion of AUDIT04
 
-**Status:** open
+> **SUPERSEDED by `plans/AUDIT04-H_comparator_measures_and_lifecycle.md`
+> (anchor `fc003f8`, 2026-09-08).**
+> G remains on disk as provenance. It is not executed. Three statements in
+> this plan are measurable out of date and must not be cited as current:
+>
+> 1. **§7 — mutation rate.** The figures written here
+>    (`semantic 23/25 = 92.0 %; unit-test 19/25 = 76.0 %`, producer
+>    `audit/AUDIT03_R2_collapse/MUTATION.md`) reflect the catalogue as it stood
+>    on 2026-09-05 at SHA `c9bc412`. The catalogue has since been extended to
+>    30 semantic mutants plus 3 reachability probes (33 scored, 30 semantic
+>    denominator) and re-run on 2026-09-05 at SHA `f2c2f77` (recorded in
+>    `audit/AUDIT03_R2_collapse/mutation_results.json` as
+>    `head_sha: f2c2f773562f8832240c43e56a630ddfdc7aa2ce`, `complete: True`).
+>    The current pair is **semantic 30/30 = 100.0 %, unit-test 30/30 = 100.0 %**,
+>    measured by `venv/bin/python audit/AUDIT03_R2_collapse/mutation_harness.py
+>    --report` at HEAD `fc003f8`. The results are **34 commits stale**; the
+>    staleness contract is added in AUDIT04-H task H0.2 so this drift is no
+>    longer silent.
+> 2. The Phase B denominator that §7 depends on ("Phase B must land first —
+>    mutants on uncovered code measure nothing") was recorded as `c9bc412`;
+>    the current measured denominator is at `fc003f8` and is reported in
+>    AUDIT04-H §1.2.
+> 3. The five-step MUnit runner block at lines around §6 was rebuilt in
+>    `tests/MUnit/run-tests.sh` (bilingual manifest) and the 23/72 → 72/72
+>    pass that G predicted did not happen. AUDIT04-H supersedes that block.
+
+**Status:** open (carried forward into AUDIT04-H)
 **Branch:** `fixing`
 **Written:** 2026-09-08
 **Anchor commit:** `20b2ae1` (pushed; `origin/fixing` is identical, verified by `git rev-parse`)
@@ -417,6 +443,12 @@ logic-carrying part to module level and test it**, not to lower the floor.
 ---
 
 ## 7. Phase D — mutation testing
+
+> **SUPERSEDED 2026-09-08 — see the supersession header at the top of this
+> file for the measured state at anchor `fc003f8`. The figures written below
+> are the predecessor catalogue (25 semantic mutants, scored at `8b8c0e3`).
+> They are kept on disk as provenance for the gap-16 finding the AUDIT04-H
+> plan describes; they are not the current state.**
 
 **Goal.** Extend the mutation catalogue to the modules newly covered by Phase B,
 and widen thin margins.

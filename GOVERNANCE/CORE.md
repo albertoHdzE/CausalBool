@@ -145,7 +145,7 @@ the single survivor is the wrong file.
 | `.github/workflows/ci.yml` | the pure tier on every push; states plainly that the Wolfram tier is **not** covered |
 | `githooks/pre-push` (via `tools/install_hooks.sh`) | refuses a push whose Wolfram tier or MUnit suite is red |
 | `.coveragerc` + `pytest.ini` | owner coverage floor, **95%** (measured 98.56%) |
-| `audit/AUDIT03_R2_collapse/mutation_harness.py` | whether the suite can actually catch a defect, not merely run. Measured `23/25` semantic kills but only `19/25` by a unit test — four mutants were caught by a governance gate alone. `NetworkIO` has **zero** kills, `CausalBoolCore` zero *unit-test* kills, and `deconvolution` is **not measured** (probes only). `--report` refuses on a partial run |
+| `audit/AUDIT03_R2_collapse/mutation_harness.py` | whether the suite can actually catch a defect, not merely run. Measured `30/30` semantic kills and `30/30` by a unit test (catalogue 33 = 30 semantic + 3 reachability probes; results on disk recorded at SHA `f2c2f77` 2026-09-05, HEAD `fc003f8` 2026-09-08, **35 commits stale**). The predecessor run scored `23/25` / `19/25` and exposed a 16-point gap (`NetworkIO` zero kills, `CausalBoolCore` zero unit-test kills, `deconvolution` not measured); that gap is now closed — every owner is unit-killed and no owner reads `NOT MEASURED`. `--report` refuses on a partial run and prints a staleness line (AUDIT04-H task H0.2) |
 
 **Every guard must, without exception:** refuse on empty input, print its
 denominator, exit non-zero on failure, and have been verified by planting the

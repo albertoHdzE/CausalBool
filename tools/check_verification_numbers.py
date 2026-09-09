@@ -489,7 +489,79 @@ def main() -> int:
         for b in bad:
             print(f"    - {b}")
         return 1
+
+    # AUDIT04-H task H0.3 — the page that checks itself. The sentence about
+    # this gate (the "for 12 of its 44 numbers" line) used to be a footnote
+    # about a thing that checked the document, while nothing checked the
+    # footnote. A planted wrong figure here would not move any other claim;
+    # the gate would print "checked 12 of 44" and exit 0 and the wrong
+    # number would sit on the page until somebody read the prose aloud.
+    #
+    # The three counts in that sentence are now parsed from the document and
+    # compared against what the gate has just computed. A planted change
+    # must exit non-zero naming it; a clean state exits 0 with a confirmation
+    # line. The three numbers do not include the {n}-of-{m} rate as one
+    # figure: they are three independent counts (checked, total, unchecked)
+    # and each has its own producer — `total = checked + unchecked + unknown`
+    # is held, not asserted.
+    self_bad = self_check_counts(DOC.read_text(), checked, total, len(unchecked),
+                                 len(unknown))
+    if self_bad:
+        print("\n  MISMATCH -- the page's own summary of this gate disagrees with what it computed:")
+        for s in self_bad:
+            print(f"    - {s}")
+        return 1
+    print(f"\n  SELF-CHECK: prose counts (checked={checked}, total={total}, "
+          f"unchecked={len(unchecked)}, unknown={len(unknown)}) agree with the page.")
     return 0
+
+
+def self_check_counts(text: str, checked: int, total: int,
+                      unchecked: int, unknown: int) -> list[str]:
+    """Re-derive the page's own self-describing counts and compare.
+
+    The three numbers in the §3 sub-section are bound to the same quantities
+    the gate has just computed: how many of the parsed claims it checked,
+    how many there were in total, and how many it did not check (the
+    remainder over the UNKNOWN+bad pile is the "names the N it does not"
+    figure on the page). A `bad` count > 0 is already returned at exit 1
+    above; this function only looks at the counts that are settled.
+
+    Returns an empty list on agreement, a list of human-readable lines on
+    disagreement. The caller decides the exit code.
+    """
+    bad: list[str] = []
+
+    def first_int(pattern: str) -> int | None:
+        m = re.search(pattern, text)
+        return int(m.group(1)) if m else None
+
+    # "for 12 of its 44 numbers" — the section heading carries the SAME two
+    # numbers the gate has just computed. Reading it twice from one regex
+    # would tie the two to each other and let a paired typo pass; each is
+    # parsed independently and compared independently.
+    m_heading = re.search(r"for\s+(\d+)\s+of\s+its\s+(\d+)\s+numbers", text)
+    if m_heading:
+        h_checked, h_total = int(m_heading.group(1)), int(m_heading.group(2))
+        if h_checked != checked:
+            bad.append(f"heading says checked={h_checked}, gate computed {checked}")
+        if h_total != total:
+            bad.append(f"heading says total={h_total}, gate computed {total}")
+
+    # "Of the **44 numeric rows** it checks **12** and **names the 32 it does not**"
+    prose_total = first_int(r"\*\*(\d+)\s+numeric rows\*\*")
+    prose_checked = first_int(r"checks\s+\*\*(\d+)\*\*")
+    # The "it does not" sits INSIDE the same bold as the number, and the
+    # opening ** is BEFORE "names the", not between it and the number.
+    prose_unchecked = first_int(r"\*\*names the\s+(\d+)\s+it does not\*\*")
+
+    if prose_total is not None and prose_total != total:
+        bad.append(f"prose says total=**{prose_total}**, gate computed {total}")
+    if prose_checked is not None and prose_checked != checked:
+        bad.append(f"prose says checked=**{prose_checked}**, gate computed {checked}")
+    if prose_unchecked is not None and prose_unchecked != unchecked:
+        bad.append(f"prose says unchecked=**{prose_unchecked}**, gate computed {unchecked}")
+    return bad
 
 
 if __name__ == "__main__":

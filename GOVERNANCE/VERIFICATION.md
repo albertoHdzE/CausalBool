@@ -93,7 +93,7 @@ that file so `COVERAGE_RATCHET.toml` is the single owner of every floor.
 > about whether the assertions are any good. The mutation harness is what
 > measures that.
 
-### This page now checks itself — for 12 of its 29 numbers
+### This page now checks itself — for 12 of its 44 numbers
 
 The header above claims none of these figures is typed by hand. **That sentence
 was false when it was written:** the `check_core_index.sh` row read `36 / 36`
@@ -102,8 +102,8 @@ it cites, so a governance document about verification was the least verified
 artefact in the repository.
 
 `tools/check_verification_numbers.py` (pure tier) parses **§3, §4 and §5** and
-re-derives each claim from the tool named beside it. Of the **29 numeric rows**
-it checks **12** and **names the 17 it does not**, so they are declared unchecked
+re-derives each claim from the tool named beside it. Of the **44 numeric rows**
+it checks **12** and **names the 32 it does not**, so they are declared unchecked
 rather than quietly skipped. Verified in all three states: a planted wrong figure
 exits `1` printing both values, an unparseable table exits `2`, clean exits `0`.
 
