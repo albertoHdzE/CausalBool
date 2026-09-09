@@ -322,7 +322,46 @@ silently pass while the live test loses the guard.
 
 ## 5. The fourth law in `GOVERNANCE/NULLS.md` (H2.4)
 
-(populated by the H2.4 step; left for the next commit)
+**Owner edited:** `GOVERNANCE/NULLS.md`
+**Sections added:** §6 *The fourth law — response of headline statistics
+to parameters they are not about*, with §6.1 (gap_bits vs null count) and
+§6.2 (the two measures vs node labelling) as case studies; §7 (adoption
+status of §6).
+
+The plan §H2.4 directs the enrichment to `GOVERNANCE/NULLS.md` and forbids
+a new governance file. The fourth law is written as the symmetric
+counterpart of §1 of that file: §1 governs statistics **inside** a null
+test, §6 governs statistics **outside** it, and both rest on the same
+root — a number whose value depends on something the question does not
+name cannot answer the question.
+
+### 5.1 The rule, as committed
+
+> **A headline statistic is published together with its response to the
+> run parameters it is not about** (null count, seed, node labelling,
+> subsample rule), **and a statistic that moves monotonically in one of
+> them may not be the headline.**
+
+### 5.2 The two case studies cited in §6
+
+- **§6.1 — `gap_bits` against the null count (H1.1).** The median gap to
+  the best null moves monotonically with the null count across all three
+  null kinds (er: +21.05 → −7.62 → −25.81; deg: −4.91 → −17.65 → −22.07;
+  gate: −14.30 → −26.25 → −37.30, for null counts 10, 100, 1000). The
+  best-null comparator reads the null ensemble, not the network.
+- **§6.2 — the two measures against node labelling (H2.1).** Variant A
+  has a 784.79-bit spread on the checkerboard (min 134.89, max 919.68);
+  the canonical 1050.5 bits is the worst case over labellings, not a
+  property of the family. The declared inversion is the labelling
+  response in disguise.
+
+### 5.3 The combined four laws
+
+The four laws of the programme (measure; report the reference
+distribution; locate the owner; report the response of the headline to
+the parameters it is not about) are the four facets of the same
+diagnostic. The §6.3 paragraph in `NULLS.md` makes this explicit, with
+the case studies attached as evidence.
 
 ---
 

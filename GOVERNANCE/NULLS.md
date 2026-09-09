@@ -94,3 +94,121 @@ enumerated before the draw.
   addendum in series-deconvolution (commit `db6343d`, pushed) — that sibling has
   no standalone Phase-2 TODO file, so the living transfer document received it
   per T2.6 precedent. Binding for all sibling pre-registrations from this date.
+
+---
+
+## §6 The fourth law — response of headline statistics to parameters they are not about
+
+> **A headline statistic is published together with its response to the run
+> parameters it is not about** (null count, seed, node labelling, subsample
+> rule), **and a statistic that moves monotonically in one of them may not
+> be the headline.**
+
+This is the symmetric counterpart of §1, which governs statistics **inside**
+a null test. §1 catches the case where the null destroyed a dimension the
+statistic was responding to; §6 catches the case where the statistic itself
+moves under a run parameter that the headline does not name. The pattern is
+the same: declare the response, then check it, then publish the response
+beside the headline. Two reversals in this repository, both measured, share
+this single mechanism (§6.1, §6.2).
+
+### §6.1 Case study 1 — `gap_bits` against the null count (AUDIT04-H1.1)
+
+- **Headline under test:** `gap_bits = D(best null) − D_bio`, the comparator
+  reported in `Null_Generator_HPC.py` lines 363–411 and quoted in
+  `GOVERNANCE/VERIFICATION.md` §5b. A negative value means the bio network
+  is the *longer* one, the algorithmic-complexity reading.
+- **Response profile measured:** the median gap to the best null moves
+  monotonically with the null count across all three null kinds over 30
+  networks, seed 42 (`audit/AUDIT04_H_comparator/FINDING.md` §5):
+    - er: +21.05 → −7.62 → −25.81 (null counts 10, 100, 1000)
+    - deg: −4.91 → −17.65 → −22.07
+    - gate: −14.30 → −26.25 → −37.30
+  The median gap to the **median** null (er: 50.28 → 44.61 → 41.73) and
+  the median permutation tail `exceed` (er: 0.000 → 0.015 → 0.012) do not
+  move under the same sweep.
+- **Why the headline is the wrong one.** The null count is a run
+  parameter the comparator is not about — a 10-null run and a 1000-null
+  run use the *same* network; only the ensemble size varies. A comparator
+  whose value depends on the ensemble size is reading the ensemble, not
+  the network. The best-null gap can only become more negative as the
+  null count grows (an order-statistic floor), and that is exactly the
+  direction the measurement reports. The H1.5 verdict-change count
+  (231 networks, 10 vs 1000 nulls) makes the same point at the
+  decision-rule level: 16 of 231 cells change verdict, 4 from
+  `separating(best)` to `separating(median)` and 12 the other way.
+- **What the fourth law would have caught.** A pre-registration of the
+  headline that did not include a sweep over the null count would have
+  produced a +21.05 figure at 10 nulls and a −25.81 figure at 1000 nulls
+  with no way to tell which was the network. The §6 rule requires both
+  figures, with the run parameter named, in the same sentence as the
+  headline. The §6.1 case study is the evidence: the best-null gap at
+  any single null count is a reading of the ensemble size, not of the
+  network.
+
+### §6.2 Case study 2 — the two reported measures against node labelling (AUDIT04-H2.1)
+
+- **Headline under test:** the two description-length measures reported
+  side by side — Variant A (`row_run_index_set_length`) and BDM. Both
+  are quoted in `GOVERNANCE/VERIFICATION.md` §5b and in the comp-paper
+  Table 2 as the two algorithmic complexity readings for each network.
+- **Response profile measured:** the spread of each measure under 200
+  random node relabellings, at n = 16, seed 20260908
+  (`audit/AUDIT04_H_measures/FINDING.md` §2):
+    - chain: Variant A 61.31 bits, BDM 170.72 bits
+    - hub: Variant A 28.61 bits, BDM 100.12 bits
+    - checkerboard: Variant A **784.79 bits**, BDM 437.34 bits
+    - random p=0.2: Variant A 89.92 bits, BDM 127.61 bits
+  The node labelling is a parameter the headline is not about — a
+  relabelling of the adjacency matrix is a graph isomorphism and changes
+  no information. A measure that moves under a relabelling is reading
+  the labelling, not the graph.
+- **The headline that the response profile overturns.** The two
+  `DECLARED_INVERSIONS` in
+  `tests/analysis/test_complexity_measures_are_algorithmic.py:284-299`
+  read the canonical Variant A cost on the checkerboard
+  (1050.5 bits) as a property of the family. The 784.79-bit Variant A
+  spread on the same family — min 134.89, max 919.68 — shows that
+  1050.5 is the *worst-case* cost over labellings, not a graph
+  property. A run-parameter-symmetric reading (§6) of the canonical
+  1050.5 figure would have caught this: the same graph, in a different
+  labelling, can cost an order of magnitude less.
+- **What the fourth law would have caught.** A pre-registration of
+  `DECLARED_INVERSIONS` that did not include a sweep over node
+  labelling would have read 1050.5 bits as the family's complexity.
+  The §6 rule requires the response profile beside the headline, in
+  the same declaration. The §6.2 case study is the evidence: the
+  declared inversion is the labelling response in disguise, and the
+  declaration in `tests/analysis/test_complexity_measures_are_algorithmic.py`
+  now carries the response profile beside the cause.
+
+### §6.3 The combined rule
+
+§1 (inside a null) and §6 (outside it) together:
+
+1. **Inside a null:** declare the response profile, the held-fixed set,
+   and the destroyed dimension. The destroyed dimension must be the
+   claimed one; nothing in the held-fixed set may vary.
+2. **Outside a null:** publish the response to the run parameters the
+   headline is not about. A statistic that moves monotonically in one
+   of them may not be the headline; if a sweep is not run, the
+   response is *unknown* and the statistic is reported as such.
+
+Both rules rest on the same root: a number whose value depends on
+something the question does not name cannot answer the question. §1
+names it for the null; §6 names it for the headline. The four laws of
+the programme — measure; report the reference distribution; locate the
+owner; report the response of the headline to the parameters it is not
+about — are the four facets of the same diagnostic.
+
+## §7 Adoption status
+
+- The fourth law (§6) is binding for new headline statistics published
+  in this programme from the date its first case study is committed
+  (2026-09-08, AUDIT04-H2.4). It applies to all current and future
+  pre-registrations, the same scope as §1.
+- The case studies in §6.1 and §6.2 are evidence of the law, not its
+  source. Two distinct defects in this repository — a comparator that
+  read the null count instead of the network, and an inversion
+  declaration that read the labelling instead of the family — share
+  the same root cause and the same fix.
