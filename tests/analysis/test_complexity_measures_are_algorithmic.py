@@ -271,13 +271,31 @@ FAMILIES = {
 }
 
 # Declared, reasoned exceptions: (measure, family) pairs known to invert.
+# AUDIT04-H2.3: H2.1 measured the response profile of both declared
+# inversions under 200 random node relabellings at n = 16, seed 20260908.
+# Both have a 784.79-bit Variant A spread: the canonical 1050.5 bits is
+# the WORST-CASE cost over labellings, not a property of the graph. Under
+# a random relabelling the same graph can cost 134.89 bits. The
+# declared reason is the run-length code over alternating rows; the H2.1
+# evidence shows that the alternating-row pathology is a labelling
+# response, not a property of the family. The declaration is kept
+# (Arm 1 of the H2.3 plan) and the response profile is cited beside the
+# measured ratio so the reader sees both the cause and its scope.
 DECLARED_INVERSIONS = {
     ("index_set", "checkerboard"):
-        "run-length code over rows; an alternating row costs n/2 runs, its "
-        "maximum. Measured 1050.5 bits against 563.9 for random of equal density.",
+        "run-length code over rows; an alternating row costs n/2 runs, "
+        "its maximum. Measured 1050.5 bits against 563.9 for random of "
+        "equal density. AUDIT04-H2.1: 784.79-bit Variant A spread under "
+        "200 node relabellings (min 134.89, max 919.68, seed 20260908); "
+        "the declared inversion is the labelling response, not a graph "
+        "property. See audit/AUDIT04_H_measures/FINDING.md §2.",
     ("index_set", "column_stripes"):
-        "same cause as checkerboard: every row alternates, so every row is "
-        "priced at the code's worst case. Measured 1050.5 against 568.4.",
+        "same cause as checkerboard: every row alternates, so every row "
+        "is priced at the code's worst case. Measured 1050.5 against "
+        "568.4. AUDIT04-H2.3: 784.79-bit Variant A spread under 200 node "
+        "relabellings (min 134.89, max 919.68, seed 20260908) — "
+        "identically to checkerboard, as the mechanism predicts. See "
+        "audit/AUDIT04_H_measures/FINDING.md §4.",
 }
 
 
@@ -294,15 +312,30 @@ def test_structured_families_against_matched_random(measure, family):
     mean_random = float(np.mean(randoms))
     inverted = ref >= mean_random
     declared = (measure, family) in DECLARED_INVERSIONS
+    reason = DECLARED_INVERSIONS.get((measure, family), "")
 
+    _assert_declaration_status(measure, family, inverted, ref, mean_random,
+                               declared, edges, n, reason)
+
+
+def _assert_declaration_status(measure, family, inverted, ref, mean_random,
+                               declared, edges, n, reason=""):
+    """One assertion path for the structured-family probe.
+
+    Extracted so the planting tests below can exercise the SAME assertion
+    with a planted declaration status, and so a fix to the assertion
+    message only has to be made in one place. The `reason` argument is
+    the on-record reason for the declaration; it is only used in the
+    declared-and-no-longer-inverting branch, and a planted test may pass
+    a planted reason rather than relying on the dict lookup.
+    """
     if declared:
         assert inverted, (
             f"{measure} on {family} was DECLARED to invert, and it no longer "
             f"does ({ref:.1f} bits vs {mean_random:.1f} for matched random). "
             f"That is good news, but the declaration in DECLARED_INVERSIONS and "
             f"in Universal_D_v2_Encoder is now stale and must be removed in the "
-            f"same commit as the fix.\nReason on record: "
-            f"{DECLARED_INVERSIONS[(measure, family)]}")
+            f"same commit as the fix.\nReason on record: {reason}")
     else:
         assert not inverted, (
             f"{measure} ranked the structured family '{family}' at {ref:.1f} "
@@ -310,6 +343,50 @@ def test_structured_families_against_matched_random(measure, family):
             f"edge count ({edges} edges, n={n}) -- it calls the structured "
             f"object at least as complex as noise. This is a NEW inversion: it "
             f"is not in DECLARED_INVERSIONS.")
+
+
+def test_declaration_guard_fires_on_silently_disappeared_inversion():
+    """AUDIT04-H2.3 plant: a declared inversion that no longer holds must
+    fail this test, not pass.
+
+    The plan §H2.3 requires the guard to go red when a declared inversion
+    silently disappears. We verify by planting a status where the pair
+    is marked declared but does not invert; the SAME assertion path the
+    live test runs must fail. If a future refactor breaks the link
+    between the live test and the planted one (e.g., by inlining a new
+    copy of the assertion), this test still passes against the planted
+    copy, but the live test would silently lose the guard. The fix is
+    to keep the assertion in ONE place (the helper above) and route both
+    the live and the planted cases through it.
+    """
+    with pytest.raises(AssertionError, match="was DECLARED to invert"):
+        _assert_declaration_status(
+            measure="bdm",
+            family="two_blocks",
+            inverted=False,            # planted: no longer inverts
+            ref=50.0,                  # planted
+            mean_random=400.0,         # planted: structured << random
+            declared=True,             # planted: the future-stale declaration
+            edges=128,                 # n=16, two_blocks diagonal
+            n=16,
+            reason="<planted stale declaration>",
+        )
+
+
+def test_declaration_guard_fires_on_planted_new_inversion():
+    """AUDIT04-H2.3 plant (the other arm): a NEW inversion that is not
+    declared must also fail this test, not pass."""
+    with pytest.raises(AssertionError, match="NEW inversion"):
+        _assert_declaration_status(
+            measure="index_set",
+            family="two_blocks",
+            inverted=True,             # planted: index_set now inverts
+            ref=600.0,                 # planted
+            mean_random=400.0,         # planted: structured >> random
+            declared=False,
+            edges=128,
+            n=16,
+        )
 
 
 def test_schema_length_is_blind_to_rewiring_so_cannot_serve_the_null_test():

@@ -222,7 +222,101 @@ Neither replaces the other. Both are reported.
 
 ## 4. Adjudication of `DECLARED_INVERSIONS` (H2.3)
 
-(populated by the H2.3 step; left for the next commit)
+**Producer:** `venv/bin/python audit/AUDIT04_H_measures/response_profile_column_stripes.py`
+**Artefact:** `audit/AUDIT04_H_measures/response_profile_column_stripes.json`
+**Owners edited:** `tests/analysis/test_complexity_measures_are_algorithmic.py`
+
+### 4.1 The measurement extends H2.1 to the second declared family
+
+`DECLARED_INVERSIONS` carries two pairs, both Variant A:
+`("index_set", "checkerboard")` and `("index_set", "column_stripes")`.
+H2.1 measured the response profile of the checkerboard. The
+`response_profile_column_stripes.py` script extends the same protocol
+to the column_stripes family at the same n, the same 200 relabellings,
+the same seed `20260908`:
+
+| family | canonical Variant A | Variant A spread | range |
+|---|---|---|---|
+| checkerboard (H2.1) | 1050.48 | **784.79** | 134.89 – 919.68 |
+| column_stripes (H2.3) | 1050.48 | **784.79** | 134.89 – 919.68 |
+| random p=0.2 (H2.1, reference) | 282.03 | 89.92 | 265.69 – 355.61 |
+
+The two declared families have **identical** response profiles: same
+canonical cost, same spread, same range. The mechanism is the same
+alternating-row pathology the existing declaration identifies. The
+H2.1 evidence therefore applies symmetrically: both declared inversions
+are labelling responses, and the run-length-code cause is real but
+labelling-mediated, not family-intrinsic.
+
+### 4.2 The arm chosen: keep the declaration, cite the response profile
+
+The plan §H2.3 permits two arms:
+
+1. **Keep the declaration and add the response profile beside it.** The
+   declared reason stands (the run-length code over alternating rows is
+   the cause), but the declaration is incomplete without the response
+   profile: a reader who relies on it must see the labelling-mediated
+   scope of the inversion.
+2. **Withdraw the family from the probe set as label-confounded.** The
+   family is removed from `FAMILIES`; no inversion is declared and no
+   probe is run.
+
+**Arm 1 is chosen.** The declared cause is correct; the gap is the
+absence of the response profile. Withdrawing the family would lose
+information the existing test still guards: the *canonical* inversion
+is real, and the run-length-code mechanism is verifiable from the code
+in `imp_causalnet_paper/src/imp_causalnet_paper/causalbool_mirror.py`.
+The fix is to enrich the declaration, not to suppress the probe.
+
+### 4.3 The declaration, as enriched
+
+`tests/analysis/test_complexity_measures_are_algorithmic.py:284-299`
+now reads:
+
+```python
+DECLARED_INVERSIONS = {
+    ("index_set", "checkerboard"):
+        "run-length code over rows; an alternating row costs n/2 runs, "
+        "its maximum. Measured 1050.5 bits against 563.9 for random of "
+        "equal density. AUDIT04-H2.1: 784.79-bit Variant A spread under "
+        "200 node relabellings (min 134.89, max 919.68, seed 20260908); "
+        "the declared inversion is the labelling response, not a graph "
+        "property. See audit/AUDIT04_H_measures/FINDING.md §2.",
+    ("index_set", "column_stripes"):
+        "same cause as checkerboard: every row alternates, so every row "
+        "is priced at the code's worst case. Measured 1050.5 against "
+        "568.4. AUDIT04-H2.3: 784.79-bit Variant A spread under 200 node "
+        "relabellings (min 134.89, max 919.68, seed 20260908) — "
+        "identically to checkerboard, as the mechanism predicts. See "
+        "audit/AUDIT04_H_measures/FINDING.md §4.",
+}
+```
+
+Each declared pair now carries the response-profile number, the seed,
+and a pointer to the finding note. A reader who reaches the declaration
+in code can reach the measurement in one step.
+
+### 4.4 The guard is verified by planting
+
+The plan §H2.3 requires the guard to go red when a declared inversion
+silently disappears, verified by planting. The existing test
+`test_structured_families_against_matched_random` had the assertion
+inline; its assertion was extracted into the helper
+`_assert_declaration_status`, and two new planting tests were added:
+
+- `test_declaration_guard_fires_on_silently_disappeared_inversion` —
+  plants a status where the pair is marked declared but no longer
+  inverts. The assertion must fail.
+- `test_declaration_guard_fires_on_planted_new_inversion` — the other
+  arm: plants a status where a non-declared pair now inverts. The
+  assertion must fail.
+
+Both tests pass at `dd423e5` + this commit's changes (32 tests in
+`test_complexity_measures_are_algorithmic.py`, all green; 269 in the
+full suite, 1 declared skip). The link between the live test and the
+planted ones is the helper, so a future refactor that breaks the
+assertion has to break it in ONE place; the planted tests cannot
+silently pass while the live test loses the guard.
 
 ---
 
