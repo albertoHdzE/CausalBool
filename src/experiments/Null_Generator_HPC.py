@@ -157,36 +157,63 @@ def compute_both(cm: np.ndarray) -> Dict[str, float | None]:
     res = enc.compute()
     return {"index_set": float(res["index_set_bits"]), "bdm": res["bdm"]}
 
-def load_existing_results() -> List[Dict[str, Any]]:
-    if NULL_STATS_FILE.exists():
+def load_existing_results(out_file: Path | None = None) -> List[Dict[str, Any]]:
+    """Load the in-memory list from `out_file` (or NULL_STATS_FILE).
+
+    The subsample runs (H1.1) keep their own files so the main 231-network
+    artefact is not touched. The default is unchanged.
+    """
+    target = out_file if out_file is not None else NULL_STATS_FILE
+    if target.exists():
         try:
-            with open(NULL_STATS_FILE, "r") as f:
+            with open(target, "r") as f:
                 return json.load(f)
         except json.JSONDecodeError:
             return []
     return []
 
-def save_results(results: List[Dict[str, Any]]):
-    # Created here rather than at import; see the note beside RESULTS_DIR.
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+def save_results(results: List[Dict[str, Any]], out_file: Path | None = None):
+    """Write the in-memory list to `out_file` (or NULL_STATS_FILE).
+
+    Created here rather than at import; see the note beside RESULTS_DIR.
+    When `out_file` is given, the parent directory is created if missing, so
+    a per-subsample run writes to its own file without disturbing the main
+    231-network artefact. The default behaviour is unchanged.
+    """
+    target = out_file if out_file is not None else NULL_STATS_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
     # Atomic write to avoid corruption
-    temp_file = NULL_STATS_FILE.with_suffix(".tmp")
+    temp_file = target.with_suffix(".tmp")
     with open(temp_file, "w") as f:
         json.dump(results, f, indent=2)
-    temp_file.replace(NULL_STATS_FILE)
+    temp_file.replace(target)
 
 def process_networks(
     max_networks: int = 200,
     nulls_per_type: int = 1000,
     allow_self_loops: bool = False,
     seed: int | None = 42,
-    time_limit_sec: int | None = None
+    time_limit_sec: int | None = None,
+    subsample_name: str | None = None,
 ) -> List[Dict]:
-    
+    """Run the null generator.
+
+    When `subsample_name` is set, the run writes to
+    `results/bio/null_stats_{subsample_name}.json` instead of the main
+    `null_stats.json` artefact, and the resume logic reads from the same
+    file. The first `max_networks` files in alphabetical order are taken
+    (the existing selection rule), so passing `max_networks=30` and
+    `subsample_name="h1_30"` reproduces the H1.1 subsample exactly.
+    """
+    if subsample_name is not None:
+        out_file = RESULTS_DIR / f"null_stats_{subsample_name}.json"
+    else:
+        out_file = NULL_STATS_FILE
+
     start_time = time.time()
-    
-    # Load existing results (Resume capability)
-    results = load_existing_results()
+
+    # Load existing results (Resume capability) from the run's own file.
+    results = load_existing_results(out_file)
     processed_names = {r["network"] for r in results}
     
     # Load all potential files
@@ -312,16 +339,16 @@ def process_networks(
                     for kind in ("er", "deg", "gate")
                 }
             results.append(entry)
-            save_results(results) # Checkpoint after each network
+            save_results(results, out_file) # Checkpoint after each network
             count += 1
-            
+
     except TimeoutException:
         print("Time limit reached. Saving progress...")
     except KeyboardInterrupt:
         print("Interrupted! Saving progress...")
     finally:
-        save_results(results)
-        
+        save_results(results, out_file)
+
     return results
 
 def main():
@@ -330,18 +357,21 @@ def main():
     parser.add_argument("--nulls", type=int, default=1000, help="Nulls per type per network")
     parser.add_argument("--time_limit", type=int, default=None, help="Time limit in seconds (soft stop)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
-    
+    parser.add_argument("--subsample", type=str, default=None,
+                        help="If set, write to null_stats_{subsample}.json instead of null_stats.json")
+
     args = parser.parse_args()
 
     print("=== Phase 3: Massive Null Model Generation ===")
-    print(f"Configuration: Max Networks={args.networks}, Nulls={args.nulls}, Time Limit={args.time_limit}s")
-    
+    print(f"Configuration: Max Networks={args.networks}, Nulls={args.nulls}, Time Limit={args.time_limit}s, Subsample={args.subsample}")
+
     results = process_networks(
         max_networks=args.networks,
         nulls_per_type=args.nulls,
         allow_self_loops=False,
         seed=args.seed,
-        time_limit_sec=args.time_limit
+        time_limit_sec=args.time_limit,
+        subsample_name=args.subsample,
     )
     
     print(f"Total processed so far: {len(results)}")
@@ -359,15 +389,36 @@ def main():
             return [r["bdm"][kind][field] for r in results
                     if isinstance(r.get("bdm"), dict) and kind in r["bdm"]]
 
+        def _col_gap_to_median(kind: str, measure: str = "index_set") -> List[float]:
+            # gap_to_median = D(median null) - D(bio). Per-record, so we
+            # derive it from median_null and D_bio here rather than asking
+            # the artefact to store it.
+            D_key = "D_bio_bdm" if measure == "bdm" else "D_bio"
+            if measure == "bdm":
+                return [r["bdm"][kind]["median_null"] - r[D_key] for r in results
+                        if isinstance(r.get("bdm"), dict)]
+            return [r[kind]["median_null"] - r[D_key] for r in results if kind in r]
+
         def _block(kind: str, measure: str) -> Dict[str, Any]:
-            gaps = _col(kind, "gap_bits", measure)
-            exc = _col(kind, "exceed", measure)
+            # AUDIT04-H (H1.2): the summary now publishes FIVE statistics per
+            # measure × null, three of them new and two retained. The retained
+            # ones — `median_gap_bits` (the gap to the SINGLE BEST null, i.e.
+            # the worst-case advantage) and `separating_at_exceed_0` (the
+            # count of networks with `exceed == 0`) — are unchanged. The new
+            # ones — `median_gap_to_median_null`, `n_bio_lt_median_null`,
+            # and `median_exceed` — do not move with the null count.
+            gaps_best  = _col(kind, "gap_bits", measure)
+            gap_med    = _col_gap_to_median(kind, measure)
+            exc        = _col(kind, "exceed", measure)
             return {
-                "median_gap_bits": float(np.median(gaps)) if gaps else None,
-                "min_gap_bits": float(min(gaps)) if gaps else None,
-                "separating_at_exceed_0": sum(1 for e in exc if e == 0.0),
-                "separating_at_exceed_lt_0.05": sum(1 for e in exc if e < 0.05),
-                "n": len(gaps),
+                "median_gap_bits": float(np.median(gaps_best)) if gaps_best else None,
+                "min_gap_bits":    float(min(gaps_best)) if gaps_best else None,
+                "median_gap_to_median_null": float(np.median(gap_med)) if gap_med else None,
+                "n_bio_lt_median_null":      int(sum(1 for g in gap_med if g > 0)) if gap_med else 0,
+                "median_exceed":             float(np.median(exc)) if exc else None,
+                "separating_at_exceed_0":          int(sum(1 for e in exc if e == 0.0)) if exc else 0,
+                "separating_at_exceed_lt_0.05":    int(sum(1 for e in exc if e < 0.05)) if exc else 0,
+                "n": len(gaps_best),
             }
 
         summary: Dict[str, Any] = {
@@ -399,16 +450,26 @@ def main():
         # The module-level mkdir was removed (it ran on import); every write
         # site must now guarantee the directory itself.
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-        with open(RESULTS_DIR / "null_summary.json", "w") as f:
+        if args.subsample is not None:
+            summary_path = RESULTS_DIR / f"null_summary_{args.subsample}.json"
+        else:
+            summary_path = RESULTS_DIR / "null_summary.json"
+        with open(summary_path, "w") as f:
             json.dump(summary, f, indent=2)
         for measure in ("index_set", "bdm"):
             print(f"  -- {measure} --")
             for kind in ("er", "deg", "gate"):
                 s = summary[kind] if measure == "index_set" else summary["bdm"][kind]
                 if s["n"]:
-                    print(f"  {kind:5s} median gap {s['median_gap_bits']:8.2f} bits · "
-                          f"worst {s['min_gap_bits']:8.2f} · "
-                          f"beats EVERY null {s['separating_at_exceed_0']}/{s['n']}")
+                    # AUDIT04-H (H1.2): three comparators now published.
+                    # The "worst-case advantage" is the gap to the best null.
+                    # The "median-null gap" is the gap to the median null.
+                    # The "exceed==0" count is the worst-case indicator.
+                    print(f"  {kind:5s} worst-case adv {s['median_gap_bits']:8.2f} bits · "
+                          f"med-null gap {s['median_gap_to_median_null']:7.2f} · "
+                          f"med exceed {s['median_exceed']:.3f} · "
+                          f"beats EVERY null {s['separating_at_exceed_0']}/{s['n']} · "
+                          f"shorter than median null {s['n_bio_lt_median_null']}/{s['n']}")
         for kind in ("er", "deg", "gate"):
             a = summary["agreement"][kind]
             if a["n"]:

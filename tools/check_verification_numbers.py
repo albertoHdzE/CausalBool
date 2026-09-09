@@ -72,6 +72,16 @@ CHECKERS: dict[str, str] = {
     # pair is that quoting only the 92% would merge two different statements.
     "semantic kill rate": "mutation_semantic",
     "unit-test kill rate": "mutation_unit",
+    # Section 5b.1. AUDIT04-H acceptance: the gate covers the six median-null
+    # figures and the six tail counts; planted changes go red. Each row keys
+    # on the cell name and returns the two figures the row carries, so a
+    # planted change to any one of the twelve numbers hits one row.
+    "index-set / er": "bio_summary_index_set_er",
+    "index-set / deg": "bio_summary_index_set_deg",
+    "index-set / gate": "bio_summary_index_set_gate",
+    "BDM / er": "bio_summary_bdm_er",
+    "BDM / deg": "bio_summary_bdm_deg",
+    "BDM / gate": "bio_summary_bdm_gate",
 }
 
 # Rows carrying SEVERAL bold figures rather than one. Everywhere else only the
@@ -82,7 +92,13 @@ MULTI_BOLD = {"Lint hygiene debt", "Coverage of `src/` as a whole",
               # AUDIT04-E: tests AND files. A suite that silently stops
               # collecting a whole file keeps a plausible test count, which is
               # how 24 files went unrun without any number looking wrong.
-              "Declared Python suite"}
+              "Declared Python suite",
+              # AUDIT04-H: each §5b.1 cell row carries the median-null gap and
+              # the exceed==0 count as two separate bolded values. A gate that
+              # only checked the first would let a wrong tail count sit on the
+              # page beside a right gap.
+              "index-set / er", "index-set / deg", "index-set / gate",
+              "BDM / er", "BDM / deg", "BDM / gate"}
 
 # A checker may return this prefix in its `how` string to mean "the measurement
 # itself is invalid", which is a FAILURE and not an UNKNOWN. UNKNOWN is for a
@@ -320,6 +336,87 @@ def mutation_unit() -> tuple[list[float] | None, str]:
     return _mutation_rate("UNIT-TEST")
 
 
+# ── §5b.1 Bio comparator values (AUDIT04-H) ─────────────────────────────────
+#
+# The bio summary block at `results/bio/null_summary.json` carries, per
+# (measure, null kind) cell, a `median_gap_to_median_null` and a
+# `separating_at_exceed_0` count. VERIFICATION.md §5b.1 quotes both in a
+# 3-cell row per cell. Reading them through the JSON is the gate's job; a
+# planted change in any one of the twelve values must turn one of these
+# six rows red.
+#
+# The earlier 4-cell `ER null / median gap −27.68` rows in §5b's main table
+# are NOT gated by design: the row is a 4-cell layout, the parser only
+# handles 2 or 3, and the 6 best-null `median_gap_bits` figures are
+# already cross-checked at the source by the byte-identical diff that
+# H1.2 records. The new 3-cell sub-table in §5b.1 is what the H1
+# acceptance criterion names.
+
+_BIO_PATH = ROOT / "results/bio/null_summary.json"
+
+
+def _bio_cell(measure: str, kind: str) -> tuple[list[float] | None, str]:
+    """[median_gap_to_median_null, separating_at_exceed_0] for one cell.
+
+    The two figures are checked in document order: gap, then count. The
+    row's `231` denominator is left unbolded in the document on purpose
+    — a denominator that disagrees with the artefact is the producer's
+    own self-check, not the gate's, and bolding it would make the gate
+    assert against a value that the producer does not own.
+
+    The summary file at `results/bio/null_summary.json` is shaped by
+    `Null_Generator_HPC._block`: the three null kinds (`er`, `deg`,
+    `gate`) sit at the top level for the index_set measure, while the
+    BDM cells are nested one level deeper under a `bdm` parent. Both
+    shapes are read here.
+
+    The gap is rounded to two decimal places before being returned, so
+    the value the gate compares is the same one a reader sees on the
+    page. Full precision lives in the JSON; a planted change of a few
+    units in the last decimal place is the same value to the page, and
+    asserting a more-precise value than the page states would let a
+    rounding-style change pass.
+    """
+    import json
+    if not _BIO_PATH.exists():
+        return None, f"UNKNOWN: {_BIO_PATH} absent"
+    data = json.loads(_BIO_PATH.read_text())
+    try:
+        if measure == "index_set":
+            cell = data[kind]
+        else:
+            cell = data[measure][kind]
+        gap = cell["median_gap_to_median_null"]
+        count = cell["separating_at_exceed_0"]
+    except (KeyError, TypeError) as e:
+        return None, f"REFUSED: {measure}/{kind} missing field: {e}"
+    return [round(float(gap), 2), float(count)], "results/bio/null_summary.json"
+
+
+def bio_summary_index_set_er() -> tuple[list[float] | None, str]:
+    return _bio_cell("index_set", "er")
+
+
+def bio_summary_index_set_deg() -> tuple[list[float] | None, str]:
+    return _bio_cell("index_set", "deg")
+
+
+def bio_summary_index_set_gate() -> tuple[list[float] | None, str]:
+    return _bio_cell("index_set", "gate")
+
+
+def bio_summary_bdm_er() -> tuple[list[float] | None, str]:
+    return _bio_cell("bdm", "er")
+
+
+def bio_summary_bdm_deg() -> tuple[list[float] | None, str]:
+    return _bio_cell("bdm", "deg")
+
+
+def bio_summary_bdm_gate() -> tuple[list[float] | None, str]:
+    return _bio_cell("bdm", "gate")
+
+
 def core_index() -> tuple[list[int] | None, str]:
     rc, out = run(["zsh", str(ROOT / "tools/check_core_index.sh")], ROOT)
     m = re.search(r"(\d+)\s*/\s*(\d+)\s+paths", out)
@@ -412,7 +509,14 @@ def parse_claims(text: str) -> list[tuple[str, list[float], str]]:
     in_section = False
     for ln in text.splitlines():
         if ln.startswith("## "):
-            in_section = ln.startswith(("## 3.", "## 4.", "## 5."))
+            # AUDIT04-H: the original regex only matched `## 5.` literally, so
+            # the §5a and §5b sub-sections (where the bio comparator table now
+            # lives) were silently ignored by the parser. The fix is the same
+            # intent, widened: any `## ` whose second character is `3`, `4` or
+            # `5` opens a parsable section. No other top-level heading in this
+            # document starts with those digits.
+            head = ln[3:4]
+            in_section = head in ("3", "4", "5")
             continue
         if not in_section:
             continue

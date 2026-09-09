@@ -61,7 +61,7 @@ repository is absent. That is correct refusal, and it is what CI sees.
 |---|---|---|
 | MUnit suite | **72 / 72**, 0 failures | `make suite`, claim gated by the tracked `SCOPE=all` rollup |
 | Declared Python suite | **268** tests over **28** files (1 skipped, declared) | CI asserts the count; membership from `MANIFEST.tsv` |
-| `src/` line+branch coverage | **31.74 %** over **61** files | `check_coverage_ratchet.py`, global + per-module floors |
+| `src/` line+branch coverage | **31.67 %** over **61** files | `check_coverage_ratchet.py`, global + per-module floors |
 | Complexity measures that are algorithmic | **3 / 3** — index-set, BDM, `D_v2` forwarder; 0 rank random below structured **on the chain family** | `test_complexity_measures_are_algorithmic.py` |
 | Structured families ordered correctly | **BDM 5 / 5 · index-set 3 / 5** — the index-set length inverts on a checkerboard (1050.5 bits against 563.9 for random of equal density) and on column stripes (1050.5 against 568.4), because it is a run-length code over rows and an alternating row costs its maximum. **Declared, not hidden**: `DECLARED_INVERSIONS` goes red if either disappears without the declaration moving | `test_structured_families_against_matched_random` |
 | `index-deconvolution` | **146** tests | CI asserts the count |
@@ -93,7 +93,7 @@ that file so `COVERAGE_RATCHET.toml` is the single owner of every floor.
 > about whether the assertions are any good. The mutation harness is what
 > measures that.
 
-### This page now checks itself — for 12 of its 44 numbers
+### This page now checks itself — for 17 of its 50 numbers
 
 The header above claims none of these figures is typed by hand. **That sentence
 was false when it was written:** the `check_core_index.sh` row read `36 / 36`
@@ -102,8 +102,8 @@ it cites, so a governance document about verification was the least verified
 artefact in the repository.
 
 `tools/check_verification_numbers.py` (pure tier) parses **§3, §4 and §5** and
-re-derives each claim from the tool named beside it. Of the **44 numeric rows**
-it checks **12** and **names the 32 it does not**, so they are declared unchecked
+re-derives each claim from the tool named beside it. Of the **50 numeric rows**
+it checks **17** and **names the 32 it does not**, so they are declared unchecked
 rather than quietly skipped. Verified in all three states: a planted wrong figure
 exits `1` printing both values, an unparseable table exits `2`, clean exits `0`.
 
@@ -142,7 +142,7 @@ three-state discipline as the glossary sync.
 |---|---|---|
 | **Manuscript tables with a producer wired** | **5 of 34 (15 %)** | The gate's old summary read *"7 covered, 1 pending"*, which invites 88 %. The pending entry was an unenumerated catch-all. Wiring the remaining 29 is research-shaped: some have no producer at all. |
 | **Lint hygiene debt** | enforced **0** · exempted-path residue F401 **154** · F841 **32** | **No longer debt: F401, F541 and F841 are now ENFORCED**, so a new one fails CI. F541 went 67 → 0 everywhere; F401 and F841 → 0 in every production path. The residue sits only in paths exempted **by name with a reason** in `ruff.toml`. The two figures are separate on purpose — reporting only "enforced 0" would hide the residue, which is how the old declared debt drifted 176/47/47 → 213/67/40 unseen. |
-| **Coverage of `src/` as a whole** | **31.74 %** over **61** files; **22 of 52** modules with statements sit at exactly 0 % (was 42) | The 98.56 % in §3 is real but covers **99 statements in two files**. This row exists so the scoped figure can never be read as the unscoped one. **This figure was first published as 13 % and was wrong** — coverage only enumerates unexecuted files inside importable packages, and seven directories under `src/` had no `__init__.py`, so the report covered **25 of 54** files. With the markers added it covers **61 of 61** and the true figure is **6 %**. The gate now **fails** (not "unknown") when report and disk disagree: a percentage over a partial denominator is not unknown, it is wrong. **Moved 6 % -> 9 % on 2026-09-05** when the four parser contract tests landed; three of those four do not catch a planted defect, so this rise is executed lines and not verification. **Moved 12.63 % -> 29.90 % on 2026-09-07, and NOT ONE TEST WAS WRITTEN TO MOVE IT.** The coverage command was `pytest tests/analysis --cov`, and 24 further Python test files were run by nothing, so the 17.27 points they already exercised were never counted. This rise is neither executed lines nor verification — it is **arithmetic that was always true and never performed**, which is the worst of the three, because a wrong denominator makes every ratio above it wrong too. |
+| **Coverage of `src/` as a whole** | **31.67 %** over **61** files; **22 of 52** modules with statements sit at exactly 0 % (was 42) | The 98.56 % in §3 is real but covers **99 statements in two files**. This row exists so the scoped figure can never be read as the unscoped one. **This figure was first published as 13 % and was wrong** — coverage only enumerates unexecuted files inside importable packages, and seven directories under `src/` had no `__init__.py`, so the report covered **25 of 54** files. With the markers added it covers **61 of 61** and the true figure is **6 %**. The gate now **fails** (not "unknown") when report and disk disagree: a percentage over a partial denominator is not unknown, it is wrong. **Moved 6 % -> 9 % on 2026-09-05** when the four parser contract tests landed; three of those four do not catch a planted defect, so this rise is executed lines and not verification. **Moved 12.63 % -> 29.90 % on 2026-09-07, and NOT ONE TEST WAS WRITTEN TO MOVE IT.** The coverage command was `pytest tests/analysis --cov`, and 24 further Python test files were run by nothing, so the 17.27 points they already exercised were never counted. This rise is neither executed lines nor verification — it is **arithmetic that was always true and never performed**, which is the worst of the three, because a wrong denominator makes every ratio above it wrong too. |
 | **Modules that cannot be imported in the declared environment** | **3 of 53** — `BulkScraper`, `CurateNatureDataset`, `grn_data_pipeline` | All three need `requests`, which `requirements.txt` deliberately does **not** pin because they are orphaned scrapers reaching external services. They therefore sit at 0 % and no test can reach them until that is resolved — a Phase 3 decision, recorded here rather than discovered later. |
 | **Where the remaining 154 F401 live** | replication packages **85** · `index-deconvolution/level*` **33** · `tests/` Lev4–7 runners **12** · `audit/` scripts **9** · frozen `workspaces/` **6** · `doc/` archives **6** · `experiments/` **3** | Every one is a replication package with its own pinned environment, a **dated experiment record**, or a provenance archive. Editing those rewrites history rather than fixing code, which is why they are declared instead of cleared. |
 | ~~**`Trajectory_LZ.py` `k_max`**~~ **RESOLVED — and it was the other file that was wrong** | `Trajectory_LZ` agrees with published LZ76 on **255/300**; `Scaling_LZ_Tools` on **6/300** | See below. The unused `k_max` was a real signal, but it pointed at a different defect from the one I first recorded. |
@@ -469,6 +469,111 @@ against **1935.6 / 4374.4 / 7759.9**.
 particular claim, over this corpus and these three nulls, is not supported. The
 `imp-*` replication packages and the manuscripts are untouched — `D_v2` appears
 in neither `method_paper.tex` nor `comp_paper.tex`.
+
+### 5b.1 The comparator question (AUDIT04-H, H1)
+
+The gap published in the table above is the gap to the **best** of 1000
+nulls, i.e. `D(best null) − D_bio`. That comparator is one of three that
+the run can publish. AUDIT04-H enriched the summary block
+(`Null_Generator_HPC._block`, regenerated 2026-09-08) to also publish
+the gap to the **median** null and the permutation tail `exceed`
+(`#{null ≤ bio} / n`). The six best-null `median_gap_bits` figures in
+the table above are **byte-identical** before and after the enrichment;
+the diff is empty on those values.
+
+The same six cells, under all three comparators, in human-readable form.
+Order per cell: `best-null gap`, `median-null gap`, `median exceed`,
+`exceed == 0`, `n`, `bio < median null`, `n`:
+
+| cell | best-null gap (bits) | median-null gap (bits) | median `exceed` | `exceed == 0` | n | `bio < median null` | n |
+|------|----------------------|------------------------|-----------------|---------------|---|----------------------|---|
+| index-set / er   | −27.68 | 25.22 | 0.130 | 53 | 231 | 171 | 231 |
+| index-set / deg  | −31.26 | 10.72 | 0.257 | 34 | 231 | 149 | 231 |
+| index-set / gate | −38.05 |  9.29 | 0.296 | 39 | 231 | 147 | 231 |
+| BDM / er         | −59.20 |  3.35 | 0.340 | 14 | 231 | 150 | 231 |
+| BDM / deg        | −53.12 |  1.09 | 0.395 |  7 | 231 | 130 | 231 |
+| BDM / gate       | −68.45 |  1.39 | 0.423 | 10 | 231 | 131 | 231 |
+
+The same six cells, in a form the verification-numbers gate can parse
+(per H1 acceptance criterion: "covers at least the six median-null
+figures and the six tail counts; planted changes to them go red"):
+
+| Bio comparator values | median-null gap (bits), `exceed == 0` count |
+|-----------------------|----------------------------------------------|
+| index-set / er        | gap **25.22** bits, count **53** / 231      |
+| index-set / deg       | gap **10.72** bits, count **34** / 231      |
+| index-set / gate      | gap  **9.29** bits, count **39** / 231      |
+| BDM / er              | gap  **3.35** bits, count **14** / 231      |
+| BDM / deg             | gap  **1.09** bits, count  **7** / 231      |
+| BDM / gate            | gap  **1.39** bits, count **10** / 231      |
+
+The best-null gap is negative in every cell, the median-null gap is
+positive in every cell, and `exceed` is below 0.5 in every cell. The
+three comparators are not telling the same story: the best-null gap
+says the corpus is not simpler than the worst case it generated, the
+median-null gap says the corpus is shorter than the typical null, and
+the permutation tail says only a small fraction of nulls are as short
+as the bio object. The H1 plan
+(`plans/AUDIT04-H_comparator_measures_and_lifecycle.md`, lines 342–427)
+treats this as a comparator question, not a measure question.
+
+**Knob effect, index-set, 30 networks, seed 42.** With the null count
+moved from 10 to 100 to 1000, the best-null gap moves monotonically
+more negative on every null kind (er: +21.05 → −7.62 → −25.81; deg:
+−4.91 → −17.65 → −22.07; gate: −14.30 → −26.25 → −37.30), while the
+median-null gap and the median `exceed` do not. The full 9-cell
+knob table is in `audit/AUDIT04_H_comparator/FINDING.md` §5. This is
+the empirical content of H1.1, and the result is that the best-null
+comparator is the one that depends on the run parameter it is not
+about. The median-null comparator and the permutation tail are
+distribution-free or order-statistic; they are predicted and observed
+to be approximately flat across null counts.
+
+**Tail count reference.** Under the exchangeability of a network with
+its own nulls, the probability that no null is shorter than the
+network is `1 / (n + 1)` where `n` is the null count, giving
+`1/1001 ≈ 0.000999` at `n = 1000`. Over 231 networks, the expected
+count is `0.23`:
+
+| cell | expected `exceed == 0` count | measured `exceed == 0` count |
+|------|------------------------------|------------------------------|
+| expected (N=231, p=1/1001) | 0.23 | — |
+| index-set / er   | — | 53 |
+| index-set / deg  | — | 34 |
+| index-set / gate | — | 39 |
+| BDM / er         | — | 14 |
+| BDM / deg        | — |  7 |
+| BDM / gate       | — | 10 |
+
+The exact binomial upper-tail probability for the observed counts is
+`5.4 × 10⁻¹⁰⁷` (index-set / er), `4.8 × 10⁻⁶²` (index-set / deg),
+`2.0 × 10⁻⁷³` (index-set / gate), `7.6 × 10⁻²¹` (BDM / er),
+`5.2 × 10⁻⁹` (BDM / deg), `7.9 × 10⁻¹⁴` (BDM / gate). These are
+published for context and not gated: a planted wrong count is the
+failure mode the gate is for, and the p-value is implied by the
+count's distance from the expectation.
+
+**Whether to call biological objects simpler than their null ensembles,
+with the binomial probability as evidence and the comparator as the
+question, is author decision H-D1 and is not drawn here.** The
+`Contingency_Monitor` falsification rule
+(`src/pipeline/Contingency_Monitor.py:138`) currently uses the best-null
+gap on its `gap_bits` arm. If that arm is moved to the median-null
+gap, the measured verdict change on the 231 networks is:
+
+| Verdict change (best-null → median-null, 231 networks) | er | deg | gate | total (3 null kinds) |
+|--------------------------------------------------------|----|----|------|----------------------|
+| index-set                                              | 118 | 115 | 108 | 341 / 693 |
+| BDM                                                    | 136 | 123 | 121 | 380 / 693 |
+
+The index-set total is **49.2 %** of the 693 (network × null kind)
+pairs and the BDM total is **54.8 %**. The decision rule therefore
+depends on the comparator choice, and the choice is a substantive
+scientific decision rather than a technical one. The change is **not**
+made in this commit; the count above is the measured consequence.
+The two measures still disagree on roughly a third of the corpus,
+which is the reason `Contingency_Monitor` returns `UNDECIDED` rather
+than picking one.
 
 ---
 
