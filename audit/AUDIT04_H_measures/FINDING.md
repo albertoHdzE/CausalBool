@@ -142,7 +142,81 @@ must say so.
 
 ## 3. The label-matched probe (H2.2)
 
-(populated by the H2.2 step; left for the next commit)
+**Producer:** `venv/bin/python audit/AUDIT04_H_measures/label_matched_probe.py`
+**Artefact:** `audit/AUDIT04_H_measures/label_matched_probe.json`
+**Denominator:** 200 chain instances × 200 random graphs = 200 paired
+comparisons per configuration, n = 12, 11 ones in the matrix, draw seed
+`11` (the seed the existing test uses; the chain seed `20260908` controls
+the relabelling sampler, drawn fresh per configuration).
+
+The probe re-runs the chain comparison of
+`test_complexity_measures_are_algorithmic.py:test_random_is_not_simpler_than_a_chain`
+in two configurations. **Canonical** — the chain in its natural labelling
+0-1-2-…-11, exactly as the existing test presents it. **Relabelled** — the
+chain under a fresh random permutation per instance, drawn with
+`np.random.default_rng(20260908).permutation(12)`. In both cases the
+matched random graphs are drawn with `np.random.default_rng(11)`, the
+existing test's seed, so the canonical column reproduces the existing
+test's 9.5 % figure draw-for-draw.
+
+### 3.1 The measurement (side by side with the existing probe)
+
+| configuration | Variant A simpler-or-equal (%) | BDM simpler-or-equal (%) |
+|---|---|---|
+| canonical (the existing probe) | 9.50 | 0.00 |
+| relabelled (the label-matched probe) | 11.00 | **69.00** |
+
+The BDM figure inverts on relabelling: the chain is more expensive than
+random 100 % of the time in the canonical configuration, but only 31 % of
+the time (100 − 69) in the relabelled one. The two figures are the SAME
+graph and the SAME random comparator distribution; only the chain's
+labelling differs. BDM's "the chain is simpler than random" finding is
+a labelling response, not a property of the family.
+
+Variant A is comparatively stable: 9.50 % canonical, 11.00 % relabelled,
+both within the noise the existing test accepts (its 25 % threshold
+allows up to 50/200). The run-length code over rows is not
+labelling-sensitive at the fraction level, consistent with H2.1's
+Variant A spread of 61.31 bits on the chain being a moderate move in
+absolute terms (the chain is dominated by rows of runs 1 or 2) but a
+modest one relative to the chain's 196-bit canonical cost.
+
+### 3.2 The review value cross-check
+
+The plan's review values for H2.2, n = 12, 11 edges, 200 × 200:
+
+| configuration | Variant A | BDM |
+|---|---|---|
+| canonical | 9.5 % | 0.0 % |
+| relabelled | 9.5 % | **66.9 %** |
+
+The canonical column is exactly reproducible (9.50 %, 0.00 %). The
+relabelled column reproduces the BDM 0 → 66.9 % finding as 0 → 69.00 %,
+a 2.1-percentage-point shift attributable to the different random
+permutation sets drawn under the different seeds; the qualitative claim
+is identical. The Variant A relabelled value is 11.00 % against the
+plan's 9.5 %; both are within the noise band of the existing test's
+25 % acceptance threshold, and the two values are not distinguishable
+from each other at this sample size.
+
+### 3.3 Why the existing probe was not enough
+
+The existing probe in `test_complexity_measures_are_algorithmic.py`
+asks whether the measure inverts. It is a single-draw test: the chain is
+presented in one labelling, and the figure is the inversion rate over
+60 (or 200) draws of the random comparator. The H2.1 response profile
+shows that the figure is a draw of a labelling-sensitive distribution
+and not a property of the family; the label-matched probe is the same
+test with the labelling sampled. Both figures now stand:
+
+- the existing probe (canonical, 9.5 % / 0.0 %) is the
+  `DECLARED_INVERSIONS` evidence; the reader who relies on it must see
+  that the probe does not exclude the relabelled case.
+- the label-matched probe (relabelled, 11.0 % / 69.0 %) is the
+  measure's behaviour on the family; the BDM figure inverts on
+  relabelling, and that is the fact the H2.3 adjudication rests on.
+
+Neither replaces the other. Both are reported.
 
 ---
 
