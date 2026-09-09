@@ -138,7 +138,7 @@ class — a statistic chosen without regard to what it responds to.
 be re-reported under all three comparators with the reference distribution
 stated, and leaves the scientific reading to the author (decision **H-D1**).
 
-### 2.2 "The index-set program length" names two different quantities
+### 2.2 "The index-set program length" names two different quantities: Variant A vs Variant E
 
 `GOVERNANCE/DESCRIPTION_LENGTHS.md` names five variants. Two matter here:
 

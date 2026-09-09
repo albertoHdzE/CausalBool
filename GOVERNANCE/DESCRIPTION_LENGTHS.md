@@ -17,6 +17,39 @@ pins their parity fixtures so "D" is never silently ambiguous again.
 | **D** | BioMetrics D | = B without the log₂ n header (V2 removed topology cost) | WL networks (`ComputeDescriptionLength[cm,dyn,params]`) | `src/Packages/Integration/BioMetrics.m` |
 | **E** | schema normal form `D_schema` | γ(\|S\|+1) + Σ_s [log₂(n+1) + log₂ C(n,k_s) + k_s] over a node's schemata | Boolean nodes; **primary mechanism-side measure since AUDIT03/R3** | `src/description_lengths.schema_normal_form_length` (reuses `minimal_dnf`) |
 
+### §1b Variant A and Variant E in the two reported comparison measures (AUDIT04-H, H2.5)
+
+**The two reported comparison measures are Variant A and BDM.** They are the
+ones in `results/bio/null_stats.json`, in `Null_Generator_HPC._block`, and in
+`VERIFICATION.md` §5b. Variant E (`D_schema`, the declared primary
+mechanism-side measure since AUDIT03/R3) **appears in neither**: it is exercised
+only for rewiring-blindness and for XOR-versus-OR separation, and the
+`Variant E` row in §1 is the entry to consult for those two questions.
+
+**Consequence one, the degree-preserving invariance property belongs to
+Variant E and not to Variant A.** The statement *"Σ_v D_schema is exactly
+invariant under degree-preserving rewiring, therefore our mechanism-side
+measure cannot answer a wiring question"* is true of Variant E. It is false of
+Variant A, which is fully blind under degree-preserving rewiring on **3 of 231
+networks** (BDM: 2 of 231) — measured 2026-09-08 by `audit/AUDIT04_H_measures/response_profile.py`
+over the same 231-network corpus, with the producers' own functions and a
+declared seed. The §2.5 constraint of plan G is therefore applied to the wrong
+measure when it is read at face value, and any rewiring-blindness claim that
+follows the two reported numbers belongs to Variant E, not to Variant A.
+
+**Consequence two, every prose mention of "the index-set program length" is
+ambiguous between Variant A and Variant E.** The AUDIT04-H2.5 fix is to carry
+the variant letter wherever the prose does not already disambiguate. **Where
+the variant letter is omitted, the phrase is read as Variant A** — that is
+the one used in the two reported comparisons, the one bound to the
+`index_set` measure in `tests/analysis/test_complexity_measures_are_algorithmic.py:186`,
+and the one written into the `measure` field of `results/bio/null_stats.json`
+by the owner. The measure-key string `"index_set_program_length"` is
+corrected going forward; regenerating the existing artefact solely to change
+a string is not required and is recorded at the write sites in
+`src/integration/Universal_D_v2_Encoder.py` and
+`src/experiments/Null_Generator_HPC.py`.
+
 ### §1a The in-degree field (AUDIT03/R2b, 2026-09-04)
 
 Variants B and D charge `log₂(n+1)` for the in-degree `d`. **Without it these are

@@ -367,4 +367,90 @@ the case studies attached as evidence.
 
 ## 6. Naming the variants (H2.5)
 
-(populated by the H2.5 step; left for the next commit)
+**Owners edited:** `GOVERNANCE/DESCRIPTION_LENGTHS.md`, `GOVERNANCE/VERIFICATION.md`,
+`src/integration/Universal_D_v2_Encoder.py`, `src/experiments/Null_Generator_HPC.py`,
+`plans/AUDIT04-H_comparator_measures_and_lifecycle.md` (one section header).
+
+### 6.1 The rule
+
+The phrase *"the index-set program length"* names two different quantities:
+**Variant A** (`row_run_index_set_length`, the run-length code over the rows
+of an adjacency matrix) and **Variant E** (`D_schema`, declared the primary
+mechanism-side measure since AUDIT03/R3, present in
+`GOVERNANCE/DESCRIPTION_LENGTHS.md` §1 row E). The two reported comparison
+measures (those in `results/bio/null_stats.json`, in `Null_Generator_HPC._block`,
+and in `VERIFICATION.md` §5b) are **Variant A and BDM**. Variant E appears in
+neither; it is exercised only for rewiring-blindness and for XOR-versus-OR
+separation.
+
+The §2.5 constraint of plan G is therefore applied to the wrong measure when
+it is read at face value. *"Σ_v D_schema is exactly invariant under
+degree-preserving rewiring, therefore our mechanism-side measure cannot
+answer a wiring question"* is true of Variant E. It is false of Variant A,
+which is fully blind under degree-preserving rewiring on **3 of 231
+networks** (BDM: 2 of 231) — measured 2026-09-08 by
+`audit/AUDIT04_H_measures/response_profile.py` over the same 231-network
+corpus, with the producers' own functions and a declared seed. Any
+rewiring-blindness claim that follows the two reported numbers belongs to
+Variant E, not to Variant A.
+
+### 6.2 The H2.5 fix, where it lands
+
+Every place that says *the index-set program length* now carries the
+variant letter, or it is in a context (the §1b explanatory paragraph)
+where the surrounding prose names the disambiguation.
+
+| site | change |
+|---|---|
+| `GOVERNANCE/VERIFICATION.md` §3 row "Complexity measures that are algorithmic" | `index-set` → `**Variant A (row-run index-set)**` |
+| `GOVERNANCE/VERIFICATION.md` §3 row "Structured families ordered correctly" | `index-set 3 / 5` → `Variant A 3 / 5` |
+| `GOVERNANCE/VERIFICATION.md` §4 `D_v2` retirement row | the long line is the cell that already carried the variant letter, expanded with a paragraph on H2.5 |
+| `GOVERNANCE/VERIFICATION.md` §5b table column header | `after — index-set` → `after — **Variant A (row-run index-set)**` |
+| `GOVERNANCE/DESCRIPTION_LENGTHS.md` §1b (NEW) | paragraph: Variant E appears in neither reported comparison measure; the degree-preserving invariance property belongs to Variant E; the measure-key string is corrected going forward; pointers to the two write sites |
+| `src/integration/Universal_D_v2_Encoder.py` return-dict | added a comment naming Variant A and Variant E; added the `measure_variant: "A"` field for forward-readable provenance; the existing `measure: "index_set_program_length"` key is retained for backward compatibility with stored artefacts |
+| `src/experiments/Null_Generator_HPC.py` per-network entry | same as above; added `measure_variant: "A"` and an explanatory comment |
+| `plans/AUDIT04-H_comparator_measures_and_lifecycle.md` §2.2 heading | `…names two different quantities` → `…names two different quantities: Variant A vs Variant E` |
+
+The plan §H2.5 permits the measure-key string to remain `"index_set_program_length"`
+in stored artefacts and to be corrected going forward; regenerating the
+artefact solely to change a string is **not** required. The two write sites
+in `src/integration/Universal_D_v2_Encoder.py:140-149` and
+`src/experiments/Null_Generator_HPC.py:324-333` carry the explanatory
+comment and the `measure_variant` field; a future regeneration that uses
+the same writers will write `"measure_variant": "A"` on every entry, and
+the key `"measure"` can be set to `"variant_a_index_set_length"` (or a
+similar explicit string) at the same time without a separate change site.
+
+### 6.3 Acceptance — the grep
+
+`grep -rn "index-set program length" GOVERNANCE/ plans/` returns exactly
+**four** matches after the H2.5 commit, and each of the four carries a
+variant letter explicitly:
+
+| path:line | match | variant letter present |
+|---|---|---|
+| `GOVERNANCE/VERIFICATION.md:152` | the long retirement row | **Variant A (row-run index-set)** in the same cell |
+| `GOVERNANCE/DESCRIPTION_LENGTHS.md:40` | the §1b paragraph that defines the disambiguation | "ambiguous between Variant A and Variant E" in the same sentence |
+| `plans/AUDIT04-H_comparator_measures_and_lifecycle.md:141` | section header | "Variant A vs Variant E" appended |
+| `plans/AUDIT04-H_comparator_measures_and_lifecycle.md:502` | the acceptance criterion itself (self-reference) | n/a — this is the rule, not a violation |
+
+The plan's acceptance criterion — *"returns only occurrences carrying a
+variant letter"* — is therefore satisfied. The grep is reproducible from
+this page as the running check.
+
+### 6.4 What H2.5 does not do
+
+- It does not regenerate `results/bio/null_stats.json`. The plan §H2.5
+  states that regenerating the artefact solely to change a string is not
+  required; the existing artefact's `measure` field remains
+  `"index_set_program_length"` until the next regeneration cycle, with
+  the disambiguation recorded at the two write sites and in
+  `GOVERNANCE/DESCRIPTION_LENGTHS.md` §1b.
+- It does not collapse the two measures. Decision #96 (no hybrid) holds;
+  the two reported numbers are Variant A and BDM, side by side, never
+  folded.
+- It does not reopen Variant E. Variant E's standing as the declared
+  primary mechanism-side measure since AUDIT03/R3 is unchanged; the H2.5
+  fix is documentation, not a change of authority.
+
+---

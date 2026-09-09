@@ -321,7 +321,15 @@ def process_networks(
                 "n": n,
                 "E": int(cm.sum()),
                 "D_bio": D_bio,
+                # AUDIT04-H2.5: the measure key is "index_set_program_length"
+                # for backward compatibility with stored artefacts, but the
+                # quantity is Variant A (row-run index-set length). Variant E
+                # (D_schema) is the declared primary mechanism-side measure
+                # and is not what this entry holds. Going forward the key
+                # string is corrected in tandem with the artefact
+                # regeneration; see GOVERNANCE/DESCRIPTION_LENGTHS.md §1b.
                 "measure": "index_set_program_length",
+                "measure_variant": "A",
                 "measures": ["index_set_program_length", "bdm"],
                 "D_bio_bdm": bio["bdm"],
                 "nulls_per_type": nulls_per_type,

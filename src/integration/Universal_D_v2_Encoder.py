@@ -137,14 +137,25 @@ class UniversalDv2Encoder:
             "dv2": bits,
             "index_set_bits": bits,
             "bdm": bdm,
+            # AUDIT04-H2.5: the measure key is "index_set_program_length" for
+            # backward compatibility with stored artefacts, but the QUANTITY
+            # being returned is Variant A (row-run index-set length). The
+            # degree-preserving invariance property belongs to Variant E
+            # (D_schema), which appears in neither reported comparison measure
+            # and is not what this encoder returns. Going forward the key
+            # string is corrected in tandem with the `results/bio/null_stats.json`
+            # regeneration; see GOVERNANCE/DESCRIPTION_LENGTHS.md §1b.
             "measure": "index_set_program_length",
+            "measure_variant": "A",
             "measures": ("index_set_program_length", "bdm"),
             "n": self.n,
             "detail": {
                 "note": "D_v2 retired 2026-09-07; `dv2` and `index_set_bits` are "
-                        "the index-set program length in bits, owned by "
+                        "Variant A (row-run index-set length) in bits, owned by "
                         "src/description_lengths.py. `bdm` is the second "
-                        "comparison measure and is reported, never combined.",
+                        "comparison measure and is reported, never combined. "
+                        "Variant E (D_schema) is the declared primary "
+                        "mechanism-side measure and is NOT what this returns.",
                 "bdm_note": bdm_note,
             },
             "blocks": None,
