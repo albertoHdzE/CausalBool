@@ -1,0 +1,74 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\title{A Repaired Exact Laboratory for Adversarial Boolean-Network Repertoires}
+\author{CausalBool group}
+\date{2026-09-09}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We define and validate a finite Boolean-network laboratory for studying how
+small wiring perturbations constrain attainable long-run distributions and
+payoffs. The repaired contract uses row-input adjacency, an explicit
+basin-weighted attractor repertoire, standard forward KL, and a canonical
+reversible distribution codec. An exact N=6 study covers four topology
+families, two independent base seeds, and separate edge additions and
+removals. The resulting artefacts are reproducible and validated; this report
+does not claim large-network scaling or detector performance.
+\end{abstract}
+
+\section{Contract}
+The adjacency convention is $A[\mathrm{target}][\mathrm{source}]=1$. We record
+the one-step transition map, its uniform-input output distribution, and the
+primary long-run distribution. The latter follows every uniformly sampled
+initial state to its deterministic cycle and phase-averages that cycle. For
+distributions on the full $N$-bit alphabet, $D_{KL}(p\Vert q)$ is standard
+forward KL and is infinite when $p$ has mass outside the support of $q$.
+Conditional KL is secondary. Additions and removals are separate estimands .
+
+\section{Exact study}
+The prespecified run uses ring, sparse-random, modular, and hub families; two
+independent seeds; maximum in-degree three; no empty inputs; no self-loops;
+$k=1$; a single baseline-support target selected by seed; and $C=0.25$.
+There are 16 family/seed/operation runs and 219 admissible perturbation rows.
+All 219 rows pass the independent trajectory oracle and have normal process
+status. Ninety-one rows have infinite forward KL, demonstrating why support
+intersection must not replace the declared alarm statistic. Exclusions and
+failures are retained in each run summary.
+
+The finite-catalogue value is computed as
+\[
+ V_k(C)=\max_{A:\,D_{KL}(\mu_A\Vert q)\le C} E_{\mu_A}[s].
+\]
+The exponential-family KL-ball expression is reported only as an upper-bound
+benchmark; its gap from $V_k(C)$ measures the restriction imposed by the
+network catalogue. It is not asserted that the exponential tilt is a network
+attacker.
+
+\section{Reproducibility and limitations}
+Run the experiment from the repository root with
+\begin{verbatim}
+PYTHONPATH=doppel-challenge/src python -m doppel_challenge \\
+  --out-dir doppel-challenge/results/exact_small
+\end{verbatim}
+Each case has an atomic checkpoint, a stable perturbation identifier, source
+and environment provenance, and a scientific digest. The descriptive report
+is generated only from accepted rows. The historical pilot files are retained
+as exploratory diagnostics and are not used in the denominators above.
+
+The experiment is finite-state and exact only at the declared small size. It
+does not identify a wiring mechanism from a distribution when distinct
+networks collide, and it does not establish a finite-observation detector.
+Held-out benign/attack sampling, false-positive calibration, uncertainty
+under clustered perturbations, and approximate larger-$N$ estimators require a
+separate declared study.
+
+\section*{Data and software}
+The protocol, schema, code, and hashed artefacts are in
+\texttt{doppel-challenge/}. The committed exact-study summary is
+\texttt{results/exact\_small/study\_summary.json}; its descriptive analysis is
+\texttt{results/exact\_small/analysis.json}.
+
+\end{document}
