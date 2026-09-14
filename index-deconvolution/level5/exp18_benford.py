@@ -4,7 +4,7 @@ Do the occurrence gaps obey Benford's law?
 
 Benford's law -- P(leading digit d) = log10(1 + 1/d) -- is the fingerprint of
 scale-invariance: a quantity whose logarithm is spread uniformly across scales
-shows it.  The representation-free pivot gaps (the waiting times dt and the move
+shows it.  The representation-free financial pivot gaps (the waiting times dt and the move
 sizes |dv|) are, by construction, differences taken under a relative threshold, so
 they should be more scale-invariant than the raw values.  The experiment measures
 the total-variation distance of each leading-digit histogram from Benford and

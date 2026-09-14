@@ -1,6 +1,6 @@
 """test_level5.py
 
-Deterministic tests for the representation-free pivot geometry: the directional-
+Deterministic tests for the representation-free financial pivot geometry: the directional-
 change construction, the fractal-dimension fit, Benford, and the intrinsic-time
 memory, each pinned on a synthetic where the answer is known.
 """

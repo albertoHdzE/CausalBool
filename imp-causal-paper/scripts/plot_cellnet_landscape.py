@@ -104,5 +104,5 @@ print("\nCell types plotted (with reprogrammability):")
 print(computed[["cell_type", "n_nodes", "complexity_bdm",
                "relative_reprogrammability"]].to_string(index=False))
 if len(skipped) > 0:
-    print(f"\nLarge networks (complexity only, no perturbation):")
+    print("\nLarge networks (complexity only, no perturbation):")
     print(skipped[["cell_type", "n_nodes", "complexity_bdm"]].to_string(index=False))

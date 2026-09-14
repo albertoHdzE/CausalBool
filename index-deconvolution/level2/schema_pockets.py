@@ -1,10 +1,18 @@
 """schema_pockets.py  (Level 2)
 
 Search for a deterministic backbone in a binarised time series: a set of schemata
-(pivots) that predict a target bit with high purity, found on training data and
-validated out of sample.  The days a schema fires are the pivots; the uncovered
-days are the residual (the sumandos of this level), on which the search can
-recurse.
+that predict a target bit with high purity, found on training data and validated
+out of sample.  The days a schema fires are the FINANCIAL PIVOTS (GLOSSARY
+sec.1b: the points a causal, one-pass process reproduces exactly); the uncovered
+days are the RESIDUAL, on which the search can recurse.
+
+CORRECTED 2026-09-07.  This docstring called the schemata themselves pivots, and
+then called the residual "the sumandos of this level".  Both are GLOSSARY sec.1c
+errors and the second is the more serious: a residual is what causality CANNOT
+reach -- lossy, a failure -- while the sumandos are fully enumerable offsets in
+an EXACT reconstruction.  Equating them inverts the epistemic status of both.
+There are no sumandos in finance, because nothing here is a subset-sum lattice
+over free coordinates.
 
 The essential safeguard against the tautology of "select the matching points and
 declare victory" is a strict train/test split (schemata are committed on training

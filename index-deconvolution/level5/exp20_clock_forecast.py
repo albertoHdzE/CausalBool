@@ -2,7 +2,7 @@
 
 Turn the clock structure of exp19 into an out-of-sample forecast.
 
-In event time the waiting times dt between pivots cluster: short waits follow short
+In event time the waiting times dt between financial pivots cluster: short waits follow short
 waits (activity bursts).  Binarise the clock into a short-wait unit (1 if the
 waiting time is below its median) and forecast the next value from a short trailing
 window, committing window and threshold on the first 60 % of the legs and

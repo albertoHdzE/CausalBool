@@ -1,7 +1,6 @@
 
 import numpy as np
 from scipy import stats
-import math
 
 class BayesFactorCalculator:
     """

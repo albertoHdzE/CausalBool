@@ -1,4 +1,10 @@
 baseDir = DirectoryName[$InputFileName];
+(* AUDIT03/R2a.2 — weights, allOffsets and givePlaces now come from the single
+   owner CausalBoolCore.wl. This script previously defined them locally, and its
+   allOffsets lacked the empty-ws guard the other two copies carried; the three
+   were verified functionally identical before the collapse (126/126 cases,
+   audit/AUDIT03_R2_collapse/probe_alloffsets_parity.wl). *)
+Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
 
 cm06 = {
   {1, 0, 0, 0, 0, 0},
@@ -10,14 +16,6 @@ cm06 = {
 };
 
 dyn06 = {"OR", "NOT", "OR", "IMPLIES", "AND", "XOR"};
-
-weights[n_Integer] := 2^Range[0, n - 1];
-
-allOffsets[n_Integer, connected_List] := Module[
-  {free = Complement[Range[n], connected], ws},
-  ws = weights[n][[free]];
-  Sort[(# . ws) & /@ Tuples[{0, 1}, Length[ws]]]
-];
 
 onPossibleBehaviour[mechanism_List, substate_List, dynVector_List, cm_List] := Module[
   {target, desired, n, connected, decimalAnchor, sumandos},
@@ -53,20 +51,13 @@ xor06Representation[] := Module[
   <|"DecimalRepertoire" -> baseLocations, "Sumandos" -> sumandos|>
 ];
 
-givePlaces[locations_List, sumandos_List] := Sort@Flatten[Table[loc + sumandos, {loc, locations}]];
-
 inputs06 = Reverse /@ IntegerDigits[Range[0, 2^6 - 1], 2, 6];
 
-networkUpdate[input_List] := Module[
-  {y1, y2, y3, y4, y5, y6},
-  y1 = input[[1]];
-  y2 = Boole[input[[2]] == 0];
-  y3 = input[[3]];
-  y4 = Boole[input[[1]] == 0 || input[[4]] == 1];
-  y5 = Boole[input[[2]] == 1 && input[[4]] == 1];
-  y6 = Mod[input[[1]] + input[[3]] + y5, 2];
-  {y1, y2, y3, y4, y5, y6}
-];
+(* AUDIT03 — one owner for the composed 6-node update. It is COMPOSED, not
+   synchronous: node 6 takes the newly computed y5, so it differs from
+   CreateRepertoiresDispatch on 32 of 64 rows by design. See the CAUTION in
+   CausalBoolCore.wl. *)
+networkUpdate[input_List] := composedUpdate6Node[input];
 
 outputs06 = networkUpdate /@ inputs06;
 

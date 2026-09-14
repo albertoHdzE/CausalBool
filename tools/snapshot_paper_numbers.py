@@ -12,6 +12,8 @@ decimal numbers, percentages, and scientific-notation tokens, plus a flag and
 label when the line sits inside a table/table* environment. Volatile metadata
 (generation time) lives outside the compared payload.
 """
+import collections
+import hashlib
 import json
 import re
 import sys
@@ -31,6 +33,25 @@ NUM_RE = re.compile(
     r"|-\d+[eE][+-]?\d+"                 # integer sci-notation
     r"|\d+(?:\.\d+)?\s*(?:\\?%|\\\\%)"   # percentages
 )
+# AUDIT03/R6.4: entries are keyed by CONTENT, not by line number. Keying by
+# line meant that inserting a paragraph reported every later entry as
+# REMOVED+ADDED -- 91 such entries for zero value changes on one occasion, and
+# 37+30 for zero on another during this very audit. A gate that reports dozens
+# of findings when nothing has changed teaches the reader to regenerate blindly,
+# which is the opposite of what it is for. The key is a digest of the line with
+# its numbers MASKED OUT, so a sentence keeps its identity when it moves and
+# loses it only when its wording changes.
+KEYMASK = re.compile(r"\d")
+
+
+def content_key(path_name: str, kind: str, text: str, seen: dict) -> str:
+    masked = KEYMASK.sub("#", " ".join(text.split()))
+    h = hashlib.sha1(masked.encode("utf-8")).hexdigest()[:12]
+    base = f"{path_name}#{kind}@{h}"
+    seen[base] = seen.get(base, 0) + 1
+    return base if seen[base] == 1 else f"{base}~{seen[base]}"
+
+
 TABLE_BEGIN = re.compile(r"\\begin\{table\*?\}")
 TABLE_END = re.compile(r"\\end\{table\*?\}")
 LABEL_RE = re.compile(r"\\label\{([^}]*)\}")
@@ -47,6 +68,7 @@ def extract_file(path: Path):
     current_section = ""
     pending_table_lines = []
     table_start = None
+    seen: dict = {}
 
     def flush_table():
         nonlocal pending_table_lines, table_start, current_label
@@ -57,7 +79,8 @@ def extract_file(path: Path):
             nums.extend(m.group(0).strip() for m in NUM_RE.finditer(ln))
         if nums:
             entries.append({
-                "id": f"{path.name}#tbl@{table_start}",
+                "id": content_key(path.name, "tbl",
+                                  "".join(pending_table_lines), seen),
                 "kind": "table",
                 "start_line": table_start,
                 "label": current_label or "",
@@ -96,7 +119,7 @@ def extract_file(path: Path):
             nums = [m.group(0).strip() for m in NUM_RE.finditer(line)]
             if nums:
                 entries.append({
-                    "id": f"{path.name}#L{lineno}",
+                    "id": content_key(path.name, "L", line, seen),
                     "kind": "inline",
                     "line": lineno,
                     "section": current_section,
@@ -129,19 +152,68 @@ def main():
             sys.exit(1)
         old = json.loads(SNAP.read_text())["entries"]
         new = fresh["entries"]
+
+        # AUDIT03/R6.4: line position is METADATA, not content. Comparing it
+        # made every move a "change"; excluding it makes a move visible as a
+        # move and reserves failure for what actually matters -- a value.
+        POSITION = ("line", "start_line")
+
+        def payload(e):
+            return {k: v for k, v in e.items() if k not in POSITION}
+
+        def pos(e):
+            return e.get("line", e.get("start_line"))
+
         removed = sorted(set(old) - set(new))
         added = sorted(set(new) - set(old))
-        changed = sorted(k for k in set(old) & set(new) if old[k] != new[k])
-        if not (removed or added or changed):
+        both = set(old) & set(new)
+        changed = sorted(k for k in both if payload(old[k]) != payload(new[k]))
+        moved = sorted(k for k in both
+                       if payload(old[k]) == payload(new[k])
+                       and pos(old[k]) != pos(new[k]))
+
+        # The value multiset is what a reader actually cares about, and it is
+        # what I ended up computing by hand every time this gate cried wolf.
+        # It is reported here so nobody has to do that again.
+        def multiset(entries):
+            c = collections.Counter()
+            for k, v in entries.items():
+                for x in v["numbers"]:
+                    c[(k.split("#")[0], x)] += 1
+            return c
+
+        gained = multiset(new) - multiset(old)
+        lost = multiset(old) - multiset(new)
+
+        if moved and not (removed or added or changed):
+            print(f"PAPER-NUMBER GATE PASS: {len(new)} entries, "
+                  f"{len(moved)} moved, NO value changed")
+            print("  (a move is not a finding; content keys make it visible "
+                  "without failing)")
+            sys.exit(0)
+        if not (removed or added or changed or moved):
             print(f"PAPER-NUMBER GATE PASS: {len(new)} entries identical")
             sys.exit(0)
+
         print("PAPER-NUMBER GATE FAIL")
-        for k in removed:
-            print(f"  REMOVED: {k}")
-        for k in added:
-            print(f"  ADDED:   {k} -> {new[k]['numbers'][:4]}")
         for k in changed:
-            print(f"  CHANGED: {k}\n    was: {old[k]['numbers']}\n    now: {new[k]['numbers']}")
+            print(f"  CHANGED: {k}\n    was: {old[k]['numbers']}"
+                  f"\n    now: {new[k]['numbers']}")
+        for k in removed:
+            print(f"  REMOVED: {k} (was L{pos(old[k])}) -> {old[k]['numbers'][:4]}")
+        for k in added:
+            print(f"  ADDED:   {k} (now L{pos(new[k])}) -> {new[k]['numbers'][:4]}")
+        if moved:
+            print(f"  moved without changing: {len(moved)} entries "
+                  f"(not a failure on their own)")
+        print("\n  VALUE MULTISET — the question a reader actually asks:")
+        if not gained and not lost:
+            print("    no value gained or lost; every difference above is "
+                  "wording or position")
+        for k, n in sorted(gained.items()):
+            print(f"    GAINED {k[0]} {k[1]} x{n}")
+        for k, n in sorted(lost.items()):
+            print(f"    LOST   {k[0]} {k[1]} x{n}")
         sys.exit(1)
     BASE.mkdir(parents=True, exist_ok=True)
     SNAP.write_text(json.dumps(fresh, indent=1, sort_keys=True) + "\n")

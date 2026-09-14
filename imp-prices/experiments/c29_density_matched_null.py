@@ -24,8 +24,28 @@ Observed anchors are taken from the committed artifact
 results/phase1b_gate_network.json (panel/thermometer): bdm_gate 156.449 at 23
 edges, bdm_cpt 123.368 at 17 edges, difference 33.081.
 
-Determinism: numpy PCG64 via default_rng; seed 42 drives the primary
-off-diagonal null, 43/44/45 the three sensitivity samplers; N draws per cell.
+Determinism: numpy PCG64 via default_rng, seeded by the PAIR (sampler_seed, k) --
+42 for the primary off-diagonal null, 43/44/45 for the three sensitivity
+samplers, and k in {17, 23} as the second coordinate; N draws per cell.
+
+AUDIT03-C, corrected, and the correction is narrower than it first looked.
+Every sampler previously re-seeded with its bare scalar INSIDE the k loop, so
+the k=17 and k=23 nulls shared a stream. Measured consequence, n=1000-2000 draws:
+
+  * The three EXACT-K samplers were unaffected. rng.choice(replace=False)
+    consumes the stream differently for k=17 and k=23, so the subsets are
+    effectively unrelated: 2.11 shared edges per draw against 2.15 expected
+    under independence, draw-wise BDM correlation r = +0.014.
+  * The BERNOULLI sampler was entirely coupled. It thresholds ONE array of
+    uniforms at two different p, so the k=17 draw was a strict subset of the
+    k=23 draw in 100.0 PER CENT of draws, with draw-wise BDM r = +0.724. Its
+    reported spread is the denominator of a z-score and its mean is differenced
+    against the other null, so a sensitivity check meant to vary the sampler was
+    in fact reporting one nested sample twice.
+
+Seeding on (seed, k) gives each null its own stream -- Bernoulli nesting falls
+to 0.0 per cent and r to -0.025 -- while keeping the sampler->seed mapping above
+readable and reproducible.
 
 Run:
     .venv/bin/python experiments/c29_density_matched_null.py [--draws N]
@@ -88,22 +108,30 @@ def main():
     args = ap.parse_args()
     n = args.draws
 
-    rng = np.random.default_rng(42)
-    out = {"config": {"draws_per_null": n, "seed": 42, "shape": [14, 14],
+    out = {"config": {"draws_per_null": n, "shape": [14, 14],
+                      "seed_scheme": "default_rng([sampler_seed, k]) -- one "
+                                     "independent stream per (sampler, k)",
+                      "sampler_seeds": {"offdiag_182": 42, "diag196": 43,
+                                        "upper_tri_91": 44,
+                                        "bernoulli_p_matched": 45},
                       "primary_sampler": "exact-k uniform over 182 off-diagonal cells"},
            "observed": OBSERVED, "prose": PROSE}
 
     samplers = {}
     for k in (17, 23):
         s = {}
-        m = sample_exact_k(np.random.default_rng(42), OFFDIAG, k, n)
+        # k is part of the seed. Without it the Bernoulli sampler below drew
+        # both k from ONE array of uniforms, nesting the two nulls in 100% of
+        # draws; the exact-k samplers were measurably unaffected but are keyed
+        # the same way so that no sampler depends on that accident.
+        m = sample_exact_k(np.random.default_rng([42, k]), OFFDIAG, k, n)
         s["offdiag_182"] = null_stats(m)
-        m = sample_exact_k(np.random.default_rng(43), [(i, j) for i in range(14)
-                                                       for j in range(14)], k, n)
+        m = sample_exact_k(np.random.default_rng([43, k]), [(i, j) for i in range(14)
+                                                            for j in range(14)], k, n)
         s["diag196"] = null_stats(m)
-        m = sample_exact_k(np.random.default_rng(44), TRIU, k, n)
+        m = sample_exact_k(np.random.default_rng([44, k]), TRIU, k, n)
         s["upper_tri_91"] = null_stats(m)
-        g = np.random.default_rng(45)
+        g = np.random.default_rng([45, k])
         u = g.random((n, 14, 14))
         mm = (u < k / 196.0).astype(int)
         st = null_stats(mm)

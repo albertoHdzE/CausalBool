@@ -1,5 +1,4 @@
 import numpy as np
-import random
 import json
 
 class BooleanDynamics:
@@ -77,8 +76,9 @@ class BooleanDynamics:
         Perform one synchronous update step.
         state: boolean array of shape (N,) or (Batch, N)
         """
-        new_state = state.copy()
-        
+        # (A `new_state = state.copy()` sat here, assigned once and never read;
+        # the update is accumulated into next_state_batch below.)
+
         # If single state, expand dims for uniform handling
         if state.ndim == 1:
             batch_mode = False

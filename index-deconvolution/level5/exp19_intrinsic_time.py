@@ -1,6 +1,6 @@
 """exp19_intrinsic_time.py  (Level 5)  -- the headline
 
-Where does the temporal information live: in how big the pivot-to-pivot moves are
+Where does the temporal information live: in how big the financial pivot-to-pivot moves are
 (the driver) or in when the pivots happen (the clock)?
 
 Re-index time by pivot events, so each leg is one tick.  Measure the lag-1 memory

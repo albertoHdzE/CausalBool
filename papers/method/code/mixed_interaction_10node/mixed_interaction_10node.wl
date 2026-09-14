@@ -1,6 +1,12 @@
 baseDir = DirectoryName[$InputFileName];
 Get[FileNameJoin[{baseDir, "..", "lib", "CausalBoolCore.wl"}]];
-AppendTo[$Path, FileNameJoin[{baseDir, "..", "..", "..", "src", "Packages"}]];
+(* AUDIT02/A1: the bootstrap was one level too shallow. baseDir is
+   papers/method/code/mixed_interaction_10node/, so three ".." reach papers/,
+   not the repo root: Needs failed with Get::noopen, IndexSetAnalytic never
+   resolved, every downstream expression stayed unevaluated and the script
+   exited 1. Verified by probe: DirectoryQ of the three-".." path is False,
+   of the four-".." path is True. *)
+AppendTo[$Path, FileNameJoin[{baseDir, "..", "..", "..", "..", "src", "Packages"}]];
 Needs["Integration`Gates`"];
 
 cm10 = {
@@ -27,15 +33,8 @@ params10 = <|
 n10 = Length[dyn10];
 allIndices10 = Range[1, 2^n10];
 
-weights[n_Integer] := 2^Range[0, n - 1];
 
-allOffsets[n_Integer, connected_List] := Module[
-  {free = Complement[Range[n], connected], ws},
-  ws = weights[n][[free]];
-  If[Length[ws] == 0, {0}, Sort[(# . ws) & /@ Tuples[{0, 1}, Length[ws]]]]
-];
 
-givePlaces[locations_List, sumandos_List] := Sort@Flatten[Table[loc + sumandos, {loc, locations}]];
 
 formatVector[vec_List] := StringJoin[ToString /@ vec];
 texSet[list_List] := "\\(\\{" <> StringRiffle[ToString /@ list, ", "] <> "\\}\\)";

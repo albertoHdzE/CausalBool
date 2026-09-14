@@ -6,10 +6,7 @@ import pandas as pd
 import networkx as nx
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score, precision_recall_curve, auc
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
+from sklearn.metrics import roc_auc_score
 
 # Add src to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

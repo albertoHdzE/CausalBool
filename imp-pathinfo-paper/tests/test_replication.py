@@ -481,3 +481,65 @@ def test_hyperparameters_cover_every_case():
         assert hp.get('t_hop', ds, 1)['pow_dim'] >= 1
         assert hp.get('mix_hop', ds, 0)['max_pow'] == 1
         assert hp.get('mix_hop', ds, 1)['max_pow'] >= 2
+
+
+# ---------------------------------------------------------------------------
+# AUDIT04-D (root repository, 2026-09-06): the pin for a DECLARED divergence.
+#
+# The root core-loading guard flags method_comparison.py for holding a second
+# `math.log2(math.comb(...))` alongside the `node_description_cost` it already
+# imports from causalbool_mirror. That flag is correct that two cost expressions
+# coexist and wrong that either mirrors the other: `wiring_description_length`
+# is the INDEX-SET TERM ALONE, deliberately excluding the gate name and its
+# parameters, which is why the paper's finding that D_wiring is not a complexity
+# measure is a statement about a different quantity.
+#
+# Under the collapse protocol a divergence may be declared only once it has been
+# MEASURED elementwise, and it must be pinned by something that fails when it
+# moves. Measured over 45 (n, degree, gate) cases: 45 of 45 disagree, and the
+# gap is exactly the gate-naming term plus the gate's parameter payload. This
+# test is that pin -- it goes red the moment either definition drifts toward the
+# other, which is precisely when the exception would stop being true.
+# ---------------------------------------------------------------------------
+
+def test_wiring_term_is_not_the_full_node_cost_and_the_gap_is_exact():
+    import math as _math
+
+    from imp_pathinfo.causalbool_mirror import GATE_LABELS, node_description_cost
+
+    n_gates = len(GATE_LABELS)
+    assert n_gates == 12, 'the twelve-family catalogue is the reference'
+
+    # The gate-specific parameter payload, written out from encodeNodeCost
+    # rather than read back from the implementation.
+    def parameter_bits(n, d, gate):
+        if gate == 'KOFN':
+            return _math.log2(d + 1) + 1
+        if gate == 'CANALISING':
+            return _math.log2(max(1, n)) + 2
+        if gate in ('IMPLIES', 'NIMPLIES'):
+            return _math.log2(max(1, d * (d - 1)))
+        if gate == 'NOT':
+            return _math.log2(max(1, d))
+        return 1.0
+
+    disagreements = 0
+    cases = 0
+    for n in (4, 6, 8):
+        for d in (1, 2, 3):
+            for gate in ('AND', 'XOR', 'KOFN', 'CANALISING', 'NOT'):
+                owner = node_description_cost(n, d, gate)
+                wiring_term = _math.log2(max(1, _math.comb(n, d)))
+                cases += 1
+                if abs(owner - wiring_term) > 1e-12:
+                    disagreements += 1
+                # The gap is not merely non-zero, it is exactly accounted for.
+                expected_gap = _math.log2(n_gates) + parameter_bits(n, d, gate)
+                assert abs((owner - wiring_term) - expected_gap) < 1e-9, (
+                    f'gap unexplained for n={n} d={d} {gate}: '
+                    f'{owner - wiring_term} != {expected_gap}')
+
+    assert cases == 45
+    assert disagreements == 45, (
+        'the two quantities must differ on every case; if they ever agree, '
+        'one has drifted into the other and the declared exception is void')

@@ -13,50 +13,9 @@ Get["Integration`BioExperiments`"];
 Print["Packages loaded."];
 
 (* 2. Helper to load and format the network from JSON *)
-LoadJSONNetwork[path_] := Module[
-    {json, rawNodes, rawCM, rawGates, n, nodeNames, cm, dynamic, params, i, name, gData, gType, gParams},
-    
-    If[!FileExistsQ[path], 
-        Print["Error: File not found: ", path]; 
-        Return[$Failed]
-    ];
-    
-    json = Import[path, "RawJSON"]; (* Use RawJSON for easier Association handling *)
-    
-    rawNodes = json["nodes"];
-    rawCM = json["cm"];
-    rawGates = json["gates"];
-    
-    n = Length[rawNodes];
-    nodeNames = rawNodes;
-    cm = rawCM;
-    
-    (* Extract dynamic (gate types) and params in order of nodes *)
-    dynamic = Table["", {n}];
-    params = <||>;
-    
-    Do[
-        name = nodeNames[[i]];
-        gData = rawGates[name];
-        gType = gData["gate"];
-        gParams = gData["parameters"];
-        
-        dynamic[[i]] = gType;
-        If[Length[gParams] > 0,
-            params[i] = gParams;
-        ];
-    , {i, n}];
-    
-    <|
-        "name" -> json["name"],
-        "cm" -> cm,
-        "nodeNames" -> nodeNames,
-        "dynamic" -> dynamic,
-        "params" -> params,
-        "n" -> n,
-        "edges" -> Total[Flatten[cm]]
-    |>
-];
+(* AUDIT03 — delegated to the single owner, src/scripts/NetworkIO.m, which
+   carries the AUDIT02/H "logic" correction this copy lacked. *)
+Get[FileNameJoin[{DirectoryName[$InputFileName], "NetworkIO.m"}]];
 
 (* 3. Run Demo on Lambda Phage *)
 netPath = FileNameJoin[{currentDir, "data", "bio", "processed", "lambda_phage.json"}];

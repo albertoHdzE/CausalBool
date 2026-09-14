@@ -65,6 +65,24 @@ def main() -> None:
         34, 36, 37, 39, 42, 43, 45, 48, 50, 52, 53, 55, 58, 59, 61, 64,
     ]
 
+    # AUDIT03. `lsb_inputs` was defined here and NEVER CALLED: the LSB one-sets
+    # above were hard-coded literals, so only the MSB side of the invariance
+    # claim was ever recomputed. The check still had teeth -- a wrong literal
+    # would fail it -- but it asserted half of what it could compute.
+    #
+    # Both sides are now derived from the same update rule under the two
+    # orderings, and the published literals are verified against the computed
+    # LSB one-sets rather than trusted. The orphan is gone because it is used.
+    outputs_lsb = [network_update(state) for state in lsb_inputs(6)]
+    and_lsb_computed = output_indices_with_one(outputs_lsb, 5)
+    xor_lsb_computed = output_indices_with_one(outputs_lsb, 6)
+    if and_lsb_computed != and_lsb or xor_lsb_computed != xor_lsb:
+        raise SystemExit(
+            "ordering_invariance_6node.py: the published LSB one-sets do not "
+            f"match the computed ones.\n  AND published {and_lsb}\n"
+            f"  AND computed  {and_lsb_computed}\n  XOR published {xor_lsb}\n"
+            f"  XOR computed  {xor_lsb_computed}")
+
     outputs_msb = [network_update(state) for state in msb_inputs(6)]
     and_phi = phi_set(and_lsb, 6)
     xor_phi = phi_set(xor_lsb, 6)
@@ -81,7 +99,7 @@ def main() -> None:
     session_lines = [
         "In := phi06[j_] := 1 + FromDigits[Reverse[IntegerDigits[j - 1, 2, 6]], 2]",
         f"In := andLSB06 = {wl_list(and_lsb)}",
-        f"In := andPhi06 = Sort[phi06 /@ andLSB06]",
+        "In := andPhi06 = Sort[phi06 /@ andLSB06]",
         f"In := andMSB06 = {wl_list(and_msb)}",
         "",
         "(* Transported AND one-set under MSB ordering *)",
@@ -94,7 +112,7 @@ def main() -> None:
         f"Out = {verified_and}",
         "",
         f"In := xorLSB06 = {wl_list(xor_lsb)}",
-        f"In := xorPhi06 = Sort[phi06 /@ xorLSB06]",
+        "In := xorPhi06 = Sort[phi06 /@ xorLSB06]",
         f"In := xorMSB06 = {wl_list(xor_msb)}",
         "",
         "(* Transported XOR one-set under MSB ordering *)",

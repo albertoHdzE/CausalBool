@@ -50,7 +50,7 @@ See `bitacora/` for the full scientific logbook:
       Deconvolution.wl       Wolfram port of the deconvolution (with REGULATORY gate)
       CADeconvolution.wl     Wolfram port of the CA deconvolution
     experiments/
-      exp01_pivots_sumandos.py   verifies the pivots/sumandos factorisation
+      exp01_connected_inputs_and_sumandos.py   verifies the factorisation
       exp02_exact_recovery.py    main result: exact recovery over a batch
       exp03_ca_to_network.py     cellular automaton to network, exact global map
       exp04_biological.py        real gene-regulatory networks, round-trip exactness certificate
@@ -79,7 +79,7 @@ Tests:
 
 Experiments (write JSON to `results/`):
 
-    python experiments/exp01_pivots_sumandos.py
+    python experiments/exp01_connected_inputs_and_sumandos.py
     python experiments/exp02_exact_recovery.py
 
 Wolfram equivalence cross-check (proves the Python forward model equals
@@ -129,14 +129,25 @@ Regenerate and verify (paths via environment variables), for example:
 - Unit tests: 11 / 11 pass (network and cellular-automaton cases).
 - Exact repertoire reproduction: 200 / 200 networks (sizes 7 to 10, full 12-gate
   family).
-- Free-coordinate insensitivity (experiment `exp01_pivots_sumandos.py` — the
-  filename names a set and an encoding side by side, per GLOSSARY §1c):
-  disconnected nodes never sensitive across 1700 nodes (100%).
+- Free-coordinate insensitivity (experiment
+  `exp01_connected_inputs_and_sumandos.py`, renamed from `exp01_pivots_sumandos.py`
+  on 2026-09-07 — the old name set a set beside an encoding per GLOSSARY §1c, and
+  used a finance term for a method object per §1e): disconnected nodes never
+  sensitive across 1700 nodes (100%).
 - Functional connectivity recovered exactly for all gates except degenerate
   CANALISING parameterisations (which are functionally independent of a declared
   input; the deconvolution correctly recovers the smaller functional set).
-- Python forward model proven equivalent to the Wolfram reference: 45 / 45
-  repertoires identical.
+- Python forward model proven equivalent to the Wolfram reference: **135 / 135**
+  repertoires identical, over **all twelve gate families** and the parameters
+  `k`, `strict`, `tiePolicy`, `canalisingIndex`, `canalisingValue`,
+  `canalisedOutput`.
+  *AUDIT02/P1 — the previous claim read "45 / 45". That was true as stated but
+  the bundle used `gate_pool="core"`, i.e. the full family MINUS CANALISING,
+  because `CausalBoolCore.wl` had no CANALISING branch and fell through to a
+  silent 0. The proof was therefore blind to the one gate the downstream
+  packages instantiate most, and it exercised only the `k` parameter. Both the
+  reference and the bundle have been corrected; a claim of equivalence must now
+  state its gate and parameter coverage, not only its case count.*
 - Cellular automaton to network: exact global-map recovery on 12 / 12 rules,
   agreeing between the Python and Wolfram implementations.
 - Biological networks: 8 / 8 PyBoolNet models pass the round-trip exactness

@@ -73,34 +73,137 @@ class TestNullModelGenerator(unittest.TestCase):
         # In-degree might change
     
     def test_checkpointing_logic(self):
-        """Simulate checkpointing by creating a dummy result file."""
-        dummy_res = [{"network": "TEST_NET", "z_er": 0.0}]
-        res_file = Path("results/bio/null_stats.json")
-        
-        # Backup existing
-        backup = None
-        if res_file.exists():
-            with open(res_file, "r") as f:
-                backup = f.read()
-                
-        try:
-            # Write dummy
-            with open(res_file, "w") as f:
-                json.dump(dummy_res, f)
-            
-            # Verify loading
-            with open(res_file, "r") as f:
-                loaded = json.load(f)
-            self.assertEqual(len(loaded), 1)
-            self.assertEqual(loaded[0]["network"], "TEST_NET")
-            
-        finally:
-            # Restore
-            if backup:
-                with open(res_file, "w") as f:
-                    f.write(backup)
-            elif res_file.exists():
-                os.remove(res_file)
+        """Round-trip through the module's OWN save/load, on a temporary path.
+
+        AUDIT04-F. This test used to open `results/bio/null_stats.json` -- the
+        real, tracked artefact carrying 231 measured records -- overwrite it with
+        a dummy, and restore it in a `finally`. Two defects. It put a published
+        artefact one interrupted run away from being replaced by a stub; and it
+        reimplemented `json.dump`/`json.load` rather than calling
+        `save_results`/`load_existing_results`, so the functions it purported to
+        test were never executed.
+        """
+        import tempfile
+        import experiments.Null_Generator_HPC as ng
+
+        dummy = [{"network": "TEST_NET", "D_bio": 1.0, "measure": "index_set_program_length"}]
+        with tempfile.TemporaryDirectory() as tmp:
+            old_dir, old_file = ng.RESULTS_DIR, ng.NULL_STATS_FILE
+            try:
+                ng.RESULTS_DIR = Path(tmp) / "bio"
+                ng.NULL_STATS_FILE = ng.RESULTS_DIR / "null_stats.json"
+                self.assertEqual(ng.load_existing_results(), [],
+                                 "an absent checkpoint must read as empty, not raise")
+                ng.save_results(dummy)
+                loaded = ng.load_existing_results()
+                self.assertEqual(loaded, dummy)
+                # A corrupt checkpoint must not abort a 24-minute run.
+                ng.NULL_STATS_FILE.write_text("{ not json")
+                self.assertEqual(ng.load_existing_results(), [])
+            finally:
+                ng.RESULTS_DIR, ng.NULL_STATS_FILE = old_dir, old_file
+        self.assertTrue(old_file == ng.NULL_STATS_FILE,
+                        "the module's real path must be restored")
+
+    def test_both_measures_are_computed_for_the_same_matrix(self):
+        """AUDIT04-F: the null experiment scores every matrix twice, by name.
+
+        The author's directive of 2026-09-07 names two comparison measures. They
+        are reported side by side and never merged (decision #96 forbids folding
+        them into one number), so this asserts that both are present, that they
+        are different numbers, and that BDM refuses rather than returning zero
+        below its 4x4 partition floor.
+        """
+        from experiments.Null_Generator_HPC import compute_both
+
+        both = compute_both(self.adj)
+        self.assertIn("index_set", both)
+        self.assertIn("bdm", both)
+        self.assertGreater(both["index_set"], 0.0)
+        self.assertIsNotNone(both["bdm"])
+        self.assertNotAlmostEqual(both["index_set"], both["bdm"], places=6,
+                                  msg="two measures reporting the same number "
+                                      "would make reporting both pointless")
+
+        tiny = np.array([[0, 1], [1, 0]])
+        self.assertIsNone(compute_both(tiny)["bdm"],
+                          "below the 4x4 floor BDM is UNMEASURED, never 0 bits")
+
+    def test_separation_is_order_statistics_and_refuses_an_empty_ensemble(self):
+        """AUDIT04-F: one definition of the comparison, promoted from a closure.
+
+        Expected values are hand-computed from the definition, not read off the
+        function: for x = 10 against nulls {12, 15, 9}, the best null is 9, so
+        the gap is 9 - 10 = -1 bit, one null is at least as short, so exceed is
+        1/3, and the median null is 12.
+        """
+        from experiments.Null_Generator_HPC import separation
+
+        s = separation(10.0, [12.0, 15.0, 9.0])
+        self.assertAlmostEqual(s['gap_bits'], -1.0)
+        self.assertAlmostEqual(s['exceed'], 1 / 3)
+        self.assertAlmostEqual(s['best_null'], 9.0)
+        self.assertAlmostEqual(s['median_null'], 12.0)
+
+        # Beating every null: gap positive, exceed exactly zero.
+        s2 = separation(5.0, [12.0, 15.0, 9.0])
+        self.assertAlmostEqual(s2['gap_bits'], 4.0)
+        self.assertEqual(s2['exceed'], 0.0)
+
+        with self.assertRaises(ValueError):
+            separation(1.0, [])
+
+    def test_summarise_reports_per_measure_and_never_fabricates_a_bdm(self):
+        """The monitor's inputs come from order statistics, per measure.
+
+        A network below pybdm's 4x4 floor has NO BDM. The summary must pass
+        `None`, because 0.0 is a legitimate gap and the monitor would read it as
+        a measured absence of advantage rather than an absent measurement.
+        """
+        from experiments.SimplicityV2_Nature import summarise
+
+        def rec(gap_i, exc_i, gap_b=None, exc_b=None):
+            r = {'D_index_set': 100.0,
+                 'index_set': {'gap_bits': gap_i, 'exceed': exc_i,
+                               'best_null': 0.0, 'median_null': 120.0},
+                 'bdm': None, 'alpha_diff': None}
+            if gap_b is not None:
+                r['bdm'] = {'gap_bits': gap_b, 'exceed': exc_b,
+                            'best_null': 0.0, 'median_null': 0.0}
+            return r
+
+        with_bdm = [rec(10.0, 0.0, 4.0, 0.0), rec(2.0, 0.5, -1.0, 0.6),
+                    rec(6.0, 0.0, 1.0, 0.0)]
+        s = summarise(with_bdm)
+        self.assertAlmostEqual(s['gap_bits_deg'], 6.0)     # median of 10, 2, 6
+        self.assertAlmostEqual(s['exceed_deg'], 0.0)       # median of 0, .5, 0
+        self.assertAlmostEqual(s['gap_bits_bdm'], 1.0)     # median of 4, -1, 1
+        self.assertEqual(s['beats_every_null_index'], 2)
+        self.assertEqual(s['beats_every_null_bdm'], 2)
+        self.assertAlmostEqual(s['aer'], 1.2)              # 120 / 100
+        self.assertIsNone(s['scaling_diff'],
+                          "the block-size exponent is retired; None, never 0.0")
+
+        no_bdm = summarise([rec(10.0, 0.0), rec(2.0, 0.5)])
+        self.assertIsNone(no_bdm['gap_bits_bdm'])
+        self.assertIsNone(no_bdm['exceed_bdm'])
+        self.assertEqual(no_bdm['beats_every_null_bdm'], 0)
+
+    def test_the_nulls_preserve_what_each_claims_to_preserve(self):
+        """Each null is only a control if its invariant holds.
+
+        Stated per null, because they fail differently and a null that quietly
+        changed the edge count would make every gap in bits meaningless.
+        """
+        e = int(self.adj.sum())
+        self.assertEqual(int(er_edge_shuffle(self.adj, seed=1).sum()), e)
+        deg = degree_preserving_swap(self.adj, nswap_factor=10, seed=1)
+        self.assertTrue((deg.sum(axis=0) == self.in_degs).all(),
+                        "degree_preserving_swap must preserve IN-degree; the "
+                        "schema-length invariance argument depends on it")
+        fan = gate_preserving_fanout(self.adj, seed=1)
+        self.assertTrue((fan.sum(axis=1) == self.out_degs).all(),
+                        "gate_preserving_fanout must preserve out-degree")
 
 if __name__ == '__main__':
     unittest.main()

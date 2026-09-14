@@ -57,15 +57,104 @@ def check(art: dict) -> list[str]:
         if s not in blob:
             errs.append(f"{art['id']}: required disclosure string '{s}' absent")
 
-    if "json_expect" in checks:
-        for path, want in checks["json_expect"].items():
+    # AUDIT03/R2b — this block was DEAD, in two independent ways, and neither
+    # was visible from its output.
+    #
+    #  1. It read checks["json_expect"], but every inventory entry carries
+    #     json_expect as a SIBLING of checks, not inside it. The condition was
+    #     therefore never true and no JSON value was ever compared: the gate
+    #     checked only that certain strings appear in the .tex.
+    #  2. Had it run, it would have raised. The resolver walked
+    #     path.split("_"), so "D_formula_bits_round2" asked for produced["D"]
+    #     and raised KeyError, which main() catches and reports as FAIL.
+    #
+    # Both are fixed here: the inventory is read from either location, and a
+    # "_round2" suffix is stripped to recover the flat key rather than split on
+    # every underscore. A missing key is now an ERROR, not a silent pass --
+    # otherwise a typo in the inventory would disable the check it declares.
+    expectations = {**checks.get("json_expect", {}), **art.get("json_expect", {})}
+    for path, want in expectations.items():
+        key = path[:-len("_round2")] if path.endswith("_round2") else path
+        if key not in produced:
+            errs.append(f"{art['id']}: json key '{key}' absent from "
+                        f"{art['produced_json']} (declared as '{path}')")
+            continue
+        got = round(produced[key], 2) if path.endswith("_round2") else produced[key]
+        if abs(got - want) > 1e-9:
+            errs.append(f"{art['id']}: json {path}={got} != expected {want}")
+
+    # AUDIT03/R6.2 — every bit-count quoted in a .tex block must NAME its
+    # declared language and its decodability proof.
+    #
+    # A number of bits is meaningless until the language is fixed: the same
+    # network is 135.66 bits under the twelve-family catalogue and 232.72
+    # catalogue-free, and neither is "the" description length. Worse, a length
+    # in a code that is not uniquely decodable is not a length at all -- which
+    # is exactly what D was for eight implementations before R3.1/R2b, when the
+    # missing in-degree field left the per-node code with Kraft sum n+1.
+    #
+    # So the inventory must declare, for each bit-count it quotes, the language
+    # it is a length in and where the proof of decodability lives. An
+    # undeclared bit-count is an error: silence is how 101.07 and 1600 survived.
+    bit_decl = art.get("bit_counts", {})
+    if bit_decl is not None:
+        quoted = set()
+        # The number is usually inside LaTeX math and the word "bits" outside
+        # it: `\(232.72\) bits`, `$10\,016$ bits`. Allow the closing delimiter
+        # and a thin space between the two, or the count silently finds nothing
+        # and the whole check passes vacuously -- which it did on first writing.
+        BITS = re.compile(r"(\d[\d,\\\s]*(?:\.\d+)?)\s*(?:\\\)|\$)?"
+                          r"\s*(?:\\,)?\s*bits\b")
+        for m in BITS.finditer(blob):
+            quoted.add(m.group(1).replace(",", "").replace("\\,", "")
+                       .replace("\\", "").replace(" ", ""))
+        for val in sorted(quoted):
+            d = bit_decl.get(val)
+            if d is None:
+                errs.append(
+                    f"{art['id']}: bit-count '{val} bits' is quoted in the .tex "
+                    f"but not declared in artefacts.json 'bit_counts' -- name "
+                    f"its language and decodability proof (AUDIT03/R6.2)")
+                continue
+            for field in ("language", "decodability"):
+                if not d.get(field):
+                    errs.append(
+                        f"{art['id']}: bit-count '{val} bits' declares no "
+                        f"{field} (AUDIT03/R6.2)")
+
+    # AUDIT02/W0.5: json_expect resolves only flat top-level keys, so it cannot
+    # reach a value inside a list of case records. json_paths is additive -- it
+    # leaves json_expect and every existing entry untouched -- and supports
+    # dotted paths with [i] indices and [Name=X] record selection, so a table
+    # cell can be tied to the exact JSON field it was transcribed from.
+    for path, want in checks.get("json_paths", {}).items():
+        try:
             node = produced
-            for key in path.split("_"):
-                node = node[key] if isinstance(node, dict) else node
-            key0 = path.split("_")[0]
-            got = round(produced[key0], 2) if path.endswith("round2") else produced[path]
+            for part in path.split("."):
+                while part.endswith("]"):
+                    part, _, sel = part[:-1].partition("[")
+                    if part:
+                        node = node[part]
+                        part = ""
+                    if "=" in sel:
+                        k, _, v = sel.partition("=")
+                        hits = [r for r in node if str(r.get(k)) == v]
+                        if len(hits) != 1:
+                            raise KeyError(f"{sel} matched {len(hits)} records")
+                        node = hits[0]
+                    else:
+                        node = node[int(sel)]
+                if part:
+                    node = node[part]
+            got = node
+        except Exception as exc:  # noqa: BLE001
+            errs.append(f"{art['id']}: json path '{path}' unresolvable: {exc}")
+            continue
+        if isinstance(want, (int, float)) and isinstance(got, (int, float)):
             if abs(got - want) > 1e-9:
                 errs.append(f"{art['id']}: json {path}={got} != expected {want}")
+        elif got != want:
+            errs.append(f"{art['id']}: json {path}={got!r} != expected {want!r}")
 
     if checks.get("metrics_all_zero_mismatches"):
         runs = produced if isinstance(produced, list) else produced.get("runs", [])
@@ -100,8 +189,29 @@ def main() -> int:
         for f in failures:
             print(" -", f)
         return 1
-    print(f"\nVERIFY-PAPER OK ({len(inv['covered'])} covered, "
-          f"{len(inv['pending'])} pending with reasons)")
+    # AUDIT03-B — report the DENOMINATOR, not just the numerator.
+    #
+    # This line used to read "7 covered, 1 pending with reasons", which invites
+    # the reading 7/8. The pending entry was an unenumerated catch-all
+    # ("remaining appendix/expansion tables") while the two active manuscripts
+    # carry 34 number-bearing tables. Measured coverage was 5 of 34.
+    #
+    # The gate itself was never wrong: what it checks, it checks properly. The
+    # summary line was.
+    cov_path = ROOT / "papers/method/artifact_baseline/table_coverage.json"
+    tail = ""
+    if cov_path.exists():
+        cov = json.loads(cov_path.read_text())
+        n, k = cov["n_numeric"], cov["n_covered"]
+        tail = (f"\n  TABLE COVERAGE of the active manuscripts: {k}/{n} "
+                f"({100 * k / max(1, n):.0f}%) lie inside a verified block."
+                f"\n  Regenerate with: venv/bin/python tools/enumerate_paper_tables.py")
+    else:
+        tail = ("\n  TABLE COVERAGE unmeasured — run "
+                "tools/enumerate_paper_tables.py")
+
+    print(f"\nVERIFY-PAPER OK ({len(inv['covered'])} artefact groups covered, "
+          f"{len(inv['pending'])} pending with reasons){tail}")
     return 0
 
 

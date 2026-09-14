@@ -72,7 +72,7 @@ def main() -> None:
     net = networks["EarlyNet"]
     G = net.graph
     print(f"Processing EarlyNet ({net.node_count} nodes, {net.edge_count} edges)")
-    print(f"Using algodyn CTM table (3x3 blocks)")
+    print("Using algodyn CTM table (3x3 blocks)")
 
     t0 = time.time()
     spectra = analyzer.spectra(G, what="vertices")
@@ -97,7 +97,7 @@ def main() -> None:
     pct = agree / common * 100 if common else 0
 
     print(f"\n{'='*60}")
-    print(f"Cross-validation: algodyn 3x3 vs paper ground truth")
+    print("Cross-validation: algodyn 3x3 vs paper ground truth")
     print(f"  Common genes: {common}")
     print(f"  Sign agree:   {agree} ({pct:.0f}%)")
     print(f"  Sign disagree: {disagree}")
@@ -111,7 +111,7 @@ def main() -> None:
         pybdm_dict = dict(zip(pybdm_df["element"], pybdm_df["delta"]))
         p_agree, p_disagree, p_common = sign_agreement(pybdm_dict, gt)
         p_pct = p_agree / p_common * 100 if p_common else 0
-        print(f"\nComparison:")
+        print("\nComparison:")
         print(f"  pybdm 4x4:    {p_agree}/{p_common} ({p_pct:.0f}%) sign agreement")
         print(f"  algodyn 3x3:  {agree}/{common} ({pct:.0f}%) sign agreement")
 

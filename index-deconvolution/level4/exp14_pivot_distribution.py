@@ -1,6 +1,6 @@
 """exp14_pivot_distribution.py  (Level 4)
 
-Characterise how the pivots -- the occurrences of the surviving volatility unit --
+Characterise how the financial pivots -- the occurrences of the surviving volatility unit --
 are distributed along the index: uniform, clustered, or self-similar.
 
 Three complementary readings, each against the time-shuffle null (which, by

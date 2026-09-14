@@ -3,7 +3,7 @@
    Detailed comparison helpers for the biological notebook: compare the original
    output repertoire with the reconstructed one, and locate a node's one-set (the
    input states in which it fires) in the repertoire.  The recovered network and
-   its index-set pivot/sumandos rules are rendered by CADetailLibrary
+   its index-set decimal-anchor/sumandos rules are rendered by CADetailLibrary
    (CBNetworkTable, CBPrintRule).
 
    Depends on CausalBoolCore.wl, Deconvolution.wl, CADeconvolution.wl and

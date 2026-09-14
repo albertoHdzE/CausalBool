@@ -6,10 +6,10 @@ def verify_bdm():
     # The default CTM dataset for ndim=1, nsymbols=2 is 'CTM-B2-D12' (Block size 12)
     bdm = BDM(ndim=1, raise_if_zero=False)
 
-    print(f"BDM Configuration:")
+    print("BDM Configuration:")
     print(f"  Dimensions: {bdm.ndim}")
     print(f"  CTM Dataset: {bdm.ctmname}")
-    print(f"  Note: 'D12' in CTM name implies a block size of 12 bits.")
+    print("  Note: 'D12' in CTM name implies a block size of 12 bits.")
     print("-" * 80)
 
     # Define the 5 examples

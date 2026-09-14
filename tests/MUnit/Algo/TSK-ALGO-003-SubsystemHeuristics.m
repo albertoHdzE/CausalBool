@@ -4,16 +4,17 @@ base = FileNameJoin[{"results", "tests", "algo003"}];
 If[!DirectoryQ[base], CreateDirectory[base, CreateIntermediateDirectories -> True]];
 
 (* Compression metric consistent with THEORY-001/003 tests *)
-compressionWeight[gate_, d_Integer] := Switch[gate,
-  "AND" | "OR" | "NAND" | "NOR", 1 + d,
-  "XOR" | "XNOR" | "MAJORITY", 1 + 1,
-  "NOT", 1,
-  _, 1 + d
-];
-computeCompression[cm_List, dyn_List] := Module[{n = Length[dyn], ics},
-  ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
-  Total@Table[compressionWeight[dyn[[i]], Length[ics[[i]]]], {i, n}]
-];
+(* AUDIT03 — delegated to the single owner, Integration`BioMetrics`.
+   The SIXTH copy of C_formula, and the one I missed by eye: the guard in
+   tools/check_single_engine.sh found it. Like TSK-EXPER-004's it was the
+   drifted two-argument form with no KOFN and no CANALISING branch, so those
+   gates fell through to "1 + d". Its numbers move, which is the correction.
+   This file is also one of the 23 the runner never executes. *)
+Get["src/Packages/Integration/BioMetrics.m"];
+compressionWeight[gate_, d_Integer] :=
+  Integration`BioMetrics`FormulaComponentWeight[gate, Range[d], <||>];
+computeCompression[cm_List, dyn_List] :=
+  Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, <||>];
 
 (* Jaccard similarity over input sets to propose blocks *)
 inputSets[cm_List] := Table[Flatten@Position[cm[[i]], 1], {i, Length[cm]}];
@@ -79,3 +80,13 @@ blocksTex = StringJoin[
   "\n\\end{itemize}\n"
 ];
 Export[FileNameJoin[{base, "Blocks.tex"}], blocksTex, "Text"];
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

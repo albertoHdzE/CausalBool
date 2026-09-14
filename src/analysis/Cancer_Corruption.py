@@ -16,28 +16,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
 from data.cancer_network_builder import CancerNetworkBuilder
 
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
-
-
-def _paper_root() -> Path:
-    env = os.getenv("CAUSALBOOL_PAPER_ROOT")
-    if env:
-        return Path(env).expanduser().resolve()
-    repo = _repo_root()
-    candidates = [
-        repo / "workspaces" / "claude-nature" / "paper",
-        repo / "workspaces" / "level8-paper" / "paper",
-        repo / "4ClaudeCode" / "claude-Nature" / "paper",
-    ]
-    for c in candidates:
-        if c.is_dir():
-            return c
-    return candidates[-1]
-
-
-def _paper_figures_dir() -> str:
-    return str(_paper_root() / "figures")
+# AUDIT03 (monolithic-code): _repo_root, _paper_root and _paper_figures_dir
+# were defined identically here and in three other production modules. One
+# owner now; parity proven over 24 of 24 comparisons before this edit
+# (audit/AUDIT03_R2_collapse/probe_paths_parity.py). Guarded by
+# tools/check_single_engine.sh.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from causalbool_paths import paper_figures_dir as _paper_figures_dir  # noqa: E402
 
 
 # Configuration
@@ -46,14 +31,23 @@ METADATA_PATH = os.getenv("CANCER_METADATA_PATH", "data/cancer/clinical_metadata
 TCGA_INDEX_PATH = os.getenv("TCGA_INDEX_PATH", "")
 OUTPUT_DIR = os.getenv("CANCER_OUTPUT_DIR", "results/cancer")
 OUTPUT_BASENAME = os.getenv("CANCER_OUTPUT_BASENAME", "corruption_metrics.csv")
-FIGURE_DIR = os.getenv("CANCER_FIGURE_DIR", _paper_figures_dir())
+FIGURE_DIR = os.getenv("CANCER_FIGURE_DIR", str(_paper_figures_dir()))
 TCGA_SWEEP_THRESHOLDS = os.getenv("TCGA_SWEEP_THRESHOLDS", "")
 TCGA_COUNTS_ROOT = os.getenv("TCGA_COUNTS_ROOT", "data/cancer/tcga_paired")
 TCGA_BASE_NETWORK_PATH = os.getenv("TCGA_BASE_NETWORK_PATH", "data/bio/processed/egfr_signaling.json")
 
-# Ensure directories
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(FIGURE_DIR, exist_ok=True)
+# AUDIT04 Phase 2: these two makedirs ran at module level, so merely importing
+# this module created results/ and figures/ directories as a side effect. A test
+# that imports it would leave those directories behind -- the stale-artefact
+# class this programme has already been bitten by. They now run inside main(),
+# where the output is actually about to be written.
+
+
+def ensure_output_dirs():
+    """Create the output directories. Called by main(), never by import."""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(FIGURE_DIR, exist_ok=True)
+
 
 def load_network(path):
     with open(path, 'r') as f:
@@ -132,6 +126,7 @@ def _mutate_cm(base_cm: np.ndarray, nodes: list, diff: pd.Series, thr: float) ->
     return cm, int(mutated)
 
 def main():
+    ensure_output_dirs()
     print(f"[{datetime.now()}] Starting Cancer Corruption Analysis...")
     results = []
     plot_prefix = os.path.splitext(str(OUTPUT_BASENAME))[0]
@@ -334,7 +329,7 @@ def main():
 
             t_stat, p_val = stats.ttest_rel(results_df["D_tumor"], results_df["D_normal"])
             corr, p_corr = stats.pearsonr(results_df["Delta_D"], results_df["mutation_count"])
-            print(f"\nStatistical Summary:")
+            print("\nStatistical Summary:")
             print(f"  Mean D_normal: {results_df['D_normal'].mean():.2f}")
             print(f"  Mean D_tumor:  {results_df['D_tumor'].mean():.2f}")
             print(f"  Mean Delta_D:  {results_df['Delta_D'].mean():.2f}")
@@ -460,7 +455,7 @@ def main():
 
         if len(normals) >= 2 and len(tumors) >= 2:
             t_stat, p_val = stats.ttest_ind(normals, tumors, equal_var=False)
-            print(f"\nStatistical Summary:")
+            print("\nStatistical Summary:")
             print(f"  Mean D_normal: {normals.mean():.2f}")
             print(f"  Mean D_tumor:  {tumors.mean():.2f}")
             print(f"  Welch t-test:  t={t_stat:.2f}, p={p_val:.2e}")
@@ -531,7 +526,7 @@ def main():
     print(f"[{datetime.now()}] Results saved to {results_path}")
 
     t_stat, p_val = stats.ttest_rel(results_df["D_normal"], results_df["D_tumor"])
-    print(f"\nStatistical Summary:")
+    print("\nStatistical Summary:")
     print(f"  Mean D_normal: {results_df['D_normal'].mean():.2f}")
     print(f"  Mean D_tumor:  {results_df['D_tumor'].mean():.2f}")
     print(f"  Mean Delta_D:  {results_df['Delta_D'].mean():.2f}")

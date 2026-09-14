@@ -1603,3 +1603,31 @@ def prepare_th17_series(raw_dir: Path, output_dir: Path, supp_dir: Path | None =
     }
     (output_dir / "summary.json").write_text(json.dumps(combined, indent=2, sort_keys=True))
     return payload
+
+
+# --- CellNet TF -> TG edge lists ---------------------------------------------
+#
+# AUDIT03 (monolithic-code). This function was defined four times, byte for
+# byte, across the run_cellnet_* scripts. Four identical copies are four
+# independent chances to fix a column name in one place and not the others.
+# Owner here, beside the other ingestion readers; the scripts import it.
+
+def load_edgelist(path):
+    """Read a CellNet TF/TG edge list into a directed graph.
+
+    Columns ``TF`` (source) and ``TG`` (target); one directed edge per row.
+    Raises rather than returning an empty graph if either column is missing,
+    so a renamed column fails loudly instead of yielding a graph with no edges.
+    """
+    import networkx as nx
+
+    df = pd.read_csv(path)
+    missing = {"TF", "TG"} - set(df.columns)
+    if missing:
+        raise ValueError(
+            f"{path}: edge list is missing column(s) {sorted(missing)}; "
+            f"found {list(df.columns)}"
+        )
+    G = nx.DiGraph()
+    G.add_edges_from(zip(df["TF"], df["TG"]))
+    return G

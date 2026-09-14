@@ -44,8 +44,8 @@ codeNetwork = StringRiffle[{
   }, "\n"];
 
 codeRule = StringRiffle[{
-  "(* Each cell's rule as index-set pivots and sumandos: a union of cosets, one",
-  "   pivot (decimal) per clause, shifted over the free cells. *)",
+  "(* Each cell's rule as index-set decimal anchors and sumandos: a union of cosets, one",
+  "   decimal anchor per clause, shifted over the free cells. *)",
   "CBPrintRule[dec30, 6];",
   "CBPrintRule[dec30, 7];"
   }, "\n"];
@@ -72,7 +72,7 @@ introText = StringJoin[
   "gate. A space-time diagram gives only a trajectory, in which each row is the ",
   "input to the next, not the exhaustive input repertoire. This notebook recovers ",
   "the network from such observations, shows the recovered model in full (its ",
-  "connectivity matrix, its gates, and each cell's index-set rule in pivot and ",
+  "connectivity matrix, its gates, and each cell's index-set rule in decimal-anchor and ",
   "sumandos form), and compares the original pattern with the reconstructed ",
   "evolution row by row."];
 
@@ -94,8 +94,8 @@ textNetwork = StringJoin[
   "its index-set rule."];
 
 textRule = StringJoin[
-  "Each cell's rule is a short index-set expression: a union of pivot-shifted ",
-  "cosets. Each clause has a pivot, the decimal value of its activator cells, and ",
+  "Each cell's rule is a short index-set expression: a union of anchor-shifted ",
+  "cosets. Each clause has a decimal anchor, the decimal value of its activator cells, and ",
   "ranges freely (the sumandos) over the cells it does not fix. Rule 30 at an ",
   "interior cell is three clauses over its three neighbours; a named gate such as ",
   "XOR is the same structure with a fixed clause pattern."];
@@ -125,7 +125,7 @@ cells = {
   Cell["The recovered network (connectivity and gates)", "Section"],
   Cell[textNetwork, "Text"],
   Cell[codeNetwork, "Input"],
-  Cell["The index-set rules (pivots and sumandos)", "Section"],
+  Cell["The index-set rules (decimal anchors and sumandos)", "Section"],
   Cell[textRule, "Text"],
   Cell[codeRule, "Input"],
   Cell["Original versus reconstructed pattern", "Section"],

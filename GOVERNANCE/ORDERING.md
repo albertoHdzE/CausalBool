@@ -50,7 +50,7 @@ indices from different producers may be compared without transport.
 | `IndexAlgebra`OneBandIndices/ZeroBandIndices | **MSB** | band indices over `IntegerDigits` enumeration |
 | `Experiments`CreateRepertoiresDispatch / RunDynamicDispatch | **LSB** (`Reverse[IntegerDigits]`) | packaged dispatch |
 | legacy Alpha.m `createRepertoires` / `runDynamic` / `runDynamicHD` / file variants | **LSB** via `allPosibleInputsReverse` | supported gates only since T4.1 (§6) |
-| `BioExperiments.m:126 states = Tuples[{0,1},n]` | **lexicographic ≡ MSB digit order** | see §7 migration path |
+| `BioExperiments.m` `ComputeAttractors` state enumeration | **LSB-canonical** (`Reverse[IntegerDigits[x,2,n]]`) | migrated 2026-09-02, AUDIT02/W0.1; §7 |
 
 Rule of thumb: anything "table-like" (`TruthTable`, `IndexSet`, band indices,
 `Tuples`) is MSB; anything "repertoire-like" (dispatch repertoires, legacy Alpha,
@@ -75,11 +75,28 @@ Pinned elementwise by `tests/MUnit/Gates/TSK-GATES-014-CanalisingCoordTests.m`
 TSK-MIXED-001 was aligned (default case provably identical; benchmark sets no
 CANALISING parameters — published numbers invariant, verified by suite + Summary).
 
-Documented exceptions (unchanged pending their own coverage):
+Documented exceptions — **CLOSED 2026-09-02, AUDIT02/W0.2.**
 `tests/MUnit/Mixed/TSK-MIXED-001-Comparison.m` and
-`TSK-MIXED-001-OnPossibleBehaviour.m` are non-globbed provenance helpers whose
-local CANALISING branches read network-absolute indices. Do not cite them as
-semantics; alignment requires its own executed test before landing.
+`TSK-MIXED-001-OnPossibleBehaviour.m` read network-absolute indices in their
+local CANALISING branches. Both are now migrated to the Ic-relative reading
+(`bits[[ci]]`, relative default 1), so §4b holds with no exception.
+
+The alignment landed with the executed test §4 required:
+`tests/MUnit/Mixed/TSK-MIXED-001-CanalisingExceptionTests.m`, 8,960 cases over
+n = 5, every support of size 2–4, every relative `ci`, both canalising values
+and both canalised outputs. Three assertions, of which the second is what makes
+the first mean anything:
+
+| assertion | result |
+|---|---|
+| POSITIVE — migrated relative reading vs `ApplyGate` on `Part[row,Ic]` | 0 mismatches |
+| NEGATIVE — old absolute reading vs the engine | **1,440 mismatches** (the divergence was real, and the grid reaches it) |
+| DEFAULT — relative vs absolute with no explicit `canalisingIndex` | 0 mismatches |
+
+The default row explains why the exception survived: with `ci` defaulting to the
+first connected input the two conventions coincide, so the bug was unreachable
+until a caller set `canalisingIndex` explicitly. Ledger moves OK=53→54,
+TOTAL=54→55; the single red (`TopologiesTests`) is unchanged.
 
 Callers holding network-absolute canalising coordinates translate once at their
 boundary: `rel = First@FirstPosition[Ic, ciAbs]`.
@@ -138,7 +155,30 @@ degenerate all-zero/all-one twin; any reported accuracy should be accompanied by
 its confusion counts or per-node symmetric differences so degenerate agreement is
 visible immediately.
 
-## §7 BioExperiments migration path (documented, not yet executed)
+## §7 BioExperiments migration path (EXECUTED 2026-09-02, AUDIT02/W0.1)
+
+**Status: done.** `ComputeAttractors` now enumerates
+`Reverse[IntegerDigits[x,2,n]]`, so §3 no longer carries an MSB exception.
+
+Executed only after the invariance was *established*, not assumed. The function
+was run through its public API over 40 real corpus networks (n = 4…11) under
+both enumerations; the attractor sets agree elementwise, **0/40 differing**. The
+reason is structural: `states` feeds a `Graph` keyed by state *vectors*, and the
+two enumerations are the same set in a different order, so fixed points and
+cycles are unchanged. The comparison was proven able to detect a difference by a
+planted defect — removing half the state space moves 18/40 — because a check
+that has never failed proves nothing. Step 2 of the path below therefore did not
+bite: nothing this function returns is keyed by row order.
+
+Two traps were caught on the way, both worth recording because they would
+silently invalidate any similar probe:
+- `Reverse /@ Tuples[{0,1},n]` is **not** a defect — it permutes the state set
+  onto itself, so it is useless as a control.
+- `ComputeNextState` is private; calling
+  `Integration`BioExperiments`ComputeNextState` reaches a definition-less symbol
+  that returns unevaluated. Probes must go through `ComputeAttractors`.
+
+The original path, retained for provenance:
 
 `src/Packages/Integration/BioExperiments.m:126` enumerates states as
 `Tuples[{0,1}, n]` (lexicographic ≡ MSB digit order) while downstream metric code

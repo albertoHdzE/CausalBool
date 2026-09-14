@@ -27,6 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "imp-causalNet-paper" / "src"))
 sys.path.insert(0, str(ROOT / "imp-pathinfo-paper" / "src"))
+sys.path.insert(0, str(ROOT / "src"))
 
 OUT = ROOT / "results" / "description_lengths" / "toy_fixture.json"
 
@@ -50,10 +51,48 @@ def variant_a_row_run(A) -> float:
 
 
 def variant_b_gate_index(n: int, edges, gates) -> float:
+    """Variant B from the OWNER, src/description_lengths.py.
+
+    AUDIT03/R2b moved this off the imp-pathinfo mirror. The fixture is the
+    root repository's pin, so it must be produced by the root repository's
+    owner; sourcing it from a subproject mirror meant the value the gate
+    defended and the value the owner computed were free to differ.
+    """
+    import description_lengths as dl
+    degrees = [len(edges[v]) for v in range(n)]
+    gl = [gates[v] if v in gates else gates[str(v)] for v in range(n)]
+    return float(dl.graph_gate_index_length(degrees, gl, include_header=True))
+
+
+def variant_b_legacy_pathinfo(n: int, edges, gates) -> float:
+    """The SAME variant as computed by imp-pathinfo's mirror, which does not
+    charge the in-degree field and so is not a decodable code (Kraft sum n+1).
+
+    It is pinned rather than fixed because imp-pathinfo's published tables were
+    computed with it, and silently changing them would corrupt a replication.
+    Pinning both makes the gap a measured, guarded quantity instead of a
+    difference nobody is looking at: the parity test asserts it is exactly
+    n*log2(n+1).
+    """
     from imp_pathinfo.causalbool_mirror import node_description_cost
     total = math.log2(max(1, n))  # graph_description_length header
     for v in range(n):
         total += node_description_cost(n, len(edges[v]), gates[v])
+    return float(total)
+
+
+def variant_e_schema(n: int, edges, gates) -> float:
+    """Variant E: the catalogue-free schema-normal-form length, summed over the
+    toy network. Primary measure since AUDIT03/R3."""
+    import description_lengths as dl
+    sys.path.insert(0, str(ROOT / "papers" / "method" / "code" / "complexity_analysis"))
+    from complexity_analysis import _eval_gate
+    total = 0.0
+    for v in range(n):
+        d = len(edges[v])
+        tt = [_eval_gate(gates[v], [(y >> i) & 1 for i in range(d)], {})
+              for y in range(2 ** d)]
+        total += dl.schema_normal_form_length(tt, n)
     return float(total)
 
 
@@ -85,8 +124,11 @@ def main() -> int:
         "variants": {
             "A_row_run_index_set_bits": variant_a_row_run(A),
             "B_gate_plus_index_set_bits": variant_b_gate_index(n, edges, gates),
+            "B_legacy_pathinfo_no_indegree_bits":
+                variant_b_legacy_pathinfo(n, edges, gates),
             "C_model_dnf_and_node_bits": variant_c_model_dnf(),
             "D_biometrics_D_bits_wl": wl_variant_d(),
+            "E_schema_normal_form_bits": variant_e_schema(n, edges, gates),
         },
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -1,4 +1,4 @@
-"""Builder for notebook 05 -- representation-free pivots: the clock."""
+"""Builder for notebook 05 -- representation-free financial pivots: the clock."""
 import os
 from _nblib import md, code, write_notebook, BOOTSTRAP
 

@@ -65,7 +65,10 @@ A deterministic, physics‑inspired programme of algorithmic information theory 
 
 ## Structure
 - `papers/` canonical paper-programme entry layer with common, method, and Nature tracks.
-- `src/Packages/Integration/` core packages: `Alpha.m`, `Gates.m`, `Experiments.m`, `SelfTest.m`.
+- `src/Packages/Integration/` core packages: `Alpha.m`, `Gates.m`, `Experiments.m`,
+  `IndexAlgebra.m`, `BioMetrics.m`, `BioExperiments.m`. `SelfTest.m` is a smoke
+  check, not a core package: it delegates to `Gates.m`/`Experiments.m` and is run
+  by `tests/SelfTest.m`. Owners are listed in `GOVERNANCE/CORE.md`.
 - `src/integration/` legacy notebooks/routines: `Alpha.m`, `Alpha.nb`, `newAlpha.nb`.
 - `tests/MUnit/` deterministic tests by section: `Analysis/`, `Gates/`, `Pattern/`, `Arch/`, `Mixed/`.
 - `results/` CSV/JSON outputs from experiments and tests; `figures/` plots.

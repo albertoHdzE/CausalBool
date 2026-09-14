@@ -5,20 +5,21 @@ base = FileNameJoin[{"results", "tests", "theory001"}]; If[!DirectoryQ[base], Cr
 cm3 = {{0,1,0},{1,0,1},{0,1,0}};
 dyn3 = {"AND","OR","XOR"};
 
-compressionWeight[gate_, Ic_List, params_Association:<||>] := Module[{d = Length[Ic]}, Switch[gate,
-  "AND" | "OR" | "NAND" | "NOR", 1 + d,
-  "XOR" | "XNOR", 1 + 1,
-  "NOT", 1,
-  "IMPLIES" | "NIMPLIES", 1 + 2,
-  "MAJORITY", 1 + 1,
-  "KOFN", 1 + 1,
-  "CANALISING", 1 + If[KeyExistsQ[params, "canalisedOutput"], 0, 1],
-  _, 1 + d
-]];
-computeCompression[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics},
-  ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
-  Total@Table[compressionWeight[dyn[[i]], ics[[i]], Lookup[params, i, <||>]], {i, n}]
-];
+(* AUDIT03 — delegated to the single owner, Integration`BioMetrics`.
+   C_formula had FIVE definition sites, all local to tests/, and they had
+   drifted: TSK-EXPER-004's copy lacked KOFN and CANALISING branches, so 20 of
+   72 (gate, d) cells disagreed with the other four. C_formula = 23 on the
+   flagship is a published number, so it gets one home. *)
+(* AUDIT03 fix: the C_formula delegation added here in 019ff70 had no Get for
+   BioMetrics.m, so Integration`BioMetrics`ComputeFormulaComponents stayed
+   unevaluated and this file exported no status at all. The suite still
+   reported it green because the runner read a STALE Status.txt from an
+   earlier run -- fixed in run-tests.sh, which now clears the status first. *)
+Get["src/Packages/Integration/BioMetrics.m"];
+compressionWeight[gate_, Ic_List, params_Association:<||>] :=
+  Integration`BioMetrics`FormulaComponentWeight[gate, Ic, params];
+computeCompression[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, params];
 alphaBase = computeCompression[cm3, dyn3, <||>];
 alphaZero = computeCompression[ConstantArray[0, {3,3}], dyn3, <||>];
 
@@ -52,3 +53,13 @@ Export[FileNameJoin[{base, "Metrics.json"}], metrics, "JSON"];
 status = If[And[okNonNeg, okSepZero, okRelabel, okCollapse], "OK", "FAIL"];
 Export[FileNameJoin[{base, "Status.txt"}], {status, DateString[]}, "Text"];
 Association["Status"->status, "ResultsPath"->base]
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

@@ -2,12 +2,9 @@
 import os
 import sys
 import json
-import re
-import glob
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import networkx as nx
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -16,28 +13,13 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from integration.Universal_D_v2_Encoder import UniversalDv2Encoder
 
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
-
-
-def _paper_root() -> Path:
-    env = os.getenv("CAUSALBOOL_PAPER_ROOT")
-    if env:
-        return Path(env).expanduser().resolve()
-    repo = _repo_root()
-    candidates = [
-        repo / "workspaces" / "claude-nature" / "paper",
-        repo / "workspaces" / "level8-paper" / "paper",
-        repo / "4ClaudeCode" / "claude-Nature" / "paper",
-    ]
-    for c in candidates:
-        if c.is_dir():
-            return c
-    return candidates[-1]
-
-
-def _paper_figures_dir() -> Path:
-    return _paper_root() / "figures"
+# AUDIT03 (monolithic-code): _repo_root, _paper_root and _paper_figures_dir
+# were defined identically here and in three other production modules. One
+# owner now; parity proven over 24 of 24 comparisons before this edit
+# (audit/AUDIT03_R2_collapse/probe_paths_parity.py). Guarded by
+# tools/check_single_engine.sh.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from causalbool_paths import paper_figures_dir as _paper_figures_dir  # noqa: E402
 
 
 class BioNetworkOverlay:
@@ -117,7 +99,7 @@ class BioNetworkOverlay:
                     return state[node_map.get(logic_str, 0)] # Fallback
                     
                 return eval(logic_str, {"__builtins__": {}}, local_ctx)
-            except Exception as e:
+            except Exception:
                 # print(f"Error evaluating logic '{logic_str}': {e}")
                 return 0
                 

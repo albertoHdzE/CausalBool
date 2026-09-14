@@ -29,6 +29,25 @@ import sys
 import time
 import warnings
 
+# AUDIT02/Q1: this script was NOT reproducible run to run.  Two invocations with
+# identical arguments returned different hill-climb winners (WTI_Spot @ 0.375 vs
+# WTI_CL @ 0.4583), so the committed b4_description_length.json recorded one draw
+# from an unpinned distribution rather than a result.
+#
+# The cause is not the resampling, which is seeded (np.random.default_rng(42)),
+# and not pgmpy, which is deterministic WITHIN a process (verified: six
+# learn_structure calls on one frame agree).  It is PYTHONHASHSEED.  Python
+# randomises string hashing per process; pgmpy's search breaks ties by set
+# iteration order, so the tie-break — and hence the counts — vary per process.
+#
+# PYTHONHASHSEED must be set before the interpreter starts, so it cannot be
+# fixed from inside a running process; the only correct remedy is to re-exec.
+# With it pinned, repeated runs are byte-identical.  SUCCESSOR_PLAN_R4 already
+# requires recording PYTHONHASHSEED for hash-order-sensitive output.
+if os.environ.get("PYTHONHASHSEED") != "0":
+    os.environ["PYTHONHASHSEED"] = "0"
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
 warnings.filterwarnings("ignore")
 
 from imp_prices import RegimeDiscretiser, SERIES, TARGET, load_and_split
@@ -170,9 +189,14 @@ def main():
         except Exception:
             continue
         hc_wins[pa] = hc_wins.get(pa, 0) + 1
-    ranked = sorted(hc_wins.items(), key=lambda kv: -kv[1])
+    # AUDIT02/Q1: tie-break on the parent tuple, not on dict insertion order.
+    # With counts tied, `key=-count` alone left `ranked[0]` at the mercy of the
+    # order winners happened to be first seen, which is a second, independent
+    # source of run-to-run variation on top of the PYTHONHASHSEED one.
+    ranked = sorted(hc_wins.items(), key=lambda kv: (-kv[1], kv[0]))
     out["bootstrap"]["hill_climb"] = dict(
         n_boot=n_hc, n_distinct_winners=len(hc_wins),
+        pythonhashseed=os.environ.get("PYTHONHASHSEED"),
         modal_parents="+".join(ranked[0][0]) or "(none)",
         modal_frequency=round(ranked[0][1] / n_hc, 4),
         top=[dict(parents="+".join(p) or "(none)", frequency=round(c / n_hc, 4))

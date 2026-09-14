@@ -43,7 +43,7 @@ def main(confidence: str = "C") -> None:
     estimator = BDMComplexityEstimator()
     analyzer = GraphPerturbationAnalyzer(estimator)
 
-    print(f"\nRunning BDM node perturbation (alphabetical node ordering)...")
+    print("\nRunning BDM node perturbation (alphabetical node ordering)...")
     t0 = time.time()
     spectra = analyzer.spectra(G, what="vertices")
     elapsed = time.time() - t0

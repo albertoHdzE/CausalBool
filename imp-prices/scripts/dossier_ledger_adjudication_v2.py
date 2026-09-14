@@ -175,7 +175,7 @@ def main():
         lines.append(f"| {dom} | {cells} |")
     lines += ["", "## Real decimals"] + body
     lines += ["---",
-              f"Headline: " + ", ".join(f"{k}={v}" for k, v in counts.items())
+              "Headline: " + ", ".join(f"{k}={v}" for k, v in counts.items())
               + f" (total {sum(counts.values())}).",
               "Interpretation rule: only STRONG supports 'value stands on",
               "artifact' without further work; WEAK/PROSE keep the batch-rule",

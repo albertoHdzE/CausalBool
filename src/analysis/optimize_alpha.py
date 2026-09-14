@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_auc_score, roc_curve, auc
+from sklearn.metrics import roc_auc_score, roc_curve
 import os
 
 def optimize_alpha(csv_path, output_dir):
@@ -61,7 +61,7 @@ def optimize_alpha(csv_path, output_dir):
         except:
             aucs.append(0.5)
             
-    print(f"Optimization Results:")
+    print("Optimization Results:")
     print(f"  Best Alpha (Z-score weighting): {best_alpha:.2f}")
     print(f"  Best AUC: {best_auc:.4f}")
     

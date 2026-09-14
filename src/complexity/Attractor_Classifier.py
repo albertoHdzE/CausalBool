@@ -1,5 +1,3 @@
-import numpy as np
-import collections
 from .Basin_Entropy import BasinEntropyEstimator
 
 class AttractorClassifier:

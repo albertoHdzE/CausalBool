@@ -2,7 +2,7 @@
 
 Which synthetic gate-network reproduces the market clock's self-similar signature?
 
-For each of the 100 stocks we take the pivot clock, measure its Fano-factor self-similarity
+For each of the 100 stocks we take the financial pivot clock, measure its Fano-factor self-similarity
 exponent, and compare three synthetic constructions, each mapping to a reading of the
 original gate picture:
 

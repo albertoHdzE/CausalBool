@@ -1,5 +1,6 @@
 AppendTo[$Path, "src/Packages"];
 Needs["Integration`Gates`"];
+Needs["Integration`BioMetrics`"];
 Needs["Integration`Experiments`"];
 base = FileNameJoin[{"results", "tests", "mixed001FormulaVsExhaustive"}]; If[!DirectoryQ[base], CreateDirectory[base, CreateIntermediateDirectories -> True]];
 inputsFor[n_Integer] := IntegerDigits[Range[0, 2^n - 1], 2, n];
@@ -185,53 +186,33 @@ shannonPerNode = Hbin /@ pPerNode;
 (* removed dataset comparison metrics by project policy *)
 
 (* Formula-based compression component count *)
-compressionWeight[gate_, Ic_List, params_Association:<||>] := Module[{d = Length[Ic]}, Switch[gate,
-  "AND" | "OR" | "NAND" | "NOR", 1 + d,
-  "XOR" | "XNOR", 1 + 1,
-  "NOT", 1,
-  "IMPLIES" | "NIMPLIES", 1 + 2,
-  "MAJORITY", 1 + 1,
-  "KOFN", 1 + 1,
-  "CANALISING", 1 + If[KeyExistsQ[params, "canalisedOutput"], 0, 1],
-  _, 1 + d
-]];
-computeCompression[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics},
-  ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
-  Total@Table[compressionWeight[dyn[[i]], ics[[i]], Lookup[params, i, <||>]], {i, n}]
-];
+(* AUDIT03 — delegated to the single owner, Integration`BioMetrics`.
+   C_formula had FIVE definition sites, all local to tests/, and they had
+   drifted: TSK-EXPER-004's copy lacked KOFN and CANALISING branches, so 20 of
+   72 (gate, d) cells disagreed with the other four. C_formula = 23 on the
+   flagship is a published number, so it gets one home. *)
+(* AUDIT03 fix: the C_formula delegation added here in 019ff70 had no Get for
+   BioMetrics.m, so Integration`BioMetrics`ComputeFormulaComponents stayed
+   unevaluated and this file exported no status at all. The suite still
+   reported it green because the runner read a STALE Status.txt from an
+   earlier run -- fixed in run-tests.sh, which now clears the status first. *)
+Get["src/Packages/Integration/BioMetrics.m"];
+compressionWeight[gate_, Ic_List, params_Association:<||>] :=
+  Integration`BioMetrics`FormulaComponentWeight[gate, Ic, params];
+computeCompression[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, params];
 Cformula = computeCompression[cm10, dyn10, params10];
 
 (* LaTeX tables for documentation *)
 
-gateLabels = {"AND","OR","XOR","NAND","NOR","XNOR","NOT","IMPLIES","NIMPLIES","MAJORITY","KOFN","CANALISING"};
-log2Int[x_] := N@Log[2, x];
-encodeCostBits[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics, K = Length[gateLabels]},
-  ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
-  Total@Table[
-    Module[{d = Length[ics[[i]]], g = dyn[[i]], p = Lookup[params, i, <||>], cost = 0.0},
-      cost += log2Int[K];
-      (* In-degree field: required for unique decodability. Without d the decoder
-         cannot determine the width of the input-set field, nor read it as an index
-         into the d-subsets of [n]. Added 2026-08-14; earlier revisions omitted it
-         and yielded D_formula = 101.07 bits, which was not a valid description
-         length. The corrected figure is 135.66 bits. Mirrored in
-         papers/method/code/complexity_analysis/complexity_analysis.py. *)
-      cost += log2Int[n + 1];
-      cost += log2Int[Max[1, Binomial[n, d]]];
-      Switch[g,
-        "KOFN", cost += log2Int[d + 1] + 1,
-        "CANALISING", cost += log2Int[n] + 1 + 1,
-        "IMPLIES" | "NIMPLIES", cost += log2Int[Max[1, d (d - 1)]],
-        "NOT", cost += log2Int[Max[1, d]],
-        "MAJORITY", cost += 1,
-        "XOR" | "XNOR", cost += 1,
-        _, cost += 1
-      ];
-      cost
-    ],
-    {i, n}
-  ]
-];
+(* AUDIT03/R2b — delegated to the single owner, Integration`BioMetrics`.
+   This copy was already CORRECT: it carried the log2(n+1) in-degree field, and
+   it is the site that superseded D_formula = 101.07 by 135.66. It is collapsed
+   anyway, and that makes it the control for the collapse -- a correct copy
+   replaced by the owner must leave the value bit-identical. If D_formula moves
+   here, the delegation is wrong, not the arithmetic. *)
+encodeCostBits[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeDescriptionLength[cm, dyn, params]["D"];
 
 (* Visual sampling and side-by-side comparisons *)
 SeedRandom[1234];
@@ -254,3 +235,13 @@ baseColored = tableLaTeX[samplesBase, subsetVis, "red"];
 anaColored = tableLaTeX[samplesAna, subsetVis, "blue"];
 Export[FileNameJoin[{base, "SubsetComparison_Base.tex"}], baseColored, "Text"];
 Export[FileNameJoin[{base, "SubsetComparison_Analytic.tex"}], anaColored, "Text"];
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

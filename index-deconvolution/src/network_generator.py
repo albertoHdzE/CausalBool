@@ -43,23 +43,26 @@ def random_network(
     if max_arity is None:
         max_arity = min(n, 5)
 
+    # AUDIT03-C: a `pool_canalising` flag was set in all three branches and read
+    # in none. Checked before removing it, because a dead exclusion flag could
+    # equally have meant CANALISING was leaking into the pools that exclude it:
+    # it is not, since CANALISING enters only through `pool_any` in the `else`
+    # branch, and the two branches that set the flag False also omit it there.
+    # So the flag was redundant, not a broken guard.
     if gate_pool == "symmetric":
         pool_any = list(_ANY_ARITY) + ["KOFN"]
         pool_unary: list[str] = []
         pool_binary: list[str] = []
-        pool_canalising = False
     elif gate_pool == "core":
         # Gates supported by the canonical Wolfram CausalBoolCore.wl reference
         # (everything except CANALISING).  Used by the equivalence cross-check.
         pool_any = list(_ANY_ARITY) + ["KOFN"]
         pool_unary = list(_UNARY)
         pool_binary = list(_BINARY)
-        pool_canalising = False
     else:
         pool_any = list(_ANY_ARITY) + ["KOFN", "CANALISING"]
         pool_unary = list(_UNARY)
         pool_binary = list(_BINARY)
-        pool_canalising = True
 
     C = [[0] * n for _ in range(n)]
     gates: list[str] = []

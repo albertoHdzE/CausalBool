@@ -12,7 +12,9 @@ predictiveEval[v_List, Ic_List, gate_String, params_Association] := Which[
   gate === "IMPLIES" || gate === "NIMPLIES", Module[{pair = Lookup[params, "pair", If[Length[Ic] >= 2, {Ic[[1]], Ic[[2]]}, {Ic[[1]], Ic[[1]]}]], a, b}, a = v[[pair[[1]]]]; b = v[[pair[[2]]]]; If[gate === "IMPLIES", Boole[(1 - a) == 1 || b == 1], Boole[a == 1 && b == 0]]],
   gate === "MAJORITY", Boole[Total[v[[Ic]]] >= Ceiling[Length[Ic]/2]],
   gate === "KOFN", Module[{k = Lookup[params, "k", 1], strict = TrueQ[Lookup[params, "strict", False]]}, If[strict, Boole[Count[v[[Ic]], 1] > k], Boole[Count[v[[Ic]], 1] >= k]]],
-  gate === "CANALISING", Module[{ci = Lookup[params, "canalisingIndex", If[Length[Ic] >= 1, Ic[[1]], Ic[[1]]]], vcan = Lookup[params, "canalisingValue", 1], cout = Lookup[params, "canalisedOutput", 0]}, If[v[[ci]] == vcan, cout, Boole[MemberQ[v[[Ic]], 1]]]],
+  (* AUDIT02/W0.2: migrated to the Ic-RELATIVE reading pinned by ORDERING §4/§4b;
+     see the twin note in TSK-MIXED-001-Comparison.m. Was v[[ci]] (absolute). *)
+  gate === "CANALISING", Module[{ci = Lookup[params, "canalisingIndex", 1], vcan = Lookup[params, "canalisingValue", 1], cout = Lookup[params, "canalisedOutput", 0]}, If[v[[Ic]][[ci]] == vcan, cout, Boole[MemberQ[v[[Ic]], 1]]]],
   True, 0
 ];
 inputsFor[n_Integer] := IntegerDigits[Range[0, 2^n - 1], 2, n];
@@ -56,3 +58,13 @@ Export[FileNameJoin[{base, "Places.json"}], places, "JSON"];
 Export[FileNameJoin[{base, "ZerosBaseline.json"}], zerosBaseline, "JSON"];
 Export[FileNameJoin[{base, "Status.txt"}], {If[ok, "OK", "FAIL"], DateString[]}, "Text"];
 Association["Status" -> If[ok, "OK", "FAIL"], "ResultsPath" -> base]
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

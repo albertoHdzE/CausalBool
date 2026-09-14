@@ -1,7 +1,7 @@
 """exp21_fractal_clock.py  (Level 6)
 
 Is the clock a self-similar fractal point process, and is its clustering invariant
-across reversal scales (the intra-pivot self-similarity)?
+across reversal scales (the intra-financial pivot self-similarity)?
 
 Measure the Fano-factor scaling exponent alpha of the pivot point process at
 several reversal scales theta, each against the return-shuffle null.  A renewal

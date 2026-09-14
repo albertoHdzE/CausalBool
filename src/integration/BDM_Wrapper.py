@@ -1,7 +1,7 @@
 
 import numpy as np
 from pybdm import BDM
-from typing import Tuple, Dict, Any
+from typing import Dict, Any
 
 class BDMWrapper:
     """

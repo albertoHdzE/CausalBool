@@ -30,11 +30,10 @@ from imp_causal_paper.complexity import BDMComplexityEstimator, adjacency_matrix
 import networkx as nx
 
 
-def load_edgelist(path):
-    df = pd.read_csv(path)
-    G = nx.DiGraph()
-    G.add_edges_from(zip(df["TF"], df["TG"]))
-    return G
+# AUDIT03 (monolithic-code): four byte-identical copies of this reader
+# collapsed onto the ingestion owner. Parity 50/50 on the real edge lists
+# before the change; the owner additionally raises on a renamed column.
+from imp_causal_paper.bio_ingestion import load_edgelist
 
 
 def main():

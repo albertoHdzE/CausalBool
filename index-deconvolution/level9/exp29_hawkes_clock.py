@@ -2,7 +2,7 @@
 
 A three-number generative program for the clock, and how self-exciting it is.
 
-For each instrument the pivot times are fitted with an exponential Hawkes process
+For each instrument the financial pivot times are fitted with an exponential Hawkes process
 (mu, alpha, beta). Four questions, each against the return-shuffle null:
 
   1. Self-excitation. Is the branching ratio n = alpha/beta well above the shuffle's
@@ -118,7 +118,7 @@ def run(quiet: bool = False) -> dict:
         print(f"\n  1. self-excitation: branching ratio n = {m('branching_ratio'):.3f} "
               f"vs shuffle {m('branching_null'):.3f} "
               f"({out['n_above_null']}/{len(rows)} clearly self-exciting)")
-        print(f"     (n=0 memoryless, n=1 critical; markets are strongly self-exciting, sub-critical)")
+        print("     (n=0 memoryless, n=1 critical; markets are strongly self-exciting, sub-critical)")
         print(f"  2. out of sample: Hawkes beats Poisson by {m('oos_gain_per_event'):+.3f} nats/event "
               f"({out['n_oos_positive']}/{len(rows)} positive)")
         print(f"  3. compression: 3 numbers stand in for ~{int(m('n_events'))} event times per series")

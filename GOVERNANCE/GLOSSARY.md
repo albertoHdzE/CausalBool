@@ -1,22 +1,11 @@
 ># GOVERNANCE/GLOSSARY.md — synchronized copy
 >
 > **Canonical source of truth:** `~/Documents/projects/series-deconvolution/GLOSSARY.md`
-> @ sibling commit `b868cd0` (T2.7 precision note appended 2026-08-24).
-> Recopied 2026-08-24 by AUDIT01/T27 after the author-permitted sibling edit;
-> previous sync @ `77a5381` by AUDIT01/T1.4.
+> @ sibling commit `d26343a` (§1e — *pivot* is a finance term — 2026-09-07).
+> Recopied 2026-09-07 by AUDIT04-F after the author-permitted sibling edit;
+> previous syncs @ `b868cd0` (AUDIT01/T27), `77a5381` (AUDIT01/T1.4).
 > On definitions this file outranks every other document in this repository.
 > Verify freshness: `tools/check_glossary_sync.sh` (0=clean, 1=drift, 2=sibling absent).
-
-# GLOSSARY — the gold source of truth for terminology
-
-**Status:** authoritative. Where any paper, notebook, bitácora, docstring, commit message
-or memory disagrees with this file, **this file wins** and the other is stale.
-
-**Settled 2026-08-22, after three wrong framings by me.** In order: I called it a
-*collision* (two unrelated senses — wrong); then a *misnomer* (one sense wrong — also
-wrong); the truth is that **there is one concept, instantiated in two domains**, and the
-error was always in how it is *defined*, never in the word.
-
 ---
 
 ## 1. THE DEFINITION
@@ -31,8 +20,9 @@ Source, and it is the project's founding object, not a Level-10 invention:
   residual."*
 - `bitacora/14_level3_behaviour_tables.md:63-64` — *"The pivots, the points and segments
   where **local determinism holds exactly**, are the gold."*
-- Level 1, `experiments/exp01_pivots_sumandos.py` — pivots vs sumandos: the **essential
-  nodes that determine the output** vs the **free offsets that never change it**.
+- Level 1, `experiments/exp01_connected_inputs_and_sumandos.py` (renamed 2026-09-07 from
+  `exp01_pivots_sumandos.py`, see §1e) — the **essential variables that determine the
+  output** vs the **free offsets that never change it**.
 
 **Pivot = the exactly-determined part.** That is the whole of the shared definition, and
 it is *all* that transfers between domains. **The name of the complement does not
@@ -40,8 +30,15 @@ transfer** — see §1c, which is the correction of 2026-08-22.
 
 ### 1a. In the Boolean indexing method
 
-The **connected inputs** `I_c` determine the output: they are the pivot coordinates. The
-**free coordinates** contribute **sumandos** — offsets that never change the result.
+A coordinate is **free** exactly when the *schema under consideration* does not depend on
+it, and the **free coordinates** contribute **sumandos** — offsets that never change the
+result. The **connected inputs** `I_c` are the coordinates that can matter at all, so the
+**disconnected** coordinates are free in every schema.
+
+> **Free is per schema, not per node. Disconnected ⇒ free; free ⇏ disconnected.**
+> This sentence is the whole of §1d, and it is the single most expensive confusion in
+> the project's history — settled, then re-adopted, four times. Read §1d before writing
+> the word *sumando* anywhere.
 
 `P(I_c) = Σ_{i∈I_c} w(i)` is therefore **not "the pivots"**: it is the *decimal encoding of
 the pivot set*. Call it the **decimal anchor**; `L` is the **decimal family**. Calling
@@ -105,17 +102,103 @@ into **connected** `I_c` and **free**. Each side then gets *its own decimal enco
 
 | coordinate set | its decimal encoding |
 |---|---|
-| **connected** `I_c` — determine the output → the **pivot coordinates** | **decimal anchor** `P(I_c)`, ranging over the **decimal family** `L` |
-| **free** — never change the output | **sumandos** `S` |
+| **fixed by the schema** → the **pivot coordinates** | **decimal anchor** `P`, ranging over the **decimal family** `L` |
+| **free in the schema** — do not change membership | **sumandos** `S` |
 
-So *sumandos* is **not** the complement of *pivot*: it is the complement's **encoding**, and
-it stands parallel to the **decimal anchor**, which is the pivot set's encoding. The
-complement of *pivot coordinates* is *free coordinates*. `exp01_pivots_sumandos.py` names a
-**set** and an **encoding** side by side, and reading that filename as a partition is how a
-lossless factorisation got mistaken for a lossy one.
+So *sumandos* is **not** the complement of the fixed coordinates: it is the complement's
+**encoding**, and it stands parallel to the **decimal anchor**, which is the fixed set's
+encoding. The complement of the **connected inputs** is the **free coordinates**.
+`exp01_pivots_sumandos.py` named a **set** and an **encoding** side by side, and reading
+that filename as a partition is how a lossless factorisation got mistaken for a lossy one.
+*(That file has since been renamed — see §1e.)*
 
 **Rule.** Write **pivot / residual** for causal reachability. Write **decimal family /
 sumandos** (or *decimal / offset*) for the compressed form. Never cross them.
+
+> **Amended 2026-09-07 by §1e.** This subsection formerly wrote "pivot coordinates" for
+> the coordinates a schema fixes. That usage is withdrawn: *pivot* is now reserved for
+> finance. Read **connected inputs** wherever this section previously said *pivot
+> coordinates*.
+
+---
+
+### 1d. **Sumandos are NOT "the disconnected coordinates."** (author ruling, 2026-09-03)
+
+This has now been settled and then re-adopted **four times**, and each recurrence has cost
+a long conversation. The cause is always the same: a reader meets the function
+`allOffsets[n, connected] := ... Complement[Range[n], connected] ...`, which computes only
+the disconnected part, and promotes that implementation detail into the definition.
+
+> **Definition.** The **sumandos** of a schema are the fillings of **its own don't-care
+> positions**, wherever those positions fall. `Ω` is the offset family they generate.
+
+**Rule 110 is the standing counterexample.** It has three inputs and **all three are
+connected**. Under the wrong reading its free coordinates are empty, so `Ω = {0}`, there
+are no sumandos and no compression, and `L` must list all five minterms. Under the correct
+reading it is three schemata — `01*`, `10*`, `*10` — and **every one of their don't-cares
+sits on a connected input**. The wrong reading cannot express the right one.
+
+Established 2026-07-09 in `index-deconvolution/bitacora/11_gate_confusion_arity_schemata.md:83`
+(*"the don't-cares … are exactly the sumandos"*); re-derived and re-verified 2026-09-03 in
+`audit/AUDIT03_R3_description_length/probe_sumandos_two_readings.py`.
+
+**Why it matters quantitatively, not just terminologically.** The narrow reading sees
+compression only from disconnected coordinates, so it cannot distinguish an OR from an XOR
+of the same in-degree: both are "one gate with `n−d` free coordinates". The general reading
+separates them exactly — an OR of in-degree 10 covers 1023 minterms with **10** schemata,
+while an XOR of in-degree 10 covers 512 minterms and needs **512**, because none of its
+minterms merge. A measure blind to that is not measuring the object.
+
+**Permitted phrasing.** "The disconnected coordinates are free in every schema, and are the
+special case always present" — true, and useful. **Forbidden phrasing.** Anything of the
+form "the sumandos are / correspond to / are generated by the coordinates that do not feed
+the node", stated as the definition. The special case may be *illustrated*; it may never be
+*defined as* the general object.
+
+---
+
+### 1e. ***Pivot* is a finance term. It has no place in the method vocabulary.** (author ruling, 2026-09-07)
+
+§1c and §3 previously permitted **pivot coordinates** inside the Boolean indexing method,
+on the reasoning that *pivot* names one shared concept instantiated in two domains. That
+permission is **withdrawn**. The author's ruling is that *pivot* denotes a specific kind of
+set **in finance**, and that letting it stand anywhere near *decimals and sumandos* is a
+standing invitation to re-import the lossy partition into a lossless factorisation — which
+is confusion source #5, and which §1c diagnosed without removing the word that causes it.
+
+> **Rule.** In the Boolean indexing method the vocabulary is:
+>
+> | object | name |
+> |---|---|
+> | the coordinates that can matter at all | **connected inputs** `I_c` |
+> | the coordinates a given schema actually fixes | **essential variables** |
+> | their decimal encoding | **decimal anchor** `P`, ranging over the **decimal family** `L` |
+> | the coordinates a schema leaves free | **free coordinates** |
+> | the fillings of those free positions | **sumandos** `S` (§1d) |
+>
+> The word *pivot* appears in none of these rows, and must not be introduced into any of
+> them — not in prose, not in an identifier, not in a filename, not in a JSON key.
+
+**Why a naming rule needed to become a ruling.** §1c already said the two decompositions
+are not the same shape, and the confusion recurred anyway, because the word survived in the
+code while the correction lived only in this file. A reader who meets `pivots_essential_bits`
+in a dict does not consult a glossary; they conclude that pivots *are* the essential bits.
+The remedy is to remove the word from the objects, not to explain it better.
+
+**Scope.**
+
+- **Method-sense uses are renamed** using the table above. Measured 2026-09-07: 17
+  occurrences in 7 files, all in `index-deconvolution/` plus one paper-code file.
+- **Finance-sense uses keep the concept and gain the proper name** — write **financial
+  pivot** in prose (§1b, §3). `directional_change_pivots()` keeps its identifier: it names
+  the *recovery method*, and §2 confusion source #1 is about defining a pivot by that
+  method, not about the function's name.
+- **Stored result keys and executed notebooks are not retro-edited** (§7). Renaming
+  `"oos_gain_pivot"` (100 recorded occurrences), `"n_meta_pivots"` (12) and
+  `"mean_oos_pivot"` would invalidate recorded Level 5–17 values; a terminology fix does not
+  get to move measured numbers.
+- **Ordinary-English uses are retired too** — see the superseding note in §8. Adjudicating
+  a sense is exactly the work this ruling exists to abolish.
 
 ---
 
@@ -145,11 +228,14 @@ property of a sound recovery method, not a market claim.
 - **decimal anchor** `P(I_c)`, **decimal family** `L`, **sumandos** `S` — never "pivot",
   and never "residual". **Lossless.** *Sumandos* pairs with *decimal family*, and only with
   it. Never appears in finance. Papers may say *decimal* and *offset*; both are correct.
-- **free coordinates** — the complement of the *pivot coordinates*. This, not *sumandos*,
-  is what the word "pivot" is opposed to inside the Boolean method (§1c).
+- **free coordinates** — the complement of the **connected inputs**. This, not *sumandos*,
+  is what the fixed coordinates are opposed to inside the Boolean method (§1c).
+  ~~"the complement of the *pivot coordinates* … is what the word 'pivot' is opposed to
+  inside the Boolean method"~~ — **struck 2026-09-07 by §1e**: *pivot* is finance-only, so
+  it names nothing inside the method and cannot be the thing anything is opposed to.
 - `directional_change_pivots()` keeps its name: it is the **causal recovery method**.
-- Ordinary English *pivot* ("Pivot to Hybrid Encoding", `PIVOT_HYBRID`) is unaffected —
-  the technical term is two words, so flat English is unambiguous by construction.
+- ~~Ordinary English *pivot* ("Pivot to Hybrid Encoding", `PIVOT_HYBRID`) is unaffected~~ —
+  **superseded 2026-09-07 by §1e**; see §8.
 
 ---
 
@@ -162,8 +248,9 @@ property of a sound recovery method, not a market claim.
 - **Behaviour Table** — the thesis Chapter 4 *instrument*: columns `Node`, `node−1=pow`,
   `2^(pow−1)`, and the forward ratio. Its sum column is the **decimal anchor**
   ~~"AND pivot"~~.
-- **sumandos** — decimal offsets: every subset sum of the free coordinates' weights.
-  *Not* the free nodes.
+- **sumandos** — decimal offsets: every subset sum of the free coordinates' weights,
+  where *free* is **per schema** (§1d). *Not* the free nodes, and **not** the
+  disconnected nodes.
 - **DecimalRepertoire** — the **decimal family** `L`; `givePlaces` adds the whole sumandos
   list to each anchor.
 
@@ -220,7 +307,7 @@ every future pre-registration.
 | `papers/method/manuscript_computational/comp_paper.tex` | 15 | **12 corrected**, uncommitted; 3 left — see note |
 | `doc/finalpaper/together_full.tex` | 16 | **7 corrected**, uncommitted; 35 English-sense left untouched |
 | `imp-pathinfo-paper/NEXT_PHASES.md` | 1 | corrected in place with a dated note, uncommitted |
-| `index-deconvolution`, `imp-prices` finance code | many | **no change needed** — all finance-sense; already unambiguous in context |
+| `index-deconvolution`, `imp-prices` finance code | ~~many~~ **17 method-sense in 7 files** | ~~no change needed — all finance-sense~~ **THIS ROW WAS FALSE.** Corrected 2026-09-07 — see below |
 
 ### Code identifiers — renamed together with the papers, 2026-08-21
 
@@ -235,14 +322,58 @@ pass**, so they cannot disagree:
 | `comp_paper.tex` listing | `pivot5` | `decimalAnchor5` — **0 occurrences of "pivot" remain; paper and code agree** |
 | `src/causal/CausalBool.m` `findANDIndicesFormula` | local `pivot = Total[decC]`, output key `"Pivot"` | `decimalAnchor`, key `"DecimalAnchor"`. The key had no readers outside its definition site (checked), so this is safe |
 
-### `PIVOT_HYBRID` is ordinary English — verified, keep it
+### The `index-deconvolution` row above was written without scanning the tree — 2026-09-07
 
-Checked in context: it is a **strategic redirection**, not our object —
-*"Action Code: `PIVOT_HYBRID`; Reason: Z-Score (0.00) > −2.0 indicates failure to separate
-Biological Complexity from the Null Model"*, i.e. "Pivot to Hybrid Encoding (70% BDM + 30%
-Motifs)". All 35 such uses in `together_full.tex` stay. Adopting **financial pivot** as the
-proper name is exactly what frees them: the technical term is now two words, so bare
-English *pivot* is unambiguous by construction.
+The 2026-08-21/22 sweep renamed every method-sense `pivot` in the **Mathematica** core and
+the papers, and then cleared the whole `index-deconvolution` tree on the assumption that it
+was all finance. The **Python** side of the Boolean indexing method lives in that tree. So
+the sweep's conclusion — *"zero `pivot` identifiers remain in the Mathematica core"* — was
+true over a denominator chosen to exclude the files that still had the defect.
+
+Counted 2026-09-07: **178** occurrences of `pivot` repo-wide in `CausalBool`, of which
+**17 in 7 files** are method-sense. Two of the seventeen are the very objects §1c names as
+the source of the confusion, and which §1c diagnosed while leaving them on disk:
+
+| file | what it was | why it is the worst kind |
+|---|---|---|
+| `index-deconvolution/level3/behaviour_table.py` | dict key `"pivots_essential_bits"` | a wrong **identifier** is a definition that cannot be argued with |
+| `index-deconvolution/experiments/exp01_pivots_sumandos.py` | the **filename** §1c quotes verbatim | the document that explains the error shipped alongside the file that commits it |
+
+The remaining five: `deconvolution.py` ("PIVOT COORDINATES", ×2), `causalbool.py`
+("pivot-shifted cosets"), `audit_legitimacy.py` ("connected (a pivot)"),
+`tests/test_deconvolution.py` ("Pivots vs sumandos"), and
+`papers/method/code/worked_example_7node/worked_example_7node.py` ("one pivot and N free
+weights") — the last being **paper code missed by the paper sweep**.
+
+**Guard:** the ruling is no longer prose only. `tests/analysis/test_sumandos_definition.py`
+gains a `pivot` arm scanning the method trees, with the finance levels as a declared,
+reasoned exception, a control that "financial pivot" must not fire, a printed denominator
+and a refusal on zero files.
+
+### ~~`PIVOT_HYBRID` is ordinary English — verified, keep it~~ — SUPERSEDED 2026-09-07
+
+The earlier ruling is left visible rather than deleted, because it was reasoned and
+because knowing it was reversed is more useful than not knowing it existed. It read:
+
+> Checked in context: it is a **strategic redirection**, not our object —
+> *"Action Code: `PIVOT_HYBRID`; Reason: Z-Score (0.00) > −2.0 indicates failure to separate
+> Biological Complexity from the Null Model"*, i.e. "Pivot to Hybrid Encoding (70% BDM + 30%
+> Motifs)". All 35 such uses in `together_full.tex` stay. Adopting **financial pivot** as the
+> proper name is exactly what frees them: the technical term is now two words, so bare
+> English *pivot* is unambiguous by construction.
+
+**Why it is reversed.** The argument was that a two-word technical term makes the bare
+English word safe. It is sound in principle and it failed in practice: a first pass under
+this very ruling blind-substituted two English-sense uses and had to be reverted, and the
+method-sense defect above survived three sweeps. Every one of those costs is the cost of
+**adjudicating a sense**, and that is the work §1e abolishes. `PIVOT_HYBRID` and
+`PIVOT_CELL` become `SWITCH_TO_HYBRID_ENCODING` and `SWITCH_TO_CELL_LINES`, which say what
+they do and need no adjudication at all.
+
+Two limits, both deliberate. Generated artefacts (`results/bio/Contingency_Report.md`) are
+**regenerated**, not edited. Archives (`doc/`) are not rewritten, per §7 — and the count
+"35 such uses in `together_full.tex`" was itself wrong: measured 2026-09-07, that file
+contains **zero** occurrences of `PIVOT_HYBRID` or `PIVOT_CELL`.
 
 *(A first pass here blind-substituted two English-sense uses and was reverted; every
 replacement is now anchored to method vocabulary, never the bare word.)*
@@ -295,8 +426,10 @@ derivation is a separate piece of work.
 
 ## 9. How to use this file
 
-1. Before writing *pivot*, check §1. If it is the compressed form, you want **decimal
-   family** / **sumandos**. If it is a price turning point, **financial pivot**.
+1. Before writing *pivot*, check **§1e**. If it is a price turning point, write **financial
+   pivot**. Otherwise do not write the word at all: the method's objects are **connected
+   inputs**, **essential variables**, **decimal anchor**, **decimal family**, **free
+   coordinates** and **sumandos**, and one of those six is the word you want.
 2. Before quoting a relation between named objects, check §3 — direction, and the two
    readings.
 3. New term minted → add it here **with its source**, in the same commit.

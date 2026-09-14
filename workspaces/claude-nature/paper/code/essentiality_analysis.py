@@ -346,7 +346,7 @@ def generate_figure2_extended(df: pd.DataFrame, output_dir: str | None = None):
     summary_text = "STATISTICAL SUMMARY\n" + "="*40 + "\n\n"
 
     # Dataset info
-    summary_text += f"Dataset:\n"
+    summary_text += "Dataset:\n"
     summary_text += f"  Total genes: {len(df)}\n"
     summary_text += f"  Essential: {y.sum()} ({100*y.mean():.1f}%)\n"
     summary_text += f"  Networks: {df['Network'].nunique()}\n\n"
@@ -369,7 +369,7 @@ def generate_figure2_extended(df: pd.DataFrame, output_dir: str | None = None):
 
     # Statistical tests
     summary_text += "\nMann-Whitney U Test:\n"
-    summary_text += f"  Essential vs Non-essential ΔD\n"
+    summary_text += "  Essential vs Non-essential ΔD\n"
     summary_text += f"  p-value: {p_val:.2e}\n"
 
     ax.text(0.1, 0.95, summary_text, transform=ax.transAxes,

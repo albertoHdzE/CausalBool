@@ -24,7 +24,7 @@ ascending absolute cell indices.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from causalbool import Network, evolve_network, repertoire
 from deconvolution import identify_gate, GateMatch

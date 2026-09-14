@@ -52,8 +52,8 @@ def main() -> None:
             break
 
     print(f"Phase-transition crossover (neg >= pos): {crossover} edges")
-    print(f"\nEdge | %pos   | %neu   | %neg")
-    print(f"-----+--------+--------+--------")
+    print("\nEdge | %pos   | %neu   | %neg")
+    print("-----+--------+--------+--------")
     for _, row in df.iterrows():
         print(
             f"  {int(row['num_edges']):2d} | {row['frac_positive']*100:5.1f}% | "

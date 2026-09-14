@@ -1,4 +1,5 @@
 Get["src/Packages/Integration/Gates.m"];
+Get["src/Packages/Integration/BioMetrics.m"];
 base = FileNameJoin[{"results", "tests", "theory002"}]; If[!DirectoryQ[base], CreateDirectory[base, CreateIntermediateDirectories -> True]];
 
 avgSensitivityNode[cm_List, dyn_List, params_Association:<||>, i_Integer] := Module[{n = Length[dyn], Ic, inputs, flips, f, s},
@@ -11,25 +12,26 @@ avgSensitivityNode[cm_List, dyn_List, params_Association:<||>, i_Integer] := Mod
 
 avgSensitivity[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn]}, N@Total@Table[avgSensitivityNode[cm, dyn, params, i], {i, n}]];
 
-compressionWeight[gate_, Ic_List, params_Association:<||>] := Module[{d = Length[Ic]}, Switch[gate,
-  "AND" | "OR" | "NAND" | "NOR", 1 + d,
-  "XOR" | "XNOR", 1 + 1,
-  "NOT", 1,
-  "IMPLIES" | "NIMPLIES", 1 + 2,
-  "MAJORITY", 1 + 1,
-  "KOFN", 1 + 1,
-  "CANALISING", 1 + If[KeyExistsQ[params, "canalisedOutput"], 0, 1],
-  _, 1 + d
-]];
+(* AUDIT03 — delegated to the single owner, Integration`BioMetrics`.
+   C_formula had FIVE definition sites, all local to tests/, and they had
+   drifted: TSK-EXPER-004's copy lacked KOFN and CANALISING branches, so 20 of
+   72 (gate, d) cells disagreed with the other four. C_formula = 23 on the
+   flagship is a published number, so it gets one home. *)
+compressionWeight[gate_, Ic_List, params_Association:<||>] :=
+  Integration`BioMetrics`FormulaComponentWeight[gate, Ic, params];
+computeCompression[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, params];
 
-computeCompression[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics}, ics = Table[Flatten@Position[cm[[i]], 1], {i, n}]; Total@Table[compressionWeight[dyn[[i]], ics[[i]], Lookup[params, i, <||>]], {i, n}]];
-
-gateLabels = {"AND","OR","XOR","NAND","NOR","XNOR","NOT","IMPLIES","NIMPLIES","MAJORITY","KOFN","CANALISING"};
-log2Int[x_] := N@Log[2, x];
-encodeCostBits[cm_List, dyn_List, params_Association:<||>] := Module[{n = Length[dyn], ics, K = Length[gateLabels]},
-  ics = Table[Flatten@Position[cm[[i]], 1], {i, n}];
-  Total@Table[Module[{d = Length[ics[[i]]], g = dyn[[i]], p = Lookup[params, i, <||>], cost = 0.0}, cost += log2Int[K]; cost += log2Int[Max[1, Binomial[n, d]]]; Switch[g, "KOFN", cost += log2Int[d + 1] + 1, "CANALISING", cost += log2Int[n] + 1 + 1, "IMPLIES" | "NIMPLIES", cost += log2Int[Max[1, d (d - 1)]], "NOT", cost += log2Int[Max[1, d]], "MAJORITY", cost += 1, "XOR" | "XNOR", cost += 1, _, cost += 1]; cost], {i, n}]
-];
+(* AUDIT03/R2b — the local cost model is gone; this delegates to the single
+   owner, Integration`BioMetrics`. Two things were wrong with the copy that
+   stood here. It duplicated a formula that four other files also carried, and
+   it LACKED the log2(n+1) in-degree field, so the code it priced had Kraft sum
+   n+1 rather than 1 and was not uniquely decodable. Delegation fixes both at
+   once and makes a future divergence impossible rather than merely unlikely.
+   The assertions below are inequalities, so the value moving by n*log2(n+1)
+   does not move the test's verdict; that was checked, not assumed. *)
+encodeCostBits[cm_List, dyn_List, params_Association:<||>] :=
+  Integration`BioMetrics`ComputeDescriptionLength[cm, dyn, params]["D"];
 
 cm = {{0,1,0,0,0},{1,0,1,0,0},{0,1,0,1,0},{0,0,1,0,1},{0,0,0,1,0}};
 dyn = {"AND","OR","XOR","KOFN","CANALISING"};
@@ -59,3 +61,13 @@ Export[FileNameJoin[{base, "Metrics.json"}], jsonText, "Text"];
 statusStr = "OK";
 Export[FileNameJoin[{base, "Status.txt"}], StringJoin[statusStr, "\n", DateString[]], "Text"];
 Association["Status"->statusStr, "ResultsPath"->base]
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

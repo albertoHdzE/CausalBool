@@ -1,7 +1,7 @@
 """exp11_pivot_distribution.py  (Level 3)
 
 The whole-picture view: instead of asking for one global rule, measure how local
-structure (the pivots, the islands of determinism) is distributed along time.
+structure (the financial pivots, the islands of determinism) is distributed along time.
 
 A long binary series is cut into non-overlapping windows; the Lempel-Ziv
 complexity of each window is a local structure score.  If markets were structure-

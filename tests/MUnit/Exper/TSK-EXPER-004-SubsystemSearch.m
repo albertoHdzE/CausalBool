@@ -37,13 +37,26 @@ makeSW[n_, seed_] := BlockRandom[
     Graph[Range[n], UndirectedEdge @@@ edges]
   ], RandomSeeding -> seed];
 
-compressionWeight[gate_, d_Integer] := Switch[gate,
-  "AND" | "OR" | "NAND" | "NOR", 1 + d,
-  "XOR" | "XNOR" | "MAJORITY", 1 + 1,
-  "NOT", 1,
-  _, 1 + d
-];
-computeCompression[cm_List, dyn_List] := Module[{n = Length[dyn], ics}, ics = Table[Flatten@Position[cm[[i]], 1], {i, n}]; Total@Table[compressionWeight[dyn[[i]], Length[ics[[i]]]], {i, n}]];
+(* AUDIT03 — delegated to the single owner, Integration`BioMetrics`.
+
+   THIS COPY WAS THE DRIFTED ONE. It had no KOFN and no CANALISING branch, so
+   both fell through to the "1 + d" default, and it took the in-degree instead
+   of the connected-input list, so it could not see parameters at all. Measured
+   in the kernel over the twelve families at d = 1..6: 20 of 72 cells disagreed
+   with the four other copies -- IMPLIES and NIMPLIES at every d except 2, KOFN
+   and CANALISING at every d except 1.
+
+   ITS NUMBERS THEREFORE MOVE, and that is the intended correction rather than
+   a regression. Nothing downstream notices today, for a reason worth recording:
+   this file is one of 23 under tests/MUnit that the runner NEVER EXECUTES --
+   run-tests.sh globs "*Tests.m" and this name does not match. It also exports
+   Status "OK" unconditionally, so it could not have failed in any case. Both
+   are recorded in BASELINE.md as separate open items. *)
+Get["src/Packages/Integration/BioMetrics.m"];
+compressionWeight[gate_, d_Integer] :=
+  Integration`BioMetrics`FormulaComponentWeight[gate, Range[d], <||>];
+computeCompression[cm_List, dyn_List] :=
+  Integration`BioMetrics`ComputeFormulaComponents[cm, dyn, <||>];
 
 proposeBlocks[cm_List] := Module[{n = Length[cm], adjU, visited = ConstantArray[False, Length[cm]], blocks = {}},
   adjU = Unitize[cm + Transpose[cm]]; Do[adjU[[i, i]] = 0, {i, n}];

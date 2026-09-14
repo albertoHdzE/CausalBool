@@ -67,7 +67,7 @@ def main() -> None:
     # Basic statistics
     edge_counts = [r["num_edges"] for r in rows]
     print(f"Edge count range: {min(edge_counts)}–{max(edge_counts)}")
-    print(f"Edge count distribution:")
+    print("Edge count distribution:")
     ec_series = pd.Series(edge_counts)
     for ec, count in sorted(ec_series.value_counts().items()):
         print(f"  {ec:>2} edges: {count:>5} graphs")
@@ -113,7 +113,7 @@ def main() -> None:
     gdf.to_csv(OUTPUT_DIR / "mmc8_graph_summaries.csv", index=False)
 
     # Aggregate statistics for the paper
-    print(f"\n--- Per-node delta statistics ---")
+    print("\n--- Per-node delta statistics ---")
     print(f"Total node-delta entries: {len(df)}")
     print(f"  Positive: {(df['classification'] == 'positive').sum()}")
     print(f"  Neutral:  {(df['classification'] == 'neutral').sum()}")
@@ -122,7 +122,7 @@ def main() -> None:
     print(f"  Mean delta: {df['delta'].mean():.4f}")
 
     # Distribution by edge count (key for Figure 4D)
-    print(f"\n--- Classification by edge count (Figure 4D) ---")
+    print("\n--- Classification by edge count (Figure 4D) ---")
     pivot = df.groupby(["num_edges", "classification"]).size().unstack(fill_value=0)
     for col in ["positive", "neutral", "negative"]:
         if col not in pivot.columns:

@@ -4,17 +4,16 @@ EnsureDir[path_] := If[!DirectoryQ[path], CreateDirectory[path, CreateIntermedia
 base = FileNameJoin[{"results", "tests", "compare003"}];
 EnsureDir[base];
 
+Needs["Integration`Gates`"];
+
 gates = {"AND","OR","XOR","XNOR","NAND","NOR"};
 
-apply2[gate_, x_, y_] := Switch[gate,
-  "AND", If[x == 1 && y == 1, 1, 0],
-  "OR", If[x == 1 || y == 1, 1, 0],
-  "XOR", If[Mod[x + y, 2] == 1, 1, 0],
-  "XNOR", If[Mod[x + y, 2] == 0, 1, 0],
-  "NAND", If[x == 1 && y == 1, 0, 1],
-  "NOR", If[x == 1 || y == 1, 0, 1],
-  _, 0
-];
+(* AUDIT04 Phase C -- see TSK-COMPARE-002 for the full reasoning. This file
+   measures transfer entropy and mutual information OVER gate distributions; it
+   does not test gate semantics, so its private six-family Switch was unchecked
+   machinery. Forwarded to the owner; the silent `_, 0` fallback is dropped in
+   favour of ApplyGate's refusal. *)
+apply2[gate_, x_, y_] := Integration`Gates`ApplyGate[gate, {x, y}, <||>];
 
 triples = Tuples[{0, 1}, 2];
 
@@ -67,3 +66,13 @@ Export[FileNameJoin[{base, "Summary.json"}], rows, "JSON"];
 ok = Abs[SelectFirst[rows, # ["gate"] == "XOR" &]["TE_X_to_Y"] - 1.0] < 1.0*^-6 && Abs[SelectFirst[rows, # ["gate"] == "XOR" &]["TC_XY_Y1"] - 1.0] < 1.0*^-6;
 Export[FileNameJoin[{base, "Status.txt"}], If[ok, "OK", "NOT_OK"], "Text"];
 Association["Status" -> If[ok, "OK", "NOT_OK"], "ResultsPath" -> base]
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

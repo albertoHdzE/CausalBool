@@ -1,18 +1,32 @@
 import json
+import re
 import math
 import random
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 
-try:
-    from integration.BDM_Wrapper import BDMWrapper
-except ModuleNotFoundError:
-    src_dir = Path(__file__).resolve().parents[1]
-    if str(src_dir) not in sys.path:
-        sys.path.append(str(src_dir))
-    from integration.BDM_Wrapper import BDMWrapper
+# AUDIT04-D: src/ is placed on sys.path here once, and BOTH the BDM wrapper and
+# the description-length owner are reached through it. A second path insertion
+# for the owner would be a second way to find one thing.
+_SRC_DIR = Path(__file__).resolve().parents[1]
+if str(_SRC_DIR) not in sys.path:
+    sys.path.append(str(_SRC_DIR))
+
+from integration.BDM_Wrapper import BDMWrapper
+
+
+@lru_cache(maxsize=1)
+def _gate_owner():
+    """The declared Python owner of gate semantics (author decision 2026-09-06)."""
+    _idsrc = _SRC_DIR.parent / "index-deconvolution" / "src"
+    if str(_idsrc) not in sys.path:
+        sys.path.insert(0, str(_idsrc))
+    import causalbool
+
+    return causalbool
 
 
 GATE_LABELS = [
@@ -38,28 +52,26 @@ def log2_int(x: int) -> float:
 
 
 def encode_node_cost(cm_row, gate: str, n: int) -> float:
-    d = int(sum(cm_row))
-    k = len(GATE_LABELS)
-    cost = 0.0
-    cost += log2_int(k)
-    if 0 <= d <= n:
-        binom = math.comb(n, d)
-    else:
-        binom = 1
-    cost += log2_int(max(1, binom))
-    if gate == "KOFN":
-        cost += log2_int(d + 1) + 1.0
-    elif gate == "CANALISING":
-        cost += log2_int(n) + 2.0
-    elif gate == "IMPLIES" or gate == "NIMPLIES":
-        cost += log2_int(max(1, d * (d - 1)))
-    elif gate == "NOT":
-        cost += log2_int(max(1, d))
-    elif gate in ("MAJORITY", "XOR", "XNOR"):
-        cost += 1.0
-    else:
-        cost += 1.0
-    return cost
+    """Per-node description length in bits, delegated to the declared owner.
+
+    AUDIT04-D. This used to carry its own copy of the cost model. Measured
+    elementwise against ``src/description_lengths.node_description_cost`` before
+    anything moved: **0 disagreements over 180 (n, degree, gate) cases**. Zero is
+    drift, not a second concept, so it is collapsed rather than declared.
+
+    Nothing was guarding it, and that is not hypothetical. The AUDIT03/R3.1 note
+    this docstring replaces records that the copy HAD drifted before: the
+    ``log2(n + 1)`` in-degree field was absent, so a decoder could not know how
+    wide the input-set field was, the Kraft sum was ``n + 1`` rather than 1, and
+    every DeltaD built from it was a difference of two invalid lengths. It was
+    corrected by hand then, and nothing would have caught it happening again.
+
+    The signature keeps ``cm_row`` because callers pass a connectivity row; the
+    owner takes the degree, which is that row's sum.
+    """
+    from description_lengths import node_description_cost
+
+    return node_description_cost(n, int(sum(cm_row)), gate)
 
 
 def compute_description_length(cm, dynamic):
@@ -270,39 +282,134 @@ def compute_d_bdm_correlation(base_dir: Path, repertoire_dir: Path | None = None
     return out_path
 
 
+
+
+# --- AUDIT02/P8: Boolean formula evaluator -----------------------------------
+# Mirrors src/Packages/Integration/LogicEval.m. Scope measured over the corpus:
+# 3,709 of 4,628 expressions (80.1%) are Boolean and evaluated exactly; 512
+# multi-valued (X:k) and 407 threshold (GEQ/theta) expressions are REFUSED,
+# returning None so the caller falls back rather than fabricating a value.
+_LOGIC_WORDS = {"AND", "OR", "NOT", "TRUE", "FALSE"}
+
+
+def logic_class(expr: str) -> str:
+    if re.search(r"\b(GEQ|LEQ|LT|GT|EQ)\s*\(", expr):
+        return "Threshold"
+    if re.search(r"[A-Za-z_0-9\-]+:[0-9]", expr):
+        return "MultiValued"
+    return "Boolean"
+
+
+def evaluate_logic(expr: str, state: dict):
+    """Return 0/1, or None if the expression is refused or unbound."""
+    if logic_class(expr) != "Boolean":
+        return None
+    out = []
+    for tok in re.split(r"([&|!(),])", expr):
+        t = tok.strip()
+        if not t:
+            continue
+        if t == "&":
+            out.append(" and ")
+        elif t == "|":
+            out.append(" or ")
+        elif t == "!":
+            out.append(" not ")
+        elif t in "(),":
+            out.append(t)
+        else:
+            u = t.upper()
+            if u == "AND":
+                out.append("__AND")
+            elif u == "OR":
+                out.append("__OR")
+            elif u == "NOT":
+                out.append("__NOT")
+            elif u == "TRUE":
+                out.append("True")
+            elif u == "FALSE":
+                out.append("False")
+            else:
+                if t not in state:
+                    return None
+                out.append(f"V[{t!r}]")
+    env = {"__AND": lambda *a: all(a), "__OR": lambda *a: any(a),
+           "__NOT": lambda a: not a, "V": state}
+    try:
+        return 1 if eval("".join(out), {"__builtins__": {}}, env) else 0
+    except Exception:
+        return None
+
+
 def apply_gate(gate: str, inputs, params):
-    if gate == "INPUT":
-        return inputs[0] if len(inputs) > 0 else 0
-    if gate == "IDENTITY":
-        return inputs[0] if len(inputs) > 0 else 0
-    if gate == "NOT":
-        return 0 if inputs[0] == 1 else 1
-    if gate == "AND":
-        return 1 if all(inputs) else 0
-    if gate == "OR":
-        return 1 if any(inputs) else 0
-    if gate == "CANALISING":
-        idx = params.get("canalisingIndex", 1) - 1
-        val = params.get("canalisingValue", 1)
-        out = params.get("canalisedOutput", 1)
-        if 0 <= idx < len(inputs) and inputs[idx] == val:
-            return out
-        fallback = [v for i, v in enumerate(inputs) if i != idx]
-        return 1 if any(fallback) else 0
-    return 0
+    """Evaluate a gate. The twelve families are delegated to the owner.
+
+    AUDIT04-D. This carried its own copy of the twelve-family catalogue.
+    Measured elementwise against ``index-deconvolution/src/causalbool.apply_gate``
+    before anything moved: **0 disagreements over 168 (gate, input) cases**.
+    Zero is drift, so the twelve are delegated rather than declared.
+
+    It was the only ``def apply_gate`` under ``src/`` -- an experiment module
+    serving as the de facto gate owner for the whole source tree, with nothing
+    guarding it. It was briefly INVISIBLE to the guard as well: crediting this
+    file for importing ``description_lengths`` cleared its gate flag, because the
+    ledger listed the description-length owner among the gate owner's references.
+    That cross-concept credit is now removed.
+
+    INPUT and IDENTITY are NOT delegated and are not gate families. They are
+    corpus sentinels meaning "this node holds its value", particular to the
+    biological networks this module reads, and the owner has no such notion.
+    Keeping only what is particular here is the rule; inventing them in the owner
+    would put a corpus artefact into the gate catalogue.
+    """
+    if gate in ("INPUT", "IDENTITY"):
+        if not inputs:
+            # AUDIT02/P1: the caller already handles the empty case by holding
+            # the node's value, so reaching here means the caller changed. A
+            # silent 0 would be indistinguishable from a legitimate FALSE.
+            raise ValueError(f"{gate} with no inputs must be resolved by the caller")
+        return inputs[0]
+    return int(_gate_owner().apply_gate(gate, list(inputs), params or {}))
 
 
 def generate_repertoire_for_network(net):
+    """Exhaustive output repertoire.
+
+    AUDIT02/P8: the node's Boolean FORMULA in net["logic"] is now preferred over
+    its classification label in net["gates"]. The label alone left CUSTOM,
+    IDENTITY, INPUT and unlisted nodes -- 76.4% of node instances across the
+    corpus -- evaluated by a fallthrough that silently returned 0.
+
+    Formulas are evaluated against the full NAMED state, because 466 of the
+    corpus formulas reference their own node (the cm omits self-edges).
+    Multi-valued and threshold expressions are refused by evaluate_logic and
+    fall back to the label, surfacing rather than being fabricated.
+    """
     nodes = net["nodes"]
-    cm = net["cm"]
+    # Not read, but the subscript asserts the key is present, so a network
+    # missing its connectivity matrix fails here rather than much later with a
+    # confusing error. Kept deliberately.
+    cm = net["cm"]    # noqa: F841
     gates = net["gates"]
+    logic = net.get("logic") or {}
     n = len(nodes)
     name_to_idx = {name: i for i, name in enumerate(nodes)}
     outputs = []
     for state_int in range(2 ** n):
         x = [(state_int >> i) & 1 for i in range(n)]
+        named = {nm: x[j] for j, nm in enumerate(nodes)}
         y = [0] * n
         for i, node in enumerate(nodes):
+            expr = logic.get(node)
+            # "INPUT" is a sentinel for a free source node: it holds its value.
+            if isinstance(expr, str) and expr.strip().upper() == "INPUT":
+                y[i] = x[i]
+                continue
+            if isinstance(expr, str):
+                v = evaluate_logic(expr, named)
+                if v is not None:
+                    y[i] = v
+                    continue
             gate_info = gates.get(node)
             if gate_info is None:
                 y[i] = x[i]
@@ -311,6 +418,9 @@ def generate_repertoire_for_network(net):
             input_names = gate_info.get("inputs", [])
             inputs = [x[name_to_idx[name]] for name in input_names]
             params = gate_info.get("parameters", {})
+            if gate in ("INPUT", "IDENTITY") and not inputs:
+                y[i] = x[i]
+                continue
             y[i] = apply_gate(gate, inputs, params)
         outputs.append(y)
     return np.array(outputs, dtype=int)

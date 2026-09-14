@@ -5,6 +5,7 @@ VerifyRandomization::usage = "VerifyRandomization[cmBio, cmRand, dynBio, dynRand
 KnockoutNetworkByIndex::usage = "KnockoutNetworkByIndex[net, i] returns network with node i removed";
 ComputeKnockoutDeltas::usage = "ComputeKnockoutDeltas[net] returns per-node \[CapitalDelta]D criticality values";
 ComputeAttractors::usage = "ComputeAttractors[net] returns the list of attractors (cycles) for the synchronous STG";
+ComputeAttractors::unevaluable = "AUDIT02/W0.1a: network `1` has `2` of `3` states whose successor could not be evaluated, so no attractor set can be reported; returning Failure[\"UnevaluableSuccessorMap\"] rather than an empty list, which would have claimed the network has no attractors. A deterministic finite system always has at least one. Unhandled gate labels: `4`.";
 LoadEssentialityData::usage = "LoadEssentialityData[path] returns nested association Network -> Gene -> Essentiality(0/1)";
 CompareCriticalityToEssentiality::usage = "CompareCriticalityToEssentiality[crit, ess] returns a dataset of predictions vs ground truth";
 ComputeKnockoutBehaviorDeltas::usage = "ComputeKnockoutBehaviorDeltas[net] returns per-node attractor-based behavioural deltas";
@@ -13,6 +14,8 @@ Begin["`Private`"]
 
 Needs["Integration`BioMetrics`"];
 Needs["Integration`Gates`"];
+(* AUDIT02/H: evaluator for the corpus "logic" formulas; see ComputeNextState. *)
+Needs["Integration`LogicEval`"];
 
 LoadEssentialityData[path_String] := Module[{data, assoc},
   If[!FileExistsQ[path], Return[$Failed]];
@@ -100,34 +103,151 @@ CompareCriticalityToEssentiality[crit_Association, ess_Association, beh_Associat
   result
 ];
 
-ComputeNextState[state_List, cm_List, dynamic_List, params_Association] := Module[
-  {n, nextState, inputs, gate, p},
+(* AUDIT02/H: ComputeNextState now prefers the node's own Boolean FORMULA over
+   its classification label when both are available.
+
+   The processed corpus stores, per node, a label in "gates" and the actual
+   Boolean expression in "logic". Only the label was consumed, so labels outside
+   the twelve families reached ApplyGate and fell through to a silent 0 —
+   measured at 243,152 calls in one run of RunEssentialityValidation.m.
+
+   Formulas are evaluated against the FULL NAMED state, not the cm-derived input
+   subvector. Measured reason: of 3,709 Boolean-class formulas, 466 reference
+   the node itself (the cm omits self-edges), which a cm-keyed subvector drops.
+
+   Fallback order, and it never guesses:
+     1. a Boolean-class "logic" formula, evaluated exactly;
+     2. otherwise the gate label via ApplyGate (which now also handles
+        IDENTITY/INPUT and fails loudly on genuinely unknown labels).
+   Multi-valued and threshold formulas are REFUSED by EvaluateLogic, so they
+   fall to step 2 and surface as Failure rather than a fabricated 0. *)
+ComputeNextState[state_List, cm_List, dynamic_List, params_Association] :=
+  ComputeNextState[state, cm, dynamic, params, <||>, {}, <||>];
+
+ComputeNextState[state_List, cm_List, dynamic_List, params_Association,
+                 logic_Association, nodeNames_List] :=
+  ComputeNextState[state, cm, dynamic, params, logic, nodeNames, <||>];
+
+ComputeNextState[state_List, cm_List, dynamic_List, params_Association,
+                 logic_Association, nodeNames_List, forced_Association] := Module[
+  {n, nextState, inputs, gate, p, named, expr, viaLogic},
   n = Length[state];
+  (* forced entries (knocked-out genes held at 0) are merged UNDER the live
+     state, so a live node never has its own value overwritten. *)
+  named = If[Length[nodeNames] === n,
+    Join[forced, Association[Thread[nodeNames -> state]]], <||>];
   nextState = Table[
-    inputs = state[[ Flatten[Position[cm[[i]], 1]] ]];
     gate = dynamic[[i]];
     p = Lookup[params, i, <||>];
-    Integration`Gates`ApplyGate[gate, inputs, p],
+    expr = If[Length[nodeNames] === n, Lookup[logic, nodeNames[[i]], None], None];
+    inputs = state[[ Flatten[Position[cm[[i]], 1]] ]];
+    Which[
+      (* AUDIT02/H: "INPUT" is a SENTINEL, not a variable. It marks a free
+         source node, and in a synchronous update such a node holds its own
+         value: x_i(t+1) = x_i(t). Four nodes in the essentiality corpus carry
+         the bare formula "INPUT" (lambda_phage N; tcell_activation TCR, CD4,
+         CD28). Treating it as a gate over the connected inputs pinned them to 0
+         for all time, because a source node has no incoming edges and
+         ApplyGate then saw an empty input list. *)
+      StringQ[expr] && ToUpperCase[StringTrim[expr]] === "INPUT",
+        state[[i]],
+      StringQ[gate] && MemberQ[{"INPUT", "IDENTITY"}, ToUpperCase[gate]] && Length[inputs] === 0,
+        state[[i]],
+      True,
+        viaLogic = If[StringQ[expr] && Length[named] > 0,
+          Integration`LogicEval`EvaluateLogic[expr, named], $Failed];
+        If[IntegerQ[viaLogic],
+          viaLogic,
+          Integration`Gates`ApplyGate[gate, inputs, p]
+        ]
+    ],
     {i, n}
   ];
   nextState
 ];
 
 ComputeAttractors[net_Association] := Module[
-  {n, cm, dynamic, params, states, nextStates, edges, g, attractors},
+  {n, cm, dynamic, params, states, nextStates, edges, g, attractors, logic, nodeNames, forced, fixedPoints,
+   badRows, badGates},
   n = Lookup[net, "n", Length[net["dynamic"]]];
-  If[n > 15, 
+  If[n > 15,
     Print["Warning: Network too large for brute-force attractor analysis (N > 15)."];
     Return[$Failed]
   ];
   cm = net["cm"];
   dynamic = net["dynamic"];
   params = Lookup[net, "params", <||>];
-  states = Tuples[{0, 1}, n];
-  nextStates = Map[ComputeNextState[#, cm, dynamic, params]&, states];
+  (* AUDIT02/H: pass the formulas and node names through so ComputeNextState can
+     prefer the exact Boolean expression over the classification label. Networks
+     loaded without them fall back to the previous label-only behaviour. *)
+  logic = Lookup[net, "logic", <||>];
+  nodeNames = Lookup[net, "nodeNames", {}];
+  (* Knocked-out genes are held at 0 for any surviving formula that names them. *)
+  forced = Association[# -> 0 & /@ Lookup[net, "forcedZero", {}]];
+  (* AUDIT02/W0.1: ORDERING §7 migration. Was Tuples[{0,1},n] (lexicographic,
+     i.e. MSB digit order) while the rest of the project treats repertoire-like
+     row enumerations as LSB-canonical; §3 listed this line as the sole
+     outstanding exception.
+     Executed only after establishing that it is result-invariant, not assumed:
+     ComputeAttractors was run through the public API over 40 real corpus
+     networks (n = 4..11) under both enumerations and the attractor sets agree
+     elementwise, 0/40 differing. The reason is structural — `states` feeds a
+     Graph keyed by state VECTORS, and the two enumerations are the same set in
+     a different order, so cycles and fixed points are unchanged. Verified
+     sensitive by a planted defect (half the state space removed -> 18/40
+     networks differ), because a comparison that has never detected a
+     difference proves nothing. §7's caveat about persisted artefacts keyed by
+     row order therefore does not bite here: nothing this function returns is
+     positional. *)
+  states = Reverse[IntegerDigits[#, 2, n]] & /@ Range[0, 2^n - 1];
+  nextStates = Map[ComputeNextState[#, cm, dynamic, params, logic, nodeNames, forced]&, states];
+  (* AUDIT02/W0.1a: a deterministic finite state machine ALWAYS has at least one
+     attractor -- every trajectory must eventually re-enter a state it has
+     already visited. So an empty result is never the truth about the network;
+     it means the successor map could not be evaluated. That happened silently
+     on 21 of 40 corpus networks: 2,486 corpus nodes (58% of all gate labels)
+     carry the label "CUSTOM", which ApplyGate does not implement, so they
+     depend entirely on the node's "logic" formula. Where that formula is
+     multi-valued, threshold-valued, or otherwise unparseable, ApplyGate is
+     reached with "CUSTOM" and returns Failure (AUDIT02/B2). A Failure inside
+     nextState makes the state neither a fixed point nor a member of any cycle,
+     and the function returned {} -- reporting "no attractors" for a question it
+     could not answer. Before B2 the same path returned a silent 0, which was
+     worse: a confident WRONG attractor set rather than an empty one.
+     Refuse loudly instead, and name the offending nodes so the caller can act. *)
+  badRows = Position[nextStates,
+    r_ /; !(ListQ[r] && Length[r] === n && AllTrue[r, IntegerQ[#] && 0 <= # <= 1 &]),
+    {1}, Heads -> False];
+  If[Length[badRows] > 0,
+    (* the gate labels ApplyGate cannot evaluate, named so the caller can act *)
+    badGates = Select[DeleteDuplicates[dynamic],
+      !MemberQ[{"AND", "OR", "XOR", "NAND", "NOR", "XNOR", "NOT", "IMPLIES",
+                "NIMPLIES", "MAJORITY", "KOFN", "CANALISING", "IDENTITY",
+                "INPUT", "Input"}, #] &];
+    Message[ComputeAttractors::unevaluable,
+      Lookup[net, "name", "<unnamed>"], Length[badRows], 2^n, badGates];
+    Return[Failure["UnevaluableSuccessorMap", <|
+      "Network" -> Lookup[net, "name", "<unnamed>"],
+      "UnevaluableStates" -> Length[badRows],
+      "TotalStates" -> 2^n,
+      "GateLabels" -> DeleteDuplicates[dynamic]|>]]];
   edges = MapThread[DirectedEdge, {states, nextStates}];
   g = Graph[states, edges];
-  attractors = FindCycle[g, Infinity, All];
+  (* AUDIT02/H: FindCycle DOES NOT REPORT SELF-LOOPS, so every period-1
+     attractor (a steady state) was missed -- including with {1, Infinity}.
+     Verified on a minimal two-node graph whose only attractor is a fixed point:
+     the self-loop edge is present, FindCycle returns {}. In Boolean biological
+     networks steady states are the dominant attractor type, so ComputeAttractors
+     was returning nothing for most networks, which in turn made every
+     ComputeKnockoutBehaviorDeltas value identically 0 and left the behavioural
+     half of the essentiality prediction contributing no information.
+     Fixed points are therefore detected directly and prepended; FindCycle still
+     supplies the cycles of period >= 2. *)
+  fixedPoints = Pick[states, MapThread[SameQ, {states, nextStates}]];
+  attractors = Join[
+    {DirectedEdge[#, #]} & /@ fixedPoints,
+    FindCycle[g, Infinity, All]
+  ];
   Map[
     Function[cycle,
       If[Length[cycle] === 0, {},
@@ -141,14 +261,18 @@ ComputeAttractors[net_Association] := Module[
 ComputeKnockoutBehaviorDeltas[net_Association] := Module[
   {baseAttr, baseMetric, n, nodeNames, deltas, kNet, attrKO, metricKO},
   baseAttr = ComputeAttractors[net];
-  If[baseAttr === $Failed, Return[<||>]];
+  (* AUDIT02/W0.1a: ComputeAttractors now refuses with Failure[...] where the
+     successor map cannot be evaluated, in addition to the older $Failed path.
+     Failure[..] is NOT === $Failed, and Length[Failure[t, a]] is 2, so testing
+     only for $Failed would have fed a bogus metric of 2 into every delta. *)
+  If[baseAttr === $Failed || FailureQ[baseAttr], Return[<||>]];
   baseMetric = Total[Length /@ baseAttr];
   n = Lookup[net, "n", Length[net["dynamic"]]];
   nodeNames = Lookup[net, "nodeNames", Range[n]];
   deltas = Table[
     kNet = KnockoutNetworkByIndex[net, i];
     attrKO = ComputeAttractors[kNet];
-    If[attrKO === $Failed,
+    If[attrKO === $Failed || FailureQ[attrKO],
       0,
       metricKO = Total[Length /@ attrKO];
       baseMetric - metricKO
@@ -241,7 +365,15 @@ KnockoutNetworkByIndex[net_Association, idx_Integer] := Module[
     "dynamic" -> dynamicKO,
     "params" -> paramsKO,
     "n" -> Length[nodeNamesKO],
-    "edges" -> Total[Flatten[cmKO]]
+    "edges" -> Total[Flatten[cmKO]],
+    (* AUDIT02/H: carry the formulas through the knockout, and record the
+       removed node as FORCED TO ZERO rather than merely absent. Both matter:
+       without "logic" the knockout would silently fall back to label-only
+       dynamics while the baseline used formulas, so the delta would compare two
+       different semantics; and a knocked-out gene is held at 0, which is what
+       the surviving nodes' formulas must see when they reference it. *)
+    "logic" -> Lookup[net, "logic", <||>],
+    "forcedZero" -> Append[Lookup[net, "forcedZero", {}], nodeNames[[idx]]]
   |>
 ];
 ComputeKnockoutDeltas[net_Association] := Module[

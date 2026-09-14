@@ -38,13 +38,62 @@ Both are canonical, with distinct scopes — regenerate their numbers via
 
 ### Branch status
 
-Live branch: **`clean`**. `main` is stale by policy until plan task T0.4 retags it;
-do not trust `main` for current state.
+Live branch: **`fixing`** (AUDIT04-H, anchor `fc003f8` of 2026-09-08). `main` is
+stale by policy until plan task T0.4 retags it; do not trust `main` for current
+state. The `clean` branch holds the scientific work up to `b839bfd` (Level 9)
+and is not where verification is currently done.
+
+### Plan lineage (added AUDIT04-H, 2026-09-08)
+
+`AUDIT_FIXING_PLAN_01.md` closed at its own close-out entry (line 1775,
+*"This plan now holds NO open items"*) and handed authority to
+`SUCCESSOR_PLAN_R4.md`. Of the successor, **Wave 0** — ORDERING §7 migration
+and F36 exception coverage — is **open and out of scope for AUDIT04**; no
+AUDIT04 task inherits it. The current governing plan for the remainder of
+AUDIT04 is `plans/AUDIT04-H_comparator_measures_and_lifecycle.md`, which
+supersedes `plans/AUDIT04-G_stall_and_completion.md`. Plan G is kept on disk
+as provenance and is not executed; a supersession header at its top names
+the three statements that were measurably out of date at handover.
 
 ### Governance
 
+**Verification status: `GOVERNANCE/VERIFICATION.md`** — what is checked, to
+what measured degree, and what is not. Run `make ci-local` before every push;
+CI covers only the pure tier because hosted runners have no WolframKernel.
+
+**Start here: `GOVERNANCE/CORE.md`** — one owner per concept, every declared
+exception with its reason, and the guard protecting each. Under the
+`monolithic-code` law, find the owner **before** writing code, never after.
+
+Test membership is DECLARED in `tests/MUnit/MANIFEST.tsv`, not discovered by a
+glob, and the manifest covers **all of `tests/` in both languages**:
+**121 files — 85 Wolfram + 36 Python — 100 test / 15 producer / 6 quarantine**.
+`tools/check_test_manifest.sh` goes red on any unclassified file and **refuses
+(exit 2) if either language scans zero files**.
+
+> This paragraph said "all of `tests/`" from AUDIT03-B until 2026-09-07 while the
+> guard scanned `-name '*.m'` and the count read **85 / 85**. The 34 Python test
+> files were declared by nothing and run by nothing. Quarantine entries are RED
+> or blocked, never passing — read their reasons in `GOVERNANCE/VERIFICATION.md`.
+
+The Python suite is `venv/bin/python -m pytest` with no path argument: `pytest.ini`
+names every directory holding a declared test, and the root `conftest.py` builds
+`collect_ignore` from the manifest, so **declared and collected are one statement**.
+`conftest.py` also puts `src/` first on `sys.path`, because a `.pth` file in this
+venv injects two sibling repositories and one name (`data`) collides.
+
 Definitions: `GOVERNANCE/GLOSSARY.md` (synchronized from `series-deconvolution`; check
 with `tools/check_glossary_sync.sh`). Test truth: `tests/MUnit/BASELINE.md`.
+
+Description lengths: `GOVERNANCE/DESCRIPTION_LENGTHS.md`. Variants A–E are named and
+scoped there; the owners are `src/description_lengths.py` (Python) and
+`Integration`BioMetrics`` (Wolfram), guarded by `tools/check_single_engine.sh`.
+**`D_schema` is the primary mechanism-side measure; `D_formula` is a length under
+the twelve-family catalogue.** No description length may be entropy-derived —
+enforced by `tests/analysis/test_description_length_is_algorithmic.py`.
+
+Large binaries: `GOVERNANCE/LARGE_BINARIES.md`. Nothing over 10 MB enters history;
+external datasets are ignored and reached by manifest plus fetch script.
 
 ### Python (venv-based)
 ```
@@ -88,7 +137,9 @@ Python tests and validation campaigns live under `tests/Bio/`, `tests/Lev4/`–`
 
 The canonical entry layer for paper-oriented work:
 - `papers/common/` — shared scientific base; points to canonical upstream sources
-- `papers/method/` — first paper track: formal method, gate formulae, validation. Active manuscript at `papers/method/manuscript/method_paper.tex`
+- `papers/method/` — first paper track: formal method, gate formulae, validation. Two active manuscripts (D-4):
+  - `papers/method/manuscript_formal/method_paper.tex` — theory/method paper.
+  - `papers/method/manuscript_computational/comp_paper.tex` — computational/validation paper (its output generator is `generate_paper_outputs.wl`, which exits non-zero on any failed verification).
 - `papers/method/derivations/` — LaTeX derivation documents per gate
 - `papers/method/code/` — reproducible computation packages (corroboration_6node, mixed_interaction_10node, scalability)
 - `papers/nature/` — Nature-oriented track entrypoint

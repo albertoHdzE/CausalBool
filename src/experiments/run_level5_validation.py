@@ -1,7 +1,6 @@
 import os
 import sys
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from datetime import datetime
@@ -33,7 +32,7 @@ def run_experiment():
         
         # Skip if file missing
         if not os.path.exists(os.path.join(data_dir, filename)):
-            print(f"  Skipping (not found)")
+            print("  Skipping (not found)")
             continue
             
         try:

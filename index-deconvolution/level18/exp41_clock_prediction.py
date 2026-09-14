@@ -127,12 +127,12 @@ def run(quiet: bool = False) -> dict:
             print(f"  {side.upper():4} (+/-{TOL_MAIN}d): precision {p['precision']:.3f}  recall {p['recall']:.3f}  "
                   f"F1 {p['f1']:.3f}   |  random: precision {p['rand_precision']:.3f}  "
                   f"recall {p['rand_recall']:.3f}  F1 {p['rand_f1']:.3f}")
-        print(f"\n  tolerance sweep (buy) -- model F1 vs random F1:")
+        print("\n  tolerance sweep (buy) -- model F1 vs random F1:")
         for tol in TOLS:
             sm = out["sweep_buy"][tol]
             win = "model" if sm["model_f1"] > sm["rand_f1"] else "random"
             print(f"    +/-{tol}d: model {sm['model_f1']:.3f}  random {sm['rand_f1']:.3f}  -> {win} wins")
-        print(f"\n  the model beats random by the widest margin at PRECISE tolerances; at loose")
+        print("\n  the model beats random by the widest margin at PRECISE tolerances; at loose")
         print("  tolerances random tiles the timeline and wins. The clock is predictable to a few days.")
 
     os.makedirs(RESULTS_DIR, exist_ok=True)

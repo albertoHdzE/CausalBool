@@ -1,0 +1,168 @@
+global_floor = 31.73
+# Measured from pure tier: source venv/bin/activate && python -m pytest -q
+# --cov=src --cov-report=json (pure tier, no Wolfram kernel; AUDIT04-P4g).
+#
+# NOTE THE ABSENT PATH ARGUMENT (corrected 2026-09-07, AUDIT04-F). This line
+# read `pytest -q tests/analysis/ --cov=src`, and following it produced a report
+# over about a tenth of the declared suite: global 13.97% against a floor of
+# 29.12%, with 18 modules coming back UNMEASURED rather than measured. The file
+# that records the floors was prescribing a partial denominator.
+# Includes 4 new contract tests for corpus parsers.
+# The floor RATCHES: it may rise, never fall. A module whose coverage drops
+# below its recorded floor is a regression (exit 1), even when global figure is fine.
+# Date: 2026-09-05.
+# AUDIT04 review: every floor here was seeded at full float precision
+# (98.0952380952381, 86.79245283018868, ...). A floor at that precision is a
+# TRIPWIRE, not a ratchet -- it fires on jitter nobody can act on. All floored
+# DOWN to two decimals, which still catches a real regression.
+#
+# WHAT A FLOOR HERE MEANS, AS OF 2026-09-06. All four parser floors now rest on
+# tests that BITE. Re-measured by planting the same three defects that used to
+# leave the suite green, plus one more:
+#   SBMLParser   truncated to a single node        -> RED (1 test)
+#   GINMLParser  every edge dropped                -> RED (1 test)
+#   LogicParser  input bit ordering reversed       -> RED (3 tests)
+#   LogicParser  functional-mode NOT inverted      -> RED (1 test)
+#   BNetParser   last node dropped                 -> RED (unchanged, already bit)
+# Restored -> GREEN, with no diff left in src/.
+#
+# Two corrections were needed to get there, and both were errors in the earlier
+# prescription rather than in the parsers:
+#   * "make `>= 1` an exact count" was NOT enough. The SBML fixture held ONE
+#     node, so `== 1` also survives truncation-to-one-node. The FIXTURE had to
+#     grow first; assertions over a fixture that small cannot bite whatever they
+#     say.
+#   * "LogicParser needs an ASYMMETRIC gate" was wrong. Bit reversal keeps each
+#     row internally consistent and only permutes row ORDER, and
+#     classify_truth_table recomputes from the input columns it is handed, so the
+#     label is invariant: 'A AND NOT B' reads CANALISING with and without the
+#     defect. Only an ELEMENTWISE assertion on the input enumeration catches it.
+#
+# Earlier ratchet planting, still valid:
+#   Skip DL tests -> RED (description_lengths measured: 0.00%, below floor).
+#   Restore full suite -> GREEN. Aspirational global floor 99.99% -> RED.
+
+# ONE FLOOR WENT DOWN, AND THAT IS DECLARED RATHER THAN ABSORBED (AUDIT04-D).
+# src/integration/LogicParser.py: 77.92 -> 75.67. It is NOT a regression, and
+# the absolute figures are why:
+#
+#            statements  covered  missing  percent
+#   before          114       93       21    77.92
+#   after           116       94       22    75.67
+#
+# COVERED LINES WENT UP, 93 -> 94. The module gained two statements when its
+# private six-family catalogue was collapsed onto the owner, one of them the
+# `raise FileNotFoundError` guard in the owner accessor, which is unreachable in
+# a normal checkout. The percentage fell because the DENOMINATOR grew.
+#
+# The design point this exposes: a PERCENTAGE floor is not refactor-invariant, so
+# a ratchet built on it can be lowered by an improvement and raised by deleting
+# tested code. A covered-statement floor would be invariant under both. That is
+# recorded as an open weakness of this file rather than fixed here, because
+# changing the ratchet's unit is a governance change, not a tidy-up.
+
+# ---------------------------------------------------------------------------
+# AUDIT04-E, 2026-09-07. THE FLOOR MOVED 12.63 -> 29.89, AND NOT ONE TEST WAS
+# WRITTEN TO MOVE IT.
+#
+# The coverage command was `pytest tests/analysis --cov`. 24 further Python test
+# files under tests/Bio, tests/Lev4-7 and tests/Nature were declared by nothing
+# and run by nothing, so the 17.26 points they already exercised were never
+# counted. Making them run is what moved the number; the tests predate this
+# commit. Reading this as new work would be reading it wrong.
+#
+#   modules with statements        52
+#   at exactly 0%                  42  ->  25
+#   declared Python tests          179 ->  211 collected
+#
+# `.coveragerc` also changed scope in the same commit: `source` was the two
+# owner import-names, so the old gate could read 99% while 42 modules sat at 0%.
+# It is now `src`, and `fail_under` has been REMOVED from that file so this one
+# is the single owner of every floor.
+#
+# 19 module floors added, 0 raised. A floor is the measured value floored
+# to two decimals, never the aspirational one.
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# AUDIT04-E MEASURE CHANGE, 2026-09-07. THREE FLOORS WENT DOWN, DECLARED.
+#
+# D_v2 was retired: it computed Shannon binary entropy over block densities and
+# ranked a RANDOM graph simpler-or-equal than a chain in 195 of 200 draws
+# (BDM 0/200, index-set 14/200). It now forwards to the index-set program
+# length. Global 29.89 -> 29.04.
+#
+#   module                              stmts  cov   pct     was
+#   src/complexity/Scaling_LZ_Tools.py     40   32  77.08   77.21
+#   src/analysis/DepMap_Validation.py     916  299  30.52   30.59
+#
+# NEITHER IS A COVERAGE REGRESSION, and the first is the refactor-invariance
+# weakness recorded above, seen live. Scaling_LZ_Tools went 61 statements /50
+# covered -> 40 /32 because compute_scaling_exponent now RAISES: the block-size
+# sweep D(b) ~ b^alpha is meaningless for a measure with no block size, and it
+# returned Alpha 0.0000 for every network. The body below the raise became
+# unreachable and left the denominator. Covered lines fell because CODE fell,
+# not because a test did.
+#
+# DepMap_Validation lost 0.07 points to the one test method skipped with it.
+# The skip is at METHOD level, deliberately: quarantining the whole file would
+# have taken test_lz_complexity with it and dropped this module to 0.00%, which
+# an earlier pass of mine did before the ratchet caught it.
+# ---------------------------------------------------------------------------
+
+# ONE MORE DECLARED DROP, AND COVERAGE IS UNDERSTATING IT (AUDIT04-E).
+# src/integration/Universal_D_v2_Encoder.py: 100.00 -> 90.47, one line, 18/19.
+#
+# The uncovered line is `sys.path.insert(0, _root)` inside the forwarder. It
+# runs only when the repo root is NOT already importable -- and the root
+# conftest.py always makes it importable under pytest, so the branch is
+# unreachable in this harness BY CONSTRUCTION.
+#
+# It is not untested. It is the line that fixed the Wolfram bridge failure
+# (ModuleNotFoundError: No module named 'src', which took the whole MUnit suite
+# red while the pure tier stayed green), and
+# test_the_forwarder_works_without_a_conftest exercises it in a SUBPROCESS with
+# src on the path and the root off it -- the bridge condition exactly. Coverage
+# does not attribute child processes, so the line reads missing.
+#
+# Declared rather than papered over with a pragma: a pragma would hide the fact
+# that the harness cannot see this line, which is the thing worth knowing.
+
+# DECLARED DROP (AUDIT04-E, z-score replacement).
+# src/experiments/Null_Generator_HPC.py: 31.96 -> 30.04, 59/183 statements.
+# The zscore() helper was replaced by separation(), which computes a gap in bits
+# and a distribution-free rank instead of (mu - x)/sd. The new helper is longer
+# and its branches are not reached by the current tests, so the DENOMINATOR grew
+# while the covered set did not. Not a lost test.
+
+[module_floors]
+"src/analysis/Cancer_Corruption.py" = 8.42
+"src/analysis/DepMap_Validation.py" = 30.51
+"src/analysis/Hybrid_Essentiality_Validator.py" = 82.41
+"src/analysis/r4_segment_grammar.py" = 92.25
+"src/causalbool_paths.py" = 100.00
+"src/complexity/Attractor_Classifier.py" = 93.54
+"src/complexity/Basin_Entropy.py" = 100.00
+"src/complexity/Scaling_LZ_Tools.py" = 77.08
+"src/complexity/Trajectory_LZ.py" = 61.29
+"src/data/cancer_network_builder.py" = 42.60
+"src/description_lengths.py" = 98.09
+"src/dynamics/Boolean_Dynamics.py" = 85.34
+"src/integration/HierarchyEncoder.py" = 93.33
+"src/experiments/SimplicityV2_Nature.py" = 14.59
+"src/experiments/Null_Generator_HPC.py" = 35.05
+"src/pipeline/Contingency_Monitor.py" = 88.17
+"src/integration/BDM_Wrapper.py" = 71.42
+"src/integration/BNetParser.py" = 86.79
+"src/integration/Basin_Encoder.py" = 90.47
+"src/integration/BioBridge.py" = 67.74
+"src/integration/GINMLParser.py" = 84.76
+"src/integration/Hybrid_Encoder.py" = 72.58
+"src/integration/LogicParser.py" = 75.67
+"src/integration/MotifEncoder.py" = 89.70
+"src/integration/SBMLParser.py" = 57.19
+"src/integration/Universal_D_v2_Encoder.py" = 92.85
+"src/integration/bio_D_experiment.py" = 12.86
+"src/integration/phase_transition_experiment.py" = 43.70
+"src/stats/Bayes_Factor_Calculator.py" = 78.43
+"src/stats/Mutual_Information_Analyzer.py" = 77.27

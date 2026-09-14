@@ -36,7 +36,7 @@ codeNetwork = StringRiffle[{
   }, "\n"];
 
 codeRule = StringRiffle[{
-  "(* The activator/inhibitor node, in index-set pivot/sumandos form. *)",
+  "(* The activator/inhibitor node, in index-set decimal-anchor/sumandos form. *)",
   "regNode = FirstPosition[decY[\"gates\"], \"REGULATORY\"][[1]];",
   "Print[\"regulatory (activator/inhibitor) node index: \", regNode];",
   "CBPrintRule[decY, regNode];"
@@ -71,7 +71,7 @@ gateText = StringJoin[
   "its activators are present and its repressors absent. The single-repressor ",
   "case is NIMPLIES and the all-repressor case is NOR; the mixed case is the ",
   "REGULATORY gate, and unions of clauses are the regulatory disjunctive normal ",
-  "form. Each is a union of pivot-shifted cosets in the index set."];
+  "form. Each is a union of anchor-shifted cosets in the index set."];
 
 netText = StringJoin[
   "The recovered model is defined exactly like the forward model: a connectivity ",
@@ -79,7 +79,7 @@ netText = StringJoin[
   "the size of its one-set, and the number of clauses in its index-set rule."];
 
 ruleText = StringJoin[
-  "The activator/inhibitor node is shown as its index-set rule: a pivot (the ",
+  "The activator/inhibitor node is shown as its index-set rule: a decimal anchor (the ",
   "decimal value of the activator inputs) and the free inputs (the sumandos) over ",
   "which it ranges."];
 
@@ -104,7 +104,7 @@ cells = {
   Cell["The recovered network (connectivity and gates)", "Section"],
   Cell[netText, "Text"],
   Cell[codeNetwork, "Input"],
-  Cell["An index-set rule (pivots and sumandos)", "Section"],
+  Cell["An index-set rule (decimal anchors and sumandos)", "Section"],
   Cell[ruleText, "Text"],
   Cell[codeRule, "Input"],
   Cell["Original versus reconstructed repertoire", "Section"],

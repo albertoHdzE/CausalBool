@@ -2,7 +2,7 @@
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 # Add src to path to import integration modules
 sys.path.append(str(Path(__file__).resolve().parent.parent))

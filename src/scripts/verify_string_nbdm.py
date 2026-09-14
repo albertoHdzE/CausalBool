@@ -1,7 +1,6 @@
 
 import re
 import math
-import sys
 
 def parse_mathematica_list(filepath):
     """

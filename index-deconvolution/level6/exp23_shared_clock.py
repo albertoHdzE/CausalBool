@@ -125,7 +125,7 @@ def run(quiet: bool = False) -> dict:
               f"(min {out['min_pairwise_corr']:.2f}, max {out['max_pairwise_corr']:.2f})")
         print(f"  2. activity variance explained by the common (leave-one-out) clock : "
               f"mean R^2 = {out['mean_common_R2']:.3f}")
-        print(f"  3. out-of-sample forecast enhancement from the common clock:")
+        print("  3. out-of-sample forecast enhancement from the common clock:")
         print(f"       mean enhancement over own-past       : {out['mean_enhancement']:+.4f}")
         print(f"       mean enhancement under time-shuffle  : {out['mean_enhancement_null']:+.4f}")
         print(f"       beats null on {n_pos}/{n} instruments, sign-test p = {p_sign:.4g}")

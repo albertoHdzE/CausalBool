@@ -50,7 +50,7 @@ introText = StringJoin[
   "and the causal method is shown to be invertible."];
 
 textA = StringJoin[
-  "Example A uses AND and OR gates only, so the closed-form pivot-and-sumandos ",
+  "Example A uses AND and OR gates only, so the closed-form decimal-anchor-and-sumandos ",
   "index sets of the derivations apply: the one-set of each node is constructed ",
   "directly, without scanning all inputs."];
 

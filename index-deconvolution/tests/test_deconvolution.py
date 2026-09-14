@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from causalbool import Network, apply_gate, truth_table, repertoire, node_output_column
 from deconvolution import (
-    essential_variables, reduce_column, identify_gate,
+    essential_variables, identify_gate,
     deconvolve, verify,
 )
 from network_generator import random_network
@@ -39,7 +39,7 @@ def test_gate_truth_tables():
 
 
 # ---------------------------------------------------------------------------
-# Pivots vs sumandos: essential variables equal connected inputs
+# Connected inputs vs sumandos: essential variables equal connected inputs
 # ---------------------------------------------------------------------------
 
 def test_essential_variables_equal_connectivity():
@@ -206,7 +206,9 @@ def test_ca_named_gate_identities():
 
 
 def test_regulatory_gate_identity_and_forward():
-    from causalbool import truth_table, apply_gate
+    # AUDIT03-C: the local `from causalbool import truth_table, apply_gate` was
+    # removed -- both names are already bound at module scope (line 13), so the
+    # re-import shadowed them with themselves. Flagged by ruff F811.
     # a AND NOT b AND c over three inputs: single satisfying assignment a=1,b=0,c=1.
     tt = truth_table("REGULATORY", 3, {"activators": [0, 2]})
     assert sum(tt) == 1

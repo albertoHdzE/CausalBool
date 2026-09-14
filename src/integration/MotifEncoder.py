@@ -48,15 +48,17 @@ class MotifEncoder:
             "total_cost": motif_cost + residual_cost
         }
 
+    # The DECLARED catalogue. compute_cost charges log2(len(MOTIF_CATALOGUE)) to
+    # name a type, so this must be the set a decoder can read -- not the set that
+    # happens to be non-empty in one network. Making the price depend on which
+    # types occurred is the frequency coupling AUDIT04-E removed.
+    MOTIF_CATALOGUE = ("FFL", "FeedbackLoop", "Other")
+
     def find_motifs(self):
         """
         Enumerate 3-node motifs.
         """
-        instances = {
-            "FFL": [],
-            "FeedbackLoop": [],
-            "Other": []
-        }
+        instances = {name: [] for name in self.MOTIF_CATALOGUE}
         
         # Iterate over all 3-node combinations
         for nodes in combinations(range(self.n), 3):
@@ -82,30 +84,47 @@ class MotifEncoder:
         return instances
 
     def compute_cost(self, instances):
-        """
-        Compute a description length cost based on motif frequency.
-        Cost = Entropy_of_types + Location_cost
+        """Bits to write down every motif instance. NO FREQUENCY TERM.
+
+        AUDIT04-E, author directive 2026-09-07: no Shannon quantity may serve as
+        one of our complexity measures.
+
+        WHAT THIS WAS:
+
+            p = count / total_motifs
+            type_entropy -= p * math.log2(p)        # Shannon
+            return total_motifs * (location_cost + type_entropy)
+
+        The docstring said "a description length cost based on motif FREQUENCY",
+        which names the defect exactly. A frequency-weighted code is the cost
+        under a distribution over an ENSEMBLE of networks; a description length
+        is the cost of writing down THIS network. The difference is not
+        cosmetic -- an entropy term makes the cost of a motif depend on how
+        often OTHER motifs occur, so adding an unrelated motif elsewhere in the
+        graph changes the price of this one.
+
+        WHAT IT IS NOW. Naming one of K motif types costs log2(K) bits, exactly
+        as the twelve-family gate catalogue charges log2(12) for a gate
+        (src/description_lengths.py, node_description_cost). K is the size of
+        the DECLARED catalogue, not the number of types that happen to appear,
+        because a decoder must be able to read any catalogue member.
+
+        Both remaining terms are enumerative code lengths -- bits to name one
+        object among a counted set -- which is a length in a declared language
+        and not a distributional quantity.
         """
         total_motifs = sum(len(v) for v in instances.values())
         if total_motifs == 0:
             return 0
-            
-        # Cost to specify "where" the motif is (3 nodes out of N)
-        # log2(N choose 3)
-        if self.n >= 3:
-            n_choose_3 = math.comb(self.n, 3)
-            location_cost = math.log2(n_choose_3)
-        else:
-            location_cost = 0
-            
-        # Shannon entropy of the motif distribution (Cost to specify "which" motif)
-        type_entropy = 0
-        for m_type, items in instances.items():
-            count = len(items)
-            if count > 0:
-                p = count / total_motifs
-                type_entropy -= p * math.log2(p)
-                
-        # Total bits
-        # Sum over all motifs: (Location Cost + Type Entropy)
-        return total_motifs * (location_cost + type_entropy)
+
+        # WHERE: which 3 of n nodes carry this instance.
+        location_cost = math.log2(math.comb(self.n, 3)) if self.n >= 3 else 0.0
+
+        # WHICH: an index into the declared catalogue. Flat, frequency-free.
+        catalogue_size = len(self.MOTIF_CATALOGUE)
+        type_cost = math.log2(catalogue_size) if catalogue_size > 1 else 0.0
+
+        # HOW MANY: self-delimiting, so the decoder knows when to stop reading.
+        count_cost = 2.0 * math.log2(total_motifs + 1) + 1.0
+
+        return count_cost + total_motifs * (location_cost + type_cost)

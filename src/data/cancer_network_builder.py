@@ -13,8 +13,17 @@ METADATA_PATH = "data/cancer/clinical_metadata.csv"
 N_PATIENTS = 100
 SEED = 2026
 
-random.seed(SEED)
-np.random.seed(SEED)
+# AUDIT04 Phase 2: these two seed calls ran at module level, so importing this
+# module reseeded the global `random` and `numpy` streams of whatever imported
+# it. Seeding is now done by seed_streams(), called from the __main__ block, so
+# running the script is unchanged and importing it is inert. Determinism is
+# preserved where it matters and no longer leaks where it does not.
+
+
+def seed_streams(seed: int = SEED) -> None:
+    """Pin both global RNGs. Called by the script, never by import."""
+    random.seed(seed)
+    np.random.seed(seed)
 
 class CancerNetworkBuilder:
     def __init__(self, base_network_path, output_dir, metadata_path=None):
@@ -375,5 +384,6 @@ class CancerNetworkBuilder:
         return path
 
 if __name__ == "__main__":
+    seed_streams()
     builder = CancerNetworkBuilder(BASE_NETWORK_PATH, OUTPUT_DIR)
     builder.generate_patient_cohort(N_PATIENTS)

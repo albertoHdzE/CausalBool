@@ -215,3 +215,57 @@ either the CPT's 4 or hill climbing's 5–7. The instability finding extends led
 C13/C12: any future structural claim from this search must fix and record
 `PYTHONHASHSEED` (see `results/recheck_c18/environment.txt` for the stack this
 sweep ran on).
+
+---
+
+## Addendum 2026-09-02 (AUDIT02/Q1) — the mandate above is now implemented in the producer
+
+The 2026-08-24 addendum diagnosed the hash-seed instability correctly and closed
+with a rule: *"any future structural claim from this search must fix and record
+`PYTHONHASHSEED`."* That rule was written but never wired into the producer.
+`scripts/phase1_b4_description_length.py` still ran unpinned, so every
+regeneration kept drawing a fresh sample and `results/b4_description_length.json`
+remained one unlabelled draw rather than a result.
+
+Found independently, by a different route: an arm-1 reproducibility sweep re-ran
+every producer in the five replication packages and compared each committed
+artefact elementwise. This one did not reproduce. Two invocations with identical
+arguments gave `WTI_Spot @ 0.375` and `WTI_CL @ 0.4583` — both inside the 5–7
+winners / 35–55 per cent band the August sweep had already mapped, which is a
+cross-validation of that sweep rather than a new phenomenon.
+
+Isolation, so the cause is named rather than assumed:
+
+| candidate | verdict |
+|---|---|
+| resampling rng | not it — `np.random.default_rng(42)`, seeded |
+| pgmpy `HillClimbSearch` | not it — deterministic *within* a process (six `learn_structure` calls on one frame agree elementwise) |
+| `PYTHONHASHSEED` | **it** — pinning it makes repeated runs byte-identical, `content_sha256` included |
+
+Two changes, both in the producer:
+
+1. Re-exec with `PYTHONHASHSEED=0` when it is unset. The variable is read by the
+   interpreter at start-up, so it cannot be set from inside a running process;
+   re-exec is the only correct remedy. The value is now recorded in the output
+   under `bootstrap.hill_climb.pythonhashseed`.
+2. Tie-break `ranked` on the parent tuple, not on dict insertion order. With
+   counts tied, `key=-count` alone left `ranked[0]` at the mercy of the order
+   winners were first seen — a second, independent source of variation.
+
+Verified: three fresh runs with no environment set by the caller agree
+elementwise, `content_sha256` included.
+
+`results/b4_description_length.json` has been regenerated at its own recorded
+config (`--boot 300`). The pinned triple is now **(5, {WTI_CL}, 48.33%)**. The
+CPT arm is unchanged at modal frequency 0.5167 over 300 resamples, confirming it
+was always deterministic and that only the hill-climb comparator moved.
+
+§4 and the 2026-08-24 addendum stand unmodified (no-retro-edit rule). The
+stability verdict is unaffected: 22 distinct index-set winners remain far less
+stable than the CPT's 4 or hill climbing's 5.
+
+The `_curation_note` recorded in the previous artefact (AUDIT01/T2.0, duplicate
+prequential rows, "regeneration queued as backlog") is discharged by this
+regeneration. It is not carried into the new file, because the producer does not
+emit it and hand-adding a field no producer writes is the practice this sweep
+exists to catch.

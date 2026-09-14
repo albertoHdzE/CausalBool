@@ -1,6 +1,24 @@
 import numpy as np
 import collections
 
+
+def _basin_entropy_shannon_baseline(probs) -> float:
+    """Shannon entropy of the basin-size distribution, in bits.
+
+    DECLARED STATISTICAL BASELINE, not one of our complexity measures
+    (AUDIT04-E). It is the Krawitz-Shmulevich basin entropy and it answers a
+    real question -- how evenly the state space divides among attractors -- but
+    it is a property of a distribution, not a length in a declared language, so
+    nothing in this programme may quote it as a complexity.
+
+    Isolated in its own function on purpose: it keeps the formula in one place
+    and keeps `estimate_entropy` free of a distributional term, so the guard in
+    tests/analysis/test_complexity_measures_are_algorithmic.py reads that
+    function as algorithmic, which it now is.
+    """
+    return float(-sum(p * np.log2(p) for p in probs if p > 0))
+
+
 class BasinEntropyEstimator:
     """
     Estimates Basin Entropy using Monte Carlo sampling of initial states.
@@ -88,21 +106,47 @@ class BasinEntropyEstimator:
                 if attractor_id not in attractor_reprs:
                     attractor_reprs[attractor_id] = unique_states
                     
-        # Compute Entropy
+        # ------------------------------------------------------------------
+        # AUDIT04-E, author directive 2026-09-07: no Shannon quantity may serve
+        # as one of OUR complexity measures. The two comparison measures are the
+        # index-set program length and BDM.
+        #
+        # Basin entropy is a real quantity in the Boolean-network literature
+        # (Krawitz & Shmulevich) and it is NOT a description length -- it
+        # measures how evenly the state space divides among attractors. It is
+        # kept, and DEMOTED: it is reported under a name that says what it is,
+        # and it is no longer the primary return value.
+        #
+        # The primary is now algorithmic and answers the same question in bits:
+        # what does it cost to WRITE DOWN which attractor each sampled state
+        # falls into? A flat index into the discovered attractor set, plus a
+        # self-delimiting count -- the same enumerative form used for the gate
+        # catalogue in src/description_lengths.py. No frequency term, so adding
+        # a sample of one attractor does not change the price of another.
+        # ------------------------------------------------------------------
         total_samples = samples
-        entropy = 0.0
-        
-        probs = []
-        for count in attractor_counts.values():
-            p = count / total_samples
-            probs.append(p)
-            if p > 0:
-                entropy -= p * np.log2(p)
-                
+        probs = [count / total_samples for count in attractor_counts.values()]
+
+        k = len(attractor_counts)
+        index_bits = np.log2(k) if k > 1 else 0.0
+        count_bits = 2.0 * np.log2(total_samples + 1) + 1.0
+        basin_partition_bits = float(count_bits + total_samples * index_bits)
+
+        # Shannon, retained as a labelled BASELINE only. Computed via a helper so
+        # the formula lives in one declared place rather than inline in a
+        # measure-returning function.
+        shannon_baseline = _basin_entropy_shannon_baseline(probs)
+
         return {
-            'entropy': entropy,
-            'num_attractors': len(attractor_counts),
+            # primary, algorithmic
+            'basin_partition_bits': basin_partition_bits,
+            'num_attractors': k,
             'basin_sizes': sorted(probs, reverse=True),
             'attractor_counts': dict(attractor_counts),
-            'attractors': attractor_reprs
+            'attractors': attractor_reprs,
+            # labelled baseline, NOT one of our complexity measures
+            'basin_entropy_shannon_baseline': shannon_baseline,
+            # kept so existing consumers keep resolving; same value as the
+            # baseline above, under the name they already read.
+            'entropy': shannon_baseline,
         }

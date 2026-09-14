@@ -14,7 +14,7 @@ conf = Which[
   mode === "medium", <|"sizes" -> {8}, "seeds" -> Range[301, 303], "timeLimit" -> 240, "topos" -> {"ER","BA","WS"}|>,
   True, <|"sizes" -> {10}, "seeds" -> Range[401, 404], "timeLimit" -> 600, "topos" -> {"ER","BA","WS"}|>
 ];
-progressBar[prog_Integer, total_Integer, width_Integer:30] := Module[{ratio, filled, empty}, ratio = N[prog/total]; filled = Floor[ratio*width]; empty = width - filled; "[" <> StringRepeat["#", filled] <> StringRepeat[".", empty] <> "]"]];
+progressBar[prog_Integer, total_Integer, width_Integer:30] := Module[{ratio, filled, empty}, ratio = N[prog/total]; filled = Floor[ratio*width]; empty = width - filled; "[" <> StringRepeat["#", filled] <> StringRepeat[".", empty] <> "]"];
 validateOnce[gen_, args_List, seed_] := Module[{top, cm, dyn, params, rep, run, diffs, err, indeg, n, steps},
   top = gen @@ Append[args, seed]; cm = top["cm"]; n = Length[cm]; steps = n*2^n;
   log["Test type=" <> mode <> " | topo=" <> top["meta"]["type"] <> " | n=" <> ToString[n] <> " | est steps=" <> ToString[steps]];
@@ -55,3 +55,13 @@ status = If[maxErr === 0., "OK", If[maxErr === Indeterminate, "TIMEOUT", "FAIL"]
 Export[FileNameJoin[{base, "Status.txt"}], {status, DateString[]}, "Text"];
 Close[stream];
 Association["Status" -> status, "ResultsPath" -> base]
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];

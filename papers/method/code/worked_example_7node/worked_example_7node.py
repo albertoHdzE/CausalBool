@@ -65,6 +65,13 @@ def base_and_offsets(cm, dyn, node0, params=None, value=1):
     L : positions where the node takes `value` when only its connected inputs vary
         and every disconnected coordinate is held at zero.
     Omega : all subset sums of the bit weights of the disconnected coordinates.
+
+    CAUTION -- this is the SPECIAL CASE, not the definition of Omega. The
+    disconnected coordinates are the don't-cares free in EVERY schema of a node,
+    so they are always present; but sumandos are the fillings of a SCHEMA'S OWN
+    don't-care positions, wherever they fall, including on connected inputs.
+    Rule 110 is the witness: three inputs, all connected, decomposing as
+    01*, 10*, *10. See GOVERNANCE/GLOSSARY.md section 1d.
     """
     n = len(dyn)
     params = params or {}
@@ -165,7 +172,7 @@ def main() -> None:
     print("  generative rule — the offset family factorises:")
     print(f"    Omega = {fmt_factors(factors)}")
     print(f"    one-set = L (+) Omega,  L = {L}")
-    print(f"    {rule_tokens} tokens: one pivot and {len(D)} free weights.")
+    print(f"    {rule_tokens} tokens: one decimal anchor and {len(D)} free weights.")
     print("    Each free coordinate contributes an independent binary choice, so the")
     print("    activation pattern recurs at every partial sum of the free weights.")
     print("    That recursion is the self-similarity; the flat form destroys it.")

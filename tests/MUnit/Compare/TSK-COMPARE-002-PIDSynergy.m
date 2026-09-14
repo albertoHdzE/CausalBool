@@ -4,17 +4,22 @@ EnsureDir[path_] := If[!DirectoryQ[path], CreateDirectory[path, CreateIntermedia
 base = FileNameJoin[{"results", "tests", "compare002"}];
 EnsureDir[base];
 
+Needs["Integration`Gates`"];
+
 gates = {"AND","OR","XOR","XNOR","NAND","NOR"};
 
-apply2[gate_, x1_Integer, x2_Integer] := Switch[gate,
-  "AND", If[x1 == 1 && x2 == 1, 1, 0],
-  "OR", If[x1 == 1 || x2 == 1, 1, 0],
-  "XOR", If[Mod[x1 + x2, 2] == 1, 1, 0],
-  "XNOR", If[Mod[x1 + x2, 2] == 0, 1, 0],
-  "NAND", If[x1 == 1 && x2 == 1, 0, 1],
-  "NOR", If[x1 == 1 || x2 == 1, 0, 1],
-  _, 0
-];
+(* AUDIT04 Phase C. apply2 used to be a private six-family Switch, and nothing
+   compared it against the owner. This file does not TEST gate semantics -- it
+   computes PID/synergy quantities OVER gate distributions -- so the private
+   copy was unchecked machinery feeding published numbers: had it drifted from
+   Integration`Gates`ApplyGate, the synergy figures would have described gates
+   that are not this project's gates, and no gate would have said so.
+
+   Kept as a FORWARDER rather than deleted, so every call site below is
+   unchanged. The old `_, 0` fallback is deliberately not preserved: a silent 0
+   is indistinguishable from a legitimate FALSE, which is the AUDIT02/P1 defect.
+   ApplyGate refuses on an unsupported label instead. *)
+apply2[gate_, x1_Integer, x2_Integer] := Integration`Gates`ApplyGate[gate, {x1, x2}, <||>];
 
 pairs = Tuples[{0,1}, 2];
 
@@ -73,3 +78,13 @@ Export[FileNameJoin[{base, "Summary.json"}], rows, "JSON"];
 ok = Abs[SelectFirst[rows, # ["gate"] == "XOR" &]["Synergy"] - 1.0] < 1.0*^-6;
 Export[FileNameJoin[{base, "Status.txt"}], If[ok, "OK", "NOT_OK"], "Text"];
 Association["Status" -> If[ok, "OK", "NOT_OK"], "ResultsPath" -> base]
+
+(* AUDIT04-D: completion sentinel, written LAST.
+   The runner deletes this before the run, so its presence afterwards proves
+   every expression above it evaluated. Status.txt is written earlier and is
+   followed by further exports in most tests, so a fresh verdict alone does not
+   show the test finished -- a kernel dying between the two leaves a plausible
+   OK beside incomplete artefacts. That is also the shape of the AUDIT03 defect
+   where a kernel skipped a malformed expression, exited 0, and the runner read
+   a pass. *)
+Export[FileNameJoin[{base, "Done.txt"}], DateString[], "Text"];
