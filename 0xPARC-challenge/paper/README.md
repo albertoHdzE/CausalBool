@@ -37,6 +37,7 @@ The plotting script evaluates all 32 input states, records all seven internal ga
 - [Complete state and internal-output table](generated/worked_repertoire.csv)
 - [Network PDF](generated/majority_network.pdf) and [pattern PDF](generated/majority_patterns.pdf)
 - [Figure checks](../evidence/paper_figures.json), [index checks](../evidence/paper_index.json), and [PDF checks](../evidence/pdf.json)
+- [Index-deconvolution capacity map](generated/index_deconvolution_capacities.pdf), showing the exact forward, inverse, schema and query stages
 
 The original release record describes the earlier complete verification run. The manuscript revision record identifies the reused evidence and the checks executed for this edition.
 

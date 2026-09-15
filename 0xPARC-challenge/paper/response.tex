@@ -43,6 +43,37 @@ explains the constructions through worked examples; Supplementary Information
 gives the proofs, complete specifications and verification evidence.
 \end{abstract}
 
+\section{Index deconvolution as a supporting capability}
+\label{sec:index-capability}
+
+Some of the questions below are answered with the help of the
+index-deconvolution method because it supplies an exact description of a
+Boolean network's behaviour and can test that description in both directions.
+For the majority construction in Q2, the method turns the network into its
+complete input--output repertoire, recovers the inputs that functionally
+determine each output, reduces the result to a Boolean rule, and expands its
+schema representation back to the same output set. It therefore supports
+both construction and verification: a proposed rule can be queried, replayed
+and checked against every finite input state.
+
+This capability follows the algorithmic-information-dynamics perspective of
+using perturbations to expose generative structure, short descriptions and
+model-based explanations~\cite{hernandez2019aid,hernandez2021aid}. In the
+present project, that perspective is implemented for a finite Boolean
+repertoire through exact index sets, decimal anchors and sumandos. The
+resulting description is computable and lossless for the stated domain, but
+it is not a computation of minimal Kolmogorov complexity: minimal program
+length is uncomputable in general, and different internal circuits may realise
+the same function.
+
+The method is consequently a supporting capability rather than a claim that
+all eight challenges have one common solution. Q1, Q3 and Q4--Q8 use their
+own positional, Fourier and finite-field constructions. The full capacity
+map, visual workflow, evidence boundaries and current development directions
+are given in Supplementary Section~S11. The method remains under active
+development, particularly for partial or noisy observations, larger systems
+and principled comparisons of alternative descriptions.
+
 \section{Introduction}
 The challenges, presented through 3Blue1Brown, bring together several kinds
 of restricted computation~\cite{challenge}. A hidden list can be queried but
@@ -412,6 +443,15 @@ needed to reproduce and assess them.
 \begin{thebibliography}{9}
 \bibitem{challenge} 0xPARC. \emph{Beyond Primitive Computing: Puzzles and Connections}, Field Extension.
 \url{https://fieldextension.org/3b1b/}.
+\bibitem{hernandez2019aid} A. Hernández-Espinosa, H. Zenil, N. A. Kiani and
+J. Tegnér, \emph{Estimations of Integrated Information Based on Algorithmic
+Complexity and Dynamic Querying}, arXiv:1904.10393 [q-bio.NC] (2019).
+\url{https://arxiv.org/abs/1904.10393}.
+\bibitem{hernandez2021aid} A. Hernández-Espinosa, H. Zenil, N. A. Kiani and
+J. Tegnér, ``Estimations of Integrated Information Based on Algorithmic
+Complexity and Dynamic Querying,'' in \emph{Handbook of Unconventional
+Computing}, Vol. 1: Theory, ed. A. Adamatzky (World Scientific, 2021), Chap. 5,
+pp. 171--220.\ \url{https://doi.org/10.1142/9789811235726_0005}.
 \bibitem{cohen} G. Cohen, I. B. Damg\aa rd, Y. Ishai, J. K\"olker,
 P. B. Miltersen, R. Raz, and R. D. Rothblum.
 \emph{Efficient Multiparty Protocols via Log-Depth Threshold Formulae}, 2013.

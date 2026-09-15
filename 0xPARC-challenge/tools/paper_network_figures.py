@@ -189,10 +189,135 @@ def patterns_figure(rows, schemas):
     save(fig,'majority_patterns')
 
 
+def capacities_figure(rows, schemas):
+    """Show the method's forward, inverse, compression, and query capacities."""
+    column = [r['output'] for r in rows]
+    connected = essential_variables(column, 5)
+    if connected != list(range(5)):
+        raise RuntimeError('Capacity figure requires all five functional inputs')
+
+    pairs = []
+    for bit in range(5):
+        zero = next(x for x in range(32)
+                    if not (x & (1 << bit)) and column[x] != column[x | (1 << bit)])
+        pairs.append((bit, zero, zero | (1 << bit), column[zero], column[zero | (1 << bit)]))
+
+    fig = plt.figure(figsize=(11.5, 8.8))
+    grid = fig.add_gridspec(2, 2, hspace=.48, wspace=.32,
+                            height_ratios=[1.08, 1], width_ratios=[1.08, 1])
+
+    # A complete repertoire is the exact object consumed by deconvolution.
+    ax = fig.add_subplot(grid[0, 0])
+    data = np.array([r['inputs'] + [r['output']] for r in rows])
+    ax.imshow(data, cmap=ListedColormap([LIGHT, TEAL]), vmin=0, vmax=1,
+              aspect='auto', interpolation='nearest')
+    ax.set_title('A. Exact repertoire supplied to the inverse', loc='left', pad=14)
+    ax.set_xticks(range(6), [f'$x_{i}$' for i in range(5)] + ['$y$'])
+    ax.set_yticks(range(0, 32, 4), range(0, 32, 4))
+    ax.set_ylabel('Input index (LSB first)')
+    ax.set_xlabel('Inputs and output')
+    ax.axvline(4.5, color=GREY, lw=1.2)
+    ax.set_xticks(np.arange(-.5, 6, 1), minor=True)
+    ax.set_yticks(np.arange(-.5, 32, 1), minor=True)
+    ax.grid(which='minor', color='white', linewidth=.7)
+    ax.tick_params(which='minor', length=0)
+    ax.text(5.55, 15.5, '$2^5$ rows', rotation=90, va='center', ha='left',
+            color=GREY, fontsize=9)
+
+    # Essential-variable detection is an exact paired perturbation test.
+    ax = fig.add_subplot(grid[0, 1])
+    ax.axis('off')
+    ax.set_title('B. Perturbation recovers functional inputs', loc='left', pad=14)
+    ax.text(0, .91, r'Compare $y[x]$ with $y[x\oplus2^i]$ for each $i$.',
+            transform=ax.transAxes, fontsize=10, color=INK)
+    headings = ['bit', '$x$', r'$x\oplus2^i$', 'y', "$y'$\n(change)"]
+    cells = [[bit, zero, one, y0, f'{y1}']
+             for bit, zero, one, y0, y1 in pairs]
+    table = ax.table(cellText=cells, colLabels=headings, cellLoc='center',
+                     bbox=[0, .28, 1, .52], colWidths=[.13, .21, .25, .13, .28])
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    for (r, c), cell in table.get_celld().items():
+        cell.set_edgecolor('white')
+        cell.set_facecolor(PALE if r == 0 else LIGHT)
+        cell.set_text_props(color=INK)
+    ax.text(.5, .16, r'$I_c=$ connected inputs $=$ essential variables',
+            transform=ax.transAxes, ha='center', fontsize=10.5, color=TEAL,
+            fontweight='bold')
+    ax.text(.5, .07, 'Here every coordinate has a witnessed output change.',
+            transform=ax.transAxes, ha='center', fontsize=9, color=GREY)
+
+    # The schema view makes the lossless description explicit.
+    ax = fig.add_subplot(grid[1, 0])
+    ax.axis('off')
+    ax.set_title('C. Lossless schema compression', loc='left', pad=14)
+    ax.text(0, .9, 'Output-one states are grouped by fixed bits and\ndon\'t-care positions.',
+            transform=ax.transAxes, va='top', fontsize=10, color=INK)
+    shown = [s['pattern'] for s in schemas]
+    ax.text(.02, .61, '\n'.join(shown[:5]), transform=ax.transAxes,
+            va='top', family='monospace', fontsize=10.5, color=TEAL,
+            linespacing=1.35)
+    ax.text(.26, .61, '\n'.join(shown[5:]), transform=ax.transAxes,
+            va='top', family='monospace', fontsize=10.5, color=TEAL,
+            linespacing=1.35)
+    ax.text(.55, .61, r'$111**:\quad P=1+2+4=7$', transform=ax.transAxes,
+            va='top', fontsize=10, color=INK)
+    ax.text(.55, .43, r'$S=\{0,8,16,24\}$', transform=ax.transAxes,
+            va='top', fontsize=10, color=ORANGE)
+    ax.text(.55, .26, r'$\mathrm{Dec}(P,S)=\{7,15,23,31\}$',
+            transform=ax.transAxes, va='top', fontsize=10, color=INK)
+    ax.text(.55, .09, 'schema union = exact on-set\n(16 output-one indices)',
+            transform=ax.transAxes, va='top', fontsize=9.5, color=TEAL,
+            fontweight='bold')
+
+    # Recovered function supports exact replay and deterministic queries.
+    ax = fig.add_subplot(grid[1, 1])
+    ax.axis('off')
+    ax.set_title('D. Reconstruct, replay, and answer queries', loc='left', pad=14)
+
+    def box(x, y, w, h, label, *, fill=PALE, text_colour=INK, size=9.5):
+        ax.add_patch(Rectangle((x, y), w, h, transform=ax.transAxes,
+                               facecolor=fill, edgecolor=TEAL, linewidth=1.2,
+                               joinstyle='round'))
+        ax.text(x + w / 2, y + h / 2, label, transform=ax.transAxes,
+                ha='center', va='center', fontsize=size, color=text_colour)
+
+    def arrow(x1, y1, x2, y2):
+        ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), transform=ax.transAxes,
+                                     arrowstyle='-|>', mutation_scale=11,
+                                     linewidth=1.1, color=GREY))
+
+    box(.03, .66, .25, .17, 'connected inputs\n+ reduced truth table')
+    box(.38, .66, .23, .17, 'canonical gate\nor exact LUT', fill='#ffead8')
+    box(.71, .66, .25, .17, 'recovered\nnetwork')
+    arrow(.28, .745, .38, .745)
+    arrow(.61, .745, .71, .745)
+    ax.text(.5, .53, 'independent forward replay', transform=ax.transAxes,
+            ha='center', fontsize=9, color=GREY)
+    arrow(.835, .66, .835, .37)
+    box(.55, .16, .42, .17, 'exact repertoire reproduced\nfor every input state',
+        fill=PALE, text_colour=TEAL, size=9.5)
+    box(.03, .16, .42, .17, 'query or counterfactual\ninput  →  deterministic output',
+        fill='#ffead8', text_colour=INK, size=9.5)
+    arrow(.24, .33, .24, .52)
+    ax.text(.24, .42, 'evaluate', transform=ax.transAxes, ha='center',
+            fontsize=8.5, color=GREY)
+    ax.text(.03, .05, 'The guarantee is exact within the stated model and data domain;',
+            transform=ax.transAxes, fontsize=8.5, color=GREY)
+    ax.text(.03, .005, 'it is not a claim of minimal K or unique hidden wiring.',
+            transform=ax.transAxes, fontsize=8.5, color=GREY)
+
+    fig.text(.5, .965,
+             'Index deconvolution: from exact behaviour to a checked generative description',
+             ha='center', va='top', fontsize=12, color=INK, fontweight='bold')
+    save(fig, 'index_deconvolution_capacities')
+
+
 def main():
     circuit,rows,schemas=derive()
     network_figure(circuit,rows)
     patterns_figure(rows,schemas)
+    capacities_figure(rows, schemas)
     from paper_operation_figures import generate
     generate()
     sources=[Path(__file__), ROOT/'src/oxparc_challenge/boolean.py',

@@ -541,9 +541,171 @@ The arithmetic results establish properties of the compiled constraint
 systems and supplied witnesses. They are not a benchmark of proving time,
 proof size or a deployed cryptographic protocol.
 
+\section{General capacities and developmental scope of index deconvolution}
+\label{sec:index-capacities}
+
+The index-deconvolution method is the Boolean-network component of the
+broader CausalBool programme. Its conceptual lineage is the algorithmic
+information-dynamics and programmability framework developed for analysing
+how systems respond to perturbations, how short rules can describe their
+behaviour, and how such descriptions can support explanations and
+predictions~\cite{hernandez2019aid,hernandez2021aid}. The present method is a
+specialisation of that perspective to an exact, finite Boolean repertoire. It
+should therefore be read as strongly aligned with the spirit of
+Kolmogorov--Chaitin complexity, while remaining distinct from a computation
+of Kolmogorov complexity itself.
+
+\subsection{The capacity map}
+
+For a synchronous Boolean network, the forward CausalBool representation
+maps a connectivity matrix and node rules to an ordered repertoire. The
+inverse method starts with that repertoire and works one output column at a
+time. For column $k$, a coordinate $i$ is functional exactly when there is a
+state $x$ such that
+\begin{equation}
+  O_k[x]\ne O_k[x\mathbin{\oplus}2^i].
+\end{equation}
+The resulting set is the set of connected inputs that the behaviour itself
+determines. Restricting the column to those inputs gives a reduced truth
+table. Matching that table against the canonical gate family, or retaining
+it as an explicit look-up table when no named gate matches, produces a
+generative description that can be replayed independently.
+
+The main capacities and their exact boundaries are summarised below. The
+word ``exact'' always refers to the stated finite model and its supplied
+repertoire; it does not mean that an arbitrary hidden implementation is
+uniquely identifiable.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\linewidth}{lXX}
+\toprule
+\textbf{Capacity} & \textbf{What the method does} & \textbf{Boundary of the claim}\\
+\midrule
+Exact representation & Represents the complete Boolean behaviour as an
+ordered index/output repertoire and can expand a compact description back to
+that repertoire. & Requires a deterministic, correctly ordered finite
+repertoire.\\
+Functional deconvolution & Detects connected inputs by paired single-bit
+perturbations and reduces each output column to its functional truth table. &
+Recovers functional dependence, not edges that the function never uses.\\
+Gate identification & Matches a reduced truth table to canonical gates and
+reports the full equivalence class of matching names. & Different internal
+circuits or gate names can realise the same function.\\
+Lossless compression & Groups output-one indices into schemata using decimal
+anchors, decimal families and sumandos; schema expansion reproduces the
+on-set exactly. & The description is a computable representation and need not
+be shorter for every function.\\
+Perturbation analysis & Supplies witnesses for whether changing one input can
+change an output, giving deterministic functional-sensitivity and
+counterfactual checks. & This is model-based intervention analysis, not a
+general causal claim from observational data.\\
+Prediction by replay & Evaluates a recovered function for a queried input and
+checks the prediction by independent forward replay. & It is exact within the
+model/data domain, not an out-of-sample forecast for noisy or incomplete data.\\
+\bottomrule
+\end{tabularx}
+\caption{Capacities and boundaries of the index-deconvolution method. The
+method separates what is recoverable from a complete repertoire from what
+remains non-identifiable.}
+\label{tab:index-capacities}
+\end{table}
+
+Figure~\ref{fig:index-capacities} displays these operations in the same
+network--matrix--pattern style as the worked majority figures. It uses the
+five-input circuit already checked in this response: the complete repertoire
+is the input to the inverse, paired perturbations expose functional inputs,
+the reduced behaviour is named or retained exactly, and the schema view gives
+a lossless expansion into output indices. The final panel closes the loop by
+replaying the recovered description and answering a deterministic query.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{generated/index_deconvolution_capacities.pdf}
+\caption{\textbf{Capacities of index deconvolution.} The actual five-input
+majority example is followed from its complete repertoire through paired
+single-bit perturbations, recovery of connected inputs, schema-based
+description and independent replay. The schema example has decimal anchor
+$P=7$ and sumandos $S=\{0,8,16,24\}$, whose exact expansion is
+$\{7,15,23,31\}$. The diagram is a visual summary of finite exact
+operations, not a claim that the method computes minimal Kolmogorov
+complexity or identifies hidden wiring uniquely.}
+\label{fig:index-capacities}
+\end{figure}
+
+\subsection{Compression and the Kolmogorov perspective}
+
+The schema representation makes the algorithmic-information connection
+concrete. A schema fixes some coordinates and leaves others as don't-cares.
+Its fixed coordinates determine a decimal anchor $P$; the fillings of its
+own don't-care positions form the sumando family $S$. Across a decimal family
+$L$ of anchors, the decoder expands the representation by
+\begin{equation}
+  \operatorname{Dec}(L,S)=\{\ell+s:\ell\in L,\ s\in S_{\ell}\}.
+\end{equation}
+The expansion is checked against the original output-one index set, so this
+is lossless representation rather than a probabilistic approximation. When a
+function has repeated structure or overlapping regularities, the schema
+description can be substantially more compact than listing every active
+index. For functions such as XOR, however, the same representation can offer
+little or no compression. Compression is therefore a capacity to be measured
+for a specified function, not a property to be assumed in advance.
+
+Kolmogorov complexity $K(x)$ is the length of the shortest halting program
+that produces $x$ and is uncomputable in general. A fixed index-set encoding
+therefore supplies a computable description length, and hence an upper-bound
+candidate relative to that encoding, rather than $K(x)$ itself. The method
+does not establish minimality across all programming languages, coding
+schemes or representations. Its algorithmic character comes from describing
+an individual deterministic object by a generative rule and testing whether
+that rule reproduces the object exactly.
+
+\subsection{Prediction, explanation and scale}
+
+Once the functional inputs and reduced truth table have been recovered, a
+new input can be evaluated without consulting the original hidden circuit.
+Schema membership gives the same answer for an input in the represented
+domain, while a paired state $x\mathbin{\oplus}2^i$ supplies a direct witness
+for whether coordinate $i$ can affect the output. In this limited but precise
+sense, the method supports prediction and explanation together: the predicted
+output is accompanied by the recovered rule, the inputs on which it depends,
+and the exact repertoire-replay check. This is the model-driven explanatory
+role that motivates the perturbation framework in the earlier work
+\cite{hernandez2019aid,hernandez2021aid}.
+
+The computational boundary is equally important. Given the full
+$2^n\times n$ repertoire, exhaustive paired checks for all columns take
+$O(n^2 2^n)$ time, but obtaining and storing that repertoire already costs an
+exponential number of states. Exact inversion is therefore practical for
+small networks and for larger systems only when an additional structural
+condition, such as bounded locality, makes the relevant observations
+effectively complete. Partial, noisy or non-recurrent observations require a
+different approximate problem and are not silently treated as exact
+deconvolution.
+
+The method remains in development. The current implementation establishes
+finite exact reconstruction and lossless schema expansion for the checked
+Boolean cases; it does not yet provide a universal minimal description,
+representation-invariant complexity value, unique recovery of internal gate
+wiring, or a general out-of-sample predictor. Larger-network trajectories,
+partial observations, richer dynamical systems and principled comparisons of
+description lengths remain development directions. These qualifications are
+part of the method's scientific specification rather than caveats added after
+the result.
+
 \begin{thebibliography}{9}
 \bibitem{challenge} 0xPARC. \emph{Beyond Primitive Computing: Puzzles and Connections}, Field Extension.
 \url{https://fieldextension.org/3b1b/}.
+\bibitem{hernandez2019aid} A. Hernández-Espinosa, H. Zenil, N. A. Kiani and
+J. Tegnér, \emph{Estimations of Integrated Information Based on Algorithmic
+Complexity and Dynamic Querying}, arXiv:1904.10393 [q-bio.NC] (2019).
+\url{https://arxiv.org/abs/1904.10393}.
+\bibitem{hernandez2021aid} A. Hernández-Espinosa, H. Zenil, N. A. Kiani and
+J. Tegnér, ``Estimations of Integrated Information Based on Algorithmic
+Complexity and Dynamic Querying,'' in \emph{Handbook of Unconventional
+Computing}, Vol. 1: Theory, ed. A. Adamatzky (World Scientific, 2021), Chap. 5,
+pp. 171--220.\ \url{https://doi.org/10.1142/9789811235726_0005}.
 \bibitem{cohen} G. Cohen, I. B. Damg\aa rd, Y. Ishai, J. K\"olker,
 P. B. Miltersen, R. Raz, and R. D. Rothblum.
 \emph{Efficient Multiparty Protocols via Log-Depth Threshold Formulae}, 2013.
