@@ -33,6 +33,14 @@ def _row(a: LinearExpression, b: LinearExpression, c: LinearExpression, label: s
     return QuadraticConstraint(a, b, c, label)
 
 
+def _sum_terms(*terms: tuple[str, int]) -> dict[str, int]:
+    """Combine repeated signal names instead of overwriting coefficients."""
+    result: dict[str, int] = {}
+    for name, coefficient in terms:
+        result[name] = result.get(name, 0) + coefficient
+    return {name: coefficient for name, coefficient in result.items() if coefficient}
+
+
 def _assert_bit(name: str, label: str) -> QuadraticConstraint:
     return _row(_l(terms={name: 1}), _l(-1, terms={name: 1}), _l(), label)
 
@@ -116,10 +124,12 @@ def lower_boolean_dag(dag: BooleanDAG, input_signals: list[str] | tuple[str, ...
                      f"gate_{index}_and"), gate_rows)
         elif gate.kind == "OR":
             add(_row(_l(terms={args[0]: 1}), _l(terms={args[1]: 1}),
-                     _l(terms={args[0]: 1, args[1]: 1, out: -1}), f"gate_{index}_or"), gate_rows)
+                     _l(terms=_sum_terms((args[0], 1), (args[1], 1), (out, -1))),
+                     f"gate_{index}_or"), gate_rows)
         elif gate.kind == "XOR":
             add(_row(_l(terms={args[0]: 2}), _l(terms={args[1]: 1}),
-                     _l(terms={args[0]: 1, args[1]: 1, out: -1}), f"gate_{index}_xor"), gate_rows)
+                     _l(terms=_sum_terms((args[0], 1), (args[1], 1), (out, -1))),
+                     f"gate_{index}_xor"), gate_rows)
         elif gate.kind == "NOT":
             add(_row(_l(1), _l(1, terms={args[0]: -1}), _l(terms={out: 1}),
                      f"gate_{index}_not"), gate_rows)

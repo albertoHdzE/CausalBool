@@ -11,6 +11,7 @@ from oxparc_challenge.boolean_constraints import (
     build_q5,
     build_q6,
     build_q7,
+    assignment_q7_bits,
     lower_boolean_dag,
     witness_q5,
     witness_q6,
@@ -44,6 +45,20 @@ def test_each_supported_gate_lowers_to_valid_rows(kind, arity):
                 "gate_g0_xor": a ^ b,
                 "gate_g0_cterm": c & (a ^ b),
             })
+        assert check_rows(system.to_dict(), witness) == []
+
+
+@pytest.mark.parametrize("kind, expected", [("OR", None), ("XOR", 0)])
+def test_lowering_preserves_repeated_binary_operands(kind, expected):
+    dag = BooleanDAG(1, (BooleanGate(kind, (0, 0)),), (1,))
+    lowered = lower_boolean_dag(dag, ["input_0"], prefix="repeat")
+    system = ConstraintSystem(
+        private_inputs=list(lowered.input_signals),
+        auxiliary_signals=list(lowered.auxiliary_signals),
+        constraints=list(lowered.constraints),
+    )
+    for bit in (0, 1):
+        witness = {"input_0": bit, "repeat_g0": bit if expected is None else expected}
         assert check_rows(system.to_dict(), witness) == []
 
 
@@ -85,9 +100,12 @@ def test_q7_exhaustive_width_four_oracle_and_attacks():
     valid = 0
     for u, v, n in itertools.product(range(1 << Q7_WIDTH), repeat=3):
         expected = u >= 2 and v >= 2 and u * v == n
+        failures = check_rows(serialized, assignment_q7_bits(n, u, v))
         if expected:
             valid += 1
-            assert check_rows(serialized, witness_q7(n, u, v)) == []
+            assert failures == []
+        else:
+            assert failures
     assert valid == 16
 
     # A full-width product must not be accepted as n=0 by a truncated

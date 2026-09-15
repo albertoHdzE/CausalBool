@@ -41,8 +41,8 @@ was used explicitly.
 
 | Command | Exit | Result |
 |---|---:|---|
-| `PYTHONPATH=src /Users/alberto/Documents/projects/CausalBool/venv/bin/python -m pytest tests/test_boolean_arithmetic.py tests/test_boolean_constraints.py -q` | 0 | 23 passed |
-| `/Users/alberto/Documents/projects/CausalBool/venv/bin/python -m pytest tests -q` | 0 | 86 passed |
+| `PYTHONPATH=src /Users/alberto/Documents/projects/CausalBool/venv/bin/python -m pytest tests/test_boolean_arithmetic.py tests/test_boolean_constraints.py -q` | 0 | 25 passed |
+| `/Users/alberto/Documents/projects/CausalBool/venv/bin/python -m pytest tests -q` | 0 | 88 passed |
 | `PYTHONPATH=src /Users/alberto/Documents/projects/CausalBool/venv/bin/python tools/verify_boolean_arithmetic.py --output evidence/causalbool_arithmetic/verification.json` | 0 | PASS; 4096 Q7 triples |
 | `PYTHONPATH=src /Users/alberto/Documents/projects/CausalBool/venv/bin/python tools/verify_boolean_arithmetic.py --compile --output evidence/causalbool_arithmetic/verification.json` | 0 | bounded checks PASS; external compile UNKNOWN |
 | `PYTHONPATH=src /Users/alberto/Documents/projects/CausalBool/venv/bin/python -m py_compile src/oxparc_challenge/boolean_arithmetic.py src/oxparc_challenge/boolean_constraints.py tools/verify_boolean_arithmetic.py` | 0 | syntax check passed |
@@ -69,7 +69,7 @@ Legacy comparator stats are Q5 65 signals/65 rows, Q6 2/1, and Q7 199/200
 signals/200 rows. These are not efficiency comparisons: the new systems use a
 gate-compiled Boolean route, and Q7 compares width 4 with the legacy width-64
 builder. No performance win is claimed. The verifier elapsed in the final run
-was approximately 1.32 seconds, with no resource exhaustion.
+was approximately 39.2 seconds, with no resource exhaustion.
 
 Checks include 8 full-adder states, multiplier exhaustive states 4/16/64/256
 for widths 1/2/3/4, a deliberately defective carry block with counterexample
@@ -120,13 +120,13 @@ Relevant reused sources:
 New source/evidence hashes:
 
 * `boolean_arithmetic.py` — `9d3847b34cc54ada2c9e7cbecacbbccdbef07fd3c118bec0dbcbb0769f501208`
-* `boolean_constraints.py` — `364625c1bd0c58063ad2ea3c4bac31f763884f6579f3e9963ecfe99c862995d4`
+* `boolean_constraints.py` — `a9a525278ef4c0576e3de39034301ae014e2827cdc93b47ea5c02b751731f3a6`
 * `test_boolean_arithmetic.py` — `42d8b1e40352085f05617434691f794852b994c79d49e4fa2b6a667afd3419b8`
-* `test_boolean_constraints.py` — `82d8c1a1b198f0f90cbaf5af262537b99b92ebb520500deb447c61763e465080`
-* `verify_boolean_arithmetic.py` — `fb90300f3aff66514445d5b761a7f2d8f820ea522d8f0c6b65708a9bead36c82`
+* `test_boolean_constraints.py` — `fc21bfbb1164f317a7e2a731866a49f36706873beee2a5e8f90c0ed7730a27bc`
+* `verify_boolean_arithmetic.py` — `8852fd06fa898d6587d470abd7897de4959bf549bc64cea883d7d91933c5373c`
 * `CONTRACT.md` — `ad18d5891c6d7a6d259effbe058c42ab26d91df7bb1c2777fb724b939f806e28`
 * `MANUSCRIPT_PROPOSAL.md` — `a64e5f30961d58cddc54cc213f954f5db8f0fd2ad29a9d44a7beb8f2d538eb6f`
-* `verification.json` — `d81a4d9cf0e78b7fb73f95ac0504a0e62b619899e1f819d6590b7943e1c66953`
+* `verification.json` — `38d5d7c36da9bce95b7315c76caf6b4c07735d6a8199b3d5dff764de64aafbec`
 * `verification.compile.json` — `babe1fc887bbf2a347823816dd8b416d0403dfc84d12b28022721bf5338c6e60`
 
 ## Unmet criteria and reviewer reproduction

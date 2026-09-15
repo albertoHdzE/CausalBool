@@ -23,7 +23,7 @@ from oxparc_challenge.boolean_arithmetic import (
 )
 from oxparc_challenge.boolean_constraints import (
     Q6_WIDTH, Q7_WIDTH, build_q5, build_q6, build_q7, witness_q5, witness_q6,
-    witness_q7,
+    assignment_q7_bits, witness_q7,
 )
 from oxparc_challenge.circom import compile_circuit, export_circom
 from oxparc_challenge.constraints import ConstraintSystem
@@ -114,10 +114,12 @@ def _check_q7_exhaustive() -> dict:
     valid = invalid = 0
     for u, v, n in itertools.product(range(1 << Q7_WIDTH), repeat=3):
         expected = u >= 2 and v >= 2 and u * v == n
+        failures = check_rows(system, assignment_q7_bits(n, u, v, Q7_WIDTH))
         if expected:
-            assert check_rows(system, witness_q7(n, u, v)) == []
+            assert failures == []
             valid += 1
         else:
+            assert failures
             invalid += 1
     assert valid + invalid == (1 << Q7_WIDTH) ** 3
     return {"width": Q7_WIDTH, "triples": valid + invalid, "valid": valid, "invalid": invalid,
