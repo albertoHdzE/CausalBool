@@ -408,9 +408,59 @@ past the 64 public limbs, and the inverse constraints make both factors
 nontrivial. This proves both directions independently of witness generation.
 
 \section{Verification record and reproducibility}
+\subsection{CausalBool-assisted arithmetic route}
+The additive implementation provides an implementation-level connection
+between the Boolean method and the arithmetic questions. Its Boolean DAG
+evaluator calls the existing CausalBool gate semantics~\cite{causalbool}; a
+separate lowering pass then emits the frozen serialized rows
+$A(w)B(w)=C(w)$ used by the challenge evaluator and Circom exporter. The
+evaluator is used to generate and replay gate values, while the serialized
+rows remain the acceptance boundary. This keeps witness generation separate
+from constraint enforcement.
+
+The lowering supports AND, OR, XOR, NOT, three-input MAJORITY and Boolean
+constants. For example, the rows for AND and XOR are
+
+\begin{equation}
+ ab=z,\qquad 2ab=a+b-z,
+\end{equation}
+
+with explicit Booleanity rows for inputs, outputs and auxiliary signals.
+Repeated operands are combined as coefficients in the linear expression, so
+the same contract applies to fan-out and duplicate ports. The resulting
+systems are:
+
+\begin{center}
+\begin{tabularx}{\linewidth}{lrrX}
+\toprule
+Question & Signals & Rows & Verified scope\\\midrule
+Q5 & 193 & 321 & 64-bit range relation compiled through a Boolean DAG\\
+Q6 & 1,376 & 2,499 & 254-bit canonical comparison and exclusion of one\\
+Q7 & 200 & 407 & complete width-four multiplier and lower-bound checks\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+For Q5, the packed scalar is bound to 64 Boolean bits. For Q6, the scalar is
+packed into 254 bits, constrained below $P$, and required to differ from one.
+For Q7, the multiplier retains all eight product bits and its stage carries;
+the public product is range-bound and the factors are required to be at least
+two. The verifier checks every $16^3=4096$ width-four assignment against the
+independent integer predicate: 16 satisfy the relation and 4,080 are rejected.
+This is an exact finite implementation result. It does not extend the
+CausalBool Q7 construction to 64 bits or provide a CausalBool Q8 circuit.
+
+The local serialized-row verifier and Boolean tests pass. In the recorded
+environment the pinned Circom and snarkjs binaries are unavailable, so the
+external compiled-row and witness status for this route is UNKNOWN rather
+than PASS. The evidence and exact commands are recorded in
+\texttt{evidence/causalbool\_arithmetic/verification.json} and
+\texttt{plan/causalbool\_arithmetic/LUNA\_REPORT.md}.
+
 The exporter writes only generic quadratic equalities and input declarations.
-All private and auxiliary assignments are supplied explicitly. Compilation uses
-Circom 2.2.3, BN128, optimisation level zero, and disabled witness sanity checks;
+All private and auxiliary assignments are supplied explicitly. When the pinned
+tools are available, compilation uses Circom 2.2.3, BN128, optimisation level
+zero, and disabled witness sanity checks;
 the R1CS remains enforced. Snarkjs 0.7.6 checks valid witnesses. A separate
 Python evaluator reads exported compiled rows, and malicious assignments are
 evaluated directly against those rows. Witness-generator refusal is never
@@ -797,6 +847,8 @@ F. Soler-Toscano, A. Rueda-Toicen and J. Tegnér, \emph{A Decomposition Method
 for Global Evaluation of Shannon Entropy and Local Estimations of Algorithmic
 Complexity}, \emph{Entropy} 20, 605 (2018).
 \url{https://doi.org/10.3390/e20080605}.
+\bibitem{causalbool} A. Hernández-Espinosa, \emph{CausalBool}, source code
+accompanying this response, 2026.
 \bibitem{cohen} G. Cohen, I. B. Damg\aa rd, Y. Ishai, J. K\"olker,
 P. B. Miltersen, R. Raz, and R. D. Rothblum.
 \emph{Efficient Multiparty Protocols via Log-Depth Threshold Formulae}, 2013.

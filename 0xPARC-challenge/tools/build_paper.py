@@ -26,6 +26,7 @@ def main():
     if index['status'] != 'PASS':raise RuntimeError('Index reconstruction check failed')
     discrete=json.loads((evidence/'discrete.json').read_text())
     arithmetic=json.loads((evidence/'compiled_audit.json').read_text())
+    causalbool=json.loads((evidence/'causalbool_arithmetic/verification.json').read_text())
     suites=[json.loads((evidence/name).read_text()) for name in ('acceptance_pytest.json','legacy_pytest.json')]
     fourier=[json.loads((evidence/f'fourier_{n}_validation.json').read_text()) for n in (32768,65536)]
     if any(d.get('status')!='PASS' for d in (discrete,arithmetic,*fourier)):raise RuntimeError('Incomplete scientific evidence')
@@ -46,9 +47,18 @@ def main():
     lines += [r'\begin{center}\begin{tabular}{rrrrrrrrr}\toprule',
               '$n$ & '+' & '.join(str(d['n']) for d in discrete['majority'])+r'\\',
               'Gates & '+' & '.join(str(d['gates']) for d in discrete['majority'])+r'\\\bottomrule\end{tabular}\end{center}',
-              r'\begin{center}\begin{tabular}{lrr}\toprule Circuit & Compiled rows & Signals\\\midrule']
+              r'\subsection*{Original direct arithmetic systems}',
+              r'\begin{center}\begin{tabular}{lrr}\toprule System & Compiled rows & Signals\\\midrule']
     for q,d in arithmetic['families'].items():lines.append(f"{q} & {d['compiled_rows']} & {d['signals']}"+r'\\')
     lines += [r'\bottomrule\end{tabular}\end{center}',
+              r'\subsection*{CausalBool-assisted arithmetic systems}',
+              r'\begin{center}\begin{tabular}{lrr}\toprule System & Rows & Signals\\\midrule']
+    for q in ('Q5', 'Q6', 'Q7'):
+        stats=causalbool['rows'][q]['stats']
+        lines.append(f"{q} & {stats['rows']} & {stats['signals']}"+r'\\')
+    lines += [r'\bottomrule\end{tabular}\end{center}',
+              'The CausalBool verifier checks all 4096 width-four Q7 assignments, '
+              'with 16 valid and 4080 invalid cases, against an independent integer predicate.',
               f"The compiled audit records {len(arithmetic['checks'])} passing checks. "
               f"The challenge and affected Boolean regression suites collect {suites[0]['collected']} and {suites[1]['collected']} tests respectively; all pass. "
               'The modular enumeration counts for primes 3, 5, 7, 11, 13, 19 are '+

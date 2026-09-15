@@ -1,6 +1,6 @@
 # Manuscript and supplementary information
 
-- [Main paper](response.pdf): natural-language explanations and five figures. Figures 2–3 (pages 4–5) connect the actual seven-gate majority network, its connection matrix, internal states, patterns and full repertoire.
+- [Main paper](response.pdf): natural-language explanations and six figures. Figures 2–3 connect the actual seven-gate majority network, its connection matrix, internal states, patterns and full repertoire; the arithmetic section adds a CausalBool-to-constraint pipeline diagram.
 - [Supplementary Information](supplementary.pdf): full proofs, conventions, reconstruction limits, Fourier search and validation inputs, arithmetic bounds, witness cases and recorded results.
 - [Reading companion](response.md): concise explanation with the network figures.
 - Sources: [main](response.tex), [supplement](supplementary.tex).

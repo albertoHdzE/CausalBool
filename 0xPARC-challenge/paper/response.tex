@@ -30,11 +30,12 @@
 The 0xPARC challenges ask how much can be done with a small set of permitted
 operations: recover a hidden list, construct a large majority vote, transform
 a packed vector and express integer conditions through quadratic equations.
-I present here some possible solutions to all eight questions, then examine what their representations
-preserve. I use a method in progress which I call index
-deconvolution. Index deconvolution provides an exact account of the Boolean
-function computed by a majority circuit, including the inputs that determine
-its output and the patterns that leave some inputs free. For the Fourier
+I present possible solutions to all eight questions and examine what their
+representations preserve. I use an index-deconvolution method in progress for
+the Boolean network, and a CausalBool-assisted Boolean-to-quadratic route for
+the arithmetic questions. Index deconvolution provides an exact account of
+the Boolean function computed by a majority circuit, including the inputs that
+determine its output and the patterns that leave some inputs free. For the Fourier
 problem, grouping stages into three multiplication levels reduces the stated
 operation cost by factors of 6.347 and 4.743 relative to a dense construction
 at the two stated dimensions. For factorisation, explicit bounds make the
@@ -51,21 +52,22 @@ methods, validation, interpretations and claims are original to the author,
 who takes responsibility for the final content and for independently checking
 the cited sources.
 
-\section{Index deconvolution as a supporting capability}
+\section{Index deconvolution and CausalBool as supporting capabilities}
 \label{sec:index-capability}
 
-Some of the questions below are answered with the help of the
-index-deconvolution method because it supports Q2 by treating the Boolean network as an
-integrated system: from its complete finite input--output repertoire,
-perturbations isolate a specified output condition, and an exact
-index/schema description can be replayed and queried. This capability follows
-the algorithmic-information-dynamics perspective of using interventions and
+Q2 uses index deconvolution by treating the Boolean network as an integrated
+system: from its complete finite input--output repertoire, perturbations
+isolate a specified output condition, and an exact index/schema description
+can be replayed and queried. This capability follows the
+algorithmic-information-dynamics perspective of using interventions and
 generative descriptions to expose structure and support explanation
-~\cite{hernandez2019aid,hernandez2021aid}; it is a computable, lossless
-description for the stated domain, not a computation of minimal Kolmogorov
-complexity or a claim of unique hidden wiring. The other challenges retain
-their own constructions, while the full capacity map, boundaries and
-development directions are given in Supplementary Section~S11.
+~\cite{hernandez2019aid,hernandez2021aid}. Q5 and Q6 additionally use the
+CausalBool gate evaluator as the semantic layer of a Boolean-to-quadratic
+compiler; Q7 uses the same route for an exact width-four multiplier. The
+arithmetic route is implementation-grounded while retaining the original
+direct constructions for the full 64-bit and 4096-bit questions. The two
+roles, their evidence and their limits are given in Supplementary
+Sections~S10--S11.
 
 \section{Introduction}
 The challenges, presented through 3Blue1Brown, bring together several kinds
@@ -82,18 +84,22 @@ mathematical ingredients include positional encoding, majority identities,
 Fourier factorisation and binary arithmetic. These have established
 precedents~\cite{cohen,cheon}. The contribution of this response is to connect
 the solutions to explicit representations that can be checked in both
-directions. Index deconvolution method adds a functional description to
-the Boolean construction: from its complete input--output table, we recover
-which inputs matter and reconstruct the output exactly. The Fourier study
-makes the tradeoff between depth and operation count explicit. The arithmetic
-study identifies the bounds needed to prevent a modular equality from
-accepting a false integer product.
+directions. Index deconvolution adds a functional description to the Boolean
+construction: from its complete input--output table, we recover which inputs
+matter and reconstruct the output exactly. CausalBool also supplies the
+semantic execution layer for Boolean DAGs that are lowered to the frozen
+quadratic-row format; this is used fully for Q5 and Q6 and at width four for
+Q7. The Fourier study makes the tradeoff between depth and operation count
+explicit, while the direct arithmetic study identifies the bounds needed to
+prevent a modular equality from accepting a false integer product.
 
 These are different uses of exact representation. Index deconvolution applies
-to the Boolean repertoire; it is not used to derive the Fourier schedule or
-the factorisation constraints. Keeping their roles explicit lets us identify
-which conclusions follow from a proof, which are established by finite
-checks and which depend on the stated cost model.
+to the Boolean repertoire, and CausalBool gate execution supports the new
+Boolean arithmetic compiler; neither is used to derive the Fourier schedule.
+The full-width Q7 and Q8 constructions remain direct quadratic systems, while
+the CausalBool Q7 result is bounded to four bits. Keeping these roles explicit
+lets us identify which conclusions follow from a proof and which are
+established by finite checks.
 
 \section{Recovering a hidden list (Q1)}
 Suppose the hidden list contains positive integers $v_0,\ldots,v_{n-1}$.
@@ -347,7 +353,7 @@ has the form $A(w)B(w)=C(w)$, where each expression is linear in the
 variables $w$. A \emph{witness} is an assignment of all private and auxiliary
 values satisfying the constraints.
 
-\subsection{Ranges, exclusion and a small factorisation}
+\subsection{Direct equations and the CausalBool route}
 To require a 64-bit integer $x$ (Q5), introduce 64 bits and impose
 \begin{equation}
 b_i(b_i-1)=0,\qquad x=\sum_{i=0}^{63}2^i b_i.
@@ -361,8 +367,37 @@ For Q7, write the proposed factors as $u,v$, bound both to 64 bits and
 impose $uv=n$ for the public 64-bit integer $n$. Require each factor to be
 at least two. Since $uv<2^{128}<P$, the modular product equation is also an
 integer equality. A valid factorisation supplies a witness, and a satisfying
-witness gives a valid factorisation. These constraints verify supplied
+witness gives a valid factorisation. These direct constraints verify supplied
 factors; they do not provide an algorithm for finding them.
+
+The implementation adds a second route for the arithmetic questions. The
+CausalBool evaluator~\cite{causalbool} executes each gate of an acyclic
+Boolean DAG, and the compiler lowers the same gates to the existing
+quadratic-row schema. Q5 is demonstrated at 64 bits with 321 serialized rows;
+Q6 uses a 254-bit canonical comparator and exclusion predicate with 2,499
+rows. Q7 uses a complete width-four shift-and-add multiplier with 407 rows;
+all $16^3=4096$ assignments are checked against the independent predicate,
+including the 4,080 invalid assignments. This route is exact for the stated
+finite systems, but its Q7 result is bounded to four bits and does not replace
+the direct 64-bit Q7 or 4096-bit Q8 constructions.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=4mm and 3mm]
+\node[box,text width=0.18\linewidth] (dag) {Boolean DAG\\ordered inputs and gates};
+\node[box,text width=0.18\linewidth,right=of dag] (engine) {CausalBool\\gate evaluation};
+\node[box,text width=0.18\linewidth,right=of engine] (rows) {Quadratic lowering\\$A(w)B(w)=C(w)$};
+\node[box,text width=0.18\linewidth,right=of rows] (check) {Serialized replay\\Q5, Q6, Q7 width 4};
+\draw[arrow] (dag) -- (engine);
+\draw[arrow] (engine) -- (rows);
+\draw[arrow] (rows) -- (check);
+\end{tikzpicture}
+\caption{\textbf{CausalBool-assisted arithmetic route.} The Boolean DAG is
+evaluated through the existing CausalBool gate semantics and lowered to the
+frozen quadratic-row representation. Independent serialized replay verifies
+Q5 and Q6 at their stated widths and Q7 exhaustively at width four.}
+\label{fig:causalbool-route}
+\end{figure}
 
 \subsection{A large factorisation and the role of carries}
 A 4096-bit integer exceeds the field modulus, so one field element cannot
@@ -405,9 +440,10 @@ multiplication produces carries within these bounds. Together with
 nontrivial factors and the zero upper outputs, this proves the equivalence
 between a satisfying assignment and the intended integer factorisation.
 
-The compiled systems contain 65, 1, 200 and 25,725 quadratic rows for
-Q5--Q8. Checks evaluate their equations directly, including altered bits,
-partial products, carries and public values. A useful negative control
+The original direct systems contain 65, 1, 200 and 25,725 quadratic rows for
+Q5--Q8. The CausalBool systems contain 321, 2,499 and 407 rows for Q5, Q6
+and bounded Q7, respectively. Checks evaluate their equations directly,
+including altered bits, partial products, carries and public values. A useful negative control
 removes the carry bounds: the false integer statement
 $2((P+7)/2)=7$ can then satisfy the multiplication columns modulo $P$.
 Restoring the bounds rejects it. Supplementary Sections S7--S10 give
@@ -456,6 +492,8 @@ P. B. Miltersen, R. Raz, and R. D. Rothblum.
 \emph{Faster Homomorphic Discrete Fourier Transforms and Improved FHE
 Bootstrapping}. Cryptology ePrint 2018/1073.
 \url{https://eprint.iacr.org/2018/1073}.
+\bibitem{causalbool} A. Hernández-Espinosa, \emph{CausalBool}, source code
+accompanying this response, 2026.
 \bibitem{circom} iden3. \emph{Circom 2.2.3} and \emph{snarkjs 0.7.6}.
 \url{https://docs.circom.io/};
 \url{https://www.npmjs.com/package/snarkjs/v/0.7.6}.

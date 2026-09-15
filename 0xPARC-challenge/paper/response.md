@@ -8,7 +8,7 @@ Read the [main paper](response.pdf) and [Supplementary Information](supplementar
 
 The eight questions ask what can be computed using restricted operations. The answers use positional encoding, majority identities, Fourier factorisation and bounded integer arithmetic. The contribution of this response is to connect these constructions to exact representations and explicit checks of what they preserve.
 
-Index deconvolution gives the Boolean part a second direction of explanation. Starting with a circuit, we calculate its complete repertoire. Starting with that repertoire, we recover the inputs that affect the output and describe the output-one states through patterns. Expanding those patterns must reproduce the same repertoire exactly.
+Index deconvolution gives the Boolean part a second direction of explanation. Starting with a circuit, we calculate its complete repertoire. Starting with that repertoire, we recover the inputs that affect the output and describe the output-one states through patterns. Expanding those patterns must reproduce the same repertoire exactly. For the arithmetic questions, the CausalBool gate evaluator supplies the semantics for a Boolean-to-quadratic compiler, used fully for Q5 and Q6 and at width four for Q7.
 
 ## Recovering a list (Q1)
 
@@ -61,7 +61,7 @@ For a 64-bit factorisation, bound both factors and require uv = n with factors a
 
 For a 4096-bit factorisation, represent each integer by 64 limbs in base 2⁶⁴. Form all partial products and connect multiplication columns by carries. Range-check the limbs and intermediate carries, fix endpoint carries to zero and require the upper output limbs to vanish. Every column side is then below the field modulus. Adding the weighted column equations cancels the carries and yields the intended integer product.
 
-The compiled systems contain 65, 1, 200 and 25,725 rows. Direct checks include altered bits, partial products, carries and public values. Removing selected range constraints admits deliberately false assignments; restoring them rejects those assignments. The supplement explains the proofs and controls in detail.
+The original direct systems contain 65, 1, 200 and 25,725 rows. The CausalBool-assisted systems contain 321 rows for Q5, 2,499 for Q6 and 407 for bounded Q7. The width-four Q7 verifier checks all 4,096 assignments, including 4,080 invalid cases. The supplement explains the proofs, implementation boundary and controls in detail.
 
 ![Partial products and carries for 23 times 47, illustrating the same column equations used with larger limbs.](generated/carry_network.png)
 
