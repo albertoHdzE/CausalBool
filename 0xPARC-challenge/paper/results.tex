@@ -1,0 +1,20 @@
+\subsection*{Generated results}
+\begin{center}\begin{tabular}{rrrrrr}\toprule
+$N$ & Multiplies & Adds & Rotations & Depth & Cost (s)\\\midrule
+32768 & 4757 & 4754 & 433 & 3 & 29.299516\\
+65536 & 13313 & 13310 & 570 & 3 & 78.083040\\
+\bottomrule\end{tabular}\end{center}
+For $N=32768$, stages are [7, 7, 1], baby sizes [2048, 32, 256], and the dense baseline is 185.962068 seconds (6.347 times the selected cost). The 13 target cases have maximum normalised error $2\times 10^{-15}$. 
+For $N=65536$, stages are [8, 7, 1], baby sizes [4096, 32, 256], and the dense baseline is 370.374740 seconds (4.743 times the selected cost). The 13 target cases have maximum normalised error $2.13\times 10^{-15}$. 
+\begin{center}\begin{tabular}{rrrrrrrrr}\toprule
+$n$ & 1 & 3 & 5 & 7 & 9 & 11 & 13 & 15\\
+Gates & 0 & 1 & 7 & 30 & 88 & 205 & 411 & 742\\\bottomrule\end{tabular}\end{center}
+\begin{center}\begin{tabular}{lrr}\toprule Circuit & Compiled rows & Signals\\\midrule
+Q5 & 65 & 65\\
+Q6 & 1 & 2\\
+Q7 & 200 & 199\\
+Q8 & 25725 & 25597\\
+\bottomrule\end{tabular}\end{center}
+The compiled audit records 66 passing checks. The challenge and affected Boolean regression suites collect 63 and 525 tests respectively; all pass. The modular enumeration counts for primes 3, 5, 7, 11, 13, 19 are 9, 25, 1, 1, 73, 1.
+Tables are generated from the recorded verification results; individual records retain the producing commands and source hashes.
+The supplementary index check reconstructs 2730 majority circuit states. The incorrect nine-input circuit disagrees with majority on 54 of 512 states, despite having the same functional inputs and the same number of active indices.

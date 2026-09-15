@@ -1,0 +1,427 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,booktabs,tabularx,graphicx}
+\usepackage{xcolor,caption,placeins,tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage[colorlinks=true,linkcolor=teal,citecolor=teal,urlcolor=teal]{hyperref}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{2em}
+\definecolor{ink}{HTML}{204B57}
+\definecolor{pale}{HTML}{EDF4F4}
+\definecolor{warm}{HTML}{B26338}
+\tikzset{box/.style={draw=ink,rounded corners=3pt,fill=pale,align=center,inner sep=7pt},
+ arrow/.style={-{Stealth},thick,draw=ink}}
+\newtheorem{proposition}{Proposition}
+\newcommand{\Maj}{\operatorname{MAJ}_3}
+\newcommand{\F}{\mathbb F}
+\hypersetup{pdftitle={Solutions to the challenges proposed by 0xPARC},pdfauthor={Alberto Hernandez-Espinosa}}
+\title{Solutions to the challenges proposed by 0xPARC\\[5pt]
+\large Exact representations, index deconvolution and constrained computation}
+\author{Alberto Hernandez-Espinosa}
+\date{15 September 2026}
+\begin{document} 
+\maketitle
+\begin{abstract}
+The 0xPARC challenges ask how much can be done with a small set of permitted
+operations: recover a hidden list, construct a large majority vote, transform
+a packed vector and express integer conditions through quadratic equations.
+I present here some possible solutions to all eight questions, then examine what their representations
+preserve. I use a method in progress which I call index
+deconvolution. Index deconvolution provides an exact account of the Boolean
+function computed by a majority circuit, including the inputs that determine
+its output and the patterns that leave some inputs free. For the Fourier
+problem, grouping stages into three multiplication levels reduces the stated
+operation cost by factors of 6.347 and 4.743 relative to a dense construction
+at the two stated dimensions. For factorisation, explicit bounds make the
+modular constraints equivalent to integer multiplication. The main text
+explains the constructions through worked examples; Supplementary Information
+gives the proofs, complete specifications and verification evidence.
+\end{abstract}
+
+\section{Introduction}
+The challenges, presented through 3Blue1Brown, bring together several kinds
+of restricted computation~\cite{challenge}. A hidden list can be queried but
+not read. A majority vote must be assembled from three-input gates. A Fourier
+transform has only three multiplication levels available. Integer conditions
+must be expressed by equations in a finite field. In each case, the first
+question is whether the permitted operations can express the answer. A second
+question is what a particular construction costs and how its correctness can
+be checked.
+
+I answer the questions in their original order, numbered Q1--Q8. The
+mathematical ingredients include positional encoding, majority identities,
+Fourier factorisation and binary arithmetic. These have established
+precedents~\cite{cohen,cheon}. The contribution of this response is to connect
+the solutions to explicit representations that can be checked in both
+directions. Index deconvolution method adds a functional description to
+the Boolean construction: from its complete input--output table, we recover
+which inputs matter and reconstruct the output exactly. The Fourier study
+makes the tradeoff between depth and operation count explicit. The arithmetic
+study identifies the bounds needed to prevent a modular equality from
+accepting a false integer product.
+
+These are different uses of exact representation. Index deconvolution applies
+to the Boolean repertoire; it is not used to derive the Fourier schedule or
+the factorisation constraints. Keeping their roles explicit lets us identify
+which conclusions follow from a proof, which are established by finite
+checks and which depend on the stated cost model.
+
+\section{Recovering a hidden list (Q1)}
+Suppose the hidden list contains positive integers $v_0,\ldots,v_{n-1}$.
+A query specifies coefficients, and the answer is their exact dot product
+with the list. First ask for its sum, $S=\sum_i v_i$. For $n>1$, choose
+$B=S+1$ and ask a second question with coefficients $1,B,\ldots,B^{n-1}$:
+\begin{equation}
+R=\sum_{i=0}^{n-1}v_iB^i.
+\end{equation}
+Each entry is smaller than $B$, so the answer stores the list as base-$B$
+digits. Divide by $B$, retain the remainder and repeat. Each remainder is
+one entry of the list. Figure~\ref{fig:packing} shows how each entry
+contributes to the two answers and how the second answer is unpacked.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{generated/query_network.pdf}
+\caption{\textbf{How do two queries recover the hidden entries?}
+Panel A gives each entry weight one, returning $S=30$ and allowing base
+$B=31$. Panel B weights the same entries by $1,31,961$ and adds their
+contributions to obtain $R=18\,510$. Panel C divides by 31 at each step:
+the quotient continues along the network, while the orange remainder is
+one recovered entry. The hidden values are shown to explain the example;
+the querying party observes only the two answers. Exact digits are required.}\label{fig:packing}
+\end{figure}
+
+If an upper bound $U$ is known, choose $B=U+1$ immediately and use one
+query. A one-entry list also needs only one query. For unbounded lists of
+length at least two, one fixed rational query cannot suffice: there is a
+nonzero integer change to the list whose dot product with the coefficients
+is zero. Starting with sufficiently large positive entries gives two
+positive lists with the same answer. Thus two adaptive rational queries are
+necessary and sufficient.
+
+The phrase ``any list of numbers'' also admits ideal exact real coefficients.
+Coefficients linearly independent over the rationals distinguish every
+integer list in one query. For example, powers of a transcendental number
+have this property. This establishes uniqueness under exact real arithmetic;
+it does not give a finite-precision decoding procedure. Fewer questions can
+require more information in each answer. Supplementary Section S2 gives the
+full argument and its assumptions.
+
+\section{Constructing and recovering majority (Q2)}
+A three-input majority gate returns one when at least two inputs are one.
+The question asks whether these gates can compute majority on 2025 inputs,
+with free duplication of wires. They can. The useful identity is easiest to
+understand by temporarily allowing a more general monotone Boolean function
+$f$: changing an input from zero to one never lowers its output.
+
+Choose three distinct inputs $a,b,c$. Form three simpler functions by
+replacing $b$ with $a$, $c$ with $b$, and $a$ with $c$, respectively. Then
+\begin{equation}\label{eq:maj}
+f=\Maj\bigl(f_{b\gets a},f_{c\gets b},f_{a\gets c}\bigr).
+\end{equation}
+If the three input bits agree, all substitutions preserve the assignment.
+Otherwise, one preserves it, one increases a bit and one decreases a bit.
+Their outputs therefore bracket the original output, with the original
+itself among them. Their majority equals $f$.
+
+Each substitution removes an active input. Odd majority is also self-dual:
+complementing every input complements the output. Both properties survive
+substitution, and a monotone self-dual function on at most two inputs is
+just an input wire. Repeating Eq.~\eqref{eq:maj} therefore produces a circuit
+containing only three-input majority gates. The proof applies to every odd
+input count, including 2025. It gives existence; its loose size bound does
+not establish an economical circuit at that scale.
+
+\subsection{A network we can inspect completely}
+For five inputs, the construction emits the seven gates in
+Figure~\ref{fig:network}. Each arrow carries an input bit or the output of
+an earlier gate. For example, $g_0=\Maj(x_0,x_2,x_4)$ and
+$g_1=\Maj(x_0,g_0,x_3)$. The final gate takes $g_1,g_3,g_5$.
+Reading across a row of the connection matrix identifies the three sources
+of that gate; evaluating the gates in order gives the output.
+
+Take input $11100$, written in the order $x_0,\ldots,x_4$. Its first three
+bits are one, and its output is one. Now vary the last two bits. The four
+inputs $11100,11110,11101,11111$ still have output one, although some
+internal gates change. This is the pattern $111**$: either value is
+allowed at each star. The network shows how the answer is produced, while
+the pattern identifies which variations preserve that answer.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{generated/majority_network.pdf}
+\caption{\textbf{How does a network of small majority gates compute a larger vote?}
+Panel A shows the actual five-input, seven-gate construction, with arrows
+from sources to targets. Every gate computes three-input majority. Panel B
+records the same connections as a matrix; each target row has three ones.
+Panel C evaluates all four fillings of $111**$. Some internal outputs
+change while the final output remains one. Inputs read $x_0\ldots x_4$;
+their index weights are $1,2,4,8,16$.}\label{fig:network}
+\end{figure}
+
+\subsection{What index deconvolution adds}
+A circuit describes how to compute an output. Its repertoire is the complete
+table of outputs for all input states. Index deconvolution starts from that
+table and asks which inputs actually affect the result. For a Boolean
+function $f$ on $n$ bits, encode a state by
+\begin{equation}\label{eq:index}
+\iota(x)=\sum_{i=0}^{n-1}2^ix_i,\qquad
+\mathcal I_f=\{\iota(x):f(x)=1\}.
+\end{equation}
+The index set $\mathcal I_f$ records exactly where the output is one; all
+other indices have output zero. Input $i$ matters if there is a pair of
+states differing only at $i$ for which the outputs differ. After finding
+these functional inputs, restrict the table to them and reconstruct the
+full table by allowing the remaining inputs to vary. Equality with the
+original table checks that the recovery is exact.
+
+A further compression describes groups of output-one states by patterns,
+or \emph{schemata}. Figure~\ref{fig:index} follows the same five-input
+network through its ten schemata and all 32 input states. Each schema
+fixes three bits to one and leaves two free. Any state with at least
+three ones belongs to one or more of these patterns; no state with fewer
+ones belongs to any of them.
+
+For $111**$, the fixed ones give decimal anchor $1+2+4=7$.
+The \emph{sumandos} are the fillings of the schema's don't-care positions.
+Here their numerical offsets are $0,8,16,24$: set neither free bit,
+only bit 3, only bit 4, or both. Adding these offsets to 7 gives indices
+$7,15,23,31$, the four highlighted rows of the repertoire. The ten
+schemata together expand to exactly 16 output-one indices. The union
+counts each index once, even when several schemata contain it.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{generated/majority_patterns.pdf}
+\caption{\textbf{How do patterns recover the same output repertoire?}
+Panel A shows the ten schemata for the network in Figure~\ref{fig:network}.
+Teal entries are fixed ones; orange stars may be zero or one. Panel B
+shows all 32 input states and the actual circuit output $y=g_6$, ordered
+by input index. Orange outlines identify the four fillings of $111**$.
+Panel C unfolds that pattern and shows a single-bit change that changes
+the output. The figure is generated from evaluated circuit states; the
+expanded schema union is checked against every output.}\label{fig:index}
+\end{figure}
+
+Free positions belong to a particular schema. In $111**$, inputs 3 and 4
+can vary without changing the final answer. Both inputs still matter
+elsewhere in the repertoire. For example, fixing two of the other inputs
+to one makes flipping either one decisive. Likewise, changing $01100$
+to $11100$ flips only input 0 and changes the output from zero to one.
+These paired states are what index deconvolution uses to recover
+functional dependence. The patterns and the perturbation pairs describe
+two complementary aspects of the same exact map.
+
+For odd majority on $n$ inputs, every input matters: fix the other $n-1$
+bits with exactly $(n-1)/2$ ones, then flip the remaining bit. Complementation
+pairs each output-one state with an output-zero state, giving $2^{n-1}$
+active indices. This explains why index deconvolution does not remove
+inputs from true majority, even though its output set admits schemata with
+free positions.
+
+The constructed circuits were exhaustively checked through 11 inputs;
+exact decision diagrams extend the circuit comparison to 13 and 15.
+The additional deconvolution check recovers every functional input and
+reconstructs every output for odd sizes 1 through 11, covering 2,730 states.
+This recovers the computed function, not a unique arrangement of internal
+gates. Several different circuits can have the same repertoire.
+
+Nor are an input count and an output frequency sufficient certificates.
+A majority of three disjoint three-input majorities uses all nine inputs
+and returns one on half its states, just like true nine-input majority.
+Yet groups $110,110,000$ give local votes $1,1,0$ and an incorrect final
+one: only four original bits are one. Comparing the actual index sets
+exposes this failure. Supplementary Section S4 gives the reconstruction
+proof, controls and limits of identifiability.
+\FloatBarrier
+
+\section{A Fourier transform within three levels (Q3)}
+A Fourier transform rewrites a vector as its frequency components. For
+$N$ complex entries, use the unnormalised forward convention
+\begin{equation}
+(Fx)_r=\sum_{j=0}^{N-1}x_j e^{-2\pi\mathrm{i}rj/N}.
+\end{equation}
+The question permits vector additions, rotations and multiplications, but
+at most three multiplications along a path from an input to an output.
+A usual radix-two factorisation has $\log_2N$ stages. I combine adjacent
+stages into three linear transforms, each requiring one multiplication
+level. The final transform also restores the natural frequency order.
+
+To implement a linear transform on a packed vector, group its matrix entries
+by cyclic diagonal. Each diagonal contributes a rotation of the input,
+multiplied entrywise by a known vector of coefficients. Adding those
+contributions gives the output. Rotations can be shared: split each offset
+into a small step and a multiple of a larger step, reuse the small rotations
+and rotate each grouped sum once. Supplementary Section S5 derives the
+identity and counts every operation, including the masks and rotations.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{generated/fourier_network.pdf}
+\caption{\textbf{How does the Fourier network fit within three multiplication levels?}
+Panel A illustrates the three radix-two stages for eight slots, followed
+by the permutation into natural frequency order. Panel B gives the
+butterfly rule: $m$ is its block length and $t$ its position within the
+half-block. Panel C shows the actual stage groupings at the two target
+sizes; each coloured group is evaluated as one fused packed linear map
+and consumes one multiplication level. The small network illustrates
+scalar dependencies, rather than the charged vector-operation count.
+Panel D compares estimated serial work under the same cost model;
+these are not ciphertext timings.}\label{fig:fourier}
+\end{figure}
+
+The source states 32,768 complex slots but uses 65,536 entries in its rotation
+example. I evaluate both sizes. Charging an addition at $4\,\mu$s, a
+known-vector multiplication at $5600\,\mu$s and a rotation at $6100\,\mu$s
+gives the comparisons in Figure~\ref{fig:fourier}. Every multiplication by
+a known vector consumes one level under this convention.
+
+The selected circuits use 4,757 multiplications, 4,754 additions and 433
+rotations at 32,768 slots; the corresponding counts at 65,536 are 13,313,
+13,310 and 570. Their estimated serial costs are 29.299516 and 78.083040
+seconds. The dense costs are 185.962068 and 370.374740 seconds, respectively:
+6.347 and 4.743 times as much estimated work.
+
+All 106 and 121 contiguous partitions into at most three groups were
+examined, together with every power-of-two rotation grouping size.
+The choices minimise cost within this family. They do not establish a
+global optimum over all possible circuits. Executing every operation in
+plaintext on 13 test vectors per target size gives maximum normalised
+errors below $2.2\times10^{-15}$ against an independent Fourier transform.
+Ciphertext noise, key operations and encrypted timing require a separate
+implementation study.
+\FloatBarrier
+
+\section{When the modular equations force zero (Q4)}
+Let $q=2^{127}-1$, the stated prime, and suppose the sums of the first,
+second and third powers of $a,b,c,d$ are all zero modulo $q$.
+There is no nontrivial solution. From the first equation,
+$d=-a-b-c$. Substitution into the third gives
+\begin{equation}
+a^3+b^3+c^3+d^3=-3(a+b)(a+c)(b+c)=0.
+\end{equation}
+Since a field has no zero divisors and $q\ne3$, one pair sum must vanish.
+Relabel to obtain $b=-a$ and $d=-c$. The square equation now says
+$a^2+c^2=0$. If $c\ne0$, division by $c^2$ would make $-1$ a square.
+But $q\equiv3\pmod4$, so $-1$ is not a square in this field. Hence $c=0$
+and then all four entries are zero. Supplementary Section S6 supplies the
+short number-theoretic proof and small-prime examples showing why the
+assumptions matter.
+
+\section{Expressing integer conditions by quadratic equations (Q5--Q8)}
+These questions use a different, 254-bit prime $P$, specified in
+Supplementary Section S1. Arithmetic takes place modulo $P$. A constraint
+has the form $A(w)B(w)=C(w)$, where each expression is linear in the
+variables $w$. A \emph{witness} is an assignment of all private and auxiliary
+values satisfying the constraints.
+
+\subsection{Ranges, exclusion and a small factorisation}
+To require a 64-bit integer $x$ (Q5), introduce 64 bits and impose
+\begin{equation}
+b_i(b_i-1)=0,\qquad x=\sum_{i=0}^{63}2^i b_i.
+\end{equation}
+The first equation restricts each $b_i$ to zero or one. Their weighted sum
+is below $2^{64}<P$, so it represents the intended integer without modular
+wraparound. To require $r\ne1$ (Q6), add $(r-1)s=1$. Such an $s$ exists
+exactly when $r-1$ is nonzero: it is its multiplicative inverse.
+
+For Q7, write the proposed factors as $u,v$, bound both to 64 bits and
+impose $uv=n$ for the public 64-bit integer $n$. Require each factor to be
+at least two. Since $uv<2^{128}<P$, the modular product equation is also an
+integer equality. A valid factorisation supplies a witness, and a satisfying
+witness gives a valid factorisation. These constraints verify supplied
+factors; they do not provide an algorithm for finding them.
+
+\subsection{A large factorisation and the role of carries}
+A 4096-bit integer exceeds the field modulus, so one field element cannot
+hold it. For Q8, split each integer into 64 pieces, or \emph{limbs}, in
+base $B=2^{64}$. Each limb is a 64-bit integer:
+\begin{equation}
+u=\sum_{i=0}^{63}u_iB^i,\qquad
+v=\sum_{i=0}^{63}v_iB^i,\qquad
+n=\sum_{i=0}^{63}n_iB^i.
+\end{equation}
+Multiply the limbs and collect terms by position, exactly as in written
+multiplication. For each column $k$,
+\begin{equation}\label{eq:carry}
+\sum_{i+j=k}u_i v_j+c_k=n_k+Bc_{k+1}.
+\end{equation}
+The incoming carry is $c_k$; the outgoing carry is $c_{k+1}$. Set the
+initial and final carries to zero, and set output limbs above position
+63 to zero. Figure~\ref{fig:carry} illustrates how the column equations
+fit together, using decimal digits so every partial product and carry
+can be followed by hand. The construction above uses the same pattern
+in base $2^{64}$.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{generated/carry_network.pdf}
+\caption{\textbf{How do partial products become an exact integer product?}
+The decimal example $23\times47=1081$ makes the carries visible. Each pale
+node is a partial product. Teal nodes add the products in one column and
+its incoming carry. Division by 10 sends the quotient to the next column
+and keeps the orange remainder as an output digit. Columns run from least
+to most significant, so the digits read $1,8,0,1$ in that order. The large
+construction uses the same equations in base $2^{64}$; its limb and carry
+bounds keep each column equality below the field modulus.}\label{fig:carry}
+\end{figure}
+
+The bounds are part of the argument. Intermediate carries are restricted
+to 70 bits. Both sides of Eq.~\eqref{eq:carry} are then below $2^{135}<P$,
+so the field cannot hide a wraparound in any column. Conversely, ordinary
+multiplication produces carries within these bounds. Together with
+nontrivial factors and the zero upper outputs, this proves the equivalence
+between a satisfying assignment and the intended integer factorisation.
+
+The compiled systems contain 65, 1, 200 and 25,725 quadratic rows for
+Q5--Q8. Checks evaluate their equations directly, including altered bits,
+partial products, carries and public values. A useful negative control
+removes the carry bounds: the false integer statement
+$2((P+7)/2)=7$ can then satisfy the multiplication columns modulo $P$.
+Restoring the bounds rejects it. Supplementary Sections S7--S10 give
+completeness and soundness proofs and the compiled verification record.
+\FloatBarrier
+
+\section{What this response establishes}
+The solutions give two-query recovery under rational arithmetic, a majority
+construction for every odd input count, a depth-three Fourier circuit at
+both stated dimensions, a proof that the modular power-sum solution is
+zero, and quadratic systems equivalent to the requested integer conditions.
+Their assumptions determine what each answer means.
+
+The distinctive addition is the account of what survives each representation.
+Index deconvolution recovers functional dependence from the Boolean
+repertoire and expands its schemata back to the exact index set. The
+Fourier construction preserves the transform while making the price of a
+three-level restriction measurable under one declared model. The arithmetic
+construction preserves integer meaning inside a modular system by bounding
+every place where wraparound could occur.
+
+The finite evidence supports these specific constructions. It includes
+small majority circuits, full target-size plaintext Fourier evaluations
+and checks of compiled arithmetic constraints. A complete 2025-input
+majority circuit, encrypted Fourier timings and generated zero-knowledge
+proofs remain outside that evidence. Supplementary Information separates
+the general proofs from these finite results and provides the details
+needed to reproduce and assess them.
+\begin{thebibliography}{9}
+\bibitem{challenge} 0xPARC. \emph{Beyond Primitive Computing: Puzzles and Connections}, Field Extension.
+\url{https://fieldextension.org/3b1b/}.
+\bibitem{cohen} G. Cohen, I. B. Damg\aa rd, Y. Ishai, J. K\"olker,
+P. B. Miltersen, R. Raz, and R. D. Rothblum.
+\emph{Efficient Multiparty Protocols via Log-Depth Threshold Formulae}, 2013.
+\url{https://www.wisdom.weizmann.ac.il/~/ranraz/publications/Pmajority_mpc-1.pdf}.
+\bibitem{cheon} J. H. Cheon, K. Han, and M. Hhan.
+\emph{Faster Homomorphic Discrete Fourier Transforms and Improved FHE
+Bootstrapping}. Cryptology ePrint 2018/1073.
+\url{https://eprint.iacr.org/2018/1073}.
+\bibitem{circom} iden3. \emph{Circom 2.2.3} and \emph{snarkjs 0.7.6}.
+\url{https://docs.circom.io/};
+\url{https://www.npmjs.com/package/snarkjs/v/0.7.6}.
+\end{thebibliography}
+\end{document}

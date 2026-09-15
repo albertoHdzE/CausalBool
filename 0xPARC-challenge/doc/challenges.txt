@@ -1,0 +1,70 @@
+
+Puzzles and Connections
+A simple query with surprising connections to FHE and lattice cryptography
+
+I have a secret list of positive integers: (v1, v2, ..., vn)
+
+You can't see my list, but you can ask me dot product questions. Give me any list of numbers
+(x1, x2, ..., xn) of the same length, and I'll tell you:
+x1·v1 + x2·v2 + ... + xn·vn
+
+Figure out my secret list using as few questions as possible.
+− Hide connections
+
+The following notes contain hints about the solution to the puzzle.
+Connection to Fully Homomorphic Encryption Schemes
+
+In Fully Homomorphic Encryption (FHE) schemes such as BGV and BFV, a vector of values is "packed" into a polynomial in similar ways to the best practical solution to this puzzle.
+
+More generally, cleverness with packing and representation is foundational to several modern FHE schemes. By packing values into a polynomial's evaluation points and harnessing the Chinese Remainder Theorem, BGV, BFV, and CKKS (another scheme used by 0xPARC's encrypted computing platform) are all able to enable operations on polynomials to apply to all packed values simultaneously. This enables SIMD (Single Instruction, Multiple Data) for encrypted computation, which is essential to harnessing modern parallel computing hardware.
+The Optimal (But Impractical) Solution
+
+Theoretically, it is possible to figure out the secret list with just a single question. This can be done by querying with "sufficiently independent" values, such as √2, √3, √5, ... (the precise technical requirement here is to query with numbers that are linearly independent over the rationals). The reason this works — in theory — is because a single question uniquely determines the answer.
+
+The catch with this solution is that extracting the answer from the single query requires distinguishing between arbitrarily close numbers. The amount of precision required to do this is physically impossible on computers unless the size of the secret list and the size of the largest number in the secret list are both very small.
+Connection to Lattice Cryptography
+
+However, if you know the biggest number in the list in advance, you can use the LLL Algorithm to recover them efficiently. LLL finds short vectors in high-dimensional lattices. Done correctly, this puzzle is exactly the type of problem LLL can solve.
+
+Note that this approach doesn't actually result in a better solution to this particular puzzle. With LLL, you have to query with a list of numbers that are each massive relative to the biggest number in the secret list (each number must be a fair bit greater than Bn, where B is the largest number in the secret list and n is the length of the secret list). If you already know the largest number in the secret list, you can use numbers that are smaller than what would be necessary for LLL to work.
+
+That said, LLL can solve the problem with a query list of numbers that look random. This connects to how LLL shaped both early cryptography history, and some of our efforts at 0xPARC today. In 1978, Merkle and Hellman proposed a public-key cryptosystem based on the subset sum problem. Four years later, Shamir broke it using concepts from the then recently developed LLL algorithm. This refined our understanding of lattices in ways that led to the foundation of lattice-based cryptography, including the FHE schemes used by our encrypted computing platform today.
+Constructing complex operations from simple primitives
+Part 1
+
+Suppose you have many black-box majority functions on three binary inputs. Is it possible to chain them to construct a majority function on 2025 binary inputs? (You can duplicate inputs and outputs of the black-box function for free.)
+Part 2
+
+The CKKS fully homomorphic encryption scheme gives a way to encrypt vectors in ℂ32768 such that anyone can add encrypted vectors elementwise, multiply encrypted vectors elementwise, or "rotate" ciphertexts (z1, z2, ..., z65536) → (zi, zi+1, ..., zi-1) by any "offset" i.
+
+Suppose that:
+
+    encrypted addition takes 4 microseconds
+    encrypted multiplication takes 5600 microseconds
+    encrypted rotation takes 6100 microseconds
+
+Find a fast arithmetic circuit that computes the Fourier transform on an encrypted vector, conditioned on the multiplicative depth of the circuit being at most three.
+Modular Systems & Zero-Knowledge Proofs
+Part 1
+
+Are there any nontrivial solutions to the system of equations
+a + b + c + d ≡ 0 (mod p)
+a2 + b2 + c2 + d2 ≡ 0 (mod p)
+a3 + b3 + c3 + d3 ≡ 0 (mod p)
+
+for p = 2127 - 1?
+Part 2
+
+The programming language circom allows users to prove that they have an assignment to a set of variables satisfying a system of quadratic constraints over linear combinations of variables
+(lin. comb. of variables) × (lin. comb. of variables) ≡ (lin. comb. of variables) (mod p)
+(lin. comb. of variables) × (lin. comb. of variables) ≡ (lin. comb. of variables) (mod p)
+⋮
+(lin. comb. of variables) × (lin. comb. of variables) ≡ (lin. comb. of variables) (mod p)
+
+without revealing the complete assignment of variables. Here, p is a 254-bit prime number (*). Some of the variables are set to be public, and the rest are set to be private.
+(a) Give a system of quadratic constraints in private variables x, s1, s2, s3, ... that has a satisfying solution if and only if x ∈ {0, 1, ..., 264 - 1}.
+(b) Give a system of quadratic constraints in private variables r, s1, s2, s3, ... that has a satisfying solution if and only if r ≠ 1.
+(c) Give a system of quadratic constraints in one public variable n ∈ {2, 3, ..., 264 - 1} and private variables s1, s2, s3, ... such that finding a satisfying solution to the system of quadratic constraints is equivalent to finding a nontrivial factorization of n.
+(d) Give a system of quadratic constraints in 64 public variables ℓ0, ℓ1, ..., ℓ63 ∈ {0, 1, ..., 264 - 1} and private variables s1, s2, s3, ... such that finding a satisfying solution to the system of quadratic constraints is equivalent to finding a nontrivial factorization of ℓ0 + 264·ℓ1 + 2128·ℓ2 + ... + 24032·ℓ63.
+
+(*) p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
