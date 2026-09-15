@@ -1,0 +1,19 @@
+{
+  "contract_version": "causalbool-arithmetic-v1",
+  "base_checkpoint": "9cd7509",
+  "worker_identity": "Luna (GPT-5 implementation worker)",
+  "overall_status": "accepted_bounded",
+  "lead_acceptance": "accepted_bounded",
+  "stages": {
+    "L0_contract": {"status": "accepted", "blocker": null},
+    "L1_boolean_lowering": {"status": "accepted", "blocker": null},
+    "L2_q5_q6": {"status": "accepted_bounded", "blocker": "Circom/snarkjs toolchain absent; compiled status UNKNOWN"},
+    "L3_q7_bounded": {"status": "accepted_bounded", "blocker": "Only exhaustive width 4; target width 64 is not implemented"},
+    "L4_evidence": {"status": "accepted_bounded", "blocker": "External compilation not verifiable in this environment"}
+  },
+  "dependencies": ["existing constraints.py", "existing row_evaluator.py", "existing circom.py", "CausalBool apply_gate"],
+  "artifacts": ["evidence/causalbool_arithmetic/verification.json", "evidence/causalbool_arithmetic/verification.compile.json"],
+  "unmet_acceptance": ["Q5-Q7 Circom compiled-row/witness verification (UNKNOWN: pinned tools absent)", "Q7 target width 64 (not claimed)", "Q8 implementation (design only)"],
+  "lead_review": "plan/causalbool_arithmetic/LEAD_REVIEW.md",
+  "next_owner": "future extension"
+}
