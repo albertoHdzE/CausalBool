@@ -151,7 +151,7 @@ $\{3,5,6,7\}$. All three inputs affect the function, although each schema
 has a free position. Disconnected coordinates are free in every schema;
 freedom in one schema does not imply disconnection.
 
-\subsection{Recovery of functional inputs}
+\subsection{Isolation of functionally responsive coordinates}
 From the complete column, recover
 \[
 I_c(f)=\{i:\exists x,\ f(x)\ne f(x\oplus e_i)\},
@@ -159,13 +159,15 @@ I_c(f)=\{i:\exists x,\ f(x)\ne f(x\oplus e_i)\},
 where $x\oplus e_i$ flips bit $i$. These are the functional inputs. If
 $i\notin I_c(f)$, changing only bit $i$ never changes the output. Any two
 states agreeing on $I_c(f)$ can be joined by a sequence of flips outside
-$I_c(f)$, so their outputs agree. Therefore there is a well-defined reduced
-function $g$ with $f(x)=g(x|_{I_c(f)})$. Its truth table is obtained by
-restricting the full column and checking consistency across all free
-assignments. Expanding it to the original coordinates reconstructs $f$
-exactly. This proves functional recovery from a complete deterministic
-repertoire. Gate identification can match $g$ to a declared family; multiple
-names or parameterisations may describe the same function.
+$I_c(f)$, so their outputs agree. For a static one-output projection this is
+an exact consistency identity, but the inverse method uses it to isolate an
+output condition within the full integrated description; it does not discard
+the remaining nodes or claim to produce a reduced truth table for the whole
+system. In a dynamical network, the relevant observation is instead indexed
+by the selected node union, state and time or intervention condition. Different
+selections can expose different outputs of the same evolving system. A
+declared model family may still be used to name an isolated pattern, but
+multiple names or internal implementations can describe the same behaviour.
 
 Testing all coordinate pairs costs at most $n2^{n-1}$ comparisons per
 output column, with $O(2^n)$ storage when the full column is retained.
@@ -547,29 +549,53 @@ proof size or a deployed cryptographic protocol.
 The index-deconvolution method is the Boolean-network component of the
 broader CausalBool programme. Its conceptual lineage is the algorithmic
 information-dynamics and programmability framework developed for analysing
-how systems respond to perturbations, how short rules can describe their
-behaviour, and how such descriptions can support explanations and
-predictions~\cite{hernandez2019aid,hernandez2021aid}. The present method is a
-specialisation of that perspective to an exact, finite Boolean repertoire. It
-should therefore be read as strongly aligned with the spirit of
-Kolmogorov--Chaitin complexity, while remaining distinct from a computation
-of Kolmogorov complexity itself.
+how integrated systems respond to interventions, how generative rules expose
+their behaviour, and how such descriptions can support explanations and
+predictions~\cite{hernandez2019aid,hernandez2021aid,zenil2019calculus,
+zenil2019deconvolution}. The method is strongly aligned with the
+Kolmogorov--Chaitin view of information as program size and with its modern
+formal treatment~\cite{kolmogorov1965,chaitin1966,li2019}. In parallel, its
+interest in how simple rules can generate rich behaviour is consonant with
+Wolfram's Principle of Computational Equivalence, namely the proposed
+computational equivalence in sophistication of many processes above a low
+threshold~\cite{wolfram2002,wolfram2002pce}. We use that principle as a
+conceptual motivation, not as a theorem about the present Boolean examples.
+The perturbational and causal interpretation follows Zenil and collaborators'
+model-based interventional calculus and causal deconvolution work~
+\cite{zenil2017causality,zenil2019calculus,zenil2019deconvolution}. The
+present method is a specialisation of these ideas to exact finite Boolean
+descriptions, and remains distinct from a computation of Kolmogorov
+complexity itself.
 
 \subsection{The capacity map}
 
 For a synchronous Boolean network, the forward CausalBool representation
 maps a connectivity matrix and node rules to an ordered repertoire. The
-inverse method starts with that repertoire and works one output column at a
-time. For column $k$, a coordinate $i$ is functional exactly when there is a
-state $x$ such that
+inverse method treats the network and its evolution as one integrated system,
+rather than as a collection of independently reduced tables. Given node sets
+$S_1,\ldots,S_m$, it can ask for a pattern associated with their union
+$U=\bigcup_{r=1}^{m}S_r$ under a stated dynamical condition, such as an
+initial state, time window, intervention or output coordinate. For the
+single-output illustration used in the checked Boolean example, a coordinate
+$i$ has an output-changing witness exactly when there is a state $x$ such that
 \begin{equation}
   O_k[x]\ne O_k[x\mathbin{\oplus}2^i].
 \end{equation}
-The resulting set is the set of connected inputs that the behaviour itself
-determines. Restricting the column to those inputs gives a reduced truth
-table. Matching that table against the canonical gate family, or retaining
-it as an explicit look-up table when no named gate matches, produces a
-generative description that can be replayed independently.
+Such a witness isolates a dependence under the stated condition; it does not
+cut a piece out of the integrated dynamics. Changing $U$ changes the
+observation and conditioning map, and can therefore change the set of outputs
+that is obtained. The isolated pattern is consequently not asserted to be a
+set-theoretic subset, intersection, or independent sub-behaviour of the whole
+system. It is an exact observation of the integrated evolution under the
+specified node union and condition.
+
+When the supplied description contains the complete transition map, its
+evolution can be iterated from every admissible state. A lossless pattern
+description can then account for all outputs and attractor cycles entailed by
+that description, including those seen through different unions of node sets.
+This attractor statement requires a transition description; the static
+single-step repertoire checked here supports exact output and perturbation
+claims but is not by itself a dynamical attractor analysis.
 
 The main capacities and their exact boundaries are summarised below. The
 word ``exact'' always refers to the stated finite model and its supplied
@@ -587,23 +613,30 @@ Exact representation & Represents the complete Boolean behaviour as an
 ordered index/output repertoire and can expand a compact description back to
 that repertoire. & Requires a deterministic, correctly ordered finite
 repertoire.\\
-Functional deconvolution & Detects connected inputs by paired single-bit
-perturbations and reduces each output column to its functional truth table. &
-Recovers functional dependence, not edges that the function never uses.\\
-Gate identification & Matches a reduced truth table to canonical gates and
-reports the full equivalence class of matching names. & Different internal
-circuits or gate names can realise the same function.\\
+Integrated-system querying & Considers the whole network and asks for exact
+patterns under unions of selected node sets and stated dynamical conditions. &
+The result depends on the observation and condition; it is not an independent
+component of the global dynamics.\\
+Perturbational isolation & Uses paired interventions to witness whether a
+coordinate changes a specified output under the supplied integrated behaviour. &
+It isolates conditional dependence, not every structural edge or a reduced
+truth table.\\
+Generative identification & Matches an exact observed pattern to a declared
+model family, or retains a lossless decoder when no named description is
+available. & Different internal circuits or model names can realise the same
+integrated behaviour.\\
 Lossless compression & Groups output-one indices into schemata using decimal
 anchors, decimal families and sumandos; schema expansion reproduces the
 on-set exactly. & The description is a computable representation and need not
 be shorter for every function.\\
-Perturbation analysis & Supplies witnesses for whether changing one input can
-change an output, giving deterministic functional-sensitivity and
-counterfactual checks. & This is model-based intervention analysis, not a
-general causal claim from observational data.\\
-Prediction by replay & Evaluates a recovered function for a queried input and
-checks the prediction by independent forward replay. & It is exact within the
-model/data domain, not an out-of-sample forecast for noisy or incomplete data.\\
+Dynamic accounting & Iterates a complete transition description to enumerate
+the outputs and attractor cycles entailed by the supplied model, including
+node-union observations. & A static repertoire alone cannot establish
+attractors; partial or noisy trajectories require additional assumptions.\\
+Prediction by replay & Evaluates a queried condition and checks the result by
+independent forward replay of the integrated description. & It is exact within
+the model/data domain, not an out-of-sample forecast for noisy or incomplete
+data.\\
 \bottomrule
 \end{tabularx}
 \caption{Capacities and boundaries of the index-deconvolution method. The
@@ -615,22 +648,28 @@ remains non-identifiable.}
 Figure~\ref{fig:index-capacities} displays these operations in the same
 network--matrix--pattern style as the worked majority figures. It uses the
 five-input circuit already checked in this response: the complete repertoire
-is the input to the inverse, paired perturbations expose functional inputs,
-the reduced behaviour is named or retained exactly, and the schema view gives
-a lossless expansion into output indices. The final panel closes the loop by
-replaying the recovered description and answering a deterministic query.
+is the input to the inverse, paired perturbations isolate an output condition,
+and the schema view gives a lossless description of that condition in the
+chosen index representation. The final panel closes the loop by replaying the
+integrated description and answering a deterministic query. The static
+example visualises one output condition; the general method applies the same
+logic to unions of node sets and, when a transition map is supplied, to
+evolution and attractors.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{generated/index_deconvolution_capacities.pdf}
 \caption{\textbf{Capacities of index deconvolution.} The actual five-input
-majority example is followed from its complete repertoire through paired
-single-bit perturbations, recovery of connected inputs, schema-based
+majority example is followed from its complete integrated repertoire through
+paired perturbations, isolation of an output condition, schema-based
 description and independent replay. The schema example has decimal anchor
 $P=7$ and sumandos $S=\{0,8,16,24\}$, whose exact expansion is
-$\{7,15,23,31\}$. The diagram is a visual summary of finite exact
-operations, not a claim that the method computes minimal Kolmogorov
-complexity or identifies hidden wiring uniquely.}
+$\{7,15,23,31\}$. In the general case, unions of node sets and dynamical
+conditions select observations of the integrated evolution; they are not
+asserted to be set-theoretic subsets or intersections of a global behaviour.
+The diagram is a visual summary of finite exact operations, not a claim that
+the method computes minimal Kolmogorov complexity or identifies hidden wiring
+uniquely.}
 \label{fig:index-capacities}
 \end{figure}
 
@@ -638,6 +677,16 @@ complexity or identifies hidden wiring uniquely.}
 
 The schema representation makes the algorithmic-information connection
 concrete. A schema fixes some coordinates and leaves others as don't-cares.
+This is a fixed, exact code for the supplied finite behaviour, whereas
+Kolmogorov complexity is defined by the shortest program relative to a fixed
+universal description language~\cite{kolmogorov1965,chaitin1966,li2019}.
+The distinction is important when comparing the present decoder with the
+Block Decomposition Method (BDM), which uses algorithmic-probability/CTM
+estimates on local blocks and combines them into a global complexity estimate
+~\cite{zenil2018bdm}. BDM is a general approximate complexity framework; the
+index-deconvolution schemas here are an exact finite-domain representation,
+not a BDM estimate and not a direct evaluation of $K$.
+
 Its fixed coordinates determine a decimal anchor $P$; the fillings of its
 own don't-care positions form the sumando family $S$. Across a decimal family
 $L$ of anchors, the decoder expands the representation by
@@ -653,26 +702,31 @@ little or no compression. Compression is therefore a capacity to be measured
 for a specified function, not a property to be assumed in advance.
 
 Kolmogorov complexity $K(x)$ is the length of the shortest halting program
-that produces $x$ and is uncomputable in general. A fixed index-set encoding
-therefore supplies a computable description length, and hence an upper-bound
-candidate relative to that encoding, rather than $K(x)$ itself. The method
-does not establish minimality across all programming languages, coding
-schemes or representations. Its algorithmic character comes from describing
-an individual deterministic object by a generative rule and testing whether
-that rule reproduces the object exactly.
+that produces $x$ and is uncomputable in general~\cite{kolmogorov1965,
+chaitin1966,li2019}. A fixed index-set encoding therefore supplies a
+computable description length, and hence an upper-bound candidate relative to
+that encoding, rather than $K(x)$ itself. The method does not establish
+minimality across all programming languages, coding schemes or
+representations. Its algorithmic character comes from describing an
+individual deterministic object by a generative rule and testing whether
+that rule reproduces the object exactly. This is the sense in which the
+method is compression-oriented while retaining a rigorous distinction between
+an exact decoder and an estimated algorithmic-complexity value.
 
 \subsection{Prediction, explanation and scale}
 
-Once the functional inputs and reduced truth table have been recovered, a
-new input can be evaluated without consulting the original hidden circuit.
-Schema membership gives the same answer for an input in the represented
-domain, while a paired state $x\mathbin{\oplus}2^i$ supplies a direct witness
-for whether coordinate $i$ can affect the output. In this limited but precise
-sense, the method supports prediction and explanation together: the predicted
-output is accompanied by the recovered rule, the inputs on which it depends,
-and the exact repertoire-replay check. This is the model-driven explanatory
-role that motivates the perturbation framework in the earlier work
-\cite{hernandez2019aid,hernandez2021aid}.
+Once a pattern has been isolated under a specified node union and dynamical
+condition, the integrated description can be replayed for a new admissible
+condition without consulting the original hidden implementation. Schema
+membership gives the same answer for an input in the represented domain,
+while a paired state $x\mathbin{\oplus}2^i$ supplies a direct witness for
+whether coordinate $i$ can affect the observed output. In this limited but
+precise sense, the method supports prediction and explanation together: the
+predicted output is accompanied by the selected condition, the integrated
+generative description, and the exact replay check. This is the model-driven
+explanatory role that motivates the perturbation framework in the earlier
+work~\cite{hernandez2019aid,hernandez2021aid,zenil2019calculus,
+zenil2019deconvolution}.
 
 The computational boundary is equally important. Given the full
 $2^n\times n$ repertoire, exhaustive paired checks for all columns take
@@ -694,7 +748,7 @@ description lengths remain development directions. These qualifications are
 part of the method's scientific specification rather than caveats added after
 the result.
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 \bibitem{challenge} 0xPARC. \emph{Beyond Primitive Computing: Puzzles and Connections}, Field Extension.
 \url{https://fieldextension.org/3b1b/}.
 \bibitem{hernandez2019aid} A. Hernández-Espinosa, H. Zenil, N. A. Kiani and
@@ -706,6 +760,43 @@ J. Tegnér, ``Estimations of Integrated Information Based on Algorithmic
 Complexity and Dynamic Querying,'' in \emph{Handbook of Unconventional
 Computing}, Vol. 1: Theory, ed. A. Adamatzky (World Scientific, 2021), Chap. 5,
 pp. 171--220.\ \url{https://doi.org/10.1142/9789811235726_0005}.
+\bibitem{kolmogorov1965} A. N. Kolmogorov, \emph{Three approaches to the
+definition of the concept of quantity of information}, \emph{Problems of
+Information Transmission} 1(1), 3--11 (1965); English reprint,
+\emph{Three Approaches to the Quantitative Definition of Information},
+\emph{International Journal of Computer Mathematics} 2(1--4), 157--168
+(1968).\\ \url{https://doi.org/10.1080/00207166808803030}.
+\bibitem{chaitin1966} G. J. Chaitin, \emph{On the length of programs for
+computing finite binary sequences}, \emph{Journal of the ACM} 13(4),
+547--569 (1966).\\ \url{https://doi.org/10.1145/321356.321363}.
+\bibitem{li2019} M. Li and P. M. B. Vitányi, \emph{An Introduction to
+Kolmogorov Complexity and Its Applications}, 4th ed., Texts in Computer
+Science (Springer, Cham, 2019).\\ \url{https://doi.org/10.1007/978-3-030-11298-1}.
+\bibitem{wolfram2002} S. Wolfram, \emph{A New Kind of Science}, Chap. 12
+(Wolfram Media, Champaign, IL, 2002).\\
+\url{https://www.wolframscience.com/nks/}.
+\bibitem{wolfram2002pce} S. Wolfram, ``Notes for Chapter 12: The Principle
+of Computational Equivalence,'' in \emph{A New Kind of Science Online}
+(2002).\ \url{https://www.wolframscience.com/reference/notes/1128c/}.
+\bibitem{zenil2017causality} H. Zenil, A. Schmidt and J. Tegnér,
+\emph{Causality, Information, and Biological Computation: An Algorithmic
+Software Approach to Life, Disease, and the Immune System}, in \emph{From
+Matter to Life: Information and Causality}, eds. S. I. Walker, P. C. W. Davies
+and G. F. R. Ellis (Cambridge University Press, 2017), pp. 244--280.
+\url{https://doi.org/10.1017/9781316584200.011}.
+\bibitem{zenil2019calculus} H. Zenil, N. A. Kiani, F. Marabita, Y. Deng,
+S. Elias, A. Schmidt, G. Ball and J. Tegnér, \emph{An Algorithmic Information
+Calculus for Causal Discovery and Reprogramming Systems}, \emph{iScience}
+19, 1160--1172 (2019).\\ \url{https://doi.org/10.1016/j.isci.2019.07.043}.
+\bibitem{zenil2019deconvolution} H. Zenil, N. A. Kiani, A. A. Zea and
+J. Tegnér, \emph{Causal deconvolution by algorithmic generative models},
+\emph{Nature Machine Intelligence} 1, 58--66 (2019).
+\url{https://doi.org/10.1038/s42256-018-0005-0}.
+\bibitem{zenil2018bdm} H. Zenil, S. Hernández-Orozco, N. A. Kiani,
+F. Soler-Toscano, A. Rueda-Toicen and J. Tegnér, \emph{A Decomposition Method
+for Global Evaluation of Shannon Entropy and Local Estimations of Algorithmic
+Complexity}, \emph{Entropy} 20, 605 (2018).
+\url{https://doi.org/10.3390/e20080605}.
 \bibitem{cohen} G. Cohen, I. B. Damg\aa rd, Y. Ishai, J. K\"olker,
 P. B. Miltersen, R. Raz, and R. D. Rothblum.
 \emph{Efficient Multiparty Protocols via Log-Depth Threshold Formulae}, 2013.

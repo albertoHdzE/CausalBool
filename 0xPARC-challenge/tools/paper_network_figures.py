@@ -227,8 +227,8 @@ def capacities_figure(rows, schemas):
     # Essential-variable detection is an exact paired perturbation test.
     ax = fig.add_subplot(grid[0, 1])
     ax.axis('off')
-    ax.set_title('B. Perturbation recovers functional inputs', loc='left', pad=14)
-    ax.text(0, .91, r'Compare $y[x]$ with $y[x\oplus2^i]$ for each $i$.',
+    ax.set_title('B. Perturbation isolates an output condition', loc='left', pad=14)
+    ax.text(0, .91, r'Compare $y[x]$ with $y[x\oplus2^i]$ within the integrated repertoire.',
             transform=ax.transAxes, fontsize=10, color=INK)
     headings = ['bit', '$x$', r'$x\oplus2^i$', 'y', "$y'$\n(change)"]
     cells = [[bit, zero, one, y0, f'{y1}']
@@ -241,7 +241,7 @@ def capacities_figure(rows, schemas):
         cell.set_edgecolor('white')
         cell.set_facecolor(PALE if r == 0 else LIGHT)
         cell.set_text_props(color=INK)
-    ax.text(.5, .16, r'$I_c=$ connected inputs $=$ essential variables',
+    ax.text(.5, .16, r'$I_c=$ nodes with an output-changing witness',
             transform=ax.transAxes, ha='center', fontsize=10.5, color=TEAL,
             fontweight='bold')
     ax.text(.5, .07, 'Here every coordinate has a witnessed output change.',
@@ -250,7 +250,7 @@ def capacities_figure(rows, schemas):
     # The schema view makes the lossless description explicit.
     ax = fig.add_subplot(grid[1, 0])
     ax.axis('off')
-    ax.set_title('C. Lossless schema compression', loc='left', pad=14)
+    ax.set_title('C. Lossless description of a pattern', loc='left', pad=14)
     ax.text(0, .9, 'Output-one states are grouped by fixed bits and\ndon\'t-care positions.',
             transform=ax.transAxes, va='top', fontsize=10, color=INK)
     shown = [s['pattern'] for s in schemas]
@@ -287,15 +287,15 @@ def capacities_figure(rows, schemas):
                                      arrowstyle='-|>', mutation_scale=11,
                                      linewidth=1.1, color=GREY))
 
-    box(.03, .66, .25, .17, 'connected inputs\n+ reduced truth table')
-    box(.38, .66, .23, .17, 'canonical gate\nor exact LUT', fill='#ffead8')
-    box(.71, .66, .25, .17, 'recovered\nnetwork')
+    box(.03, .66, .25, .17, 'union of node sets\n+ dynamical condition')
+    box(.38, .66, .23, .17, 'exact pattern\nor decoder', fill='#ffead8')
+    box(.71, .66, .25, .17, 'integrated\nsystem model')
     arrow(.28, .745, .38, .745)
     arrow(.61, .745, .71, .745)
     ax.text(.5, .53, 'independent forward replay', transform=ax.transAxes,
             ha='center', fontsize=9, color=GREY)
     arrow(.835, .66, .835, .37)
-    box(.55, .16, .42, .17, 'exact repertoire reproduced\nfor every input state',
+    box(.55, .16, .42, .17, 'whole supplied repertoire\nreproduced exactly',
         fill=PALE, text_colour=TEAL, size=9.5)
     box(.03, .16, .42, .17, 'query or counterfactual\ninput  →  deterministic output',
         fill='#ffead8', text_colour=INK, size=9.5)
@@ -308,7 +308,7 @@ def capacities_figure(rows, schemas):
             transform=ax.transAxes, fontsize=8.5, color=GREY)
 
     fig.text(.5, .965,
-             'Index deconvolution: from exact behaviour to a checked generative description',
+             'Index deconvolution: from integrated behaviour to exact conditioned patterns',
              ha='center', va='top', fontsize=12, color=INK, fontweight='bold')
     save(fig, 'index_deconvolution_capacities')
 
