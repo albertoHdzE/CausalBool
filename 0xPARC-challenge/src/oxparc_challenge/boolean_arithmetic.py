@@ -237,20 +237,112 @@ def emit_recovered(builder: "DAGBuilder", recovered: RecoveredGate,
     """
     refs = [input_refs[i] for i in recovered.connected_inputs]
     kind = recovered.gate
+    params = dict(recovered.params)
+
+    def fold(op: str, operands: list[int]) -> int:
+        if not operands:
+            return builder.add("TRUE" if op == "AND" else "FALSE")
+        current = operands[0]
+        for ref in operands[1:]:
+            current = builder.add(op, current, ref)
+        return current
+
+    def literal(ref: int, want: int) -> int:
+        return ref if want else builder.add("NOT", ref)
+
+    def threshold(operands: list[int], k: int) -> int:
+        """At least ``k`` of ``operands`` are one, by counting dynamic programme."""
+        if k <= 0:
+            return builder.add("TRUE")
+        if k > len(operands):
+            return builder.add("FALSE")
+        false_ref = builder.add("FALSE")
+        # previous[j] is "at least j of the operands seen so far".
+        previous = [None] * (k + 1)
+        previous[0] = builder.add("TRUE")
+        for j in range(1, k + 1):
+            previous[j] = false_ref
+        for ref in operands:
+            current = [previous[0]]
+            for j in range(1, k + 1):
+                with_ref = builder.add("AND", ref, previous[j-1])
+                current.append(builder.add("OR", previous[j], with_ref))
+            previous = current
+        return previous[k]
+
     if not refs:
         return builder.add("TRUE" if kind == "TRUE" else "FALSE")
-    if kind == "MAJORITY" and len(refs) == 3:
-        return builder.add("MAJORITY", *refs)
+    if kind == "MAJORITY":
+        degree = len(refs)
+        at_or_above = params.get("tiePolicy", "strict") == "atOrAbove"
+        if degree == 3 and not at_or_above:
+            return builder.add("MAJORITY", *refs)
+        return threshold(refs, -(-degree // 2) if at_or_above else degree // 2 + 1)
+    if kind == "KOFN":
+        return threshold(refs, params.get("k", 1) + int(bool(params.get("strict", False))))
+    if kind == "CANALISING":
+        index = params.get("canalisingIndex", 0)
+        value = params.get("canalisingValue", 1)
+        out = params.get("canalisedOutput", 0)
+        condition = literal(refs[index], value)
+        canalised = builder.add("TRUE") if out else builder.add("FALSE")
+        otherwise = fold("OR", list(refs))
+        return builder.add("OR",
+                           builder.add("AND", condition, canalised),
+                           builder.add("AND", builder.add("NOT", condition), otherwise))
     if kind in ("AND", "OR", "XOR"):
-        if len(refs) == 1:
-            return refs[0]
-        current = refs[0]
-        for ref in refs[1:]:
-            current = builder.add(kind, current, ref)
-        return current
+        return refs[0] if len(refs) == 1 else fold(kind, refs)
+    if kind in ("NAND", "NOR", "XNOR"):
+        return builder.add("NOT", fold({"NAND": "AND", "NOR": "OR", "XNOR": "XOR"}[kind], refs))
     if kind == "NOT" and len(refs) == 1:
         return builder.add("NOT", refs[0])
+    if kind == "IMPLIES" and len(refs) == 2:
+        return builder.add("OR", builder.add("NOT", refs[0]), refs[1])
+    if kind == "NIMPLIES" and len(refs) == 2:
+        return builder.add("AND", refs[0], builder.add("NOT", refs[1]))
+    if kind == "REGULATORY":
+        activators = set(params["activators"])
+        return fold("AND", [literal(ref, 1 if i in activators else 0)
+                            for i, ref in enumerate(refs)])
+    if kind == "REGULATORY_DNF":
+        terms = []
+        for clause in params["clauses"]:
+            operands = ([literal(refs[j], 1) for j in clause["activators"]] +
+                        [literal(refs[j], 0) for j in clause["inhibitors"]])
+            terms.append(fold("AND", operands))
+        return fold("OR", terms)
+    if kind == "LUT":
+        table = params["table"]
+        minterms = []
+        for y, bit in enumerate(table):
+            if not bit:
+                continue
+            minterms.append(fold("AND", [literal(ref, (y >> j) & 1)
+                                         for j, ref in enumerate(refs)]))
+        return fold("OR", minterms)
     raise ValueError(f"no supported expansion for recovered gate {kind!r} of arity {len(refs)}")
+
+
+def verify_expansion(recovered: RecoveredGate) -> bool:
+    """Prove the DAG expansion computes the recovered gate, over every input.
+
+    The expansion in :func:`emit_recovered` is an obligation, not an assumption.
+    This discharges it by root identity between the recovered gate and the DAG
+    that replaces it, so a wrong fold cannot reach a constraint system.
+    """
+    engine = _deconvolution_module()
+    arity = len(recovered.connected_inputs)
+    builder = DAGBuilder(arity)
+    identity = RecoveredGate(recovered.output, tuple(range(arity)), recovered.gate,
+                             recovered.params, recovered.matches)
+    output = emit_recovered(builder, identity, tuple(range(arity)))
+    dag = builder.finish((output,))
+    manager = engine.symbolic_manager(max(arity, 1))
+    expanded = engine.root_from_behaviour(
+        manager, arity, lambda bits: evaluate_boolean_dag(dag, list(bits))[0])
+    named = engine.gate_root(manager, recovered.gate, list(range(arity)),
+                             dict(recovered.params))
+    return expanded == named
 
 
 def full_adder_cell() -> tuple[RecoveredGate, ...]:
@@ -310,20 +402,46 @@ def build_multiplier_dag(width: int) -> BooleanDAG:
     return b.finish(tuple(product + stage_carries))
 
 
+def _comparator_step(bound_bit: int) -> tuple[RecoveredGate, ...]:
+    """Recover ``(less_out, equal_out)`` for one bit against a fixed bound bit.
+
+    Inputs are ``(less_in, equal_in, x_bit)`` and the cell is stated only as the
+    meaning of a running comparison: once below the bound stay below, while
+    equal decide on this bit. Specialising the bound bit is not an optimisation
+    applied afterwards -- deconvolution finds it. At ``bound_bit = 0`` the
+    method reports that ``less_out`` depends on ``less_in`` alone, because no
+    new strict inequality can arise against a zero bound bit.
+    """
+    if bound_bit not in (0, 1):
+        raise ValueError("bound_bit must be 0 or 1")
+
+    def less_out(bits):
+        less_in, equal_in, x = bits
+        return 1 if less_in or (equal_in and not x and bound_bit) else 0
+
+    def equal_out(bits):
+        _, equal_in, x = bits
+        return 1 if equal_in and x == bound_bit else 0
+
+    return recover_cell(f"comparator_bound_{bound_bit}", 3, (less_out, equal_out))
+
+
 def build_less_than_constant_dag(width: int, bound: int) -> BooleanDAG:
-    """Build a little-endian Boolean predicate ``bits < bound``."""
+    """Build a little-endian Boolean predicate ``bits < bound``.
+
+    The per-bit comparator is recovered, not written: the scan below only
+    threads ``(less, equal)`` through whatever gates deconvolution returned.
+    """
     if type(width) is not int or width <= 0 or type(bound) is not int or not 0 <= bound < (1 << width):
         raise ValueError("invalid width or bound")
     b = DAGBuilder(width)
-    false = b.add("FALSE")
+    less = b.add("FALSE")
     equal = b.add("TRUE")
-    less = false
     for bit in reversed(range(width)):
-        not_bit = b.add("NOT", bit)
-        term = b.add("AND", equal, not_bit) if (bound >> bit) & 1 else false
-        less = b.add("OR", less, term)
-        equal_bit = bit if (bound >> bit) & 1 else not_bit
-        equal = b.add("AND", equal, equal_bit)
+        less_gate, equal_gate = _comparator_step((bound >> bit) & 1)
+        state = (less, equal, bit)
+        less, equal = (emit_recovered(b, less_gate, state),
+                       emit_recovered(b, equal_gate, state))
     return b.finish((less,))
 
 

@@ -68,6 +68,9 @@ def export_circom(system, path):
     system, names = _as_dict(system)
     public = system["public_inputs"]
     rows = system["constraints"]
+    # Hoisted: this set was rebuilt three times per row, which made the export
+    # quadratic in the row count and cost 327s on the 64-bit Q7 system.
+    declared = set(names)
     for row in rows:
         if not isinstance(row, dict) or set(row) != {"A", "B", "C", "label"}:
             raise ValueError("malformed constraint row")
@@ -75,7 +78,7 @@ def export_circom(system, path):
             raise ValueError("constraint label must be a string")
         for key in ("A", "B", "C"):
             _linear(row[key])
-            if not set(row[key]['terms']) <= set(names):
+            if not set(row[key]['terms']) <= declared:
                 raise ValueError('undeclared signal in constraint')
     lines = [f"pragma circom {_CIRCOM_VERSION};", "", "template Main() {"]
     lines.extend(f"    signal input {name};" for name in names)

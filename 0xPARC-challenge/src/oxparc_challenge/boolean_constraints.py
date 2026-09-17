@@ -9,6 +9,7 @@ constraint format.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 import re
 
 from . import FIELD_PRIME
@@ -19,7 +20,7 @@ from .constraints import ConstraintSystem, LinearExpression, QuadraticConstraint
 
 
 _P = FIELD_PRIME
-Q7_WIDTH = 4  # Deliberate bounded implementation; target-width Q7 remains open.
+Q7_WIDTH = 64  # The question's width. Small widths remain buildable for exhaustive checks.
 Q6_WIDTH = _P.bit_length()
 
 
@@ -84,6 +85,16 @@ class BooleanLowering:
         for name, rule in self.aux_rules:
             result[name] = rule(result)
         return result
+
+
+@lru_cache(maxsize=None)
+def _cached_lowering(dag: BooleanDAG, input_signals: tuple[str, ...], prefix: str) -> BooleanLowering:
+    """Lowering of a fixed DAG under fixed names; pure, so it is cached.
+
+    Witness tracing asks for the same lowering once per assignment, and an
+    exhaustive sweep asks millions of times.
+    """
+    return lower_boolean_dag(dag, list(input_signals), prefix=prefix)
 
 
 def _signal_ok(name: str) -> bool:
@@ -197,37 +208,55 @@ def _integer(value: int, name: str) -> int:
     return value
 
 
+Q5_BOUND = 1 << 64
+# One wider than the bound, so the comparator is doing real work: a decomposition
+# of this width can represent values at or above the bound, and only the
+# recovered comparator excludes them. A 64-wide decomposition would make the
+# predicate vacuously true and prove nothing.
+Q5_WIDTH = Q5_BOUND.bit_length()
+
+
+@lru_cache(maxsize=None)
+def _q5_dag() -> BooleanDAG:
+    return build_less_than_constant_dag(Q5_WIDTH, Q5_BOUND)
+
+
 def build_q5() -> ConstraintSystem:
-    """CausalBool-compiled 64-bit scalar range relation (Q5)."""
-    width = 64
-    bits = [f"x_b{i}" for i in range(width)]
-    builder = DAGBuilder(width)
-    outputs = []
-    for bit in range(width):
-        first = builder.add("NOT", bit)
-        outputs.append(builder.add("NOT", first))
-    dag = builder.finish(outputs)
+    """Scalar range relation (Q5): ``x`` lies in ``[0, 2**64)``.
+
+    Built from the recovered comparator, so the bound is general rather than a
+    power of two that a bit count would settle on its own.
+    """
+    bits = [f"x_b{i}" for i in range(Q5_WIDTH)]
+    dag = _q5_dag()
     lowered = lower_boolean_dag(dag, bits, prefix="q5")
-    packed_bits = [lowered.wire_signals[ref] for ref in dag.outputs]
+    below = lowered.wire_signals[dag.outputs[0]]
     return _system([], ["x"], bits + list(lowered.auxiliary_signals),
-                   list(lowered.constraints) + [_pack("x", packed_bits, "x_pack")])
+                   list(lowered.constraints) +
+                   [_pack("x", bits, "x_pack"), _assert_one(below, "range_below_bound")])
 
 
 def witness_q5(x: int) -> dict[str, int]:
     x = _integer(x, "x")
-    if not 0 <= x < (1 << 64):
+    if not 0 <= x < Q5_BOUND:
         raise ValueError("x must be a 64-bit nonnegative integer")
-    bits = [(x >> i) & 1 for i in range(64)]
-    dag_builder = DAGBuilder(64)
-    outputs = []
-    for bit in range(64):
-        first = dag_builder.add("NOT", bit)
-        outputs.append(dag_builder.add("NOT", first))
-    dag = dag_builder.finish(outputs)
-    values = evaluate_wires(dag, bits)
-    result = {"x": x, **_bits(x, 64, "x")}
-    result.update({f"q5_g{i}": values[64 + i] for i in range(len(dag.gates))})
-    return result
+    return assignment_q5_bits(x, [(x >> i) & 1 for i in range(Q5_WIDTH)])
+
+
+def assignment_q5_bits(scalar: int, bits: list[int] | tuple[int, ...]) -> dict[str, int]:
+    """Trace a complete Q5 assignment without asserting the range relation.
+
+    Separate from :func:`witness_q5` so a reviewer can submit an out-of-range
+    decomposition straight to the serialized rows and watch them reject it.
+    """
+    scalar = _integer(scalar, "scalar")
+    if type(bits) not in (list, tuple) or len(bits) != Q5_WIDTH:
+        raise ValueError("Q5 bit vector is invalid")
+    if any(type(bit) is not int or isinstance(bit, bool) or bit not in (0, 1) for bit in bits):
+        raise ValueError("Q5 bits must be binary integers")
+    dag = _q5_dag()
+    lowered = _cached_lowering(dag, tuple(f"x_b{i}" for i in range(Q5_WIDTH)), "q5")
+    return {"x": scalar, **lowered.assignment(dag, list(bits))}
 
 
 def _append_dag(left: DAGBuilder, right: BooleanDAG, input_refs: list[int]) -> list[int]:
@@ -241,6 +270,7 @@ def _append_dag(left: DAGBuilder, right: BooleanDAG, input_refs: list[int]) -> l
     return [translated[ref] for ref in right.outputs]
 
 
+@lru_cache(maxsize=None)
 def _q6_dag() -> BooleanDAG:
     b = DAGBuilder(Q6_WIDTH)
     lt = _append_dag(b, build_less_than_constant_dag(Q6_WIDTH, _P), list(range(Q6_WIDTH)))[0]
@@ -280,10 +310,18 @@ def assignment_q6_bits(scalar: int, bits: list[int] | tuple[int, ...]) -> dict[s
     if any(type(bit) is not int or isinstance(bit, bool) or bit not in (0, 1) for bit in bits):
         raise ValueError("Q6 bits must be binary integers")
     dag = _q6_dag()
-    lowered = lower_boolean_dag(dag, [f"r_b{i}" for i in range(Q6_WIDTH)], prefix="q6")
+    lowered = _cached_lowering(dag, tuple(f"r_b{i}" for i in range(Q6_WIDTH)), "q6")
     return {"r": scalar, **lowered.assignment(dag, list(bits))}
 
 
+def _width(width: int) -> int:
+    """A Q7 width must be a positive integer; the question asks for 64."""
+    if type(width) is not int or isinstance(width, bool) or width < 2:
+        raise ValueError("Q7 width must be an integer of at least two")
+    return width
+
+
+@lru_cache(maxsize=None)
 def _q7_lower_dag(width: int) -> BooleanDAG:
     """OR of bits 1..width-1: the Boolean predicate ``value >= 2``."""
     builder = DAGBuilder(width)
@@ -293,6 +331,7 @@ def _q7_lower_dag(width: int) -> BooleanDAG:
     return builder.finish((nontrivial,))
 
 
+@lru_cache(maxsize=None)
 def _q7_dag(width: int) -> BooleanDAG:
     multiplier = build_multiplier_dag(width)
     b = DAGBuilder(2 * width)
@@ -302,9 +341,8 @@ def _q7_dag(width: int) -> BooleanDAG:
 
 
 def build_q7(width: int = Q7_WIDTH) -> ConstraintSystem:
-    """Bounded CausalBool factor-verification relation; only width four is supported."""
-    if width != Q7_WIDTH:
-        raise ValueError("bounded Q7 implementation supports width=4 only")
+    """Factor-verification relation at ``width`` bits, from the recovered cells."""
+    width = _width(width)
     product_width = 2 * width
     nbits = [f"n_b{i}" for i in range(width)]
     ubits = [f"u_b{i}" for i in range(width)]
@@ -334,8 +372,7 @@ def build_q7(width: int = Q7_WIDTH) -> ConstraintSystem:
 
 
 def witness_q7(n: int, u: int, v: int, width: int = Q7_WIDTH) -> dict[str, int]:
-    if width != Q7_WIDTH:
-        raise ValueError("bounded Q7 implementation supports width=4 only")
+    width = _width(width)
     n, u, v = (_integer(n, "n"), _integer(u, "u"), _integer(v, "v"))
     limit = 1 << width
     if not (0 <= n < limit and 2 <= u < limit and 2 <= v < limit and u * v == n):
@@ -345,8 +382,7 @@ def witness_q7(n: int, u: int, v: int, width: int = Q7_WIDTH) -> dict[str, int]:
 
 def assignment_q7_bits(n: int, u: int, v: int, width: int = Q7_WIDTH) -> dict[str, int]:
     """Trace a complete bounded Q7 assignment without relation assertions."""
-    if width != Q7_WIDTH:
-        raise ValueError("bounded Q7 implementation supports width=4 only")
+    width = _width(width)
     n, u, v = (_integer(n, "n"), _integer(u, "u"), _integer(v, "v"))
     limit = 1 << width
     if not (0 <= n < limit and 0 <= u < limit and 0 <= v < limit):
@@ -356,15 +392,15 @@ def assignment_q7_bits(n: int, u: int, v: int, width: int = Q7_WIDTH) -> dict[st
     uvec = [(u >> i) & 1 for i in range(width)]
     vvec = [(v >> i) & 1 for i in range(width)]
     dag = _q7_dag(width)
-    lowered = lower_boolean_dag(dag, ubits + vbits, prefix="q7")
+    lowered = _cached_lowering(dag, tuple(ubits + vbits), "q7")
     result = {"n": n, "u": u, "v": v}
     result.update(_bits(n, width, "n"))
     result.update(lowered.assignment(dag, uvec + vvec))
     # The two lower-bound DAGs have their own generated signals; each is
     # assigned through the lowering that minted those names.
     lower_dag = _q7_lower_dag(width)
-    result.update(lower_boolean_dag(lower_dag, ubits, prefix="q7_u").assignment(lower_dag, uvec))
-    result.update(lower_boolean_dag(lower_dag, vbits, prefix="q7_v").assignment(lower_dag, vvec))
+    result.update(_cached_lowering(lower_dag, tuple(ubits), "q7_u").assignment(lower_dag, uvec))
+    result.update(_cached_lowering(lower_dag, tuple(vbits), "q7_v").assignment(lower_dag, vvec))
     return result
 
 
