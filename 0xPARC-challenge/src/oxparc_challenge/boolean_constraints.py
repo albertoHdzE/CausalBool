@@ -71,6 +71,19 @@ class BooleanLowering:
     auxiliary_signals: tuple[str, ...]
     constraints: tuple[QuadraticConstraint, ...]
     rows_by_gate: tuple[tuple[str, ...], ...]
+    # Rules for the auxiliaries a gate needs beyond its own output wire, paired
+    # with the names at the point those names are minted. Witness builders used
+    # to re-derive the naming convention themselves, which silently produced
+    # incomplete assignments the moment a gate grew an extra auxiliary.
+    aux_rules: tuple[tuple[str, object], ...] = ()
+
+    def assignment(self, dag: BooleanDAG, bits: list[int] | tuple[int, ...]) -> dict[str, int]:
+        """Value every signal this lowering generated, from the input bits."""
+        values = evaluate_wires(dag, bits)
+        result = {name: values[index] for index, name in enumerate(self.wire_signals)}
+        for name, rule in self.aux_rules:
+            result[name] = rule(result)
+        return result
 
 
 def _signal_ok(name: str) -> bool:
@@ -98,6 +111,7 @@ def lower_boolean_dag(dag: BooleanDAG, input_signals: list[str] | tuple[str, ...
     auxiliary: list[str] = []
     rows: list[QuadraticConstraint] = []
     rows_by_gate: list[list[str]] = []
+    aux_rules: list[tuple[str, object]] = []
 
     def fresh(suffix: str) -> str:
         name = f"{prefix}_{suffix}"
@@ -143,6 +157,12 @@ def lower_boolean_dag(dag: BooleanDAG, input_signals: list[str] | tuple[str, ...
             ab = fresh(f"g{index}_and")
             axb = fresh(f"g{index}_xor")
             cterm = fresh(f"g{index}_cterm")
+            # Value rules beside the names, so a witness can never omit them.
+            aux_rules.extend((
+                (ab, lambda w, x=args[0], y=args[1]: w[x] & w[y]),
+                (axb, lambda w, x=args[0], y=args[1]: w[x] ^ w[y]),
+                (cterm, lambda w, z=args[2], t=axb: w[z] & w[t]),
+            ))
             add(_row(_l(terms={args[0]: 1}), _l(terms={args[1]: 1}), _l(terms={ab: 1}),
                      f"gate_{index}_and"), gate_rows)
             add(_row(_l(terms={args[0]: 2}), _l(terms={args[1]: 1}),
@@ -158,7 +178,7 @@ def lower_boolean_dag(dag: BooleanDAG, input_signals: list[str] | tuple[str, ...
         rows_by_gate.append(gate_rows)
 
     return BooleanLowering(names, tuple(wire_signals), tuple(auxiliary), tuple(rows),
-                           tuple(tuple(group) for group in rows_by_gate))
+                           tuple(tuple(group) for group in rows_by_gate), tuple(aux_rules))
 
 
 def _system(public: list[str], private: list[str], auxiliary: list[str],
@@ -260,10 +280,17 @@ def assignment_q6_bits(scalar: int, bits: list[int] | tuple[int, ...]) -> dict[s
     if any(type(bit) is not int or isinstance(bit, bool) or bit not in (0, 1) for bit in bits):
         raise ValueError("Q6 bits must be binary integers")
     dag = _q6_dag()
-    values = evaluate_wires(dag, bits)
-    result = {"r": scalar, **{f"r_b{i}": bit for i, bit in enumerate(bits)}}
-    result.update({f"q6_g{i}": values[Q6_WIDTH + i] for i in range(len(dag.gates))})
-    return result
+    lowered = lower_boolean_dag(dag, [f"r_b{i}" for i in range(Q6_WIDTH)], prefix="q6")
+    return {"r": scalar, **lowered.assignment(dag, list(bits))}
+
+
+def _q7_lower_dag(width: int) -> BooleanDAG:
+    """OR of bits 1..width-1: the Boolean predicate ``value >= 2``."""
+    builder = DAGBuilder(width)
+    nontrivial = builder.add("FALSE")
+    for bit in range(1, width):
+        nontrivial = builder.add("OR", nontrivial, bit)
+    return builder.finish((nontrivial,))
 
 
 def _q7_dag(width: int) -> BooleanDAG:
@@ -292,12 +319,7 @@ def build_q7(width: int = Q7_WIDTH) -> ConstraintSystem:
     rows.extend(_assert_zero(product[i], f"product_high_{i}") for i in range(width, product_width))
     rows.extend(_assert_zero(carry, f"stage_carry_zero_{i}") for i, carry in enumerate(stage_carries))
     rows.extend(_assert_bit(bit, f"public_n_bit_{i}") for i, bit in enumerate(nbits))
-    # OR of bits 1..w-1 is the Boolean lower-bound predicate >= 2.
-    lower_builder = DAGBuilder(width)
-    nontrivial = lower_builder.add("FALSE")
-    for bit in range(1, width):
-        nontrivial = lower_builder.add("OR", nontrivial, bit)
-    lower_dag = lower_builder.finish((nontrivial,))
+    lower_dag = _q7_lower_dag(width)
     lower = lower_boolean_dag(lower_dag, ubits, prefix="q7_u")
     lower_v = lower_boolean_dag(lower_dag, vbits, prefix="q7_v")
     rows.extend(lower.constraints)
@@ -329,26 +351,20 @@ def assignment_q7_bits(n: int, u: int, v: int, width: int = Q7_WIDTH) -> dict[st
     limit = 1 << width
     if not (0 <= n < limit and 0 <= u < limit and 0 <= v < limit):
         raise ValueError("Q7 scalar values must fit the bounded width")
+    ubits = [f"u_b{i}" for i in range(width)]
+    vbits = [f"v_b{i}" for i in range(width)]
+    uvec = [(u >> i) & 1 for i in range(width)]
+    vvec = [(v >> i) & 1 for i in range(width)]
     dag = _q7_dag(width)
-    values = evaluate_wires(dag, [(u >> i) & 1 for i in range(width)] +
-                             [(v >> i) & 1 for i in range(width)])
+    lowered = lower_boolean_dag(dag, ubits + vbits, prefix="q7")
     result = {"n": n, "u": u, "v": v}
     result.update(_bits(n, width, "n"))
-    result.update(_bits(u, width, "u"))
-    result.update(_bits(v, width, "v"))
-    for i in range(len(dag.gates)):
-        result[f"q7_g{i}"] = values[2 * width + i]
-    # The two lower-bound DAGs have their own generated signals and are
-    # evaluated independently, matching their deterministic prefixes.
-    lower_builder = DAGBuilder(width)
-    nontrivial = lower_builder.add("FALSE")
-    for bit in range(1, width):
-        nontrivial = lower_builder.add("OR", nontrivial, bit)
-    lower_dag = lower_builder.finish((nontrivial,))
-    uvals = evaluate_wires(lower_dag, [(u >> i) & 1 for i in range(width)])
-    vvals = evaluate_wires(lower_dag, [(v >> i) & 1 for i in range(width)])
-    result.update({f"q7_u_g{i}": uvals[width + i] for i in range(len(lower_dag.gates))})
-    result.update({f"q7_v_g{i}": vvals[width + i] for i in range(len(lower_dag.gates))})
+    result.update(lowered.assignment(dag, uvec + vvec))
+    # The two lower-bound DAGs have their own generated signals; each is
+    # assigned through the lowering that minted those names.
+    lower_dag = _q7_lower_dag(width)
+    result.update(lower_boolean_dag(lower_dag, ubits, prefix="q7_u").assignment(lower_dag, uvec))
+    result.update(lower_boolean_dag(lower_dag, vbits, prefix="q7_v").assignment(lower_dag, vvec))
     return result
 
 

@@ -152,14 +152,128 @@ class DAGBuilder:
         return BooleanDAG(self.n_inputs, tuple(self.gates), tuple(outputs)).validate()
 
 
+# ---------------------------------------------------------------------------
+# Recovered cells
+#
+# The cells below are not written down.  Each is stated as an integer relation,
+# its complete finite behaviour is handed to index deconvolution, and the gate
+# that comes back is what gets compiled.  For the full adder the method returns
+# sum = XOR and carry = MAJORITY without being told either, which is the
+# classical identity recovered rather than asserted.
+#
+# Recovery is cached per cell because it is deterministic: the same behaviour
+# always yields the same gates, and the recovery itself is re-checked by the
+# tests and by tools/verify_boolean_arithmetic.py.
+# ---------------------------------------------------------------------------
+
+
+def _deconvolution_module():
+    path = Path(__file__).resolve().parents[3] / "index-deconvolution" / "src"
+    name = "_oxparc_deconvolution_adapter"
+    module = sys.modules.get(name)
+    if module is None:
+        if str(path) not in sys.path:
+            sys.path.insert(0, str(path))
+        spec = importlib.util.spec_from_file_location(name, path / "deconvolution.py")
+        if spec is None or spec.loader is None:
+            raise ImportError(f"cannot load the deconvolution engine: {path}")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+    return module
+
+
+@dataclass(frozen=True)
+class RecoveredGate:
+    """One output of a cell, as index deconvolution named it."""
+
+    output: int
+    connected_inputs: tuple[int, ...]
+    gate: str
+    params: tuple[tuple[str, object], ...]
+    matches: tuple[str, ...]
+
+    def as_dict(self) -> dict:
+        return {"output": self.output, "connected_inputs": list(self.connected_inputs),
+                "gate": self.gate, "params": dict(self.params),
+                "ambiguity_class": list(self.matches)}
+
+
+_RECOVERY_CACHE: dict[str, tuple[RecoveredGate, ...]] = {}
+
+
+def recover_cell(label: str, n_inputs: int, outputs) -> tuple[RecoveredGate, ...]:
+    """Recover a cell's gates from its behaviour alone.
+
+    ``outputs`` is a sequence of callables mapping an LSB-first input bit list
+    to 0 or 1 -- the integer relation the cell is required to satisfy. Nothing
+    about gates is supplied. What returns is what the method found.
+    """
+    if label in _RECOVERY_CACHE:
+        return _RECOVERY_CACHE[label]
+    engine = _deconvolution_module()
+    manager = engine.symbolic_manager(n_inputs)
+    recovered = []
+    for index, behaviour in enumerate(outputs):
+        root = engine.root_from_behaviour(manager, n_inputs, behaviour)
+        report = engine.deconvolve_root(manager, root, index)
+        recovered.append(RecoveredGate(
+            index, tuple(report.connected_inputs), report.canonical.gate,
+            tuple(sorted(report.canonical.params.items())),
+            tuple(sorted({m.gate for m in report.matches}))))
+    result = tuple(recovered)
+    _RECOVERY_CACHE[label] = result
+    return result
+
+
+def emit_recovered(builder: "DAGBuilder", recovered: RecoveredGate,
+                   input_refs: list[int] | tuple[int, ...]) -> int:
+    """Realise one recovered gate using the supported DAG gates.
+
+    A recovered gate names a function of any arity; the DAG layer carries
+    binary XOR/AND/OR and ternary MAJORITY. Expansion here is therefore an
+    associative fold, and it is verified against the recovered gate by root
+    identity in ``tools/verify_boolean_arithmetic.py`` rather than assumed.
+    """
+    refs = [input_refs[i] for i in recovered.connected_inputs]
+    kind = recovered.gate
+    if not refs:
+        return builder.add("TRUE" if kind == "TRUE" else "FALSE")
+    if kind == "MAJORITY" and len(refs) == 3:
+        return builder.add("MAJORITY", *refs)
+    if kind in ("AND", "OR", "XOR"):
+        if len(refs) == 1:
+            return refs[0]
+        current = refs[0]
+        for ref in refs[1:]:
+            current = builder.add(kind, current, ref)
+        return current
+    if kind == "NOT" and len(refs) == 1:
+        return builder.add("NOT", refs[0])
+    raise ValueError(f"no supported expansion for recovered gate {kind!r} of arity {len(refs)}")
+
+
+def full_adder_cell() -> tuple[RecoveredGate, ...]:
+    """Recover ``(sum, carry)`` from the relation ``a + b + carry_in``."""
+    return recover_cell(
+        "full_adder", 3,
+        (lambda bits: sum(bits) & 1, lambda bits: sum(bits) >> 1))
+
+
+def partial_product_cell() -> tuple[RecoveredGate, ...]:
+    """Recover the one-bit product ``u * v``."""
+    return recover_cell("partial_product", 2, (lambda bits: bits[0] * bits[1],))
+
+
 def build_full_adder_dag() -> BooleanDAG:
-    """Return a 3-input full adder with outputs ``(sum, carry)``."""
+    """Return a 3-input full adder with outputs ``(sum, carry)``.
+
+    The two gates are recovered from the integer relation, not written here.
+    """
+    total_gate, carry_gate = full_adder_cell()
     b = DAGBuilder(3)
-    ab = b.add("XOR", 0, 1)
-    carry_ab = b.add("AND", 0, 1)
-    total = b.add("XOR", ab, 2)
-    carry_total = b.add("AND", ab, 2)
-    carry = b.add("OR", carry_ab, carry_total)
+    total = emit_recovered(b, total_gate, (0, 1, 2))
+    carry = emit_recovered(b, carry_gate, (0, 1, 2))
     return b.finish((total, carry))
 
 
@@ -172,6 +286,8 @@ def build_multiplier_dag(width: int) -> BooleanDAG:
     """
     if type(width) is not int or isinstance(width, bool) or width <= 0:
         raise ValueError("width must be a positive integer")
+    total_gate, carry_gate = full_adder_cell()
+    product_gate, = partial_product_cell()
     b = DAGBuilder(2 * width)
     zero = b.add("FALSE")
     product = [zero] * (2 * width)
@@ -179,13 +295,14 @@ def build_multiplier_dag(width: int) -> BooleanDAG:
     for j in range(width):
         carry = zero
         for k in range(2 * width):
-            addend = b.add("AND", k - j, width + j) if j <= k < j + width else zero
-            s1 = b.add("XOR", product[k], addend)
-            c1 = b.add("AND", product[k], addend)
-            s2 = b.add("XOR", s1, carry)
-            c2 = b.add("AND", s1, carry)
-            carry = b.add("OR", c1, c2)
-            product[k] = s2
+            addend = (emit_recovered(b, product_gate, (k - j, width + j))
+                      if j <= k < j + width else zero)
+            # One recovered full adder per column: sum and carry come from the
+            # gates deconvolution returned, never from a hand-written pattern.
+            operands = (product[k], addend, carry)
+            total = emit_recovered(b, total_gate, operands)
+            carry = emit_recovered(b, carry_gate, operands)
+            product[k] = total
         stage_carries.append(carry)
     # Stage carries are returned as diagnostic outputs after the product.  The
     # arithmetic compiler constrains them to zero in addition to the full
