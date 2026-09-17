@@ -1,6 +1,6 @@
 # Manuscript and supplementary information
 
-- [Main paper](response.pdf): natural-language explanations and six figures. Figures 2–3 connect the actual seven-gate majority network, its connection matrix, internal states, patterns and full repertoire; the arithmetic section adds a CausalBool-to-constraint pipeline diagram.
+- [Main paper](response.pdf): natural-language explanations and six figures. Figures 2–3 connect the actual seven-gate majority network, its connection matrix, internal states, patterns and full repertoire; the arithmetic section adds a pipeline diagram running from a stated integer relation, through the gates deconvolution recovers, to verified constraint rows.
 - [Supplementary Information](supplementary.pdf): full proofs, conventions, reconstruction limits, Fourier search and validation inputs, arithmetic bounds, witness cases and recorded results.
 - [Reading companion](response.md): concise explanation with the network figures.
 - Sources: [main](response.tex), [supplement](supplementary.tex).
@@ -17,7 +17,7 @@ From the challenge directory, using the environment established by the project s
 PYTHONPATH=src .venv/bin/python tools/build_paper.py
 ```
 
-This reruns the bounded index-deconvolution examples, verifies the stored figure sources and assets by hash, regenerates the recorded results table, and compiles both PDFs. Three LaTeX passes resolve references and the supplementary contents. Checks reject overfull text, unresolved references and words outside the page bounds.
+This reruns the bounded index-deconvolution examples and the per-question certificates, verifies the stored figure sources and assets by hash, regenerates the recorded results table, and compiles both PDFs. Three LaTeX passes resolve references and the supplementary contents. Checks reject overfull text, unresolved references and words outside the page bounds.
 
 This document build reuses the prior compiled arithmetic and large Fourier results. It does not rerun those experiments. Full scientific verification remains available through the command in the [reproduction guide](../README.md).
 

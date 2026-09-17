@@ -7,6 +7,18 @@ import sys
 
 _checks={}
 
+def _serialisable(params):
+    """Record a test's parameters without letting their type break the record.
+
+    Parameters are whatever a test was parametrised with, so they may be any
+    object at all. A structured test-evidence file must not fail to write
+    because one of them is not JSON.
+    """
+    out={}
+    for name,value in dict(params).items():
+        out[name]=value if isinstance(value,(str,int,float,bool,type(None))) else repr(value)
+    return out
+
 def pytest_collection_finish(session):
     for item in session.items:
         name=item.nodeid
@@ -22,7 +34,7 @@ def pytest_collection_finish(session):
         _checks[item.nodeid]={'test_id':name,'requirement_ids':requirements,'status':'UNKNOWN','elapsed_seconds':0,
             'test_source_sha256':hashlib.sha256(Path(item.path).read_bytes()).hexdigest(),
             'implementation_hashes':'release.json#/source_sha256',
-            'parameters':getattr(getattr(item,'callspec',None),'params',{}),
+            'parameters':_serialisable(getattr(getattr(item,'callspec',None),'params',{})),
             'comparison':'numerical' if 'fourier' in name else 'exact',
             'tolerance':1e-10 if 'fourier' in name else None,
             'command':[sys.executable,*sys.argv], 'resource_record':'release.json#/checks'}

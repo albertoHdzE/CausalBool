@@ -12,6 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
     evidence=ROOT/'evidence';paper=ROOT/'paper';build=ROOT/'.build/paper';build.mkdir(parents=True,exist_ok=True)
     subprocess.run([sys.executable, str(ROOT/'tools/paper_index_examples.py')], check=True, timeout=180)
+    subprocess.run([sys.executable, str(ROOT/'tools/paper_certificates.py')], check=True, timeout=1800)
     if '--regenerate-figures' in sys.argv:
         subprocess.run([sys.executable, str(ROOT/'tools/paper_network_figures.py')], check=True, timeout=180)
     figures=json.loads((evidence/'paper_figures.json').read_text())
@@ -27,6 +28,8 @@ def main():
     discrete=json.loads((evidence/'discrete.json').read_text())
     arithmetic=json.loads((evidence/'compiled_audit.json').read_text())
     causalbool=json.loads((evidence/'causalbool_arithmetic/verification.json').read_text())
+    certificates=json.loads((evidence/'paper_certificates.json').read_text())
+    if certificates['status']!='PASS':raise RuntimeError('Certificates failed')
     suites=[json.loads((evidence/name).read_text()) for name in ('acceptance_pytest.json','legacy_pytest.json')]
     fourier=[json.loads((evidence/f'fourier_{n}_validation.json').read_text()) for n in (32768,65536)]
     if any(d.get('status')!='PASS' for d in (discrete,arithmetic,*fourier)):raise RuntimeError('Incomplete scientific evidence')
@@ -47,18 +50,41 @@ def main():
     lines += [r'\begin{center}\begin{tabular}{rrrrrrrrr}\toprule',
               '$n$ & '+' & '.join(str(d['n']) for d in discrete['majority'])+r'\\',
               'Gates & '+' & '.join(str(d['gates']) for d in discrete['majority'])+r'\\\bottomrule\end{tabular}\end{center}',
-              r'\subsection*{Original direct arithmetic systems}',
+              r'\subsection*{Direct arithmetic systems}',
               r'\begin{center}\begin{tabular}{lrr}\toprule System & Compiled rows & Signals\\\midrule']
     for q,d in arithmetic['families'].items():lines.append(f"{q} & {d['compiled_rows']} & {d['signals']}"+r'\\')
     lines += [r'\bottomrule\end{tabular}\end{center}',
-              r'\subsection*{CausalBool-assisted arithmetic systems}',
+              r'\subsection*{Recovered-cell arithmetic systems}',
               r'\begin{center}\begin{tabular}{lrr}\toprule System & Rows & Signals\\\midrule']
     for q in ('Q5', 'Q6', 'Q7'):
         stats=causalbool['rows'][q]['stats']
         lines.append(f"{q} & {stats['rows']} & {stats['signals']}"+r'\\')
+    q7=certificates['certificates']['Q7'];q8=certificates['certificates']['Q8']
+    q2=certificates['certificates']['Q2'];cells=certificates['certificates']['cells']
+    ladder=', '.join(f"{w} ({d['triples']:,})" for w,d in sorted(q7['constraint_ladder'].items(),key=lambda kv:int(kv[0])))
     lines += [r'\bottomrule\end{tabular}\end{center}',
-              'The CausalBool verifier checks all 4096 width-four Q7 assignments, '
-              'with 16 valid and 4080 invalid cases, against an independent integer predicate.',
+              r'\subsection*{Role ledger}',
+              r'\begin{center}\begin{tabular}{ll}\toprule Question & Role\\\midrule']
+    lines += [f"{q} & {role}"+r'\\' for q,role in sorted(certificates['role_ledger'].items())]
+    lines += [r'\bottomrule\end{tabular}\end{center}',
+              'Recovered cells, as the method named them from stated integer relations: '
+              + '; '.join(f"{name.replace('_',' ')} = "
+                          + ', '.join(g['gate'].replace('_',r'\_') for g in group)
+                          for name,group in sorted(cells['cells'].items()))
+              + f". All {cells['expansions_verified_by_root_identity']} expansions into the "
+                'constraint gate set are verified by root identity.',
+              f"Majority is recovered at n={q2['largest_n']} with every input essential and "
+              f"identity against an independent threshold, using {q2['largest_decision_nodes']:,} "
+              f"decision nodes and enumerating {q2['states_enumerated']} states.",
+              f"The Q7 constraint ladder is exhaustive at widths {ladder}: "
+              f"{q7['constraint_triples_total']:,} triples with "
+              f"{q7['constraint_discrepancies_total']} discrepancies against an independent "
+              'integer predicate.',
+              f"Description size grows as $n^{{{q8['majority_growth_degree']}}}$ for majority and "
+              f"by a factor of {q8['multiplier_growth_per_bit']} per bit for multiplication, so a "
+              f"4096-bit multiplier would need about $10^{{{q8['multiplier_nodes_at_4096_log10']}}}$ "
+              f"nodes against roughly $10^{{{q8['atoms_in_observable_universe_log10']}}}$ atoms in "
+              'the observable universe.',
               f"The compiled audit records {len(arithmetic['checks'])} passing checks. "
               f"The challenge and affected Boolean regression suites collect {suites[0]['collected']} and {suites[1]['collected']} tests respectively; all pass. "
               'The modular enumeration counts for primes 3, 5, 7, 11, 13, 19 are '+

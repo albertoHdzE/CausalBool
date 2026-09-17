@@ -29,7 +29,7 @@
 \title{Supplementary Information\\[5pt]
 \large Solutions to the challenges proposed by 0xPARC}
 \author{Alberto Hernandez-Espinosa}
-\date{15 September 2026}
+\date{17 September 2026}
 \begin{document}
 \maketitle
 \tableofcontents
@@ -110,8 +110,13 @@ With $T(2)=0$ and $T(k)\le1+3T(k-1)$, a loose unshared bound is
 $T(n)\le(3^{n-2}-1)/2$ for $n\ge3$. This proves the requested existence for
 2025 inputs but is not a compactness guarantee. No 2025-input circuit is
 materialised here. Gate counts below refer only to emitted circuits. Exhaustive
-checks cover odd sizes through 11; exact decision diagrams cover 13 and 15.
-The symbolic target is built independently by a threshold recurrence.
+checks cover odd sizes through 11. Beyond that, enumeration is replaced by
+identity on a canonical decision diagram, which settles agreement on all $2^n$
+states without visiting any: the emitted circuit is confirmed equal to an
+independently built threshold recurrence at $n=13$, $15$, $21$, $31$, $41$,
+$51$, $63$, $101$ and $151$. At $n=151$ this is 8{,}116{,}950 gates and
+41{,}196{,}123 decision nodes. The threshold target shares no code with the
+majority builder.
 
 For comparison, a naive majority of disjoint group majorities fails: the
 groups $110,110,000$ produce local votes $1,1,0$ and hence output one, although
@@ -407,16 +412,61 @@ giving $uv=n+B^{128}c_{128}-c_0=n$. The zero upper outputs prevent overflow
 past the 64 public limbs, and the inverse constraints make both factors
 nontrivial. This proves both directions independently of witness generation.
 
+\paragraph{Why the recovered route does not reach this question.}
+The construction above is what answers Q8, and index deconvolution is not what
+produces it. The reason is measured rather than asserted, and it is worth
+separating two different costs.
+
+The first is the gate count of a bit-level multiplier. Its scaling is exact and
+was fitted over widths four to sixty-four and confirmed at 128: width $w$ gives
+$7w^2+1$ gates and $26w^2+12w+7$ rows, so $w=4096$ gives 436{,}256{,}775 rows
+against 25{,}725 here, a factor of about seventeen thousand. That is an
+argument about expense only.
+
+The second is decisive. The method's reach depends on the decision-diagram
+description staying small, and whether it does is a property of the function.
+Built on the same engine, majority's description grows as $n^{3.96}$ across six
+sizes from $n=31$ to $n=151$, reaching 41{,}196{,}123 nodes at $n=151$; that is
+why Section~S4's recovery climbs so far. The multiplier's grows by a factor of
+$2.977$ per additional bit, measured across eleven widths from two to twelve,
+where it already occupies 4{,}384{,}542 nodes and exceeds an eight-million-node
+budget at thirteen. Extrapolating that factor to 4096 bits gives roughly
+$10^{1942}$ nodes, against about $10^{80}$ atoms in the observable universe.
+
+This is not an encoding that has yet to be found. Exponential growth of such
+descriptions for integer multiplication is a known lower bound~\cite{bryant},
+and the measurements are that bound appearing in our own engine. The limb
+construction escapes it by never entering Boolean logic at all: each limb
+product is a single field multiplication, so the blow-up has no opportunity to
+arise. Recording the boundary states which problems this method is the correct
+instrument for, which omitting the question would not.
+
 \section{Verification record and reproducibility}
-\subsection{CausalBool-assisted arithmetic route}
-The additive implementation provides an implementation-level connection
-between the Boolean method and the arithmetic questions. Its Boolean DAG
-evaluator calls the existing CausalBool gate semantics~\cite{causalbool}; a
-separate lowering pass then emits the frozen serialized rows
-$A(w)B(w)=C(w)$ used by the challenge evaluator and Circom exporter. The
-evaluator is used to generate and replay gate values, while the serialized
-rows remain the acceptance boundary. This keeps witness generation separate
-from constraint enforcement.
+\subsection{Recovered-cell arithmetic route}
+The arithmetic questions are answered a second time out of gates that index
+deconvolution returned. No cell is written down: each is stated as an integer
+relation, its complete behaviour is handed to the method, and the recovered
+gate is compiled. The evaluator calls the existing CausalBool gate
+semantics~\cite{causalbool}; a separate lowering pass emits the frozen
+serialized rows $A(w)B(w)=C(w)$ used by the challenge evaluator and Circom
+exporter. Witness generation and constraint enforcement stay separate: the
+serialized rows remain the acceptance boundary.
+
+The cells, as the method named them, are as follows. From $a+b+c_{\mathrm{in}}$
+it returns the sum bit as \textsc{xor} and the carry bit as \textsc{majority},
+both on all three inputs, which is the classical full adder recovered rather
+than recalled; from the one-bit product it returns \textsc{and}. From a running
+comparison against a fixed bound bit it returns the comparator recurrence, and
+specialises it without being asked: against a zero bound bit the outgoing
+``less'' is reported to depend on the incoming ``less'' alone. From a running
+inequality it returns \textsc{or} against a zero bit and a two-clause
+disjunction against a one bit.
+
+A recovered gate names a function of any arity while the lowering carries two-
+and three-input gates, so the expansion between them is a proof obligation. It
+is discharged by root identity, not assumed: all nine expansions in use are
+checked, together with every candidate the identifier can return at arities one
+to five and every function of one to three variables.
 
 The lowering supports AND, OR, XOR, NOT, three-input MAJORITY and Boolean
 constants. For example, the rows for AND and XOR are
@@ -434,21 +484,35 @@ systems are:
 \begin{tabularx}{\linewidth}{lrrX}
 \toprule
 Question & Signals & Rows & Verified scope\\\midrule
-Q5 & 193 & 321 & 64-bit range relation compiled through a Boolean DAG\\
-Q6 & 1,376 & 2,499 & 254-bit canonical comparison and exclusion of one\\
-Q7 & 200 & 407 & complete width-four multiplier and lower-bound checks\\
+Q5 & 200 & 335 & $x<2^{64}$ from the recovered comparator\\
+Q6 & 1,223 & 2,193 & 254-bit canonical comparison and exclusion of one\\
+Q7 & 53,572 & 107,271 & complete 64-bit multiplier and lower-bound checks\\
 \bottomrule
 \end{tabularx}
 \end{center}
 
-For Q5, the packed scalar is bound to 64 Boolean bits. For Q6, the scalar is
-packed into 254 bits, constrained below $P$, and required to differ from one.
-For Q7, the multiplier retains all eight product bits and its stage carries;
-the public product is range-bound and the factors are required to be at least
-two. The verifier checks every $16^3=4096$ width-four assignment against the
-independent integer predicate: 16 satisfy the relation and 4,080 are rejected.
-This is an exact finite implementation result. It does not extend the
-CausalBool Q7 construction to 64 bits or provide a CausalBool Q8 circuit.
+For Q5 the decomposition is 65 bits, one wider than the bound, so values at or
+above $2^{64}$ are representable and only the recovered comparator excludes
+them; a 64-bit decomposition would make the predicate vacuously true. For Q6
+the scalar is packed into 254 bits, constrained below $P$, and required to
+differ from one. For Q7 the multiplier retains every product bit and its stage
+carries; the public product is range-bound and both factors are required to be
+at least two.
+
+Verification is exhaustive where enumeration is possible and adversarial where
+it is not. Every triple at widths four, five and six is checked against an
+independent integer predicate: $4{,}096+32{,}768+262{,}144=299{,}008$
+assignments with no discrepancy, of which 216 satisfy the relation and the rest
+are rejected. At the full 64 bits the system accepts genuine factorisations,
+including semiprimes whose product occupies all 64 bits, and rejects trivial
+factors, wrong products, and a pair of 34-bit factors whose product overflows
+64 bits and would otherwise pass as its truncated residue.
+
+The recovered route is larger than the direct one at every question, and no
+efficiency claim is made for it. At Q7 the comparison is like-for-like, both at
+width 64, and the recovered system is 536 times the size. What it establishes
+is that the gates performing the arithmetic were obtained from behaviour rather
+than asserted.
 
 The local serialized-row verifier and Boolean tests pass. In the recorded
 environment the pinned Circom and snarkjs binaries are unavailable, so the
@@ -860,5 +924,8 @@ Bootstrapping}. Cryptology ePrint 2018/1073.
 \bibitem{circom} iden3. \emph{Circom 2.2.3} and \emph{snarkjs 0.7.6}.
 \url{https://docs.circom.io/};
 \url{https://www.npmjs.com/package/snarkjs/v/0.7.6}.
+\bibitem{bryant} R. E. Bryant. \emph{On the Complexity of VLSI Implementations
+and Graph Representations of Boolean Functions with Application to Integer
+Multiplication}. IEEE Transactions on Computers 40(2):205--213, 1991.
 \end{thebibliography}
 \end{document}

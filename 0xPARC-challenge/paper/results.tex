@@ -9,20 +9,34 @@ For $N=65536$, stages are [8, 7, 1], baby sizes [4096, 32, 256], and the dense b
 \begin{center}\begin{tabular}{rrrrrrrrr}\toprule
 $n$ & 1 & 3 & 5 & 7 & 9 & 11 & 13 & 15\\
 Gates & 0 & 1 & 7 & 30 & 88 & 205 & 411 & 742\\\bottomrule\end{tabular}\end{center}
-\subsection*{Original direct arithmetic systems}
+\subsection*{Direct arithmetic systems}
 \begin{center}\begin{tabular}{lrr}\toprule System & Compiled rows & Signals\\\midrule
 Q5 & 65 & 65\\
 Q6 & 1 & 2\\
 Q7 & 200 & 199\\
 Q8 & 25725 & 25597\\
 \bottomrule\end{tabular}\end{center}
-\subsection*{CausalBool-assisted arithmetic systems}
+\subsection*{Recovered-cell arithmetic systems}
 \begin{center}\begin{tabular}{lrr}\toprule System & Rows & Signals\\\midrule
-Q5 & 321 & 193\\
-Q6 & 2499 & 1376\\
-Q7 & 407 & 200\\
+Q5 & 335 & 200\\
+Q6 & 2193 & 1223\\
+Q7 & 107271 & 53572\\
 \bottomrule\end{tabular}\end{center}
-The CausalBool verifier checks all 4096 width-four Q7 assignments, with 16 valid and 4080 invalid cases, against an independent integer predicate.
-The compiled audit records 66 passing checks. The challenge and affected Boolean regression suites collect 63 and 525 tests respectively; all pass. The modular enumeration counts for primes 3, 5, 7, 11, 13, 19 are 9, 25, 1, 1, 73, 1.
+\subsection*{Role ledger}
+\begin{center}\begin{tabular}{ll}\toprule Question & Role\\\midrule
+Q1 & CERTIFIES\\
+Q2 & DERIVES\\
+Q3 & CERTIFIES\\
+Q4 & CERTIFIES\\
+Q5 & DERIVES\\
+Q6 & DERIVES\\
+Q7 & DERIVES\\
+Q8 & BOUNDS\\
+\bottomrule\end{tabular}\end{center}
+Recovered cells, as the method named them from stated integer relations: comparator bound 0 = AND, NIMPLIES; comparator bound 1 = REGULATORY\_DNF, AND; difference bit 0 = OR; difference bit 1 = REGULATORY\_DNF; full adder = XOR, MAJORITY; partial product = AND. All 9 expansions into the constraint gate set are verified by root identity.
+Majority is recovered at n=151 with every input essential and identity against an independent threshold, using 41,196,123 decision nodes and enumerating 0 states.
+The Q7 constraint ladder is exhaustive at widths 4 (4,096), 5 (32,768), 6 (262,144): 299,008 triples with 0 discrepancies against an independent integer predicate.
+Description size grows as $n^{3.96}$ for majority and by a factor of 2.977 per bit for multiplication, so a 4096-bit multiplier would need about $10^{1942}$ nodes against roughly $10^{80}$ atoms in the observable universe.
+The compiled audit records 66 passing checks. The challenge and affected Boolean regression suites collect 90 and 36 tests respectively; all pass. The modular enumeration counts for primes 3, 5, 7, 11, 13, 19 are 9, 25, 1, 1, 73, 1.
 Tables are generated from the recorded verification results; individual records retain the producing commands and source hashes.
 The supplementary index check reconstructs 2730 majority circuit states. The incorrect nine-input circuit disagrees with majority on 54 of 512 states, despite having the same functional inputs and the same number of active indices.

@@ -178,23 +178,23 @@
         },
         {
           "n": 101,
-          "gates": 1623175,
           "states": 2535301200456458802993406410752,
-          "decision_nodes": 8304498,
           "all_inputs_essential": true,
           "gate": "MAJORITY",
           "identity_with_threshold_specification": true,
-          "source": "rerun"
+          "gates": 1623175,
+          "decision_nodes": 8304498,
+          "source": "recorded"
         },
         {
           "n": 151,
-          "gates": 8116950,
           "states": 2854495385411919762116571938898990272765493248,
-          "decision_nodes": 41196123,
           "all_inputs_essential": true,
           "gate": "MAJORITY",
           "identity_with_threshold_specification": true,
-          "source": "rerun"
+          "gates": 8116950,
+          "decision_nodes": 41196123,
+          "source": "recorded"
         }
       ],
       "largest_n": 151,
@@ -370,7 +370,7 @@
           "invalid": 32716,
           "rows": 717,
           "discrepancies": 0,
-          "source": "rerun"
+          "source": "recorded"
         },
         "6": {
           "triples": 262144,
@@ -378,15 +378,13 @@
           "invalid": 261996,
           "rows": 1015,
           "discrepancies": 0,
-          "source": "rerun"
+          "source": "recorded"
         }
       },
       "constraint_triples_total": 299008,
       "constraint_discrepancies_total": 0,
       "reran_widths": [
-        4,
-        5,
-        6
+        4
       ],
       "gate_law": "7*w**2 + 1",
       "row_law": "26*w**2 + 12*w + 7",
@@ -399,47 +397,47 @@
       "multiplier_program_nodes": {
         "2": {
           "nodes": 18,
-          "source": "rerun"
+          "source": "recorded"
         },
         "3": {
           "nodes": 104,
-          "source": "rerun"
+          "source": "recorded"
         },
         "4": {
           "nodes": 491,
-          "source": "rerun"
+          "source": "recorded"
         },
         "5": {
           "nodes": 1811,
-          "source": "rerun"
+          "source": "recorded"
         },
         "6": {
           "nodes": 6062,
-          "source": "rerun"
+          "source": "recorded"
         },
         "7": {
           "nodes": 18754,
-          "source": "rerun"
+          "source": "recorded"
         },
         "8": {
           "nodes": 56611,
-          "source": "rerun"
+          "source": "recorded"
         },
         "9": {
           "nodes": 168845,
-          "source": "rerun"
+          "source": "recorded"
         },
         "10": {
           "nodes": 501957,
-          "source": "rerun"
+          "source": "recorded"
         },
         "11": {
           "nodes": 1484787,
-          "source": "rerun"
+          "source": "recorded"
         },
         "12": {
           "nodes": 4384542,
-          "source": "rerun"
+          "source": "recorded"
         }
       },
       "multiplier_growth_per_bit": 2.977,
@@ -602,14 +600,77 @@
               "REGULATORY"
             ]
           }
+        ],
+        "difference_bit_0": [
+          {
+            "output": 0,
+            "connected_inputs": [
+              0,
+              1
+            ],
+            "gate": "OR",
+            "params": {},
+            "ambiguity_class": [
+              "CANALISING",
+              "KOFN",
+              "OR",
+              "REGULATORY_DNF"
+            ]
+          }
+        ],
+        "difference_bit_1": [
+          {
+            "output": 0,
+            "connected_inputs": [
+              0,
+              1
+            ],
+            "gate": "REGULATORY_DNF",
+            "params": {
+              "arity": 2,
+              "clauses": [
+                {
+                  "activators": [
+                    0
+                  ],
+                  "inhibitors": []
+                },
+                {
+                  "activators": [],
+                  "inhibitors": [
+                    1
+                  ]
+                }
+              ]
+            },
+            "ambiguity_class": [
+              "REGULATORY_DNF"
+            ]
+          }
         ]
       },
-      "expansions_verified_by_root_identity": 7,
+      "expansions_verified_by_root_identity": 9,
+      "used_by": {
+        "Q5": [
+          "comparator_bound_0",
+          "comparator_bound_1"
+        ],
+        "Q6": [
+          "comparator_bound_0",
+          "comparator_bound_1",
+          "difference_bit_0",
+          "difference_bit_1"
+        ],
+        "Q7": [
+          "full_adder",
+          "partial_product"
+        ]
+      },
       "note": "sum = XOR and carry = MAJORITY are returned by the method from the relation a + b + carry_in; neither gate is named in the source"
     }
   },
   "source_sha256": {
-    "0xPARC-challenge/tools/paper_certificates.py": "4d32c052e06214ceeabbe04d44d77ea869cda123ecae446cfbd9a83b980c2690",
+    "0xPARC-challenge/tools/paper_certificates.py": "9e9d052c2ea4f235892ca091651ed8ca5abd3eee67277a648888beb16c5ad47f",
     "0xPARC-challenge/src/oxparc_challenge/boolean_arithmetic.py": "f8926b7de7d57c41edc2c188b456dc0afc1290ffa6aa509ae6168c41de53b04f",
     "0xPARC-challenge/src/oxparc_challenge/boolean_constraints.py": "0134039a1ad0b9d31ffdd5e330a7b099ba17de77afbcf611162c78d6e2971cb1",
     "index-deconvolution/src/deconvolution.py": "6749376102315a996f0d80977b38f520f7dbce1b30db9635047f30d9158a1177",

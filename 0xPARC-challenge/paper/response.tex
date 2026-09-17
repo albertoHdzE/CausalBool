@@ -23,7 +23,7 @@
 \title{Solutions to the challenges proposed by 0xPARC\\[5pt]
 \large Exact representations, index deconvolution and constrained computation}
 \author{Alberto Hernandez-Espinosa}
-\date{15 September 2026}
+\date{17 September 2026}
 \begin{document} 
 \maketitle
 \begin{abstract}
@@ -31,11 +31,15 @@ The 0xPARC challenges ask how much can be done with a small set of permitted
 operations: recover a hidden list, construct a large majority vote, transform
 a packed vector and express integer conditions through quadratic equations.
 I present possible solutions to all eight questions and examine what their
-representations preserve. I use an index-deconvolution method in progress for
-the Boolean network, and a CausalBool-assisted Boolean-to-quadratic route for
-the arithmetic questions. Index deconvolution provides an exact account of
-the Boolean function computed by a majority circuit, including the inputs that
-determine its output and the patterns that leave some inputs free. For the Fourier
+representations preserve. An index-deconvolution method recovers a Boolean
+system's functional description from its behaviour alone; run on a canonical
+decision diagram it does so without enumerating states, which takes the exact
+recovery of a majority circuit to 151 inputs. The same method supplies the
+gates for the arithmetic questions: each cell is stated as an integer relation
+and whatever gate the method returns is what is compiled, so the classical full
+adder is recovered rather than assumed. Each answer states which of three roles
+the method plays for it, including the one question where it supplies only a
+measured limit. For the Fourier
 problem, grouping stages into three multiplication levels reduces the stated
 operation cost by factors of 6.347 and 4.743 relative to a dense construction
 at the two stated dimensions. For factorisation, explicit bounds make the
@@ -475,12 +479,12 @@ from behaviour rather than asserted.
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=4mm and 3mm]
-\node[box,text width=0.17\linewidth] (rel) {Integer relation\\$a+b+c_{\mathrm{in}}$};
-\node[box,text width=0.17\linewidth,right=of rel] (dec) {Deconvolution\\\textsc{xor}, \textsc{majority}};
-\node[box,text width=0.17\linewidth,right=of dec] (dag) {Composed DAG\\expansion verified};
-\node[box,text width=0.17\linewidth,right=of dag] (rows) {Quadratic rows\\$A(w)B(w)=C(w)$};
-\node[box,text width=0.17\linewidth,right=of rows] (check) {Replay\\Q5, Q6, Q7 at 64 bits};
+\begin{tikzpicture}[node distance=3mm and 2mm]
+\node[box,text width=0.155\linewidth] (rel) {Integer relation\\$a+b+c_{\mathrm{in}}$};
+\node[box,text width=0.155\linewidth,right=of rel] (dec) {Deconvolution\\\textsc{xor}, \textsc{maj}};
+\node[box,text width=0.155\linewidth,right=of dec] (dag) {Composed DAG\\expansion verified};
+\node[box,text width=0.155\linewidth,right=of dag] (rows) {Quadratic rows\\$AB=C$};
+\node[box,text width=0.155\linewidth,right=of rows] (check) {Replay\\Q5--Q7 at 64 bits};
 \draw[arrow] (rel) -- (dec);
 \draw[arrow] (dec) -- (dag);
 \draw[arrow] (dag) -- (rows);

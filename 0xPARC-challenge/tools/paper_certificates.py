@@ -269,21 +269,30 @@ def certificate_q4() -> dict:
 # ---------------------------------------------------------------------------
 
 def certificate_cells() -> dict:
-    """Every cell compiled into an arithmetic answer, as the method named it."""
-    def comparator(bound_bit):
-        return recover_cell(f"comparator_bound_{bound_bit}", 3, (
-            lambda bits, b=bound_bit: 1 if bits[0] or (bits[1] and not bits[2] and b) else 0,
-            lambda bits, b=bound_bit: 1 if bits[1] and bits[2] == b else 0))
+    """Every cell compiled into an arithmetic answer, as the method named it.
+
+    The cells are taken from the builders that use them, not re-derived here, so
+    this certificate cannot drift from what is actually compiled.
+    """
+    from oxparc_challenge.boolean_arithmetic import _comparator_step, _difference_step
 
     cells = {"full_adder": full_adder_cell(), "partial_product": partial_product_cell(),
-             "comparator_bound_0": comparator(0), "comparator_bound_1": comparator(1)}
+             "comparator_bound_0": _comparator_step(0), "comparator_bound_1": _comparator_step(1),
+             "difference_bit_0": _difference_step(0), "difference_bit_1": _difference_step(1)}
     expansions = 0
     for group in cells.values():
         for gate in group:
             assert verify_expansion(gate), gate.as_dict()
             expansions += 1
+    # The classical identities, recovered rather than written down.
+    assert [g.gate for g in cells["full_adder"]] == ["XOR", "MAJORITY"]
+    assert [g.gate for g in cells["partial_product"]] == ["AND"]
     return {"cells": {name: [g.as_dict() for g in group] for name, group in cells.items()},
             "expansions_verified_by_root_identity": expansions,
+            "used_by": {"Q5": ["comparator_bound_0", "comparator_bound_1"],
+                        "Q6": ["comparator_bound_0", "comparator_bound_1",
+                               "difference_bit_0", "difference_bit_1"],
+                        "Q7": ["full_adder", "partial_product"]},
             "note": "sum = XOR and carry = MAJORITY are returned by the method from the "
                     "relation a + b + carry_in; neither gate is named in the source"}
 
