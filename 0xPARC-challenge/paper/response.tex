@@ -52,22 +52,50 @@ methods, validation, interpretations and claims are original to the author,
 who takes responsibility for the final content and for independently checking
 the cited sources.
 
-\section{Index deconvolution and CausalBool as supporting capabilities}
+\section{What index deconvolution does for each answer}
 \label{sec:index-capability}
 
-Q2 uses index deconvolution by treating the Boolean network as an integrated
-system: from its complete finite input--output repertoire, perturbations
-isolate a specified output condition, and an exact index/schema description
-can be replayed and queried. This capability follows the
-algorithmic-information-dynamics perspective of using interventions and
-generative descriptions to expose structure and support explanation
-~\cite{hernandez2019aid,hernandez2021aid}. Q5 and Q6 additionally use the
-CausalBool gate evaluator as the semantic layer of a Boolean-to-quadratic
-compiler; Q7 uses the same route for an exact width-four multiplier. The
-arithmetic route is implementation-grounded while retaining the original
-direct constructions for the full 64-bit and 4096-bit questions. The two
-roles, their evidence and their limits are given in Supplementary
-Sections~S10--S11.
+Index deconvolution takes the complete finite input--output repertoire of a
+Boolean system and returns, for each output, the inputs that actually matter
+and the gate acting on them. Single-bit perturbations isolate the responsive
+coordinates; the restricted behaviour is then matched against a canonical gate
+family. The recovered description is replayed forward and must reproduce the
+original behaviour exactly. This follows the algorithmic-information-dynamics
+practice of using interventions and generative descriptions to expose
+structure~\cite{hernandez2019aid,hernandez2021aid}.
+
+A method is only as useful as the claims it actually carries, so each answer
+below states which of three roles the method plays. It \textbf{derives} an
+answer when the object compiled into that answer is what the method returned.
+It \textbf{certifies} an answer when the answer is argued another way and the
+method recovers and verifies a decisive Boolean part of it exactly. It
+\textbf{bounds} an answer when it does not produce the answer at all and what
+it contributes is a measurement of why.
+
+\begin{center}
+\begin{tabular}{llp{0.56\linewidth}}
+\toprule
+ & Role & What the method supplies\\\midrule
+Q1 & certifies & every decoder output bit reads one position of its own digit window\\
+Q2 & derives & majority recovered to 151 inputs, identical to an independent threshold\\
+Q3 & certifies & the emitted schedule's dependency support, recovered and shown total\\
+Q4 & certifies & the solution-set structure for each tractable prime\\
+Q5 & derives & the comparator the range predicate is built from\\
+Q6 & derives & the comparator and inequality cells at 254 bits\\
+Q7 & derives & the full adder and partial product the 64-bit multiplier is built from\\
+Q8 & bounds & a measurement of where the representation stops working\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Two consequences are worth stating plainly at the outset. The arithmetic cells
+are not written down anywhere in the source: each is stated as an integer
+relation, handed to the method, and whatever gate comes back is what gets
+compiled. For the full adder the method returns sum as \textsc{xor} and carry
+as \textsc{majority} without either being named. And Q8's answer is the direct
+limb construction of Section~\ref{sec:q8}; the method does not produce it, and
+Section~\ref{sec:q8} reports the measurement that explains why. Supplementary
+Sections~S10--S11 give the evidence, the denominators and the limits.
 
 \section{Introduction}
 The challenges, presented through 3Blue1Brown, bring together several kinds
@@ -84,22 +112,27 @@ mathematical ingredients include positional encoding, majority identities,
 Fourier factorisation and binary arithmetic. These have established
 precedents~\cite{cohen,cheon}. The contribution of this response is to connect
 the solutions to explicit representations that can be checked in both
-directions. Index deconvolution adds a functional description to the Boolean
-construction: from its complete input--output table, we recover which inputs
-matter and reconstruct the output exactly. CausalBool also supplies the
-semantic execution layer for Boolean DAGs that are lowered to the frozen
-quadratic-row format; this is used fully for Q5 and Q6 and at width four for
-Q7. The Fourier study makes the tradeoff between depth and operation count
-explicit, while the direct arithmetic study identifies the bounds needed to
-prevent a modular equality from accepting a false integer product.
+directions, and to be exact about which direction carries which claim.
 
-These are different uses of exact representation. Index deconvolution applies
-to the Boolean repertoire, and CausalBool gate execution supports the new
-Boolean arithmetic compiler; neither is used to derive the Fourier schedule.
-The full-width Q7 and Q8 constructions remain direct quadratic systems, while
-the CausalBool Q7 result is bounded to four bits. Keeping these roles explicit
-lets us identify which conclusions follow from a proof and which are
-established by finite checks.
+Running an answer forwards and recovering it backwards are different acts. A
+circuit tells us how to compute an output. Its repertoire is the complete table
+of outputs over all input states, and index deconvolution starts from that
+table to ask which inputs matter and what function they compute. Where the
+recovered description is what we then compile, the method has done the work.
+Where the answer rests on a proof over unbounded integers, or on complex
+arithmetic, or on the field's own multiplication, it has not, and the table in
+Section~\ref{sec:index-capability} says so.
+
+One practical point decides how far any of this reaches. Deconvolution was
+originally defined over a materialised repertoire, which costs $2^n$ and caps
+every claim built on it at a dozen or so inputs. The same three steps run
+instead on an ordered decision diagram, where a canonical representation makes
+structural identity the same thing as agreement on all $2^n$ inputs. Essential
+variables become a comparison of two restrictions, gate naming becomes an
+identity test, and verification becomes an identity test on the recompiled
+system. Nothing is sampled and nothing is approximated; what disappears is the
+need to write the repertoire down. That is why Q2 below reaches 151 inputs
+rather than eleven, and it is also why Q8 does not reach at all.
 
 \section{Recovering a hidden list (Q1)}
 Suppose the hidden list contains positive integers $v_0,\ldots,v_{n-1}$.
@@ -257,12 +290,41 @@ active indices. This explains why index deconvolution does not remove
 inputs from true majority, even though its output set admits schemata with
 free positions.
 
-The constructed circuits were exhaustively checked through 11 inputs;
-exact decision diagrams extend the circuit comparison to 13 and 15.
-The additional deconvolution check recovers every functional input and
-reconstructs every output for odd sizes 1 through 11, covering 2,730 states.
-This recovers the computed function, not a unique arrangement of internal
-gates. Several different circuits can have the same repertoire.
+Recovery is not limited to circuits small enough to tabulate. Run on the
+decision diagram, deconvolution recovers the emitted circuit at 151 inputs:
+every one of the 151 inputs comes back essential, the gate comes back as
+majority, and the recovered object is identical to a threshold function built
+independently of the majority construction. That identity settles agreement on
+all $2^{151}$ input states at once, and not one of them is enumerated. The
+diagram holds 41{,}196{,}123 nodes for a circuit of 8{,}116{,}950 gates.
+
+Table~\ref{tab:majority} lists the ladder. It grows as roughly $n^{4}$, which
+is what lets the method climb: the running count of active inputs is all a
+majority needs to remember, so the description stays small as $n$ grows. Not
+every function is so obliging, and Section~\ref{sec:q8} reports one that is
+not.
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{Recovering majority from its own behaviour.} Each row is the
+emitted circuit at that size, deconvolved and compared with an independently
+built threshold function. Every input is recovered as essential and every
+comparison is an identity, so the agreement holds on all $2^n$ states without
+enumerating any.}\label{tab:majority}
+\begin{tabular}{rrrl}
+\toprule
+$n$ & Gates & Decision nodes & States covered\\\midrule
+11 & 205 & 1{,}473 & $2{,}048$\\
+31 & 14{,}190 & 77{,}573 & $2^{31}$\\
+63 & 245{,}086 & 1{,}273{,}757 & $2^{63}$\\
+101 & 1{,}623{,}175 & 8{,}304{,}498 & $2^{101}$\\
+151 & 8{,}116{,}950 & 41{,}196{,}123 & $2^{151}$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+What is recovered is the computed function, not a unique arrangement of
+internal gates. Several different circuits can share one repertoire.
 
 Nor are an input count and an output frequency sufficient certificates.
 A majority of three disjoint three-input majorities uses all nine inputs
@@ -370,36 +432,70 @@ integer equality. A valid factorisation supplies a witness, and a satisfying
 witness gives a valid factorisation. These direct constraints verify supplied
 factors; they do not provide an algorithm for finding them.
 
-The implementation adds a second route for the arithmetic questions. The
-CausalBool evaluator~\cite{causalbool} executes each gate of an acyclic
-Boolean DAG, and the compiler lowers the same gates to the existing
-quadratic-row schema. Q5 is demonstrated at 64 bits with 321 serialized rows;
-Q6 uses a 254-bit canonical comparator and exclusion predicate with 2,499
-rows. Q7 uses a complete width-four shift-and-add multiplier with 407 rows;
-all $16^3=4096$ assignments are checked against the independent predicate,
-including the 4,080 invalid assignments. This route is exact for the stated
-finite systems, but its Q7 result is bounded to four bits and does not replace
-the direct 64-bit Q7 or 4096-bit Q8 constructions.
+\subsection{Building the same conditions out of recovered gates}
+The direct equations above are short because they borrow the field's own
+arithmetic. The second route asks a different question: if we are only allowed
+Boolean gates, which gates are they, and who chooses them? Here nothing is
+chosen by hand. Each cell is stated as an integer relation, its complete
+behaviour is handed to index deconvolution, and the gate that comes back is
+what gets compiled.
+
+Handed the relation $a+b+c_{\mathrm{in}}$ and nothing else, the method returns
+the sum bit as \textsc{xor} on all three inputs and the carry bit as
+\textsc{majority} on all three. The classical full adder is recovered rather
+than recalled. Handed the one-bit product it returns \textsc{and}. Handed a
+running comparison it returns the comparator recurrence, and once the bound bit
+is fixed it specialises on its own: against a bound bit of zero it reports that
+the outgoing ``less'' depends on the incoming ``less'' alone, because no new
+strict inequality can arise there. That specialisation is found, not applied
+afterwards.
+
+A recovered gate names a function of any arity, while the constraint layer
+carries two- and three-input gates, so the expansion between them is an
+obligation rather than a convenience. It is discharged by identity for every
+gate the method can return at the arities in use, and for every function of one
+to three variables.
+
+Q5 is the range predicate $x<2^{64}$ built from the recovered comparator, over a
+decomposition one bit wider than the bound so that out-of-range values are
+representable and only the comparator excludes them. Q6 uses the same
+comparator at 254 bits together with a recovered inequality cell. Q7 is a
+shift-and-add multiplier assembled from the recovered full adder and partial
+product, at the full 64 bits the question asks for: 107{,}271 rows over
+53{,}572 signals. It accepts genuine factorisations including semiprimes whose
+product needs all 64 bits, and rejects trivial factors, wrong products, and a
+pair of 34-bit factors whose product overflows 64 bits and would otherwise pass
+as its truncated residue. Exhaustive enumeration is complete at the widths
+where it is possible: every one of the 299{,}008 triples at widths four, five
+and six agrees with an independent integer predicate.
+
+This route is larger than the direct one everywhere, and no efficiency claim is
+made for it. What it buys is that the gates doing the arithmetic were derived
+from behaviour rather than asserted.
 
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=4mm and 3mm]
-\node[box,text width=0.18\linewidth] (dag) {Boolean DAG\\ordered inputs and gates};
-\node[box,text width=0.18\linewidth,right=of dag] (engine) {CausalBool\\gate evaluation};
-\node[box,text width=0.18\linewidth,right=of engine] (rows) {Quadratic lowering\\$A(w)B(w)=C(w)$};
-\node[box,text width=0.18\linewidth,right=of rows] (check) {Serialized replay\\Q5, Q6, Q7 width 4};
-\draw[arrow] (dag) -- (engine);
-\draw[arrow] (engine) -- (rows);
+\node[box,text width=0.17\linewidth] (rel) {Integer relation\\$a+b+c_{\mathrm{in}}$};
+\node[box,text width=0.17\linewidth,right=of rel] (dec) {Deconvolution\\\textsc{xor}, \textsc{majority}};
+\node[box,text width=0.17\linewidth,right=of dec] (dag) {Composed DAG\\expansion verified};
+\node[box,text width=0.17\linewidth,right=of dag] (rows) {Quadratic rows\\$A(w)B(w)=C(w)$};
+\node[box,text width=0.17\linewidth,right=of rows] (check) {Replay\\Q5, Q6, Q7 at 64 bits};
+\draw[arrow] (rel) -- (dec);
+\draw[arrow] (dec) -- (dag);
+\draw[arrow] (dag) -- (rows);
 \draw[arrow] (rows) -- (check);
 \end{tikzpicture}
-\caption{\textbf{CausalBool-assisted arithmetic route.} The Boolean DAG is
-evaluated through the existing CausalBool gate semantics and lowered to the
-frozen quadratic-row representation. Independent serialized replay verifies
-Q5 and Q6 at their stated widths and Q7 exhaustively at width four.}
+\caption{\textbf{From a stated relation to verified constraints.} The cell
+enters as an integer relation, not as a circuit. Deconvolution names its gates,
+the expansion into the constraint layer's gate set is verified by identity, and
+the resulting rows are replayed against an independent predicate. No gate in
+this chain is written down by hand.}
 \label{fig:causalbool-route}
 \end{figure}
 
 \subsection{A large factorisation and the role of carries}
+\label{sec:q8}
 A 4096-bit integer exceeds the field modulus, so one field element cannot
 hold it. For Q8, split each integer into 64 pieces, or \emph{limbs}, in
 base $B=2^{64}$. Each limb is a 64-bit integer:
@@ -440,14 +536,62 @@ multiplication produces carries within these bounds. Together with
 nontrivial factors and the zero upper outputs, this proves the equivalence
 between a satisfying assignment and the intended integer factorisation.
 
-The original direct systems contain 65, 1, 200 and 25,725 quadratic rows for
-Q5--Q8. The CausalBool systems contain 321, 2,499 and 407 rows for Q5, Q6
-and bounded Q7, respectively. Checks evaluate their equations directly,
-including altered bits, partial products, carries and public values. A useful negative control
-removes the carry bounds: the false integer statement
-$2((P+7)/2)=7$ can then satisfy the multiplication columns modulo $P$.
-Restoring the bounds rejects it. Supplementary Sections S7--S10 give
-completeness and soundness proofs and the compiled verification record.
+Checks evaluate these equations directly, including altered bits, partial
+products, carries and public values. A useful negative control removes the
+carry bounds: the false integer statement $2((P+7)/2)=7$ can then satisfy the
+multiplication columns modulo $P$. Restoring the bounds rejects it.
+Supplementary Sections S7--S10 give completeness and soundness proofs and the
+compiled verification record.
+
+\subsection{Where the recovered route stops, and why}
+Q8 is answered above, and the recovered route of the previous subsection is not
+what answers it. It is worth being precise about why, because the reason is not
+effort.
+
+The obvious attempt is to build a 4096-bit multiplier from the same recovered
+cells that give Q7. Its cost follows an exact law, fitted over widths four to
+sixty-four and confirmed at 128: a width-$w$ multiplier has $7w^2+1$ gates and
+$26w^2+12w+7$ rows. At $w=4096$ that is 436{,}256{,}775 rows against 25{,}725
+for the limb construction, a factor of about seventeen thousand. Large, but on
+its own only an argument about expense.
+
+The real obstruction appears when we ask for the compressed description rather
+than the gate count. Deconvolution's reach comes from the decision diagram
+staying small, and whether it does is a property of the function, not of the
+implementation. Table~\ref{tab:growth} puts the two cases side by side on the
+same engine. Majority's description grows polynomially, as $n^{3.96}$ across
+six sizes, which is what carries it to 151 inputs. Multiplication's grows by a
+factor of $2.977$ for every additional bit, measured across eleven widths, and
+is already beyond a budget of eight million nodes at thirteen bits.
+Extrapolating that factor to 4096 bits gives a description of some $10^{1942}$
+nodes. The observable universe holds about $10^{80}$ atoms.
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{Why one function is recoverable at scale and the other is
+not.} Both columns are the same engine on the same machine. A majority need
+only remember how many inputs are active, so its description stays polynomial.
+A multiplier must retain every partial sum, and no summary suffices; the growth
+is geometric and the limit is intrinsic.}\label{tab:growth}
+\begin{tabular}{lrr}
+\toprule
+ & Majority & Multiplication\\\midrule
+Description size & polynomial, $n^{3.96}$ & geometric, $\times2.977$ per bit\\
+Measured over & 6 sizes, $n=31$ to $151$ & 11 widths, $w=2$ to $12$\\
+Largest built & 41{,}196{,}123 nodes & 4{,}384{,}542 nodes\\
+At that size & $n=151$, all $2^{151}$ states & $w=12$ bits\\
+Extrapolated & --- & $\approx10^{1942}$ nodes at 4096 bits\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This is not a gap awaiting a better encoding. The exponential growth of such
+descriptions for integer multiplication is a known lower bound~\cite{bryant},
+and the measurements above are that bound appearing in our own engine. The limb
+construction avoids it entirely by never going through Boolean logic: each limb
+product is one field multiplication, and the blow-up has no opportunity to
+occur. Reporting the boundary is more useful than omitting the question, since
+it says exactly which problems this method is the right instrument for.
 \FloatBarrier
 
 \section{What this response establishes}
@@ -457,13 +601,22 @@ both stated dimensions, a proof that the modular power-sum solution is
 zero, and quadratic systems equivalent to the requested integer conditions.
 Their assumptions determine what each answer means.
 
-The distinctive addition is the account of what survives each representation.
-Index deconvolution recovers functional dependence from the Boolean
-repertoire and expands its schemata back to the exact index set. The
-Fourier construction preserves the transform while making the price of a
-three-level restriction measurable under one declared model. The arithmetic
-construction preserves integer meaning inside a modular system by bounding
-every place where wraparound could occur.
+The distinctive addition is the account of what survives each representation,
+and of who supplies each answer. Index deconvolution recovers functional
+dependence from behaviour and, run on a canonical decision diagram, does so
+without writing the repertoire down: majority comes back exactly at 151 inputs,
+and the arithmetic cells that build Q5, Q6 and Q7 come back from stated integer
+relations with no gate named by hand. The Fourier construction preserves the
+transform while making the price of a three-level restriction measurable under
+one declared model. The arithmetic construction preserves integer meaning
+inside a modular system by bounding every place where wraparound could occur.
+
+The same account marks where the method does not reach. Q8 is answered by the
+limb construction and not by recovery, and the reason is measured rather than
+conceded: descriptions of integer multiplication grow geometrically in the
+width, so at 4096 bits no such description can be written down. A method worth
+using is one whose boundary is known, and this response reports both sides of
+it.
 
 The finite evidence supports these specific constructions. It includes
 small majority circuits, full target-size plaintext Fourier evaluations
@@ -494,6 +647,9 @@ Bootstrapping}. Cryptology ePrint 2018/1073.
 \url{https://eprint.iacr.org/2018/1073}.
 \bibitem{causalbool} A. Hernández-Espinosa, \emph{CausalBool}, source code
 accompanying this response, 2026.
+\bibitem{bryant} R. E. Bryant. \emph{On the Complexity of VLSI Implementations
+and Graph Representations of Boolean Functions with Application to Integer
+Multiplication}. IEEE Transactions on Computers 40(2):205--213, 1991.
 \bibitem{circom} iden3. \emph{Circom 2.2.3} and \emph{snarkjs 0.7.6}.
 \url{https://docs.circom.io/};
 \url{https://www.npmjs.com/package/snarkjs/v/0.7.6}.

@@ -41,6 +41,9 @@ def _system_stats(system: ConstraintSystem) -> dict:
             "serialized_bytes": len(serialized), "structural_sha256": _sha(serialized)}
 
 
+EXHAUSTIVE_WIDTH = 4  # Q7_WIDTH is 64; enumerating it would be 2**192 triples.
+
+
 def _check_gate_and_blocks() -> dict:
     full = build_full_adder_dag()
     full_count = 0
@@ -50,7 +53,10 @@ def _check_gate_and_blocks() -> dict:
         assert got == [expected & 1, expected >> 1]
         full_count += 1
     multipliers = {}
-    for width in range(1, Q7_WIDTH + 1):
+    # Bounded by EXHAUSTIVE_WIDTH, never by Q7_WIDTH: this loop enumerates
+    # (2**width)**2 products, so following the question's width would ask for
+    # 2**128 evaluations and never return.
+    for width in range(1, EXHAUSTIVE_WIDTH + 1):
         dag = build_multiplier_dag(width)
         count = 0
         for u in range(1 << width):
@@ -104,46 +110,91 @@ def _check_rows() -> dict:
         "Q5_legacy_64bit_range": _system_stats(build_range()),
         "Q6_legacy_field_inverse": _system_stats(build_exclude_one()),
         "Q7_legacy_64bit_factor": _system_stats(build_factor64()),
-        "note": "Counts are not like-for-like: the new route is Boolean-gate compiled; Q7 new is width 4 and legacy is width 64."
+        "note": "Q7 is now like-for-like: both routes are width 64. Q5 and Q6 are not, "
+                "because the recovered route compiles a general bound through Boolean gates "
+                "where the legacy systems use a bit count and a field inverse. The recovered "
+                "route is larger everywhere and no performance claim is made for it."
     }
     return result
 
 
-def _check_q7_exhaustive() -> dict:
-    system = build_q7().to_dict()
+def _check_q7_exhaustive(width: int = EXHAUSTIVE_WIDTH) -> dict:
+    """Every triple at a width small enough to enumerate completely."""
+    system = build_q7(width).to_dict()
     valid = invalid = 0
-    for u, v, n in itertools.product(range(1 << Q7_WIDTH), repeat=3):
+    for u, v, n in itertools.product(range(1 << width), repeat=3):
         expected = u >= 2 and v >= 2 and u * v == n
-        failures = check_rows(system, assignment_q7_bits(n, u, v, Q7_WIDTH))
+        failures = check_rows(system, assignment_q7_bits(n, u, v, width))
         if expected:
             assert failures == []
             valid += 1
         else:
             assert failures
             invalid += 1
-    assert valid + invalid == (1 << Q7_WIDTH) ** 3
-    return {"width": Q7_WIDTH, "triples": valid + invalid, "valid": valid, "invalid": invalid,
+    assert valid + invalid == (1 << width) ** 3
+    return {"width": width, "triples": valid + invalid, "valid": valid, "invalid": invalid,
             "oracle": "independent integer predicate u>=2 and v>=2 and u*v==n"}
 
 
+def _check_full_width_q7() -> dict:
+    """The width the question asks for, on genuine and adversarial assignments."""
+    system = build_q7().to_dict()
+    accepted = [(3, 5), (65537, 65539), (4294967291, 4294967279), (2, 2)]
+    for u, v in accepted:
+        assert check_rows(system, witness_q7(u * v, u, v)) == []
+    big, other = (1 << 33) + 7, (1 << 33) + 13
+    attacks = {
+        "trivial_factor_u": assignment_q7_bits(7, 1, 7),
+        "trivial_factor_v": assignment_q7_bits(7, 7, 1),
+        "all_zero": assignment_q7_bits(0, 0, 0),
+        "wrong_product": assignment_q7_bits(15, 3, 4),
+        "truncated_overflow": assignment_q7_bits((big * other) % (1 << Q7_WIDTH), big, other),
+    }
+    for name, attack in attacks.items():
+        assert check_rows(system, attack), name
+    return {"width": Q7_WIDTH, "accepted_factorisations": len(accepted),
+            "rejected_attacks": sorted(attacks),
+            "largest_accepted_product": max(u * v for u, v in accepted)}
+
+
 def _check_deconvolution() -> dict:
-    root = Path(__file__).resolve().parents[2] / "index-deconvolution" / "src"
-    sys.path.insert(0, str(root))
-    from causalbool import Network, repertoire
-    from deconvolution import deconvolve, verify_forward
-    # A six-node local repertoire contains pass-through inputs, the first XOR,
-    # full-adder sum XOR, and MAJ3 carry.  It is a deconvolution replay probe,
-    # not part of the quadratic correctness boundary.
-    network = Network(6, [
-        [1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0],
-        [1, 1, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0], [1, 1, 1, 0, 0, 0],
-    ], ["OR", "OR", "OR", "XOR", "XOR", "MAJORITY"])
-    original = repertoire(network)
-    recovered, reports = deconvolve(original)
-    replay = verify_forward(original, recovered)
-    assert replay["exact"]
-    return {"nodes": 6, "rows": len(original), "exact_forward_replay": True,
-            "canonical_gates": [report.canonical.gate for report in reports]}
+    """Check the cells actually compiled into Q5, Q6 and Q7 are recovered ones.
+
+    This replaces a six-node replay probe that verified nothing about the
+    constraint systems. Every cell below is named by the method from a stated
+    integer relation, and every expansion into the DAG gates is discharged by
+    root identity rather than assumed.
+    """
+    from oxparc_challenge.boolean_arithmetic import (
+        _comparator_step, _difference_step, full_adder_cell, partial_product_cell,
+        verify_expansion)
+
+    cells = {"full_adder": full_adder_cell(), "partial_product": partial_product_cell(),
+             "comparator_bound_0": _comparator_step(0), "comparator_bound_1": _comparator_step(1),
+             "difference_bit_0": _difference_step(0), "difference_bit_1": _difference_step(1)}
+    recovered, expansions = {}, 0
+    for name, group in cells.items():
+        for gate in group:
+            assert verify_expansion(gate), name
+            expansions += 1
+        recovered[name] = [g.as_dict() for g in group]
+    # The classical identities, recovered rather than written down.
+    assert [g.gate for g in cells["full_adder"]] == ["XOR", "MAJORITY"]
+    assert [g.gate for g in cells["partial_product"]] == ["AND"]
+    return {"cells": recovered, "expansions_verified_by_root_identity": expansions,
+            "used_by": {"Q5": ["comparator_bound_0", "comparator_bound_1"],
+                        "Q6": ["comparator_bound_0", "comparator_bound_1",
+                               "difference_bit_0", "difference_bit_1"],
+                        "Q7": ["full_adder", "partial_product"]},
+            "note": "sum = XOR and carry = MAJORITY are returned by the method from the "
+                    "relation a + b + carry_in; neither gate is named in the source"}
+
+
+# What index deconvolution does for each question. BOUNDS is not a softer
+# DERIVES: for Q8 the method supplies a measured limit, and the answer itself is
+# the direct limb construction. Detail and denominators in paper_certificates.py.
+ROLE_LEDGER = {"Q1": "CERTIFIES", "Q2": "DERIVES", "Q3": "CERTIFIES", "Q4": "CERTIFIES",
+               "Q5": "DERIVES", "Q6": "DERIVES", "Q7": "DERIVES", "Q8": "BOUNDS"}
 
 
 def _compile_if_requested(output: Path, systems: dict) -> dict:
@@ -176,16 +227,21 @@ def main() -> int:
     gate = _check_gate_and_blocks()
     rows = _check_rows()
     q7 = _check_q7_exhaustive()
+    q7_full = _check_full_width_q7()
     deconv = _check_deconvolution()
     systems = {"Q5": build_q5(), "Q6": build_q6(), "Q7": build_q7()}
     compile_status = _compile_if_requested(args.output.with_suffix(".compile.json"), systems) if args.compile else {"status": "UNKNOWN", "reason": "not attempted"}
-    report = {"status": "PASS", "q7_scope": "width=4 exhaustive only", "gate_and_blocks": gate,
-              "rows": rows, "q7_exhaustive": q7, "deconvolution": deconv,
+    report = {"status": "PASS", "role_ledger": ROLE_LEDGER,
+              "q7_scope": f"width {Q7_WIDTH} built and attacked; exhaustive enumeration "
+                          f"at width {q7['width']}, where it is complete",
+              "gate_and_blocks": gate, "rows": rows, "q7_exhaustive": q7,
+              "q7_full_width": q7_full, "deconvolution": deconv,
               "compile": compile_status, "elapsed_seconds": time.monotonic() - started}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"status": report["status"], "output": str(args.output),
-                      "q7_triples": q7["triples"], "elapsed_seconds": report["elapsed_seconds"]}, sort_keys=True))
+                      "q7_triples": q7["triples"], "q7_full_width": q7_full["width"],
+                      "elapsed_seconds": report["elapsed_seconds"]}, sort_keys=True))
     return 0
 
 

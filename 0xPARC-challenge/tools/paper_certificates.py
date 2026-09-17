@@ -1,15 +1,21 @@
 """Index-deconvolution certificates for every question, and the role ledger.
 
-Each question declares what index deconvolution actually does for it. Only two
-roles are load-bearing:
+Each question declares what index deconvolution actually does for it:
 
   DERIVES    the object compiled into the answer is what deconvolution returned;
   CERTIFIES  the answer is argued another way, and deconvolution recovers and
-             verifies a decisive Boolean sub-object of it exactly.
+             verifies a decisive Boolean sub-object of it exactly;
+  BOUNDS     the method does not answer the question, and what it supplies is a
+             measurement of why. This is not a softer DERIVES. It is the honest
+             label for Q8, whose answer is the direct limb construction.
 
-Anything weaker is written down as ILLUSTRATES and claimed as nothing more.
 Every certificate states its own denominator, because agreement over an empty
-case list is the failure this file exists to prevent.
+case list is the failure this file exists to prevent, and names what it does
+not claim, because a certificate that only lists successes is advocacy.
+
+Expensive ladders are recorded rather than rerun on every invocation. The
+``--full`` flag reruns them and asserts they reproduce the recorded values
+exactly, so a stale number fails instead of quietly persisting.
 """
 import hashlib
 import itertools
@@ -83,34 +89,63 @@ def certificate_q1() -> dict:
 # Q2 - majority, recovered from its own repertoire
 # ---------------------------------------------------------------------------
 
-def certificate_q2(limit: int = 63) -> dict:
-    """Recover majority from the emitted circuit and check it against a spec."""
-    from oxparc_challenge.boolean import build_majority
+# Recovered majority sizes. The last three take minutes to rebuild, so they are
+# recorded and rerun under --full, which asserts they reproduce exactly.
+MAJORITY_SIZES = (1, 3, 5, 7, 9, 11, 13, 15, 21, 31, 41, 51, 63, 101, 151)
+MAJORITY_CHEAP = 63
+MAJORITY_RECORDED = {
+    63: {"gates": 245086, "decision_nodes": 1273757},
+    101: {"gates": 1623175, "decision_nodes": 8304498},
+    151: {"gates": 8116950, "decision_nodes": 41196123},
+}
+
+
+def _recover_majority(n: int) -> dict:
+    """Build majority at ``n``, recover it, and check it against a specification."""
+    from oxparc_challenge.boolean import build_majority, BuildLimits
     engine = D._program_module()
+    circuit = build_majority(n, BuildLimits(max_gates=50_000_000,
+                                            max_subproblems=50_000_000,
+                                            timeout_seconds=1800))
+    manager = D.symbolic_manager(n, engine.ProgramLimits(max_nodes=60_000_000,
+                                                         timeout_seconds=1800))
+    refs = [manager.mk(i, 0, 1) for i in range(n)]
+    for gate in circuit.gates:
+        a, b, c = (refs[r] for r in gate.operands)
+        refs.append(manager.apply('or', manager.apply('and', a, b),
+                                  manager.apply('or', manager.apply('and', a, c),
+                                                manager.apply('and', b, c))))
+    root = refs[circuit.outputs[0]]
+    report = D.deconvolve_root(manager, root, 0, max_table_bits=0)
+    specification = manager.threshold(list(range(n)), n // 2 + 1)
+    assert report.connected_inputs == list(range(n)), "an input was found inessential"
+    assert root == specification, "recovered circuit is not majority"
+    return {"n": n, "gates": len(circuit.gates), "states": 2 ** n,
+            "decision_nodes": len(manager.nodes), "all_inputs_essential": True,
+            "gate": report.canonical.gate, "identity_with_threshold_specification": True}
+
+
+def certificate_q2(full: bool = False) -> dict:
+    """Recover majority from the emitted circuit and check it against a spec."""
     records = []
-    for n in (1, 3, 5, 7, 9, 11, 13, 15, 21, 31, limit):
-        circuit = build_majority(n)
-        manager = D.symbolic_manager(n, engine.ProgramLimits(max_nodes=20_000_000,
-                                                             timeout_seconds=600))
-        refs = [manager.mk(i, 0, 1) for i in range(n)]
-        for gate in circuit.gates:
-            a, b, c = (refs[r] for r in gate.operands)
-            refs.append(manager.apply('or', manager.apply('and', a, b),
-                                      manager.apply('or', manager.apply('and', a, c),
-                                                    manager.apply('and', b, c))))
-        root = refs[circuit.outputs[0]]
-        report = D.deconvolve_root(manager, root, 0, max_table_bits=0)
-        specification = manager.threshold(list(range(n)), n // 2 + 1)
-        assert report.connected_inputs == list(range(n)), "an input was found inessential"
-        assert root == specification, "recovered circuit is not majority"
-        records.append({"n": n, "gates": len(circuit.gates), "states": 2 ** n,
-                        "decision_nodes": len(manager.nodes),
-                        "all_inputs_essential": True, "gate": report.canonical.gate,
-                        "identity_with_threshold_specification": True})
+    for n in MAJORITY_SIZES:
+        if n <= MAJORITY_CHEAP or full:
+            record = _recover_majority(n)
+            if n in MAJORITY_RECORDED:
+                for key, value in MAJORITY_RECORDED[n].items():
+                    assert record[key] == value, (n, key, record[key], value)
+            records.append({**record, "source": "rerun"})
+        else:
+            records.append({"n": n, "states": 2 ** n, "all_inputs_essential": True,
+                            "gate": "MAJORITY", "identity_with_threshold_specification": True,
+                            **MAJORITY_RECORDED[n], "source": "recorded"})
     return {"role": "DERIVES", "cases": records,
             "largest_n": records[-1]["n"], "largest_states": records[-1]["states"],
+            "largest_decision_nodes": records[-1]["decision_nodes"],
+            "states_enumerated": 0,
             "claim": "majority is recovered from behaviour and matches an independently "
-                     "built threshold by canonical node identity, with no state enumerated",
+                     "built threshold by canonical node identity, to 151 inputs and 2**151 "
+                     "states, with no state enumerated",
             "not_claimed": "a unique circuit; several arrangements share one repertoire"}
 
 
@@ -332,25 +367,100 @@ def certificate_q7(full: bool = False) -> dict:
             "not_claimed": "exhaustive enumeration at 64 bits, which is 2**192 triples"}
 
 
-def certificate_q8() -> dict:
-    """State plainly what deconvolution does and does not do for Q8."""
+# Decision-program size for the whole multiplier, built one width at a time.
+# Recorded because the ladder takes about a minute and the last widths are large;
+# --full rebuilds it and must reproduce these node counts exactly.
+MULTIPLIER_PROGRAM_NODES = {2: 18, 3: 104, 4: 491, 5: 1811, 6: 6062, 7: 18754,
+                            8: 56611, 9: 168845, 10: 501957, 11: 1484787, 12: 4384542}
+# Measured in certificate_q2, same engine, same machine.
+MAJORITY_PROGRAM_NODES = {31: 77573, 41: 232948, 51: 551623, 63: 1273757,
+                          101: 8304498, 151: 41196123}
+
+
+def _multiplier_program_nodes(width: int) -> int:
+    """Build the multiplier's decision program and return its node count."""
+    engine = D._program_module()
+    dag = build_multiplier_dag(width)
+    manager = D.symbolic_manager(2 * width,
+                                 engine.ProgramLimits(max_nodes=8_000_000, timeout_seconds=600))
+    refs = [manager.mk(i, 0, 1) for i in range(2 * width)]
+    for gate in dag.gates:
+        args = [refs[r] for r in gate.operands]
+        if gate.kind == "TRUE":
+            refs.append(1)
+        elif gate.kind == "FALSE":
+            refs.append(0)
+        elif gate.kind == "NOT":
+            refs.append(manager.negate(args[0]))
+        elif gate.kind == "MAJORITY":
+            ab = manager.apply("and", args[0], args[1])
+            ac = manager.apply("and", args[0], args[2])
+            bc = manager.apply("and", args[1], args[2])
+            refs.append(manager.apply("or", ab, manager.apply("or", ac, bc)))
+        else:
+            refs.append(manager.apply({"AND": "and", "OR": "or", "XOR": "xor"}[gate.kind],
+                                      args[0], args[1]))
+    return len(manager.nodes)
+
+
+def certificate_q8(full: bool = False) -> dict:
+    """Measure where the program representation stops working, and say so.
+
+    Q8 itself is answered, by the direct limb construction with completeness and
+    soundness proofs. What is measured here is why index deconvolution is not the
+    thing answering it. The same engine that carries majority to 151 inputs
+    cannot represent multiplication at all beyond about twelve bits, and the
+    reason is a property of the function rather than of the implementation.
+    """
+    import math
+
+    nodes = {}
+    for width, recorded in sorted(MULTIPLIER_PROGRAM_NODES.items()):
+        if full:
+            measured = _multiplier_program_nodes(width)
+            assert measured == recorded, (width, measured, recorded)
+            nodes[width] = {"nodes": measured, "source": "rerun"}
+        else:
+            nodes[width] = {"nodes": recorded, "source": "recorded"}
+    widths = sorted(MULTIPLIER_PROGRAM_NODES)
+    ratios = [MULTIPLIER_PROGRAM_NODES[b] / MULTIPLIER_PROGRAM_NODES[a]
+              for a, b in zip(widths, widths[1:])]
+    base = sum(ratios[-5:]) / 5
+    exponent = (math.log10(MULTIPLIER_PROGRAM_NODES[widths[-1]])
+                + (4096 - widths[-1]) * math.log10(base))
+
+    majority = sorted(MAJORITY_PROGRAM_NODES)
+    degree = (math.log(MAJORITY_PROGRAM_NODES[majority[-1]] / MAJORITY_PROGRAM_NODES[majority[0]])
+              / math.log(majority[-1] / majority[0]))
+
     gates = 7 * 4096 ** 2 + 1
     rows = 26 * 4096 ** 2 + 12 * 4096 + 7
-    return {"role": "ILLUSTRATES", "boolean_route_gates": gates, "boolean_route_rows": rows,
-            "direct_limb_rows": 25725, "ratio": round(rows / 25725),
-            "claim": "the recovered carry cell is shared with Q7, and the cost of a bit-level "
-                     "route at this width is measured rather than asserted",
-            "not_claimed": "that index deconvolution derives Q8. The limb construction is "
-                           "field arithmetic, and the 70-bit carry bound is an arithmetic "
-                           "argument the method does not supply"}
+    return {"role": "BOUNDS",
+            "question_is_answered_by": "the direct limb construction, proved complete and sound",
+            "multiplier_program_nodes": nodes,
+            "multiplier_growth_per_bit": round(base, 3),
+            "multiplier_growth_ratios": [round(r, 3) for r in ratios],
+            "multiplier_nodes_at_4096_log10": round(exponent),
+            "atoms_in_observable_universe_log10": 80,
+            "majority_program_nodes": MAJORITY_PROGRAM_NODES,
+            "majority_growth_degree": round(degree, 2),
+            "boolean_route_gates": gates, "boolean_route_rows": rows,
+            "direct_limb_rows": 25725, "row_ratio": round(rows / 25725),
+            "claim": "majority's program grows polynomially, as n**%.2f over six sizes, and "
+                     "carries the method to 151 inputs; multiplication's grows by a factor of "
+                     "%.3f per bit over eleven widths, so at 4096 bits the program would need "
+                     "about 10**%d nodes. The limit is a property of the function"
+                     % (degree, base, round(exponent)),
+            "not_claimed": "that Q8 is unanswered. It is answered and proved; index "
+                           "deconvolution is simply not what answers it"}
 
 
 def main():
     full = '--full' in sys.argv
     certificates = {
-        "Q1": certificate_q1(), "Q2": certificate_q2(), "Q3": certificate_q3(),
+        "Q1": certificate_q1(), "Q2": certificate_q2(full), "Q3": certificate_q3(),
         "Q4": certificate_q4(), "Q5": certificate_q5(), "Q7": certificate_q7(full),
-        "Q8": certificate_q8(), "cells": certificate_cells(),
+        "Q8": certificate_q8(full), "cells": certificate_cells(),
     }
     sources = [Path(__file__), ROOT/'src/oxparc_challenge/boolean_arithmetic.py',
                ROOT/'src/oxparc_challenge/boolean_constraints.py',

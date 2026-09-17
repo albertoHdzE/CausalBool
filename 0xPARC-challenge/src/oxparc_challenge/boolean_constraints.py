@@ -221,6 +221,7 @@ def _q5_dag() -> BooleanDAG:
     return build_less_than_constant_dag(Q5_WIDTH, Q5_BOUND)
 
 
+@lru_cache(maxsize=None)
 def build_q5() -> ConstraintSystem:
     """Scalar range relation (Q5): ``x`` lies in ``[0, 2**64)``.
 
@@ -229,7 +230,7 @@ def build_q5() -> ConstraintSystem:
     """
     bits = [f"x_b{i}" for i in range(Q5_WIDTH)]
     dag = _q5_dag()
-    lowered = lower_boolean_dag(dag, bits, prefix="q5")
+    lowered = _cached_lowering(dag, tuple(bits), "q5")
     below = lowered.wire_signals[dag.outputs[0]]
     return _system([], ["x"], bits + list(lowered.auxiliary_signals),
                    list(lowered.constraints) +
@@ -278,11 +279,12 @@ def _q6_dag() -> BooleanDAG:
     return b.finish((lt, neq))
 
 
+@lru_cache(maxsize=None)
 def build_q6() -> ConstraintSystem:
     """Canonical field-element exclusion relation (Q6), compiled from gates."""
     bits = [f"r_b{i}" for i in range(Q6_WIDTH)]
     dag = _q6_dag()
-    lowered = lower_boolean_dag(dag, bits, prefix="q6")
+    lowered = _cached_lowering(dag, tuple(bits), "q6")
     lt, neq = (lowered.wire_signals[ref] for ref in dag.outputs)
     rows = list(lowered.constraints)
     rows.extend([_pack("r", bits, "r_pack"), _assert_one(lt, "canonical_lt_prime"),
@@ -340,6 +342,7 @@ def _q7_dag(width: int) -> BooleanDAG:
     return b.finish(refs)
 
 
+@lru_cache(maxsize=None)
 def build_q7(width: int = Q7_WIDTH) -> ConstraintSystem:
     """Factor-verification relation at ``width`` bits, from the recovered cells."""
     width = _width(width)
@@ -349,7 +352,7 @@ def build_q7(width: int = Q7_WIDTH) -> ConstraintSystem:
     vbits = [f"v_b{i}" for i in range(width)]
     inputs = ubits + vbits
     dag = _q7_dag(width)
-    lowered = lower_boolean_dag(dag, inputs, prefix="q7")
+    lowered = _cached_lowering(dag, tuple(inputs), "q7")
     rows = list(lowered.constraints)
     product = [lowered.wire_signals[ref] for ref in dag.outputs[:product_width]]
     stage_carries = [lowered.wire_signals[ref] for ref in dag.outputs[product_width:]]
@@ -358,8 +361,8 @@ def build_q7(width: int = Q7_WIDTH) -> ConstraintSystem:
     rows.extend(_assert_zero(carry, f"stage_carry_zero_{i}") for i, carry in enumerate(stage_carries))
     rows.extend(_assert_bit(bit, f"public_n_bit_{i}") for i, bit in enumerate(nbits))
     lower_dag = _q7_lower_dag(width)
-    lower = lower_boolean_dag(lower_dag, ubits, prefix="q7_u")
-    lower_v = lower_boolean_dag(lower_dag, vbits, prefix="q7_v")
+    lower = _cached_lowering(lower_dag, tuple(ubits), "q7_u")
+    lower_v = _cached_lowering(lower_dag, tuple(vbits), "q7_v")
     rows.extend(lower.constraints)
     rows.extend(lower_v.constraints)
     rows.extend([_assert_one(lower.wire_signals[-1], "factor_u_ge_two"),

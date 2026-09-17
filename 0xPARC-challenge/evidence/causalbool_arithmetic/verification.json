@@ -1,25 +1,206 @@
 {
   "compile": {
-    "Q5": {
-      "reason": "Circom compiler unavailable: /Users/alberto/Documents/projects/CausalBool/0xPARC-challenge/.tools/circom",
-      "source_sha256": "4d99ab24967317b60a49a3bb32e2d4f50c2b48437b65b7ca2949d6d3a3abefc8",
-      "status": "UNKNOWN"
-    }
+    "reason": "not attempted",
+    "status": "UNKNOWN"
   },
   "deconvolution": {
-    "canonical_gates": [
-      "AND",
-      "AND",
-      "AND",
-      "XOR",
-      "XOR",
-      "MAJORITY"
-    ],
-    "exact_forward_replay": true,
-    "nodes": 6,
-    "rows": 64
+    "cells": {
+      "comparator_bound_0": [
+        {
+          "ambiguity_class": [
+            "AND",
+            "CANALISING",
+            "KOFN",
+            "MAJORITY",
+            "OR",
+            "REGULATORY",
+            "XOR"
+          ],
+          "connected_inputs": [
+            0
+          ],
+          "gate": "AND",
+          "output": 0,
+          "params": {}
+        },
+        {
+          "ambiguity_class": [
+            "CANALISING",
+            "NIMPLIES",
+            "REGULATORY"
+          ],
+          "connected_inputs": [
+            1,
+            2
+          ],
+          "gate": "NIMPLIES",
+          "output": 1,
+          "params": {}
+        }
+      ],
+      "comparator_bound_1": [
+        {
+          "ambiguity_class": [
+            "REGULATORY_DNF"
+          ],
+          "connected_inputs": [
+            0,
+            1,
+            2
+          ],
+          "gate": "REGULATORY_DNF",
+          "output": 0,
+          "params": {
+            "arity": 3,
+            "clauses": [
+              {
+                "activators": [
+                  0
+                ],
+                "inhibitors": []
+              },
+              {
+                "activators": [
+                  1
+                ],
+                "inhibitors": [
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "ambiguity_class": [
+            "AND",
+            "KOFN",
+            "MAJORITY",
+            "REGULATORY"
+          ],
+          "connected_inputs": [
+            1,
+            2
+          ],
+          "gate": "AND",
+          "output": 1,
+          "params": {}
+        }
+      ],
+      "difference_bit_0": [
+        {
+          "ambiguity_class": [
+            "CANALISING",
+            "KOFN",
+            "OR",
+            "REGULATORY_DNF"
+          ],
+          "connected_inputs": [
+            0,
+            1
+          ],
+          "gate": "OR",
+          "output": 0,
+          "params": {}
+        }
+      ],
+      "difference_bit_1": [
+        {
+          "ambiguity_class": [
+            "REGULATORY_DNF"
+          ],
+          "connected_inputs": [
+            0,
+            1
+          ],
+          "gate": "REGULATORY_DNF",
+          "output": 0,
+          "params": {
+            "arity": 2,
+            "clauses": [
+              {
+                "activators": [
+                  0
+                ],
+                "inhibitors": []
+              },
+              {
+                "activators": [],
+                "inhibitors": [
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "full_adder": [
+        {
+          "ambiguity_class": [
+            "XOR"
+          ],
+          "connected_inputs": [
+            0,
+            1,
+            2
+          ],
+          "gate": "XOR",
+          "output": 0,
+          "params": {}
+        },
+        {
+          "ambiguity_class": [
+            "KOFN",
+            "MAJORITY",
+            "REGULATORY_DNF"
+          ],
+          "connected_inputs": [
+            0,
+            1,
+            2
+          ],
+          "gate": "MAJORITY",
+          "output": 1,
+          "params": {}
+        }
+      ],
+      "partial_product": [
+        {
+          "ambiguity_class": [
+            "AND",
+            "KOFN",
+            "MAJORITY",
+            "REGULATORY"
+          ],
+          "connected_inputs": [
+            0,
+            1
+          ],
+          "gate": "AND",
+          "output": 0,
+          "params": {}
+        }
+      ]
+    },
+    "expansions_verified_by_root_identity": 9,
+    "note": "sum = XOR and carry = MAJORITY are returned by the method from the relation a + b + carry_in; neither gate is named in the source",
+    "used_by": {
+      "Q5": [
+        "comparator_bound_0",
+        "comparator_bound_1"
+      ],
+      "Q6": [
+        "comparator_bound_0",
+        "comparator_bound_1",
+        "difference_bit_0",
+        "difference_bit_1"
+      ],
+      "Q7": [
+        "full_adder",
+        "partial_product"
+      ]
+    }
   },
-  "elapsed_seconds": 39.22732412500045,
+  "elapsed_seconds": 44.78055341599975,
   "gate_and_blocks": {
     "defective_block_counterexample": {
       "actual": [
@@ -51,18 +232,41 @@
     "valid": 16,
     "width": 4
   },
-  "q7_scope": "width=4 exhaustive only",
+  "q7_full_width": {
+    "accepted_factorisations": 4,
+    "largest_accepted_product": 18446743979220271189,
+    "rejected_attacks": [
+      "all_zero",
+      "trivial_factor_u",
+      "trivial_factor_v",
+      "truncated_overflow",
+      "wrong_product"
+    ],
+    "width": 64
+  },
+  "q7_scope": "width 64 built and attacked; exhaustive enumeration at width 4, where it is complete",
+  "role_ledger": {
+    "Q1": "CERTIFIES",
+    "Q2": "DERIVES",
+    "Q3": "CERTIFIES",
+    "Q4": "CERTIFIES",
+    "Q5": "DERIVES",
+    "Q6": "DERIVES",
+    "Q7": "DERIVES",
+    "Q8": "BOUNDS"
+  },
   "rows": {
     "Q5": {
       "forged_assignment_failures": [
         "input_bit_0",
-        "gate_0_not"
+        "gate_132_not",
+        "x_pack"
       ],
       "stats": {
-        "rows": 321,
-        "serialized_bytes": 50651,
-        "signals": 193,
-        "structural_sha256": "3e9a5f83a827da6a9e3aa294c52cf2d9997319b89735ab0c5b954b80d4637132"
+        "rows": 335,
+        "serialized_bytes": 53516,
+        "signals": 200,
+        "structural_sha256": "f7cd306048a6ac54b958cba7cdf3faa5571f997d54430402df67e81843e032d4"
       },
       "valid_cases": [
         {
@@ -84,111 +288,111 @@
         "gate_2_not",
         "gate_5_and",
         "gate_6_not",
-        "gate_25_not",
-        "gate_29_not",
-        "gate_39_not",
-        "gate_52_not",
-        "gate_62_not",
+        "gate_20_not",
+        "gate_24_not",
+        "gate_32_not",
+        "gate_42_not",
+        "gate_50_not",
+        "gate_54_not",
+        "gate_58_not",
         "gate_66_not",
         "gate_70_not",
-        "gate_80_not",
-        "gate_84_not",
+        "gate_74_not",
+        "gate_82_not",
         "gate_88_not",
-        "gate_98_not",
-        "gate_105_not",
-        "gate_109_not",
-        "gate_113_not",
-        "gate_129_not",
-        "gate_139_not",
-        "gate_143_not",
-        "gate_156_not",
-        "gate_160_not",
-        "gate_167_not",
-        "gate_192_not",
-        "gate_199_not",
-        "gate_209_not",
-        "gate_213_not",
-        "gate_220_not",
-        "gate_224_not",
-        "gate_228_not",
-        "gate_244_not",
-        "gate_251_not",
-        "gate_270_not",
-        "gate_283_not",
-        "gate_290_not",
-        "gate_294_not",
-        "gate_301_not",
-        "gate_305_not",
-        "gate_312_not",
+        "gate_92_not",
+        "gate_96_not",
+        "gate_108_not",
+        "gate_116_not",
+        "gate_120_not",
+        "gate_130_not",
+        "gate_134_not",
+        "gate_140_not",
+        "gate_158_not",
+        "gate_164_not",
+        "gate_172_not",
+        "gate_176_not",
+        "gate_182_not",
+        "gate_186_not",
+        "gate_190_not",
+        "gate_202_not",
+        "gate_208_not",
+        "gate_222_not",
+        "gate_232_not",
+        "gate_238_not",
+        "gate_242_not",
+        "gate_248_not",
+        "gate_252_not",
+        "gate_258_not",
+        "gate_262_not",
+        "gate_268_not",
+        "gate_284_not",
+        "gate_288_not",
+        "gate_304_not",
+        "gate_310_not",
         "gate_316_not",
-        "gate_323_not",
-        "gate_345_not",
-        "gate_349_not",
-        "gate_371_not",
-        "gate_378_not",
-        "gate_385_not",
-        "gate_389_not",
-        "gate_405_not",
-        "gate_412_not",
-        "gate_416_not",
-        "gate_420_not",
-        "gate_427_not",
-        "gate_437_not",
-        "gate_444_not",
-        "gate_463_not",
-        "gate_467_not",
-        "gate_477_not",
-        "gate_481_not",
-        "gate_485_not",
-        "gate_489_not",
-        "gate_493_not",
-        "gate_500_not",
-        "gate_516_not",
+        "gate_320_not",
+        "gate_332_not",
+        "gate_338_not",
+        "gate_342_not",
+        "gate_346_not",
+        "gate_352_not",
+        "gate_360_not",
+        "gate_366_not",
+        "gate_380_not",
+        "gate_384_not",
+        "gate_392_not",
+        "gate_396_not",
+        "gate_400_not",
+        "gate_404_not",
+        "gate_408_not",
+        "gate_414_not",
+        "gate_426_not",
+        "gate_434_not",
+        "gate_446_not",
+        "gate_450_not",
+        "gate_454_not",
+        "gate_458_not",
+        "gate_466_not",
+        "gate_470_not",
+        "gate_476_not",
+        "gate_480_not",
+        "gate_484_not",
+        "gate_492_not",
+        "gate_498_not",
+        "gate_502_not",
+        "gate_506_not",
+        "gate_518_not",
         "gate_526_not",
+        "gate_536_not",
         "gate_542_not",
-        "gate_546_not",
-        "gate_550_not",
         "gate_554_not",
-        "gate_564_not",
-        "gate_568_not",
-        "gate_575_not",
-        "gate_579_not",
-        "gate_583_not",
-        "gate_593_not",
-        "gate_600_not",
+        "gate_558_not",
+        "gate_562_not",
+        "gate_566_not",
+        "gate_570_not",
+        "gate_582_not",
+        "gate_586_not",
+        "gate_590_not",
+        "gate_594_not",
+        "gate_598_not",
         "gate_604_not",
-        "gate_608_not",
-        "gate_624_not",
+        "gate_610_not",
+        "gate_614_not",
+        "gate_622_not",
+        "gate_630_not",
         "gate_634_not",
-        "gate_647_not",
-        "gate_654_not",
-        "gate_670_not",
-        "gate_674_not",
-        "gate_678_not",
-        "gate_682_not",
-        "gate_686_not",
-        "gate_702_not",
-        "gate_706_not",
-        "gate_710_not",
-        "gate_714_not",
-        "gate_718_not",
-        "gate_725_not",
-        "gate_732_not",
-        "gate_736_not",
-        "gate_746_not",
-        "gate_756_not",
-        "gate_760_not",
-        "gate_764_not",
-        "gate_768_not",
-        "gate_772_not",
-        "gate_776_not",
-        "gate_858_not"
+        "gate_638_not",
+        "gate_642_not",
+        "gate_646_not",
+        "gate_650_not",
+        "gate_706_not"
       ],
       "stats": {
-        "rows": 2499,
-        "serialized_bytes": 427362,
-        "signals": 1376,
-        "structural_sha256": "890cbaaea0d04933fe82f76a822ee013ef709d5156a77d5e6858b36910c235c3"
+        "rows": 2193,
+        "serialized_bytes": 372730,
+        "signals": 1223,
+        "structural_sha256": "8e77ba16f7fae81f61a09234ab1e54bb8fad3f9805ed0a7566360772bb5e8261"
       },
       "valid_cases": [
         {
@@ -213,10 +417,10 @@
         "product_low_3"
       ],
       "stats": {
-        "rows": 407,
-        "serialized_bytes": 67307,
-        "signals": 200,
-        "structural_sha256": "eafb32556ddf48879a55ff139359f9a3945f1f5f20823b5606f8f74c01fad63e"
+        "rows": 107271,
+        "serialized_bytes": 19982010,
+        "signals": 53572,
+        "structural_sha256": "1022a451b1469a100ffe331c848e10d2cb1f27d41a255cf987e3ce600cbd223a"
       },
       "valid_cases": [
         {
@@ -248,7 +452,7 @@
         "signals": 199,
         "structural_sha256": "4f055c6f4aa66ff238fb0eedf3b6313dd7ba4a8835c1e7ecd93790585cb9d1f0"
       },
-      "note": "Counts are not like-for-like: the new route is Boolean-gate compiled; Q7 new is width 4 and legacy is width 64."
+      "note": "Q7 is now like-for-like: both routes are width 64. Q5 and Q6 are not, because the recovered route compiles a general bound through Boolean gates where the legacy systems use a bit count and a field inverse. The recovered route is larger everywhere and no performance claim is made for it."
     }
   },
   "status": "PASS"

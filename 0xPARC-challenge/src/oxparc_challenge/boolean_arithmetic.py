@@ -445,16 +445,34 @@ def build_less_than_constant_dag(width: int, bound: int) -> BooleanDAG:
     return b.finish((less,))
 
 
+def _difference_step(value_bit: int) -> tuple[RecoveredGate, ...]:
+    """Recover ``different_out`` for one bit against a fixed constant bit.
+
+    Inputs are ``(different_in, x_bit)``. Stated only as the meaning of a
+    running inequality: once a bit has differed the values differ, and this bit
+    differs when it disagrees with the constant.
+    """
+    if value_bit not in (0, 1):
+        raise ValueError("value_bit must be 0 or 1")
+
+    def different_out(bits):
+        different_in, x = bits
+        return 1 if different_in or x != value_bit else 0
+
+    return recover_cell(f"difference_bit_{value_bit}", 2, (different_out,))
+
+
 def build_not_equal_constant_dag(width: int, value: int) -> BooleanDAG:
-    """Build the predicate ``little_endian_bits != value``."""
+    """Build the predicate ``little_endian_bits != value``.
+
+    The per-bit step is recovered rather than written; against a one bit the
+    method returns NIMPLIES and against a zero bit it returns OR.
+    """
     if type(width) is not int or width <= 0 or type(value) is not int or not 0 <= value < (1 << width):
         raise ValueError("invalid width or value")
     b = DAGBuilder(width)
     different = b.add("FALSE")
     for bit in range(width):
-        if (value >> bit) & 1:
-            mismatch = b.add("NOT", bit)
-        else:
-            mismatch = bit
-        different = b.add("OR", different, mismatch)
+        step, = _difference_step((value >> bit) & 1)
+        different = emit_recovered(b, step, (different, bit))
     return b.finish((different,))
