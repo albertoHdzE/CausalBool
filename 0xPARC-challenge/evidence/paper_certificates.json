@@ -1,0 +1,462 @@
+{
+  "status": "PASS",
+  "role_ledger": {
+    "Q1": "CERTIFIES",
+    "Q2": "DERIVES",
+    "Q3": "CERTIFIES",
+    "Q4": "CERTIFIES",
+    "Q5": "DERIVES",
+    "Q7": "DERIVES",
+    "Q8": "ILLUSTRATES",
+    "Q6": "DERIVES"
+  },
+  "certificates": {
+    "Q1": {
+      "role": "CERTIFIES",
+      "checked_output_bits": 25,
+      "cases": [
+        {
+          "entries": 3,
+          "bits_per_digit": 3,
+          "base": 8,
+          "packed_width": 9,
+          "digit_windows_exact": true,
+          "round_trip_lists": 343
+        },
+        {
+          "entries": 2,
+          "bits_per_digit": 4,
+          "base": 16,
+          "packed_width": 8,
+          "digit_windows_exact": true,
+          "round_trip_lists": 225
+        },
+        {
+          "entries": 4,
+          "bits_per_digit": 2,
+          "base": 4,
+          "packed_width": 8,
+          "digit_windows_exact": true,
+          "round_trip_lists": 81
+        }
+      ],
+      "claim": "every decoder output bit reads exactly one position of its own digit window",
+      "not_claimed": "the two-query lower bound, which is a proof over unbounded integers"
+    },
+    "Q2": {
+      "role": "DERIVES",
+      "cases": [
+        {
+          "n": 1,
+          "gates": 0,
+          "states": 2,
+          "decision_nodes": 2,
+          "all_inputs_essential": true,
+          "gate": "AND",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 3,
+          "gates": 1,
+          "states": 8,
+          "decision_nodes": 29,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 5,
+          "gates": 7,
+          "states": 32,
+          "decision_nodes": 107,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 7,
+          "gates": 30,
+          "states": 128,
+          "decision_nodes": 303,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 9,
+          "gates": 88,
+          "states": 512,
+          "decision_nodes": 716,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 11,
+          "gates": 205,
+          "states": 2048,
+          "decision_nodes": 1473,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 13,
+          "gates": 411,
+          "states": 8192,
+          "decision_nodes": 2732,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 15,
+          "gates": 742,
+          "states": 32768,
+          "decision_nodes": 4681,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 21,
+          "gates": 2935,
+          "states": 2097152,
+          "decision_nodes": 16998,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 31,
+          "gates": 14190,
+          "states": 2147483648,
+          "decision_nodes": 77573,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        },
+        {
+          "n": 63,
+          "gates": 245086,
+          "states": 9223372036854775808,
+          "decision_nodes": 1273757,
+          "all_inputs_essential": true,
+          "gate": "MAJORITY",
+          "identity_with_threshold_specification": true
+        }
+      ],
+      "largest_n": 63,
+      "largest_states": 9223372036854775808,
+      "claim": "majority is recovered from behaviour and matches an independently built threshold by canonical node identity, with no state enumerated",
+      "not_claimed": "a unique circuit; several arrangements share one repertoire"
+    },
+    "Q3": {
+      "role": "CERTIFIES",
+      "dimension": 256,
+      "stages": 8,
+      "partition": [
+        4,
+        3,
+        1
+      ],
+      "babies": [
+        64,
+        8,
+        16
+      ],
+      "operations": 393,
+      "reached_inputs": 256,
+      "support_is_total": true,
+      "damaged_schedule_detected": true,
+      "coordinates_lost_when_damaged": 1,
+      "blocks": [
+        {
+          "stage_interval": [
+            0,
+            4
+          ],
+          "final": false,
+          "rotations": 16
+        },
+        {
+          "stage_interval": [
+            4,
+            8
+          ],
+          "final": true,
+          "rotations": 256
+        }
+      ],
+      "bit_reversal_length": 256,
+      "claim": "the support read off the emitted circuit is total, the method recovers exactly those coordinates, and dropping one rotation is detected",
+      "not_claimed": "the cost model or the optimality of the selected schedule, both of which are numeric measurements"
+    },
+    "Q4": {
+      "role": "CERTIFIES",
+      "cases": [
+        {
+          "p": 3,
+          "p_mod_4": 3,
+          "solutions": 9,
+          "nontrivial_solutions": 8,
+          "zero_only": false,
+          "encoded_bits": 6,
+          "essential_bits": 6
+        },
+        {
+          "p": 5,
+          "p_mod_4": 1,
+          "solutions": 25,
+          "nontrivial_solutions": 24,
+          "zero_only": false,
+          "encoded_bits": 9,
+          "essential_bits": 9
+        },
+        {
+          "p": 7,
+          "p_mod_4": 3,
+          "solutions": 1,
+          "nontrivial_solutions": 0,
+          "zero_only": true,
+          "encoded_bits": 9,
+          "essential_bits": 9
+        },
+        {
+          "p": 11,
+          "p_mod_4": 3,
+          "solutions": 1,
+          "nontrivial_solutions": 0,
+          "zero_only": true,
+          "encoded_bits": 12,
+          "essential_bits": 12
+        },
+        {
+          "p": 13,
+          "p_mod_4": 1,
+          "solutions": 73,
+          "nontrivial_solutions": 72,
+          "zero_only": false,
+          "encoded_bits": 12,
+          "essential_bits": 12
+        },
+        {
+          "p": 19,
+          "p_mod_4": 3,
+          "solutions": 1,
+          "nontrivial_solutions": 0,
+          "zero_only": true,
+          "encoded_bits": 15,
+          "essential_bits": 15
+        }
+      ],
+      "zero_only_primes": [
+        7,
+        11,
+        19
+      ],
+      "exception": {
+        "p": 3,
+        "nontrivial_solutions": 8,
+        "note": "p = 3 is 3 mod 4 yet has nontrivial solutions, so the congruence class is necessary and not sufficient"
+      },
+      "claim": "every prime whose only solution is zero satisfies p = 3 mod 4, recovered from the indicator rather than assumed",
+      "not_claimed": "the converse, which p = 3 refutes, and the result for p = 2**127 - 1, which is a proof"
+    },
+    "Q5": {
+      "role": "DERIVES",
+      "width": 65,
+      "bound": "2**64",
+      "exhaustive_cases": 87380,
+      "exhaustive_correct": 87380,
+      "claim": "the range predicate is built from the recovered comparator and is exact on every width to eight, every bound and every input",
+      "not_claimed": "compiled-circuit verification; the Circom toolchain is absent"
+    },
+    "Q7": {
+      "role": "DERIVES",
+      "width": 64,
+      "exhaustive_by_width": {
+        "1": {
+          "pairs": 4,
+          "wrong": 0,
+          "gates": 8
+        },
+        "2": {
+          "pairs": 16,
+          "wrong": 0,
+          "gates": 29
+        },
+        "3": {
+          "pairs": 64,
+          "wrong": 0,
+          "gates": 64
+        },
+        "4": {
+          "pairs": 256,
+          "wrong": 0,
+          "gates": 113
+        },
+        "5": {
+          "pairs": 1024,
+          "wrong": 0,
+          "gates": 176
+        }
+      },
+      "gate_law": "7*w**2 + 1",
+      "row_law": "26*w**2 + 12*w + 7",
+      "claim": "the multiplier is composed from recovered cells and is exact with every stage carry zero at the widths that can be enumerated",
+      "not_claimed": "exhaustive enumeration at 64 bits, which is 2**128 pairs"
+    },
+    "Q8": {
+      "role": "ILLUSTRATES",
+      "boolean_route_gates": 117440513,
+      "boolean_route_rows": 436256775,
+      "direct_limb_rows": 25725,
+      "ratio": 16958,
+      "claim": "the recovered carry cell is shared with Q7, and the cost of a bit-level route at this width is measured rather than asserted",
+      "not_claimed": "that index deconvolution derives Q8. The limb construction is field arithmetic, and the 70-bit carry bound is an arithmetic argument the method does not supply"
+    },
+    "cells": {
+      "cells": {
+        "full_adder": [
+          {
+            "output": 0,
+            "connected_inputs": [
+              0,
+              1,
+              2
+            ],
+            "gate": "XOR",
+            "params": {},
+            "ambiguity_class": [
+              "XOR"
+            ]
+          },
+          {
+            "output": 1,
+            "connected_inputs": [
+              0,
+              1,
+              2
+            ],
+            "gate": "MAJORITY",
+            "params": {},
+            "ambiguity_class": [
+              "KOFN",
+              "MAJORITY",
+              "REGULATORY_DNF"
+            ]
+          }
+        ],
+        "partial_product": [
+          {
+            "output": 0,
+            "connected_inputs": [
+              0,
+              1
+            ],
+            "gate": "AND",
+            "params": {},
+            "ambiguity_class": [
+              "AND",
+              "KOFN",
+              "MAJORITY",
+              "REGULATORY"
+            ]
+          }
+        ],
+        "comparator_bound_0": [
+          {
+            "output": 0,
+            "connected_inputs": [
+              0
+            ],
+            "gate": "AND",
+            "params": {},
+            "ambiguity_class": [
+              "AND",
+              "CANALISING",
+              "KOFN",
+              "MAJORITY",
+              "OR",
+              "REGULATORY",
+              "XOR"
+            ]
+          },
+          {
+            "output": 1,
+            "connected_inputs": [
+              1,
+              2
+            ],
+            "gate": "NIMPLIES",
+            "params": {},
+            "ambiguity_class": [
+              "CANALISING",
+              "NIMPLIES",
+              "REGULATORY"
+            ]
+          }
+        ],
+        "comparator_bound_1": [
+          {
+            "output": 0,
+            "connected_inputs": [
+              0,
+              1,
+              2
+            ],
+            "gate": "REGULATORY_DNF",
+            "params": {
+              "arity": 3,
+              "clauses": [
+                {
+                  "activators": [
+                    0
+                  ],
+                  "inhibitors": []
+                },
+                {
+                  "activators": [
+                    1
+                  ],
+                  "inhibitors": [
+                    2
+                  ]
+                }
+              ]
+            },
+            "ambiguity_class": [
+              "REGULATORY_DNF"
+            ]
+          },
+          {
+            "output": 1,
+            "connected_inputs": [
+              1,
+              2
+            ],
+            "gate": "AND",
+            "params": {},
+            "ambiguity_class": [
+              "AND",
+              "KOFN",
+              "MAJORITY",
+              "REGULATORY"
+            ]
+          }
+        ]
+      },
+      "expansions_verified_by_root_identity": 7,
+      "note": "sum = XOR and carry = MAJORITY are returned by the method from the relation a + b + carry_in; neither gate is named in the source"
+    }
+  },
+  "source_sha256": {
+    "0xPARC-challenge/tools/paper_certificates.py": "1169b1421f446266dff0b4c5b800dd828a2815875047505b7a8abf8ded221417",
+    "0xPARC-challenge/src/oxparc_challenge/boolean_arithmetic.py": "01759a24a49b87a2eb6c3c78220296a14c5798895aec8d517d9b7e7fc1394b79",
+    "0xPARC-challenge/src/oxparc_challenge/boolean_constraints.py": "133fc137840eebff14649567606df7cbdd27a2c93ab1896a720dae149cc8f10b",
+    "index-deconvolution/src/deconvolution.py": "6749376102315a996f0d80977b38f520f7dbce1b30db9635047f30d9158a1177",
+    "index-deconvolution/src/causalbool.py": "856cd0f29549f49685de43cc8bfe0796f96ca91457d649d97275b74fdafb1100",
+    "doppel-challenge/src/doppel_challenge/repertoire_program.py": "ccc8e94a9476de9f7644771052a70e3bad2d476b4847218817fe562d67227325"
+  }
+}
