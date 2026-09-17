@@ -270,7 +270,36 @@ def certificate_q5() -> dict:
             "not_claimed": "compiled-circuit verification; the Circom toolchain is absent"}
 
 
-def certificate_q7() -> dict:
+# Exhaustive sweeps of the serialized constraint system, every (u, v, n) triple
+# against an independent integer predicate. Widths 5 and 6 take minutes, so they
+# are recorded rather than rerun by default; --full reruns the whole ladder and
+# must reproduce these counts exactly.
+Q7_CONSTRAINT_LADDER = {
+    4: {"triples": 4096, "valid": 16, "invalid": 4080, "rows": 471, "discrepancies": 0},
+    5: {"triples": 32768, "valid": 52, "invalid": 32716, "rows": 717, "discrepancies": 0},
+    6: {"triples": 262144, "valid": 148, "invalid": 261996, "rows": 1015, "discrepancies": 0},
+}
+
+
+def _sweep_constraints(width: int) -> dict:
+    from oxparc_challenge.boolean_constraints import build_q7, assignment_q7_bits
+    from oxparc_challenge.row_evaluator import check_rows
+    serialized = build_q7(width).to_dict()
+    valid = invalid = discrepancies = 0
+    for u, v, n in itertools.product(range(1 << width), repeat=3):
+        expected = u >= 2 and v >= 2 and u * v == n
+        failures = check_rows(serialized, assignment_q7_bits(n, u, v, width))
+        if expected:
+            valid += 1
+            discrepancies += bool(failures)
+        else:
+            invalid += 1
+            discrepancies += not failures
+    return {"triples": valid + invalid, "valid": valid, "invalid": invalid,
+            "rows": len(serialized["constraints"]), "discrepancies": discrepancies}
+
+
+def certificate_q7(full: bool = False) -> dict:
     exact = {}
     for w in (1, 2, 3, 4, 5):
         dag = build_multiplier_dag(w)
@@ -282,11 +311,25 @@ def certificate_q7() -> dict:
             if product != u * v or any(out[2*w:]):
                 bad += 1
         exact[w] = {"pairs": (1 << w) ** 2, "wrong": bad, "gates": len(dag.gates)}
+
+    ladder, reran = {}, sorted(Q7_CONSTRAINT_LADDER) if full else [4]
+    for width, recorded in sorted(Q7_CONSTRAINT_LADDER.items()):
+        if width in reran:
+            measured = _sweep_constraints(width)
+            assert measured == recorded, (width, measured, recorded)
+            ladder[width] = {**measured, "source": "rerun"}
+        else:
+            ladder[width] = {**recorded, "source": "recorded"}
+    total = sum(entry["triples"] for entry in ladder.values())
+    assert not any(entry["discrepancies"] for entry in ladder.values())
     return {"role": "DERIVES", "width": Q7_WIDTH, "exhaustive_by_width": exact,
+            "constraint_ladder": ladder, "constraint_triples_total": total,
+            "constraint_discrepancies_total": 0, "reran_widths": reran,
             "gate_law": "7*w**2 + 1", "row_law": "26*w**2 + 12*w + 7",
-            "claim": "the multiplier is composed from recovered cells and is exact with every "
-                     "stage carry zero at the widths that can be enumerated",
-            "not_claimed": "exhaustive enumeration at 64 bits, which is 2**128 pairs"}
+            "claim": "the multiplier is composed from recovered cells; every one of "
+                     f"{total} triples at widths four to six satisfies the serialized rows "
+                     "exactly when an independent integer predicate says it should",
+            "not_claimed": "exhaustive enumeration at 64 bits, which is 2**192 triples"}
 
 
 def certificate_q8() -> dict:
@@ -303,9 +346,10 @@ def certificate_q8() -> dict:
 
 
 def main():
+    full = '--full' in sys.argv
     certificates = {
         "Q1": certificate_q1(), "Q2": certificate_q2(), "Q3": certificate_q3(),
-        "Q4": certificate_q4(), "Q5": certificate_q5(), "Q7": certificate_q7(),
+        "Q4": certificate_q4(), "Q5": certificate_q5(), "Q7": certificate_q7(full),
         "Q8": certificate_q8(), "cells": certificate_cells(),
     }
     sources = [Path(__file__), ROOT/'src/oxparc_challenge/boolean_arithmetic.py',
