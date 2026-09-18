@@ -74,14 +74,24 @@ def main():
               + f". All {cells['expansions_verified_by_root_identity']} expansions into the "
                 'constraint gate set are verified by root identity.',
               f"Majority is recovered at n={q2['largest_n']} with every input essential and "
-              f"identity against an independent threshold, using {q2['largest_decision_nodes']:,} "
-              f"decision nodes and enumerating {q2['states_enumerated']} states.",
+              f"identity against an independent threshold, enumerating "
+              f"{q2['states_enumerated']} states. Recovering it allocated "
+              f"{q2['largest_decision_nodes']:,} decision nodes, growing as "
+              f"$n^{{{q2['allocation_growth_degree']}}}$; the recovered function's own diagram "
+              f"is {q2['largest_recovered_diagram_nodes']:,} nodes, growing as "
+              f"$n^{{{q2['description_growth_degree']}}}$, and equals "
+              f"$(n+1)^2/4$ at every size in the ladder. The exact match class is "
+              + ' and '.join(q2['recovery_split']['match_class'])
+              + f" at n={q2['recovery_split']['n']}, so the reported name is the "
+                'canonical priority order, not a unique identification.',
               f"The Q7 constraint ladder is exhaustive at widths {ladder}: "
               f"{q7['constraint_triples_total']:,} triples with "
               f"{q7['constraint_discrepancies_total']} discrepancies against an independent "
               'integer predicate.',
-              f"Description size grows as $n^{{{q8['majority_growth_degree']}}}$ for majority and "
-              f"by a factor of {q8['multiplier_growth_per_bit']} per bit for multiplication, so a "
+              f"Recovery allocation grows as $n^{{{q8['majority_allocation_growth_degree']}}}$ for "
+              f"majority, its description as $n^{{{q8['majority_description_growth_degree']}}}$, and "
+              f"the multiplier's allocation "
+              f"by a factor of {q8['multiplier_growth_per_bit']} per bit, so a "
               f"4096-bit multiplier would need about $10^{{{q8['multiplier_nodes_at_4096_log10']}}}$ "
               f"nodes against roughly $10^{{{q8['atoms_in_observable_universe_log10']}}}$ atoms in "
               'the observable universe.',

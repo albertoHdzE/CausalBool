@@ -570,7 +570,7 @@ Q7 & $(u,v)=(2,3),(3,2),(65537,65539),(2,(B-2)/2)$\\
 Q8 & $(u,v)=(2^{2047}+123,2^{2047}+321)$,
 $(2,2^{4094}+1)$, $(2^{4094}+1,2)$\\\bottomrule
 \end{tabularx}
-\end{center}
+\end{center} 
 Valid assignments are checked both before and after compilation. Invalid
 assignments are injected directly into the compiled rows, so failure of a
 witness-generation routine is not used as rejection evidence. Mutations
@@ -627,6 +627,15 @@ $192\cdot65+4096+129+127\cdot70+2=25597$.
 For Q7, three 64-bit decompositions, one product and four inverse equations
 give $195+1+4=200$ rows. The 65-row range gadget and one-row exclusion
 gadget complete the four families.
+
+\subsection{Reading the role ledger}
+A method is only as useful as the claims it actually carries, so the generated
+ledger below states which of three roles index deconvolution plays for each
+answer. It \textbf{derives} an answer when the object compiled into that answer
+is what the method returned. It \textbf{certifies} an answer when the answer is
+argued another way and the method recovers and verifies a decisive Boolean part
+of it exactly. It \textbf{bounds} an answer when it does not produce the answer
+at all and what it contributes is a measurement of why.
 
 \input{results.tex}
 
@@ -861,6 +870,137 @@ partial observations, richer dynamical systems and principled comparisons of
 description lengths remain development directions. These qualifications are
 part of the method's scientific specification rather than caveats added after
 the result.
+
+\section{What the majority ladder measures}
+\label{sec:ladder-scope}
+
+The majority ladder reported for Q2 is the strongest evidence in this response,
+and it is also the place where a number can most easily be read as saying more
+than it does. This section separates the quantities involved, gives the
+measured values, and states which of them is a property of majority and which
+is a property of the act of recovering it.
+
+\subsection{Four counts, not one}
+
+The diagram manager is a shared store. It accumulates every function it has
+ever been asked to build and never discards one, because sharing is exactly
+what makes the representation canonical. A count taken from the manager is
+therefore a cumulative cost, not the size of any particular object. Four
+distinct quantities arise in one run at a given $n$:
+
+\begin{center}
+\begin{tabular}{p{0.27\linewidth}p{0.63\linewidth}}
+\toprule
+Field & What it counts\\\midrule
+\texttt{composition nodes} & nodes allocated while pushing the
+emitted MAJ3 circuit through the manager, one gate at a time; this includes the
+diagram of every intermediate wire\\
+\texttt{recovery nodes} & nodes allocated by the recovery itself: the
+cofactor pass that tests each coordinate for essentiality, and the
+construction of every candidate gate whose identity is tested\\
+\texttt{specification nodes} & nodes allocated when the threshold
+specification is built\\
+\texttt{recovered diagram nodes} & nodes reachable from the
+recovered root, which is the size of the recovered function's own description\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Only the last is a property of majority. The first three are the price of
+obtaining and checking it.
+
+\subsection{Measured values}
+
+\begin{center}
+\begin{tabular}{rrrrrr}
+\toprule
+$n$ & Gates & Composition & Recovery & Specification & Description\\\midrule
+15 & 742 & 3{,}955 & 726 & 0 & 64\\
+21 & 2{,}935 & 15{,}270 & 1{,}728 & 0 & 121\\
+31 & 14{,}190 & 72{,}655 & 4{,}918 & 0 & 256\\
+41 & 43{,}720 & 222{,}290 & 10{,}658 & 0 & 441\\
+51 & 105{,}025 & 531{,}925 & 19{,}698 & 0 & 676\\
+63 & 245{,}086 & 1{,}237{,}799 & 35{,}958 & 0 & 1{,}024\\
+101 & 1{,}623{,}175 & --- & --- & --- & 2{,}601\\
+151 & 8{,}116{,}950 & --- & --- & --- & 5{,}776\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Sizes to $n=63$ are rebuilt on every certificate run. At $n=101$ and $n=151$
+the totals are recorded and reproduced; the description
+size at those two sizes is measured directly and cheaply, because building the
+threshold function on its own costs milliseconds, and it is the recovered
+object's size precisely because the recorded run established that the recovered
+root and the threshold specification are the same node.
+
+The sum of the first three columns is the \texttt{decision nodes} total quoted
+in the main text, which is why that total is dominated by composition: at
+$n=31$ the circuit accounts for $72{,}655$ of $77{,}573$ nodes, the recovery for
+$4{,}918$, and the specification for none.
+
+\subsection{Two growth rates, and why they differ}
+
+Fitted over $n=31$ to $n=151$, the allocation grows as $n^{3.96}$ and the
+description as $n^{1.97}$. The description obeys a closed form,
+\begin{equation}
+  \lvert\text{diagram}\rvert=\frac{(n+1)^2}{4},
+\end{equation}
+which is verified at every size in the ladder rather than fitted, and which the
+certificate asserts on each run. The reason is a counting argument. Reading the
+coordinates in order, the only thing a threshold function must remember is how
+many inputs have been one so far, so a node is determined by a position and a
+running count, and there are $O(n^2)$ such pairs. This is the justification
+offered in the main text for why the method climbs to 151 inputs, and it is a
+statement about the $5{,}776$-node object, not about the $41{,}196{,}123$-node
+allocation.
+
+The two exponents answer different questions. The description exponent says
+what it costs to \emph{hold} majority at a given width. The allocation exponent
+says what it cost to \emph{recover} it from one particular eight-million-gate
+circuit, and it would change if a different circuit computing the same function
+were supplied. Only the description exponent is a property of the function.
+
+\subsection{What the independence of the specification amounts to}
+
+The check that the recovered object is majority compares the composed root
+against the threshold builder called with every coordinate and a bound of
+$\lfloor n/2\rfloor+1$. The canonical \textsc{majority} family in the gate
+builder is defined by that same call under the default strict tie policy, so
+naming the gate \textsc{majority} and matching the specification are one test,
+not two. The measurement makes this visible:
+\texttt{specification nodes} is zero at every size, because the specification
+was already present in the shared store.
+
+What remains, and is not circular, is the content that matters. The circuit is
+produced by a recursive weight-merging construction that emits three-input
+majority gates and shares no code with the threshold builder, which is a
+dynamic program over coordinates. The identity therefore states that composing
+that circuit yields the counting function, over all $2^n$ inputs at once. It
+does not state that two independent specifications of majority were compared.
+
+\subsection{The recovered name is a canonical choice, not a unique one}
+
+At $n=31$ the recovery tests 162 candidates and two of them match the root
+exactly: \textsc{majority} with default parameters, and \textsc{kofn} with
+$k=16$. These are the same Boolean function, so both matches are correct and
+neither can be eliminated by any amount of behavioural evidence. The reported
+name is the earlier of the two in a fixed canonical priority order. The same
+two-member match class occurs at every size in the ladder. What the method
+identifies uniquely is the function; the name is a convention applied to it,
+and the full match class is recorded rather than discarded.
+
+\subsection{Consequence for the comparison in Section~S9}
+
+The multiplier ladder used to bound Q8 counts allocation while composing a
+circuit, with no recovery and no candidate gates. The like-for-like column for
+majority is therefore its allocation, and that is the column the comparison
+uses. Majority's allocation includes a recovery cost the multiplier's does not,
+which inflates the majority side by about six per cent at $n=31$; this is far
+below the gap being described, and the conclusion is unaffected. The
+description sizes are reported beside the allocations so that the quadratic
+growth of one function and the per-bit multiplicative growth of the other are
+not read off columns that were produced by different procedures.
 
 \begin{thebibliography}{99}
 \bibitem{challenge} 0xPARC. \emph{Beyond Primitive Computing: Puzzles and Connections}, Field Extension.

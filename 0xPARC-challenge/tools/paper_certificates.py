@@ -100,8 +100,46 @@ MAJORITY_RECORDED = {
 }
 
 
+def _reachable_nodes(manager, root: int) -> int:
+    """Decision nodes reachable from ``root``: the size of that function's diagram.
+
+    This is not ``len(manager.nodes)``. The manager accumulates every diagram it
+    has ever been asked to build, so its allocation counts the whole composition
+    and every candidate gate tried during naming, whereas this counts only the
+    recovered object itself.
+    """
+    seen, stack = set(), [root]
+    while stack:
+        ref = stack.pop()
+        if ref < 2 or ref in seen:
+            continue
+        seen.add(ref)
+        _, low, high = manager.nodes[ref-2]
+        stack.extend((low, high))
+    return len(seen)
+
+
+def _description_nodes(n: int) -> int:
+    """Size of majority's own diagram at ``n``, built in a manager of its own.
+
+    Costs milliseconds at every size in the ladder, because the object is small:
+    the diagram a threshold function needs is quadratic in ``n``. Recovery of it
+    from an eight-million-gate circuit is what is expensive, not the object.
+    """
+    engine = D._program_module()
+    manager = D.symbolic_manager(n, engine.ProgramLimits(max_nodes=1_000_000,
+                                                         timeout_seconds=60))
+    return _reachable_nodes(manager, manager.threshold(list(range(n)), n // 2 + 1))
+
+
 def _recover_majority(n: int) -> dict:
-    """Build majority at ``n``, recover it, and check it against a specification."""
+    """Build majority at ``n``, recover it, and check it against a specification.
+
+    Four node counts are recorded separately because they measure four different
+    things and only the last is a property of majority itself: what composing the
+    circuit allocated, what recovering it allocated, what the specification
+    allocated, and how large the recovered function's own diagram is.
+    """
     from oxparc_challenge.boolean import build_majority, BuildLimits
     engine = D._program_module()
     circuit = build_majority(n, BuildLimits(max_gates=50_000_000,
@@ -116,17 +154,66 @@ def _recover_majority(n: int) -> dict:
                                   manager.apply('or', manager.apply('and', a, c),
                                                 manager.apply('and', b, c))))
     root = refs[circuit.outputs[0]]
+    composition = len(manager.nodes)
     report = D.deconvolve_root(manager, root, 0, max_table_bits=0)
+    recovery = len(manager.nodes)
     specification = manager.threshold(list(range(n)), n // 2 + 1)
     assert report.connected_inputs == list(range(n)), "an input was found inessential"
     assert root == specification, "recovered circuit is not majority"
+    diagram = _reachable_nodes(manager, root)
+    assert diagram == _description_nodes(n), "recovered diagram is not the threshold's"
     return {"n": n, "gates": len(circuit.gates), "states": 2 ** n,
             "decision_nodes": len(manager.nodes), "all_inputs_essential": True,
-            "gate": report.canonical.gate, "identity_with_threshold_specification": True}
+            "gate": report.canonical.gate, "identity_with_threshold_specification": True,
+            "composition_nodes": composition,
+            "recovery_nodes": recovery - composition,
+            "specification_nodes": len(manager.nodes) - recovery,
+            "recovered_diagram_nodes": diagram,
+            "match_class": sorted(m.gate for m in report.matches)}
+
+
+MAJORITY_SPLIT_AT = 31
+
+
+def _recovery_split(n: int) -> dict:
+    """Divide the recovery allocation into its two causes, at one cheap size.
+
+    Both halves are charged to naming an object, not to holding it: the cofactor
+    pass tests essentiality coordinate by coordinate, and the candidate pass
+    builds every gate in the canonical family to test identity against. Neither
+    is part of the recovered description.
+    """
+    from oxparc_challenge.boolean import build_majority, BuildLimits
+    engine = D._program_module()
+    circuit = build_majority(n, BuildLimits(max_gates=50_000_000,
+                                            max_subproblems=50_000_000,
+                                            timeout_seconds=1800))
+    manager = D.symbolic_manager(n, engine.ProgramLimits(max_nodes=60_000_000,
+                                                         timeout_seconds=1800))
+    refs = [manager.mk(i, 0, 1) for i in range(n)]
+    for gate in circuit.gates:
+        a, b, c = (refs[r] for r in gate.operands)
+        refs.append(manager.apply('or', manager.apply('and', a, b),
+                                  manager.apply('or', manager.apply('and', a, c),
+                                                manager.apply('and', b, c))))
+    root = refs[circuit.outputs[0]]
+    composition = len(manager.nodes)
+    connected = D.essential_variables_symbolic(manager, root)
+    cofactors = len(manager.nodes)
+    matches, canonical = D.identify_gate_symbolic(manager, root, connected, 0)
+    return {"n": n, "composition_nodes": composition,
+            "cofactor_nodes": cofactors - composition,
+            "candidate_gate_nodes": len(manager.nodes) - cofactors,
+            "candidates_tried": len(D._candidate_gates(len(connected))),
+            "match_class": sorted(m.gate for m in matches),
+            "canonical_gate": canonical.gate,
+            "canonical_chosen_by": "position in the fixed canonical priority order"}
 
 
 def certificate_q2(full: bool = False) -> dict:
     """Recover majority from the emitted circuit and check it against a spec."""
+    import math
+
     records = []
     for n in MAJORITY_SIZES:
         if n <= MAJORITY_CHEAP or full:
@@ -138,15 +225,37 @@ def certificate_q2(full: bool = False) -> dict:
         else:
             records.append({"n": n, "states": 2 ** n, "all_inputs_essential": True,
                             "gate": "MAJORITY", "identity_with_threshold_specification": True,
-                            **MAJORITY_RECORDED[n], "source": "recorded"})
+                            **MAJORITY_RECORDED[n],
+                            "recovered_diagram_nodes": _description_nodes(n),
+                            "source": "recorded"})
+    for record in records:
+        n, diagram = record["n"], record["recovered_diagram_nodes"]
+        assert diagram == (n+1) ** 2 // 4, (n, diagram)
+
+    fitted = [r for r in records if r["n"] >= 31]
+    first, last = fitted[0], fitted[-1]
+    span = math.log(last["n"] / first["n"])
+    allocation_degree = math.log(last["decision_nodes"] / first["decision_nodes"]) / span
+    description_degree = (math.log(last["recovered_diagram_nodes"]
+                                   / first["recovered_diagram_nodes"]) / span)
     return {"role": "DERIVES", "cases": records,
             "largest_n": records[-1]["n"], "largest_states": records[-1]["states"],
             "largest_decision_nodes": records[-1]["decision_nodes"],
+            "largest_recovered_diagram_nodes": records[-1]["recovered_diagram_nodes"],
             "states_enumerated": 0,
+            "allocation_growth_degree": round(allocation_degree, 2),
+            "description_growth_degree": round(description_degree, 2),
+            "growth_fitted_over": [first["n"], last["n"]],
+            "description_closed_form": "(n+1)**2//4, verified at every size in the ladder",
+            "recovery_split": _recovery_split(MAJORITY_SPLIT_AT),
             "claim": "majority is recovered from behaviour and matches an independently "
                      "built threshold by canonical node identity, to 151 inputs and 2**151 "
                      "states, with no state enumerated",
-            "not_claimed": "a unique circuit; several arrangements share one repertoire"}
+            "not_claimed": "a unique circuit; several arrangements share one repertoire. "
+                           "Nor a unique gate name: MAJORITY and KOFN with k=n//2+1 are the "
+                           "same function, and the canonical pick between them is a priority "
+                           "order, not a measurement. Nor that decision_nodes measures "
+                           "majority's description; recovered_diagram_nodes does."}
 
 
 # ---------------------------------------------------------------------------
@@ -439,8 +548,12 @@ def certificate_q8(full: bool = False) -> dict:
                 + (4096 - widths[-1]) * math.log10(base))
 
     majority = sorted(MAJORITY_PROGRAM_NODES)
+    span = math.log(majority[-1] / majority[0])
     degree = (math.log(MAJORITY_PROGRAM_NODES[majority[-1]] / MAJORITY_PROGRAM_NODES[majority[0]])
-              / math.log(majority[-1] / majority[0]))
+              / span)
+    # What majority's description costs, as against what recovering it allocated.
+    description = {n: _description_nodes(n) for n in majority}
+    description_degree = math.log(description[majority[-1]] / description[majority[0]]) / span
 
     gates = 7 * 4096 ** 2 + 1
     rows = 26 * 4096 ** 2 + 12 * 4096 + 7
@@ -452,7 +565,13 @@ def certificate_q8(full: bool = False) -> dict:
             "multiplier_nodes_at_4096_log10": round(exponent),
             "atoms_in_observable_universe_log10": 80,
             "majority_program_nodes": MAJORITY_PROGRAM_NODES,
-            "majority_growth_degree": round(degree, 2),
+            "majority_allocation_growth_degree": round(degree, 2),
+            "majority_description_nodes": description,
+            "majority_description_growth_degree": round(description_degree, 2),
+            "comparison_scope": "the multiplier ladder counts what composing the "
+                                "circuit allocated, so majority's allocation is the "
+                                "like-for-like column; majority's description is the "
+                                "quadratic one and is reported beside it",
             "boolean_route_gates": gates, "boolean_route_rows": rows,
             "direct_limb_rows": 25725, "row_ratio": round(rows / 25725),
             "claim": "majority's program grows polynomially, as n**%.2f over six sizes, and "
