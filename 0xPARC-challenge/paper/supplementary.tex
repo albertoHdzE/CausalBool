@@ -215,8 +215,96 @@ illustrate its limitations; they are not a new synthesis algorithm or a
 claim to recover hidden internal topology.
 
 \section{Q5 and Q6: range and exclusion constraints}
+\subsection{What was stated, and what the method returned}
+\label{sec:cells}
+The cells behind Q5, Q6 and Q7 were obtained by one procedure, described here
+once and used by all three. For each cell an integer relation is written as a
+map from an input bit vector to an output bit, with nothing said about how the
+map is to be computed. The relation is evaluated over its complete input space,
+the resulting behaviour is turned into a decision-diagram root, and that root is
+handed to index deconvolution, which reports the coordinates the output
+actually responds to and matches the restricted behaviour against the canonical
+gate family of Section S3. The returned gate is what the compiler receives. No
+gate literal appears in the builders that assemble the comparison scan, the
+inequality scan or the multiplier; every gate they place is read from a
+recovery record.
+
+For the range and exclusion questions the stated relations are two scan steps.
+The comparison step has inputs $(\ell,e,x)$, the incoming ``less'', the incoming
+``equal'' and the value bit at this position, and a bound bit $\beta$ which is a
+constant of the position rather than an input. Its two outputs are stated as
+\[
+ \ell_{\mathrm{out}}=\ell\vee(e\wedge\bar x\wedge\beta),\qquad
+ e_{\mathrm{out}}=e\wedge[x=\beta],
+\]
+which is the meaning of a running comparison and not a circuit for it. The
+inequality step has inputs $(d,x)$ and a constant bit $\gamma$, with the single
+output $d_{\mathrm{out}}=d\vee[x\ne\gamma]$. Because $\beta$ and $\gamma$ are
+constants of the position, each step is recovered twice, once for each value.
+
+Table~\ref{tab:cellrecord} is the recovery record as the method produced it.
+The connected inputs are the coordinates found essential by the cofactor test;
+the gate is the canonical name and the match class is the full set of families
+whose exact behaviour agrees, so that the name may be read as the choice within
+that class which it is.
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{The recovery record for the six arithmetic cells.} Inputs are
+numbered in the order they are stated. The match class is every canonical
+family that reproduces the recovered behaviour exactly, so a class of size one
+is a unique name and a larger class is not. The unary cell matches seven
+families because a plain wire is expressible in nearly all of
+them.}\label{tab:cellrecord}
+\small
+\begin{tabularx}{\linewidth}{llll>{\raggedright\arraybackslash}X}
+\toprule
+Cell & Output & Connected & Gate & Match class\\\midrule
+full adder & sum & $0,1,2$ & XOR & XOR\\
+ & carry & $0,1,2$ & MAJORITY & KOFN, MAJORITY, REGULATORY\_DNF\\
+partial product & product & $0,1$ & AND & AND, KOFN, MAJORITY, REGULATORY\\
+comparison, $\beta=1$ & less & $0,1,2$ & REGULATORY\_DNF & REGULATORY\_DNF\\
+ & equal & $1,2$ & AND & AND, KOFN, MAJORITY, REGULATORY\\
+comparison, $\beta=0$ & less & $0$ & AND & AND, CANALISING, KOFN, MAJORITY, OR,
+ REGULATORY, XOR\\
+ & equal & $1,2$ & NIMPLIES & CANALISING, NIMPLIES, REGULATORY\\
+inequality, $\gamma=0$ & differs & $0,1$ & OR & CANALISING, KOFN, OR,
+ REGULATORY\_DNF\\
+inequality, $\gamma=1$ & differs & $0,1$ & REGULATORY\_DNF & REGULATORY\_DNF\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Read as expressions, the record says
+\[
+\begin{array}{ll}
+ \beta=1:&\ell_{\mathrm{out}}=\ell\vee e\bar x,\qquad e_{\mathrm{out}}=e\wedge x,\\[2pt]
+ \beta=0:&\ell_{\mathrm{out}}=\ell,\qquad\qquad\ \ e_{\mathrm{out}}=e\wedge\bar x,\\[4pt]
+ \gamma=0:&d_{\mathrm{out}}=d\vee x,\\[2pt]
+ \gamma=1:&d_{\mathrm{out}}=d\vee\bar x.
+\end{array}
+\]
+The two clauses of the $\beta=1$ ``less'' cell are returned as a regulatory
+disjunctive form with $\ell$ as a lone activator and $e$ activating under the
+inhibition of $x$, which is exactly $\ell\vee e\bar x$; the $\gamma=1$ cell is
+returned the same way as $d\vee\bar x$. At $\beta=0$ the method reports a single
+connected input for ``less'' and names the unary gate, which is the wire itself:
+two of the three stated dependencies are absent from the behaviour, because
+below a zero bound bit no new strict inequality can arise. This specialisation
+is a finding of the cofactor test, not a simplification applied to a circuit
+afterwards; no circuit exists at that point to simplify.
+
+A recovered gate names a function of whatever arity it found essential, while
+the lowering carries two- and three-input gates, so the expansion between them
+is a proof obligation. It is discharged by root identity: the expanded network
+is evaluated back into a root, the named gate is built independently by the
+engine's own gate builder, and the two roots are compared. All nine expansions
+in use are checked this way, together with every candidate the identifier can
+return at arities one to five and every function of one to three variables.
+
+\subsection{From recovered gates to quadratic rows}
 A quadratic row means $A(w)B(w)=C(w)$ in $\F_P$, with all three expressions
-linear in the signals. Both relations are compiled from recovered cells, and
+linear in the signals. Both relations are compiled from the cells above, and
 the two field-level equations they carry are consequences of putting Boolean
 wires into a field rather than a separate construction. A wire holding a bit
 must be pinned to $\{0,1\}$, which one quadratic row expresses uniquely, and
@@ -234,20 +322,117 @@ wider than the bound, so that an out-of-range value is representable and the
 recovered comparator is what rejects it; the bit count alone never does the
 work.
 
-The exclusion in Q6 is likewise compiled, from a recovered comparator against
-the prime together with a recovered inequality cell. A shorter relation is
-available to the field directly, $(r-1)s=1$, which has a witness exactly when
-$r\ne1$, since one may take $s=(r-1)^{-1}$ while at $r=1$ the equation would
-read $0=1$. It is retained as an independent cross-check on the compiled
-system rather than as the answer, and the size difference between them is
-reported plainly in Section S7.
+\subsection{Q5: the range predicate}
+The predicate is built by threading $(\ell,e)$ through the recovered comparison
+cell from the most significant position down, initialised with $\ell$ false and
+$e$ true, and reading the final ``less''. At each position the scan selects the
+cell recovered for that bound bit; the scan itself contains no logic beyond that
+selection. Compiled at 65 bits against the bound $2^{64}$, the system is 335
+rows over 200 signals.
+
+The scan is exact at every width where it can be enumerated completely. For
+each width $w$ from one to eight, and each of the $2^w$ bounds, the predicate
+was rebuilt from the recovered cells and evaluated on all $2^w$ inputs against
+the integer test $x<b$. This is $\sum_{w=1}^{8}4^w=87{,}380$ cases, and all
+87{,}380 agree. What is not claimed is compiled-circuit verification: the
+pinned Circom toolchain is absent from the recorded environment, so that status
+is UNKNOWN rather than PASS, as Section S7 records.
+
+\subsection{Q6: exclusion of one}
+The exclusion is compiled from the same comparison cell run at 254 bits against
+$P$, which forces the element to be canonical, together with the recovered
+inequality cell scanned against the constant one. The system is 2{,}193 rows
+over 1{,}223 signals. Valid witnesses are checked at $r=0,2,P-1$. The forgery
+worth naming is the modular alias: an assignment claiming $r=1$ while carrying
+the bit pattern of $P+1$, which is the same field element written
+noncanonically. Injected directly into the compiled rows, it is rejected by 102
+of them, every one a gate row of the recovered scan, so it is the recovered
+cells themselves that refuse it. Rejection is read from the rows, never from a
+witness generator declining to produce an assignment.
+
+A shorter relation is available to the field directly, $(r-1)s=1$, which has a
+witness exactly when $r\ne1$, since one may take $s=(r-1)^{-1}$ while at $r=1$
+the equation would read $0=1$. It is one row over two signals. It is retained
+as an independent cross-check on the compiled system rather than as the answer,
+and the size difference between them is reported plainly in Section S7.
 
 \section{Q7: a 64-bit factorisation}
-Range-constrain public $n$ and private $u,v$ to 64 bits, enforce $uv=n$, and
-enforce $(u-1)s=1$ and $(v-1)t=1$. The system also explicitly enforces
-$u,v\ge2$ using an inverse for the sum of each factor's bits above position
-zero. That sum lies between 0 and 63, so its nonzero field value means the
-factor is at least two. These extra rows make the public-input promise robust.
+\subsection{The multiplier built from recovered cells}
+The two cells this question needs are the last two rows of the experiment of
+Section~S4.1. The full adder is stated as the integer $a+b+c_{\mathrm{in}}$,
+with its low bit and its high bit taken as the two outputs; the partial product
+is stated as the one-bit product $uv$. Enumerating the first over its eight
+input states and the second over its four, the method returns all three inputs
+essential for both adder outputs, the sum as XOR and the carry as MAJORITY,
+and the product as AND. That is the classical full adder, and neither name
+occurs in what the method was given.
+
+The multiplier is then a shift-and-add schedule over those two cells and
+nothing else. For each factor bit $j$ the schedule places one recovered partial
+product per column in range and one recovered full adder per column of the
+running total, threading the carry along the column and retaining the stage
+carry at the end. No product bit is discarded by construction, and the stage
+carries are carried out of the network as outputs so that the compiler can
+constrain them to zero; the absence of truncation is therefore an explicit
+constraint rather than a property of the schedule. Compiled at the full 64 bits,
+the system is 107{,}271 rows over 53{,}572 signals.
+
+\subsection{The exhaustive ladder and the law it fixes}
+Verification is exhaustive wherever exhaustion is possible and adversarial where
+it is not.
+
+At the Boolean level the multiplier was enumerated at widths one to five. For
+every pair $(u,v)$ the complete $2w$-bit product must equal $uv$ and every stage
+carry must be zero: $4+16+64+256+1024$ pairs, with no failure.
+
+At the constraint level the serialized rows themselves were swept. For widths
+four, five and six, every triple $(u,v,n)$ over the width was evaluated against
+the rows and against the independent integer predicate $u\ge2\wedge v\ge2\wedge
+uv=n$, and the two were required to agree in both directions --- a satisfying
+triple must satisfy every row, and a non-satisfying triple must break at least
+one. Table~\ref{tab:ladder} records the sweep. There is no discrepancy in
+299{,}008 triples.
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{The Q7 constraint ladder.} Every triple at each width, checked
+against the compiled rows and an independent integer predicate. \emph{Valid} is
+the number of triples the predicate accepts; the remainder must be rejected by
+the rows. The row counts are the compiled systems at that width and agree with
+$26w^2+12w+7$ exactly.}\label{tab:ladder}
+\begin{tabular}{rrrrr}
+\toprule
+Width & Triples & Valid & Rows & Discrepancies\\\midrule
+4 & 4{,}096 & 16 & 471 & 0\\
+5 & 32{,}768 & 52 & 717 & 0\\
+6 & 262{,}144 & 148 & 1{,}015 & 0\\\midrule
+Total & 299{,}008 & 216 & --- & 0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two exact laws are fitted over the emitted systems from width four to width
+sixty-four and confirmed at 128: a width-$w$ multiplier has $7w^2+1$ gates and
+compiles to $26w^2+12w+7$ rows. At $w=64$ the row law reads
+$26\cdot4096+768+7=107{,}271$, which is the released system, so the ladder's
+widths and the answered width are the same construction rather than two.
+
+At 64 bits enumeration would require $2^{192}$ triples and is not attempted.
+Instead the released system is attacked. It accepts genuine factorisations,
+including semiprimes whose product occupies all 64 bits, the largest accepted
+product being $18{,}446{,}743{,}979{,}220{,}271{,}189$. It rejects an all-zero
+assignment, a trivial factor in either position, a wrong public product, and a
+pair of 34-bit factors whose product overflows 64 bits and would otherwise pass
+as its truncated residue. The forged assignment recorded in the evidence keeps a
+valid pair $(u,v)=(3,5)$ while claiming $n=0$, and four rows reject it.
+
+\subsection{The direct system, retained as a cross-check}
+The field can state the same condition in 200 rows. Range-constrain public $n$
+and private $u,v$ to 64 bits, enforce $uv=n$, and enforce $(u-1)s=1$ and
+$(v-1)t=1$. The system also explicitly enforces $u,v\ge2$ using an inverse for
+the sum of each factor's bits above position zero. That sum lies between 0 and
+63, so its nonzero field value means the factor is at least two. These extra
+rows make the public-input promise robust.
 
 Completeness follows by taking the binary expansions and inverses from every
 nontrivial integer factorisation. For soundness, range constraints give
@@ -255,6 +440,13 @@ $0\le u,v<2^{64}$, so $uv<2^{128}<P$. Both $uv$ and $n$ are therefore
 canonical integers, and the field equality lifts to $uv=n$ over the integers.
 The inverse constraints exclude trivial factors. The circuit checks supplied
 factors; it does not find them.
+
+Both routes are at width 64, so the comparison between them is like for like:
+107{,}271 rows against 200, a factor of 536. The direct system borrows the
+field's own multiplication and the recovered one borrows none of it, which is
+the whole of the difference. No efficiency claim is made for the recovered
+route; what it establishes is that the gates performing the arithmetic were
+obtained from behaviour rather than asserted.
 
 \section{Q8: a 4096-bit factorisation}
 Put $B=2^{64}$ and represent $u,v,n$ by 64 limbs each:
@@ -296,21 +488,31 @@ The construction above is what answers Q8, and index deconvolution is not what
 produces it. The reason is measured rather than asserted, and it is worth
 separating two different costs.
 
-The first is the gate count of a bit-level multiplier. Its scaling is exact and
-was fitted over widths four to sixty-four and confirmed at 128: width $w$ gives
-$7w^2+1$ gates and $26w^2+12w+7$ rows, so $w=4096$ gives 436{,}256{,}775 rows
-against 25{,}725 here, a factor of about seventeen thousand. That is an
-argument about expense only.
+The first is the gate count of a bit-level multiplier, which would be the
+obvious way to extend the Q7 route of Section~S5 to this width. Its scaling is
+the exact law fitted there, so $w=4096$ gives 436{,}256{,}775 rows against
+25{,}725 here, a factor of about seventeen thousand. That is an argument about
+expense only.
 
-The second is decisive. The method's reach depends on the decision-diagram
-description staying small, and whether it does is a property of the function.
-Built on the same engine, majority's description grows as $n^{3.96}$ across six
-sizes from $n=31$ to $n=151$, reaching 41{,}196{,}123 nodes at $n=151$; that is
-why Section~S3's recovery climbs so far. The multiplier's grows by a factor of
-$2.977$ per additional bit, measured across eleven widths from two to twelve,
-where it already occupies 4{,}384{,}542 nodes and exceeds an eight-million-node
-budget at thirteen. Extrapolating that factor to 4096 bits gives roughly
-$10^{1942}$ nodes, against about $10^{80}$ atoms in the observable universe.
+The second is decisive. The method's reach depends on the decision diagram
+staying small during the recovery, and whether it does is a property of the
+function rather than of the implementation. The quantity to compare is the
+allocation, every node the recovery had to hold, and it must be compared with
+allocation rather than with the recovered function's own description, which is a
+different and much smaller thing. Built on the same engine, majority's
+allocation grows as $n^{3.96}$ across six sizes from $n=31$ to $n=151$, reaching
+41{,}196{,}123 nodes at $n=151$; that is why Section~S3's recovery climbs so
+far, and the recovered function's own diagram there is only 5{,}776 nodes. The
+multiplier's allocation grows by a factor of $2.977$ per additional bit,
+measured across eleven widths from two to twelve, where it already occupies
+4{,}384{,}542 nodes and exceeds an eight-million-node budget at thirteen. The
+per-bit ratios settle quickly --- $5.778$, $4.721$, $3.688$, $3.347$, $3.094$,
+$3.019$, $2.983$, $2.973$, $2.958$, $2.953$ --- so the extrapolation rests on a
+rate that has stopped moving rather than on a trend still in transient.
+Extrapolating it to 4096 bits gives roughly $10^{1942}$ nodes, against about
+$10^{80}$ atoms in the observable universe. At no point in that ladder does the
+recovered description become available to compare, because the recovery does not
+finish.
 
 This is not an encoding that has yet to be found. Exponential growth of such
 descriptions for integer multiplication is a known lower bound~\cite{bryant},
@@ -331,21 +533,12 @@ serialized rows $A(w)B(w)=C(w)$ used by the challenge evaluator and Circom
 exporter. Witness generation and constraint enforcement stay separate: the
 serialized rows remain the acceptance boundary.
 
-The cells, as the method named them, are as follows. From $a+b+c_{\mathrm{in}}$
-it returns the sum bit as \textsc{xor} and the carry bit as \textsc{majority},
-both on all three inputs, which is the classical full adder recovered rather
-than recalled; from the one-bit product it returns \textsc{and}. From a running
-comparison against a fixed bound bit it returns the comparator recurrence, and
-specialises it without being asked: against a zero bound bit the outgoing
-``less'' is reported to depend on the incoming ``less'' alone. From a running
-inequality it returns \textsc{or} against a zero bit and a two-clause
-disjunction against a one bit.
-
-A recovered gate names a function of any arity while the lowering carries two-
-and three-input gates, so the expansion between them is a proof obligation. It
-is discharged by root identity, not assumed: all nine expansions in use are
-checked, together with every candidate the identifier can return at arities one
-to five and every function of one to three variables.
+The six cells, the connected inputs and canonical names the method returned for
+each, and the match class within which each name is a choice, are recorded in
+Table~\ref{tab:cellrecord} of Section~\ref{sec:cells}, together with the
+expansion obligation and the root identity that discharges all nine expansions
+in use. This subsection records the lowering and the evidence rather than
+repeating that account.
 
 The lowering supports AND, OR, XOR, NOT, three-input MAJORITY and Boolean
 constants. For example, the rows for AND and XOR are
@@ -379,13 +572,9 @@ carries; the public product is range-bound and both factors are required to be
 at least two.
 
 Verification is exhaustive where enumeration is possible and adversarial where
-it is not. Every triple at widths four, five and six is checked against an
-independent integer predicate: $4{,}096+32{,}768+262{,}144=299{,}008$
-assignments with no discrepancy, of which 216 satisfy the relation and the rest
-are rejected. At the full 64 bits the system accepts genuine factorisations,
-including semiprimes whose product occupies all 64 bits, and rejects trivial
-factors, wrong products, and a pair of 34-bit factors whose product overflows
-64 bits and would otherwise pass as its truncated residue.
+it is not. The Q5 sweep over every width to eight, every bound and every input
+is given in Section~S4.3 and the Q7 constraint ladder in Section~S5.2; neither
+records a discrepancy against its independent integer predicate.
 
 The recovered route is larger than the direct one at every question, and no
 efficiency claim is made for it. At Q7 the comparison is like-for-like, both at

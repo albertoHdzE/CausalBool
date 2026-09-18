@@ -318,103 +318,95 @@ has the form $A(w)B(w)=C(w)$, where each expression is linear in the
 variables $w$. A \emph{witness} is an assignment of all private and auxiliary
 values satisfying the constraints.
 
-\subsection{Designing the experiment, and what its results force}
-I answered these four questions by running one experiment and then reading its
-consequences, so I describe it in that order.
+Four integer conditions are asked for: that a number lies below $2^{64}$, that
+a field element is not one, that a 64-bit number has a nontrivial
+factorisation, and that a 4096-bit number does. I answered them by running a
+single experiment and then reading its consequences, so I describe it in that
+order.
 
-\paragraph{Design.} The rule I set myself was that no gate would be written
-down. For each arithmetic cell I wrote only the integer relation it is supposed
-to satisfy and nothing about how to compute it: $a+b+c_{\mathrm{in}}$ for the
-adder, the one-bit product for the partial product, a running comparison
-against a fixed bound bit for the range, and a running inequality against a
-fixed constant bit for the exclusion. I then enumerated each relation's
-complete behaviour over its input states, handed that behaviour to index
-deconvolution, and recorded whatever came back. The method never sees a
-circuit; it sees only a table of outputs.
+\subsection{An experiment in which no gate is written down}
+\label{sec:experiment}
+The rule I set myself was that nothing about \emph{how} to compute an
+arithmetic cell would appear anywhere in the source. For each cell I wrote only
+the integer relation it is required to satisfy. For the adder, the integer
+$a+b+c_{\mathrm{in}}$, with its low bit and its high bit read off as the two
+outputs. For the partial product, the one-bit product $uv$. For the range, the
+meaning of a running comparison against a fixed bound bit: once below the bound
+stay below, and while still equal let this position decide. For the exclusion,
+the meaning of a running inequality against a fixed constant bit: once a bit
+has differed the values differ, and this bit differs when it disagrees with the
+constant. Four relations, stated as arithmetic and as nothing else.
 
-\paragraph{Results.} The method returned, in every case, a set of inputs that
-matter and a named gate acting on them. For the adder it found all three
-inputs essential for both outputs and returned the sum as \textsc{xor} and the
-carry as \textsc{majority}, the classical full adder, without either name being
-supplied. For the one-bit product it returned \textsc{and}. For the comparison
-step it returned a two-clause form on all three inputs against a bound bit of
-one, and against a bound bit of zero it returned the incoming ``less'' alone,
-having found the other two inputs inessential. Every recovered gate was then
-folded into the gates the constraint layer carries, and each of the nine folds
-was discharged by root identity rather than assumed. Figures~\ref{fig:adder-recovery}
-to~\ref{fig:expansion} show these three results and the identity that licenses
-the fold.
+Each relation was then enumerated over its complete input space --- eight
+states for the adder and for the comparison step, four for the partial product
+and for the inequality step --- and the resulting behaviour was handed to index
+deconvolution. The method sees a table of outputs. It does not see a circuit, a
+gate name, or any indication that a particular one is expected. Whatever it
+returns is what the compiler is given, and there is no second route by which a
+hand-written gate could enter: the builders that assemble the multiplier, the
+comparator scan and the inequality scan read their gates from the recovery and
+contain no gate literals of their own.
 
-\paragraph{What the results force.} Two things are evident from what came back.
-First, every object the method returned is a gate over \emph{bit} coordinates:
-the essential sets it reports are sets of bit positions, and the gates it names
-act on values that are zero or one. Second, the questions themselves are about
-\emph{integers} --- a 64-bit bound, a canonical field element, a product of two
-factors --- so the recovered network and the question do not speak about the
-same objects until they are joined.
+Six cells came back, and Table~\ref{tab:cells} sets each one against what was
+said to obtain it. These expressions, and no others, are what the answers below
+are built from.
 
-Joining them inside $\F_P$ leaves no freedom, and this is where the two
-algebraic components come from. A constraint variable ranges over the whole
-field, so a wire intended to carry one of the method's bits must be pinned to
-$\{0,1\}$. In a single quadratic row there is exactly one way to say that:
-\begin{equation}\label{eq:bit}
-b(b-1)=0,
-\end{equation}
-the unique monic quadratic whose roots are zero and one, and which has no other
-solutions because a field has no zero divisors. The compiler therefore emits
-Eq.~\eqref{eq:bit} once for every input bit of every system built this way. The
-integer the question asks about must then be tied to those same bits, which is
-the weighted sum
-\begin{equation}\label{eq:pack}
-x=\sum_{i=0}^{w-1}2^i b_i .
-\end{equation}
-Neither equation was chosen for convenience; both are what the recovered
-network needs in order to exist as field constraints at all.
+\begin{table}[htbp]
+\centering
+\caption{\textbf{The gates the method returned, against what was said to obtain
+them.} The middle column is the entire input to the experiment: an integer
+relation, or the meaning of one scan step. The right-hand column is the
+expression index deconvolution returned, on the inputs it found essential.
+Here $\ell$ and $e$ are the incoming ``less'' and ``equal'' of a comparison,
+$d$ the incoming ``differs'' of an inequality, and $x$ the value bit at the
+current position; a bar denotes negation. The bound and constant bits are
+constants of the position, so each scan cell is recovered twice, once for
+each.}\label{tab:cells}
+\begin{tabular}{llll}
+\toprule
+Cell & Stated as & Output & Expression returned\\\midrule
+Full adder & $a+b+c_{\mathrm{in}}$ & sum & $a\oplus b\oplus c_{\mathrm{in}}$\\
+ & & carry & $\Maj(a,b,c_{\mathrm{in}})$\\[2pt]
+Partial product & $uv$ & product & $u\wedge v$\\[2pt]
+Comparison, bound bit 1 & comparison scan & less & $\ell\vee e\bar x$\\
+ & & equal & $e\wedge x$\\[2pt]
+Comparison, bound bit 0 & & less & $\ell$\\
+ & & equal & $e\wedge\bar x$\\[2pt]
+Inequality, constant bit 0 & inequality scan & differs & $d\vee x$\\
+Inequality, constant bit 1 & & differs & $d\vee\bar x$\\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\paragraph{Why the sum is an integer and not a residue.} Equation~\eqref{eq:pack}
-is an identity in $\F_P$, so on its own it determines $x$ only up to a multiple
-of the modulus, and a field circuit cannot distinguish $x$ from an external
-$x+P$. It states what the question means only when the sum cannot wrap: with
-$w$ bits the right-hand side lies in $[0,2^w-1]$, so if $2^w<P$ then that range
-sits inside $[0,P-1]$ and the canonical representative of the sum equals $x$ as
-an integer. This is why each width here is chosen against the modulus rather
-than against the question alone --- 65 bits for Q5, 254 for Q6, 64 per factor
-for Q7 --- and why the Q8 construction of Section~\ref{sec:q8} must split a
-4096-bit integer into limbs instead: there no single field element can hold it,
-and the bound discipline replaces Eq.~\eqref{eq:pack}.
+Three features of that table are worth drawing out, because they are the
+reason the experiment was worth running rather than assumed.
 
-One consequence is worth drawing out. For Q5 I take the decomposition one bit
-wider than the bound, at 65 bits rather than 64. A 64-bit decomposition would
-make the range true by arithmetic, since no 64-bit sum can reach $2^{64}$, and
-the recovered comparator would then be verifying something it could not fail.
-At 65 bits an out-of-range value is representable, and the comparator is what
-rejects it. The compiled systems that result are 335 rows over 200 signals for
-Q5, 2{,}193 over 1{,}223 for Q6, and 107{,}271 over 53{,}572 for Q7.
+The first is the adder. Handed the integer $a+b+c_{\mathrm{in}}$ and nothing
+else, the method found all three inputs essential for both outputs and returned
+the sum as \textsc{xor} and the carry as \textsc{majority}. That is the
+classical full adder, and neither name appears in what it was given.
+Figure~\ref{fig:adder-recovery} shows the whole of that recovery: the eight rows
+handed over, and the network handed back.
 
-\paragraph{Two shorter relations, kept as checks.} The field can express two of
-these conditions directly and far more cheaply. For $r\ne1$ one may impose
-$(r-1)s=1$, which has a witness exactly when $r-1$ is invertible, and at $r=1$
-would read $0=1$; for Q7 one may bound $u,v$ to 64 bits and impose $uv=n$,
-which is an integer equality as well as a modular one because $uv<2^{128}<P$. I
-keep both, not as the answer, but because a one-row relation that borrows the
-field's own arithmetic is a useful independent check on a hundred-thousand-row
-system that borrows none of it. Neither route finds factors; both verify
-factors that are supplied.
+The second is that the comparison cell specialises itself. Against a bound bit
+of one it uses all three inputs. Against a bound bit of zero it reports that
+two of the three are inessential and returns the incoming ``less'' alone ---
+below the bound one stays below, and no zero bound bit can create a new strict
+inequality. The ``equal'' output splits the same way, into $e\wedge x$ against a
+one and $e\wedge\bar x$ against a zero, which is the statement that equality
+survives exactly when the value bit agrees with the bound bit.
+Figure~\ref{fig:comparator-specialisation} shows the dependencies that vanish.
+None of this was applied afterwards as an optimisation; the cofactor test
+simply did not find those dependencies.
 
-\subsection{Building the same conditions out of recovered gates}
-The direct equations above are short because they borrow the field's own
-arithmetic. The second route asks a different question: if we are only allowed
-Boolean gates, which gates are they, and who chooses them? Here nothing is
-chosen by hand. Each cell is stated as an integer relation, its complete
-behaviour is handed to index deconvolution, and the gate that comes back is
-what gets compiled.
-
-Handed the relation $a+b+c_{\mathrm{in}}$ and nothing else, the method returns
-the sum bit as \textsc{xor} on all three inputs and the carry bit as
-\textsc{majority} on all three. The classical full adder is recovered rather
-than recalled. Figure~\ref{fig:adder-recovery} shows the whole of that
-recovery: the eight rows the method is given, and the network it gives back.
-Handed the one-bit product it returns \textsc{and}.
+The third is a limit, and it is the same one that applies to Q2. What is
+recovered is a function; the name attached to it is a canonical choice inside
+an equivalence class of names. The sum bit is named uniquely, but the carry's
+exact match class also contains \textsc{kofn} and a two-clause regulatory form,
+and the unary ``less'' cell matches seven families at once, because a plain
+wire is expressible in almost all of them. The class is recorded for every cell
+in Supplementary Section~S4. Nothing downstream depends on the name, since it
+is the function that is compiled.
 
 \begin{figure}[htbp]
 \centering
@@ -453,13 +445,6 @@ two-clause regulatory form, which are the same function under other names.
 These two gates, not any written by hand, are what Q7 compiles.}
 \label{fig:adder-recovery}
 \end{figure}
-
-Handed a running comparison the method returns the comparator recurrence, and
-once the bound bit is fixed it specialises on its own, as
-Figure~\ref{fig:comparator-specialisation} shows. Against a bound bit of zero
-it reports that the outgoing ``less'' depends on the incoming ``less'' alone,
-because no new strict inequality can arise there. That specialisation is found,
-not applied afterwards.
 
 \begin{figure}[htbp]
 \centering
@@ -504,12 +489,77 @@ find them.}
 \label{fig:comparator-specialisation}
 \end{figure}
 
-A recovered gate names a function of any arity, while the constraint layer
-carries two- and three-input gates, so the expansion between them is an
-obligation rather than a convenience. It is discharged by identity for every
-gate the method can return at the arities in use, and for every function of one
-to three variables. Figure~\ref{fig:expansion} shows one such expansion and the
-identity that discharges it.
+\subsection{What the recovered gates force in the field}
+Two things are evident from what came back.
+First, every object the method returned is a gate over \emph{bit} coordinates:
+the essential sets it reports are sets of bit positions, and the gates it names
+act on values that are zero or one. Second, the questions themselves are about
+\emph{integers} --- a 64-bit bound, a canonical field element, a product of two
+factors --- so the recovered network and the question do not speak about the
+same objects until they are joined.
+
+Joining them inside $\F_P$ leaves no freedom, and this is where the two
+algebraic components come from. A constraint variable ranges over the whole
+field, so a wire intended to carry one of the method's bits must be pinned to
+$\{0,1\}$. In a single quadratic row there is exactly one way to say that:
+\begin{equation}\label{eq:bit}
+b(b-1)=0,
+\end{equation}
+the unique monic quadratic whose roots are zero and one, and which has no other
+solutions because a field has no zero divisors. The compiler therefore emits
+Eq.~\eqref{eq:bit} once for every input bit of every system built this way. The
+integer the question asks about must then be tied to those same bits, which is
+the weighted sum
+\begin{equation}\label{eq:pack}
+x=\sum_{i=0}^{w-1}2^i b_i .
+\end{equation}
+Neither equation was chosen for convenience; both are what the recovered
+network needs in order to exist as field constraints at all.
+
+\paragraph{Why the sum is an integer and not a residue.} Equation~\eqref{eq:pack}
+is an identity in $\F_P$, so on its own it determines $x$ only up to a multiple
+of the modulus, and a field circuit cannot distinguish $x$ from an external
+$x+P$. It states what the question means only when the sum cannot wrap: with
+$w$ bits the right-hand side lies in $[0,2^w-1]$, so if $2^w<P$ then that range
+sits inside $[0,P-1]$ and the canonical representative of the sum equals $x$ as
+an integer. This is why each width here is chosen against the modulus rather
+than against the question alone --- 65 bits for Q5, 254 for Q6, 64 per factor
+for Q7 --- and why the Q8 construction of Section~\ref{sec:q8} must split a
+4096-bit integer into limbs instead: there no single field element can hold it,
+and the bound discipline replaces Eq.~\eqref{eq:pack}.
+
+One consequence is worth drawing out. For Q5 I take the decomposition one bit
+wider than the bound, at 65 bits rather than 64. A 64-bit decomposition would
+make the range true by arithmetic, since no 64-bit sum can reach $2^{64}$, and
+the recovered comparator would then be verifying something it could not fail.
+At 65 bits an out-of-range value is representable, and the comparator is what
+rejects it.
+
+\subsection{From a recovered gate to a quadratic row}
+Between the expression the method returns and the row the challenge evaluator
+reads there is one more step, and it is the step at which a hand-written gate
+could still slip in. A recovered gate names a function of whatever arity it
+found essential, while the constraint layer carries only two- and three-input
+gates, so the expansion between them is an obligation rather than a
+convenience. It is discharged by identity, not assumed: the expanded network is
+evaluated back into a decision-diagram root, the named gate is built
+independently by the engine's own gate builder, and the two roots are compared.
+Equal roots settle agreement on every input at once. All nine expansions in use
+are discharged this way, along with every gate the method can return at the
+arities in use and every function of one to three variables.
+Figure~\ref{fig:expansion} shows one such expansion and the identity behind it.
+A wrong fold cannot reach a constraint system, because the two roots would
+differ and the check would fail.
+
+Once the expansion is settled the lowering is mechanical. It carries
+\textsc{and}, \textsc{or}, \textsc{xor}, \textsc{not}, three-input
+\textsc{majority} and the Boolean constants, and each becomes a fixed pattern of
+rows --- $ab=z$ for a conjunction, $2ab=a+b-z$ for an exclusive or --- with
+Eq.~\eqref{eq:bit} emitted for every input, output and auxiliary signal.
+Repeated operands are combined as coefficients in the linear expressions, so
+fan-out and duplicate ports obey the same contract. Witness generation and
+constraint enforcement are kept apart throughout: the serialized rows, not the
+program that fills them in, are the acceptance boundary.
 
 \begin{figure}[htbp]
 \centering
@@ -550,22 +600,53 @@ system, because the two roots would differ and the check would fail.}
 \label{fig:expansion}
 \end{figure}
 
-Q5 is the range predicate $x<2^{64}$ built from the recovered comparator, over a
-decomposition one bit wider than the bound so that out-of-range values are
-representable and only the comparator excludes them. Q6 uses the same
-comparator at 254 bits together with a recovered inequality cell. Q7 is a
+\subsection{The three compiled systems, and what each one verifies}
+Three of the four questions are answered by scanning the recovered cells across
+the width the question asks for. Q5 threads the comparison cell through a
+65-bit decomposition and reads off the range predicate $x<2^{64}$: 335 rows over
+200 signals. Q6 runs the same comparison cell at 254 bits, against $P$ itself so
+that the element is canonical, together with the recovered inequality cell
+against the constant one: 2{,}193 rows over 1{,}223 signals. Q7 is a
 shift-and-add multiplier assembled from the recovered full adder and partial
-product, at the full 64 bits the question asks for: 107{,}271 rows over
-53{,}572 signals. It accepts genuine factorisations including semiprimes whose
-product needs all 64 bits, and rejects trivial factors, wrong products, and a
-pair of 34-bit factors whose product overflows 64 bits and would otherwise pass
-as its truncated residue. Exhaustive enumeration is complete at the widths
-where it is possible: every one of the 299{,}008 triples at widths four, five
-and six agrees with an independent integer predicate.
+product at the full 64 bits, one adder per column with every product bit and
+every stage carry retained: 107{,}271 rows over 53{,}572 signals.
 
-This route is larger than the direct one everywhere, and no efficiency claim is
-made for it. What it buys is that the gates doing the arithmetic were derived
-from behaviour rather than asserted.
+Each was then checked against an independent integer predicate, exhaustively
+wherever exhaustion is possible and adversarially where it is not. For Q5 the
+scan was rebuilt at every width up to eight and run against every bound and
+every input --- $\sum_{w=1}^{8}4^w=87{,}380$ cases, all correct. For Q7 the
+multiplier was enumerated at widths one to five, where the full $2w$-bit product
+and the zero stage carries must both come out right, and the compiled rows
+themselves were then swept at widths four, five and six over every triple
+$(u,v,n)$: $4{,}096+32{,}768+262{,}144=299{,}008$ triples, of which 216 satisfy
+the relation, with no discrepancy against the predicate in either direction.
+
+That ladder also gives an exact law, and the law is what carries the evidence up
+to 64 bits. A width-$w$ multiplier compiles to $26w^2+12w+7$ rows and
+$7w^2+1$ gates, fitted over widths four to sixty-four and confirmed at 128. At
+$w=64$ the row law reads $107{,}271$, which is exactly the system built above.
+At 64 bits enumeration is out of reach --- $2^{192}$ triples --- so the system is
+attacked instead: it accepts genuine factorisations, including semiprimes whose
+product occupies all 64 bits, and rejects trivial factors, wrong products, and a
+pair of 34-bit factors whose product overflows 64 bits and would otherwise pass
+as its truncated residue.
+
+\paragraph{Two shorter relations, kept as checks.} The field can express two of
+these conditions directly and far more cheaply. For $r\ne1$ one may impose
+$(r-1)s=1$, which has a witness exactly when $r-1$ is invertible, and at $r=1$
+would read $0=1$; for Q7 one may bound $u,v$ to 64 bits and impose $uv=n$,
+which is an integer equality as well as a modular one because $uv<2^{128}<P$. I
+keep both, not as the answer, but because a one-row relation that borrows the
+field's own arithmetic is a useful independent check on a hundred-thousand-row
+system that borrows none of it. Neither route finds factors; both verify
+factors that are supplied.
+
+The recovered route is larger than the direct one at every question --- 335 rows
+against 65 at Q5, 2{,}193 against one at Q6, and at Q7, where the comparison is
+like for like at width 64, 107{,}271 against 200. No efficiency claim is made
+for it, and none is intended. What it buys is that the gates performing the
+arithmetic were obtained from behaviour rather than asserted, and
+Figure~\ref{fig:causalbool-route} is the whole of that chain.
 
 \begin{figure}[htbp]
 \centering
@@ -634,8 +715,8 @@ Checks evaluate these equations directly, including altered bits, partial
 products, carries and public values. A useful negative control removes the
 carry bounds: the false integer statement $2((P+7)/2)=7$ can then satisfy the
 multiplication columns modulo $P$. Restoring the bounds rejects it.
-Supplementary Sections S4--S7 give completeness and soundness proofs and the
-compiled verification record.
+Supplementary Section S6 gives the completeness and soundness proofs, and
+Section S7 the compiled verification record.
 
 \subsection{Where the recovered route stops, and why}
 Q8 is answered above, and the recovered route of the previous subsection is not
@@ -649,31 +730,38 @@ $26w^2+12w+7$ rows. At $w=4096$ that is 436{,}256{,}775 rows against 25{,}725
 for the limb construction, a factor of about seventeen thousand. Large, but on
 its own only an argument about expense.
 
-The real obstruction appears when we ask for the compressed description rather
-than the gate count. Deconvolution's reach comes from the decision diagram
-staying small, and whether it does is a property of the function, not of the
-implementation. Table~\ref{tab:growth} puts the two cases side by side on the
-same engine. Majority's description grows polynomially, as $n^{3.96}$ across
-six sizes, which is what carries it to 151 inputs. Multiplication's grows by a
-factor of $2.977$ for every additional bit, measured across eleven widths, and
-is already beyond a budget of eight million nodes at thirteen bits.
-Extrapolating that factor to 4096 bits gives a description of some $10^{1942}$
-nodes. The observable universe holds about $10^{80}$ atoms.
+The real obstruction appears when we ask what the recovery has to hold in
+memory rather than what the circuit costs. Deconvolution's reach comes from the
+decision diagram staying small, and whether it does is a property of the
+function, not of the implementation. Table~\ref{tab:growth} puts the two cases
+side by side on the same engine, and compares like with like: in both columns
+the figure is the allocation, every node the recovery had to hold, which is the
+quantity that decides whether the run finishes at all. Majority's allocation
+grows polynomially, as $n^{3.96}$ across six sizes, which is what carries it to
+151 inputs; the recovered function's own description is far smaller still, 5{,}776
+nodes at $n=151$ and growing as $n^{1.97}$. Multiplication's allocation grows by
+a factor of $2.977$ for every additional bit, measured across eleven widths,
+and is already beyond a budget of eight million nodes at thirteen. Extrapolating
+that factor to 4096 bits gives some $10^{1942}$ nodes. The observable universe
+holds about $10^{80}$ atoms.
 
 \begin{table}[htbp]
 \centering
 \caption{\textbf{Why one function is recoverable at scale and the other is
-not.} Both columns are the same engine on the same machine. A majority need
-only remember how many inputs are active, so its description stays polynomial.
-A multiplier must retain every partial sum, and no summary suffices; the growth
-is geometric and the limit is intrinsic.}\label{tab:growth}
+not.} Both columns are the same engine on the same machine, and both report
+allocation: every decision node the recovery had to hold. A majority need only
+remember how many inputs are active, so the growth stays polynomial and the
+recovered function's own description is smaller again, $(n+1)^2/4$ nodes. A
+multiplier must retain every partial sum, and no summary suffices; the growth is
+geometric and the limit is intrinsic.}\label{tab:growth}
 \begin{tabular}{lrr}
 \toprule
  & Majority & Multiplication\\\midrule
-Description size & polynomial, $n^{3.96}$ & geometric, $\times2.977$ per bit\\
+Allocation growth & polynomial, $n^{3.96}$ & geometric, $\times2.977$ per bit\\
 Measured over & 6 sizes, $n=31$ to $151$ & 11 widths, $w=2$ to $12$\\
 Largest built & 41{,}196{,}123 nodes & 4{,}384{,}542 nodes\\
 At that size & $n=151$, all $2^{151}$ states & $w=12$ bits\\
+Recovered description & 5{,}776 nodes, $n^{1.97}$ & not reached\\
 Extrapolated & --- & $\approx10^{1942}$ nodes at 4096 bits\\
 \bottomrule
 \end{tabular}
