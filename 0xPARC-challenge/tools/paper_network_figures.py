@@ -189,6 +189,169 @@ def patterns_figure(rows, schemas):
     save(fig,'majority_patterns')
 
 
+def cover(column, n):
+    """Return the exact schema cover of an output column, as anchor/offset pairs.
+
+    A schema fixes some coordinates and leaves the rest free; it belongs to the
+    cover when every one of its expansions is active.  Only maximal schemata are
+    kept, so the cover is the compressed reading of the index set rather than a
+    restatement of it.  This is the representation of Section S3.1: an anchor
+    carried together with its own family of offsets.
+    """
+    active = {i for i, v in enumerate(column) if v}
+    found = []
+    for size in range(n + 1):
+        for free in combinations(range(n), size):
+            rest = [i for i in range(n) if i not in free]
+            for assignment in range(1 << len(rest)):
+                fixed = {i: (assignment >> k) & 1 for k, i in enumerate(rest)}
+                anchor = sum(1 << i for i, bit in fixed.items() if bit)
+                offsets = [sum(((j >> k) & 1) << i for k, i in enumerate(free))
+                           for j in range(1 << size)]
+                if not all(anchor + off in active for off in offsets):
+                    continue
+                pattern = ''.join('*' if i in free else str(fixed[i]) for i in range(n))
+                found.append(dict(pattern=pattern, anchor=anchor, free=list(free),
+                                  offsets=offsets, indices=[anchor + o for o in offsets]))
+    maximal = sorted((s for s in found
+                      if not any(other is not s and set(s['indices']) < set(other['indices'])
+                                 for other in found)),
+                     key=lambda s: s['anchor'])
+    union = set().union(*(set(s['indices']) for s in maximal)) if maximal else set()
+    if union != active:
+        raise RuntimeError('schema cover does not reproduce the index set')
+    return maximal
+
+
+def arithmetic_cells():
+    """Enumerate the stated relations and recover them, exactly as the compiler does.
+
+    Nothing here names a gate.  The behaviours are the relations as written in
+    ``boolean_arithmetic``; the names come back from the recovery and are only
+    read for display.
+    """
+    from oxparc_challenge.boolean_arithmetic import full_adder_cell, _comparator_step
+
+    def column(behaviour, n):
+        return [behaviour([(i >> k) & 1 for k in range(n)]) for i in range(1 << n)]
+
+    def comparator(bound_bit):
+        def less(bits):
+            l, e, x = bits
+            return 1 if l or (e and not x and bound_bit) else 0
+        return less
+
+    cells = dict(
+        adder_sum=dict(column=column(lambda b: sum(b) & 1, 3),
+                       recovered=full_adder_cell()[0]),
+        adder_carry=dict(column=column(lambda b: sum(b) >> 1, 3),
+                         recovered=full_adder_cell()[1]),
+        less_bound1=dict(column=column(comparator(1), 3),
+                         recovered=_comparator_step(1)[0]),
+        less_bound0=dict(column=column(comparator(0), 3),
+                         recovered=_comparator_step(0)[0]))
+    for name, cell in cells.items():
+        cell['indices'] = [i for i, v in enumerate(cell['column']) if v]
+        cell['essential'] = essential_variables(cell['column'], 3)
+        cell['cover'] = cover(cell['column'], 3)
+        if cell['essential'] != list(cell['recovered'].connected_inputs):
+            raise RuntimeError(f'{name}: column dependence differs from the recovery')
+    # The carry's index set is the three-input majority index set of Section S3.1.
+    if cells['adder_carry']['indices'] != [3, 5, 6, 7]:
+        raise RuntimeError('carry index set is not the majority index set')
+    if cells['adder_carry']['recovered'].gate != 'MAJORITY':
+        raise RuntimeError('carry was not recovered as MAJORITY')
+    if cells['less_bound0']['essential'] != [0]:
+        raise RuntimeError('the bound-zero comparison did not specialise')
+    return cells
+
+
+def cells_figure(cells):
+    """Render what "the resulting behaviour" is, in the method's own representation."""
+    names = ['$\\ell$', '$e$', '$x$']
+
+    def note(ax, text, y=-.30):
+        ax.text(0, y, text, transform=ax.transAxes, va='top', ha='left',
+                fontsize=9.5, color=INK, linespacing=1.5)
+
+    fig = plt.figure(figsize=(10.9, 7.3))
+    grid = fig.add_gridspec(2, 2, hspace=1.12, wspace=.30,
+                            height_ratios=[1.75, 1], width_ratios=[1, 1])
+
+    ax = fig.add_subplot(grid[0, 0])
+    rows = [[(i >> k) & 1 for k in range(3)] +
+            [cells['adder_sum']['column'][i], cells['adder_carry']['column'][i]]
+            for i in range(8)]
+    matrix(ax, np.array(rows), ['$a$', '$b$', '$c_{\\mathrm{in}}$', 'sum', 'carry'],
+           list(range(8)), font=10)
+    ax.set_title('A. The behaviour handed over', loc='left', pad=14, fontsize=11)
+    ax.set_ylabel('Input index $\\iota$')
+    ax.axvline(2.5, color=GREY, lw=1.5)
+    note(ax, 'The stated relation $a+b+c_{\\mathrm{in}}$, enumerated over its eight\n'
+             'states. This table is the whole of the input: no circuit is supplied\n'
+             'and no gate is named.', y=-.13)
+
+    ax = fig.add_subplot(grid[0, 1])
+    strips = np.array([[1 if i in cells['adder_sum']['indices'] else 0 for i in range(8)],
+                       [1 if i in cells['adder_carry']['indices'] else 0 for i in range(8)]])
+    matrix(ax, strips, list(range(8)), ['sum', 'carry'], font=10)
+    ax.set_title('B. The same behaviour as an index set', loc='left', pad=14, fontsize=11)
+    ax.set_xlabel('Index $\\iota=a+2b+4c_{\\mathrm{in}}$')
+    carry = cells['adder_carry']
+    patterns = ', '.join(s['pattern'] for s in carry['cover'])
+    anchors = ', '.join(str(s['anchor']) for s in carry['cover'])
+    note(ax, f"Only the positions of the ones are kept:  "
+             f"sum $\\mathcal{{I}}$ = {{{', '.join(map(str, cells['adder_sum']['indices']))}}},  "
+             f"carry $\\mathcal{{I}}$ = {{{', '.join(map(str, carry['indices']))}}}\n"
+             f"The carry's set is covered exactly by {patterns}, with anchors {anchors}.\n"
+             f"That is the three-input majority index set of Section S3.1,\n"
+             f"reached here from arithmetic rather than from voting.", y=-.19)
+
+    ax = fig.add_subplot(grid[1, 0])
+    matrix(ax, strips[1:], list(range(8)), ['carry'], font=10)
+    ax.set_title('C. Which coordinates the behaviour responds to', loc='left',
+                 pad=26, fontsize=11)
+    column = carry['column']
+    lines = []
+    for k, coordinate in enumerate(carry['essential']):
+        low = next(x for x in range(8) if not (x >> coordinate) & 1
+                   and column[x] != column[x ^ (1 << coordinate)])
+        high = low ^ (1 << coordinate)
+        ax.add_patch(FancyArrowPatch((low, -.55), (high, -.55), arrowstyle='<|-|>',
+                                     mutation_scale=9, linewidth=1.15, color=ORANGE,
+                                     clip_on=False, connectionstyle=f'arc3,rad={-.35 - .16 * k}',
+                                     zorder=5))
+        lines.append(f"flip $a$: $\\iota={low}\\to{high}$" if coordinate == 0 else
+                     (f"flip $b$: $\\iota={low}\\to{high}$" if coordinate == 1 else
+                      f"flip $c_{{\\mathrm{{in}}}}$: $\\iota={low}\\to{high}$"))
+    ax.set_ylim(1.2, -1.9)
+    note(ax, 'A single-bit flip that crosses the set makes that coordinate essential.\n'
+             + ';  '.join(lines) + '\n'
+             f"All three do, so the carry keeps all three inputs, and the restricted\n"
+             f"behaviour is matched against the canonical family as {carry['recovered'].gate}.",
+         y=-.55)
+
+    ax = fig.add_subplot(grid[1, 1])
+    one, zero = cells['less_bound1'], cells['less_bound0']
+    strips = np.array([[1 if i in one['indices'] else 0 for i in range(8)],
+                       [1 if i in zero['indices'] else 0 for i in range(8)]])
+    matrix(ax, strips, list(range(8)), ['bound bit 1', 'bound bit 0'], font=10)
+    ax.set_title('D. Where the behaviour is already specialised', loc='left',
+                 pad=26, fontsize=11)
+    ax.set_xlabel('Index $\\iota=\\ell+2e+4x$')
+    schema = zero['cover'][0]
+    free = ' and '.join(names[i] for i in schema['free'])
+    note(ax, f"bound bit 1: $\\mathcal{{I}}$ = {{{', '.join(map(str, one['indices']))}}}, "
+             f"essential {{{', '.join(names[i] for i in one['essential'])}}}\n"
+             f"bound bit 0: $\\mathcal{{I}}$ = {{{', '.join(map(str, zero['indices']))}}}, "
+             f"essential {{{', '.join(names[i] for i in zero['essential'])}}}\n"
+             f"The lower set is the single schema {schema['pattern']}, anchor {schema['anchor']},\n"
+             f"offsets {{{', '.join(map(str, schema['offsets']))}}}. {free} are free, so no flip of\n"
+             f"either crosses the set, and the method returns the wire.", y=-.62)
+
+    save(fig, 'arithmetic_cells')
+
+
 def capacities_figure(rows, schemas):
     """Show the method's forward, inverse, compression, and query capacities."""
     column = [r['output'] for r in rows]
@@ -317,10 +480,13 @@ def main():
     circuit,rows,schemas=derive()
     network_figure(circuit,rows)
     patterns_figure(rows,schemas)
+    cells = arithmetic_cells()
+    cells_figure(cells)
     capacities_figure(rows, schemas)
     from paper_operation_figures import generate
     generate()
     sources=[Path(__file__), ROOT/'src/oxparc_challenge/boolean.py',
+             ROOT/'src/oxparc_challenge/boolean_arithmetic.py',
              ROOT.parent/'index-deconvolution/src/deconvolution.py',
              ROOT.parent/'index-deconvolution/src/causalbool.py',
              ROOT/'paper/requirements-figures.lock',
@@ -330,6 +496,9 @@ def main():
              ROOT/'evidence/fourier_32768_ledger.json',
              ROOT/'evidence/fourier_65536_ledger.json']
     report=dict(status='PASS',states=32, gates=7, schemas=10, active_indices=16,
+        arithmetic_cells={name:dict(indices=c['indices'], essential=c['essential'],
+            gate=c['recovered'].gate, cover=[s['pattern'] for s in c['cover']])
+            for name,c in cells.items()},
         environment=dict(python=sys.version, dependencies={
             line.split('==')[0]:importlib.metadata.version(line.split('==')[0])
             for line in (ROOT/'paper/requirements-figures.lock').read_text().splitlines()}),
