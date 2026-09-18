@@ -35,11 +35,12 @@
 \tableofcontents
 \newpage
 \section{Questions, conventions, and contribution}
-We number the source's puzzles Q1--Q8 in order: list recovery, majority,
-Fourier, modular power sums, range, exclusion of one, 64-bit factorisation,
-and 4096-bit factorisation~\cite{challenge}. The Fourier text gives
-32,768 complex slots but 65,536 in its rotation example; we address both.
-The prime in Q4 is $q=2^{127}-1$. The distinct constraint field in Q5--Q8 is
+We keep the source's numbering of its eight puzzles~\cite{challenge} and
+address five of them: majority (Q2), range (Q5), exclusion of one (Q6), the
+64-bit factorisation (Q7) and the 4096-bit factorisation (Q8). List recovery
+(Q1), the Fourier circuit (Q3) and the modular power sums (Q4) are omitted,
+because index deconvolution does not supply their answers and this document
+reports only what it does supply. The constraint field in Q5--Q8 is
 $\F_P$, with
 \begin{align*}
 P={}&21888242871839275222246405745257275088548364400416034343698204186575808495617.
@@ -47,39 +48,8 @@ P={}&218882428718392752222464057452572750885483644004160343436982041865758084956
 External field values must be canonical integers in $[0,P-1]$.
 
 This supplement states the exact conventions and gives the full arguments
-behind the main text. The Boolean reconstruction is described in Section S4;
-the finite verification record is in Section S10.
-
-\section{Q1: recovering an integer list}
-Let $v=(v_0,\ldots,v_{n-1})$ be positive integers and let an oracle return exact
-dot products. With no bound, first query $(1,\ldots,1)$ to obtain $S=\sum_i v_i$.
-For $n>1$, put $B=S+1$ and query $(1,B,\ldots,B^{n-1})$, obtaining
-\[
- R=\sum_{i=0}^{n-1}v_iB^i.
-\]
-Since $0<v_i<B$, repeated division by $B$ recovers the digits without carries
-between positions. A known bound $v_i\le U$ permits $B=U+1$ in advance and
-one query. For $n=1$, the first query alone recovers the list.
-
-\begin{proposition}
-For $n\ge2$ with unbounded positive integers and rational query coefficients,
-two queries suffice and one query cannot always suffice.
-\end{proposition}
-\begin{proof}
-Sufficiency follows from the adaptive construction above. For any fixed
-rational query vector $x$, clearing denominators leaves an integer linear map
-from $\mathbb Z^n$ to $\mathbb Z$. Its rational nullspace has a nonzero integer
-vector $z$. Choose positive $v_i$ sufficiently large that $v_i+z_i>0$.
-Then $v$ and $v+z$ are different positive lists with the same answer.
-\end{proof}
-
-An idealized one-query solution uses coefficients linearly independent over
-$\mathbb Q$. For example, $1,t,\ldots,t^{n-1}$ for a transcendental real $t$
-are independent: equality of two answers would give a nonzero integer
-polynomial vanishing at $t$. This is an injectivity argument in an exact-real
-model, not a floating-point recovery algorithm. A bounded integer encoding
-already needs roughly $n\log_2 B$ answer bits; reducing the number of queries
-does not remove that information requirement.
+behind the main text. The Boolean reconstruction is described in Section S3;
+the finite verification record is in Section S7.
 
 \section{Q2: majority using only three-input majority}
 Let $f$ be a monotone Boolean function and choose distinct active variables
@@ -244,124 +214,33 @@ These controls establish the stated finite reconstruction behaviour and
 illustrate its limitations; they are not a new synthesis algorithm or a
 claim to recover hidden internal topology.
 
-\section{Q3: depth-three packed Fourier circuits}
-We use the forward unnormalised DFT and rotation convention
-\[
- (Fx)_r=\sum_{j=0}^{N-1}x_j e^{-2\pi i rj/N},\qquad
- R_k(x)[r]=x[(r+k)\bmod N].
-\]
-The primitives are vector addition, rotation by any offset, and componentwise
-multiplication by a known complex vector. Their charged costs are respectively
-4, 6100, and 5600 microseconds. Every known-vector multiplication consumes one
-multiplication level, including masks. This explicitly states how constants
-are charged under the puzzle's simplified model.
-
-\subsection{A complete factorisation}
-At DIF stage $s=0,\ldots,L-1$, where $N=2^L$, take blocks of length $m=N/2^s$
-and $h=m/2$. For each block and $0\le t<h$, the stage maps
-\[
- y_t=x_t+x_{t+h},\qquad
- y_{t+h}=(x_t-x_{t+h})e^{-2\pi i t/m}.
-\]
-The first output half contains the even-indexed frequencies after recursively
-transforming its sum inputs; the second contains the odd-indexed frequencies
-after transforming its twiddled differences. Induction on $L$ gives the DFT
-in bit-reversed frequency order. Applying the bit-reversal permutation to the
-output therefore yields the natural-order DFT.
-
-Partition the $L$ stages into at most three nonempty contiguous intervals.
-Each interval is fused into a linear transform; the final transform includes
-the bit-reversal permutation. For interval $[a,b)$, let $m=N/2^a$ and $h=N/2^b$.
-Before final permutation, each row $r$ has precisely these input columns:
-\[
- \left\lfloor r/m\right\rfloor m+(r\bmod h)+ht,
- \qquad 0\le t<2^{b-a}.
-\]
-Following a row backwards through the butterfly stages gives one path to
-each such column. An upper output contributes coefficients $+1,+1$; a lower
-output contributes the stage twiddle times $+1,-1$. Products along the chosen
-path determine the coefficient exactly. In the last transform replace $r$
-inside this rule by its $L$-bit reversal. This gives explicit, lazily generated
-coefficient vectors, without a dense full-size matrix.
-
-\subsection{Charged diagonals and rotation reuse}
-For each fused matrix $A$, set $d_k[r]=A[r,(r+k)\bmod N]$. With $K$ the set
-of nonzero cyclic diagonals,
-\[
- Ax=\sum_{k\in K}d_k\odot R_k(x).
-\]
-For a baby-step size $b_0\mid N$, write $k=gb_0+i$, $0\le i<b_0$, and regroup:
-\[
- Ax=\sum_g R_{gb_0}\left(
-       \sum_{i:\,gb_0+i\in K}R_{-gb_0}(d_{gb_0+i})\odot R_i(x)
-                         \right).
-\]
-This identity follows by evaluating both sides at a slot: the outer rotation
-cancels the opposite rotation of the known coefficient. Rotating known
-coefficient data is part of its offline definition; every rotation of the
-encrypted vector is an explicit charged node. If $I$ and $G$ are the used
-baby and giant indices, the emitted transform contains $|K|$ multiplications,
-$|K|-1$ additions, and $|I\setminus\{0\}|+|G\setminus\{0\}|$ rotations.
-There is one multiplication level per fused transform.
-
-For nonfinal intervals, $K$ is the set of $ht\bmod N$ with
-$-(2^{b-a}-1)\le t\le2^{b-a}-1$. For the final interval, $h=1$, and each
-row contributes a cyclic interval of $m$ offsets starting at
-$\lfloor\operatorname{rev}_L(r)/m\rfloor m-r$. A cyclic interval union finds
-the exact support without enumerating an $N\times N$ matrix.
-
-\subsection{Search family and comparison}
-All ordered contiguous partitions into one, two, or three groups are examined:
-$1+(L-1)+\binom{L-1}{2}$, giving 106 and 121. For every block we evaluate every
-power-of-two baby size dividing $N$. Costs add across blocks, so selecting the
-best baby size independently per block evaluates the complete Cartesian
-family without materializing redundant tuples. Ties use multiplication count,
-rotation count, partition order, then baby-size order. The ledger retains every
-evaluated block choice and its status. The result is best within this family,
-not a globally optimal arithmetic circuit.
-
-The dense depth-one baseline uses all $N$ diagonals with the same rotation
-regrouping and cost model. Its best baby sizes are 128 and 256 for the two
-dimensions (the symmetric 256 alternative ties at $N=32768$). Numerical
-validation executes every emitted primitive, compares with an independent FFT,
-and requires normalised maximum error at most $10^{-10}$. Every basis vector
-through $N=128$ is also compared with the direct exponential formula. No
-ciphertext latency is inferred from the plaintext runtime.
-
-\section{Q4: modular power sums}
-For the stated prime $q=2^{127}-1$, only the zero solution exists. The linear
-equation gives $d=-(a+b+c)$. Expanding the cube equation gives
-\[
- a^3+b^3+c^3+d^3=-3(a+b)(a+c)(b+c).
-\]
-Since $q\ne3$ and $\F_q$ has no zero divisors, one of the three pair sums is
-zero. Relabel so $b=-a$ and hence $d=-c$. The square equation becomes
-$2(a^2+c^2)=0$. Here $q\ne2$ and $q\equiv3\pmod4$. If $c\ne0$, then
-$z=a/c$ would satisfy $z^2=-1$. But Fermat's theorem gives
-$1=z^{q-1}=(-1)^{(q-1)/2}=-1$, a contradiction. Thus $c=0$ and then
-$a=b=d=0$. This proof uses the primality stated in the puzzle.
-
-Finite checks verify the polynomial identity over the integers and exhaustively
-enumerates small fields. Primes 7, 11, and 19 have only zero. Characteristic
-3 is exceptional: $(1,1,1,0)$ satisfies all three equations. For 5 and 13,
-$-1$ has square roots 2 and 5 respectively, giving nonzero opposite-pair
-solutions. These examples illustrate the assumptions; they do not substitute
-for the proof at $q$.
-
 \section{Q5 and Q6: range and exclusion constraints}
 A quadratic row means $A(w)B(w)=C(w)$ in $\F_P$, with all three expressions
-linear in the signals. For a 64-bit range use auxiliary bits $b_0,\ldots,b_{63}$:
+linear in the signals. Both relations are compiled from recovered cells, and
+the two field-level equations they carry are consequences of putting Boolean
+wires into a field rather than a separate construction. A wire holding a bit
+must be pinned to $\{0,1\}$, which one quadratic row expresses uniquely, and
+the integer must be tied to those bits:
 \[
- b_i(b_i-1)=0\ (0\le i<64),\qquad x=\sum_{i=0}^{63}2^ib_i.
+ b_i(b_i-1)=0\ (0\le i<w),\qquad x=\sum_{i=0}^{w-1}2^ib_i.
 \]
 Every satisfying bit is zero or one because a field has no zero divisors.
-The sum lies in $[0,2^{64}-1]\subset[0,P-1]$, so its canonical representative
-equals $x$ as an integer. Conversely the ordinary binary expansion of any
-such $x$ provides a witness. A field circuit cannot distinguish $x$ from an
-external integer $x+P$; canonical input validation is therefore explicit.
+For a 64-bit range the sum lies in $[0,2^{64}-1]\subset[0,P-1]$, so its
+canonical representative equals $x$ as an integer. Conversely the ordinary
+binary expansion of any such $x$ provides a witness. A field circuit cannot
+distinguish $x$ from an external integer $x+P$; canonical input validation is
+therefore explicit. The compiled Q5 system takes the decomposition one bit
+wider than the bound, so that an out-of-range value is representable and the
+recovered comparator is what rejects it; the bit count alone never does the
+work.
 
-To exclude one, impose $(r-1)s=1$. It has a witness exactly when $r\ne1$:
-take the inverse $s=(r-1)^{-1}$. At $r=1$ the equation would be $0=1$.
+The exclusion in Q6 is likewise compiled, from a recovered comparator against
+the prime together with a recovered inequality cell. A shorter relation is
+available to the field directly, $(r-1)s=1$, which has a witness exactly when
+$r\ne1$, since one may take $s=(r-1)^{-1}$ while at $r=1$ the equation would
+read $0=1$. It is retained as an independent cross-check on the compiled
+system rather than as the answer, and the size difference between them is
+reported plainly in Section S7.
 
 \section{Q7: a 64-bit factorisation}
 Range-constrain public $n$ and private $u,v$ to 64 bits, enforce $uv=n$, and
@@ -427,7 +306,7 @@ The second is decisive. The method's reach depends on the decision-diagram
 description staying small, and whether it does is a property of the function.
 Built on the same engine, majority's description grows as $n^{3.96}$ across six
 sizes from $n=31$ to $n=151$, reaching 41{,}196{,}123 nodes at $n=151$; that is
-why Section~S4's recovery climbs so far. The multiplier's grows by a factor of
+why Section~S3's recovery climbs so far. The multiplier's grows by a factor of
 $2.977$ per additional bit, measured across eleven widths from two to twelve,
 where it already occupies 4{,}384{,}542 nodes and exceeds an eight-million-node
 budget at thirteen. Extrapolating that factor to 4096 bits gives roughly
@@ -648,11 +527,13 @@ accompanying reproduction guide supplies executable commands and dependency
 pins separately from the mathematical exposition.
 
 The original verification record contains 63 challenge tests and 525 affected
-Boolean regression tests. It also records 66 compiled arithmetic checks and
-13 plaintext vectors at each target Fourier size. Missing tools, skipped
-required tests and unresolved outcomes are failures of full verification.
+Boolean regression tests. It also records 66 compiled arithmetic checks.
+Missing tools, skipped required tests and unresolved outcomes are failures of
+full verification. The evidence retains records for the three omitted
+questions, since those computations were run and their results stand; they are
+simply not reported as results of this method.
 The new index-deconvolution examples are a separate, bounded manuscript
-check, described in Section S4. The original numerical and compiled results
+check, described in Section S3. The original numerical and compiled results
 are retained; rebuilding the documents does not rerun those experiments.
 Records retain the producing commands, source hashes, numerical tolerances,
 input sizes, seeds, elapsed times and observed memory. Document validation
@@ -990,7 +871,7 @@ two-member match class occurs at every size in the ladder. What the method
 identifies uniquely is the function; the name is a convention applied to it,
 and the full match class is recorded rather than discarded.
 
-\subsection{Consequence for the comparison in Section~S9}
+\subsection{Consequence for the comparison in Section~S6}
 
 The multiplier ladder used to bound Q8 counts allocation while composing a
 circuit, with no recovery and no candidate gates. The like-for-like column for
