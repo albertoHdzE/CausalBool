@@ -326,20 +326,63 @@ order.
 
 \subsection{An experiment in which no gate is written down}
 \label{sec:experiment}
-I set the rule that nothing about \emph{how} to compute an
-arithmetic cell would appear anywhere in the source. For each written cell only
-the integer relation it is required to satisfy. For the adder, the integer
-$a+b+c_{\mathrm{in}}$, with its low bit and its high bit read off as the two
-outputs. For the partial product, the one-bit product $uv$. For the range, the
-meaning of a running comparison against a fixed bound bit: once below the bound
-stay below, and while still equal let this position decide. For the exclusion,
-the meaning of a running inequality against a fixed constant bit: once a bit
-has differed the values differ, and this bit differs when it disagrees with the
-constant. Four relations, stated as arithmetic and as nothing else.
+I set the rule that nothing about \emph{how} to compute an arithmetic cell
+would appear anywhere in the source. Stated precisely, every cell is supplied
+\emph{extensionally}. A cell with $n$ input bits and $m$ outputs is a map
+\begin{equation}\label{eq:cellmap}
+f:\{0,1\}^n\to\{0,1\}^m,
+\end{equation}
+and what the method receives is its graph $\{(x,f(x)):x\in\{0,1\}^n\}$, the
+function as a set of pairs. Writing a gate would instead supply an
+\emph{intensional} description, a term whose value happens to be $f$. The
+experiment withholds exactly that and asks the method to return one. Below,
+$\bar x$ is $1-x$ and $[\,\cdot\,]$ is one when the enclosed statement holds and
+zero otherwise.
 
-Each relation was then enumerated over its complete input space --- eight
+Each $f$ is written as the integer relation it must satisfy. For the adder, on
+$(a,b,c_{\mathrm{in}})\in\{0,1\}^3$, the two outputs are the base-two digits of
+an integer sum,
+\begin{equation}\label{eq:adderrel}
+s=(a+b+c_{\mathrm{in}})\bmod 2,\qquad
+k=\Bigl\lfloor\tfrac{1}{2}(a+b+c_{\mathrm{in}})\Bigr\rfloor,
+\end{equation}
+so that $a+b+c_{\mathrm{in}}=s+2k$ at every one of the eight states. That is the
+whole of the specification: add three bits and read the result in binary. For
+the partial product, on $(u,v)\in\{0,1\}^2$, the relation is the product itself,
+\begin{equation}\label{eq:pprel}
+p=uv .
+\end{equation}
+That $s$ is an exclusive or and $k$ a majority is a fact about these two maps,
+not information supplied with them.
+
+The remaining two relations are single steps of a scan, each carrying a
+constant of the position rather than an extra input. For the range, one step of
+a running comparison against a bound bit $\beta$. Its state is the pair
+$(\ell,e)$, meaning below the bound so far and equal to it so far, and with $x$
+the value bit at this position,
+\begin{equation}\label{eq:cmprel}
+\ell_{\mathrm{out}}=\ell\vee(e\wedge\bar x\wedge\beta),\qquad
+e_{\mathrm{out}}=e\wedge[x=\beta].
+\end{equation}
+In words, which is the level at which the source states it: once below the
+bound stay below, and while still equal let this position decide. For the
+exclusion, one step of a running inequality against a constant bit $\gamma$,
+whose state is the single bit $d$,
+\begin{equation}\label{eq:diffrel}
+d_{\mathrm{out}}=d\vee[x\ne\gamma].
+\end{equation}
+Once a bit has differed the values differ, and this bit differs when it
+disagrees with the constant.
+
+Four relations, then, stated as arithmetic and as nothing else. Each defines
+its $f$ by its values and none by a construction, which is the distinction the
+experiment turns on. Because $\beta$ and $\gamma$ each take two values, the two
+scan relations are supplied twice over, so four relations become the six cells
+recovered below.
+
+Each relation was then evaluated at all $2^n$ points of its input space --- eight
 states for the adder and for the comparison step, four for the partial product
-and for the inequality step --- and the resulting behaviour was handed to index
+and for the inequality step --- and the graph so obtained was handed to index
 deconvolution. The method sees a table of outputs. It does not see a circuit, a
 gate name, or any indication that a particular one is expected. Whatever it
 returns is what the compiler is given, and there is no second route by which a
@@ -393,8 +436,9 @@ are built from.
 \begin{table}[htbp]
 \centering
 \caption{\textbf{The gates the method returned, against what was said to obtain
-them.} The middle column is the entire input to the experiment: an integer
-relation, or the meaning of one scan step. The right-hand column is the
+them.} The middle column names the relation, stated as
+Eqs.~\eqref{eq:adderrel}--\eqref{eq:diffrel} and supplied as nothing but its
+graph; that is the entire input to the experiment. The right-hand column is the
 expression index deconvolution returned, on the inputs it found essential.
 Here $\ell$ and $e$ are the incoming ``less'' and ``equal'' of a comparison,
 $d$ the incoming ``differs'' of an inequality, and $x$ the value bit at the

@@ -229,6 +229,17 @@ gate literal appears in the builders that assemble the comparison scan, the
 inequality scan or the multiplier; every gate they place is read from a
 recovery record.
 
+Throughout, $\bar x$ denotes $1-x$ and $[\,\cdot\,]$ is one when the enclosed
+statement holds and zero otherwise. The relations behind Q7 are the two integer
+maps
+\[
+ s=(a+b+c_{\mathrm{in}})\bmod 2,\qquad
+ k=\Bigl\lfloor\tfrac{1}{2}(a+b+c_{\mathrm{in}})\Bigr\rfloor,\qquad
+ p=uv,
+\]
+the first pair on $\{0,1\}^3$ and the last on $\{0,1\}^2$, so that
+$a+b+c_{\mathrm{in}}=s+2k$ at every state.
+
 For the range and exclusion questions the stated relations are two scan steps.
 The comparison step has inputs $(\ell,e,x)$, the incoming ``less'', the incoming
 ``equal'' and the value bit at this position, and a bound bit $\beta$ which is a
@@ -358,11 +369,10 @@ and the size difference between them is reported plainly in Section S7.
 
 \section{Q7: a 64-bit factorisation}
 \subsection{The multiplier built from recovered cells}
-The two cells this question needs are the last two rows of the experiment of
-Section~S4.1. The full adder is stated as the integer $a+b+c_{\mathrm{in}}$,
-with its low bit and its high bit taken as the two outputs; the partial product
-is stated as the one-bit product $uv$. Enumerating the first over its eight
-input states and the second over its four, the method returns all three inputs
+The two cells this question needs are stated in Section~\ref{sec:cells}: the
+full adder as the base-two digits $s$ and $k$ of the integer
+$a+b+c_{\mathrm{in}}$, and the partial product as $p=uv$. Enumerating the first
+over its eight input states and the second over its four, the method returns all three inputs
 essential for both adder outputs, the sum as XOR and the carry as MAJORITY,
 and the product as AND. That is the classical full adder, and neither name
 occurs in what the method was given.
