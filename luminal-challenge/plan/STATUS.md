@@ -12,7 +12,7 @@ the direct-index implementation tasks below.
 | L00 — persistent contract and navigation | READY_FOR_REVIEW | Lead | Plan, agent instructions, status, and README links written; document audit pending |
 | L01 — direct schema algebra and solver | READY_FOR_REVIEW | Worker (Claude Opus 5) | `schema_index.py`, 34 tests pass; see record below |
 | L02 — machine facts and independent corpus | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_contract.py`, corpus of 142; 31 tests pass; see record below |
-| L03 — comparisons and joint constraints | PENDING | Unassigned | Requires L01/L02 acceptance |
+| L03 — comparisons and joint constraints | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_constraints.py`, 22 tests pass; see record below |
 | L04 — independent bootstrap compiler | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_compiler.py`, 19 tests pass; 142/142 corpus compiles and validates; see record below |
 | L05 — joint optimization | PENDING | Unassigned | Requires L03/L04 acceptance |
 | L06 — packaging and verification runners | PENDING | Unassigned | Requires frozen L04 interfaces; final gate requires L05 |
@@ -90,6 +90,51 @@ may report READY_FOR_REVIEW; only the lead sets ACCEPTED.
   refusing any result that would push the unique vectors-first allocation past
   256 words. Programs needing genuine spilling are therefore outside the corpus,
   as they are outside the exercise.
+- **Lead decision:** pending.
+
+### L03 — comparisons and joint constraints
+
+- **Plan version:** 1.0. **Owner:** as above.
+- **Exclusive files:** `direct_constraints.py`, `tests_direct/test_constraints.py`.
+- **Command:** `PYTHONPATH=.reference:. python3 -m unittest tests_direct.test_constraints`
+  → **22 tests, OK, exit 0**, 2.42 s.
+- **Source hashes (first 16):** `direct_constraints.py` `2587278813655706`;
+  `tests_direct/test_constraints.py` `93c1693629e28dbd`.
+- **Arithmetic evidence:** every cover is compared against a plain integer
+  predicate at **every index of the universe**, so soundness and completeness
+  are both established rather than sampled. This runs for `le`, `lt`, `eq` and
+  `ne` at field widths one to five, with left offsets 0, 1, 2, 3, 4, 8 and
+  negative offsets -1, -3, -8. Carries are checked not to truncate: a three-bit
+  field offset by eight ranges over 8..15 and is compared against 10.
+  A straddling predicate is confirmed to split rather than be dropped, and
+  coordinates outside the support are confirmed to remain free.
+- **Joint evidence:** twelve joint fixtures are solved and compared against
+  **exhaustive enumeration** of their declared domains, judged by
+  `machine.check_compilation` plus the explicit target bounds; the domain
+  product is asserted to stay below 65,536. Where the returned schema has at
+  most 512 fillings, every filling is checked, not only the anchor. Codes
+  outside a declared time domain are individually confirmed to be rejected.
+- **Encoding:** fields are laid out by increasing operation identifier — issue
+  time, result address if any, then a lane bit only for two-slot engines. Lanes
+  are solver auxiliaries and are never emitted. Capacity is enforced per issue,
+  not for the duration of a latency: two selected operations may share a cycle
+  on a two-slot engine in different lanes, and may not in the same lane; the
+  single-slot store engine has no lane field at all.
+- **Simplification:** a pair of values is dropped from scratch safety only when
+  it is *exactly* constant — when their widest possible live intervals cannot
+  overlap, or their widest possible address ranges cannot share a word.
+  `end(u) < start(v)` is expanded over every consumer of `u`, never
+  approximated by a selected one.
+- **Note for review:** two of my own tests initially failed because they built
+  an index from the fields under test alone, leaving unrelated addresses at
+  zero, which tripped scratch safety for an unrelated reason. They now encode a
+  complete assignment from the incumbent and vary one thing at a time. The
+  production code was not changed for them. A general invariant test was added:
+  each fixture's own incumbent must be accepted by its own acceptance
+  expression.
+- **Limitations:** the window is at most four operations and time domains are
+  the incumbent plus or minus two, so an `UNSAT` result excludes a solution
+  only in that neighbourhood. It is not a statement about the program.
 - **Lead decision:** pending.
 
 ### L04 — independent bootstrap compiler

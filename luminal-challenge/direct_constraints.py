@@ -1,0 +1,579 @@
+"""Arithmetic covers and the complete joint acceptance expression.
+
+Task L03 of ``plan/INDEX_ONLY_PLAN.md``, sections 3.3 and 5.3.
+
+A term is a field plus an integer offset, or a plain constant. All time and
+address arithmetic here is **nonwrapping**: an offset is added with ordinary
+Python integers and a carry is never truncated because the underlying field has
+a fixed width. Comparisons are built as exact cube covers by min and max
+interval reasoning on each partial cube; when the extrema straddle the boundary
+the cube is unresolved and is split, never dropped.
+
+The joint query of section 5.3 varies the issue times of a small window of
+operations, the addresses of the results they produce, and their engine lanes.
+Every other decision stays fixed, and constraints involving fixed decisions are
+still built, including constraints on values whose producers lie outside the
+window.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Sequence, Tuple
+
+import machine
+
+import direct_contract as dc
+import schema_index as si
+
+
+__all__ = [
+    "Term",
+    "constant",
+    "le",
+    "lt",
+    "ge",
+    "gt",
+    "eq",
+    "ne",
+    "relation_cover",
+    "JointQuery",
+    "Infeasible",
+]
+
+
+class Infeasible(Exception):
+    """A fixed decision already violates the requested target.
+
+    This does not authorise widening the window; the query is simply
+    infeasible as posed.
+    """
+
+
+# --------------------------------------------------------------------------
+# Terms
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Term:
+    """``field + offset``, or a bare constant when ``field`` is ``None``.
+
+    The offset may be negative. Addition never wraps.
+    """
+
+    field: Optional[si.Field] = None
+    offset: int = 0
+
+    def __post_init__(self) -> None:
+        if self.field is not None and not isinstance(self.field, si.Field):
+            raise TypeError("a term holds a Field or None")
+        if not isinstance(self.offset, int) or isinstance(self.offset, bool):
+            raise TypeError("a term offset must be a plain integer")
+
+    @property
+    def mask(self) -> int:
+        return 0 if self.field is None else self.field.mask
+
+    @property
+    def is_constant(self) -> bool:
+        return self.field is None
+
+    def bounds(self, cube: si.Cube) -> Tuple[int, int]:
+        """The smallest and largest value this term takes inside ``cube``."""
+
+        if self.field is None:
+            return self.offset, self.offset
+        field = self.field
+        low = (cube.anchor & field.mask) >> field.offset
+        high = ((cube.anchor | cube.free_mask) & field.mask) >> field.offset
+        return low + self.offset, high + self.offset
+
+    def shifted(self, amount: int) -> "Term":
+        return Term(self.field, self.offset + amount)
+
+
+def constant(value: int) -> Term:
+    return Term(None, value)
+
+
+# --------------------------------------------------------------------------
+# Relations
+# --------------------------------------------------------------------------
+
+
+def _decide_le(low_l, high_l, low_r, high_r):
+    if high_l <= low_r:
+        return True
+    if low_l > high_r:
+        return False
+    return None
+
+
+def _decide_lt(low_l, high_l, low_r, high_r):
+    if high_l < low_r:
+        return True
+    if low_l >= high_r:
+        return False
+    return None
+
+
+def _decide_eq(low_l, high_l, low_r, high_r):
+    if low_l == high_l == low_r == high_r:
+        return True
+    if high_l < low_r or high_r < low_l:
+        return False
+    return None
+
+
+def _decide_ne(low_l, high_l, low_r, high_r):
+    if high_l < low_r or high_r < low_l:
+        return True
+    if low_l == high_l == low_r == high_r:
+        return False
+    return None
+
+
+_RELATIONS = {
+    "le": (_decide_le, lambda a, b: a <= b),
+    "lt": (_decide_lt, lambda a, b: a < b),
+    "eq": (_decide_eq, lambda a, b: a == b),
+    "ne": (_decide_ne, lambda a, b: a != b),
+}
+
+
+def relation_cover(
+    name: str, lhs: Term, rhs: Term, n: int, meter: si.Meter
+) -> Tuple[si.Cube, ...]:
+    """An exact, sound and complete cover of ``lhs <name> rhs``.
+
+    Coordinates outside the two terms' fields are left free. The highest
+    relevant free coordinate is split first, zero branch before one, so the
+    result is deterministic.
+    """
+
+    if name not in _RELATIONS:
+        raise ValueError(f"unknown relation {name!r}")
+    decide, exact = _RELATIONS[name]
+
+    # Simplify before splitting: two constants, or the same field on both
+    # sides, reduce to a constant comparison.
+    if lhs.is_constant and rhs.is_constant:
+        return (si.universe(n),) if exact(lhs.offset, rhs.offset) else ()
+    if lhs.field is not None and rhs.field is not None and lhs.field == rhs.field:
+        return (si.universe(n),) if exact(lhs.offset, rhs.offset) else ()
+
+    support = lhs.mask | rhs.mask
+    limit = si.universe_mask(n)
+    if support & ~limit:
+        raise ValueError("a term reaches outside the declared universe")
+
+    accepted: List[si.Cube] = []
+    stack = [si.universe(n)]
+    while stack:
+        meter.visit()
+        cube = stack.pop()
+        low_l, high_l = lhs.bounds(cube)
+        low_r, high_r = rhs.bounds(cube)
+        verdict = decide(low_l, high_l, low_r, high_r)
+        if verdict is True:
+            accepted.append(cube)
+            continue
+        if verdict is False:
+            continue
+        free = support & cube.free_mask
+        if free == 0:
+            # Fully fixed on the support: evaluate the predicate exactly.
+            if exact(low_l, low_r):
+                accepted.append(cube)
+            continue
+        coordinate = free.bit_length() - 1
+        one = si.restrict(cube, coordinate, 1)
+        zero = si.restrict(cube, coordinate, 0)
+        # Pushed one first so that the zero branch is explored first.
+        if one is not None:
+            stack.append(one)
+        if zero is not None:
+            stack.append(zero)
+    cover = si.normalise_cover(accepted)
+    meter.cover(len(cover))
+    return cover
+
+
+def _leaf(name: str, lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
+    return si.Leaf(relation_cover(name, lhs, rhs, n, meter))
+
+
+def le(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
+    return _leaf("le", lhs, rhs, n, meter)
+
+
+def lt(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
+    return _leaf("lt", lhs, rhs, n, meter)
+
+
+def ge(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
+    return _leaf("le", rhs, lhs, n, meter)
+
+
+def gt(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
+    return _leaf("lt", rhs, lhs, n, meter)
+
+
+def eq(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
+    return _leaf("eq", lhs, rhs, n, meter)
+
+
+def ne(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
+    return _leaf("ne", lhs, rhs, n, meter)
+
+
+# --------------------------------------------------------------------------
+# The joint query
+# --------------------------------------------------------------------------
+
+
+TIME_SLACK = 2
+
+
+class JointQuery:
+    """One joint scheduling, allocation and lane query over a small window.
+
+    Fields are allocated by increasing operation identifier: issue time, then
+    the result address if the operation produces one, then a lane bit if its
+    engine has two slots. Bits within every field are LSB-first.
+    """
+
+    def __init__(
+        self,
+        facts: dc.ProgramFacts,
+        times: Dict[int, int],
+        addresses: Dict[str, int],
+        window: Sequence[int],
+        target_cycles: int,
+        target_memory: int,
+        meter: si.Meter,
+    ) -> None:
+        self.facts = facts
+        self.times = dict(times)
+        self.addresses = dict(addresses)
+        self.window = tuple(sorted(set(window)))
+        self.target_cycles = target_cycles
+        self.target_memory = target_memory
+        self.meter = meter
+
+        if not self.window:
+            raise ValueError("a joint query needs at least one selected operation")
+        if target_cycles < 1 or target_memory < 1:
+            raise Infeasible("a target must be positive")
+
+        self.time_bits = dc.time_width(facts.horizon)
+        self.time_field: Dict[int, si.Field] = {}
+        self.address_field: Dict[str, si.Field] = {}
+        self.lane_field: Dict[int, si.Field] = {}
+
+        offset = 0
+        for op_id in self.window:
+            self.time_field[op_id] = si.Field("t%d" % op_id, offset, self.time_bits)
+            offset += self.time_bits
+            name = facts.dest[op_id]
+            if name is not None:
+                self.address_field[name] = si.Field("a_" + name, offset, dc.ADDRESS_WIDTH)
+                offset += dc.ADDRESS_WIDTH
+            if machine.ENGINE_LIMITS[facts.engine[op_id]] > 1:
+                self.lane_field[op_id] = si.Field("l%d" % op_id, offset, 1)
+                offset += 1
+        self.n = offset
+
+        self.selected_values = tuple(
+            facts.dest[op_id] for op_id in self.window if facts.dest[op_id] is not None
+        )
+        # A value is affected when its producer moves, or when any consumer
+        # moves and so may extend or shorten its live interval.
+        affected = set(self.selected_values)
+        for name in facts.value_names:
+            if any(consumer in self.time_field for consumer in facts.consumers[name]):
+                affected.add(name)
+        self.affected_values = tuple(
+            name for name in facts.value_names if name in affected
+        )
+
+    # -- terms --------------------------------------------------------------
+
+    def time_term(self, op_id: int, offset: int = 0) -> Term:
+        field = self.time_field.get(op_id)
+        if field is None:
+            return constant(self.times[op_id] + offset)
+        return Term(field, offset)
+
+    def address_term(self, name: str, offset: int = 0) -> Term:
+        field = self.address_field.get(name)
+        if field is None:
+            return constant(self.addresses[name] + offset)
+        return Term(field, offset)
+
+    def lane_term(self, op_id: int) -> Term:
+        field = self.lane_field.get(op_id)
+        if field is None:
+            return constant(self._fixed_lane(op_id))
+        return Term(field, 0)
+
+    def write_term(self, name: str, offset: int = 0) -> Term:
+        producer = self.facts.producers[name]
+        return self.time_term(producer, self.facts.latency[producer] + offset)
+
+    def _fixed_lane(self, op_id: int) -> int:
+        """External operations are numbered within their engine and cycle."""
+
+        engine = self.facts.engine[op_id]
+        cycle = self.times[op_id]
+        lane = 0
+        for other in range(self.facts.count):
+            if other == op_id:
+                break
+            if other in self.time_field:
+                continue
+            if self.facts.engine[other] == engine and self.times[other] == cycle:
+                lane += 1
+        return lane
+
+    # -- possible extents, used only for exact simplification ---------------
+
+    def _time_bounds(self, op_id: int) -> Tuple[int, int]:
+        if op_id not in self.time_field:
+            fixed = self.times[op_id]
+            return fixed, fixed
+        low, high = self._time_domain(op_id)
+        return low, high
+
+    def _time_domain(self, op_id: int) -> Tuple[int, int]:
+        ceiling = min(self.facts.horizon, self.target_cycles) - 1
+        incumbent = self.times[op_id]
+        return max(0, incumbent - TIME_SLACK), min(incumbent + TIME_SLACK, ceiling)
+
+    def _live_bounds(self, name: str) -> Tuple[int, int]:
+        """The widest live interval this value can take over the domains."""
+
+        producer = self.facts.producers[name]
+        low, high = self._time_bounds(producer)
+        latency = self.facts.latency[producer]
+        start, end = low + latency, high + latency
+        for consumer in self.facts.consumers[name]:
+            end = max(end, self._time_bounds(consumer)[1])
+        return start, end
+
+    def _address_bounds(self, name: str) -> Tuple[int, int]:
+        if name not in self.address_field:
+            base = self.addresses[name]
+            return base, base
+        return 0, self.target_memory - self.facts.width[name]
+
+    # -- constraint groups --------------------------------------------------
+
+    def _domains(self) -> List[si.Leaf]:
+        parts: List[si.Leaf] = []
+        for op_id in self.window:
+            field = self.time_field[op_id]
+            low, high = self._time_domain(op_id)
+            if low > high:
+                raise Infeasible(
+                    f"operation {op_id} has no cycle below the target of {self.target_cycles}"
+                )
+            if high >= field.limit:
+                raise Infeasible("a time domain does not fit its field")
+            self.meter.cover(1)
+            parts.append(si.Leaf(si.interval(field, low, high, self.n)))
+        for name in self.selected_values:
+            field = self.address_field[name]
+            width = self.facts.width[name]
+            high = self.target_memory - width
+            if high < 0:
+                raise Infeasible(f"value {name!r} cannot fit a target of {self.target_memory}")
+            cover = si.interval(field, 0, high, self.n)
+            if width == machine.VLEN:
+                alignment = si.Cube(
+                    self.n, 0, si.universe_mask(self.n) ^ (field.encode(machine.VLEN - 1))
+                )
+                cover = tuple(
+                    met
+                    for met in (si.intersect(cube, alignment) for cube in cover)
+                    if met is not None
+                )
+            if not cover:
+                raise Infeasible(f"value {name!r} has an empty address domain")
+            self.meter.cover(len(cover))
+            parts.append(si.Leaf(cover))
+        return parts
+
+    def _fixed_targets(self) -> None:
+        """A fixed decision violating a target makes the query infeasible."""
+
+        for op_id in range(self.facts.count):
+            if op_id in self.time_field:
+                continue
+            if self.times[op_id] >= self.target_cycles:
+                raise Infeasible(
+                    f"external operation {op_id} issues at {self.times[op_id]}, "
+                    f"at or past the target of {self.target_cycles}"
+                )
+        for name in self.facts.value_names:
+            if name in self.address_field:
+                continue
+            if self.addresses[name] + self.facts.width[name] > self.target_memory:
+                raise Infeasible(
+                    f"external value {name!r} ends past the target of {self.target_memory}"
+                )
+
+    def _data_precedence(self) -> List[si.Leaf]:
+        parts = []
+        for op_id in range(self.facts.count):
+            for predecessor, lag in sorted(self.facts.predecessors[op_id].items()):
+                if op_id not in self.time_field and predecessor not in self.time_field:
+                    continue
+                clause = ge(
+                    self.time_term(op_id), self.time_term(predecessor, lag), self.n, self.meter
+                )
+                if not clause.cubes:
+                    raise Infeasible(
+                        f"operation {op_id} cannot follow operation {predecessor}"
+                    )
+                if len(clause.cubes) == 1 and clause.cubes[0] == si.universe(self.n):
+                    continue
+                parts.append(clause)
+        return parts
+
+    def _engine_capacity(self) -> List[si.Expression]:
+        parts: List[si.Expression] = []
+        for op_id in self.window:
+            engine = self.facts.engine[op_id]
+            low, high = self._time_domain(op_id)
+            for other in range(self.facts.count):
+                if other == op_id or self.facts.engine[other] != engine:
+                    continue
+                if other in self.time_field and other < op_id:
+                    continue  # the pair was already stated once
+                other_low, other_high = self._time_bounds(other)
+                if other_high < low or high < other_low:
+                    continue  # the two can never share a cycle
+                different_time = ne(
+                    self.time_term(op_id), self.time_term(other), self.n, self.meter
+                )
+                if machine.ENGINE_LIMITS[engine] == 1:
+                    if not different_time.cubes:
+                        raise Infeasible(
+                            f"operations {op_id} and {other} must share a single slot"
+                        )
+                    parts.append(different_time)
+                    continue
+                different_lane = ne(
+                    self.lane_term(op_id), self.lane_term(other), self.n, self.meter
+                )
+                if different_lane.cubes and si.universe(self.n) in different_lane.cubes:
+                    continue
+                if not different_time.cubes and not different_lane.cubes:
+                    raise Infeasible(
+                        f"operations {op_id} and {other} cannot share engine {engine}"
+                    )
+                parts.append(si.AnyOf((different_time, different_lane)))
+        return parts
+
+    def _scratch_safety(self) -> List[si.Expression]:
+        """Spatial separation OR temporal separation, never both required."""
+
+        parts: List[si.Expression] = []
+        names = list(self.facts.value_names)
+        affected = set(self.affected_values)
+        for i, first in enumerate(names):
+            for second in names[i + 1 :]:
+                if first not in affected and second not in affected:
+                    continue
+                first_live = self._live_bounds(first)
+                second_live = self._live_bounds(second)
+                if first_live[1] < second_live[0] or second_live[1] < first_live[0]:
+                    continue  # they can never be live together
+                first_span = self._address_bounds(first)
+                second_span = self._address_bounds(second)
+                first_width = self.facts.width[first]
+                second_width = self.facts.width[second]
+                if (
+                    first_span[1] + first_width <= second_span[0]
+                    or second_span[1] + second_width <= first_span[0]
+                ):
+                    continue  # they can never share a word
+                clause = si.AnyOf(
+                    (
+                        le(
+                            self.address_term(first, first_width),
+                            self.address_term(second),
+                            self.n,
+                            self.meter,
+                        ),
+                        le(
+                            self.address_term(second, second_width),
+                            self.address_term(first),
+                            self.n,
+                            self.meter,
+                        ),
+                        self._ends_before(first, second),
+                        self._ends_before(second, first),
+                    )
+                )
+                parts.append(clause)
+        return parts
+
+    def _ends_before(self, first: str, second: str) -> si.Expression:
+        """``end(first) < start(second)``, expanded over every consumer.
+
+        The maximum in ``end`` is not approximated by a selected consumer: the
+        write and *every* consumer of ``first`` must precede the write of
+        ``second``.
+        """
+
+        write_second = self.write_term(second)
+        children: List[si.Expression] = [
+            lt(self.write_term(first), write_second, self.n, self.meter)
+        ]
+        for consumer in self.facts.consumers[first]:
+            children.append(
+                lt(self.time_term(consumer), write_second, self.n, self.meter)
+            )
+        return si.AllOf(tuple(children))
+
+    # -- assembly -----------------------------------------------------------
+
+    def expression(self) -> si.Expression:
+        """The acceptance expression, built in the plan's declared order."""
+
+        self._fixed_targets()
+        children: List[si.Expression] = []
+        children.extend(self._domains())
+        children.extend(self._data_precedence())
+        children.extend(self._engine_capacity())
+        children.extend(self._scratch_safety())
+        return si.AllOf(tuple(children))
+
+    def decode(self, cube: si.Cube) -> Tuple[Dict[int, int], Dict[str, int]]:
+        """Read a witness back into a complete schedule and allocation."""
+
+        if cube.n != self.n:
+            raise ValueError("the witness has the wrong width")
+        times = dict(self.times)
+        addresses = dict(self.addresses)
+        anchor = cube.anchor
+        for op_id, field in self.time_field.items():
+            value = field.decode(anchor)
+            low, high = self._time_domain(op_id)
+            if not low <= value <= high:
+                raise ValueError(
+                    f"decoded cycle {value} for operation {op_id} is outside its domain"
+                )
+            times[op_id] = value
+        for name, field in self.address_field.items():
+            value = field.decode(anchor)
+            width = self.facts.width[name]
+            if value + width > self.target_memory:
+                raise ValueError(f"decoded address {value} for {name!r} exceeds the target")
+            if width == machine.VLEN and value % machine.VLEN:
+                raise ValueError(f"decoded address {value} for {name!r} is misaligned")
+            addresses[name] = value
+        return times, addresses
