@@ -15,8 +15,8 @@ the direct-index implementation tasks below.
 | L03 — comparisons and joint constraints | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_constraints.py`, 22 tests pass; see record below |
 | L04 — independent bootstrap compiler | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_compiler.py`, 19 tests pass; 142/142 corpus compiles and validates; see record below |
 | L05 — joint optimization | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_optimizer.py`, 18 tests pass; 7 validated improvements over the corpus; see record below |
-| L06 — packaging and verification runners | PENDING | Unassigned | Requires frozen L04 interfaces; final gate requires L05 |
-| L07 — integration and independent review | PENDING | Lead | Requires all implementation gates |
+| L06 — packaging and verification runners | READY_FOR_REVIEW | Worker (Claude Opus 5) | Export, verification and comparison runners; `--stage all` PASS, exit 0; see record below |
+| L07 — integration and independent review | PENDING | Lead | L01–L06 all offered for review; `results/direct_index_v1/REVIEW.md` is the lead's to write and has deliberately not been created |
 
 ## Required task record when work starts
 
@@ -246,6 +246,76 @@ as a discovered result.
 - **Limitations:** 480 searches still exhaust the 100 ms per-query budget, so
   the optimiser's reach is limited by search cost rather than by the method. An
   UNSAT result excludes solutions only in the queried neighbourhood.
+- **Lead decision:** pending.
+
+### L06 — packaging and verification runners
+
+- **Plan version:** 1.0. **Owner:** as above.
+- **Exclusive files:** `export_direct.py`, `compare_direct.py`, `verify_direct.py`,
+  `tests_direct/test_export.py`, `tests_direct/test_independence.py`.
+  `SUBMISSION.md` was also prepared here; `REVIEW.md` was **not**, because only
+  the lead writes that verdict.
+- **Source hashes (first 16):** `export_direct.py` `984ffb653535772b`;
+  `verify_direct.py` `e93c58ee5de88d93`;
+  `compare_direct.py` `587777f8bbad10b3`.
+- **Export:** `.build/direct_index/compiler.py`, 2,104 lines, SHA256
+  `f31ac937e4d1735092ffbab93482a438b9187546dbbcde824b9f8752b7bb46c5`. Assembled from an explicit five-module allowlist in
+  dependency order, carrying each constituent's hash. An audit refuses any
+  export mentioning a baseline compiler, a decision diagram, a prohibited
+  module, or `exec`/`eval`/`compile`; the audit is itself tested by feeding it
+  sources it must reject.
+
+**Commands and exit codes actually run.**
+
+| Command | Result |
+|---|---|
+| `verify_direct.py --stage all --timeout 20` | **PASS, exit 0**, 153 s |
+| `compare_direct.py --repeats 3 --timeout 20` | **exit 0**, 72 runs, 0 failures |
+| `export_direct.py` | exit 0 |
+| `PYTHONPATH=.reference python3 .build/direct_index/compiler.py ...` | exit 0, valid JSON |
+
+**Verification stages.** schema 34, contract 31, constraints 22, construction
+19, optimizer 18, independence 11, export 12 — **147 direct tests** — plus
+acceptance: **142 programs and 277 cases** through the standalone export in one
+isolated process, the **unchanged public suite at 11 tests**, and the
+documented command line on all eight public programs under the 20 s limit.
+**158 tests in total.** Every stage records its command, exit code and count; a
+stage running zero tests or zero programs fails, and there is no unconditional
+success banner.
+
+**Official comparison, three fresh-process arms, three repetitions, rotated order.**
+
+| Arm | Cycle | Scratch | Combined (mean) | Median compile |
+|---|---:|---:|---:|---:|
+| serial | 1.0000x | 1.0000x | 1.000000x | 0.022 ms |
+| classical | 1.4936x | 2.4204x | 1.901379x | 0.267 ms |
+| direct_index | 1.5099x | 2.6717x | **2.008466x** | 437.5 ms |
+
+The frozen classical control reproduced `1.9013791212645499` with a difference
+of **0.000e+00**, and its integer cycles and footprints match the historical
+report exactly. That is the evidence that the harness measures what it claims.
+The direct arm cleared 1.0 in **every** recorded repetition. Worst
+whole-process time 0.70 s against the 20 s allowance.
+
+**Stated plainly, as section 9 R05 requires:** the direct-index compiler scores
+**higher** than the classical arm, 2.0085x against 1.9014x, and is about
+**1,639 times slower** to run, 437.5 ms against 0.267 ms median. The gain is
+almost entirely scratch, 2.672 against 2.420, not cycles.
+
+**Two runner defects found and fixed while running this, both mine:** the
+acceptance step parsed the worker's JSON from a 2,000-character tail, which
+truncated a longer payload and reported zero programs checked; and the corpus
+path was passed relative while the worker runs from a neutral directory, so it
+found no files. Both surfaced as a FAIL rather than a false pass, which is the
+behaviour the runner is meant to have.
+
+**Isolation note.** A first attempt isolated the acceptance process by
+replacing `sys.path` outright, which removed the standard library and made even
+`__future__` unimportable. Isolation is now by `PYTHONPATH` plus a neutral
+working directory, which leaves the standard library intact while keeping the
+development tree off the path.
+- **Limitations:** the comparison covers the eight public programs only; the
+  private grader is unavailable and nothing is inferred about it.
 - **Lead decision:** pending.
 
 ## Version and decision log
