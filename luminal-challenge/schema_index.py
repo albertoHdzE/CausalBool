@@ -44,6 +44,7 @@ __all__ = [
     "intersect",
     "difference",
     "restrict",
+    "split",
     "interval",
     "domain",
     "min_member",
@@ -156,6 +157,29 @@ class Cube:
         return "x0..x{}:{}".format(max(self.n - 1, 0), "".join(marks))
 
 
+def _derived_cube(n: int, anchor: int, free_mask: int) -> Cube:
+    """Build a cube whose invariant is already proved by its caller.
+
+    ``Cube.__post_init__`` re-validates three integers on every construction.
+    That is the right behaviour at the boundary, where a cube is built from
+    values this module did not produce. Inside the algebra it is pure overhead:
+    each operation below derives its result from operands that are already
+    valid cubes of the same width, and each carries the proof that the
+    invariant survives. The profiled search built cubes 142,485 times and asked
+    ``universe_mask`` to revalidate a width 49,092,774 times.
+
+    Every use of this constructor states its proof at the call site. The public
+    ``Cube`` constructor is unchanged and still rejects a bad anchor, a bad
+    free mask, an overlap between them, a boolean, or a negative value.
+    """
+
+    cube = object.__new__(Cube)
+    object.__setattr__(cube, "n", n)
+    object.__setattr__(cube, "anchor", anchor)
+    object.__setattr__(cube, "free_mask", free_mask)
+    return cube
+
+
 def universe(n: int) -> Cube:
     """The cube holding every index of an ``n`` bit universe.
 
@@ -181,13 +205,31 @@ def _require_same_width(a: Cube, b: Cube) -> None:
 
 
 def intersect(a: Cube, b: Cube) -> Optional[Cube]:
-    """The exact intersection of two equal-width cubes, or ``None`` if empty."""
+    """The exact intersection of two equal-width cubes, or ``None`` if empty.
 
-    _require_same_width(a, b)
-    limit = universe_mask(a.n)
-    if ((a.anchor ^ b.anchor) & (limit ^ (a.free_mask | b.free_mask))) != 0:
+    This is the innermost operation of the whole method: the profiled search of
+    one public query called it 48,950,288 times, and 99.7% of those calls
+    return ``None``. Two rewritings make that path cheap without changing what
+    it computes.
+
+    The universe mask is not needed. Both anchors are at most ``U``, so their
+    exclusive-or is too, and for nonnegative ``x, y <= U`` the identity
+    ``x & ~y == x & (U ^ (y & U))`` holds. Masking by ``U`` was therefore
+    always redundant here, and removing it removes a revalidation of the width
+    from every call.
+
+    The result's invariant is proved rather than rechecked. ``anchor | anchor``
+    is at most ``U`` and ``free & free`` is at most ``U``; and since
+    ``a.anchor & a.free_mask == 0`` and ``b.anchor & b.free_mask == 0``,
+    ``(a.anchor | b.anchor) & (a.free_mask & b.free_mask)`` is zero.
+    """
+
+    if a.__class__ is not Cube or b.__class__ is not Cube or a.n != b.n:
+        # Preserve the documented type and width errors exactly.
+        _require_same_width(a, b)
+    if (a.anchor ^ b.anchor) & ~(a.free_mask | b.free_mask):
         return None
-    return Cube(a.n, a.anchor | b.anchor, a.free_mask & b.free_mask)
+    return _derived_cube(a.n, a.anchor | b.anchor, a.free_mask & b.free_mask)
 
 
 def difference(a: Cube, b: Cube) -> Tuple[Cube, ...]:
@@ -216,7 +258,10 @@ def difference(a: Cube, b: Cube) -> Tuple[Cube, ...]:
         matching = (b.anchor >> i) & 1
         remaining = free & ~bit
         opposite_anchor = anchor if matching else anchor | bit
-        pieces.append(Cube(a.n, opposite_anchor, remaining))
+        # ``bit`` is free in ``a`` and is removed from ``remaining``, so the
+        # anchor and the free mask stay disjoint and neither leaves the
+        # universe; the invariant is proved rather than rechecked.
+        pieces.append(_derived_cube(a.n, opposite_anchor, remaining))
         anchor = anchor | bit if matching else anchor
         free = remaining
     return tuple(pieces)
@@ -237,8 +282,39 @@ def restrict(cube: Cube, coordinate: int, value: int) -> Optional[Cube]:
         raise ValueError("value must be the integer 0 or 1")
     bit = 1 << coordinate
     if cube.free_mask & bit:
-        return Cube(cube.n, cube.anchor | (bit if value else 0), cube.free_mask ^ bit)
+        # ``bit`` moves from the free mask to the anchor, so the two stay
+        # disjoint and neither grows past the universe.
+        return _derived_cube(
+            cube.n, cube.anchor | (bit if value else 0), cube.free_mask ^ bit
+        )
     return cube if ((cube.anchor >> coordinate) & 1) == value else None
+
+
+def split(cube: Cube, coordinate: int) -> Tuple[Cube, Cube]:
+    """Both cofactors of a coordinate that is free in ``cube``.
+
+    This is ``(restrict(cube, coordinate, 0), restrict(cube, coordinate, 1))``
+    for a coordinate the caller already knows to be free, which is the only
+    case the comparison splitter of ``direct_constraints`` ever needs. It
+    exists so that splitter does not restate the cofactor algebra: the owner of
+    the cube representation stays the only place that builds a cube. The two
+    parts partition ``cube`` exactly, so a cover built from them is unchanged.
+    """
+
+    if not isinstance(cube, Cube):
+        raise TypeError("split requires a Cube")
+    _require_index(coordinate, "coordinate")
+    if coordinate >= cube.n:
+        raise ValueError(f"coordinate {coordinate} is outside a {cube.n} bit universe")
+    bit = 1 << coordinate
+    if not (cube.free_mask & bit):
+        raise ValueError(f"coordinate {coordinate} is not free in {cube.label()}")
+    remaining = cube.free_mask ^ bit
+    anchor = cube.anchor
+    return (
+        _derived_cube(cube.n, anchor, remaining),
+        _derived_cube(cube.n, anchor | bit, remaining),
+    )
 
 
 def normalise_cover(
@@ -251,9 +327,33 @@ def normalise_cover(
     normalisation is interrupted by the deadline rather than running past it.
     """
 
+    # A cover that is already in the canonical order is returned untouched. A
+    # relation cover is normalised once when it is built and again when it is
+    # handed to ``Leaf``, and without this the second pass repeats the sort and
+    # rebuilds the set for nothing. The scan below is one pass and allocates
+    # nothing; anything it cannot certify falls through to the full path, which
+    # is also what raises the documented type and width errors.
+    ordered = tuple(cubes)
+    if len(ordered) > 1:
+        previous = None
+        canonical = True
+        for index, cube in enumerate(ordered):
+            if meter is not None and not index % 256:
+                meter.check_time()
+            if cube.__class__ is not Cube or cube.n != ordered[0].n:
+                canonical = False
+                break
+            key = (cube.anchor, -cube.free_mask.bit_count(), cube.free_mask)
+            if previous is not None and key <= previous:
+                canonical = False
+                break
+            previous = key
+        if canonical:
+            return ordered
+
     seen = set()
     unique = []
-    for index, cube in enumerate(cubes):
+    for index, cube in enumerate(ordered):
         if meter is not None and not index % 256:
             meter.check_time()
         if not isinstance(cube, Cube):
@@ -374,7 +474,10 @@ def interval(field: Field, lo: int, hi: int, n: int) -> Tuple[Cube, ...]:
             block += 1
         free_low = (1 << block) - 1
         anchor = (value & ~free_low) << field.offset
-        cubes.append(Cube(n, anchor, outside | (free_low << field.offset)))
+        # The anchor lies inside the field mask above the block's free bits, so
+        # it is disjoint from both ``outside`` and the shifted block, and the
+        # field was checked to fit the universe.
+        cubes.append(_derived_cube(n, anchor, outside | (free_low << field.offset)))
         value += 1 << block
     return tuple(cubes)
 
@@ -451,27 +554,48 @@ def _checked_children(children) -> Tuple["Expression", ...]:
 
 
 def expression_width(expression: "Expression") -> Optional[int]:
-    """The universe width implied by an expression, or ``None`` if unconstrained."""
+    """The universe width implied by an expression, or ``None`` if unconstrained.
 
-    if isinstance(expression, Leaf):
-        return expression.width
-    if isinstance(expression, (AllOf, AnyOf)):
-        for child in expression.children:
-            width = expression_width(child)
-            if width is not None:
-                return width
-        return None
-    raise TypeError(f"expected an expression, got {type(expression).__name__}")
+    The first width found in pre-order, exactly as the recursive definition
+    returned the first non-``None`` child. Walked with an explicit stack: this
+    runs once per child every time a node is constructed, so a deep conjunction
+    used to recurse its whole depth at each level and could exhaust the
+    interpreter's recursion limit while merely being built.
+    """
+
+    stack = [expression]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, Leaf):
+            if node.cubes:
+                return node.cubes[0].n
+        elif isinstance(node, (AllOf, AnyOf)):
+            stack.extend(reversed(node.children))
+        else:
+            raise TypeError(f"expected an expression, got {type(node).__name__}")
+    return None
 
 
 def count_records(expression: "Expression") -> int:
-    """Expression records: one per node plus one per cube alternative."""
+    """Expression records: one per node plus one per cube alternative.
 
-    if isinstance(expression, Leaf):
-        return 1 + len(expression.cubes)
-    if isinstance(expression, (AllOf, AnyOf)):
-        return 1 + sum(count_records(child) for child in expression.children)
-    raise TypeError(f"expected an expression, got {type(expression).__name__}")
+    Counted with an explicit stack rather than by recursion. The total is
+    identical; a deep conjunction no longer pays Python's call overhead per
+    node, and the walk cannot exhaust the interpreter's recursion limit.
+    """
+
+    total = 0
+    stack = [expression]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, Leaf):
+            total += 1 + len(node.cubes)
+        elif isinstance(node, (AllOf, AnyOf)):
+            total += 1
+            stack.extend(node.children)
+        else:
+            raise TypeError(f"expected an expression, got {type(node).__name__}")
+    return total
 
 
 def true_leaf(n: int) -> Leaf:
@@ -543,32 +667,54 @@ class Meter:
         self._charged: Dict[int, object] = {}
 
     @property
+    def started(self) -> float:
+        return self._started
+
+    @started.setter
+    def started(self, value: float) -> None:
+        """Move the start, and the deadline derived from it, together.
+
+        ``check_time`` compares the clock against a precomputed deadline rather
+        than recomputing ``elapsed > budget.seconds``: it is consulted tens of
+        millions of times in a single search. The two must never drift apart,
+        and tests that age a meter by assigning to ``started`` must keep
+        working, so the deadline is maintained here rather than only at
+        construction.
+        """
+
+        self._started = value
+        self._deadline = value + self.budget.seconds
+
+    @property
     def elapsed(self) -> float:
-        return time.monotonic() - self.started
+        return time.monotonic() - self._started
 
     @property
     def remaining(self) -> float:
         return self.budget.seconds - self.elapsed
 
     def check_time(self) -> None:
-        if self.elapsed > self.budget.seconds:
+        if time.monotonic() > self._deadline:
             raise BudgetExhausted("time budget exhausted")
 
     def visit(self, count: int = 1) -> None:
         self.visited += count
         if self.visited > self.budget.max_visited:
             raise BudgetExhausted("visited-cube budget exhausted")
-        self.check_time()
+        if time.monotonic() > self._deadline:
+            raise BudgetExhausted("time budget exhausted")
 
     def record(self, count: int = 1) -> None:
         self.records += count
         if self.records > self.budget.max_records:
             raise BudgetExhausted("expression-record budget exhausted")
-        self.check_time()
+        if time.monotonic() > self._deadline:
+            raise BudgetExhausted("time budget exhausted")
 
     def intersection(self, count: int = 1) -> None:
         self.intersections += count
-        self.check_time()
+        if time.monotonic() > self._deadline:
+            raise BudgetExhausted("time budget exhausted")
 
     def node(self, count: int = 1) -> None:
         """Charge expression nodes as they are built.
@@ -720,6 +866,21 @@ def solve(
 
     No Cartesian product of constraint families or candidate assignments is
     ever materialised.
+
+    Two representation choices, neither of which changes the order in which
+    states are explored or the answer that is returned:
+
+    * The pending list is a chain of ``(head, tail)`` pairs rather than a
+      tuple. Placing a conjunction's children in front used to copy the whole
+      remaining list, which made a deep conjunction quadratic in its depth;
+      building a chain is one pair per child.
+    * A leaf charges the meter once for its whole cover instead of once per
+      alternative. The count the meter accumulates is identical. The clock is
+      therefore consulted before a cover is scanned rather than inside the
+      scan, so a deadline can overshoot by at most one cover — itself capped at
+      ``max_cover`` alternatives, and already validated against that cap before
+      the search starts. Every popped state still checks the clock through
+      ``visit``.
     """
 
     _require_index(n, "n")
@@ -730,26 +891,43 @@ def solve(
         # Idempotent: an expression this meter already paid to build is not
         # billed again, while an externally supplied one still is.
         meter.charge_expression(expression)
-        stack = [(universe(n), (expression,))]
+        stack = [(universe(n), (expression, None))]
         while stack:
             meter.visit()
             cube, pending = stack.pop()
-            if not pending:
+            if pending is None:
                 return QueryResult(SAT, cube, None, meter.elapsed, meter.visited, meter.counters())
-            head = pending[0]
-            rest = pending[1:]
+            head, rest = pending
             if isinstance(head, AllOf):
-                stack.append((cube, head.children + rest))
+                chain = rest
+                for child in reversed(head.children):
+                    chain = (child, chain)
+                stack.append((cube, chain))
             elif isinstance(head, AnyOf):
                 for child in reversed(head.children):
-                    stack.append((cube, (child,) + rest))
+                    stack.append((cube, (child, rest)))
             elif isinstance(head, Leaf):
+                alternatives = head.cubes
+                meter.intersection(len(alternatives))
+                anchor = cube.anchor
+                free = cube.free_mask
                 survivors = []
-                for alternative in head.cubes:
-                    meter.intersection()
-                    narrowed = intersect(cube, alternative)
-                    if narrowed is not None:
-                        survivors.append((narrowed, rest))
+                for alternative in alternatives:
+                    # ``intersect`` inlined over a fixed left operand: the two
+                    # cubes are members of the same query, so they share a
+                    # width and the type check cannot fail.
+                    if (anchor ^ alternative.anchor) & ~(free | alternative.free_mask):
+                        continue
+                    survivors.append(
+                        (
+                            _derived_cube(
+                                cube.n,
+                                anchor | alternative.anchor,
+                                free & alternative.free_mask,
+                            ),
+                            rest,
+                        )
+                    )
                 stack.extend(reversed(survivors))
             else:
                 raise TypeError(f"expected an expression, got {type(head).__name__}")

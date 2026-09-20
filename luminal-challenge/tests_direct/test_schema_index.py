@@ -517,3 +517,259 @@ class IncomingExpressionBudgetTests(unittest.TestCase):
         meter.mark_charged(expression)
         meter.charge_expression(expression)
         self.assertEqual(meter.records, 0)
+
+
+# --------------------------------------------------------------------------
+# Optimization-phase regressions (plan/OPTIMIZATION_PHASE_PLAN.md, stage B)
+# --------------------------------------------------------------------------
+
+
+def every_cube(n: int):
+    """Every valid cube of width ``n``, built through the public constructor."""
+
+    limit = (1 << n) - 1
+    for free in range(limit + 1):
+        for anchor in range(limit + 1):
+            if anchor & free:
+                continue
+            yield si.Cube(n, anchor, free)
+
+
+class DerivedCubeInvariantTests(unittest.TestCase):
+    """The algebra builds cubes without revalidating them; prove the invariant.
+
+    ``_derived_cube`` skips ``Cube.__post_init__``. Each operation that uses it
+    carries a proof that its result is a valid cube. These tests check that
+    proof exhaustively rather than trusting it: every produced cube is fed back
+    through the public constructor, which raises on a bad anchor, a bad free
+    mask, or an overlap between them.
+    """
+
+    def revalidate(self, cube, context):
+        rebuilt = si.Cube(cube.n, cube.anchor, cube.free_mask)
+        self.assertEqual(rebuilt, cube, context)
+
+    def test_intersection_results_are_valid_cubes(self):
+        checked = 0
+        for n in range(6):
+            for a in every_cube(n):
+                for b in every_cube(n):
+                    met = si.intersect(a, b)
+                    if met is None:
+                        continue
+                    self.revalidate(met, f"intersect {a.label()} {b.label()}")
+                    checked += 1
+        self.assertGreater(checked, 0, "no intersections were checked")
+
+    def test_difference_results_are_valid_cubes(self):
+        checked = 0
+        for n in range(5):
+            for a in every_cube(n):
+                for b in every_cube(n):
+                    for piece in si.difference(a, b):
+                        self.revalidate(piece, f"difference {a.label()} {b.label()}")
+                        checked += 1
+        self.assertGreater(checked, 0)
+
+    def test_restriction_and_interval_results_are_valid_cubes(self):
+        checked = 0
+        for n in range(1, 6):
+            for cube in every_cube(n):
+                for coordinate in range(n):
+                    for value in (0, 1):
+                        part = si.restrict(cube, coordinate, value)
+                        if part is None:
+                            continue
+                        self.revalidate(part, "restrict")
+                        checked += 1
+            field = si.Field("f", 0, n)
+            for lo in range(1 << n):
+                for hi in range(lo, 1 << n):
+                    for cube in si.interval(field, lo, hi, n):
+                        self.revalidate(cube, "interval")
+                        checked += 1
+        self.assertGreater(checked, 0)
+
+
+class SplitTests(unittest.TestCase):
+    """``split`` is both cofactors at once, and nothing else."""
+
+    def test_split_equals_both_restrictions_everywhere(self):
+        checked = 0
+        for n in range(1, 6):
+            for cube in every_cube(n):
+                for coordinate in range(n):
+                    if not (cube.free_mask >> coordinate) & 1:
+                        continue
+                    zero, one = si.split(cube, coordinate)
+                    self.assertEqual(zero, si.restrict(cube, coordinate, 0))
+                    self.assertEqual(one, si.restrict(cube, coordinate, 1))
+                    # An exact partition: disjoint, and together the original.
+                    self.assertEqual(
+                        cube_members(zero) | cube_members(one), cube_members(cube)
+                    )
+                    self.assertFalse(cube_members(zero) & cube_members(one))
+                    checked += 1
+        self.assertGreater(checked, 0)
+
+    def test_split_refuses_a_coordinate_that_is_not_free(self):
+        cube = si.Cube(3, 0b001, 0b010)
+        with self.assertRaises(ValueError):
+            si.split(cube, 0)
+        with self.assertRaises(ValueError):
+            si.split(cube, 7)
+        with self.assertRaises(TypeError):
+            si.split("not a cube", 0)
+
+
+class NormalisationFastPathTests(unittest.TestCase):
+    """The already-normalised short cut must agree with the full path."""
+
+    def slow_normalise(self, cubes):
+        seen, unique = set(), []
+        for cube in cubes:
+            key = (cube.n, cube.anchor, cube.free_mask)
+            if key in seen:
+                continue
+            seen.add(key)
+            unique.append(cube)
+        unique.sort(key=lambda c: (c.anchor, -c.free_mask.bit_count(), c.free_mask))
+        return tuple(unique)
+
+    def test_the_fast_path_agrees_with_the_full_path(self):
+        for n in range(1, 5):
+            cubes = list(every_cube(n))
+            for size in (0, 1, 2, 5, len(cubes)):
+                sample = cubes[:size]
+                self.assertEqual(
+                    si.normalise_cover(sample), self.slow_normalise(sample)
+                )
+                # Reversed, duplicated, and already canonical inputs alike.
+                self.assertEqual(
+                    si.normalise_cover(list(reversed(sample))),
+                    self.slow_normalise(sample),
+                )
+                self.assertEqual(
+                    si.normalise_cover(sample + sample), self.slow_normalise(sample)
+                )
+                canonical = self.slow_normalise(sample)
+                self.assertEqual(si.normalise_cover(canonical), canonical)
+
+    def test_the_fast_path_still_rejects_bad_covers(self):
+        with self.assertRaises(TypeError):
+            si.normalise_cover((si.Cube(2, 0, 0), "not a cube"))
+        with self.assertRaises(ValueError):
+            si.normalise_cover((si.Cube(2, 0, 0), si.Cube(3, 0, 0)))
+        # A mixed-width cover that is otherwise in canonical key order must
+        # still be refused rather than short-circuited.
+        with self.assertRaises(ValueError):
+            si.normalise_cover((si.Cube(2, 0, 0), si.Cube(3, 1, 0)))
+
+
+class RecordCountingTests(unittest.TestCase):
+    def recursive_count(self, expression):
+        if isinstance(expression, si.Leaf):
+            return 1 + len(expression.cubes)
+        return 1 + sum(self.recursive_count(c) for c in expression.children)
+
+    def test_iterative_counting_matches_the_recursive_definition(self):
+        leaves = [si.Leaf(tuple(every_cube(2))[:k]) for k in range(4)]
+        shapes = [
+            si.Leaf(()),
+            si.AllOf(()),
+            si.AnyOf(()),
+            si.AllOf(tuple(leaves)),
+            si.AnyOf((si.AllOf(tuple(leaves)), si.AnyOf(tuple(leaves)))),
+        ]
+        for shape in shapes:
+            self.assertEqual(si.count_records(shape), self.recursive_count(shape))
+
+    def test_a_deep_conjunction_does_not_exhaust_the_interpreter(self):
+        # Deeper than the interpreter's default recursion limit of 1000, so
+        # both the width check run on every construction and the record count
+        # must be iterative for this to be buildable at all.
+        depth = 1200
+        node = si.Leaf((si.universe(2),))
+        for _ in range(depth):
+            node = si.AllOf((node,))
+        self.assertEqual(si.count_records(node), depth + 2)
+        self.assertEqual(si.expression_width(node), 2)
+
+
+class SolverEquivalenceTests(unittest.TestCase):
+    """The solver's inlined narrowing and its pending chain change nothing."""
+
+    def test_the_inlined_narrowing_matches_intersect(self):
+        for n in range(1, 5):
+            cubes = list(every_cube(n))
+            for left in cubes:
+                for right in cubes:
+                    expected = si.intersect(left, right)
+                    # The solver narrows a current cube by a leaf alternative
+                    # with exactly this test; drive it through solve and read
+                    # the accepted witness back.
+                    result = si.solve(
+                        si.AllOf((si.Leaf((left,)), si.Leaf((right,)))), n
+                    )
+                    if expected is None:
+                        self.assertTrue(result.is_unsat)
+                    else:
+                        self.assertTrue(result.is_sat)
+                        self.assertEqual(result.cube, expected)
+
+    def test_the_first_witness_is_the_first_in_declared_order(self):
+        # A disjunction is explored in child order and a leaf in cover order,
+        # so the witness is the first alternative that survives.
+        n = 3
+        first = si.Cube(n, 0b101, 0)
+        second = si.Cube(n, 0b010, 0)
+        expression = si.AnyOf((si.Leaf((first,)), si.Leaf((second,))))
+        self.assertEqual(si.solve(expression, n).cube, first)
+        expression = si.AnyOf((si.Leaf((second,)), si.Leaf((first,))))
+        self.assertEqual(si.solve(expression, n).cube, second)
+
+    def test_an_empty_conjunction_is_true_and_an_empty_disjunction_is_false(self):
+        self.assertTrue(si.solve(si.AllOf(()), 3).is_sat)
+        self.assertTrue(si.solve(si.AnyOf(()), 3).is_unsat)
+        self.assertTrue(si.solve(si.AllOf((si.AllOf(()),)), 3).is_sat)
+
+    def test_every_alternative_is_still_charged_to_the_meter(self):
+        """A leaf is billed once for its whole cover, for the same total."""
+
+        n = 3
+        cover = tuple(every_cube(n))[:6]
+        meter = si.Budget(seconds=30.0).start()
+        si.solve(si.AllOf((si.Leaf(cover), si.Leaf(()))), n, meter=meter)
+        # One scan of the leaf's cover: one intersection charged per
+        # alternative, exactly as when each was charged separately.
+        self.assertEqual(meter.intersections, len(si.Leaf(cover).cubes))
+
+    def test_an_expired_clock_still_stops_the_search(self):
+        n = 4
+        expression = si.AllOf(
+            tuple(si.Leaf(tuple(every_cube(n))) for _ in range(6))
+        )
+        meter = si.Budget(seconds=0.05).start()
+        meter.started -= 10  # age the meter past its deadline
+        result = si.solve(expression, n, meter=meter)
+        self.assertTrue(result.is_unknown)
+        self.assertIn("time", result.reason)
+
+
+class MeterDeadlineTests(unittest.TestCase):
+    """The precomputed deadline must track the start it was derived from."""
+
+    def test_moving_the_start_moves_the_deadline(self):
+        meter = si.Budget(seconds=0.5).start()
+        meter.check_time()  # fresh, so this must not raise
+        meter.started -= 10
+        with self.assertRaises(si.BudgetExhausted):
+            meter.check_time()
+        meter.started += 10
+        meter.check_time()
+
+    def test_elapsed_and_remaining_follow_the_same_start(self):
+        meter = si.Budget(seconds=1.0).start()
+        meter.started -= 5
+        self.assertGreater(meter.elapsed, 4.9)
+        self.assertLess(meter.remaining, -3.9)
