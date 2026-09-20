@@ -145,10 +145,11 @@ def _subtract_cover(
         survivors: List[si.Cube] = []
         for member in current:
             meter.intersection()
-            if si.compatible(member, cube):
-                survivors.extend(si.difference(member, cube))
-            else:
-                survivors.append(member)
+            # ``difference`` performs the compatibility test itself and returns
+            # the member untouched when the two cannot meet, which is exactly
+            # what the separate test used to arrange. Asking twice computed the
+            # same predicate twice for every member of every cover.
+            survivors.extend(si.difference(member, cube))
         meter.cover(len(survivors))
         current = tuple(survivors)
         if not current:
@@ -171,7 +172,9 @@ def _earliest_cycle(
     facts: dc.ProgramFacts,
     op_id: int,
     lower: int,
-    calendar: Dict[Tuple[str, int], int],
+    full_cycles: Dict[str, List[int]],
+    field: si.Field,
+    width: int,
     budget: si.Budget,
     counters: _Counters,
 ) -> int:
@@ -192,15 +195,22 @@ def _earliest_cycle(
     """
 
     engine = facts.engine[op_id]
-    capacity = machine.ENGINE_LIMITS[engine]
-    width = dc.time_width(facts.horizon)
-    field = si.Field("t", 0, width)
 
-    blocked = sorted(
-        cycle
-        for (other_engine, cycle), used in calendar.items()
-        if other_engine == engine and used >= capacity and cycle >= lower
-    )
+    # The cycles on which this engine is already at capacity, kept sorted by
+    # the caller as they fill. Rescanning the whole calendar and sorting it
+    # once per operation made the schedule quadratic in the program's length
+    # for no gain: the same set is available by slicing from ``lower``.
+    occupied = full_cycles.get(engine)
+    if occupied:
+        start = 0
+        for start, cycle in enumerate(occupied):
+            if cycle >= lower:
+                break
+        else:
+            start = len(occupied)
+        blocked = occupied[start:]
+    else:
+        blocked = []
     hi = min(facts.horizon - 1, max(lower + len(blocked), facts.prefix_horizon(op_id)))
     if lower > hi:
         raise CompilationFailure(
@@ -227,6 +237,14 @@ def _schedule(
 ) -> Dict[int, int]:
     times: Dict[int, int] = {}
     calendar: Dict[Tuple[str, int], int] = {}
+    # Per engine, the cycles already at capacity, held sorted. This is the same
+    # information the calendar carries, indexed the way the scheduling query
+    # asks for it.
+    full_cycles: Dict[str, List[int]] = {}
+    # The time field does not change between operations, so it is built once
+    # rather than revalidated for every query.
+    width = dc.time_width(facts.horizon)
+    field = si.Field("t", 0, width)
     for op_id in range(facts.count):
         lower = 0
         for predecessor, lag in facts.predecessors[op_id].items():
@@ -235,15 +253,27 @@ def _schedule(
                 lower = candidate
         try:
             cycle = _earliest_cycle(
-                facts, op_id, lower, calendar, deadline.budget(limits), counters
+                facts, op_id, lower, full_cycles, field, width,
+                deadline.budget(limits), counters,
             )
         except si.BudgetExhausted as exc:
             raise CompilationFailure(
                 f"scheduling query for operation {op_id} exhausted its budget: {exc.reason}"
             ) from exc
         times[op_id] = cycle
-        key = (facts.engine[op_id], cycle)
-        calendar[key] = calendar.get(key, 0) + 1
+        engine = facts.engine[op_id]
+        key = (engine, cycle)
+        used = calendar.get(key, 0) + 1
+        calendar[key] = used
+        if used == machine.ENGINE_LIMITS[engine]:
+            # Kept in increasing order, which is the order the query wants and
+            # the order the old whole-calendar sort produced. A cycle reaches
+            # capacity exactly once, so this inserts each cycle once.
+            occupied = full_cycles.setdefault(engine, [])
+            position = len(occupied)
+            while position and occupied[position - 1] > cycle:
+                position -= 1
+            occupied.insert(position, cycle)
     return times
 
 
@@ -258,6 +288,7 @@ def _lowest_address(
     live: Dict[str, Tuple[int, int]],
     placed: Sequence[str],
     addresses: Dict[str, int],
+    field: si.Field,
     budget: si.Budget,
     counters: _Counters,
 ) -> int:
@@ -278,11 +309,15 @@ def _lowest_address(
     """
 
     width = facts.width[name]
-    field = si.Field("a", 0, dc.ADDRESS_WIDTH)
     universe = dc.ADDRESS_WIDTH
     cap = machine.SCRATCH_WORDS - width
 
-    overlapping = [other for other in placed if _overlap(live[name], live[other])]
+    own_start, own_end = live[name]
+    overlapping = [
+        other
+        for other in placed
+        if own_start <= live[other][1] and live[other][0] <= own_end
+    ]
     occupied = sum(facts.width[other] for other in overlapping)
 
     windows = []
@@ -333,10 +368,13 @@ def _allocate(
 
     addresses: Dict[str, int] = {}
     placed: List[str] = []
+    # One address field for every allocation query; it never varies.
+    field = si.Field("a", 0, dc.ADDRESS_WIDTH)
     for name in order:
         try:
             addresses[name] = _lowest_address(
-                facts, name, live, placed, addresses, deadline.budget(limits), counters
+                facts, name, live, placed, addresses, field,
+                deadline.budget(limits), counters,
             )
         except si.BudgetExhausted as exc:
             raise CompilationFailure(

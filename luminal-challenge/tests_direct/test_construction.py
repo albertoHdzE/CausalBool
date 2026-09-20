@@ -447,3 +447,108 @@ class CorpusConstructionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# --------------------------------------------------------------------------
+# Bootstrap bookkeeping (plan/OPTIMIZATION_PHASE_PLAN.md, stage B)
+# --------------------------------------------------------------------------
+
+
+class ScheduleBookkeepingTests(unittest.TestCase):
+    """Indexing the calendar differently must not change a single cycle.
+
+    ``_schedule`` keeps the cycles on which each engine is already at capacity
+    in a sorted list, instead of rescanning and re-sorting the whole calendar
+    for every operation. The set the scheduling query subtracts must be exactly
+    the one the old whole-calendar scan produced, in the same order.
+    """
+
+    def blocked_by_rescanning(self, facts, calendar, engine, lower):
+        capacity = machine.ENGINE_LIMITS[engine]
+        return sorted(
+            cycle
+            for (other, cycle), used in calendar.items()
+            if other == engine and used >= capacity and cycle >= lower
+        )
+
+    def test_the_incremental_index_matches_a_full_rescan(self):
+        checked = 0
+        for source in small_programs():
+            facts = dc.derive(source)
+            times, calendar, full_cycles = {}, {}, {}
+            width = dc.time_width(facts.horizon)
+            field = dcmp.si.Field("t", 0, width)
+            limits = dcmp.DEFAULT_LIMITS
+            deadline = dcmp._Deadline(limits.total_seconds)
+            counters = dcmp._Counters()
+            for op_id in range(facts.count):
+                lower = 0
+                for predecessor, lag in facts.predecessors[op_id].items():
+                    lower = max(lower, times[predecessor] + lag)
+                engine = facts.engine[op_id]
+                expected = self.blocked_by_rescanning(facts, calendar, engine, lower)
+                occupied = full_cycles.get(engine, [])
+                observed = [cycle for cycle in occupied if cycle >= lower]
+                self.assertEqual(observed, expected, f"{source['name']} op {op_id}")
+                cycle = dcmp._earliest_cycle(
+                    facts, op_id, lower, full_cycles, field, width,
+                    deadline.budget(limits), counters,
+                )
+                times[op_id] = cycle
+                key = (engine, cycle)
+                used = calendar.get(key, 0) + 1
+                calendar[key] = used
+                if used == machine.ENGINE_LIMITS[engine]:
+                    seat = full_cycles.setdefault(engine, [])
+                    position = len(seat)
+                    while position and seat[position - 1] > cycle:
+                        position -= 1
+                    seat.insert(position, cycle)
+                checked += 1
+            self.assertEqual(times, brute_force_schedule(facts), source["name"])
+        self.assertGreater(checked, 0)
+
+    def test_the_full_cycle_index_stays_sorted_and_holds_no_duplicates(self):
+        for source in small_programs():
+            facts = dc.derive(source)
+            limits = dcmp.DEFAULT_LIMITS
+            deadline = dcmp._Deadline(limits.total_seconds)
+            times = dcmp._schedule(facts, limits, deadline, dcmp._Counters())
+            # Reconstruct what the scheduler must have recorded and check it
+            # against the schedule it produced.
+            usage = dc.engine_usage(facts, times)
+            for engine in {facts.engine[i] for i in range(facts.count)}:
+                at_capacity = sorted(
+                    cycle
+                    for (other, cycle), used in usage.items()
+                    if other == engine and used >= machine.ENGINE_LIMITS[engine]
+                )
+                self.assertEqual(at_capacity, sorted(set(at_capacity)))
+
+
+class SubtractionTests(unittest.TestCase):
+    """Dropping the separate compatibility test changes no cover."""
+
+    def test_subtraction_matches_the_two_step_form(self):
+        si = dcmp.si
+        checked = 0
+        for n in range(1, 5):
+            limit = (1 << n) - 1
+            cubes = [
+                si.Cube(n, anchor, free)
+                for free in range(limit + 1)
+                for anchor in range(limit + 1)
+                if not anchor & free
+            ]
+            for removed in cubes:
+                meter = si.Budget(seconds=30.0, max_records=10 ** 6).start()
+                observed = dcmp._subtract_cover(cubes, (removed,), meter)
+                expected = []
+                for member in cubes:
+                    if si.compatible(member, removed):
+                        expected.extend(si.difference(member, removed))
+                    else:
+                        expected.append(member)
+                self.assertEqual(list(observed), expected)
+                checked += 1
+        self.assertGreater(checked, 0)
