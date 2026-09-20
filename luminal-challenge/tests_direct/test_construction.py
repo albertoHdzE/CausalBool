@@ -231,7 +231,7 @@ class WitnessTests(unittest.TestCase):
     def test_every_chosen_cycle_is_the_smallest_feasible_one(self):
         for source in small_programs():
             facts = dc.derive(source)
-            compiled, _ = dcmp.compile_with_report(source)
+            compiled, _ = dcmp.compile_with_report(source, optimise=False)
             times = {
                 op_id: cycle
                 for cycle, bundle in enumerate(compiled["bundles"])
@@ -243,7 +243,7 @@ class WitnessTests(unittest.TestCase):
     def test_every_chosen_address_is_the_smallest_legal_one(self):
         for source in small_programs():
             facts = dc.derive(source)
-            compiled, _ = dcmp.compile_with_report(source)
+            compiled, _ = dcmp.compile_with_report(source, optimise=False)
             times = {
                 op_id: cycle
                 for cycle, bundle in enumerate(compiled["bundles"])
@@ -280,7 +280,7 @@ class WitnessTests(unittest.TestCase):
     def test_every_address_below_the_choice_is_illegal(self):
         for source in small_programs()[:8]:
             facts = dc.derive(source)
-            compiled, _ = dcmp.compile_with_report(source)
+            compiled, _ = dcmp.compile_with_report(source, optimise=False)
             times = {
                 op_id: cycle
                 for cycle, bundle in enumerate(compiled["bundles"])
@@ -313,12 +313,12 @@ class StructureTests(unittest.TestCase):
     def test_chain_cannot_beat_its_dependency_lower_bound(self):
         source = FIXTURES["chain"]
         facts = dc.derive(source)
-        compiled = dcmp.compile_program(source)
+        compiled, _ = dcmp.compile_with_report(source, optimise=False)
         self.assertEqual(len(compiled["bundles"]), facts.cycle_lower_bound())
 
     def test_many_ready_operations_fill_engine_slots(self):
         source = FIXTURES["many_ready"]
-        compiled = dcmp.compile_program(source)
+        compiled, _ = dcmp.compile_with_report(source, optimise=False)
         # Six consts on a two-slot load engine need three cycles.
         self.assertEqual(len(compiled["bundles"][0].get("load", [])), 2)
         self.assertEqual(len(compiled["bundles"][1].get("load", [])), 2)

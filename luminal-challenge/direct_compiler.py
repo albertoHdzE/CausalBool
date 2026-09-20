@@ -361,10 +361,14 @@ def bootstrap(
     return times, addresses
 
 
-def compile_with_report(program: dict, limits: Optional[Limits] = None) -> Tuple[dict, dict]:
+def compile_with_report(
+    program: dict, limits: Optional[Limits] = None, optimise: bool = True
+) -> Tuple[dict, dict]:
     """Compile, and return diagnostics beside the official result.
 
-    The input dictionary is read and never modified.
+    The input dictionary is read and never modified. ``optimise`` is a
+    diagnostic switch used to measure the bootstrap on its own; the official
+    ``compile_program`` entry point never sets it.
     """
 
     limits = limits or DEFAULT_LIMITS
@@ -399,11 +403,36 @@ def compile_with_report(program: dict, limits: Optional[Limits] = None) -> Tuple
             "queries": counters.as_dict(),
             "seconds": deadline.elapsed,
         },
+        "optimisation": {"enabled": False},
         "cycles": cycles,
         "footprint": footprint,
         "product": cycles * footprint,
         "seconds": deadline.elapsed,
     }
+
+    if optimise:
+        # Imported inside the function so that the two modules do not form an
+        # import cycle. This is the integration point of plan section 6, where
+        # the lead wires L05 in behind L04's frozen interface.
+        import direct_optimizer
+
+        times, addresses, record = direct_optimizer.optimise(
+            program, facts, times, addresses, limits, deadline, counters
+        )
+        report["optimisation"] = record
+        report["stage"] = "optimised" if record["accepted"] else "bootstrap"
+        # Whatever survives is validated again before it is returned.
+        dc.check_feasible(facts, times, addresses)
+        compiled = dc.compilation(facts, times, addresses)
+        machine.check_compilation(program, compiled)
+        cycles = len(compiled["bundles"])
+        footprint = dc.footprint(facts, addresses)
+        report["cycles"] = cycles
+        report["footprint"] = footprint
+        report["product"] = cycles * footprint
+        report["queries"] = counters.as_dict()
+        report["seconds"] = deadline.elapsed
+
     return compiled, report
 
 

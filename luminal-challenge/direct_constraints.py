@@ -142,6 +142,18 @@ _RELATIONS = {
 }
 
 
+def _significance(coordinate: int, lhs: "Term", rhs: "Term") -> int:
+    """Place value of a coordinate within whichever term's field holds it."""
+
+    best = -1
+    for term in (lhs, rhs):
+        if term.field is None:
+            continue
+        if term.field.offset <= coordinate < term.field.end():
+            best = max(best, coordinate - term.field.offset)
+    return best
+
+
 def relation_cover(
     name: str, lhs: Term, rhs: Term, n: int, meter: si.Meter
 ) -> Tuple[si.Cube, ...]:
@@ -168,6 +180,21 @@ def relation_cover(
     if support & ~limit:
         raise ValueError("a term reaches outside the declared universe")
 
+    # Split order: the most significant bit *within its own field* first, and
+    # the higher coordinate to break a tie. Comparing two fields held at
+    # different offsets, a plain highest-coordinate rule would exhaust every
+    # value of whichever field sits higher in the index before it ever looked
+    # at the other operand, which produces an enormous though still exact
+    # cover. Ordering by place value is the usual comparator structure. Any
+    # split order gives the same set, since each split partitions the cube;
+    # only the size and the cost of the cover change.
+    order: List[int] = []
+    for coordinate in range(n):
+        if not (support >> coordinate) & 1:
+            continue
+        order.append(coordinate)
+    order.sort(key=lambda c: (_significance(c, lhs, rhs), c), reverse=True)
+
     accepted: List[si.Cube] = []
     stack = [si.universe(n)]
     while stack:
@@ -187,7 +214,7 @@ def relation_cover(
             if exact(low_l, low_r):
                 accepted.append(cube)
             continue
-        coordinate = free.bit_length() - 1
+        coordinate = next(c for c in order if (free >> c) & 1)
         one = si.restrict(cube, coordinate, 1)
         zero = si.restrict(cube, coordinate, 0)
         # Pushed one first so that the zero branch is explored first.
@@ -297,6 +324,7 @@ class JointQuery:
         self.affected_values = tuple(
             name for name in facts.value_names if name in affected
         )
+        self._live_cache: Dict[str, Tuple[int, int]] = {}
 
     # -- terms --------------------------------------------------------------
 
@@ -354,6 +382,14 @@ class JointQuery:
     def _live_bounds(self, name: str) -> Tuple[int, int]:
         """The widest live interval this value can take over the domains."""
 
+        cached = self._live_cache.get(name)
+        if cached is not None:
+            return cached
+        result = self._compute_live_bounds(name)
+        self._live_cache[name] = result
+        return result
+
+    def _compute_live_bounds(self, name: str) -> Tuple[int, int]:
         producer = self.facts.producers[name]
         low, high = self._time_bounds(producer)
         latency = self.facts.latency[producer]
@@ -482,11 +518,22 @@ class JointQuery:
 
         parts: List[si.Expression] = []
         names = list(self.facts.value_names)
-        affected = set(self.affected_values)
-        for i, first in enumerate(names):
-            for second in names[i + 1 :]:
-                if first not in affected and second not in affected:
+        position = {name: index for index, name in enumerate(names)}
+
+        # Only a pair holding an affected value can be anything but constant,
+        # so the scan runs over affected values against all values rather than
+        # over all pairs. The pairs are then ordered by increasing value
+        # identifier, which is the order the plan declares.
+        pairs = set()
+        for first in self.affected_values:
+            for second in names:
+                if second == first:
                     continue
+                pairs.add(
+                    (first, second) if position[first] < position[second] else (second, first)
+                )
+
+        for first, second in sorted(pairs, key=lambda pair: (position[pair[0]], position[pair[1]])):
                 first_live = self._live_bounds(first)
                 second_live = self._live_bounds(second)
                 if first_live[1] < second_live[0] or second_live[1] < first_live[0]:

@@ -282,7 +282,14 @@ _joint(
 
 
 def incumbent(source):
-    compiled, _ = dcmp.compile_with_report(source)
+    """The bootstrap result.
+
+    These are unit tests of the joint query, so they are posed against the
+    deterministic bootstrap incumbent rather than against whatever the
+    optimiser happens to have reached.
+    """
+
+    compiled, _ = dcmp.compile_with_report(source, optimise=False)
     times = {
         op_id: cycle
         for cycle, bundle in enumerate(compiled["bundles"])

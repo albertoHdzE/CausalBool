@@ -14,7 +14,7 @@ the direct-index implementation tasks below.
 | L02 — machine facts and independent corpus | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_contract.py`, corpus of 142; 31 tests pass; see record below |
 | L03 — comparisons and joint constraints | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_constraints.py`, 22 tests pass; see record below |
 | L04 — independent bootstrap compiler | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_compiler.py`, 19 tests pass; 142/142 corpus compiles and validates; see record below |
-| L05 — joint optimization | PENDING | Unassigned | Requires L03/L04 acceptance |
+| L05 — joint optimization | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_optimizer.py`, 18 tests pass; 7 validated improvements over the corpus; see record below |
 | L06 — packaging and verification runners | PENDING | Unassigned | Requires frozen L04 interfaces; final gate requires L05 |
 | L07 — integration and independent review | PENDING | Lead | Requires all implementation gates |
 
@@ -179,6 +179,73 @@ may report READY_FOR_REVIEW; only the lead sets ACCEPTED.
 - **Limitations:** the bootstrap places operations in source identifier order,
   as the plan specifies. A priority function is not explored, and changing it
   would be a section 12 amendment. No optimiser is wired in yet; that is L05.
+- **Lead decision:** pending.
+
+### L05 — joint optimization
+
+- **Plan version:** 1.0. **Owner:** as above.
+- **Exclusive files:** `direct_optimizer.py`, `tests_direct/test_optimizer.py`.
+- **Command:** `PYTHONPATH=.reference:. python3 -m unittest tests_direct.test_optimizer`
+  → **18 tests, OK, exit 0**, 4.63 s. Whole suite:
+  `python3 -m unittest discover -s tests_direct -p 'test_*.py'`
+  → **124 tests, OK, exit 0**, 24.3 s.
+- **Source hashes (first 16):** `direct_optimizer.py` `20ccca6e9f64dda8`;
+  `tests_direct/test_optimizer.py` `44156e18046394e1`; `direct_constraints.py` `74f335de3b16b99a`;
+  `direct_compiler.py` `57f6256783e42da7`.
+
+**Integration edit for the lead to confirm.** Plan section 6 reserves the
+wiring of L05 behind L04's interface for the lead. With no other agent active I
+made that edit myself: `compile_with_report` imports `direct_optimizer` inside
+the function, so the two modules do not form an import cycle, and it takes a
+new keyword `optimise` that defaults to true. `compile_program` never passes
+it; it exists so that the bootstrap can be measured alone.
+
+**Measured over the whole 142-program corpus, with the optimiser enabled:**
+
+| Outcome | Count |
+|---|---:|
+| SAT, validated and accepted | 7 |
+| UNSAT, this neighbourhood exhausted | 178 |
+| UNKNOWN, construction over budget | 8 |
+| UNKNOWN, search over budget | 480 |
+| Infeasible as posed | 3,197 |
+| Candidate-validation discrepancies | **0** |
+
+All 142 still compile, pass the frozen validator and reproduce the complete
+final memory image. Total compile time 55.5 s for the corpus, slowest single
+program 1.13 s.
+
+**A performance defect found and fixed in L03 while measuring this.** The
+split rule of section 3.3 says to split the highest relevant free coordinate.
+Read as the highest *absolute* coordinate, a comparison between two fields held
+at different offsets exhausts every value of whichever field sits higher in the
+index before it looks at the other operand at all. A single `le` between two
+eight-bit fields produced **977 cubes in 7.8 ms**, and construction then
+overran its 100 ms budget on 418 queries. Splitting instead by place value
+*within each field*, the usual comparator order, gives **393 cubes in 2.9 ms**.
+Construction overruns fell from 418 to **8**, definite UNSAT results rose from
+129 to 178, and accepted improvements from 5 to 7. Any split order yields the
+same set, because each split partitions the cube; only size and cost change,
+and the exhaustive index-by-index tests confirm exactness is unaltered.
+**This is a literal deviation from section 3.3's wording and needs the lead's
+ruling**, under section 12 change control.
+
+**Honest negative result.** On the eight public programs the optimiser accepts
+nothing: 158 of its 205 queries are infeasible as posed, because operations
+outside a four-operation window already breach the target. The public score is
+therefore exactly the bootstrap's. This mirrors the historical hybrid pilot,
+where bounded queries also improved the classical incumbent by nothing.
+
+**No naturally occurring cycle/memory tradeoff was found.** In all 7 accepted
+improvements no metric worsens, so T05's tradeoff requirement is tested at the
+level of the mechanism instead: `targets_for` is shown to emit a `(C+1, M)`
+target whose product strictly improves, and the objective identity — that a
+worse cycle count with a better product scores better under the official
+formula — is checked directly. I did not manufacture a fixture and present it
+as a discovered result.
+- **Limitations:** 480 searches still exhaust the 100 ms per-query budget, so
+  the optimiser's reach is limited by search cost rather than by the method. An
+  UNSAT result excludes solutions only in the queried neighbourhood.
 - **Lead decision:** pending.
 
 ## Version and decision log
