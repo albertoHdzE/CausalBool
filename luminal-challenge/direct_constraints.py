@@ -37,9 +37,95 @@ __all__ = [
     "eq",
     "ne",
     "relation_cover",
+    "CoverCache",
     "JointQuery",
     "Infeasible",
 ]
+
+
+# --------------------------------------------------------------------------
+# Cover reuse
+# --------------------------------------------------------------------------
+
+
+class CoverCache:
+    """Relation covers already built during one compilation.
+
+    A relation cover is a pure function of the relation name, the two terms and
+    the universe width: no clock, no incumbent and no target enters it. Terms
+    and fields are frozen, cubes are immutable and a cover is a tuple of them,
+    so a stored cover can be handed to a second query unchanged. The optimiser
+    poses the same window against several targets in turn, and the precedence,
+    capacity and scratch-safety relations of a window do not depend on the
+    target, so the same covers are otherwise rebuilt from scratch each time.
+
+    Three properties make this safe to use inside a budgeted search.
+
+    * **The key carries every semantic input.** Relation name, each term's
+      field — itself keyed by name, offset and width — each term's integer
+      offset, and the universe width.
+    * **A hit costs exactly what the miss cost.** The visits and records the
+      original construction paid are stored beside the cover and charged again
+      on every hit, so a query that could not have afforded to build the cover
+      still cannot afford to use it. The cache buys time, never budget.
+    * **A partial cover is never stored.** An entry is written only after
+      ``relation_cover`` returns, so a construction stopped by exhaustion
+      leaves nothing behind.
+
+    The cache is created per compilation and thrown away with it. It is never
+    process-global, it holds no mutable state, and it is bounded in both
+    entries and retained cubes; past either bound it simply stops storing.
+    """
+
+    __slots__ = ("_entries", "max_entries", "max_cubes", "cubes", "hits", "misses", "refused")
+
+    def __init__(self, max_entries: int = 4096, max_cubes: int = 200000) -> None:
+        self._entries: Dict[tuple, Tuple[Tuple[si.Cube, ...], int, int]] = {}
+        self.max_entries = max_entries
+        self.max_cubes = max_cubes
+        self.cubes = 0
+        self.hits = 0
+        self.misses = 0
+        self.refused = 0
+
+    @staticmethod
+    def key(name: str, lhs: "Term", rhs: "Term", n: int) -> tuple:
+        return (
+            name,
+            lhs.field,
+            lhs.offset,
+            rhs.field,
+            rhs.offset,
+            n,
+        )
+
+    def get(self, key: tuple):
+        found = self._entries.get(key)
+        if found is None:
+            self.misses += 1
+            return None
+        self.hits += 1
+        return found
+
+    def put(self, key: tuple, cover: Tuple[si.Cube, ...], visits: int, records: int) -> None:
+        if key in self._entries:
+            return
+        if len(self._entries) >= self.max_entries or self.cubes + len(cover) > self.max_cubes:
+            self.refused += 1
+            return
+        self._entries[key] = (cover, visits, records)
+        self.cubes += len(cover)
+
+    def statistics(self) -> Dict[str, int]:
+        return {
+            "entries": len(self._entries),
+            "cubes_retained": self.cubes,
+            "hits": self.hits,
+            "misses": self.misses,
+            "refused": self.refused,
+            "max_entries": self.max_entries,
+            "max_cubes": self.max_cubes,
+        }
 
 
 class Infeasible(Exception):
@@ -155,7 +241,12 @@ def _significance(coordinate: int, lhs: "Term", rhs: "Term") -> int:
 
 
 def relation_cover(
-    name: str, lhs: Term, rhs: Term, n: int, meter: si.Meter
+    name: str,
+    lhs: Term,
+    rhs: Term,
+    n: int,
+    meter: si.Meter,
+    cache: Optional[CoverCache] = None,
 ) -> Tuple[si.Cube, ...]:
     """An exact, sound and complete cover of ``lhs <name> rhs``.
 
@@ -172,19 +263,50 @@ def relation_cover(
         raise ValueError(f"unknown relation {name!r}")
     decide, exact = _RELATIONS[name]
 
+    # A cover already built in this compilation is handed back, but only after
+    # the meter has been charged the visits and records the original build
+    # cost. The cache therefore saves time and never budget: a query that could
+    # not have afforded to construct this cover still cannot afford to use it,
+    # and it still stops with UNKNOWN rather than receiving a free answer.
+    key = None
+    if cache is not None:
+        key = cache.key(name, lhs, rhs, n)
+        found = cache.get(key)
+        if found is not None:
+            cover, visits, records = found
+            meter.visit(visits)
+            meter.record(records)
+            meter.cover_limit(len(cover))
+            return cover
+    visits_before = meter.visited
+    records_before = meter.records
+
     # Simplify before splitting: two constants, or the same field on both
     # sides, reduce to a constant comparison. These paths still answer a query
     # and still cost a cube, so they are charged and the clock is checked; an
     # early return that skipped both would hand back an answer under an
     # already-expired budget.
+    def store(cover: Tuple[si.Cube, ...]) -> Tuple[si.Cube, ...]:
+        """Keep a completed cover, with what it cost, for the next query.
+
+        Only reached on a normal return, so a cover abandoned part-way through
+        by an exhausted budget is never stored.
+        """
+
+        if cache is not None and key is not None:
+            cache.put(
+                key, cover, meter.visited - visits_before, meter.records - records_before
+            )
+        return cover
+
     if (lhs.is_constant and rhs.is_constant) or (
         lhs.field is not None and rhs.field is not None and lhs.field == rhs.field
     ):
         meter.check_time()
         if not exact(lhs.offset, rhs.offset):
-            return ()
+            return store(())
         meter.record(1)
-        return (si.universe(n),)
+        return store((si.universe(n),))
 
     support = lhs.mask | rhs.mask
     limit = si.universe_mask(n)
@@ -205,21 +327,43 @@ def relation_cover(
             continue
         order.append(coordinate)
     order.sort(key=lambda c: (_significance(c, lhs, rhs), c), reverse=True)
+    # The split order is fixed for the whole construction, so its weights are
+    # computed once instead of rebuilding a generator at every node.
+    order_bits = [(1 << coordinate, coordinate) for coordinate in order]
+
+    # A term's bounds are ``((anchor & mask) >> shift) + offset`` and
+    # ``(((anchor | free) & mask) >> shift) + offset``. Hoisting the mask, the
+    # shift and the offset out of the loop turns two method calls per node into
+    # local arithmetic; a constant term has mask zero, for which the same
+    # expression yields its offset twice, so no separate case is needed.
+    l_mask = lhs.field.mask if lhs.field is not None else 0
+    l_shift = lhs.field.offset if lhs.field is not None else 0
+    l_offset = lhs.offset
+    r_mask = rhs.field.mask if rhs.field is not None else 0
+    r_shift = rhs.field.offset if rhs.field is not None else 0
+    r_offset = rhs.offset
 
     accepted: List[si.Cube] = []
     stack = [si.universe(n)]
+    visit = meter.visit
+    record = meter.record
+    cover_limit = meter.cover_limit
     while stack:
-        meter.visit()
+        visit()
         cube = stack.pop()
-        low_l, high_l = lhs.bounds(cube)
-        low_r, high_r = rhs.bounds(cube)
+        anchor = cube.anchor
+        span = anchor | cube.free_mask
+        low_l = ((anchor & l_mask) >> l_shift) + l_offset
+        high_l = ((span & l_mask) >> l_shift) + l_offset
+        low_r = ((anchor & r_mask) >> r_shift) + r_offset
+        high_r = ((span & r_mask) >> r_shift) + r_offset
         verdict = decide(low_l, high_l, low_r, high_r)
         if verdict is True:
             accepted.append(cube)
             # Charged and checked as the cover grows, not once it is finished:
             # otherwise an over-cap cover is fully built before anyone objects.
-            meter.cover_limit(len(accepted))
-            meter.record(1)
+            cover_limit(len(accepted))
+            record(1)
             continue
         if verdict is False:
             continue
@@ -228,52 +372,60 @@ def relation_cover(
             # Fully fixed on the support: evaluate the predicate exactly.
             if exact(low_l, low_r):
                 accepted.append(cube)
-                meter.cover_limit(len(accepted))
-                meter.record(1)
+                cover_limit(len(accepted))
+                record(1)
             continue
-        coordinate = next(c for c in order if (free >> c) & 1)
-        one = si.restrict(cube, coordinate, 1)
-        zero = si.restrict(cube, coordinate, 0)
-        # Pushed one first so that the zero branch is explored first.
-        if one is not None:
-            stack.append(one)
-        if zero is not None:
-            stack.append(zero)
+        for bit, coordinate in order_bits:
+            if free & bit:
+                break
+        # Both cofactors at once, from the owner of the cube representation.
+        # The coordinate is free here, so neither part can be empty. Pushed
+        # one first so that the zero branch is explored first.
+        zero, one = si.split(cube, coordinate)
+        stack.append(one)
+        stack.append(zero)
     cover = si.normalise_cover(accepted, meter)
     # The members were charged as they were accepted, so this validates the
     # final size without billing the same cover a second time.
     meter.cover_limit(len(cover))
-    return cover
+    return store(cover)
 
 
-def _leaf(name: str, lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    cover = relation_cover(name, lhs, rhs, n, meter)
+def _leaf(
+    name: str,
+    lhs: Term,
+    rhs: Term,
+    n: int,
+    meter: si.Meter,
+    cache: Optional[CoverCache] = None,
+) -> si.Leaf:
+    cover = relation_cover(name, lhs, rhs, n, meter, cache)
     meter.node()
     return si.Leaf(cover)
 
 
-def le(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    return _leaf("le", lhs, rhs, n, meter)
+def le(lhs, rhs, n, meter, cache=None) -> si.Leaf:
+    return _leaf("le", lhs, rhs, n, meter, cache)
 
 
-def lt(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    return _leaf("lt", lhs, rhs, n, meter)
+def lt(lhs, rhs, n, meter, cache=None) -> si.Leaf:
+    return _leaf("lt", lhs, rhs, n, meter, cache)
 
 
-def ge(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    return _leaf("le", rhs, lhs, n, meter)
+def ge(lhs, rhs, n, meter, cache=None) -> si.Leaf:
+    return _leaf("le", rhs, lhs, n, meter, cache)
 
 
-def gt(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    return _leaf("lt", rhs, lhs, n, meter)
+def gt(lhs, rhs, n, meter, cache=None) -> si.Leaf:
+    return _leaf("lt", rhs, lhs, n, meter, cache)
 
 
-def eq(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    return _leaf("eq", lhs, rhs, n, meter)
+def eq(lhs, rhs, n, meter, cache=None) -> si.Leaf:
+    return _leaf("eq", lhs, rhs, n, meter, cache)
 
 
-def ne(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    return _leaf("ne", lhs, rhs, n, meter)
+def ne(lhs, rhs, n, meter, cache=None) -> si.Leaf:
+    return _leaf("ne", lhs, rhs, n, meter, cache)
 
 
 # --------------------------------------------------------------------------
@@ -301,6 +453,7 @@ class JointQuery:
         target_cycles: int,
         target_memory: int,
         meter: si.Meter,
+        cache: Optional[CoverCache] = None,
     ) -> None:
         self.facts = facts
         self.times = dict(times)
@@ -309,6 +462,8 @@ class JointQuery:
         self.target_cycles = target_cycles
         self.target_memory = target_memory
         self.meter = meter
+        # Compilation-local, supplied by the optimiser; ``None`` means no reuse.
+        self.cache = cache
 
         if not self.window:
             raise ValueError("a joint query needs at least one selected operation")
@@ -504,7 +659,7 @@ class JointQuery:
                 if op_id not in self.time_field and predecessor not in self.time_field:
                     continue
                 clause = ge(
-                    self.time_term(op_id), self.time_term(predecessor, lag), self.n, self.meter
+                    self.time_term(op_id), self.time_term(predecessor, lag), self.n, self.meter, self.cache
                 )
                 if not clause.cubes:
                     raise Infeasible(
@@ -529,7 +684,7 @@ class JointQuery:
                 if other_high < low or high < other_low:
                     continue  # the two can never share a cycle
                 different_time = ne(
-                    self.time_term(op_id), self.time_term(other), self.n, self.meter
+                    self.time_term(op_id), self.time_term(other), self.n, self.meter, self.cache
                 )
                 if machine.ENGINE_LIMITS[engine] == 1:
                     if not different_time.cubes:
@@ -539,7 +694,7 @@ class JointQuery:
                     parts.append(different_time)
                     continue
                 different_lane = ne(
-                    self.lane_term(op_id), self.lane_term(other), self.n, self.meter
+                    self.lane_term(op_id), self.lane_term(other), self.n, self.meter, self.cache
                 )
                 if different_lane.cubes and si.universe(self.n) in different_lane.cubes:
                     continue
@@ -591,12 +746,14 @@ class JointQuery:
                             self.address_term(second),
                             self.n,
                             self.meter,
+                            self.cache,
                         ),
                         le(
                             self.address_term(second, second_width),
                             self.address_term(first),
                             self.n,
                             self.meter,
+                            self.cache,
                         ),
                         self._ends_before(first, second),
                         self._ends_before(second, first),
@@ -615,11 +772,11 @@ class JointQuery:
 
         write_second = self.write_term(second)
         children: List[si.Expression] = [
-            lt(self.write_term(first), write_second, self.n, self.meter)
+            lt(self.write_term(first), write_second, self.n, self.meter, self.cache)
         ]
         for consumer in self.facts.consumers[first]:
             children.append(
-                lt(self.time_term(consumer), write_second, self.n, self.meter)
+                lt(self.time_term(consumer), write_second, self.n, self.meter, self.cache)
             )
         return self._all(children)
 

@@ -865,3 +865,247 @@ class ConstructionBudgetTests(unittest.TestCase):
         starved = si.solve(leaf, 4, si.Budget(seconds=10.0, max_cover=1))
         self.assertTrue(starved.is_unknown)
         self.assertFalse(starved.is_unsat)
+
+
+# --------------------------------------------------------------------------
+# Cover reuse (plan/OPTIMIZATION_PHASE_PLAN.md, stage B)
+# --------------------------------------------------------------------------
+
+
+class CoverCacheTests(unittest.TestCase):
+    """A cached cover must be the cover, and must cost what building it cost.
+
+    The cache exists to save time. It must never save budget, never answer a
+    query whose meter is exhausted, never carry a partial cover out of a
+    stopped construction, and never let one relation's cover stand in for
+    another's.
+    """
+
+    RELATIONS = ("le", "lt", "eq", "ne")
+
+    def terms(self, n=6):
+        left = si.Field("l", 0, 3)
+        right = si.Field("r", 3, 3)
+        return [
+            (dk.Term(left, 0), dk.Term(right, 0)),
+            (dk.Term(left, 1), dk.Term(right, 0)),
+            (dk.Term(left, 0), dk.Term(right, 2)),
+            (dk.Term(left, 0), dk.constant(3)),
+            (dk.constant(2), dk.Term(right, 0)),
+            (dk.Term(left, -1), dk.Term(right, 0)),
+        ]
+
+    def test_a_hit_returns_exactly_the_cover_a_fresh_build_returns(self):
+        cache = dk.CoverCache()
+        checked = 0
+        for name in self.RELATIONS:
+            for lhs, rhs in self.terms():
+                fresh = dk.relation_cover(name, lhs, rhs, 6, fresh_meter())
+                first = dk.relation_cover(name, lhs, rhs, 6, fresh_meter(), cache)
+                second = dk.relation_cover(name, lhs, rhs, 6, fresh_meter(), cache)
+                self.assertEqual(fresh, first)
+                self.assertEqual(fresh, second)
+                # And the same set of indices, judged without the module.
+                expected = {
+                    index
+                    for index in range(1 << 6)
+                    if EXACT[name](
+                        ((index >> 0) & 7) + lhs.offset if lhs.field else lhs.offset,
+                        ((index >> 3) & 7) + rhs.offset if rhs.field else rhs.offset,
+                    )
+                }
+                got = {
+                    index
+                    for index in range(1 << 6)
+                    if any(cube.contains(index) for cube in second)
+                }
+                self.assertEqual(got, expected, f"{name} {lhs} {rhs}")
+                checked += 1
+        self.assertEqual(checked, len(self.RELATIONS) * len(self.terms()))
+        self.assertGreater(cache.statistics()["hits"], 0, "nothing was reused")
+
+    def test_the_key_separates_every_semantic_input(self):
+        """Change one input at a time; the cover must change with it."""
+
+        cache = dk.CoverCache()
+        base_left = si.Field("l", 0, 3)
+        base_right = si.Field("r", 3, 3)
+        base = ("le", dk.Term(base_left, 0), dk.Term(base_right, 0), 6)
+
+        variants = [
+            ("lt", base[1], base[2], 6),                                   # relation
+            ("le", dk.Term(base_left, 2), base[2], 6),                     # left offset
+            ("le", base[1], dk.Term(base_right, 2), 6),                    # right offset
+            ("le", dk.Term(si.Field("l", 0, 2), 0), base[2], 6),           # left width
+            ("le", base[1], dk.Term(si.Field("r", 2, 3), 0), 6),           # right offset bits
+            ("le", base[1], base[2], 7),                                   # universe width
+        ]
+        reference = dk.relation_cover(*base, fresh_meter(), cache)
+        for variant in variants:
+            through_cache = dk.relation_cover(*variant, fresh_meter(), cache)
+            without_cache = dk.relation_cover(*variant, fresh_meter())
+            self.assertEqual(
+                through_cache, without_cache, f"{variant} was answered from a wrong entry"
+            )
+        # The base entry itself is still intact after all those neighbours.
+        self.assertEqual(dk.relation_cover(*base, fresh_meter(), cache), reference)
+
+    def test_a_hit_is_charged_what_the_miss_was_charged(self):
+        cache = dk.CoverCache()
+        lhs, rhs = self.terms()[0]
+
+        miss = fresh_meter()
+        dk.relation_cover("le", lhs, rhs, 6, miss, cache)
+        hit = fresh_meter()
+        dk.relation_cover("le", lhs, rhs, 6, hit, cache)
+
+        self.assertEqual(hit.visited, miss.visited, "a hit skipped the visit charge")
+        self.assertEqual(hit.records, miss.records, "a hit skipped the record charge")
+        self.assertGreater(miss.records, 0)
+
+    def test_a_hit_cannot_answer_past_an_exhausted_record_budget(self):
+        """Reuse must not buy a cover the query could not afford to build."""
+
+        cache = dk.CoverCache()
+        lhs, rhs = self.terms()[0]
+        paid = fresh_meter()
+        cover = dk.relation_cover("le", lhs, rhs, 6, paid, cache)
+        self.assertGreater(len(cover), 1)
+
+        starved = fresh_meter(max_records=len(cover) - 1)
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("le", lhs, rhs, 6, starved, cache)
+        self.assertIn("record", caught.exception.reason)
+
+    def test_a_hit_cannot_answer_past_an_exhausted_visit_budget(self):
+        cache = dk.CoverCache()
+        lhs, rhs = self.terms()[0]
+        paid = fresh_meter()
+        dk.relation_cover("le", lhs, rhs, 6, paid, cache)
+        self.assertGreater(paid.visited, 1)
+
+        starved = fresh_meter(max_visited=paid.visited - 1)
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("le", lhs, rhs, 6, starved, cache)
+        self.assertIn("visited", caught.exception.reason)
+
+    def test_a_hit_cannot_answer_past_an_expired_clock(self):
+        cache = dk.CoverCache()
+        lhs, rhs = self.terms()[0]
+        dk.relation_cover("le", lhs, rhs, 6, fresh_meter(), cache)
+
+        expired = fresh_meter(seconds=0.1)
+        expired.started -= 10
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("le", lhs, rhs, 6, expired, cache)
+        self.assertIn("time", caught.exception.reason)
+
+    def test_a_construction_stopped_by_exhaustion_stores_nothing(self):
+        cache = dk.CoverCache()
+        lhs = dk.Term(si.Field("l", 0, 4), 0)
+        rhs = dk.Term(si.Field("r", 4, 4), 0)
+        starved = fresh_meter(max_records=3)
+        with self.assertRaises(si.BudgetExhausted):
+            dk.relation_cover("le", lhs, rhs, 8, starved, cache)
+        self.assertEqual(cache.statistics()["entries"], 0, "a partial cover was stored")
+        # And a later well-funded query still gets the complete cover.
+        complete = dk.relation_cover("le", lhs, rhs, 8, fresh_meter(), cache)
+        self.assertEqual(complete, dk.relation_cover("le", lhs, rhs, 8, fresh_meter()))
+
+    def test_the_cache_is_bounded_in_entries_and_in_retained_cubes(self):
+        tiny = dk.CoverCache(max_entries=2, max_cubes=10 ** 9)
+        for offset in range(6):
+            dk.relation_cover(
+                "le", dk.Term(si.Field("l", 0, 3), offset),
+                dk.Term(si.Field("r", 3, 3), 0), 6, fresh_meter(), tiny,
+            )
+        statistics = tiny.statistics()
+        self.assertLessEqual(statistics["entries"], 2)
+        self.assertGreater(statistics["refused"], 0)
+
+        narrow = dk.CoverCache(max_entries=10 ** 9, max_cubes=1)
+        for offset in range(4):
+            dk.relation_cover(
+                "lt", dk.Term(si.Field("l", 0, 3), offset),
+                dk.Term(si.Field("r", 3, 3), 0), 6, fresh_meter(), narrow,
+            )
+        self.assertLessEqual(narrow.statistics()["cubes_retained"], 1)
+
+    def test_the_simplified_paths_are_cached_without_changing_their_charge(self):
+        cache = dk.CoverCache()
+        field = si.Field("a", 0, 4)
+        for name, lhs, rhs, expected in (
+            ("le", dk.constant(0), dk.constant(1), (si.universe(4),)),
+            ("lt", dk.constant(5), dk.constant(1), ()),
+            ("le", dk.Term(field, 0), dk.Term(field, 0), (si.universe(4),)),
+        ):
+            miss = fresh_meter()
+            self.assertEqual(dk.relation_cover(name, lhs, rhs, 4, miss, cache), expected)
+            hit = fresh_meter()
+            self.assertEqual(dk.relation_cover(name, lhs, rhs, 4, hit, cache), expected)
+            self.assertEqual(hit.records, miss.records)
+            self.assertEqual(hit.visited, miss.visited)
+
+
+class CacheFreeJointQueryEquivalenceTests(unittest.TestCase):
+    """A shared cache must not change any acceptance expression."""
+
+    def test_expressions_are_identical_with_and_without_a_shared_cache(self):
+        source = JOINT_FIXTURES["two_constants"]
+        facts = dc.derive(source)
+        times, addresses = incumbent(source)
+        cycles = max(times.values()) + 1
+        memory = dc.footprint(facts, addresses)
+
+        shared = dk.CoverCache()
+        checked = 0
+        # The same cache is used across different windows and different
+        # targets, which is exactly how the optimiser uses it.
+        for target in ((cycles, memory), (cycles + 1, memory), (cycles, memory + 1)):
+            for window in ((0,), (0, 1), (1, 2), (0, 1, 2)):
+                if max(window) >= facts.count:
+                    continue
+                try:
+                    plain = dk.JointQuery(
+                        facts, times, addresses, window, target[0], target[1],
+                        fresh_meter(),
+                    ).expression()
+                except dk.Infeasible:
+                    with self.assertRaises(dk.Infeasible):
+                        dk.JointQuery(
+                            facts, times, addresses, window, target[0], target[1],
+                            fresh_meter(), shared,
+                        ).expression()
+                    continue
+                cached = dk.JointQuery(
+                    facts, times, addresses, window, target[0], target[1],
+                    fresh_meter(), shared,
+                ).expression()
+                self.assertEqual(
+                    si.count_records(plain), si.count_records(cached),
+                    f"window {window} target {target} changed size",
+                )
+                width = si.expression_width(plain)
+                if width is not None and width <= 16:
+                    for index in range(1 << width):
+                        self.assertEqual(
+                            accepts(plain, index), accepts(cached, index),
+                            f"window {window} target {target} index {index}",
+                        )
+                checked += 1
+        self.assertGreater(checked, 0, "no joint query was compared")
+
+    def test_a_cache_does_not_survive_between_compilations(self):
+        """Each compilation builds its own cache; none is process-global."""
+
+        import direct_optimizer
+
+        source = JOINT_FIXTURES["two_constants"]
+        first, report_one = dcmp.compile_with_report(source)
+        second, report_two = dcmp.compile_with_report(source)
+        self.assertEqual(first, second)
+        one = report_one["optimisation"]["cover_cache"]
+        two = report_two["optimisation"]["cover_cache"]
+        # A cache carried over would show no misses the second time round.
+        self.assertEqual(one["misses"], two["misses"])
+        self.assertEqual(one["entries"], two["entries"])

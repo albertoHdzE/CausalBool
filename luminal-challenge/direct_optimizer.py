@@ -142,6 +142,10 @@ def optimise(
     attempted: set = set()
     stopped = "pass_complete"
     started = deadline.elapsed
+    # Created here and discarded with this compilation, so nothing is shared
+    # between programs and no process-global state accumulates. A hit is
+    # charged the visits and records its miss cost, so reuse never buys budget.
+    cache = dk.CoverCache()
 
     allowance = min(
         limits.optimise_seconds, deadline.seconds - started - _RESERVE_SECONDS
@@ -196,6 +200,7 @@ def optimise(
                         target_cycles,
                         target_memory,
                         meter,
+                        cache,
                     )
                     expression = query.expression()
                 except dk.Infeasible:
@@ -212,6 +217,12 @@ def optimise(
                 if result.is_unknown:
                     # Budget exhaustion is not a statement about solutions.
                     statuses["UNKNOWN_SEARCH"] += 1
+                    # Which declared limit stopped the search is a diagnostic
+                    # worth keeping: a search that now stops on the visited-cube
+                    # cap rather than the clock has explored more of its space,
+                    # not less, and reached that cap sooner in wall-clock time.
+                    if result.reason:
+                        reasons[result.reason] = reasons.get(result.reason, 0) + 1
                     continue
                 if result.is_unsat:
                     # Only this neighbourhood is excluded, nothing wider.
@@ -302,6 +313,7 @@ def optimise(
         "target_discrepancies": target_discrepancies,
         "discrepancy_count": len(validation_errors) + len(target_discrepancies),
         "stopped_because": stopped,
+        "cover_cache": cache.statistics(),
         "seconds": deadline.elapsed - started,
         "allowance_seconds": allowance,
     }
