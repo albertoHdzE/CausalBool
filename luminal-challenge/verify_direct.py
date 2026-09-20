@@ -54,6 +54,9 @@ SOURCES = (
 
 RAN_PATTERN = re.compile(r"^Ran (\d+) tests? in", re.MULTILINE)
 
+# The frozen public suite. A run that reports any other number is not it.
+EXPECTED_PUBLIC_TESTS = 11
+
 
 class StageFailure(Exception):
     pass
@@ -147,6 +150,25 @@ def run_test_stage(name: str, logs: Path, timeout: float) -> Dict[str, object]:
     }
 
 
+def public_suite_verdict(exit_code: int, stderr: str, timed_out: bool) -> Dict[str, object]:
+    """The frozen public suite passes only at exactly the expected count.
+
+    Accepting "any positive number" would let a suite that silently shrank, or
+    one discovered from the wrong directory, still read PASS.
+    """
+
+    match = RAN_PATTERN.search(stderr or "")
+    count = int(match.group(1)) if match else 0
+    passed = exit_code == 0 and count == EXPECTED_PUBLIC_TESTS and not timed_out
+    return {
+        "status": "PASS" if passed else "FAIL",
+        "tests": count,
+        "expected_tests": EXPECTED_PUBLIC_TESTS,
+        "timed_out": timed_out,
+        "exit_code": exit_code,
+    }
+
+
 def materialise_corpus(destination: Path) -> Dict[str, object]:
     """Write the corpus to JSON so the acceptance process needs no project code."""
 
@@ -166,47 +188,167 @@ def materialise_corpus(destination: Path) -> Dict[str, object]:
     return manifest
 
 
-ACCEPTANCE_WORKER = r'''
-import json, sys, time
-from pathlib import Path
+PROHIBITED = ("common", "compilers", "index_query", "repertoire_program", "direct_compiler")
+
+# One input per process. Started with -I -S from a neutral directory holding
+# only the export and the pinned machine module, so the development tree is
+# unreachable and per-input interpreter start, import and serialisation cost
+# is inside the measured external limit.
+ISOLATED_WORKER = r'''
+import json, sys
+sys.path.insert(0, sys.argv[1])
 import machine
+
+def prohibited(*args, **kwargs):
+    raise AssertionError("serial_compile was called by the direct export")
+
+machine.serial_compile = prohibited
 import compiler
 
-directory = Path(sys.argv[1])
-paths = sorted(directory.glob("*.json"))
-checked = cases = 0
-failures = []
-slowest = 0.0
-for path in paths:
-    program = machine.load_program(path)
-    started = time.monotonic()
-    try:
-        result = compiler.compile_program(program)
-        elapsed = time.monotonic() - started
-        machine.check_compilation(program, result)
-        for case in program["cases"]:
-            machine.check_case(program, result, case)
-            cases += 1
-    except Exception as exc:
-        failures.append({"program": program["name"], "error": repr(exc)})
-        continue
-    slowest = max(slowest, elapsed)
-    checked += 1
+program = machine.load_program(sys.argv[2])
+before = json.dumps(program, sort_keys=True)
+compiled, report = compiler.compile_with_report(program)
+assert json.dumps(program, sort_keys=True) == before, "the input program was modified"
+machine.check_compilation(program, compiled)
+cases = 0
+for case in program["cases"]:
+    machine.check_case(program, compiled, case)
+    cases += 1
+banned = {"common", "compilers", "index_query", "repertoire_program", "direct_compiler"}
+leaked = sorted(name for name in sys.modules if name.split(".")[0] in banned)
+optimisation = report.get("optimisation", {})
 print(json.dumps({
-    "programs": len(paths),
-    "checked": checked,
     "cases": cases,
-    "failures": failures,
-    "slowest_seconds": slowest,
-    "modules": sorted(m for m in sys.modules if not m.startswith("_")),
+    "cycles": len(compiled["bundles"]),
+    "footprint": report["footprint"],
+    "bootstrap": report.get("bootstrap", {}),
+    "discrepancy_count": report.get("discrepancy_count", 0),
+    "validation_errors": optimisation.get("validation_errors", []),
+    "target_discrepancies": optimisation.get("target_discrepancies", []),
+    "accepted": optimisation.get("accepted", 0),
+    "statuses": optimisation.get("statuses", {}),
+    "seconds": report.get("seconds"),
+    "compiler_path": compiler.__file__,
+    "leaked": leaked,
 }))
 '''
+
+
+def run_isolated_corpus(
+    corpus_directory: Path,
+    export_path: Path,
+    timeout: float,
+    output: Path,
+    expected: int,
+) -> Dict[str, object]:
+    """Compile every corpus input in its own fresh, isolated process.
+
+    A single long-lived process would let a slow input hide behind the others
+    and would never pay per-input interpreter start and import cost, which the
+    external limit does include. Each record keeps the input hash, exit code,
+    wall time, case count and the compilation's own diagnostics, so one failure
+    fails the stage without discarding the rest.
+    """
+
+    import shutil
+    import tempfile
+
+    paths = sorted(corpus_directory.glob("*.json"))
+    runs: List[Dict[str, object]] = []
+    with tempfile.TemporaryDirectory(prefix="direct-isolated-") as directory:
+        neutral = Path(directory)
+        shutil.copyfile(export_path, neutral / "compiler.py")
+        shutil.copyfile(REFERENCE / "machine.py", neutral / "machine.py")
+        for path in paths:
+            started = time.monotonic()
+            entry: Dict[str, object] = {
+                "program": path.name,
+                "sha256": digest(path),
+            }
+            try:
+                completed = subprocess.run(
+                    [sys.executable, "-I", "-S", "-c", ISOLATED_WORKER,
+                     str(neutral), str(path)],
+                    cwd=str(neutral),
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout,
+                )
+                entry["exit_code"] = completed.returncode
+                if completed.returncode == 0:
+                    try:
+                        payload = json.loads(completed.stdout)
+                    except json.JSONDecodeError:
+                        payload = {}
+                        entry["error"] = "worker output was not JSON"
+                    entry["result"] = payload
+                    good = (
+                        bool(payload)
+                        and payload.get("cases", 0) > 0
+                        and payload.get("discrepancy_count", 0) == 0
+                        and not payload.get("leaked")
+                    )
+                    entry["status"] = "PASS" if good else "FAIL"
+                    if not good and "error" not in entry:
+                        entry["error"] = (
+                            "discrepancy or module leak recorded by the compilation"
+                        )
+                else:
+                    entry["status"] = "FAIL"
+                    entry["stderr_tail"] = completed.stderr[-1500:]
+            except subprocess.TimeoutExpired:
+                entry["status"] = "FAIL"
+                entry["error"] = f"process exceeded the external {timeout} s limit"
+                entry["timed_out"] = True
+            entry["process_seconds"] = time.monotonic() - started
+            runs.append(entry)
+
+    passed = [entry for entry in runs if entry["status"] == "PASS"]
+    failures = [entry for entry in runs if entry["status"] != "PASS"]
+    discrepancies = [
+        entry
+        for entry in runs
+        if entry.get("result", {}).get("discrepancy_count", 0)
+    ]
+    payload = {
+        "programs": len(runs),
+        "expected": expected,
+        "passed": len(passed),
+        "failures": failures,
+        "timeout_seconds": timeout,
+        "export_sha256": digest(export_path),
+        "max_process_seconds": max((e["process_seconds"] for e in runs), default=0.0),
+        "cases": sum(e.get("result", {}).get("cases", 0) for e in runs),
+        "accepted_improvements": sum(
+            e.get("result", {}).get("accepted", 0) for e in runs
+        ),
+        "runs": runs,
+    }
+    (output / "isolated_corpus.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8"
+    )
+
+    ok = len(runs) == expected and not failures and not discrepancies and runs
+    return {
+        "stage": "acceptance",
+        "step": "corpus",
+        "status": "PASS" if ok else "FAIL",
+        "programs_expected": expected,
+        "programs_checked": len(passed),
+        "cases_checked": payload["cases"],
+        "failures": [e["program"] for e in failures],
+        "discrepancies": [e["program"] for e in discrepancies],
+        "max_process_seconds": payload["max_process_seconds"],
+        "accepted_improvements": payload["accepted_improvements"],
+        "evidence": str(output / "isolated_corpus.json"),
+    }
 
 
 def run_acceptance(
     output: Path, logs: Path, timeout: float, export_path: Path
 ) -> List[Dict[str, object]]:
     steps: List[Dict[str, object]] = []
+    logs.mkdir(parents=True, exist_ok=True)
     corpus_directory = output / "corpus"
     manifest = materialise_corpus(corpus_directory)
     (output / "corpus_manifest.json").write_text(
@@ -214,61 +356,15 @@ def run_acceptance(
     )
 
     export_directory = export_path.parent
-
-    # 1. The whole corpus, through the export, with only the standard library
-    #    and the supplied machine module importable.
     import os
-    import tempfile
 
-    worker_env = dict(os.environ)
-    worker_env["PYTHONPATH"] = os.pathsep.join([str(export_directory), str(REFERENCE)])
-    record = run(
-        [sys.executable, "-c", ACCEPTANCE_WORKER, str(corpus_directory)],
-        logs,
-        "acceptance_corpus",
-        timeout=max(timeout, 900),
-        env=worker_env,
-        cwd=tempfile.gettempdir(),
+    # 1. Every corpus input in its own fresh process, each under the external
+    #    limit, with diagnostics read back from the same compilation that was
+    #    measured.
+    corpus_record = run_isolated_corpus(
+        corpus_directory, export_path, timeout, output, manifest["expected_size"]
     )
-    # Read the complete log, not the truncated tail kept for the summary:
-    # the worker's payload lists every loaded module and is far longer.
-    payload = {}
-    if record["exit_code"] == 0:
-        try:
-            payload = json.loads(
-                (logs / "acceptance_corpus.stdout.txt").read_text(encoding="utf-8")
-            )
-        except (json.JSONDecodeError, OSError):
-            payload = {}
-    expected = manifest["expected_size"]
-    ok = (
-        record["exit_code"] == 0
-        and payload.get("checked") == expected
-        and not payload.get("failures")
-        and payload.get("cases", 0) > 0
-    )
-    leaked = [
-        name
-        for name in payload.get("modules", [])
-        if name in ("common", "compilers", "index_query", "repertoire_program")
-    ]
-    if leaked:
-        ok = False
-    record.update(
-        {
-            "stage": "acceptance",
-            "step": "corpus",
-            "status": "PASS" if ok else "FAIL",
-            "programs_expected": expected,
-            "programs_checked": payload.get("checked", 0),
-            "cases_checked": payload.get("cases", 0),
-            "failures": payload.get("failures", []),
-            "slowest_seconds": payload.get("slowest_seconds"),
-            "leaked_modules": leaked,
-        }
-    )
-    record.pop("stdout_tail", None)
-    steps.append(record)
+    steps.append(corpus_record)
 
     # 2. The unchanged public suite, which imports `compiler` by name.
     import os
@@ -276,33 +372,36 @@ def run_acceptance(
     env = dict(os.environ)
     env["PYTHONPATH"] = os.pathsep.join([str(export_directory), str(REFERENCE)])
     started = time.monotonic()
-    completed = subprocess.run(
-        [sys.executable, "-m", "unittest", "discover", "-s", str(REFERENCE / "tests"),
-         "-t", str(REFERENCE), "-v"],
-        cwd=str(ROOT),
-        capture_output=True,
-        text=True,
-        timeout=max(timeout, 600),
-        env=env,
-    )
-    (logs / "acceptance_public_suite.stderr.txt").write_text(
-        completed.stderr, encoding="utf-8"
-    )
-    match = RAN_PATTERN.search(completed.stderr)
-    count = int(match.group(1)) if match else 0
-    steps.append(
+    public_timed_out = False
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-m", "unittest", "discover", "-s", str(REFERENCE / "tests"),
+             "-t", str(REFERENCE), "-v"],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=max(timeout, 600),
+            env=env,
+        )
+        public_code, public_err = completed.returncode, completed.stderr
+    except subprocess.TimeoutExpired as exc:
+        # Caught rather than propagated: an escaping exception would leave the
+        # previous summary on disk, still reading PASS.
+        public_timed_out = True
+        public_code = 124
+        public_err = exc.stderr.decode() if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+    (logs / "acceptance_public_suite.stderr.txt").write_text(public_err, encoding="utf-8")
+    verdict = public_suite_verdict(public_code, public_err, public_timed_out)
+    verdict.update(
         {
             "stage": "acceptance",
             "step": "public_suite",
-            "status": "PASS" if completed.returncode == 0 and count > 0 else "FAIL",
-            "tests": count,
-            "expected_tests": 11,
             "command": "python3 -m unittest discover -s .reference/tests -t .reference",
-            "exit_code": completed.returncode,
             "seconds": time.monotonic() - started,
-            "stderr_tail": completed.stderr[-2000:],
+            "stderr_tail": public_err[-2000:],
         }
     )
+    steps.append(verdict)
 
     # 3. The documented command line, one fresh process per public program,
     #    under the external timeout. Only JSON may reach stdout.
@@ -372,6 +471,23 @@ def main(argv) -> int:
     logs = output / "logs"
     output.mkdir(parents=True, exist_ok=True)
 
+    summary_path = output / "summary.json"
+    # Claim the file first. If this run aborts, dies or times out, what remains
+    # on disk says so rather than showing the previous run's verdict.
+    summary_path.write_text(
+        json.dumps(
+            {
+                "status": "IN_PROGRESS",
+                "requested_stage": arguments.stage,
+                "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "note": "a run was started and has not recorded a verdict",
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
     requested = STAGE_ORDER if arguments.stage == "all" else [arguments.stage]
     records: List[Dict[str, object]] = []
     export_path = ROOT / ".build" / "direct_index" / "compiler.py"
@@ -430,7 +546,7 @@ def main(argv) -> int:
             for path in sorted((ROOT / "tests_direct").glob("*.py"))
         },
     }
-    (output / "summary.json").write_text(
+    summary_path.write_text(
         json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8"
     )
 

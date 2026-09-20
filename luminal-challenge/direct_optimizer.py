@@ -94,15 +94,15 @@ def windows_for(
         sorted({facts.producers[name] for name in highest[:WINDOW_SIZE]})
     )
 
+    # Starts advance by two and each window is truncated at the operation
+    # count, which keeps the final nonempty shorter window. Breaking out as
+    # soon as a full window reached the end would drop that tail: for six
+    # operations it would omit (4, 5).
     source: List[Tuple[int, ...]] = []
-    start = 0
-    while start < facts.count:
+    for start in range(0, facts.count, 2):
         candidate = tuple(range(start, min(start + WINDOW_SIZE, facts.count)))
         if candidate:
             source.append(candidate)
-        if start + WINDOW_SIZE >= facts.count:
-            break
-        start += 2
 
     ordered: List[Tuple[int, ...]] = []
     leading = [scratch_window, time_window] if scratch_first else [time_window, scratch_window]
@@ -138,6 +138,7 @@ def optimise(
     reasons: Dict[str, int] = {}
     improvements: List[dict] = []
     validation_errors: List[dict] = []
+    target_discrepancies: List[dict] = []
     attempted: set = set()
     stopped = "pass_complete"
     started = deadline.elapsed
@@ -239,9 +240,34 @@ def optimise(
                 actual_cycles = len(compiled["bundles"])
                 actual_memory = dc.footprint(facts, candidate_addresses)
                 actual_product = actual_cycles * actual_memory
+
+                # The acceptance expression encodes both target bounds, so a
+                # satisfying witness that misses either one is a disagreement
+                # between the query and the measurement, not an ordinary
+                # unsuccessful optimisation. Record it; the release gate fails
+                # on it. Measuring first and rejecting on product alone would
+                # hide the defect, because every generated target already
+                # requires a strict product improvement.
+                if actual_cycles > target_cycles or actual_memory > target_memory:
+                    target_discrepancies.append(
+                        {
+                            "window": list(window),
+                            "target": [target_cycles, target_memory],
+                            "actual_cycles": actual_cycles,
+                            "actual_memory": actual_memory,
+                            "reason": (
+                                f"witness satisfied the query but measured "
+                                f"({actual_cycles}, {actual_memory}) against target "
+                                f"({target_cycles}, {target_memory})"
+                            ),
+                        }
+                    )
+                    continue
+
                 if actual_product >= product:
-                    # The witness met its target but not a strict improvement
-                    # of the measured product; nothing is accepted.
+                    # Within target, but not a strict improvement of the
+                    # measured product. Nothing is accepted, and this is not a
+                    # discrepancy.
                     continue
 
                 improvements.append(
@@ -273,6 +299,8 @@ def optimise(
         "accepted": len(improvements),
         "improvements": improvements,
         "validation_errors": validation_errors,
+        "target_discrepancies": target_discrepancies,
+        "discrepancy_count": len(validation_errors) + len(target_discrepancies),
         "stopped_because": stopped,
         "seconds": deadline.elapsed - started,
         "allowance_seconds": allowance,

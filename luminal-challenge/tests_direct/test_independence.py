@@ -242,3 +242,85 @@ class DecisionProvenanceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ExportOptimisationTests(unittest.TestCase):
+    """A successful optimisation, through the export, with the routes shut.
+
+    The development compiler passing under guards says nothing about what the
+    grader would run. This drives the assembled export in a neutral directory
+    under -I -S, with serial_compile replaced by a raising stub, on a program
+    known to reach an accepted improvement.
+    """
+
+    WORKER = r'''
+import json, sys
+sys.path.insert(0, sys.argv[1])
+import machine
+
+def prohibited(*args, **kwargs):
+    raise AssertionError("serial_compile was called by the direct export")
+
+machine.serial_compile = prohibited
+import compiler
+
+program = json.loads(open(sys.argv[2]).read())
+compiled, report = compiler.compile_with_report(program)
+machine.check_compilation(program, compiled)
+for case in program["cases"]:
+    machine.check_case(program, compiled, case)
+banned = {"common", "compilers", "index_query", "repertoire_program", "direct_compiler"}
+print(json.dumps({
+    "accepted": report["optimisation"]["accepted"],
+    "attempted": report["optimisation"]["attempted_queries"],
+    "discrepancy_count": report["discrepancy_count"],
+    "cycles": report["cycles"],
+    "footprint": report["footprint"],
+    "bootstrap": report["bootstrap"]["cycles"],
+    "bootstrap_footprint": report["bootstrap"]["footprint"],
+    "compiler_path": compiler.__file__,
+    "leaked": sorted(n for n in sys.modules if n.split(".")[0] in banned),
+}))
+'''
+
+    def drive(self, program):
+        import shutil
+        import tempfile
+
+        with tempfile.TemporaryDirectory(prefix="export_opt_") as directory:
+            work = Path(directory)
+            export = export_direct.export(work / "compiler.py")
+            shutil.copyfile(ROOT / ".reference" / "machine.py", work / "machine.py")
+            source = work / "program.json"
+            source.write_text(json.dumps(program, sort_keys=True), encoding="utf-8")
+            completed = subprocess.run(
+                [sys.executable, "-I", "-S", "-c", self.WORKER, str(work), str(source)],
+                cwd=str(work),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr[-2000:])
+            payload = json.loads(completed.stdout)
+            self.assertEqual(str(export), payload["compiler_path"])
+            return payload
+
+    def test_the_export_optimises_successfully_with_prohibited_routes_blocked(self):
+        from tests_direct.test_optimizer import CYCLE_FOR_MEMORY_TRADE
+
+        payload = self.drive(CYCLE_FOR_MEMORY_TRADE)
+        self.assertGreater(payload["attempted"], 0)
+        self.assertGreaterEqual(payload["accepted"], 1, "the export must optimise")
+        self.assertEqual(payload["discrepancy_count"], 0)
+        self.assertEqual(payload["leaked"], [])
+        # The accepted witness is the cycle-for-scratch trade.
+        self.assertGreater(payload["cycles"], payload["bootstrap"])
+        self.assertLess(payload["footprint"], payload["bootstrap_footprint"])
+
+    def test_the_export_optimises_a_second_program_the_same_way(self):
+        from tests_direct.test_optimizer import JOINT_NEEDED
+
+        payload = self.drive(JOINT_NEEDED)
+        self.assertGreaterEqual(payload["accepted"], 1)
+        self.assertEqual(payload["discrepancy_count"], 0)
+        self.assertEqual(payload["leaked"], [])

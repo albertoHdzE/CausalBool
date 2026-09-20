@@ -403,7 +403,10 @@ def compile_with_report(
             "queries": counters.as_dict(),
             "seconds": deadline.elapsed,
         },
-        "optimisation": {"enabled": False},
+        # A runner should not have to know how diagnostics are nested to find
+        # out whether this compilation disagreed with its own queries.
+        "optimisation": {"enabled": False, "discrepancy_count": 0},
+        "discrepancy_count": 0,
         "cycles": cycles,
         "footprint": footprint,
         "product": cycles * footprint,
@@ -420,6 +423,7 @@ def compile_with_report(
             program, facts, times, addresses, limits, deadline, counters
         )
         report["optimisation"] = record
+        report["discrepancy_count"] = record["discrepancy_count"]
         report["stage"] = "optimised" if record["accepted"] else "bootstrap"
         # Whatever survives is validated again before it is returned.
         dc.check_feasible(facts, times, addresses)

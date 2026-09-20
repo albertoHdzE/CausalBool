@@ -40,6 +40,105 @@ EXPORT = ROOT / ".build" / "direct_index" / "compiler.py"
 ARMS = ("serial", "classical", "direct_index")
 
 
+# Plan section 2 pins these. They guard the frozen baseline, the reference
+# manifest and the historical record against drift that would silently
+# invalidate a comparison.
+PROTECTED = {
+    "common.py": "5b3ae21c5a6c3a73380069ac685fdde7d3cee2fb7bc7704b610d5e24b0056fab",
+    "reference.json": "ef6042ce4acc2cfe531d974afb666b6ad40656e15828ad5f814d6cbb338875f0",
+    "results/comparison.json": "f070a6691c57c78395e67f4054928cddd753b5aa0265fe1386bb7da27f9cc535",
+    "../GOVERNANCE/GLOSSARY.md":
+        "c3d0402150fefcb1e72339ef986e9f124754c2370c0c55f3c741b311795b2b3e",
+}
+
+HISTORICAL_CLASSICAL_SCORE = 1.9013791212645499
+
+# The direct arm runs here: a neutral directory holding only the export and the
+# pinned machine module, started with -I -S so that neither the development
+# tree nor an inherited environment is reachable.
+DIRECT_WORKER = r'''
+import json, resource, sys, time
+sys.path.insert(0, sys.argv[1])
+import machine
+
+def prohibited(*args, **kwargs):
+    raise AssertionError("serial_compile was called by the direct export")
+
+machine.serial_compile = prohibited
+import compiler
+
+program = machine.load_program(sys.argv[2])
+started = time.perf_counter()
+compiled, report = compiler.compile_with_report(program)
+compile_seconds = time.perf_counter() - started
+cycles = machine.check_compilation(program, compiled)
+for case in program["cases"]:
+    machine.check_case(program, compiled, case)
+peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+if sys.platform != "darwin":
+    peak *= 1024
+banned = {"common", "compilers", "index_query", "repertoire_program", "direct_compiler"}
+optimisation = report.get("optimisation", {})
+print(json.dumps({
+    "arm": "direct_index",
+    "identity": compiler.__file__,
+    "program": program["name"],
+    "cycles": cycles,
+    "scratch": machine.scratch_footprint(program, compiled),
+    "compile_seconds": compile_seconds,
+    "peak_rss_bytes": peak,
+    "correctness": "PASS",
+    "cases": len(program["cases"]),
+    "discrepancy_count": report.get("discrepancy_count", 0),
+    "queries": {
+        "accepted": optimisation.get("accepted", 0),
+        "attempted": optimisation.get("attempted_queries", 0),
+        "statuses": optimisation.get("statuses", {}),
+        "stopped_because": optimisation.get("stopped_because"),
+    },
+    "bootstrap": {
+        "cycles": report.get("bootstrap", {}).get("cycles"),
+        "footprint": report.get("bootstrap", {}).get("footprint"),
+    },
+    "leaked": sorted(n for n in sys.modules if n.split(".")[0] in banned),
+}))
+'''
+
+
+def verify_protected() -> Dict[str, str]:
+    """Refuse to measure anything if a protected control has moved."""
+
+    for name, expected in PROTECTED.items():
+        actual = digest(ROOT / name)
+        if actual != expected:
+            raise RuntimeError(
+                f"protected file {name} has changed: expected {expected}, found {actual}"
+            )
+    return dict(PROTECTED)
+
+
+def verify_export_fresh() -> str:
+    """The measured export must be what the current sources assemble to.
+
+    Checking only that a file exists would let a stale binary be measured and
+    then reported beside hashes of newer source.
+    """
+
+    if not EXPORT.exists():
+        raise RuntimeError(f"the export {EXPORT} is missing; run export_direct.py")
+    sys.path.insert(0, str(ROOT))
+    import export_direct
+
+    current = export_direct.assemble()
+    on_disk = EXPORT.read_text(encoding="utf-8")
+    if current != on_disk:
+        raise RuntimeError(
+            "the export on disk differs from what the current sources assemble to; "
+            "rebuild it with export_direct.py before measuring"
+        )
+    return digest(EXPORT)
+
+
 def peak_rss_bytes() -> int:
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     # ru_maxrss is bytes on Darwin and kilobytes elsewhere.
@@ -109,7 +208,12 @@ def verify_reference() -> str:
 
 
 def run_all(repeats: int, timeout: float) -> dict:
+    import shutil
+    import tempfile
+
     commit = verify_reference()
+    protected = verify_protected()
+    export_hash = verify_export_fresh()
     paths = sorted((REFERENCE / "programs").glob("*.json"))
     if len(paths) != 8:
         raise RuntimeError(f"expected eight public programs, found {len(paths)}")
@@ -117,19 +221,37 @@ def run_all(repeats: int, timeout: float) -> dict:
     runs: List[dict] = []
     failures: List[dict] = []
 
+    neutral_directory = Path(tempfile.mkdtemp(prefix="direct-arm-"))
+    shutil.copyfile(EXPORT, neutral_directory / "compiler.py")
+    shutil.copyfile(REFERENCE / "machine.py", neutral_directory / "machine.py")
+
+    def command_for(arm: str, path: Path):
+        if arm == "direct_index":
+            # Isolated: no development tree, no inherited environment.
+            return (
+                [sys.executable, "-I", "-S", "-c", DIRECT_WORKER,
+                 str(neutral_directory), str(path)],
+                str(neutral_directory),
+            )
+        return (
+            [sys.executable, __file__, "--worker", arm, "--program", str(path)],
+            str(ROOT),
+        )
+
     for path in paths:
         for repeat in range(repeats):
             # Rotate the arm order so a fixed position cannot bias timings.
             order = ARMS[repeat % len(ARMS) :] + ARMS[: repeat % len(ARMS)]
             for arm in order:
+                argv, working = command_for(arm, path)
                 started = time.monotonic()
                 try:
                     completed = subprocess.run(
-                        [sys.executable, __file__, "--worker", arm, "--program", str(path)],
+                        argv,
                         capture_output=True,
                         text=True,
                         timeout=timeout,
-                        cwd=str(ROOT),
+                        cwd=working,
                     )
                     process_seconds = time.monotonic() - started
                     timed_out = False
@@ -235,7 +357,7 @@ def run_all(repeats: int, timeout: float) -> dict:
         else:
             summary[arm] = {"complete": False, "deterministic_metrics": deterministic}
 
-    return {
+    report = {
         "reference_commit": commit,
         "python": sys.version,
         "platform": platform.platform(),
@@ -257,7 +379,9 @@ def run_all(repeats: int, timeout: float) -> dict:
                 "common.py",
             )
         },
-        "export_sha256": digest(EXPORT) if EXPORT.exists() else None,
+        "export_sha256": export_hash,
+        "export_freshness": "matches the current assembly",
+        "protected_sha256": protected,
         "limitations": [
             "Eight public programs only; the private grader is unavailable.",
             "compile_seconds excludes interpreter start, imports and validation;"
@@ -266,10 +390,93 @@ def run_all(repeats: int, timeout: float) -> dict:
             "No claim of global optimality follows from any of these numbers.",
         ],
     }
+    report["gates"] = evaluate_gates(report, repeats)
+    return report
 
 
 def _name_of(path: Path) -> str:
     return json.loads(path.read_text())["name"]
+
+
+def evaluate_gates(report: dict, repeats: int) -> dict:
+    """The acceptance gates, evaluated rather than asserted.
+
+    Exit status and report wording are both derived from this. Execution
+    succeeding is not the same as the comparison passing: a correct compiler
+    that merely matched the serial baseline would run cleanly and must still
+    fail here.
+    """
+
+    gates: Dict[str, dict] = {}
+    runs = report["runs"]
+    expected_per_arm = 8 * repeats
+
+    counts = {arm: sum(1 for run in runs if run["arm"] == arm) for arm in ARMS}
+    gates["all_runs_present"] = {
+        "passed": not report["failures"]
+        and all(counts[arm] == expected_per_arm for arm in ARMS),
+        "detail": f"expected {expected_per_arm} runs per arm, got {counts}, "
+        f"{len(report['failures'])} execution failures",
+    }
+
+    bad_metrics = [
+        run
+        for run in runs
+        if not isinstance(run["cycles"], int)
+        or not isinstance(run["scratch"], int)
+        or run["cycles"] <= 0
+        or run["scratch"] <= 0
+        or run["correctness"] != "PASS"
+    ]
+    gates["metrics_valid"] = {
+        "passed": not bad_metrics,
+        "detail": f"{len(bad_metrics)} runs with non-positive or unvalidated metrics",
+    }
+
+    direct_scores = [
+        score["combined_score"] for score in report["per_repeat"].get("direct_index", [])
+    ]
+    gates["direct_beats_baseline"] = {
+        "passed": bool(direct_scores)
+        and len(direct_scores) == repeats
+        and all(score > 1.0 for score in direct_scores),
+        "detail": f"direct combined scores per repetition: {direct_scores}; "
+        f"each must exceed 1.0 and all {repeats} must be present",
+    }
+
+    classical_scores = [
+        score["combined_score"] for score in report["per_repeat"].get("classical", [])
+    ]
+    control_ok = bool(classical_scores) and all(
+        math.isclose(score, HISTORICAL_CLASSICAL_SCORE, rel_tol=0, abs_tol=1e-9)
+        for score in classical_scores
+    )
+    gates["frozen_classical_control"] = {
+        "passed": control_ok,
+        "detail": f"classical scores {classical_scores} against the historical "
+        f"{HISTORICAL_CLASSICAL_SCORE!r} within 1e-9",
+    }
+
+    discrepant = [
+        run for run in runs if run.get("discrepancy_count", 0)
+    ]
+    gates["no_candidate_discrepancies"] = {
+        "passed": not discrepant,
+        "detail": f"{len(discrepant)} measured compilations reported a "
+        f"query/validator discrepancy",
+    }
+
+    leaked = [run for run in runs if run.get("leaked")]
+    gates["direct_arm_isolated"] = {
+        "passed": not leaked,
+        "detail": f"{len(leaked)} direct runs loaded a prohibited module",
+    }
+
+    gates["all_passed"] = {
+        "passed": all(gate["passed"] for gate in gates.values()),
+        "detail": "every gate above",
+    }
+    return gates
 
 
 def write_report(report: dict, output: Path) -> None:
@@ -325,9 +532,25 @@ def write_report(report: dict, output: Path) -> None:
             f"{1000 * classical['median_compile_seconds']:.3f} ms. The direct method "
             "answers exact queries, so a larger constant is expected.",
             "",
-            f"Every recorded repetition of the direct arm scored above 1.0: the "
-            f"lowest was {direct['combined_score_min']:.6f}x.",
+            (
+                f"Every recorded repetition of the direct arm scored above 1.0; "
+                f"the lowest was {direct['combined_score_min']:.6f}x."
+            )
+            if report["gates"]["direct_beats_baseline"]["passed"]
+            else (
+                "**The score gate FAILED.** "
+                + report["gates"]["direct_beats_baseline"]["detail"]
+            ),
         ]
+    lines += ["", "## Acceptance gates", "", "| Gate | Result | Detail |", "|---|---|---|"]
+    for name, gate in report["gates"].items():
+        lines.append(
+            "| {name} | {verdict} | {detail} |".format(
+                name=name.replace("_", " "),
+                verdict="PASS" if gate["passed"] else "**FAIL**",
+                detail=gate["detail"],
+            )
+        )
     lines += [
         "",
         "## Limitations",
@@ -379,8 +602,18 @@ def main(argv) -> int:
             )
         else:
             print(f"{arm}: INCOMPLETE", file=sys.stderr)
+    for name, gate in report["gates"].items():
+        if name == "all_passed":
+            continue
+        print(
+            f"gate {name}: {'PASS' if gate['passed'] else 'FAIL'} — {gate['detail']}",
+            file=sys.stderr,
+        )
     print(str(Path(arguments.output) / "runs.json"))
-    return 0 if not report["failures"] else 1
+    # Running cleanly is not passing. A correct compiler that only matched the
+    # serial baseline would reach here with no failures and must still exit
+    # nonzero.
+    return 0 if report["gates"]["all_passed"]["passed"] else 1
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 # Luminal independent direct-index compiler: implementation and review contract
 
-Version: **1.0**. Established: **2026-09-19**.
+Version: **1.1**. Established: **2026-09-19**. Comparator-order amendment and
+independent review are recorded in [STATUS.md](STATUS.md).
 
 This is the canonical, self-contained execution plan for a new Luminal challenge
 solution. It is intended for Luna, Claude Code, Codex, and other agents. No
@@ -189,7 +190,10 @@ Construct exact covers with min/max interval reasoning on each partial cube:
 - For `lhs < rhs`, accept if `lhs_max < rhs_min`; reject if `lhs_min >= rhs_max`.
 - For equality, accept equal singleton ranges; reject disjoint ranges.
 - For inequality, accept disjoint ranges; reject equal singleton ranges.
-- Otherwise split the highest relevant free coordinate and recurse, zero first.
+- Otherwise split the relevant free coordinate of highest significance within
+  either operand field; break ties by highest absolute coordinate. Recurse zero
+  first. This version 1.1 order preserves the exact partition while avoiding
+  exhausting one entire high-offset field before considering the other operand.
 - Simplify constant expressions and identical-field comparisons before splitting.
 
 Straddling extrema are unresolved, not false. At a fully fixed assignment the

@@ -1,22 +1,42 @@
 # Luminal direct-index task status
 
-Canonical contract: [INDEX_ONLY_PLAN.md](INDEX_ONLY_PLAN.md), version **1.0**.
+Canonical contract: [INDEX_ONLY_PLAN.md](INDEX_ONLY_PLAN.md), version **1.1**.
 Last updated: **2026-09-19**.
 
-The current request is to persist the plan, not to implement the new compiler.
-The older hybrid prototype and its passing checks do not count as completion of
-the direct-index implementation tasks below.
+The implementation has received independent lead review. **CHANGES_REQUIRED**:
+see [REVIEW.md](../results/direct_index_v1/REVIEW.md) for findings R1–R9,
+repair acceptance criteria, evidence, and the repeat-review handoff. Passing
+existing tests does not close those findings. The older hybrid remains historical.
 
 | Task | State | Owner | Evidence / next action |
 |---|---|---|---|
-| L00 — persistent contract and navigation | READY_FOR_REVIEW | Lead | Plan, agent instructions, status, and README links written; document audit pending |
-| L01 — direct schema algebra and solver | READY_FOR_REVIEW | Worker (Claude Opus 5) | `schema_index.py`, 34 tests pass; see record below |
+| L00 — persistent contract and navigation | ACCEPTED | Lead | Canonical plan, agent navigation and review handoff inspected; v1.1 amendment below |
+| L01 — direct schema algebra and solver | READY_FOR_REVIEW | Worker (Claude Opus 5) | R4 repaired: caps enforced while structures grow; incoming leaves validated. See repair round below |
 | L02 — machine facts and independent corpus | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_contract.py`, corpus of 142; 31 tests pass; see record below |
-| L03 — comparisons and joint constraints | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_constraints.py`, 22 tests pass; see record below |
+| L03 — comparisons and joint constraints | READY_FOR_REVIEW | Worker (Claude Opus 5) | R3/R4 repaired: independent domains and pointwise oracle; construction budgets; v1.1 docstring corrected |
 | L04 — independent bootstrap compiler | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_compiler.py`, 19 tests pass; 142/142 corpus compiles and validates; see record below |
-| L05 — joint optimization | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_optimizer.py`, 18 tests pass; 7 validated improvements over the corpus; see record below |
-| L06 — packaging and verification runners | READY_FOR_REVIEW | Worker (Claude Opus 5) | Export, verification and comparison runners; `--stage all` PASS, exit 0; see record below |
-| L07 — integration and independent review | PENDING | Lead | L01–L06 all offered for review; `results/direct_index_v1/REVIEW.md` is the lead's to write and has deliberately not been created |
+| L05 — joint optimization | READY_FOR_REVIEW | Worker (Claude Opus 5) | R1/R6/R8 repaired: target bounds checked and recorded, real tradeoff fixture frozen, final source window restored |
+| L06 — packaging and verification runners | READY_FOR_REVIEW | Worker (Claude Opus 5) | R1/R2/R5/R7/R9 repaired: evaluated gates, per-input isolation, provenance checks, exact public count |
+| L07 — integration and independent review | CHANGES_REQUIRED | Lead | Review completed; release acceptance withheld; repair and rerun per REVIEW.md |
+
+### Lead amendment and review authority — 2026-09-19
+
+Version **1.1** approves the implemented comparator split order: decreasing
+significance within an operand field, decreasing absolute coordinate for ties,
+zero branch first. Every split partitions the current cube exactly, so soundness
+and completeness are preserved. This is an explicit amendment to section 4's
+absolute-coordinate rule, not a change to method boundaries or success gates.
+Affected tasks: L03/L05 and their performance evidence. Existing evidence for the
+implemented field-significance order remains evidence for that implementation;
+it cannot substantiate the old absolute-coordinate algorithm's performance.
+No measured-result file is overwritten by this amendment.
+
+The lead reviewed commit `2ab4fa8` with two scoped read-only reviewers and separate
+reruns. Production files were not edited. Detailed task records below are the
+worker's historical handoff and remain intact; the table above and REVIEW.md
+supersede their pending lead decisions. L02/L04 remain READY_FOR_REVIEW because
+dependency and integration gates remain open, despite passing checks. Repair
+assignments and acceptance criteria are in REVIEW.md; no submission is authorized.
 
 ## Required task record when work starts
 
@@ -317,6 +337,42 @@ development tree off the path.
 - **Limitations:** the comparison covers the eight public programs only; the
   private grader is unavailable and nothing is inferred about it.
 - **Lead decision:** pending.
+
+## Repair round — 2026-09-20, findings R1 to R9
+
+Worker: Claude Opus 5, working linearly. Starting revision `2ab4fa8`, plan
+version 1.1. Full record: [REPAIR_HANDOFF.md](../results/direct_index_v2_repair/REPAIR_HANDOFF.md).
+The lead's review and evidence in `results/direct_index_v1/` are unchanged;
+`lead_review/probes.json` was backed up before the probes were rerun and
+restored byte-identically afterwards.
+
+**All nine findings repaired, each with a regression that fails on the reviewed
+behaviour.** The lead's own three probes now reproduce as failures: the silent
+target discrepancy records 4 discrepancies where it recorded 0, the
+always-infeasible mutation makes its test fail, and the oversized atomic cover
+returns UNKNOWN instead of SAT.
+
+| Command | Exit | Result |
+|---|---:|---|
+| `python3 -m unittest discover -s tests_direct` | 0 | **168 tests OK** (was 147) |
+| `verify_direct.py --stage all --timeout 20` | 0 | **PASS**, 179 tests, 142 programs in 142 isolated processes, 277 cases |
+| `compare_direct.py --repeats 3 --timeout 20` | 0 | 72 runs, **all six acceptance gates PASS** |
+
+Scores, recomputed independently from all 72 raw runs and identical in every
+repetition: serial 1.0000000000000000, classical 1.9013791212645499 (matching
+history to 0.000e+00), direct index 2.0084662022846573. Median compile 423.9 ms
+against classical's 0.271 ms, about 1,560 times slower. Export SHA256
+`33386bc6ecc2dd82a1787cef9a0c04c369a7aacbbaf9e763a0313356653a376e`, 2,184 lines.
+
+**Reported against interest:** accepted improvements across the corpus fell from
+7 to 6. Restoring the missing tail window (R8) changes which windows are reached
+before the 32-query cap, so some programs now exhaust the cap before the window
+that previously helped. The public score is unchanged, because joint
+optimisation contributes nothing there: 165 of 218 public queries are infeasible
+as posed and none returns SAT.
+
+Offered as READY_FOR_REVIEW. Nothing is self-accepted; only the lead may accept,
+and no submission is authorised.
 
 ## Version and decision log
 

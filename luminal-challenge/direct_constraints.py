@@ -159,9 +159,13 @@ def relation_cover(
 ) -> Tuple[si.Cube, ...]:
     """An exact, sound and complete cover of ``lhs <name> rhs``.
 
-    Coordinates outside the two terms' fields are left free. The highest
-    relevant free coordinate is split first, zero branch before one, so the
-    result is deterministic.
+    Coordinates outside the two terms' fields are left free. The next
+    coordinate to split is chosen by descending bit significance within either
+    operand field, ties broken by descending absolute coordinate, and the zero
+    branch is visited first, so the result is deterministic. This is the
+    version 1.1 order approved by the lead; each split still partitions the
+    current cube into disjoint exhaustive children, so denotation and exactness
+    are unchanged and only the cover's size and cost differ.
     """
 
     if name not in _RELATIONS:
@@ -205,6 +209,10 @@ def relation_cover(
         verdict = decide(low_l, high_l, low_r, high_r)
         if verdict is True:
             accepted.append(cube)
+            # Charged and checked as the cover grows, not once it is finished:
+            # otherwise an over-cap cover is fully built before anyone objects.
+            meter.cover_limit(len(accepted))
+            meter.record(1)
             continue
         if verdict is False:
             continue
@@ -213,6 +221,8 @@ def relation_cover(
             # Fully fixed on the support: evaluate the predicate exactly.
             if exact(low_l, low_r):
                 accepted.append(cube)
+                meter.cover_limit(len(accepted))
+                meter.record(1)
             continue
         coordinate = next(c for c in order if (free >> c) & 1)
         one = si.restrict(cube, coordinate, 1)
@@ -222,8 +232,10 @@ def relation_cover(
             stack.append(one)
         if zero is not None:
             stack.append(zero)
-    cover = si.normalise_cover(accepted)
-    meter.cover(len(cover))
+    cover = si.normalise_cover(accepted, meter)
+    # The members were charged as they were accepted, so this validates the
+    # final size without billing the same cover a second time.
+    meter.cover_limit(len(cover))
     return cover
 
 

@@ -241,16 +241,21 @@ def restrict(cube: Cube, coordinate: int, value: int) -> Optional[Cube]:
     return cube if ((cube.anchor >> coordinate) & 1) == value else None
 
 
-def normalise_cover(cubes: Sequence[Cube]) -> Tuple[Cube, ...]:
+def normalise_cover(
+    cubes: Sequence[Cube], meter: Optional["Meter"] = None
+) -> Tuple[Cube, ...]:
     """Deterministic order with exact duplicates removed.
 
     Alternatives may overlap. Their cardinalities are not summed and
-    disjointness is not asserted.
+    disjointness is not asserted. A meter may be supplied so that a long
+    normalisation is interrupted by the deadline rather than running past it.
     """
 
     seen = set()
     unique = []
-    for cube in cubes:
+    for index, cube in enumerate(cubes):
+        if meter is not None and not index % 256:
+            meter.check_time()
         if not isinstance(cube, Cube):
             raise TypeError("a cover holds Cube members")
         key = (cube.n, cube.anchor, cube.free_mask)
@@ -561,9 +566,21 @@ class Meter:
         self.intersections += count
         self.check_time()
 
-    def cover(self, size: int) -> None:
+    def cover_limit(self, size: int) -> None:
+        """Validate a cover size against the cap, charging nothing.
+
+        This exists so that a structure still being built can be checked on
+        every growth step. Charging records here as well would bill the same
+        cover once per member and again at the end.
+        """
+
         if size > self.budget.max_cover:
             raise BudgetExhausted("atomic relation cover budget exhausted")
+
+    def cover(self, size: int) -> None:
+        """Check and charge a completed cover."""
+
+        self.cover_limit(size)
         self.record(size)
 
     def counters(self) -> Dict[str, int]:
@@ -629,6 +646,25 @@ def _check_expression_width(expression: "Expression", n: int) -> None:
         raise ValueError(f"expression width {width} does not match the {n} bit universe")
 
 
+def _check_incoming_leaves(expression: "Expression", meter: "Meter") -> None:
+    """Validate every leaf cover the query was handed.
+
+    A leaf built elsewhere can be arbitrarily large. Without this, a query
+    could be answered from a cover that exceeds the declared atomic-relation
+    cap, which would report SAT where the budget says the work was never
+    licensed. Exhaustion is reported as UNKNOWN by the caller.
+    """
+
+    stack = [expression]
+    while stack:
+        meter.check_time()
+        node = stack.pop()
+        if isinstance(node, Leaf):
+            meter.cover_limit(len(node.cubes))
+        elif isinstance(node, (AllOf, AnyOf)):
+            stack.extend(node.children)
+
+
 def solve(
     expression: "Expression",
     n: int,
@@ -653,6 +689,7 @@ def solve(
     meter = meter if meter is not None else (budget or DEFAULT_BUDGET).start()
     try:
         _check_expression_width(expression, n)
+        _check_incoming_leaves(expression, meter)
         meter.record(count_records(expression))
         stack = [(universe(n), (expression,))]
         while stack:

@@ -281,6 +281,33 @@ _joint(
 )
 
 
+_joint(
+    "vector_overlap",
+    {"data": 16, "out": 16},
+    [
+        {"op": "vload", "dest": "v0", "buffer": "data", "offset": 0},
+        {"op": "vload", "dest": "v1", "buffer": "data", "offset": 8},
+        {"op": "vadd", "dest": "v2", "args": ["v0", "v1"]},
+        {"op": "vstore", "args": ["v2"], "buffer": "out", "offset": 0},
+        {"op": "vstore", "args": ["v0"], "buffer": "out", "offset": 8},
+    ],
+    [{"data": list(range(16)), "out": [0] * 16}],
+)
+
+_joint(
+    "ordered_aliasing",
+    {"data": 8},
+    [
+        {"op": "load", "dest": "a", "buffer": "data", "offset": 0},
+        {"op": "add", "dest": "b", "args": ["a", "a"]},
+        {"op": "store", "args": ["b"], "buffer": "data", "offset": 0},
+        {"op": "load", "dest": "c", "buffer": "data", "offset": 0},
+        {"op": "store", "args": ["c"], "buffer": "data", "offset": 1},
+    ],
+    [{"data": list(range(8))}, {"data": [7, 6, 5, 4, 3, 2, 1, 0]}],
+)
+
+
 def incumbent(source):
     """The bootstrap result.
 
@@ -333,6 +360,88 @@ def index_for(query, times, addresses, lanes=None):
     return index
 
 
+def window_for(times):
+    """The first two operations, a deterministic small window."""
+
+    return tuple(sorted(times)[:2])
+
+
+def independent_domains(facts, times, window, target_cycles, target_memory):
+    """The declared finite domains, derived from the plan rather than the query.
+
+    Section 5.3: time domains are the incumbent plus or minus two, clipped to
+    ``[0, min(H0, T) - 1]``; selected address domains hold every aligned
+    address ending at or below ``M``. Taking these from the query object would
+    make a query that refuses to exist impossible to contradict.
+    """
+
+    labels, axes = [], []
+    ceiling = min(facts.horizon, target_cycles) - 1
+    for op_id in window:
+        low = max(0, times[op_id] - dk.TIME_SLACK)
+        high = min(times[op_id] + dk.TIME_SLACK, ceiling)
+        labels.append(("time", op_id))
+        axes.append(list(range(low, high + 1)))
+    for op_id in window:
+        name = facts.dest[op_id]
+        if name is None:
+            continue
+        width = facts.width[name]
+        step = machine.VLEN if width == machine.VLEN else 1
+        labels.append(("address", name))
+        axes.append(list(range(0, max(target_memory - width, -1) + 1, step)))
+    return labels, axes
+
+
+def machine_feasible(source, facts, times, addresses, target_cycles, target_memory):
+    """The frozen machine plus the explicit target bounds. No query involved."""
+
+    try:
+        compiled = dc.compilation(facts, times, addresses)
+        machine.check_compilation(source, compiled)
+    except (machine.CompileError, dc.ContractError):
+        return False
+    return (
+        len(compiled["bundles"]) <= target_cycles
+        and dc.footprint(facts, addresses) <= target_memory
+    )
+
+
+def decode_index(query, index, times, addresses):
+    """Read an index back with plain shifts and masks."""
+
+    decoded_times = dict(times)
+    decoded_addresses = dict(addresses)
+    for op_id, field in query.time_field.items():
+        decoded_times[op_id] = (index >> field.offset) & ((1 << field.width) - 1)
+    for name, field in query.address_field.items():
+        decoded_addresses[name] = (index >> field.offset) & ((1 << field.width) - 1)
+    return decoded_times, decoded_addresses
+
+
+def predicate_accepts(query, expression, times, addresses):
+    """Whether the predicate accepts this assignment under *some* lane choice.
+
+    Lanes are auxiliaries of the query with no counterpart in the machine, so
+    the comparison against the machine quantifies over them existentially.
+    """
+
+    base = 0
+    for op_id, field in query.time_field.items():
+        base |= times[op_id] << field.offset
+    for name, field in query.address_field.items():
+        base |= addresses[name] << field.offset
+    lanes = sorted(query.lane_field)
+    for mask in range(1 << len(lanes)):
+        index = base
+        for position, op_id in enumerate(lanes):
+            if (mask >> position) & 1:
+                index |= 1 << query.lane_field[op_id].offset
+        if accepts(expression, index):
+            return True
+    return False
+
+
 def enumerate_domains(query):
     """Every combination of the declared finite domains, in order."""
 
@@ -380,9 +489,47 @@ class JointQueryTests(unittest.TestCase):
         self.assertGreaterEqual(len(self.cases()), 12)
 
     def test_solver_agrees_with_exhaustive_enumeration(self):
+        """Enumerate independently first, then see what construction says.
+
+        The domains come from the plan text, not from the query object, so a
+        construction that refuses to build an expression is still held to the
+        oracle's verdict. Deriving them from the query would make an
+        unconditionally infeasible implementation untestable.
+        """
+
         checked = 0
+        satisfiable_cases = 0
         for source, facts, times, addresses, target_cycles, target_memory in self.cases():
-            window = tuple(sorted(times)[:2])
+            window = window_for(times)
+            labels, axes = independent_domains(
+                facts, times, window, target_cycles, target_memory
+            )
+            total = 1
+            for axis in axes:
+                total *= max(len(axis), 1)
+            self.assertLessEqual(total, 65536, "domain product must be exhaustible")
+
+            # The independent answer, computed before construction is consulted.
+            found = []
+            assignments = []
+            for combination in itertools.product(*axes):
+                candidate_times = dict(times)
+                candidate_addresses = dict(addresses)
+                for (kind, key), value in zip(labels, combination):
+                    if kind == "time":
+                        candidate_times[key] = value
+                    else:
+                        candidate_addresses[key] = value
+                feasible = machine_feasible(
+                    source, facts, candidate_times, candidate_addresses,
+                    target_cycles, target_memory,
+                )
+                assignments.append((candidate_times, candidate_addresses, feasible))
+                if feasible:
+                    found.append((candidate_times, candidate_addresses))
+            if found:
+                satisfiable_cases += 1
+
             meter = fresh_meter(max_cover=10 ** 6, max_visited=10 ** 7, max_records=10 ** 6)
             try:
                 query = dk.JointQuery(
@@ -390,33 +537,13 @@ class JointQueryTests(unittest.TestCase):
                 )
                 expression = query.expression()
             except dk.Infeasible:
-                # A fixed decision already breaks the target. The oracle must
-                # agree that no assignment over the window can rescue it.
-                query = None
-
-            labels, axes, total = (None, None, None)
-            if query is not None:
-                labels, axes, total = enumerate_domains(query)
-                self.assertLessEqual(total, 65536, "domain product must be exhaustible")
-
-            found = []
-            if query is not None:
-                for combination in itertools.product(*axes):
-                    candidate_times = dict(times)
-                    candidate_addresses = dict(addresses)
-                    for (kind, key), value in zip(labels, combination):
-                        if kind == "time":
-                            candidate_times[key] = value
-                        else:
-                            candidate_addresses[key] = value
-                    if oracle_feasible(
-                        source, facts, query, candidate_times, candidate_addresses
-                    ):
-                        found.append((candidate_times, candidate_addresses))
-            else:
-                # Without a query, verify directly that the incumbent window
-                # cannot meet the target either.
-                self.assertTrue(True)
+                self.assertEqual(
+                    found,
+                    [],
+                    f"{source['name']} target=({target_cycles},{target_memory}): "
+                    f"construction declared the query infeasible, but independent "
+                    f"enumeration found {len(found)} valid assignments",
+                )
                 checked += 1
                 continue
 
@@ -428,20 +555,46 @@ class JointQueryTests(unittest.TestCase):
                 f"{source['name']} target=({target_cycles},{target_memory}) "
                 f"solver={result.status} oracle={len(found)} feasible",
             )
+
+            # Pointwise: the predicate accepts an assignment for some lane
+            # exactly when the machine and the targets accept it.
+            if len(assignments) <= 512:
+                for candidate_times, candidate_addresses, feasible in assignments:
+                    accepted = predicate_accepts(
+                        query, expression, candidate_times, candidate_addresses
+                    )
+                    self.assertEqual(
+                        accepted,
+                        feasible,
+                        f"{source['name']}: predicate {accepted} against machine "
+                        f"{feasible} for {sorted(candidate_times.items())}",
+                    )
+
             if result.is_sat:
-                decoded_times, decoded_addresses = query.decode(result.cube)
-                self.assertTrue(
-                    oracle_feasible(
-                        source, facts, query, decoded_times, decoded_addresses
-                    ),
-                    "the witness must satisfy the independent oracle",
-                )
-                # Every filling of the returned schema, not only its anchor.
+                # Every filling, decoded by plain shifts and masks and checked
+                # against the machine, not against the expression that produced it.
                 if result.cube.size <= 512:
                     for filling in result.cube.members():
-                        self.assertTrue(accepts(expression, filling))
+                        filled_times, filled_addresses = decode_index(
+                            query, filling, times, addresses
+                        )
+                        self.assertTrue(
+                            machine_feasible(
+                                source, facts, filled_times, filled_addresses,
+                                target_cycles, target_memory,
+                            ),
+                            f"{source['name']}: filling {filling} of the returned "
+                            f"schema is not independently valid",
+                        )
             checked += 1
+
         self.assertGreaterEqual(checked, 12)
+        self.assertGreater(
+            satisfiable_cases,
+            0,
+            "at least one case must be genuinely satisfiable, or an "
+            "unconditionally infeasible implementation would pass",
+        )
 
     def test_excluded_domain_encodings_are_rejected(self):
         source = JOINT_FIXTURES["shared_engine"]

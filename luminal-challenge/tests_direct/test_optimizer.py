@@ -28,6 +28,7 @@ import direct_optimizer as do
 import schema_index as si
 from tests_direct import generate_programs as gp
 from tests_direct.test_contract import program
+from tests_direct.test_constraints import independent_domains, machine_feasible
 
 
 JOINT_NEEDED = program(
@@ -40,6 +41,35 @@ JOINT_NEEDED = program(
         {"op": "store", "args": ["b"], "buffer": "out", "offset": 1},
     ],
     [{"out": [0, 0]}],
+)
+
+# A frozen program for which the optimiser accepts a witness that spends a
+# cycle to buy scratch: the bootstrap reaches 6 cycles by 24 words, and the
+# accepted joint witness reaches 7 by 16. Cycles worsen, the product improves
+# from 144 to 112, and the official score rises. Discovered by scanning
+# generated programs, then frozen literally here so that it does not depend on
+# the generator. It is deliberately NOT added to the 142-program corpus, whose
+# membership is a declared acceptance number. Case values are simple and
+# deterministic; they cannot affect compilation, which is itself tested.
+CYCLE_FOR_MEMORY_TRADE = program(
+    "cycle_for_memory_trade",
+    {"data": 32, "out": 32},
+    [
+        {"op": "const", "dest": "v0", "value": 2130979992},
+        {"op": "vload", "dest": "v1", "buffer": "out", "offset": 24},
+        {"op": "vshl", "dest": "v2", "args": ["v1", "v1"]},
+        {"op": "vmul", "dest": "v3", "args": ["v2", "v2"]},
+        {"op": "and", "dest": "v4", "args": ["v0", "v0"]},
+        {"op": "or", "dest": "v5", "args": ["v4", "v4"]},
+        {"op": "vshl", "dest": "v6", "args": ["v1", "v1"]},
+        {"op": "vshl", "dest": "v7", "args": ["v1", "v6"]},
+        {"op": "store", "args": ["v5"], "buffer": "out", "offset": 2},
+        {"op": "vstore", "args": ["v1"], "buffer": "out", "offset": 21},
+    ],
+    [
+        {"data": [i * 7 + 1 for i in range(32)], "out": [i * 3 + 2 for i in range(32)]},
+        {"data": [0xFFFFFFFF - i for i in range(32)], "out": [i for i in range(32)]},
+    ],
 )
 
 MOVING_CONSUMER = program(
@@ -156,6 +186,100 @@ class ObjectiveTests(unittest.TestCase):
                     self.assertGreaterEqual(target[1], facts.memory_lower_bound())
                     self.assertLessEqual(target[0], facts.horizon)
                     self.assertLessEqual(target[1], machine.SCRATCH_WORDS)
+
+    def test_an_accepted_witness_actually_trades_a_cycle_for_scratch(self):
+        """A real compiled result, not target arithmetic.
+
+        The optimiser accepts a witness whose cycle count is worse than the
+        incumbent's while the product improves. Both compilations are checked
+        with the frozen machine on every case, and the official score is
+        recomputed from the actual integer metrics.
+        """
+
+        source = CYCLE_FOR_MEMORY_TRADE
+        facts = dc.derive(source)
+        baseline = machine.serial_compile(source)
+        serial_cycles = len(baseline["bundles"])
+        serial_memory = machine.scratch_footprint(source, baseline)
+
+        before, before_report = dcmp.compile_with_report(source, optimise=False)
+        after, after_report = dcmp.compile_with_report(source)
+
+        for compiled in (before, after):
+            machine.check_compilation(source, compiled)
+            for case in source["cases"]:
+                machine.check_case(source, compiled, case)
+
+        self.assertEqual(after_report["discrepancy_count"], 0)
+        self.assertEqual(after_report["optimisation"]["accepted"], 1)
+        record = after_report["optimisation"]["improvements"][0]
+
+        # One measured metric genuinely worsens.
+        self.assertGreater(after_report["cycles"], before_report["cycles"])
+        self.assertLess(after_report["footprint"], before_report["footprint"])
+        self.assertLess(after_report["product"], before_report["product"])
+        self.assertEqual(
+            (record["from"]["cycles"], record["from"]["footprint"]),
+            (before_report["cycles"], before_report["footprint"]),
+        )
+        self.assertEqual(
+            (record["to"]["cycles"], record["to"]["footprint"]),
+            (after_report["cycles"], after_report["footprint"]),
+        )
+
+        # The official score, recomputed from the actual integers.
+        def combined(cycles, memory):
+            return math.sqrt((serial_cycles / cycles) * (serial_memory / memory))
+
+        score_before = combined(before_report["cycles"], before_report["footprint"])
+        score_after = combined(after_report["cycles"], after_report["footprint"])
+        self.assertGreater(score_after, score_before)
+
+    def test_the_traded_cycle_was_necessary_for_that_footprint(self):
+        """Independently establish the alternatives over the same window.
+
+        Within the accepted window's declared domains, no assignment reaches
+        the improved footprint while keeping the incumbent's cycle count, so
+        the trade is not an artefact of search order.
+        """
+
+        source = CYCLE_FOR_MEMORY_TRADE
+        facts = dc.derive(source)
+        times, addresses, before_report = bootstrap_of(source)
+        _, after_report = dcmp.compile_with_report(source)
+        window = tuple(after_report["optimisation"]["improvements"][0]["window"])
+        incumbent_cycles = before_report["cycles"]
+        improved_memory = after_report["footprint"]
+
+        labels, axes = independent_domains(
+            facts, times, window, incumbent_cycles, improved_memory
+        )
+        total = 1
+        for axis in axes:
+            total *= max(len(axis), 1)
+        self.assertLessEqual(total, 65536)
+
+        reachable = []
+        for combination in itertools.product(*axes):
+            candidate_times = dict(times)
+            candidate_addresses = dict(addresses)
+            for (kind, key), value in zip(labels, combination):
+                if kind == "time":
+                    candidate_times[key] = value
+                else:
+                    candidate_addresses[key] = value
+            if machine_feasible(
+                source, facts, candidate_times, candidate_addresses,
+                incumbent_cycles, improved_memory,
+            ):
+                reachable.append((candidate_times, candidate_addresses))
+
+        self.assertEqual(
+            reachable,
+            [],
+            f"footprint {improved_memory} was reachable at {incumbent_cycles} "
+            f"cycles, so the accepted trade was avoidable",
+        )
 
     def test_a_worse_metric_with_a_better_product_scores_better(self):
         """The product is the right objective for the official score."""
@@ -283,6 +407,73 @@ class DeterminismTests(unittest.TestCase):
                 self.assertEqual(list(window), sorted(window))
                 self.assertLessEqual(len(window), do.WINDOW_SIZE)
                 self.assertTrue(window)
+
+    def test_source_windows_keep_the_final_shorter_tail(self):
+        """Starts advance by two and the last, shorter window is retained.
+
+        Stopping as soon as a full window touched the end dropped the tail, so
+        the final operations were never selectable together.
+        """
+
+        def source_windows(count):
+            consts = count // 2
+            operations = [
+                {"op": "const", "dest": "c%d" % i, "value": i} for i in range(consts)
+            ]
+            for index in range(count - consts):
+                operations.append(
+                    {
+                        "op": "store",
+                        "args": ["c%d" % (index % consts)],
+                        "buffer": "out",
+                        "offset": index,
+                    }
+                )
+            built = program(
+                "windows_%d" % count,
+                {"out": count},
+                operations,
+                [{"out": [0] * count}],
+            )
+            facts = dc.derive(built)
+            times, addresses, _ = bootstrap_of(built)
+            return facts, times, addresses
+
+        for count, expected_tail in ((6, (4, 5)), (7, (6,)), (10, (8, 9))):
+            facts, times, addresses = source_windows(count)
+            windows = do.windows_for(facts, times, addresses, False)
+            self.assertIn(
+                expected_tail,
+                windows,
+                f"{count} operations: the final shorter window {expected_tail} is missing",
+            )
+            # Exactly the specified starts, truncated at the operation count.
+            expected_source = []
+            for start in range(0, count, 2):
+                candidate = tuple(range(start, min(start + do.WINDOW_SIZE, count)))
+                if candidate and candidate not in expected_source:
+                    expected_source.append(candidate)
+            for candidate in expected_source:
+                self.assertIn(candidate, windows, f"{count} operations: {candidate}")
+            # Stable deduplication: no repeats, first occurrence kept.
+            self.assertEqual(len(windows), len(set(windows)))
+
+    def test_source_windows_for_six_operations_are_exact(self):
+        source = program(
+            "six_ops",
+            {"out": 3},
+            [{"op": "const", "dest": "c%d" % i, "value": i} for i in range(3)]
+            + [
+                {"op": "store", "args": ["c%d" % i], "buffer": "out", "offset": i}
+                for i in range(3)
+            ],
+            [{"out": [0, 0, 0]}],
+        )
+        facts = dc.derive(source)
+        times, addresses, _ = bootstrap_of(source)
+        windows = do.windows_for(facts, times, addresses, False)
+        for expected in ((0, 1, 2, 3), (2, 3, 4, 5), (4, 5)):
+            self.assertIn(expected, windows)
 
     def test_scratch_window_leads_when_the_memory_target_is_tighter(self):
         source = gp.public_programs()[6]
