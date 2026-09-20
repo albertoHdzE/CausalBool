@@ -1,0 +1,689 @@
+{
+  "caveat": "a deterministic profiler perturbs wall-clock search behaviour; these times locate cost, they are not performance results",
+  "command": "benchmark_optimization.py --phase profile --baseline results/direct_index_v4_optimization/baseline --output results/direct_index_v4_optimization/profile",
+  "phase": "profile",
+  "profiles": [
+    {
+      "cycles": 10,
+      "file": "05_mixed_broadcast.json",
+      "footprint": 24,
+      "hotspots": [
+        {
+          "calls": 21,
+          "cumtime": 0.000239501,
+          "function": "schema_index.py:349(interval)",
+          "matched": "interval",
+          "tottime": 5.1289e-05
+        },
+        {
+          "calls": 14,
+          "cumtime": 0.00012049900000000001,
+          "function": "direct_compiler.py:133(_subtract_cover)",
+          "matched": "_subtract_cover",
+          "tottime": 2.0452e-05
+        },
+        {
+          "calls": 5,
+          "cumtime": 5.1584000000000006e-05,
+          "function": "direct_compiler.py:119(_intersect_cover)",
+          "matched": "_intersect_cover",
+          "tottime": 6.542e-06
+        },
+        {
+          "calls": 7,
+          "cumtime": 3.9959e-05,
+          "function": "schema_index.py:193(difference)",
+          "matched": "difference",
+          "tottime": 9.332e-06
+        },
+        {
+          "calls": 8,
+          "cumtime": 3.4417e-05,
+          "function": "schema_index.py:183(intersect)",
+          "matched": "intersect",
+          "tottime": 5.872000000000001e-06
+        },
+        {
+          "calls": 66,
+          "cumtime": 2.6171e-05,
+          "function": "schema_index.py:553(check_time)",
+          "matched": "check_time",
+          "tottime": 1.2129e-05
+        },
+        {
+          "calls": 33,
+          "cumtime": 2.1747e-05,
+          "function": "schema_index.py:563(record)",
+          "matched": "record",
+          "tottime": 7.870000000000001e-06
+        }
+      ],
+      "operations": 8,
+      "optimise": false,
+      "program": "mixed_broadcast",
+      "report_seconds": 0.001059917000020505,
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/05_mixed_broadcast_bootstrap.txt",
+      "total_seconds": 0.001034122
+    },
+    {
+      "cycles": 10,
+      "file": "05_mixed_broadcast.json",
+      "footprint": 24,
+      "hotspots": [
+        {
+          "calls": 1,
+          "cumtime": 0.8070553330000001,
+          "function": "direct_optimizer.py:115(optimise)",
+          "matched": "direct_optimizer.optimise",
+          "tottime": 0.0008440050000000001
+        },
+        {
+          "calls": 20,
+          "cumtime": 0.7988057500000001,
+          "function": "direct_constraints.py:628(expression)",
+          "matched": "JointQuery.expression",
+          "tottime": 4.1754e-05
+        },
+        {
+          "calls": 670,
+          "cumtime": 0.769384756,
+          "function": "direct_constraints.py:157(relation_cover)",
+          "matched": "relation_cover",
+          "tottime": 0.128821011
+        },
+        {
+          "calls": 10,
+          "cumtime": 0.727757792,
+          "function": "direct_constraints.py:553(_scratch_safety)",
+          "matched": "_scratch_safety",
+          "tottime": 0.00039795900000000003
+        },
+        {
+          "calls": 96650,
+          "cumtime": 0.386377864,
+          "function": "schema_index.py:225(restrict)",
+          "matched": "schema_index.restrict",
+          "tottime": 0.060857931000000004
+        },
+        {
+          "calls": 194480,
+          "cumtime": 0.099634132,
+          "function": "direct_constraints.py:82(bounds)",
+          "matched": "bounds",
+          "tottime": 0.06897824200000001
+        },
+        {
+          "calls": 128887,
+          "cumtime": 0.042224587,
+          "function": "schema_index.py:553(check_time)",
+          "matched": "check_time",
+          "tottime": 0.019269323
+        },
+        {
+          "calls": 1346,
+          "cumtime": 0.042176415,
+          "function": "schema_index.py:244(normalise_cover)",
+          "matched": "normalise_cover",
+          "tottime": 0.016773197
+        },
+        {
+          "calls": 10,
+          "cumtime": 0.039654833,
+          "function": "direct_constraints.py:518(_engine_capacity)",
+          "matched": "_engine_capacity",
+          "tottime": 0.000146615
+        },
+        {
+          "calls": 28200,
+          "cumtime": 0.014658880000000001,
+          "function": "schema_index.py:563(record)",
+          "matched": "record",
+          "tottime": 0.005409654000000001
+        },
+        {
+          "calls": 6,
+          "cumtime": 0.006557584,
+          "function": "schema_index.py:705(solve)",
+          "matched": "solve",
+          "tottime": 0.000970708
+        },
+        {
+          "calls": 1688,
+          "cumtime": 0.0038765130000000003,
+          "function": "schema_index.py:183(intersect)",
+          "matched": "intersect",
+          "tottime": 0.0007493140000000001
+        },
+        {
+          "calls": 87,
+          "cumtime": 0.001080507,
+          "function": "schema_index.py:349(interval)",
+          "matched": "interval",
+          "tottime": 0.00023830500000000002
+        },
+        {
+          "calls": 14,
+          "cumtime": 0.000126667,
+          "function": "direct_compiler.py:133(_subtract_cover)",
+          "matched": "_subtract_cover",
+          "tottime": 2.0123e-05
+        },
+        {
+          "calls": 5,
+          "cumtime": 5.3916000000000004e-05,
+          "function": "direct_compiler.py:119(_intersect_cover)",
+          "matched": "_intersect_cover",
+          "tottime": 6.126e-06
+        },
+        {
+          "calls": 7,
+          "cumtime": 4.2042e-05,
+          "function": "schema_index.py:193(difference)",
+          "matched": "difference",
+          "tottime": 8.462000000000001e-06
+        }
+      ],
+      "operations": 8,
+      "optimise": true,
+      "program": "mixed_broadcast",
+      "report_seconds": 0.8088936670001203,
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/05_mixed_broadcast_full.txt",
+      "total_seconds": 0.7631054810000005
+    },
+    {
+      "cycles": 14,
+      "file": "01_scalar_pipeline.json",
+      "footprint": 6,
+      "hotspots": [
+        {
+          "calls": 75,
+          "cumtime": 0.000665338,
+          "function": "schema_index.py:349(interval)",
+          "matched": "interval",
+          "tottime": 0.000131495
+        },
+        {
+          "calls": 60,
+          "cumtime": 0.000600333,
+          "function": "direct_compiler.py:133(_subtract_cover)",
+          "matched": "_subtract_cover",
+          "tottime": 7.2697e-05
+        },
+        {
+          "calls": 48,
+          "cumtime": 0.000279504,
+          "function": "schema_index.py:193(difference)",
+          "matched": "difference",
+          "tottime": 5.0504e-05
+        },
+        {
+          "calls": 190,
+          "cumtime": 6.988900000000001e-05,
+          "function": "schema_index.py:553(check_time)",
+          "matched": "check_time",
+          "tottime": 3.1564000000000005e-05
+        },
+        {
+          "calls": 79,
+          "cumtime": 4.5749000000000005e-05,
+          "function": "schema_index.py:563(record)",
+          "matched": "record",
+          "tottime": 1.6325e-05
+        }
+      ],
+      "operations": 16,
+      "optimise": false,
+      "program": "scalar_pipeline",
+      "report_seconds": 0.002233624999917083,
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/01_scalar_pipeline_bootstrap.txt",
+      "total_seconds": 0.002153083
+    },
+    {
+      "cycles": 14,
+      "file": "01_scalar_pipeline.json",
+      "footprint": 6,
+      "hotspots": [
+        {
+          "calls": 1,
+          "cumtime": 0.20099691700000002,
+          "function": "direct_optimizer.py:115(optimise)",
+          "matched": "direct_optimizer.optimise",
+          "tottime": 0.000212835
+        },
+        {
+          "calls": 18,
+          "cumtime": 0.19996903900000002,
+          "function": "direct_constraints.py:628(expression)",
+          "matched": "JointQuery.expression",
+          "tottime": 7.709e-06
+        },
+        {
+          "calls": 300,
+          "cumtime": 0.19201958900000002,
+          "function": "direct_constraints.py:157(relation_cover)",
+          "matched": "relation_cover",
+          "tottime": 0.032230970000000005
+        },
+        {
+          "calls": 2,
+          "cumtime": 0.168703875,
+          "function": "direct_constraints.py:553(_scratch_safety)",
+          "matched": "_scratch_safety",
+          "tottime": 0.00018152600000000002
+        },
+        {
+          "calls": 24228,
+          "cumtime": 0.096696314,
+          "function": "schema_index.py:225(restrict)",
+          "matched": "schema_index.restrict",
+          "tottime": 0.015115967000000001
+        },
+        {
+          "calls": 48980,
+          "cumtime": 0.024379576,
+          "function": "direct_constraints.py:82(bounds)",
+          "matched": "bounds",
+          "tottime": 0.016982127
+        },
+        {
+          "calls": 2,
+          "cumtime": 0.021700125,
+          "function": "direct_constraints.py:518(_engine_capacity)",
+          "matched": "_engine_capacity",
+          "tottime": 7.3331e-05
+        },
+        {
+          "calls": 31272,
+          "cumtime": 0.010234144,
+          "function": "schema_index.py:553(check_time)",
+          "matched": "check_time",
+          "tottime": 0.0046478840000000006
+        },
+        {
+          "calls": 592,
+          "cumtime": 0.009758653,
+          "function": "schema_index.py:244(normalise_cover)",
+          "matched": "normalise_cover",
+          "tottime": 0.003967265
+        },
+        {
+          "calls": 6375,
+          "cumtime": 0.003313616,
+          "function": "schema_index.py:563(record)",
+          "matched": "record",
+          "tottime": 0.0012316990000000002
+        },
+        {
+          "calls": 91,
+          "cumtime": 0.000850081,
+          "function": "schema_index.py:349(interval)",
+          "matched": "interval",
+          "tottime": 0.00016785700000000002
+        },
+        {
+          "calls": 60,
+          "cumtime": 0.000591039,
+          "function": "direct_compiler.py:133(_subtract_cover)",
+          "matched": "_subtract_cover",
+          "tottime": 7.141000000000001e-05
+        },
+        {
+          "calls": 48,
+          "cumtime": 0.00027625,
+          "function": "schema_index.py:193(difference)",
+          "matched": "difference",
+          "tottime": 4.9285e-05
+        }
+      ],
+      "operations": 16,
+      "optimise": true,
+      "program": "scalar_pipeline",
+      "report_seconds": 0.20336524999993344,
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/01_scalar_pipeline_full.txt",
+      "total_seconds": 0.191570713
+    },
+    {
+      "cycles": 9,
+      "file": "07_scalar_selects.json",
+      "footprint": 6,
+      "hotspots": [
+        {
+          "calls": 61,
+          "cumtime": 0.000748663,
+          "function": "direct_compiler.py:133(_subtract_cover)",
+          "matched": "_subtract_cover",
+          "tottime": 9.310400000000001e-05
+        },
+        {
+          "calls": 77,
+          "cumtime": 0.000741793,
+          "function": "schema_index.py:349(interval)",
+          "matched": "interval",
+          "tottime": 0.000149646
+        },
+        {
+          "calls": 53,
+          "cumtime": 0.00036046300000000005,
+          "function": "schema_index.py:193(difference)",
+          "matched": "difference",
+          "tottime": 6.1967e-05
+        },
+        {
+          "calls": 226,
+          "cumtime": 8.2144e-05,
+          "function": "schema_index.py:553(check_time)",
+          "matched": "check_time",
+          "tottime": 3.7826e-05
+        },
+        {
+          "calls": 89,
+          "cumtime": 5.0709000000000005e-05,
+          "function": "schema_index.py:563(record)",
+          "matched": "record",
+          "tottime": 1.8072000000000002e-05
+        }
+      ],
+      "operations": 20,
+      "optimise": false,
+      "program": "scalar_selects",
+      "report_seconds": 0.0026603749997775594,
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/07_scalar_selects_bootstrap.txt",
+      "total_seconds": 0.0025545430000000003
+    },
+    {
+      "cycles": 9,
+      "file": "07_scalar_selects.json",
+      "footprint": 6,
+      "hotspots": [
+        {
+          "calls": 1,
+          "cumtime": 0.5943685000000001,
+          "function": "direct_optimizer.py:115(optimise)",
+          "matched": "direct_optimizer.optimise",
+          "tottime": 0.000758496
+        },
+        {
+          "calls": 32,
+          "cumtime": 0.589130669,
+          "function": "direct_constraints.py:628(expression)",
+          "matched": "JointQuery.expression",
+          "tottime": 3.2579e-05
+        },
+        {
+          "calls": 1615,
+          "cumtime": 0.555538803,
+          "function": "direct_constraints.py:157(relation_cover)",
+          "matched": "relation_cover",
+          "tottime": 0.095805104
+        },
+        {
+          "calls": 8,
+          "cumtime": 0.48885896,
+          "function": "direct_constraints.py:553(_scratch_safety)",
+          "matched": "_scratch_safety",
+          "tottime": 0.001007047
+        },
+        {
+          "calls": 66766,
+          "cumtime": 0.270639951,
+          "function": "schema_index.py:225(restrict)",
+          "matched": "schema_index.restrict",
+          "tottime": 0.042765981
+        },
+        {
+          "calls": 8,
+          "cumtime": 0.075110249,
+          "function": "direct_constraints.py:518(_engine_capacity)",
+          "matched": "_engine_capacity",
+          "tottime": 0.000134155
+        },
+        {
+          "calls": 136050,
+          "cumtime": 0.066178967,
+          "function": "direct_constraints.py:82(bounds)",
+          "matched": "bounds",
+          "tottime": 0.046174991000000006
+        },
+        {
+          "calls": 2948,
+          "cumtime": 0.036042675,
+          "function": "schema_index.py:244(normalise_cover)",
+          "matched": "normalise_cover",
+          "tottime": 0.014765964000000001
+        },
+        {
+          "calls": 93836,
+          "cumtime": 0.031229526,
+          "function": "schema_index.py:553(check_time)",
+          "matched": "check_time",
+          "tottime": 0.014164138000000001
+        },
+        {
+          "calls": 22601,
+          "cumtime": 0.011935194000000001,
+          "function": "schema_index.py:563(record)",
+          "matched": "record",
+          "tottime": 0.0044299330000000005
+        },
+        {
+          "calls": 3,
+          "cumtime": 0.003039542,
+          "function": "schema_index.py:705(solve)",
+          "matched": "solve",
+          "tottime": 0.00040406000000000003
+        },
+        {
+          "calls": 1132,
+          "cumtime": 0.001733495,
+          "function": "schema_index.py:183(intersect)",
+          "matched": "intersect",
+          "tottime": 0.000418206
+        },
+        {
+          "calls": 129,
+          "cumtime": 0.0014161260000000002,
+          "function": "schema_index.py:349(interval)",
+          "matched": "interval",
+          "tottime": 0.00029077000000000004
+        },
+        {
+          "calls": 61,
+          "cumtime": 0.0007636240000000001,
+          "function": "direct_compiler.py:133(_subtract_cover)",
+          "matched": "_subtract_cover",
+          "tottime": 8.669600000000001e-05
+        },
+        {
+          "calls": 53,
+          "cumtime": 0.00037083600000000004,
+          "function": "schema_index.py:193(difference)",
+          "matched": "difference",
+          "tottime": 6.400500000000001e-05
+        }
+      ],
+      "operations": 20,
+      "optimise": true,
+      "program": "scalar_selects",
+      "report_seconds": 0.5973524169999109,
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/07_scalar_selects_full.txt",
+      "total_seconds": 0.563346026
+    }
+  ],
+  "programs": [
+    "05_mixed_broadcast.json",
+    "01_scalar_pipeline.json",
+    "07_scalar_selects.json"
+  ],
+  "provenance": {
+    "cpu_count": 28,
+    "export_lines": 2258,
+    "export_sha256": "c0574395d339dae3b24e819955795c2a6165953c5966e46062c9bf9b18a50ce2",
+    "git": {
+      "branch": "luminal-direct-index",
+      "commit": "8e02cd7f5b97085f71e99ba2e0e81dec6769d674",
+      "status_porcelain": "M luminal-challenge/AGENTS.md\n M luminal-challenge/plan/STATUS.md\n M luminal-challenge/results/direct_index_v3_repair/REVIEW.md\n?? luminal-challenge/benchmark_optimization.py\n?? luminal-challenge/plan/OPTIMIZATION_PHASE_PLAN.md\n?? luminal-challenge/results/direct_index_v4_optimization/"
+    },
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "protected_sha256": {
+      "../GOVERNANCE/GLOSSARY.md": "c3d0402150fefcb1e72339ef986e9f124754c2370c0c55f3c741b311795b2b3e",
+      "common.py": "5b3ae21c5a6c3a73380069ac685fdde7d3cee2fb7bc7704b610d5e24b0056fab",
+      "reference.json": "ef6042ce4acc2cfe531d974afb666b6ad40656e15828ad5f814d6cbb338875f0",
+      "results/comparison.json": "f070a6691c57c78395e67f4054928cddd753b5aa0265fe1386bb7da27f9cc535"
+    },
+    "python": "3.13.12 (main, Mar  7 2026, 16:31:40) [Clang 17.0.0 (clang-1700.6.4.2)]",
+    "python_executable": "/Users/alberto/.pyenv/versions/3.13.12/bin/python3",
+    "recorded": "2026-09-20T15:31:13",
+    "reference_commit": "573b8a85f4bdb8c3d8ba9f180d5f98dac875c902",
+    "source_sha256": {
+      "compare_direct.py": "a0eb3c66317ccb8fe628c41032d4174c8fac183cbb5144b63125348b9fd33bce",
+      "direct_compiler.py": "4b0c531d1d060af2a43ca4f5140c291afddedfa0301ec62975f7dadc01b780be",
+      "direct_constraints.py": "7d34dbbddd3a2237b7f089024e1dd68e62ee96ce70d813540ef2e8fd9c860c90",
+      "direct_contract.py": "3b37ad0e7f5feb8ac464b074ebd8e8c6ab079c79ada3ab1bacc4b2a9f1a83fa8",
+      "direct_optimizer.py": "bdbc0dd71b785d283cc7a64c36518dc13a4a0ba7673010ae274d0c69e787de68",
+      "export_direct.py": "984ffb653535772bbf7ed18cbb122b9ed1fa78b74960281122808214def2cb72",
+      "schema_index.py": "0620b9862c1c25a82aa96885a87edb470e9e6dcf818122ae6f1c5b34ded3d2a3",
+      "verify_direct.py": "2e84c2a2a92af0bf0e41f1a4a1e69ac66535310bbcc37c1d8f4841bf66fcbcdb"
+    },
+    "test_sha256": {
+      "__init__.py": "b0c4f731de7a44e83b2668cbc20ed410ec4a5bd76f79bb0f665cd022a6929459",
+      "generate_programs.py": "e6f56e70dab1d2b3d1e10bf86f22d8eb4af8112bc28bd3a2dd523c1a8ecfa7b8",
+      "test_constraints.py": "81a033fc9730e6e74d954c072c10a1bc8fa3671f7122077a5f5a44196c154fe3",
+      "test_construction.py": "7787cfd5f348cb4ec7e8547491fbe72c2d0ac0400391ab1be6a5646180fcb88a",
+      "test_contract.py": "44ac3321e492c2ddcbab831c8d601f09f6cb5c8fdd1e74378f625ca486dcce46",
+      "test_export.py": "38c814dd64c0186c6ef789f5fdc6267ff6c3371c57896f9c5645e39600917d39",
+      "test_independence.py": "3c77ea846ed7b41e815c69e2f03adde73324ac9ff767ec3836dc5808f8bf7b13",
+      "test_optimizer.py": "468235590a7e4bfb5df8e2353626035b3c09e809a60e6f138ac8d7ebd30879db",
+      "test_schema_index.py": "4bbf7824b7ad3ba46c4501f74eedb857ca54dc7d518945fdcd9dd331ead972e7"
+    }
+  },
+  "search_profiles": [
+    {
+      "expression_records": 5457,
+      "intersections": 48950288,
+      "note": "this query returns UNKNOWN under the production 100 ms budget; the status here is what exhaustion actually yields",
+      "profiled_search_seconds": 89.73364150100001,
+      "program": "mixed_broadcast",
+      "status_under_generous_budget": "UNSAT",
+      "target": [
+        10,
+        23
+      ],
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/05_mixed_broadcast_search_0_2_3_4.txt",
+      "visited": 656373,
+      "width_bits": 56,
+      "window": [
+        0,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "expression_records": 5758,
+      "intersections": 18167151,
+      "note": "this query returns UNKNOWN under the production 100 ms budget; the status here is what exhaustion actually yields",
+      "profiled_search_seconds": 33.273266041,
+      "program": "mixed_broadcast",
+      "status_under_generous_budget": "UNSAT",
+      "target": [
+        10,
+        23
+      ],
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/05_mixed_broadcast_search_2_3_4_5.txt",
+      "visited": 223527,
+      "width_bits": 56,
+      "window": [
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "expression_records": 5931,
+      "intersections": 35625921,
+      "note": "this query returns UNKNOWN under the production 100 ms budget; the status here is what exhaustion actually yields",
+      "profiled_search_seconds": 76.38345095800001,
+      "program": "scalar_pipeline",
+      "status_under_generous_budget": "UNSAT",
+      "target": [
+        14,
+        5
+      ],
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/01_scalar_pipeline_search_3_4_6_9.txt",
+      "visited": 4391932,
+      "width_bits": 56,
+      "window": [
+        3,
+        4,
+        6,
+        9
+      ]
+    },
+    {
+      "expression_records": 5931,
+      "intersections": 35625921,
+      "note": "this query returns UNKNOWN under the production 100 ms budget; the status here is what exhaustion actually yields",
+      "profiled_search_seconds": 76.54623824900003,
+      "program": "scalar_pipeline",
+      "status_under_generous_budget": "UNSAT",
+      "target": [
+        15,
+        5
+      ],
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/01_scalar_pipeline_search_3_4_6_9.txt",
+      "visited": 4391932,
+      "width_bits": 56,
+      "window": [
+        3,
+        4,
+        6,
+        9
+      ]
+    },
+    {
+      "expression_records": 8392,
+      "intersections": 48668481,
+      "note": "this query returns UNKNOWN under the production 100 ms budget; the status here is what exhaustion actually yields",
+      "profiled_search_seconds": 119.92288945799999,
+      "program": "scalar_selects",
+      "status_under_generous_budget": "UNKNOWN",
+      "target": [
+        9,
+        5
+      ],
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/07_scalar_selects_search_8_9_12_13.txt",
+      "visited": 13017227,
+      "width_bits": 58,
+      "window": [
+        8,
+        9,
+        12,
+        13
+      ]
+    },
+    {
+      "expression_records": 8560,
+      "intersections": 54301916,
+      "note": "this query returns UNKNOWN under the production 100 ms budget; the status here is what exhaustion actually yields",
+      "profiled_search_seconds": 119.917904333,
+      "program": "scalar_selects",
+      "status_under_generous_budget": "UNKNOWN",
+      "target": [
+        9,
+        5
+      ],
+      "text_report": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v4_optimization/profile/reports/07_scalar_selects_search_10_11_12_13.txt",
+      "visited": 7471493,
+      "width_bits": 58,
+      "window": [
+        10,
+        11,
+        12,
+        13
+      ]
+    }
+  ],
+  "selection": "smallest, median and largest public program by operation count"
+}

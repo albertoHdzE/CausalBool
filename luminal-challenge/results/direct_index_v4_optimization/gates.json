@@ -1,0 +1,153 @@
+{
+  "status": "READY_FOR_REVIEW",
+  "note": "READY_FOR_REVIEW describes handoff completeness, not gate success. Only the lead may accept. No submission, push or publication is authorized.",
+  "plan": "plan/OPTIMIZATION_PHASE_PLAN.md version 1.1",
+  "worker": "Claude Opus 5, working linearly without subagents",
+  "date": "2026-09-20",
+  "base_commit_of_baseline": "8e02cd7f5b97085f71e99ba2e0e81dec6769d674",
+  "immutable_v3_snapshot": "35d2608d0d2ed4fde47916b7df79c138b007908d",
+  "candidate_commits": [
+    "922ed0f  retained measurement harness and evidence checker",
+    "305b9e9  experiment 1: schema core",
+    "9c6b9b6  experiment 2: relation cover reuse and construction",
+    "20aaa1f  experiment 3: bootstrap bookkeeping"
+  ],
+  "gates": [
+    {
+      "gate": 1,
+      "name": "existing direct tests pass, plus new optimization tests",
+      "result": "PASS",
+      "reason": "253 tests via unittest discovery, exit 0, 0 failures. Was 191 at v3; 62 added, none removed and no assertion weakened.",
+      "evidence": "results/direct_index_v4_optimization/verification/logs/"
+    },
+    {
+      "gate": 2,
+      "name": "verify_direct.py --stage all --timeout 20 passes with the unchanged public suite, 142 corpus programs, 277 cases and the independence checks",
+      "result": "PASS",
+      "reason": "exit 0, overall PASS, 0 failing. Stages: schema 57, contract 31, constraints 43, construction 22, optimizer 22, independence 13, export 33, benchmark 32; acceptance 142 of 142 corpus programs in 142 isolated processes, 277 of 277 cases, public suite exactly 11 tests, CLI on all eight public programs. Slowest isolated process 1.212 s against the 20 s limit.",
+      "evidence": "results/direct_index_v4_optimization/verification/summary.json"
+    },
+    {
+      "gate": 3,
+      "name": "export is fresh, standalone, standard-library compatible, hash recorded",
+      "result": "PASS",
+      "reason": "Assembled from the five-module allowlist; audit found no prohibited dependency; compare_direct and check_optimization_evidence both reassembled it and found the on-disk file identical.",
+      "export_sha256": "a87d7caeec9b00024b483652d9c6115c53eae9e95f40c539232342e384530c5c",
+      "export_lines": 2633,
+      "evidence": "results/direct_index_v4_optimization/verification/summary.json"
+    },
+    {
+      "gate": 4,
+      "name": "all direct outputs pass the pinned machine validator",
+      "result": "PASS",
+      "reason": "142 corpus programs and 277 cases through machine.check_compilation and machine.check_case in isolated processes; every one of the 2,100 benchmark direct rows validated after its timer; 0 discrepancies anywhere.",
+      "evidence": "results/direct_index_v4_optimization/verification/isolated_corpus.json"
+    },
+    {
+      "gate": 5,
+      "name": "the exact seven comparison gates pass over three repetitions",
+      "result": "PASS",
+      "reason": "compare_direct.py --repeats 3 --timeout 20, exit 0, 72 runs, 0 failures. all_runs_present, frozen_integer_metrics (48 measurements, 0 disagree), metrics_valid, direct_beats_baseline, frozen_classical_control (1.9013791212645499 in every repetition, difference 0), no_candidate_discrepancies, direct_arm_isolated.",
+      "evidence": "results/direct_index_v4_optimization/comparison/runs.json"
+    },
+    {
+      "gate": 6,
+      "name": "per-program cycles x scratch not above frozen v3; combined score >= 2.0084662022846573 within 1e-12; bootstrap metrics identical to freshly verified v3 bootstrap",
+      "result": "PASS",
+      "reason": "Zero violations on all eight public programs; every product is identical, not merely bounded. Combined score recomputes to 2.008466202284657 for all four direct arms, within 4.4e-16 of the accepted value. Bootstrap metrics identical to the frozen bootstrap arm measured in the same run.",
+      "corpus_score_distribution": "reported in BENCHMARK.md; the evaluation corpus geomean is 2.362098 for bootstrap and 2.376597 for full, against classical 2.370890",
+      "per_program_regressions": "none on the public programs; one of 100 evaluation-corpus programs is slower on the bootstrap path and is retained and reported",
+      "evidence": "results/direct_index_v4_optimization/final/runs.json"
+    },
+    {
+      "gate": 7,
+      "name": "no optimization mislabels an exhausted query or bypasses a budget; explicit regression tests for every cache and pruning change",
+      "result": "PASS",
+      "reason": "No pruning was introduced; no query is skipped and no budget lowered. Attempted queries unchanged at 3,270 and infeasible unchanged at 2,475 between frozen and candidate. The one cache is charged the visits and records its miss cost, so a hit cannot answer past an exhausted record, visit or time budget; it never stores a partial cover; its key carries every semantic input. Eleven cache tests plus sixteen schema tests and three bootstrap tests, each confirmed to fail on a planted defect.",
+      "planted_defects_caught": 8,
+      "evidence": "tests_direct/test_constraints.py, tests_direct/test_schema_index.py, tests_direct/test_construction.py"
+    },
+    {
+      "gate": 8,
+      "name": "timing reported for bootstrap and full-direct separately using section 4, with optimizer stage times and status counts as diagnostics",
+      "result": "PASS",
+      "reason": "Five arms measured together in fresh isolated processes, 15 repetitions, randomized arm order from seed 20260920, paired bootstrap intervals with 10,000 resamples. Optimizer stage times, status counts, per-search exhaustion reasons and cover-cache statistics are recorded per run.",
+      "evidence": "results/direct_index_v4_optimization/BENCHMARK.md"
+    },
+    {
+      "gate": 9,
+      "name": "scoped git diff --check passes and unrelated files are untouched",
+      "result": "PASS",
+      "reason": "git diff --check -- luminal-challenge exits 0 with no output. No pre-existing whitespace failure was found, so none needed recording. The lead's uncommitted edits to AGENTS.md, plan/STATUS.md, plan/OPTIMIZATION_PHASE_PLAN.md and results/direct_index_v3_repair/REVIEW.md, and the unrelated 0xPARC, README and plans/ changes, are left exactly as they were and are in no worker commit.",
+      "evidence": "git diff --check -- luminal-challenge, exit 0"
+    },
+    {
+      "gate": 10,
+      "name": "harness regressions reject injected identity swaps, missing/duplicate rows, invalid output, stale export, protected-hash drift, product-preserving classical integer drift; a failed subprocess makes the runner exit nonzero",
+      "result": "PASS",
+      "reason": "32 tests in tests_direct/test_benchmark_harness.py cover every listed rejection plus a wrong compilation mode, a foreign program, a non-JSON response, an unvalidated run, a module leak and a query-validator discrepancy. An empty dataset is refused rather than passing over zero cases. Execution failures and invalid rows make validate_rows fail, and both phase runners return nonzero when membership fails.",
+      "evidence": "tests_direct/test_benchmark_harness.py, verification stage 'benchmark', 32 tests"
+    },
+    {
+      "gate": 11,
+      "name": "report whether each numerical engineering target in section 1 was met",
+      "result": "REPORTED",
+      "reason": "Both targets were missed and are reported as missed. No target was adjusted after measurement.",
+      "evidence": "results/direct_index_v4_optimization/BENCHMARK.md"
+    }
+  ],
+  "performance_targets_met": {
+    "full_direct_geomean_speedup_vs_fresh_v3": {
+      "target": 2.0,
+      "criterion": "geometric mean of per-program median ratios >= 2.0 with paired 95% interval lower bound > 1.0",
+      "measured": 1.9889,
+      "interval_low": 1.9841,
+      "interval_high": 1.9913,
+      "interval_excludes_one": true,
+      "met": false,
+      "note": "A real speedup, narrowly short of target; the interval excludes 2.0 as well as 1.0."
+    },
+    "bootstrap_speedup_vs_fresh_v3": {
+      "target": 1.2,
+      "criterion": "same criterion",
+      "measured": 1.1371,
+      "interval_low": 1.1334,
+      "interval_high": 1.1406,
+      "interval_excludes_one": true,
+      "met": false,
+      "note": "A real speedup, clearly short of target."
+    },
+    "faster_than_classical": {
+      "criterion": "section 4: candidate-vs-classical ratio interval lower bound > 1.0",
+      "measured_full": 0.0014,
+      "measured_bootstrap": 0.4674,
+      "met": false,
+      "note": "Not claimed. The full path is about 714x slower than classical and the bootstrap about 2.14x slower; both improved from 1449x and 2.43x. Runtime parity is a stretch objective, not a required outcome."
+    }
+  },
+  "counts": {
+    "direct_tests": 253,
+    "direct_tests_at_v3": 191,
+    "total_tests_including_public_suite": 264,
+    "corpus_programs": 142,
+    "corpus_cases": 277,
+    "comparison_runs": 72,
+    "benchmark_public_rows": 1200,
+    "benchmark_corpus_rows": 1500,
+    "benchmark_failures": 0,
+    "evidence_checks": 34,
+    "evidence_checks_failing": 0
+  },
+  "exit_codes": {
+    "python3 -m unittest discover -s tests_direct -p 'test_*.py'": 0,
+    "python3 export_direct.py": 0,
+    "python3 verify_direct.py --stage all --timeout 20": 0,
+    "python3 compare_direct.py --repeats 3 --timeout 20": 0,
+    "python3 benchmark_optimization.py --phase baseline --repeats 15 --seed 20260920": 0,
+    "python3 benchmark_optimization.py --phase profile": 0,
+    "python3 benchmark_optimization.py --phase final --repeats 15 --seed 20260920 (round 1)": 1,
+    "python3 benchmark_optimization.py --phase final --repeats 15 --seed 20260920 (round 2)": 0,
+    "python3 check_optimization_evidence.py --root results/direct_index_v4_optimization": 0,
+    "git diff --check -- luminal-challenge": 0
+  }
+}
