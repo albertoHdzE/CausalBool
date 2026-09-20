@@ -5,7 +5,7 @@ pushed, merged or published. The exercise asks that it not be shared publicly,
 and it has not been.
 
 Compiler: [`.build/direct_index/compiler.py`](.build/direct_index/compiler.py),
-2,184 lines, Python 3.10 or later, standard library only beside the supplied
+2,255 lines, Python 3.10 or later, standard library only beside the supplied
 `machine` module.
 
 ## Measured public scores
@@ -17,19 +17,21 @@ on the eight public programs.
 | Arm | Cycle speedup | Scratch reduction | Combined | Median compile |
 |---|---:|---:|---:|---:|
 | serial (frozen baseline) | 1.0000x | 1.0000x | **1.000000x** | 0.022 ms |
-| classical (frozen prior work) | 1.4936x | 2.4204x | **1.901379x** | 0.271 ms |
-| direct index (this submission) | 1.5099x | 2.6717x | **2.008466x** | 423.9 ms |
+| classical (frozen prior work) | 1.4936x | 2.4204x | **1.901379x** | 0.265 ms |
+| direct index (this submission) | 1.5099x | 2.6717x | **2.008466x** | 430.5 ms |
 
 72 measured runs, 0 failures. Every run was validated with
 `machine.check_compilation` and `machine.check_case` before it was scored, and
 the direct arm ran in a neutral directory under `-I -S` with only the export and
 the pinned `machine` module reachable.
 
-Six acceptance gates are evaluated, and the exit status and the wording of the
-report are both derived from them rather than asserted: all runs present, all
-metrics positive and validated, direct score above 1.0 in **every** repetition,
-the frozen classical control within 1e-9 of its historical aggregate, no
-candidate discrepancies, and no module leaks in the direct arm.
+Seven acceptance gates are evaluated, and the exit status and the wording of the
+report are both derived from them rather than asserted: exactly one measurement
+per arm, program and repetition; all metrics positive and validated; the direct
+score above 1.0 in **every** repetition; the frozen serial and classical
+**per-program integers** matching the protected historical record; the classical
+aggregate within 1e-9 for every repetition; no candidate discrepancies; and no
+module leaks in the direct arm.
 
 The classical control reproduced `1.9013791212645499` to a difference of
 0.000e+00 with identical integer metrics. That is one control passing, which
@@ -40,7 +42,7 @@ Worst case whole-process time was 0.69 s against the grader's 20 s allowance.
 `compile_seconds` above is the compiler call alone; the 20 s limit applies to
 the whole process, which also pays interpreter start and imports.
 
-**The direct compiler is roughly 1,560 times slower to run than the classical
+**The direct compiler is roughly 1,625 times slower to run than the classical
 one.** It scores better because it allocates scratch better, not because it is
 efficient. That trade is the honest headline.
 
@@ -80,8 +82,8 @@ exhausted budget returns UNKNOWN and the already validated incumbent is kept.
 
 | Stage | Result |
 |---|---|
-| schema, contract, constraints, construction, optimizer | 128 tests |
-| independence, export | 40 tests |
+| schema, contract, constraints, construction, optimizer | 143 tests |
+| independence, export | 46 tests |
 | acceptance: corpus, one isolated process per input | 142 programs, 277 cases |
 | acceptance: unchanged public suite | 11 tests |
 | acceptance: documented command line, per program | 8 programs under 20 s |
@@ -132,9 +134,13 @@ timed-out input — and required to reject it.
 
 - An independent lead review of commit `2ab4fa8` returned **CHANGES_REQUIRED**
   with nine findings (`results/direct_index_v1/REVIEW.md`). All nine have been
-  repaired in this round; the evidence is in
-  `results/direct_index_v2_repair/REPAIR_HANDOFF.md`. The repairs are offered as
+  repaired, and a re-review of that work raised three further findings on
+  measurement safeguards and budget accounting, which are also repaired. The
+  evidence is in `results/direct_index_v2_repair/REPAIR_HANDOFF.md` and
+  `results/direct_index_v3_repair/REPAIR_HANDOFF.md`. The repairs are offered as
   READY_FOR_REVIEW. **Nothing here is accepted**, and only the lead may accept.
+- Optimisation outcomes vary run to run, because per-query time budgets bound
+  the search. Counts of accepted improvements describe a run, not the compiler.
 - The comparator split order was ruled on and approved as plan version 1.1.
 
 ## Time and tool assistance

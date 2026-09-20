@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/direct_index_v2_repair/lead_review/budget_probes.py", line 20, in <module>
+    expression = query.expression()
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/direct_constraints.py", line 636, in expression
+    children.extend(self._scratch_safety())
+                    ~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/direct_constraints.py", line 595, in _scratch_safety
+    le(
+    ~~^
+        self.address_term(second, second_width),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        self.meter,
+        ^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/direct_constraints.py", line 256, in le
+    return _leaf("le", lhs, rhs, n, meter)
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/direct_constraints.py", line 250, in _leaf
+    cover = relation_cover(name, lhs, rhs, n, meter)
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/direct_constraints.py", line 222, in relation_cover
+    meter.record(1)
+    ~~~~~~~~~~~~^^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/schema_index.py", line 566, in record
+    raise BudgetExhausted("expression-record budget exhausted")
+schema_index.BudgetExhausted: expression-record budget exhausted

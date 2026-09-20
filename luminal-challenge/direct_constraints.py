@@ -173,11 +173,18 @@ def relation_cover(
     decide, exact = _RELATIONS[name]
 
     # Simplify before splitting: two constants, or the same field on both
-    # sides, reduce to a constant comparison.
-    if lhs.is_constant and rhs.is_constant:
-        return (si.universe(n),) if exact(lhs.offset, rhs.offset) else ()
-    if lhs.field is not None and rhs.field is not None and lhs.field == rhs.field:
-        return (si.universe(n),) if exact(lhs.offset, rhs.offset) else ()
+    # sides, reduce to a constant comparison. These paths still answer a query
+    # and still cost a cube, so they are charged and the clock is checked; an
+    # early return that skipped both would hand back an answer under an
+    # already-expired budget.
+    if (lhs.is_constant and rhs.is_constant) or (
+        lhs.field is not None and rhs.field is not None and lhs.field == rhs.field
+    ):
+        meter.check_time()
+        if not exact(lhs.offset, rhs.offset):
+            return ()
+        meter.record(1)
+        return (si.universe(n),)
 
     support = lhs.mask | rhs.mask
     limit = si.universe_mask(n)
@@ -240,7 +247,9 @@ def relation_cover(
 
 
 def _leaf(name: str, lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
-    return si.Leaf(relation_cover(name, lhs, rhs, n, meter))
+    cover = relation_cover(name, lhs, rhs, n, meter)
+    meter.node()
+    return si.Leaf(cover)
 
 
 def le(lhs: Term, rhs: Term, n: int, meter: si.Meter) -> si.Leaf:
@@ -338,6 +347,24 @@ class JointQuery:
         )
         self._live_cache: Dict[str, Tuple[int, int]] = {}
 
+    def _leaf_node(self, cover) -> si.Leaf:
+        """A leaf built here, charged as a node plus its alternatives."""
+
+        self.meter.cover_limit(len(cover))
+        self.meter.record(len(cover))
+        self.meter.node()
+        return si.Leaf(cover)
+
+    def _all(self, children) -> si.AllOf:
+        children = tuple(children)
+        self.meter.node()
+        return si.AllOf(children)
+
+    def _any(self, children) -> si.AnyOf:
+        children = tuple(children)
+        self.meter.node()
+        return si.AnyOf(children)
+
     # -- terms --------------------------------------------------------------
 
     def time_term(self, op_id: int, offset: int = 0) -> Term:
@@ -429,8 +456,7 @@ class JointQuery:
                 )
             if high >= field.limit:
                 raise Infeasible("a time domain does not fit its field")
-            self.meter.cover(1)
-            parts.append(si.Leaf(si.interval(field, low, high, self.n)))
+            parts.append(self._leaf_node(si.interval(field, low, high, self.n)))
         for name in self.selected_values:
             field = self.address_field[name]
             width = self.facts.width[name]
@@ -449,8 +475,7 @@ class JointQuery:
                 )
             if not cover:
                 raise Infeasible(f"value {name!r} has an empty address domain")
-            self.meter.cover(len(cover))
-            parts.append(si.Leaf(cover))
+            parts.append(self._leaf_node(cover))
         return parts
 
     def _fixed_targets(self) -> None:
@@ -522,7 +547,7 @@ class JointQuery:
                     raise Infeasible(
                         f"operations {op_id} and {other} cannot share engine {engine}"
                     )
-                parts.append(si.AnyOf((different_time, different_lane)))
+                parts.append(self._any((different_time, different_lane)))
         return parts
 
     def _scratch_safety(self) -> List[si.Expression]:
@@ -559,7 +584,7 @@ class JointQuery:
                     or second_span[1] + second_width <= first_span[0]
                 ):
                     continue  # they can never share a word
-                clause = si.AnyOf(
+                clause = self._any(
                     (
                         le(
                             self.address_term(first, first_width),
@@ -596,7 +621,7 @@ class JointQuery:
             children.append(
                 lt(self.time_term(consumer), write_second, self.n, self.meter)
             )
-        return si.AllOf(tuple(children))
+        return self._all(children)
 
     # -- assembly -----------------------------------------------------------
 
@@ -609,7 +634,17 @@ class JointQuery:
         children.extend(self._data_precedence())
         children.extend(self._engine_capacity())
         children.extend(self._scratch_safety())
-        return si.AllOf(tuple(children))
+        built = self._all(children)
+
+        # Every node and alternative was charged as it was assembled, so this
+        # can only hold; it is asserted anyway, because the property that
+        # matters to a caller is that what comes back fits the declared cap.
+        total = si.count_records(built)
+        if total > self.meter.budget.max_records:
+            raise si.BudgetExhausted("expression-record budget exhausted")
+        # Construction paid for this expression; solving must not bill it twice.
+        self.meter.mark_charged(built)
+        return built
 
     def decode(self, cube: si.Cube) -> Tuple[Dict[int, int], Dict[str, int]]:
         """Read a witness back into a complete schedule and allocation."""

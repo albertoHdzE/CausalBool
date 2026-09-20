@@ -105,6 +105,27 @@ print(json.dumps({
 '''
 
 
+def historical_metrics() -> Dict[str, Dict[str, Dict[str, int]]]:
+    """Per-program cycles and scratch for the frozen arms, from pinned history.
+
+    ``results/comparison.json`` is one of the protected files, so its integers
+    are a trustworthy control once its hash has been verified. The aggregate
+    score alone is not: cycles and scratch can both move while their product,
+    and therefore every ratio derived from it, stays put.
+    """
+
+    payload = json.loads((ROOT / "results" / "comparison.json").read_text())
+    metrics: Dict[str, Dict[str, Dict[str, int]]] = {"serial": {}, "classical": {}}
+    for entry in payload["programs"]:
+        for arm in ("serial", "classical"):
+            first = entry["runs"][arm][0]
+            metrics[arm][entry["program"]] = {
+                "cycles": first["cycles"],
+                "scratch": first["scratch"],
+            }
+    return metrics
+
+
 def verify_protected() -> Dict[str, str]:
     """Refuse to measure anything if a protected control has moved."""
 
@@ -214,6 +235,8 @@ def run_all(repeats: int, timeout: float) -> dict:
     commit = verify_reference()
     protected = verify_protected()
     export_hash = verify_export_fresh()
+    # Read after the hash check, so the control itself is pinned.
+    history = historical_metrics()
     paths = sorted((REFERENCE / "programs").glob("*.json"))
     if len(paths) != 8:
         raise RuntimeError(f"expected eight public programs, found {len(paths)}")
@@ -273,6 +296,27 @@ def run_all(repeats: int, timeout: float) -> dict:
                     )
                     continue
                 record = json.loads(completed.stdout)
+                # Check the response against what was actually asked for before
+                # the parent stamps its own repetition on it. Trusting the
+                # worker's identity lets a duplicated measurement fill the slot
+                # of a missing one and keep the row count intact.
+                expected_program = _name_of(path)
+                if record.get("arm") != arm or record.get("program") != expected_program:
+                    failures.append(
+                        {
+                            "arm": arm,
+                            "program": path.name,
+                            "repeat": repeat,
+                            "timed_out": False,
+                            "exit_code": completed.returncode,
+                            "error": (
+                                f"worker answered for ({record.get('arm')!r}, "
+                                f"{record.get('program')!r}) when ({arm!r}, "
+                                f"{expected_program!r}) was requested"
+                            ),
+                        }
+                    )
+                    continue
                 record.update(
                     {
                         "repeat": repeat,
@@ -379,6 +423,8 @@ def run_all(repeats: int, timeout: float) -> dict:
                 "common.py",
             )
         },
+        "program_names": [_name_of(path) for path in paths],
+        "historical_metrics": history,
         "export_sha256": export_hash,
         "export_freshness": "matches the current assembly",
         "protected_sha256": protected,
@@ -411,12 +457,73 @@ def evaluate_gates(report: dict, repeats: int) -> dict:
     runs = report["runs"]
     expected_per_arm = 8 * repeats
 
+    # Exact membership, not row counts. A duplicate standing in for a missing
+    # measurement leaves the count untouched, so count it and you learn nothing.
+    programs = report.get("program_names") or sorted(
+        {run["program"] for run in runs}
+    )
+    expected_keys = {
+        (arm, program, repeat)
+        for arm in ARMS
+        for program in programs
+        for repeat in range(repeats)
+    }
+    observed_keys = [(run["arm"], run["program"], run["repeat"]) for run in runs]
+    observed_set = set(observed_keys)
+    duplicates = sorted(
+        {key for key in observed_keys if observed_keys.count(key) > 1}
+    )
+    missing = sorted(expected_keys - observed_set)
+    unexpected = sorted(observed_set - expected_keys)
     counts = {arm: sum(1 for run in runs if run["arm"] == arm) for arm in ARMS}
     gates["all_runs_present"] = {
         "passed": not report["failures"]
-        and all(counts[arm] == expected_per_arm for arm in ARMS),
-        "detail": f"expected {expected_per_arm} runs per arm, got {counts}, "
-        f"{len(report['failures'])} execution failures",
+        and not duplicates
+        and not missing
+        and not unexpected
+        and len(observed_keys) == len(expected_keys)
+        and len(programs) == 8,
+        "detail": (
+            f"expected {len(expected_keys)} unique (arm, program, repetition) keys over "
+            f"{len(programs)} programs, observed {len(observed_keys)} rows and "
+            f"{len(observed_set)} unique; {len(duplicates)} duplicated, {len(missing)} missing, "
+            f"{len(unexpected)} unexpected, {len(report['failures'])} execution failures; "
+            f"rows per arm {counts}"
+        ),
+        "duplicates": [list(key) for key in duplicates],
+        "missing": [list(key) for key in missing],
+        "unexpected": [list(key) for key in unexpected],
+    }
+
+    # The frozen baselines must reproduce their recorded integers, not merely
+    # an equal aggregate. Doubling cycles while halving scratch leaves every
+    # product and therefore every score untouched.
+    historical = report.get("historical_metrics") or {}
+    drift = []
+    for run in runs:
+        expected = historical.get(run["arm"], {}).get(run["program"])
+        if expected is None:
+            continue
+        if run["cycles"] != expected["cycles"] or run["scratch"] != expected["scratch"]:
+            drift.append(
+                {
+                    "arm": run["arm"],
+                    "program": run["program"],
+                    "repeat": run["repeat"],
+                    "expected": expected,
+                    "observed": {"cycles": run["cycles"], "scratch": run["scratch"]},
+                }
+            )
+    controlled = sum(
+        1 for run in runs if historical.get(run["arm"], {}).get(run["program"])
+    )
+    gates["frozen_integer_metrics"] = {
+        "passed": not drift and controlled > 0,
+        "detail": (
+            f"{controlled} serial and classical measurements checked against the "
+            f"protected historical per-program integers; {len(drift)} disagree"
+        ),
+        "drift": drift,
     }
 
     bad_metrics = [
@@ -444,17 +551,22 @@ def evaluate_gates(report: dict, repeats: int) -> dict:
         f"each must exceed 1.0 and all {repeats} must be present",
     }
 
-    classical_scores = [
-        score["combined_score"] for score in report["per_repeat"].get("classical", [])
-    ]
-    control_ok = bool(classical_scores) and all(
-        math.isclose(score, HISTORICAL_CLASSICAL_SCORE, rel_tol=0, abs_tol=1e-9)
-        for score in classical_scores
+    classical_repeats = report["per_repeat"].get("classical", [])
+    classical_ids = sorted(score["repeat"] for score in classical_repeats)
+    classical_scores = [score["combined_score"] for score in classical_repeats]
+    # Every requested repetition must be present, not merely some of them.
+    control_ok = (
+        classical_ids == list(range(repeats))
+        and all(
+            math.isclose(score, HISTORICAL_CLASSICAL_SCORE, rel_tol=0, abs_tol=1e-9)
+            for score in classical_scores
+        )
     )
     gates["frozen_classical_control"] = {
         "passed": control_ok,
-        "detail": f"classical scores {classical_scores} against the historical "
-        f"{HISTORICAL_CLASSICAL_SCORE!r} within 1e-9",
+        "detail": f"classical aggregates for repetitions {classical_ids} "
+        f"(all of {list(range(repeats))} required): {classical_scores}, each within "
+        f"1e-9 of the historical {HISTORICAL_CLASSICAL_SCORE!r}",
     }
 
     discrepant = [

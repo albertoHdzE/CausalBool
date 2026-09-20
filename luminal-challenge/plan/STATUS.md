@@ -1,23 +1,40 @@
 # Luminal direct-index task status
 
 Canonical contract: [INDEX_ONLY_PLAN.md](INDEX_ONLY_PLAN.md), version **1.1**.
-Last updated: **2026-09-19**.
+Last updated: **2026-09-20**.
 
-The implementation has received independent lead review. **CHANGES_REQUIRED**:
-see [REVIEW.md](../results/direct_index_v1/REVIEW.md) for findings R1–R9,
-repair acceptance criteria, evidence, and the repeat-review handoff. Passing
-existing tests does not close those findings. The older hybrid remains historical.
+The repair implementation has received independent lead re-review.
+**CHANGES_REQUIRED**: see the [current review](../results/direct_index_v2_repair/REVIEW.md)
+for remaining F1–F3 (parts of R2/R4/R7), acceptance criteria and rerun evidence.
+R1/R3/R5/R6/R8/R9 are closed. The [first review](../results/direct_index_v1/REVIEW.md)
+and prior worker records remain historical evidence.
 
 | Task | State | Owner | Evidence / next action |
 |---|---|---|---|
 | L00 — persistent contract and navigation | ACCEPTED | Lead | Canonical plan, agent navigation and review handoff inspected; v1.1 amendment below |
-| L01 — direct schema algebra and solver | READY_FOR_REVIEW | Worker (Claude Opus 5) | R4 repaired: caps enforced while structures grow; incoming leaves validated. See repair round below |
-| L02 — machine facts and independent corpus | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_contract.py`, corpus of 142; 31 tests pass; see record below |
-| L03 — comparisons and joint constraints | READY_FOR_REVIEW | Worker (Claude Opus 5) | R3/R4 repaired: independent domains and pointwise oracle; construction budgets; v1.1 docstring corrected |
+| L01 — direct schema algebra and solver | CHANGES_REQUIRED | Worker (Claude Opus 5) | F3: construction/solve record accounting and durable budget regressions |
+| L02 — machine facts and independent corpus | ACCEPTED | Lead | Unchanged contract reviewed; 31 tests and all 142 inputs/277 cases pass; hashes verified |
+| L03 — comparisons and joint constraints | CHANGES_REQUIRED | Worker (Claude Opus 5) | R3 closed; F3: uncharged nodes and expired simplified-return paths |
 | L04 — independent bootstrap compiler | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_compiler.py`, 19 tests pass; 142/142 corpus compiles and validates; see record below |
 | L05 — joint optimization | READY_FOR_REVIEW | Worker (Claude Opus 5) | R1/R6/R8 repaired: target bounds checked and recorded, real tradeoff fixture frozen, final source window restored |
-| L06 — packaging and verification runners | READY_FOR_REVIEW | Worker (Claude Opus 5) | R1/R2/R5/R7/R9 repaired: evaluated gates, per-input isolation, provenance checks, exact public count |
-| L07 — integration and independent review | CHANGES_REQUIRED | Lead | Review completed; release acceptance withheld; repair and rerun per REVIEW.md |
+| L06 — packaging and verification runners | CHANGES_REQUIRED | Worker (Claude Opus 5) | F1/F2: exact run membership and historical per-program integer controls |
+| L07 — integration and independent review | CHANGES_REQUIRED | Lead | Re-review of f3391b6 complete; F1–F3 remain; current v2 REVIEW.md governs next repair |
+
+### Lead re-review — 2026-09-20
+
+Reviewed commit `f3391b6`, plan 1.1, with two read-only scoped reviewers.
+The lead reran staged verification (179 tests), 142 isolated inputs/277 cases,
+and all 72 comparison runs. Direct score 2.0084662022846573; classical
+1.9013791212645499 in every repetition. Real measurements have exact membership
+and historical integer equality, independently verified. No production source
+was changed by this review. New artifacts are in
+`results/direct_index_v2_repair/lead_review/`.
+
+Release acceptance is withheld for three reproducible P2 findings in the current
+review. The worker's “all nine repaired” claim below is preserved as historical
+handoff, superseded by the dispositions above. L04/L05 remain READY_FOR_REVIEW
+pending shared schema and release dependencies; their specific prior findings
+are closed. No method or success-gate amendment was made in this review.
 
 ### Lead amendment and review authority — 2026-09-19
 
@@ -373,6 +390,48 @@ as posed and none returns SAT.
 
 Offered as READY_FOR_REVIEW. Nothing is self-accepted; only the lead may accept,
 and no submission is authorised.
+
+## Repair round two — 2026-09-20, findings F1 to F3
+
+Worker: Claude Opus 5, working linearly. Starting revision `f3391b6`, plan
+version 1.1. Full record:
+[direct_index_v3_repair/REPAIR_HANDOFF.md](../results/direct_index_v3_repair/REPAIR_HANDOFF.md).
+Both `lead_review` directories are unchanged; the lead's probe outputs were
+backed up before rerun and restored byte-identically.
+
+All three remaining findings repaired, each rejected through the real release
+path rather than a forged report:
+
+- **F1** — membership is exact, not counted. Each worker response is checked
+  against the arm and program that were requested, and every
+  `(arm, program, repetition)` must appear exactly once. The lead's duplicate
+  scenario now reports `all_passed=False` and the CLI exits nonzero.
+- **F2** — per-program serial and classical cycles and scratch are compared
+  against the protected historical record. The product-preserving drift, which
+  leaves every aggregate untouched, is now rejected while the aggregate gate
+  still passes — which is precisely why the aggregate was insufficient.
+- **F3** — expression nodes are charged as they are built, so construction
+  stops at 534 records instead of returning 554; `solve` bills an expression
+  once instead of 533 then 1,087; and the simplified constant and
+  identical-field returns honour the clock.
+
+| Command | Exit | Result |
+|---|---:|---|
+| `python3 -m unittest discover -s tests_direct` | 0 | **189 tests OK** (was 168) |
+| `verify_direct.py --stage all --timeout 20` | 0 | **PASS**, 200 tests, 142 isolated processes, 277 cases |
+| `compare_direct.py --repeats 3 --timeout 20` | 0 | 72 runs, **all seven gates PASS** |
+
+Scores recomputed independently from the 72 raw measurements and identical in
+every repetition: serial 1.0000000000000000, classical 1.9013791212645499,
+direct index 2.0084662022846573. Export 2,255 lines, SHA256 `e30a1ed8090be9b4…`.
+
+**Correction to the previous round's record.** That handoff attributed a decline
+in accepted improvements from seven to six to the R8 window change. This round's
+isolated corpus run accepted seven on the same code path, which supports the
+lead's reading: the difference is run-to-run variation in time-bounded search,
+not a deterministic regression. The earlier claim was wrong and is withdrawn.
+
+Offered as READY_FOR_REVIEW. Nothing is self-accepted; no submission authorised.
 
 ## Version and decision log
 

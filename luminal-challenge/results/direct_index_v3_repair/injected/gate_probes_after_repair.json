@@ -1,0 +1,426 @@
+[
+  {
+    "scenario": "control",
+    "gates": {
+      "all_runs_present": {
+        "passed": true,
+        "detail": "expected 72 unique (arm, program, repetition) keys over 8 programs, observed 72 rows and 72 unique; 0 duplicated, 0 missing, 0 unexpected, 0 execution failures; rows per arm {'serial': 24, 'classical': 24, 'direct_index': 24}",
+        "duplicates": [],
+        "missing": [],
+        "unexpected": []
+      },
+      "frozen_integer_metrics": {
+        "passed": true,
+        "detail": "48 serial and classical measurements checked against the protected historical per-program integers; 0 disagree",
+        "drift": []
+      },
+      "metrics_valid": {
+        "passed": true,
+        "detail": "0 runs with non-positive or unvalidated metrics"
+      },
+      "direct_beats_baseline": {
+        "passed": true,
+        "detail": "direct combined scores per repetition: [2.008466202284657, 2.008466202284657, 2.008466202284657]; each must exceed 1.0 and all 3 must be present"
+      },
+      "frozen_classical_control": {
+        "passed": true,
+        "detail": "classical aggregates for repetitions [0, 1, 2] (all of [0, 1, 2] required): [1.9013791212645499, 1.9013791212645499, 1.9013791212645499], each within 1e-9 of the historical 1.9013791212645499"
+      },
+      "no_candidate_discrepancies": {
+        "passed": true,
+        "detail": "0 measured compilations reported a query/validator discrepancy"
+      },
+      "direct_arm_isolated": {
+        "passed": true,
+        "detail": "0 direct runs loaded a prohibited module"
+      },
+      "all_passed": {
+        "passed": true,
+        "detail": "every gate above"
+      }
+    },
+    "classical_repetitions": [
+      {
+        "repeat": 0,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "scratch_reduction_geomean": 2.420448679801976,
+        "combined_score": 1.9013791212645499
+      },
+      {
+        "repeat": 1,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "scratch_reduction_geomean": 2.420448679801976,
+        "combined_score": 1.9013791212645499
+      },
+      {
+        "repeat": 2,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "scratch_reduction_geomean": 2.420448679801976,
+        "combined_score": 1.9013791212645499
+      }
+    ],
+    "run_count": 72,
+    "unique_run_keys": 72
+  },
+  {
+    "scenario": "duplicate_classical_measurement",
+    "gates": {
+      "all_runs_present": {
+        "passed": false,
+        "detail": "expected 72 unique (arm, program, repetition) keys over 8 programs, observed 71 rows and 71 unique; 0 duplicated, 1 missing, 0 unexpected, 1 execution failures; rows per arm {'serial': 24, 'classical': 23, 'direct_index': 24}",
+        "duplicates": [],
+        "missing": [
+          [
+            "classical",
+            "scalar_pipeline",
+            1
+          ]
+        ],
+        "unexpected": []
+      },
+      "frozen_integer_metrics": {
+        "passed": true,
+        "detail": "47 serial and classical measurements checked against the protected historical per-program integers; 0 disagree",
+        "drift": []
+      },
+      "metrics_valid": {
+        "passed": true,
+        "detail": "0 runs with non-positive or unvalidated metrics"
+      },
+      "direct_beats_baseline": {
+        "passed": true,
+        "detail": "direct combined scores per repetition: [2.008466202284657, 2.008466202284657, 2.008466202284657]; each must exceed 1.0 and all 3 must be present"
+      },
+      "frozen_classical_control": {
+        "passed": false,
+        "detail": "classical aggregates for repetitions [0, 2] (all of [0, 1, 2] required): [1.9013791212645499, 1.9013791212645499], each within 1e-9 of the historical 1.9013791212645499"
+      },
+      "no_candidate_discrepancies": {
+        "passed": true,
+        "detail": "0 measured compilations reported a query/validator discrepancy"
+      },
+      "direct_arm_isolated": {
+        "passed": true,
+        "detail": "0 direct runs loaded a prohibited module"
+      },
+      "all_passed": {
+        "passed": false,
+        "detail": "every gate above"
+      }
+    },
+    "classical_repetitions": [
+      {
+        "repeat": 0,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "scratch_reduction_geomean": 2.420448679801976,
+        "combined_score": 1.9013791212645499
+      },
+      {
+        "repeat": 2,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "scratch_reduction_geomean": 2.420448679801976,
+        "combined_score": 1.9013791212645499
+      }
+    ],
+    "run_count": 71,
+    "unique_run_keys": 71
+  },
+  {
+    "scenario": "classical_product_preserved_drift",
+    "gates": {
+      "all_runs_present": {
+        "passed": true,
+        "detail": "expected 72 unique (arm, program, repetition) keys over 8 programs, observed 72 rows and 72 unique; 0 duplicated, 0 missing, 0 unexpected, 0 execution failures; rows per arm {'serial': 24, 'classical': 24, 'direct_index': 24}",
+        "duplicates": [],
+        "missing": [],
+        "unexpected": []
+      },
+      "frozen_integer_metrics": {
+        "passed": false,
+        "detail": "48 serial and classical measurements checked against the protected historical per-program integers; 18 disagree",
+        "drift": [
+          {
+            "arm": "classical",
+            "program": "scalar_pipeline",
+            "repeat": 0,
+            "expected": {
+              "cycles": 14,
+              "scratch": 6
+            },
+            "observed": {
+              "cycles": 28,
+              "scratch": 3
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "scalar_pipeline",
+            "repeat": 1,
+            "expected": {
+              "cycles": 14,
+              "scratch": 6
+            },
+            "observed": {
+              "cycles": 28,
+              "scratch": 3
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "scalar_pipeline",
+            "repeat": 2,
+            "expected": {
+              "cycles": 14,
+              "scratch": 6
+            },
+            "observed": {
+              "cycles": 28,
+              "scratch": 3
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_axpy",
+            "repeat": 0,
+            "expected": {
+              "cycles": 10,
+              "scratch": 32
+            },
+            "observed": {
+              "cycles": 20,
+              "scratch": 16
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_axpy",
+            "repeat": 1,
+            "expected": {
+              "cycles": 10,
+              "scratch": 32
+            },
+            "observed": {
+              "cycles": 20,
+              "scratch": 16
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_axpy",
+            "repeat": 2,
+            "expected": {
+              "cycles": 10,
+              "scratch": 32
+            },
+            "observed": {
+              "cycles": 20,
+              "scratch": 16
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_bitmix",
+            "repeat": 0,
+            "expected": {
+              "cycles": 10,
+              "scratch": 40
+            },
+            "observed": {
+              "cycles": 20,
+              "scratch": 20
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_bitmix",
+            "repeat": 1,
+            "expected": {
+              "cycles": 10,
+              "scratch": 40
+            },
+            "observed": {
+              "cycles": 20,
+              "scratch": 20
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_bitmix",
+            "repeat": 2,
+            "expected": {
+              "cycles": 10,
+              "scratch": 40
+            },
+            "observed": {
+              "cycles": 20,
+              "scratch": 20
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "parallel_memory",
+            "repeat": 0,
+            "expected": {
+              "cycles": 14,
+              "scratch": 56
+            },
+            "observed": {
+              "cycles": 28,
+              "scratch": 28
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "parallel_memory",
+            "repeat": 1,
+            "expected": {
+              "cycles": 14,
+              "scratch": 56
+            },
+            "observed": {
+              "cycles": 28,
+              "scratch": 28
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "parallel_memory",
+            "repeat": 2,
+            "expected": {
+              "cycles": 14,
+              "scratch": 56
+            },
+            "observed": {
+              "cycles": 28,
+              "scratch": 28
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "scalar_selects",
+            "repeat": 0,
+            "expected": {
+              "cycles": 9,
+              "scratch": 6
+            },
+            "observed": {
+              "cycles": 18,
+              "scratch": 3
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "scalar_selects",
+            "repeat": 1,
+            "expected": {
+              "cycles": 9,
+              "scratch": 6
+            },
+            "observed": {
+              "cycles": 18,
+              "scratch": 3
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "scalar_selects",
+            "repeat": 2,
+            "expected": {
+              "cycles": 9,
+              "scratch": 6
+            },
+            "observed": {
+              "cycles": 18,
+              "scratch": 3
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_reduction",
+            "repeat": 0,
+            "expected": {
+              "cycles": 12,
+              "scratch": 40
+            },
+            "observed": {
+              "cycles": 24,
+              "scratch": 20
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_reduction",
+            "repeat": 1,
+            "expected": {
+              "cycles": 12,
+              "scratch": 40
+            },
+            "observed": {
+              "cycles": 24,
+              "scratch": 20
+            }
+          },
+          {
+            "arm": "classical",
+            "program": "vector_reduction",
+            "repeat": 2,
+            "expected": {
+              "cycles": 12,
+              "scratch": 40
+            },
+            "observed": {
+              "cycles": 24,
+              "scratch": 20
+            }
+          }
+        ]
+      },
+      "metrics_valid": {
+        "passed": true,
+        "detail": "0 runs with non-positive or unvalidated metrics"
+      },
+      "direct_beats_baseline": {
+        "passed": true,
+        "detail": "direct combined scores per repetition: [2.008466202284657, 2.008466202284657, 2.008466202284657]; each must exceed 1.0 and all 3 must be present"
+      },
+      "frozen_classical_control": {
+        "passed": true,
+        "detail": "classical aggregates for repetitions [0, 1, 2] (all of [0, 1, 2] required): [1.9013791212645499, 1.9013791212645499, 1.9013791212645499], each within 1e-9 of the historical 1.9013791212645499"
+      },
+      "no_candidate_discrepancies": {
+        "passed": true,
+        "detail": "0 measured compilations reported a query/validator discrepancy"
+      },
+      "direct_arm_isolated": {
+        "passed": true,
+        "detail": "0 direct runs loaded a prohibited module"
+      },
+      "all_passed": {
+        "passed": false,
+        "detail": "every gate above"
+      }
+    },
+    "classical_repetitions": [
+      {
+        "repeat": 0,
+        "cycle_speedup_geomean": 0.8881147148451991,
+        "scratch_reduction_geomean": 4.0706932363021355,
+        "combined_score": 1.9013791212645499
+      },
+      {
+        "repeat": 1,
+        "cycle_speedup_geomean": 0.8881147148451991,
+        "scratch_reduction_geomean": 4.0706932363021355,
+        "combined_score": 1.9013791212645499
+      },
+      {
+        "repeat": 2,
+        "cycle_speedup_geomean": 0.8881147148451991,
+        "scratch_reduction_geomean": 4.0706932363021355,
+        "combined_score": 1.9013791212645499
+      }
+    ],
+    "run_count": 72,
+    "unique_run_keys": 72
+  }
+]

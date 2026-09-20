@@ -455,3 +455,44 @@ class BudgetTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IncomingExpressionBudgetTests(unittest.TestCase):
+    """F3: leaves handed to the solver are validated and billed exactly once."""
+
+    def test_an_oversized_incoming_leaf_is_refused(self):
+        leaf = si.Leaf(tuple(si.Cube(4, index, 0) for index in range(16)))
+        result = si.solve(leaf, 4, si.Budget(seconds=10.0, max_cover=1))
+        self.assertTrue(result.is_unknown)
+        self.assertIn("cover", result.reason)
+        self.assertIsNone(result.cube)
+
+    def test_a_leaf_within_the_cap_is_accepted(self):
+        leaf = si.Leaf(tuple(si.Cube(4, index, 0) for index in range(4)))
+        result = si.solve(leaf, 4, si.Budget(seconds=10.0, max_cover=8))
+        self.assertTrue(result.is_sat)
+
+    def test_charging_an_expression_twice_bills_it_once(self):
+        meter = si.Budget(seconds=10.0, max_records=1000).start()
+        expression = si.AllOf((si.Leaf((si.Cube(3, 0, 0),)),))
+        meter.charge_expression(expression)
+        first = meter.records
+        meter.charge_expression(expression)
+        self.assertEqual(meter.records, first)
+        self.assertEqual(first, si.count_records(expression))
+
+    def test_a_different_expression_is_billed_separately(self):
+        meter = si.Budget(seconds=10.0, max_records=1000).start()
+        one = si.AllOf((si.Leaf((si.Cube(3, 0, 0),)),))
+        two = si.AllOf((si.Leaf((si.Cube(3, 1, 0),)),))
+        meter.charge_expression(one)
+        first = meter.records
+        meter.charge_expression(two)
+        self.assertGreater(meter.records, first)
+
+    def test_marking_charged_prevents_a_second_bill(self):
+        meter = si.Budget(seconds=10.0, max_records=1000).start()
+        expression = si.AllOf((si.Leaf((si.Cube(3, 0, 0),)),))
+        meter.mark_charged(expression)
+        meter.charge_expression(expression)
+        self.assertEqual(meter.records, 0)

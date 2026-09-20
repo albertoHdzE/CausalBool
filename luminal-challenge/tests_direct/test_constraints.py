@@ -742,3 +742,126 @@ class JointQueryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ConstructionBudgetTests(unittest.TestCase):
+    """F3: accounting must be consistent, and must stop work early.
+
+    `RelationBudgetTests` above only assert that an exception eventually
+    arrives. These assert *when* it arrives and what the accounting says, which
+    is what distinguishes a budget that is enforced from one that is merely
+    reported after the work is done.
+    """
+
+    def joint(self, max_records, seconds=30.0):
+        source = JOINT_FIXTURES["two_constants"]
+        times, addresses = incumbent(source)
+        facts = dc.derive(source)
+        meter = si.Budget(seconds=seconds, max_records=max_records).start()
+        query = dk.JointQuery(
+            facts,
+            times,
+            addresses,
+            (0, 1),
+            max(times.values()) + 1,
+            dc.footprint(facts, addresses),
+            meter,
+        )
+        return query, meter
+
+    def test_construction_never_returns_an_expression_over_its_record_cap(self):
+        """The reviewed build returned 554 records under a cap of 533."""
+
+        query, meter = self.joint(max_records=533)
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            query.expression()
+        self.assertIn("record", caught.exception.reason)
+        # It stopped as the cap was crossed, not after building everything.
+        self.assertLessEqual(meter.records, 534)
+
+    def test_a_generous_cap_charges_exactly_what_the_expression_holds(self):
+        query, meter = self.joint(max_records=100000)
+        expression = query.expression()
+        charged = meter.records
+        actual = si.count_records(expression)
+        self.assertEqual(charged, actual, "every node and alternative must be billed once")
+
+    def test_solving_does_not_bill_construction_a_second_time(self):
+        """The reviewed pair charged 533 then 1,087 for the same expression."""
+
+        query, meter = self.joint(max_records=100000)
+        expression = query.expression()
+        before = meter.records
+        result = si.solve(expression, query.n, meter=meter)
+        self.assertEqual(meter.records, before, "solve re-billed the construction")
+        self.assertFalse(result.is_unknown, result.reason)
+
+    def test_an_externally_supplied_expression_is_still_billed(self):
+        meter = si.Budget(seconds=30.0, max_records=3).start()
+        # Never seen by this meter, so it must be charged and must exhaust it.
+        outside = si.AllOf(tuple(si.Leaf((si.Cube(4, i, 0),)) for i in range(8)))
+        result = si.solve(outside, 4, meter=meter)
+        self.assertTrue(result.is_unknown)
+        self.assertIn("record", result.reason)
+
+    def test_an_expired_meter_stops_the_simplified_constant_path(self):
+        expired = si.Budget(seconds=0.1, max_records=100).start()
+        expired.started -= 1
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("le", dk.constant(0), dk.constant(1), 4, expired)
+        self.assertIn("time", caught.exception.reason)
+
+    def test_an_expired_meter_stops_the_identical_field_path(self):
+        expired = si.Budget(seconds=0.1, max_records=100).start()
+        expired.started -= 1
+        field = si.Field("a", 0, 4)
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("le", dk.Term(field, 0), dk.Term(field, 0), 4, expired)
+        self.assertIn("time", caught.exception.reason)
+
+    def test_the_simplified_paths_are_charged_when_they_succeed(self):
+        meter = si.Budget(seconds=30.0, max_records=100).start()
+        cover = dk.relation_cover("le", dk.constant(0), dk.constant(1), 4, meter)
+        self.assertEqual(cover, (si.universe(4),))
+        self.assertEqual(meter.records, 1, "an accepted simplification costs a record")
+        # A refused simplification yields nothing and so costs nothing.
+        before = meter.records
+        self.assertEqual(
+            dk.relation_cover("lt", dk.constant(5), dk.constant(1), 4, meter), ()
+        )
+        self.assertEqual(meter.records, before)
+
+    def test_the_cover_cap_stops_a_comparison_early(self):
+        """Early stopping, measured: the reviewed build visited 5,115 cubes."""
+
+        first = si.Field("a", 0, 10)
+        second = si.Field("b", 10, 10)
+        meter = si.Budget(seconds=30.0, max_cover=4).start()
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("lt", dk.Term(first), dk.Term(second), 20, meter)
+        self.assertIn("cover", caught.exception.reason)
+        self.assertLess(meter.visited, 100, "the search should stop almost at once")
+
+    def test_the_record_cap_stops_a_comparison_early(self):
+        first = si.Field("a", 0, 10)
+        second = si.Field("b", 10, 10)
+        meter = si.Budget(seconds=30.0, max_records=1).start()
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("lt", dk.Term(first), dk.Term(second), 20, meter)
+        self.assertIn("record", caught.exception.reason)
+        self.assertLess(meter.visited, 100)
+        self.assertLessEqual(meter.records, 2)
+
+    def test_exhaustion_during_a_query_is_unknown_not_unsat(self):
+        query, meter = self.joint(max_records=533)
+        try:
+            expression = query.expression()
+        except si.BudgetExhausted:
+            expression = None
+        self.assertIsNone(expression, "construction should have stopped")
+        # And when the same starvation happens inside solve, the verdict is
+        # UNKNOWN; never UNSAT.
+        leaf = si.Leaf(tuple(si.Cube(4, i, 0) for i in range(16)))
+        starved = si.solve(leaf, 4, si.Budget(seconds=10.0, max_cover=1))
+        self.assertTrue(starved.is_unknown)
+        self.assertFalse(starved.is_unsat)

@@ -537,6 +537,10 @@ class Meter:
         self.visited = 0
         self.records = 0
         self.intersections = 0
+        # Expressions this meter has already been billed for, keyed by object
+        # identity. The value keeps a reference alive so the identity cannot be
+        # reused by a later object.
+        self._charged: Dict[int, object] = {}
 
     @property
     def elapsed(self) -> float:
@@ -565,6 +569,36 @@ class Meter:
     def intersection(self, count: int = 1) -> None:
         self.intersections += count
         self.check_time()
+
+    def node(self, count: int = 1) -> None:
+        """Charge expression nodes as they are built.
+
+        A node costs a record just as a cube alternative does, so an expression
+        whose node count alone exceeds the cap is stopped while it is being
+        assembled rather than after it has been returned.
+        """
+
+        self.record(count)
+
+    def charge_expression(self, expression: object) -> None:
+        """Bill an expression once, however many times it is handed over.
+
+        Construction and solving share a meter. Charging the whole record count
+        again at the start of a search would double-bill everything the builder
+        already paid for, and could report exhaustion on an expression that fits.
+        """
+
+        key = id(expression)
+        if key in self._charged:
+            self.check_time()
+            return
+        self._charged[key] = expression
+        self.record(count_records(expression))
+
+    def mark_charged(self, expression: object) -> None:
+        """Record that this expression was billed as it was constructed."""
+
+        self._charged[id(expression)] = expression
 
     def cover_limit(self, size: int) -> None:
         """Validate a cover size against the cap, charging nothing.
@@ -690,7 +724,9 @@ def solve(
     try:
         _check_expression_width(expression, n)
         _check_incoming_leaves(expression, meter)
-        meter.record(count_records(expression))
+        # Idempotent: an expression this meter already paid to build is not
+        # billed again, while an externally supplied one still is.
+        meter.charge_expression(expression)
         stack = [(universe(n), (expression,))]
         while stack:
             meter.visit()

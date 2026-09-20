@@ -314,13 +314,25 @@ class ReleaseGateTests(unittest.TestCase):
         }
 
     def test_the_real_results_pass_every_gate(self):
+        """Every recorded comparison carrying the full controls must pass.
+
+        Reports written before a control existed cannot be judged by it, so
+        they are not candidates; there must still be at least one that is.
+        """
+
         import compare_direct
 
-        report = json.loads(
-            (ROOT / "results" / "direct_index_v2_repair" / "comparison" / "runs.json").read_text()
+        candidates = []
+        for path in sorted(ROOT.glob("results/*/comparison/runs.json")):
+            report = json.loads(path.read_text())
+            if "historical_metrics" in report and "program_names" in report:
+                candidates.append((path, report))
+        self.assertTrue(
+            candidates, "no comparison evidence carries the frozen integer control"
         )
-        gates = compare_direct.evaluate_gates(report, report["repetitions"])
-        self.assertTrue(gates["all_passed"]["passed"], gates)
+        for path, report in candidates:
+            gates = compare_direct.evaluate_gates(report, report["repetitions"])
+            self.assertTrue(gates["all_passed"]["passed"], f"{path}: {gates}")
 
     def test_a_score_equal_to_the_baseline_fails(self):
         import compare_direct
@@ -562,3 +574,179 @@ class PublicSuiteGateTests(unittest.TestCase):
                 payload.get("status"), "PASS", "a stale PASS survived the rerun"
             )
             self.assertNotEqual(code, 0)
+
+
+class ComparisonMembershipTests(unittest.TestCase):
+    """F1 and F2: replay recorded worker results through the real run_all.
+
+    Only the subprocess responses are injected. Every aggregate and every gate
+    is recomputed by the production code, so these exercise the release path
+    rather than a forged finished report.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import compare_direct
+
+        cls.comparison = compare_direct
+        source = None
+        for path in sorted(ROOT.glob("results/*/comparison/runs.json")):
+            report = json.loads(path.read_text())
+            if "historical_metrics" in report:
+                source = report
+        if source is None:  # pragma: no cover - evidence must exist
+            raise unittest.SkipTest("no comparison evidence to replay")
+        cls.source = source
+
+    def replay(self, mutate=None):
+        """Run the real run_all against recorded responses."""
+
+        import copy
+        from unittest.mock import patch
+
+        real_run = subprocess.run
+        counter = [0]
+        programs = sorted((REFERENCE / "programs").glob("*.json"))
+        first_name = json.loads(programs[0].read_text())["name"]
+
+        def responder(argv, **kwargs):
+            if argv[0] != sys.executable:
+                return real_run(argv, **kwargs)
+            repeat = (counter[0] // 3) % 3
+            counter[0] += 1
+            arm = argv[argv.index("--worker") + 1] if "--worker" in argv else "direct_index"
+            program = json.loads(Path(argv[-1]).read_text())["name"]
+            record = copy.deepcopy(
+                next(
+                    run
+                    for run in self.source["runs"]
+                    if run["arm"] == arm
+                    and run["program"] == program
+                    and run["repeat"] == repeat
+                )
+            )
+            if mutate is not None:
+                record = mutate(record, arm, program, repeat, first_name, self.source)
+            return subprocess.CompletedProcess(argv, 0, json.dumps(record), "")
+
+        with patch.object(self.comparison.subprocess, "run", side_effect=responder):
+            return self.comparison.run_all(3, 20)
+
+    def test_the_unmodified_replay_passes(self):
+        result = self.replay()
+        self.assertTrue(result["gates"]["all_passed"]["passed"], result["gates"])
+        self.assertEqual(len(result["runs"]), 72)
+
+    def test_a_duplicated_classical_measurement_is_rejected(self):
+        """A duplicate filling a missing slot keeps the row count at 72."""
+
+        import copy
+
+        def duplicate(record, arm, program, repeat, first_name, source):
+            if arm == "classical" and repeat == 1 and program == first_name:
+                return copy.deepcopy(
+                    next(
+                        run
+                        for run in source["runs"]
+                        if run["arm"] == arm
+                        and run["repeat"] == repeat
+                        and run["program"] != program
+                    )
+                )
+            return record
+
+        result = self.replay(duplicate)
+        gates = result["gates"]
+        self.assertFalse(gates["all_passed"]["passed"])
+        # Caught at the identity check, so the bad row never enters the report.
+        self.assertTrue(
+            gates["all_runs_present"]["missing"] or result["failures"],
+            "the missing measurement must be named",
+        )
+
+    def test_a_product_preserving_metric_drift_is_rejected(self):
+        """Doubling cycles and halving scratch leaves every score untouched."""
+
+        def drift(record, arm, program, repeat, first_name, source):
+            if arm == "classical" and record["scratch"] % 2 == 0:
+                record["cycles"] *= 2
+                record["scratch"] //= 2
+            return record
+
+        result = self.replay(drift)
+        gates = result["gates"]
+        self.assertFalse(gates["all_passed"]["passed"])
+        self.assertFalse(gates["frozen_integer_metrics"]["passed"])
+        self.assertTrue(gates["frozen_integer_metrics"]["drift"])
+        # The aggregate alone would not have noticed.
+        self.assertTrue(gates["frozen_classical_control"]["passed"])
+
+    def test_a_serial_metric_drift_is_rejected(self):
+        def drift(record, arm, program, repeat, first_name, source):
+            if arm == "serial" and program == first_name:
+                record["cycles"] += 1
+            return record
+
+        result = self.replay(drift)
+        self.assertFalse(result["gates"]["frozen_integer_metrics"]["passed"])
+
+    def test_a_foreign_arm_response_is_rejected(self):
+        def swap(record, arm, program, repeat, first_name, source):
+            if arm == "classical" and program == first_name and repeat == 0:
+                record["arm"] = "serial"
+            return record
+
+        result = self.replay(swap)
+        self.assertFalse(result["gates"]["all_passed"]["passed"])
+        self.assertTrue(result["failures"], "the mismatch must be retained")
+
+    def test_the_command_line_exits_nonzero_on_a_rejected_comparison(self):
+        import copy
+        from unittest.mock import patch
+
+        def duplicate(record, arm, program, repeat, first_name, source):
+            if arm == "classical" and repeat == 1 and program == first_name:
+                return copy.deepcopy(
+                    next(
+                        run
+                        for run in source["runs"]
+                        if run["arm"] == arm
+                        and run["repeat"] == repeat
+                        and run["program"] != program
+                    )
+                )
+            return record
+
+        real_run = subprocess.run
+        counter = [0]
+        programs = sorted((REFERENCE / "programs").glob("*.json"))
+        first_name = json.loads(programs[0].read_text())["name"]
+
+        def responder(argv, **kwargs):
+            if argv[0] != sys.executable:
+                return real_run(argv, **kwargs)
+            repeat = (counter[0] // 3) % 3
+            counter[0] += 1
+            arm = argv[argv.index("--worker") + 1] if "--worker" in argv else "direct_index"
+            program = json.loads(Path(argv[-1]).read_text())["name"]
+            record = copy.deepcopy(
+                next(
+                    run
+                    for run in self.source["runs"]
+                    if run["arm"] == arm
+                    and run["program"] == program
+                    and run["repeat"] == repeat
+                )
+            )
+            return subprocess.CompletedProcess(
+                argv, 0, json.dumps(duplicate(record, arm, program, repeat, first_name, self.source)), ""
+            )
+
+        with tempfile.TemporaryDirectory(prefix="cmp_gate_") as directory:
+            noise, quiet = io.StringIO(), io.StringIO()
+            with patch.object(self.comparison.subprocess, "run", side_effect=responder):
+                with contextlib.redirect_stderr(noise), contextlib.redirect_stdout(quiet):
+                    code = self.comparison.main(
+                        ["--repeats", "3", "--timeout", "20", "--output", directory]
+                    )
+            self.assertNotEqual(code, 0, "a rejected comparison must exit nonzero")
