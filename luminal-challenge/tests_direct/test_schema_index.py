@@ -460,6 +460,27 @@ if __name__ == "__main__":
 class IncomingExpressionBudgetTests(unittest.TestCase):
     """F3: leaves handed to the solver are validated and billed exactly once."""
 
+    def test_retry_after_failed_charge_stays_unknown(self):
+        meter = si.Budget(seconds=10.0, max_records=1).start()
+        expression = si.Leaf((si.universe(1),))
+        first = si.solve(expression, 1, meter=meter)
+        retry = si.solve(expression, 1, meter=meter)
+        self.assertTrue(first.is_unknown)
+        self.assertTrue(retry.is_unknown, "a failed charge must not authorize a retry")
+        self.assertIn("record", retry.reason)
+        self.assertIsNone(retry.cube)
+
+    def test_cached_expression_cannot_bypass_later_exhaustion(self):
+        meter = si.Budget(seconds=10.0, max_records=2).start()
+        first = si.Leaf((si.universe(1),))
+        second = si.Leaf((si.Cube(1, 0, 0),))
+        self.assertTrue(si.solve(first, 1, meter=meter).is_sat)
+        self.assertTrue(si.solve(second, 1, meter=meter).is_unknown)
+        retry = si.solve(first, 1, meter=meter)
+        self.assertTrue(retry.is_unknown, "cached work cannot revive an exhausted meter")
+        self.assertIn("record", retry.reason)
+        self.assertIsNone(retry.cube)
+
     def test_an_oversized_incoming_leaf_is_refused(self):
         leaf = si.Leaf(tuple(si.Cube(4, index, 0) for index in range(16)))
         result = si.solve(leaf, 4, si.Budget(seconds=10.0, max_cover=1))

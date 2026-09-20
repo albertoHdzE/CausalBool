@@ -2,6 +2,18 @@
 
 Date: 2026-09-20. **Status: READY_FOR_REVIEW. Nothing here is accepted.**
 
+> **Superseded in part on 2026-09-20.** Reviewing this round, the lead found a
+> real defect in the F3 expression cache: `Meter.charge_expression` marked an
+> expression charged *before* `record()` completed and only checked the clock on
+> a cache hit, so retrying an expression whose charge had failed returned SAT on
+> an exhausted meter. The lead's correction — check the record cap on every
+> entry, cache only after a successful charge — plus two regressions now live in
+> `schema_index.py` and `tests_direct/test_schema_index.py`. The figures below
+> therefore describe commit `7bdac4c`, not the corrected tree: the current
+> counts are **191 direct tests** and an export of **2,258 lines**
+> (`c0574395d339dae3…`), with `schema_index.py` at `0620b9862c1c25a8`. The
+> corrected measurements are in [../direct_index_v3_repair/REVIEW.md](REVIEW.md).
+
 Repairs the three remaining findings of the lead re-review
 ([direct_index_v2_repair/REVIEW.md](../direct_index_v2_repair/REVIEW.md), verdict
 CHANGES_REQUIRED) of commit `f3391b6`, which closed six of the original nine and

@@ -589,11 +589,14 @@ class Meter:
         """
 
         key = id(expression)
+        # Reusing paid work does not revive a meter exhausted by another
+        # expression. Check the record cap as well as the clock on cache hits.
+        self.record(0)
         if key in self._charged:
-            self.check_time()
             return
-        self._charged[key] = expression
         self.record(count_records(expression))
+        # Failed charges must never grant the cached, already-paid status.
+        self._charged[key] = expression
 
     def mark_charged(self, expression: object) -> None:
         """Record that this expression was billed as it was constructed."""

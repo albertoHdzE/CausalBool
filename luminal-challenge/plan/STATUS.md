@@ -433,6 +433,32 @@ not a deterministic regression. The earlier claim was wrong and is withdrawn.
 
 Offered as READY_FOR_REVIEW. Nothing is self-accepted; no submission authorised.
 
+## Lead re-review of round two — 2026-09-20
+
+[direct_index_v3_repair/REVIEW.md](../results/direct_index_v3_repair/REVIEW.md).
+F1, F2 and F3 are recorded CLOSED, F3 with a lead correction. The lead found a
+real defect in my expression cache: `Meter.charge_expression` cached the charge
+before `record()` completed and checked only the clock on a cache hit, so a
+retry of an expression whose charge had failed returned SAT on an exhausted
+meter. The fix checks the record cap on every entry and caches only successful
+charges; two durable regressions cover it. No production-output failure was
+demonstrated, because the optimiser solves once per meter — but the safeguard
+was defeatable, which is exactly the class of defect this round was meant to
+close.
+
+The final rerun was completed and its results filled into the review: 191 direct
+tests, verification **PASS** with 142 of 142 corpus programs in isolated
+processes and 277 cases, comparison exit 0 with all seven gates, and an
+independent evidence check confirming the four protected hashes, exact
+measurement membership, every historical integer, and scores recomputed from raw
+measurements — serial 1.0000000000000000, classical 1.9013791212645499, direct
+2.0084662022846573. Export now **2,258 lines**, `c0574395d339dae3…`; the 2,255
+lines and `e30a1ed8090be9b4…` recorded above belong to `7bdac4c`, before the
+cache correction.
+
+Verdict remains the lead's: **PENDING LEAD SIGN-OFF**. Still no push, no
+submission, nothing self-accepted.
+
 ## Version and decision log
 
 - **1.0 / 2026-09-19:** persisted the approved plan with explicit arithmetic,
