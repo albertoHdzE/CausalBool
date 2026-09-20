@@ -37,6 +37,10 @@ TEST_STAGES = {
     "optimizer": "tests_direct.test_optimizer",
     "independence": "tests_direct.test_independence",
     "export": "tests_direct.test_export",
+    # Additive stage for the optimization phase: the measurement harness's own
+    # regressions. Acceptance semantics of every stage above are unchanged; a
+    # stage running zero tests still fails and there is still no success banner.
+    "benchmark": "tests_direct.test_benchmark_harness",
 }
 STAGE_ORDER = list(TEST_STAGES) + ["acceptance"]
 ALL_STAGES = STAGE_ORDER + ["all"]
