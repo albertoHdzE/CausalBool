@@ -1,3 +1,27 @@
+> **SUPERSEDED IN PART, 2026-09-20.** The lead's re-review of this round is at
+> [REVIEW.md](REVIEW.md): R1 and R2 closed, R3 partially, with two further
+> evidence-enforcement findings, F1 and F2. The round that answers them is
+> [`../direct_index_v4_optimization_repair2/REPAIR2_HANDOFF.md`](../direct_index_v4_optimization_repair2/REPAIR2_HANDOFF.md).
+>
+> Two statements below are corrected there and should not be read from here:
+>
+> 1. **"Both engineering targets remain missed and the measured speedups fell
+>    slightly"** and the attribution that followed it — "the price of the
+>    correctness repair", "Correctness bought that 1.8%". The direction is wrong
+>    and the cause was not established. Bootstrap went **up**, 1.1371x → 1.1380x.
+>    The full-direct change, 1.9889x → 1.9536x, is a difference between two runs
+>    on one machine; the added clock reads plausibly contribute, but nothing in
+>    those runs isolates their cost. The F1/F2 round, which changed **no
+>    production code at all**, remeasured the same binaries and the full-direct
+>    figure moved again — which is what a cross-run difference looks like.
+> 2. **"That is machine variation in the *baseline* arm"**, on the two slow
+>    classical medians. What was observed is that those two medians were much
+>    larger in this run than in the previous one. The cause was not diagnosed and
+>    should not have been named.
+>
+> Everything else below stands, and every artifact in this directory is retained
+> unaltered. Only the two paragraphs above are withdrawn.
+
 # Repair of R1–R4 — handoff for lead review
 
 Worker: Claude Opus 5, working linearly without subagents.
