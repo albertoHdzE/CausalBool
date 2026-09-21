@@ -388,6 +388,11 @@ def relation_cover(
     # The members were charged as they were accepted, so this validates the
     # final size without billing the same cover a second time.
     meter.cover_limit(len(cover))
+    # Normalisation reads the clock only every 256 members and ``cover_limit``
+    # reads it not at all, so a cover finished after the deadline would
+    # otherwise be handed back as a completed relation. Same rule as the
+    # solver's terminal verdict: observe the deadline before certifying.
+    meter.check_time()
     return store(cover)
 
 

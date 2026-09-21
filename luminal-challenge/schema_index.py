@@ -929,8 +929,22 @@ def solve(
                         )
                     )
                 stack.extend(reversed(survivors))
+                # The cover was charged before it was scanned, so the clock has
+                # not been read since. Read it now. Usually the next popped
+                # state would, but when this scan leaves no survivor and empties
+                # the stack there is no next state, and the loop would fall
+                # through to a verdict of UNSAT — a positive claim that the
+                # declared domain holds no solution — using time the query did
+                # not have. Checking here bounds the overrun to exactly one
+                # cover, which is itself capped at ``max_cover`` and validated
+                # against that cap before the search starts.
+                meter.check_time()
             else:
                 raise TypeError(f"expected an expression, got {type(head).__name__}")
+        # Defence in depth for the branches that empty the stack without
+        # scanning anything, such as a disjunction with no children: no
+        # completed verdict is certified on a meter whose deadline has passed.
+        meter.check_time()
         return QueryResult(UNSAT, None, None, meter.elapsed, meter.visited, meter.counters())
     except BudgetExhausted as exc:
         return QueryResult(UNKNOWN, None, exc.reason, meter.elapsed, meter.visited, meter.counters())

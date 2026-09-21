@@ -9,6 +9,7 @@ from __future__ import annotations
 import itertools
 import time
 import unittest
+import unittest.mock
 
 import schema_index as si
 
@@ -773,3 +774,193 @@ class MeterDeadlineTests(unittest.TestCase):
         meter.started -= 5
         self.assertGreater(meter.elapsed, 4.9)
         self.assertLess(meter.remaining, -3.9)
+
+
+# --------------------------------------------------------------------------
+# R1: the deadline must be observed before any terminal verdict
+# (lead review of 2026-09-20, results/direct_index_v4_optimization/REVIEW.md)
+# --------------------------------------------------------------------------
+
+
+class DeterministicClock:
+    """A clock that only moves when a test moves it.
+
+    Wall-clock tests of a deadline are flaky by construction. These fixtures
+    drive ``time.monotonic`` inside ``schema_index`` directly, so the moment
+    the budget expires is exact and the regression is reproducible.
+    """
+
+    def __init__(self, start: float = 0.0) -> None:
+        self.now = start
+
+    def __call__(self) -> float:
+        return self.now
+
+
+class TerminalDeadlineTests(unittest.TestCase):
+    """Batched scanning must not certify a completed search after exhaustion.
+
+    ``solve`` charges a leaf's whole cover before scanning it, so the clock is
+    read before the scan and not during it. If that scan is the last work of
+    the query — because it leaves no survivor and empties the stack — then the
+    time it consumed must still be observed before the query may claim it
+    exhausted the search space. An expired budget is UNKNOWN. It is never
+    UNSAT, which is a positive claim that the declared domain holds no
+    solution.
+    """
+
+    def setUp(self):
+        self.clock = DeterministicClock()
+        self.patch = unittest.mock.patch.object(si.time, "monotonic", self.clock)
+        self.patch.start()
+        self.addCleanup(self.patch.stop)
+
+    def expire_during(self, meter, when_count):
+        """Advance the clock past the deadline while a cover is scanned."""
+
+        charge = meter.intersection
+
+        def advancing(count=1):
+            charge(count)
+            if count == when_count:
+                self.clock.now += 2.0
+
+        meter.intersection = advancing
+
+    def test_the_final_all_conflicting_cover_reports_unknown(self):
+        """The lead's probe: every alternative conflicts and time runs out."""
+
+        meter = si.Budget(seconds=1.0).start()
+        expression = si.AllOf(
+            (
+                si.Leaf((si.Cube(2, 0, 0),)),
+                si.Leaf((si.Cube(2, 1, 0), si.Cube(2, 2, 0))),
+            )
+        )
+        self.expire_during(meter, 2)
+        result = si.solve(expression, 2, meter=meter)
+        self.assertTrue(
+            result.is_unknown,
+            f"a search that ran out of time claimed {result.status}",
+        )
+        self.assertIn("time", result.reason)
+        self.assertIsNone(result.cube)
+
+    def test_an_exhausted_terminal_branch_reports_unknown(self):
+        """The stack empties through a disjunction with no surviving child."""
+
+        meter = si.Budget(seconds=1.0).start()
+        expression = si.AnyOf(
+            (
+                si.AllOf(
+                    (
+                        si.Leaf((si.Cube(3, 0, 0),)),
+                        si.Leaf((si.Cube(3, 7, 0),)),
+                    )
+                ),
+            )
+        )
+        self.expire_during(meter, 1)
+        result = si.solve(expression, 3, meter=meter)
+        self.assertTrue(result.is_unknown, result.status)
+        self.assertIsNone(result.cube)
+
+    def test_time_spent_on_a_middle_cover_is_observed_too(self):
+        """Not only the last scan: any scan that overruns stops the search."""
+
+        meter = si.Budget(seconds=1.0).start()
+        wide = si.Leaf(tuple(si.Cube(3, value, 0) for value in range(8)))
+        expression = si.AllOf((wide, si.Leaf((si.Cube(3, 0, 0),)), wide))
+        self.expire_during(meter, 8)
+        result = si.solve(expression, 3, meter=meter)
+        self.assertTrue(result.is_unknown, result.status)
+
+    def test_an_in_budget_unsat_is_still_unsat(self):
+        """The repair must not turn a completed search into a false UNKNOWN."""
+
+        meter = si.Budget(seconds=1.0).start()
+        expression = si.AllOf(
+            (
+                si.Leaf((si.Cube(2, 0, 0),)),
+                si.Leaf((si.Cube(2, 1, 0), si.Cube(2, 2, 0))),
+            )
+        )
+        result = si.solve(expression, 2, meter=meter)
+        self.assertTrue(result.is_unsat, result.status)
+        self.assertIsNone(result.cube)
+
+    def test_an_in_budget_sat_is_still_sat(self):
+        meter = si.Budget(seconds=1.0).start()
+        expression = si.AllOf(
+            (
+                si.Leaf((si.Cube(2, 0, 0b10),)),
+                si.Leaf((si.Cube(2, 0, 0b10), si.Cube(2, 1, 0))),
+            )
+        )
+        result = si.solve(expression, 2, meter=meter)
+        self.assertTrue(result.is_sat, result.status)
+        self.assertEqual(result.cube, si.Cube(2, 0, 0b10))
+
+    def test_a_witness_found_after_the_deadline_is_not_certified(self):
+        """The accepting return is reached only through a fresh clock check."""
+
+        meter = si.Budget(seconds=1.0).start()
+        expression = si.AllOf(
+            (
+                si.Leaf((si.Cube(2, 0, 0b11),)),
+                si.Leaf((si.Cube(2, 0, 0b11),)),
+            )
+        )
+        self.expire_during(meter, 1)
+        result = si.solve(expression, 2, meter=meter)
+        self.assertTrue(
+            result.is_unknown,
+            "a witness was certified on a meter already known to be exhausted",
+        )
+
+    def test_the_deadline_granularity_is_bounded_by_one_cover(self):
+        """Between two clock observations lies at most one cover scan.
+
+        This is the property the batched charge trades for: the clock is read
+        once per cover rather than once per alternative, so a deadline can
+        overrun by one scan of at most ``max_cover`` alternatives and no more.
+        """
+
+        observations = []
+        clock = self.clock
+
+        def counting():
+            observations.append(clock.now)
+            return clock.now
+
+        self.patch.stop()
+        with unittest.mock.patch.object(si.time, "monotonic", counting):
+            meter = si.Budget(seconds=30.0).start()
+            wide = si.Leaf(tuple(si.Cube(4, value, 0) for value in range(16)))
+            si.solve(si.AllOf((wide, wide, wide)), 4, meter=meter)
+        self.patch.start()
+        # One observation per popped state and one per scanned cover at least:
+        # the count must grow with the number of covers, not stay fixed.
+        self.assertGreaterEqual(len(observations), meter.visited)
+
+    def test_a_cover_that_overruns_never_yields_a_completed_relation(self):
+        """The same property one level up, in the comparison cover builder."""
+
+        import direct_constraints as dk
+
+        meter = si.Budget(seconds=1.0).start()
+        lhs = dk.Term(si.Field("l", 0, 3), 0)
+        rhs = dk.Term(si.Field("r", 3, 3), 0)
+        original = meter.record
+        state = {"calls": 0}
+
+        def advancing(count=1):
+            state["calls"] += 1
+            if state["calls"] == 3:
+                self.clock.now += 2.0
+            original(count)
+
+        meter.record = advancing
+        with self.assertRaises(si.BudgetExhausted) as caught:
+            dk.relation_cover("le", lhs, rhs, 6, meter)
+        self.assertIn("time", caught.exception.reason)
