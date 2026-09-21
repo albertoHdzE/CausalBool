@@ -57,9 +57,7 @@ system's functional description from its behaviour alone; run on a canonical
 decision diagram it does so without enumerating states. The same method
 supplies the gates for the arithmetic questions: each cell is stated as an
 integer relation and whatever gate the method returns is what is compiled, so
-the classical full adder is recovered rather than assumed. The remaining three
-questions have answers that this method does not supply, and reporting them
-here would credit it with work it did not do. Supplementary Information gives
+the classical full adder is recovered rather than assumed. Supplementary Information gives
 the proofs, complete specifications and verification evidence.
 \end{abstract}
 
@@ -109,12 +107,7 @@ the implementation accompanies this response~\cite{causalbool}.
 % \end{tabular}
 % \end{center}
 
-This is what decides which questions appear below. Four of them are answered by
-an object the method returned, and the fifth, Q8, is not answered by it at all:
-there the contribution is a measurement of why, and the answer is the direct
-limb construction. Questions whose answers the method does not supply are left
-to another account rather than reported here with the method attached to them.
-Supplementary Sections~S7--S9 record, answer by answer, what the method
+Supplementary record  what the method
 supplies, together with the evidence, the denominators and the limits.
 Section~S9 in particular separates what the strongest of those measurements
 does and does not establish.
@@ -326,12 +319,12 @@ order.
 
 \subsection{An experiment in which no gate is written down}
 \label{sec:experiment}
-I set the rule that nothing about \emph{how} to compute an arithmetic cell
+I set 4 rules. First: nothing about \emph{how} to compute an arithmetic cell
 would appear anywhere in the source. Stated precisely, every cell is supplied
 \emph{extensionally}. A cell with $n$ input bits and $m$ outputs is a map
 \begin{equation}\label{eq:cellmap}
 f:\{0,1\}^n\to\{0,1\}^m,
-\end{equation}
+\end{equation} 
 and what the method receives is its graph $\{(x,f(x)):x\in\{0,1\}^n\}$, the
 function as a set of pairs. Writing a gate would instead supply an
 \emph{intensional} description, a term whose value happens to be $f$. The
@@ -339,7 +332,7 @@ experiment withholds exactly that and asks the method to return one. Below,
 $\bar x$ is $1-x$ and $[\,\cdot\,]$ is one when the enclosed statement holds and
 zero otherwise.
 
-Each $f$ is written as the integer relation it must satisfy. For the adder, on
+Second: each $f$ is written as the integer relation it must satisfy. For the adder, on
 $(a,b,c_{\mathrm{in}})\in\{0,1\}^3$, the two outputs are the base-two digits of
 an integer sum,
 \begin{equation}\label{eq:adderrel}
@@ -374,7 +367,7 @@ d_{\mathrm{out}}=d\vee[x\ne\gamma].
 Once a bit has differed the values differ, and this bit differs when it
 disagrees with the constant.
 
-Four relations, then, stated as arithmetic and as nothing else. Each defines
+Four relations stated as arithmetic. Each defines
 its $f$ by its values and none by a construction, which is the distinction the
 experiment turns on. Because $\beta$ and $\gamma$ each take two values, the two
 scan relations are supplied twice over, so four relations become the six cells
@@ -390,8 +383,7 @@ hand-written gate could enter: the builders that assemble the multiplier, the
 comparator scan and the inequality scan read their gates from the recovery and
 contain no gate literals of their own.
 
-It is worth seeing what that behaviour actually is, because it does not stay a
-table for long. Figure~\ref{fig:cells} follows the adder through the
+Figure~\ref{fig:cells} follows the adder through the
 representation of Section~\ref{sec:index-capability}. The enumerated relation is
 eight rows and two output columns, and that is the entire input (Panel A).
 Keeping only the positions at which an output is one turns each column into an
@@ -459,10 +451,9 @@ Inequality, constant bit 0 & inequality scan & differs & $d\vee x$\\
 Inequality, constant bit 1 & & differs & $d\vee\bar x$\\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table} 
 
-Three features of that table are worth drawing out, because they are the
-reason the experiment was worth running rather than assumed.
+Three features of that table are highlighted over the experiment above descrived.
 
 The first is the adder. Handed the integer $a+b+c_{\mathrm{in}}$ and nothing
 else, the method found all three inputs essential for both outputs and returned
