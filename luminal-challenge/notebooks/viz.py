@@ -1,0 +1,369 @@
+"""The single owner of every picture the Luminal notebooks draw.
+
+Nothing here computes a compiler result. Every function takes objects that the
+solution modules already produced -- bundles from ``direct_contract``, cubes and
+fields from ``schema_index``, measured rows from the frozen evidence -- and
+draws them. If a figure and a number ever disagree, the fault is in the caller,
+not here.
+
+This module exists because a function defined inside a notebook cell has no
+importable home: it lives as quoted text in JSON and, once run, only in that
+notebook's kernel. ``00-concepts.ipynb`` originally defined ``narrate``,
+``show_timeline`` and ``show_lifetimes`` in cells 9, 14 and 20. Notebook 01
+needs the same three renders, so they were moved here and both notebooks now
+import them. Under the repository's single-owner rule this file is the only
+place a notebook figure is defined; a second copy anywhere is a defect, and
+``check_single_render_owner.py`` fails on one.
+
+The palette is shared so that the same meaning carries the same colour across
+every figure in both notebooks:
+
+* ``FILL`` -- an occupied slot, a live value, a member of a set.
+* ``EMPTY`` -- a legal but unused slot.
+* ``EDGE`` -- the outline of an occupied region.
+* ``EXCLUDED`` -- removed by a constraint: a blocked cycle, a taken address.
+* ``CHOSEN`` -- the witness the method actually returned.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+
+# A module must import cleanly regardless of who imports it, so the pinned
+# reference goes on the path here rather than relying on a notebook cell having
+# run first. This is path setup, not a second copy of any rule: every hardware
+# fact below is still read from ``machine``.
+ROOT = Path(__file__).resolve().parent.parent
+for _entry in (str(ROOT / ".reference"), str(ROOT)):
+    if _entry not in sys.path:
+        sys.path.insert(0, _entry)
+
+import machine  # noqa: E402  -- the frozen machine model, after the path is set
+
+import schema_index as si  # noqa: E402
+
+
+__all__ = [
+    "ENGINES",
+    "FILL",
+    "EMPTY",
+    "EDGE",
+    "EXCLUDED",
+    "CHOSEN",
+    "narrate",
+    "show_timeline",
+    "show_lifetimes",
+    "show_universe",
+    "show_cover_blocks",
+    "show_index_layout",
+    "show_expression_tree",
+    "show_search_economy",
+    "show_program_results",
+]
+
+
+ENGINES = ["load", "scalar", "vector", "store", "flow"]
+
+FILL = "#cfe3f3"
+EMPTY = "#f2f4f7"
+EDGE = "#5d8fb3"
+EXCLUDED = "#f0d5d5"
+CHOSEN = "#a8d5a2"
+
+
+# --------------------------------------------------------------------------
+# Renders shared with 00-concepts
+# --------------------------------------------------------------------------
+
+
+def narrate(program, facts, times, title) -> None:
+    """Print a tick-by-tick account of one schedule."""
+    span = max(times.values()) + 1          # the schedule is this many cycles long
+    print(title)
+    print(f"{'cycle':>5}  {'issued':30} {'becomes ready this cycle'}")
+    for cycle in range(span):
+        issued = [i for i, t in sorted(times.items()) if t == cycle]
+        landing = [i for i, t in sorted(times.items())
+                   if t + facts.latency[i] == cycle and facts.dest[i]]
+        issue_text = ", ".join(
+            f"op{i} {facts.opcode[i]}" for i in issued) or "-- nothing (stall) --"
+        land_text = ", ".join(f"{facts.dest[i]}" for i in landing) or ""
+        print(f"{cycle:>5}  {issue_text:30} {land_text}")
+    print()
+
+
+def show_timeline(bundles, title, figure_width=0.62) -> None:
+    """One column per cycle, one row per engine. Blue means occupied."""
+    n = len(bundles)
+    fig, ax = plt.subplots(figsize=(max(4.0, figure_width * n + 1.6), 2.8))
+    for row, engine in enumerate(ENGINES):
+        for cycle, bundle in enumerate(bundles):
+            ids = bundle.get(engine, [])
+            ax.add_patch(Rectangle((cycle, row), 1, 1, linewidth=1,
+                                   edgecolor="white",
+                                   facecolor=FILL if ids else EMPTY))
+            if ids:
+                ax.text(cycle + 0.5, row + 0.5, ",".join(str(i) for i in ids),
+                        ha="center", va="center", fontsize=9)
+    ax.set_xlim(0, n)
+    ax.set_ylim(0, len(ENGINES))
+    ax.set_xticks([c + 0.5 for c in range(n)], [str(c) for c in range(n)])
+    ax.set_yticks([r + 0.5 for r in range(len(ENGINES))],
+                  [f"{e} x{machine.ENGINE_LIMITS[e]}" for e in ENGINES])
+    ax.set_xlabel("cycle")
+    ax.set_title(title)
+    ax.invert_yaxis()
+    fig.tight_layout()
+    plt.show()
+
+
+def show_lifetimes(facts, addresses, life, span, title) -> None:
+    """One row per locker; each bar is a value occupying it while alive."""
+    rows = max(addresses.values()) + 1
+    fig, ax = plt.subplots(figsize=(max(4.0, 0.62 * span + 1.6), 0.6 * rows + 1.4))
+    for name, base in addresses.items():
+        start, end = life[name]
+        ax.add_patch(Rectangle((start, base + 0.12), end - start + 1, 0.76,
+                               facecolor=FILL, edgecolor=EDGE))
+        ax.text(start + (end - start + 1) / 2, base + 0.5, name,
+                ha="center", va="center", fontsize=8)
+    ax.set_xlim(0, span)
+    ax.set_ylim(0, rows)
+    ax.set_xticks([c + 0.5 for c in range(span)], [str(c) for c in range(span)])
+    ax.set_yticks([r + 0.5 for r in range(rows)], [f"word {r}" for r in range(rows)])
+    ax.set_xlabel("cycle")
+    ax.set_title(title)
+    ax.invert_yaxis()
+    fig.tight_layout()
+    plt.show()
+
+
+# --------------------------------------------------------------------------
+# Renders of the index method itself
+# --------------------------------------------------------------------------
+
+
+def show_universe(
+    groups: Sequence[Tuple[str, Sequence[si.Cube]]],
+    n: int,
+    title: str,
+    per_row: int = 16,
+) -> None:
+    """Every index of an ``n`` bit universe, with each group's members marked.
+
+    One panel per group. A cell is the integer itself, shaded when some cube of
+    that group contains it. Membership is asked of the cube algebra through
+    ``si.cover_contains``; this function never decides what a cube denotes.
+    """
+
+    size = 1 << n
+    rows = (size + per_row - 1) // per_row
+    columns = min(size, per_row)
+    fig, axes = plt.subplots(
+        len(groups), 1,
+        figsize=(0.52 * columns + 1.6, (0.52 * rows + 0.9) * len(groups)),
+        squeeze=False,
+    )
+    for axis, (label, cover) in zip(axes[:, 0], groups):
+        marked = 0
+        for value in range(size):
+            row, column = divmod(value, per_row)
+            inside = si.cover_contains(cover, value)
+            marked += inside
+            axis.add_patch(Rectangle((column, row), 1, 1, linewidth=1,
+                                     edgecolor="white",
+                                     facecolor=FILL if inside else EMPTY))
+            axis.text(column + 0.5, row + 0.5, str(value), ha="center",
+                      va="center", fontsize=8,
+                      color="#1b3a4b" if inside else "#9aa5b1")
+        axis.set_xlim(0, columns)
+        axis.set_ylim(0, rows)
+        axis.set_xticks([])
+        axis.set_yticks([])
+        axis.set_title(f"{label}  --  {marked} of {size} indices", fontsize=10)
+        axis.invert_yaxis()
+    fig.suptitle(title, y=1.0)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_cover_blocks(
+    cover: Sequence[si.Cube],
+    field: si.Field,
+    lo: int,
+    hi: int,
+    title: str,
+    excluded: Sequence[int] = (),
+    chosen: Optional[int] = None,
+) -> None:
+    """An interval cover drawn as the aligned blocks it actually is.
+
+    ``lo``/``hi`` bound the drawn axis. Each cube of the cover becomes one bar
+    spanning the field values it admits, so a reader can see that a range of
+    nine cycles is carried by a handful of blocks rather than nine singletons.
+    """
+
+    span = hi - lo + 1
+    fig, ax = plt.subplots(figsize=(max(4.5, 0.46 * span + 1.8),
+                                    0.42 * max(len(cover), 1) + 1.9))
+    for value in range(lo, hi + 1):
+        ax.add_patch(Rectangle((value, -0.9), 1, 0.7, linewidth=1,
+                               edgecolor="white",
+                               facecolor=EXCLUDED if value in excluded else EMPTY))
+        ax.text(value + 0.5, -0.55, str(value), ha="center", va="center", fontsize=7)
+    for index, cube in enumerate(cover):
+        # A cube admits field value ``v`` when ``v`` agrees with every field
+        # coordinate the cube has fixed. Coordinates outside the field are
+        # irrelevant to the drawn axis and are not consulted.
+        required = cube.anchor & field.mask
+        fixed_in_field = cube.fixed_mask & field.mask
+        values = [
+            v for v in range(lo, hi + 1)
+            if (field.encode(v) & fixed_in_field) == required
+        ]
+        if not values:
+            continue
+        start, end = min(values), max(values)
+        ax.add_patch(Rectangle((start, index + 0.12), end - start + 1, 0.76,
+                               facecolor=FILL, edgecolor=EDGE))
+        ax.text(start + (end - start + 1) / 2, index + 0.5,
+                f"{cube.label()}  ({len(values)})", ha="center", va="center",
+                fontsize=7)
+    if chosen is not None:
+        ax.add_patch(Rectangle((chosen, -0.9), 1, 0.7, linewidth=1.6,
+                               edgecolor="#2e6b2a", facecolor=CHOSEN))
+        ax.text(chosen + 0.5, -0.55, str(chosen), ha="center", va="center",
+                fontsize=7, fontweight="bold")
+    ax.set_xlim(lo, hi + 1)
+    ax.set_ylim(-1.0, max(len(cover), 1))
+    ax.set_yticks([])
+    ax.set_xticks([])
+    ax.set_xlabel(f"value of field {field.name!r}")
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_index_layout(fields: Sequence[si.Field], n: int, title: str) -> None:
+    """The bit layout of one query's index, drawn as a labelled ruler.
+
+    Coordinates are LSB-first, so bit 0 sits on the left exactly as
+    ``Cube.label`` prints it.
+    """
+
+    fig, ax = plt.subplots(figsize=(max(5.0, 0.36 * n + 2.0), 1.9))
+    palette = ["#cfe3f3", "#dfe8d5", "#f3e2cf", "#e3d5ef", "#d5eeee"]
+    for index, field in enumerate(sorted(fields, key=lambda f: f.offset)):
+        colour = palette[index % len(palette)]
+        ax.add_patch(Rectangle((field.offset, 0.25), field.width, 0.6,
+                               facecolor=colour, edgecolor=EDGE))
+        ax.text(field.offset + field.width / 2, 0.55,
+                f"{field.name}\n{field.width}b", ha="center", va="center", fontsize=8)
+    for bit in range(n):
+        ax.text(bit + 0.5, 0.08, str(bit), ha="center", va="center", fontsize=6,
+                color="#6b7684")
+    ax.set_xlim(0, n)
+    ax.set_ylim(0, 1.0)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlabel(f"index coordinate (LSB-first), width {n} bits")
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_expression_tree(expression, title: str, max_depth: int = 3) -> None:
+    """The acceptance expression as an indented tree, with each leaf's cover size.
+
+    Printed rather than plotted: the useful content is the shape and the
+    alternative counts, and a text tree survives copying into a report. Node
+    counts come from ``si.count_records`` so this cannot drift from the meter.
+    """
+
+    print(title)
+    print(f"total expression records: {si.count_records(expression)}")
+
+    def walk(node, depth, prefix):
+        if depth > max_depth:
+            print(f"{prefix}...")
+            return
+        if isinstance(node, si.Leaf):
+            print(f"{prefix}Leaf  {len(node.cubes)} alternative(s)")
+        elif isinstance(node, si.AllOf):
+            print(f"{prefix}AllOf {len(node.children)} child(ren)  [every one must hold]")
+            for child in node.children:
+                walk(child, depth + 1, prefix + "    ")
+        elif isinstance(node, si.AnyOf):
+            print(f"{prefix}AnyOf {len(node.children)} child(ren)  [at least one]")
+            for child in node.children:
+                walk(child, depth + 1, prefix + "    ")
+
+    walk(expression, 0, "  ")
+    print()
+
+
+def show_search_economy(
+    labels: Sequence[str],
+    visited: Sequence[int],
+    total: Sequence[int],
+    title: str,
+) -> None:
+    """Cubes actually visited against the size of the declared assignment space.
+
+    Both bars are drawn on a logarithmic axis because the two quantities differ
+    by orders of magnitude; the ratio is printed on each pair so the figure
+    cannot be read without its denominator.
+    """
+
+    positions = range(len(labels))
+    fig, ax = plt.subplots(figsize=(max(5.0, 1.5 * len(labels) + 2.0), 3.4))
+    ax.bar([p - 0.2 for p in positions], total, width=0.4, color=EMPTY,
+           edgecolor=EDGE, label="assignments in the declared domain")
+    ax.bar([p + 0.2 for p in positions], visited, width=0.4, color=FILL,
+           edgecolor=EDGE, label="cubes the search visited")
+    for p, seen, whole in zip(positions, visited, total):
+        if seen > 0 and whole > 0:
+            ax.text(p, max(seen, whole) * 1.6, f"1 in {whole / seen:,.0f}",
+                    ha="center", fontsize=8)
+    ax.set_yscale("log")
+    ax.set_xticks(list(positions), labels, fontsize=8)
+    ax.set_ylabel("count (log scale)")
+    ax.set_title(title, fontsize=10)
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_program_results(
+    programs: Sequence[str],
+    arms: Dict[str, Sequence[int]],
+    title: str,
+    ylabel: str = "cycles x scratch words (lower is better)",
+) -> None:
+    """One grouped bar per program, one bar per arm, on a common coordinate.
+
+    Every arm is measured on the same programs with the same metric, which is
+    the comparison this figure exists to make honest.
+    """
+
+    names = list(arms)
+    width = 0.8 / len(names)
+    positions = range(len(programs))
+    fig, ax = plt.subplots(figsize=(max(6.0, 1.15 * len(programs) + 2.0), 3.8))
+    shades = [EMPTY, "#dfe8d5", FILL]
+    for index, name in enumerate(names):
+        offset = (index - (len(names) - 1) / 2) * width
+        ax.bar([p + offset for p in positions], arms[name], width=width,
+               label=name, color=shades[index % len(shades)], edgecolor=EDGE)
+    ax.set_yscale("log")
+    ax.set_xticks(list(positions), programs, rotation=30, ha="right", fontsize=8)
+    ax.set_ylabel(ylabel, fontsize=9)
+    ax.set_title(title, fontsize=10)
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    plt.show()
