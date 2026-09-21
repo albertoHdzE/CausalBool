@@ -1,24 +1,81 @@
 # Luminal direct-index task status
 
 Canonical contract: [INDEX_ONLY_PLAN.md](INDEX_ONLY_PLAN.md), version **1.1**.
-Last updated: **2026-09-20**.
+Last updated: **2026-09-21**.
 
 The repair implementation has received independent lead re-review.
-**CHANGES_REQUIRED**: see the [current review](../results/direct_index_v2_repair/REVIEW.md)
-for remaining F1–F3 (parts of R2/R4/R7), acceptance criteria and rerun evidence.
-R1/R3/R5/R6/R8/R9 are closed. The [first review](../results/direct_index_v1/REVIEW.md)
-and prior worker records remain historical evidence.
+**ACCEPTED**: F1, F2 and F3 are closed, including the lead-found expression-cache
+regression. The final local acceptance matrix and evidence audit are recorded in
+the [accepted review](../results/direct_index_v3_repair/REVIEW.md). This is local
+acceptance only; no external submission or private-grader result is claimed.
+Earlier reviews and worker records remain historical evidence.
+
+### Runtime optimization — current disposition
+
+**ACCEPTED WITH LIMITATIONS**, reviewed `1cf98da` on 2026-09-20.
+[Final lead review](../results/direct_index_v4_optimization_repair2/REVIEW.md)
+supersedes all optimization review dispositions below. F1/F2 are closed; fresh
+340-test verification, 142 programs / 277 cases, official 72-run comparison,
+600 public timing rows, 1,500 extra-corpus rows and 50 evidence checks pass.
+The lead independently recomputed speedups: full 2.1320x, bootstrap 1.1629x versus
+frozen v3 in this run. Earlier runs are retained; timing varies across runs and
+bootstrap still misses its 1.20x target. Direct remains slower than classical.
+
+The implementation is ready for paper drafting within the
+[claims/evidence contract](../paper/CLAIMS_AND_EVIDENCE.md). No further repair or
+optimization campaign is required before writing. Novelty, proofs and publication
+readiness remain manuscript work. Historical records below are preserved.
+
+### Paper draft — 2026-09-21
+
+The internal [manuscript draft](../paper/main.pdf) is complete, with editable
+[LaTeX](../paper/main.tex), six generated figure pairs, a method diagram,
+mathematical arguments, primary-source context and reproduction instructions.
+[Paper README](../paper/README.md) and [build validation](../paper/BUILD_VALIDATION.json)
+record the deliverable. The retained evidence was re-audited: 50 checks pass.
+The draft uses the accepted runs; no new timing campaign or production change
+was made for writing. Independent manuscript review, novelty assessment and
+publication readiness remain separate from this completed draft.
+
+### Historical optimization reviews
+
+**Previous re-review: CHANGES_REQUIRED**, reviewed `bb88b31` on 2026-09-20.
+[Repair-round lead review](../results/direct_index_v4_optimization_repair/REVIEW.md):
+R1 deadline and R2 phase-exit defects are closed. R3 remains partial: the checker
+accepts a reduced resampling protocol and missing verification stages (F1/F2).
+Fresh 300-test verification and the full acceptance corpus pass. The remaining
+assignment is a bounded evidence-checker repair; no new optimization requested.
+The preceding v4 review below is historical and superseded by this disposition.
+
+**Previous lead verdict: CHANGES_REQUIRED**, reviewed `91be105` on 2026-09-20.
+See [v4 lead review](../results/direct_index_v4_optimization/REVIEW.md) for R1–R4
+and the bounded repair handoff. The full independent verification and official
+comparison passed; deterministic probes found deadline and evidence-enforcement
+defects. Retained timing improvements reproduce arithmetically, but v4 is not
+accepted and the paper remains deferred. The planning record below is historical.
+
+[Optimization execution plan](OPTIMIZATION_PHASE_PLAN.md), version **1.1**:
+**READY_FOR_IMPLEMENTATION**, not implemented or accepted. Claude may execute
+all stages through final handoff without an intermediate review. Official
+optimization remains enabled; bootstrap is a measured ablation. The lead reviews
+v4 independently after handoff. V3 acceptance above remains historical baseline
+acceptance and does not extend to future optimization changes.
+
+Plan review corrected the preliminary bootstrap timing's provenance, distinguished
+legitimate resolution of UNKNOWN from budget bypass, fixed mode-selection
+authority, and specified bounded experiments, performance criteria, ownership,
+raw evidence and rerun commands. No production behavior changed in this review.
 
 | Task | State | Owner | Evidence / next action |
 |---|---|---|---|
 | L00 — persistent contract and navigation | ACCEPTED | Lead | Canonical plan, agent navigation and review handoff inspected; v1.1 amendment below |
-| L01 — direct schema algebra and solver | CHANGES_REQUIRED | Worker (Claude Opus 5) | F3: construction/solve record accounting and durable budget regressions |
+| L01 — direct schema algebra and solver | ACCEPTED | Worker (Claude Opus 5), lead review | F3 construction/solve accounting and cache regressions; v3 final verification |
 | L02 — machine facts and independent corpus | ACCEPTED | Lead | Unchanged contract reviewed; 31 tests and all 142 inputs/277 cases pass; hashes verified |
-| L03 — comparisons and joint constraints | CHANGES_REQUIRED | Worker (Claude Opus 5) | R3 closed; F3: uncharged nodes and expired simplified-return paths |
-| L04 — independent bootstrap compiler | READY_FOR_REVIEW | Worker (Claude Opus 5) | `direct_compiler.py`, 19 tests pass; 142/142 corpus compiles and validates; see record below |
-| L05 — joint optimization | READY_FOR_REVIEW | Worker (Claude Opus 5) | R1/R6/R8 repaired: target bounds checked and recorded, real tradeoff fixture frozen, final source window restored |
-| L06 — packaging and verification runners | CHANGES_REQUIRED | Worker (Claude Opus 5) | F1/F2: exact run membership and historical per-program integer controls |
-| L07 — integration and independent review | CHANGES_REQUIRED | Lead | Re-review of f3391b6 complete; F1–F3 remain; current v2 REVIEW.md governs next repair |
+| L03 — comparisons and joint constraints | ACCEPTED | Worker (Claude Opus 5), lead review | Joint constraints and F3 budget paths covered by final verification |
+| L04 — independent bootstrap compiler | ACCEPTED | Worker (Claude Opus 5), lead review | 19 tests; 142/142 corpus compiles and validates |
+| L05 — joint optimization | ACCEPTED | Worker (Claude Opus 5), lead review | Bounds, tradeoff fixture and source window covered by final verification |
+| L06 — packaging and verification runners | ACCEPTED | Worker (Claude Opus 5), lead review | Exact membership and historical per-program integer controls |
+| L07 — integration and independent review | ACCEPTED | Lead | Final 191-test verification, isolated corpus, seven comparison gates and evidence audit |
 
 ### Lead re-review — 2026-09-20
 
@@ -456,8 +513,9 @@ measurements — serial 1.0000000000000000, classical 1.9013791212645499, direct
 lines and `e30a1ed8090be9b4…` recorded above belong to `7bdac4c`, before the
 cache correction.
 
-Verdict remains the lead's: **PENDING LEAD SIGN-OFF**. Still no push, no
-submission, nothing self-accepted.
+At the time this historical record was written, the verdict was pending. It was
+subsequently set by the lead to **ACCEPTED** in the v3 review above. Still no
+push, submission, or publication is authorized by that acceptance.
 
 ## Version and decision log
 
@@ -466,3 +524,223 @@ submission, nothing self-accepted.
   User-selected boundaries: direct schemata, incremental index construction,
   correctness/runtime/serial improvement required, classical comparison reported.
   No new compiler implementation or benchmark result is claimed.
+
+## Optimization phase — 2026-09-20, worker record
+
+Worker: Claude Opus 5, working linearly without subagents. Plan:
+[OPTIMIZATION_PHASE_PLAN.md](OPTIMIZATION_PHASE_PLAN.md) version **1.1**.
+Full handoff: [direct_index_v4_optimization/REVIEW_HANDOFF.md](../results/direct_index_v4_optimization/REVIEW_HANDOFF.md).
+State: **READY_FOR_REVIEW**. Not accepted; only the lead accepts. No submission,
+push or publication is made or authorized.
+
+**Baseline provenance is exact.** Every production and test source at the
+starting commit `8e02cd7` was byte-identical to the accepted v3 record at
+`35d2608`, and reassembling the export reproduced `c0574395d339dae3…`, 2,258
+lines, exactly. All four protected hashes and the pinned reference manifest
+verified.
+
+**Owned files changed:** `schema_index.py`, `direct_constraints.py`,
+`direct_optimizer.py`, `direct_compiler.py`, their three test modules, and the
+new `benchmark_optimization.py`, `check_optimization_evidence.py` and
+`tests_direct/test_benchmark_harness.py`. `verify_direct.py` gained one additive
+stage for the new harness regressions — the single file outside the plan's
+default ownership list, explained in the handoff. `direct_contract.py`,
+`export_direct.py` and `compare_direct.py` are untouched.
+
+Commits `922ed0f`, `305b9e9`, `9c6b9b6`, `20aaa1f`. This STATUS entry is
+deliberately left uncommitted, because the file also carries the lead's own
+uncommitted edits and plan section 7b forbids a worker committing those.
+
+| Command | Exit | Result |
+|---|---:|---|
+| `python3 -m unittest discover -s tests_direct` | 0 | **253 tests OK** (was 191) |
+| `verify_direct.py --stage all --timeout 20` | 0 | **PASS**, 142 of 142 programs, 277 cases |
+| `compare_direct.py --repeats 3 --timeout 20` | 0 | 72 runs, **all seven gates PASS** |
+| `benchmark_optimization.py --phase final --repeats 15` | 0 | 600 public + 1,500 corpus rows, 0 failures |
+| `check_optimization_evidence.py` | 0 | **34 checks, 0 failing** |
+| `git diff --check -- luminal-challenge` | 0 | clean |
+
+**Both engineering targets were missed, and are reported as missed.**
+Full-direct **1.9889x** against a 2.00x target (95% paired interval
+1.9841–1.9913); bootstrap **1.1371x** against 1.20x (1.1334–1.1406). Both
+speedups are real — the harness's own noise floor was measured at 1.0001x
+(0.9996–1.0005) in the baseline phase — and both are short of target. No target
+was adjusted after measurement.
+
+**Correctness is unchanged.** Combined public score 2.008466202284657, the
+accepted v3 value to within 4.4e-16, in every arm and every repetition. Every
+public program's cycles and scratch are identical, so no per-program
+`cycles × scratch` product moved at all. Bootstrap metrics are identical to the
+freshly measured v3 bootstrap.
+
+**Direct compilation is still not faster than classical and no such claim is
+made:** about 714x slower on the full path and 2.14x on the bootstrap, improved
+from 1,449x and 2.43x.
+
+**Reported against interest.** One of the 100 frozen evaluation-corpus programs
+is slower on the bootstrap path with the candidate; it is retained and reported.
+The first final-phase run failed in its aggregation after measuring all 1,500
+corpus rows, and is retained at `final_round1_failed/` rather than overwritten.
+
+**A finding the lead should check directly.** The baseline showed 82.5% of
+full-direct compile time going to queries that exhaust a 100 ms *wall-clock*
+budget, which should have capped any constant-factor speedup near 1.21x. The
+measured 1.9889x exceeds that because the budget system has two kinds of limit:
+speeding up the search migrated queries from the clock to the declared
+50,000-visited-cube cap, which is countable and therefore compresses. Those
+searches now reach the full declared 50,000 cubes — more of the space explored,
+not less — and reach it sooner. `max_visited` is unchanged in `Limits`.
+Attempted queries are unchanged at 3,270 and infeasible at 2,475: no window was
+skipped, no budget lowered, no search shortened, no pruning introduced.
+
+**The optimiser is worth keeping.** It contributes nothing on the eight public
+programs, but accepts 18 improvements on six of the 100 evaluation-corpus
+programs, raising that corpus's score geomean from 2.362098 to 2.376597, and
+eight improvements on the 142-program acceptance corpus. The recommendation is
+to keep the official optimization-enabled entry point; bootstrap is reported as
+an ablation only. Mode selection remains the lead's.
+
+## Optimization repair round — 2026-09-20, findings R1 to R4
+
+Worker: Claude Opus 5, working linearly. Responding to the
+[lead review](../results/direct_index_v4_optimization/REVIEW.md), verdict
+CHANGES_REQUIRED. Full record:
+[direct_index_v4_optimization_repair/REPAIR_HANDOFF.md](../results/direct_index_v4_optimization_repair/REPAIR_HANDOFF.md).
+State: **READY_FOR_REVIEW**. Nothing self-accepted; no submission authorised.
+No new speed experiment was attempted and no target was altered.
+
+All three blocking defects were reproduced first, then covered by a regression
+that failed on the reviewed code, then repaired.
+
+| Finding | State | Observable, before → after |
+|---|---|---|
+| R1 deadline bypass on a terminal verdict | **CLOSED** | `UNSAT, elapsed=2.0` → `UNKNOWN, "time budget exhausted"` |
+| R2 failed control with a successful exit | **CLOSED** | exit `0` with 90 recorded discrepancies → exit `1`; silent corpus skip → exit `2` before measuring |
+| R3 checker accepts corrupted evidence | **CLOSED** | 4 of 4 mutations passed → 6 of 6 rejected, control passes 42 checks |
+| R4 reporting corrections | **DONE** | five corrections; the v4 handoff preserved with a supersession header only |
+
+**R1** was the lead's finding exactly: `solve` charged a leaf's cover before
+scanning it, so a scan that left no survivor and emptied the stack fell through
+to `UNSAT` without reading the clock again. The clock is now read after every
+leaf scan and before the terminal verdict, and the same rule was applied to
+`relation_cover`, which had the same defect one level up. Granularity is bounded
+by one cover scan, itself capped at `max_cover`. Visit and record caps, search
+order and both v3 expression-cache retry regressions are unchanged.
+
+**R2** is now one mandatory conjunction — membership, row validity, frozen
+classical integers, per-program product nonregression, bootstrap metric
+equality, score floor and evaluation-corpus presence — from which the exit
+status is derived and nothing else. A missed speed target is deliberately not
+in it: that is a reported outcome, not a correctness failure.
+
+**R3** fixes the contract the checker enforces in the checker and the pinned
+inputs rather than reading it from the report under examination, hashes both
+exports from disk instead of trusting a stored boolean, recomputes scores,
+products, aggregates, confidence intervals and target decisions from the raw
+rows, recomputes stored gate flags, and audits the whole evaluation corpus. It
+now also hashes the harness and itself, because both produce or audit the
+numbers.
+
+| Command | Exit | Result |
+|---|---:|---|
+| `python3 -m unittest discover -s tests_direct` | 0 | **300 tests OK** (was 253) |
+| `verify_direct.py --stage all --timeout 20` | 0 | **PASS**, 142 of 142 programs, 277 cases |
+| `compare_direct.py --repeats 3 --timeout 20` | 0 | 72 runs, **all seven gates PASS** |
+| `benchmark_optimization.py --phase final --repeats 15` | 0 | 600 public + 1,500 corpus rows, **all mandatory gates PASS** |
+| `check_optimization_evidence.py --root …_repair --baseline …/baseline` | 0 | **42 checks, 0 failing** |
+| `git diff --check -- luminal-challenge` | 0 | clean |
+
+**Both engineering targets remain missed, and the measured speedups fell
+slightly because the R1 repair restores clock reads the defective version
+skipped.** Full-direct **1.9536x** against a 2.00x target (95% paired interval
+1.9503–1.9567), down from the defective 1.9889x; bootstrap **1.1380x** against
+1.20x (1.1327–1.1411). Correctness bought that 1.8%, and it is reported as such.
+
+**Correctness is unchanged.** Combined public score 2.008466202284657, the
+accepted v3 value, in every arm and repetition; every public program's cycles
+and scratch identical, so no per-program product moved at all.
+
+**Reporting corrected.** The "714x slower" figure came from inverting a rounded
+number and corresponds to no statistic: the labelled values are an inverted
+geometric mean of per-program median ratios of **513.24x** and an inverted
+pooled median of **663.38x**. The 82.5% / 1.21x ceiling was a heuristic
+presented as a decomposition; it is withdrawn and replaced by a measured
+per-query attribution — 62.00% of optimiser time ends at the countable
+visited-cube cap, 22.68% at the clock, 15.13% completes. The claim that further
+constant-factor work on the search is "ruled out" is withdrawn in full. The
+final-phase direct row count is 1,680, not 2,100.
+
+**Noted against interest.** One of the 100 evaluation-corpus programs,
+`additional_351501`, is slower on the bootstrap path with the candidate. The
+lead's retained `probes.py` can no longer run to completion, because
+`phase_final` now refuses before measuring when the mandatory corpus is skipped
+and writes no report; the equivalent updated probe is
+`results/direct_index_v4_optimization_repair/reproduction/repair_probes.py`.
+
+This STATUS entry is again left uncommitted, because the file carries the lead's
+own uncommitted edits and plan section 7b forbids a worker committing those.
+
+---
+
+## F1/F2 evidence-only repair — READY_FOR_REVIEW (2026-09-20)
+
+Responding to the lead re-review at
+`results/direct_index_v4_optimization_repair/REVIEW.md`, verdict
+CHANGES_REQUIRED at `bb88b31`. Handoff:
+`results/direct_index_v4_optimization_repair2/REPAIR2_HANDOFF.md`.
+Commits `3c9640b` (repair) and `1cf98da` (evidence and reporting).
+
+**No production file was touched.** Two files changed, both evidence
+instruments: `check_optimization_evidence.py` and
+`tests_direct/test_evidence_checker.py`. Every production source hashes as it
+did at `bb88b31` and the export is byte-identical, `d14bf39b450aaa5f…`, 2,652
+lines.
+
+**F1 closed.** The checker recomputed each paired interval with the resample
+count and seed taken from the interval it was auditing, so an experiment run at
+one resample was recomputed at one resample and passed. The protocol is now
+fixed in the checker at 10,000 resamples and seed 20260920, checked before any
+recomputation, used for every bound, aggregate and target decision; `--resamples`
+is removed rather than kept for diagnostics; and target declarations must now be
+complete, because an omitted one previously skipped its own comparison.
+
+**F2 closed.** The recorded verification needed only a positive total test count
+and the corpus totals, so a summary holding two records passed — and the suite's
+positive fixture was that two-record summary. Twelve records are now required,
+one per declared stage and per acceptance step, each checked against its own log
+and against the artifacts behind its totals. The fixture is complete, explicit,
+and materialises its own corpus through the verifier that owns writing it.
+
+**Evidence.** The lead's probes reproduced both findings before any edit. The new
+regressions gave 46 failures and 2 errors of 64 at `bb88b31`, with all 18
+existing ones passing; they now pass 64 of 64. Verification PASS with **340
+direct tests**, 142 programs and 277 cases; all seven comparison gates; every
+mandatory benchmark gate; **50 evidence checks**, all passing; control passing
+and **13 of 13** probe mutations rejected; `git diff --check` clean. Score
+unchanged at 2.008466202284657.
+
+**Both targets still missed and reported as missed:** full-direct **1.9471x**
+against 2.00x (CI 1.9396–1.9509), bootstrap **1.1337x** against 1.20x (CI
+1.1280–1.1428).
+
+**Two reporting corrections, both against interest.** The earlier claim that both
+speedups fell was wrong in direction — bootstrap rose, 1.1371x to 1.1380x — and
+wrong in attribution. This round changed no production code, remeasured the same
+binaries, and full-direct moved again to 1.9471x; so the figure varies between
+runs, the within-run interval does not capture that, and the R1 clock reads
+plausibly contribute to the earlier change without being isolated by these runs.
+And the two slow classical medians were not "machine variation in the baseline
+arm": `parallel_memory` and `scalar_selects` sit at roughly four times their v4
+medians and have stayed there for two further rounds while the other six move by
+under 2%. A step change that reproduces, cause not established.
+
+**Noted.** The first pass of this round is retained at
+`results/direct_index_v4_optimization_repair2/superseded_first_pass/`: the
+fixture read `verification/corpus` before the acceptance stage had written it.
+The lead's retained `probes.py` now additionally fails on hash drift against the
+previous tree; the equivalent is
+`results/direct_index_v4_optimization_repair2/reproduction/repair2_probes.py`,
+which keeps every one of the lead's mutations and adds seven.
+
+This STATUS entry is again left uncommitted, because the file carries the lead's
+own uncommitted edits and plan section 7b forbids a worker committing those.
