@@ -41,6 +41,9 @@ TEST_STAGES = {
     # regressions. Acceptance semantics of every stage above are unchanged; a
     # stage running zero tests still fails and there is still no success banner.
     "benchmark": "tests_direct.test_benchmark_harness",
+    # Added with the R3 repair: the independent evidence checker's own
+    # rejection regressions. Additive, like the stage above it.
+    "evidence": "tests_direct.test_evidence_checker",
 }
 STAGE_ORDER = list(TEST_STAGES) + ["acceptance"]
 ALL_STAGES = STAGE_ORDER + ["all"]
@@ -54,6 +57,10 @@ SOURCES = (
     "export_direct.py",
     "verify_direct.py",
     "compare_direct.py",
+    # The measurement harness and the evidence checker produce and audit the
+    # numbers, so their content is part of the evidence rather than outside it.
+    "benchmark_optimization.py",
+    "check_optimization_evidence.py",
 )
 
 RAN_PATTERN = re.compile(r"^Ran (\d+) tests? in", re.MULTILINE)
