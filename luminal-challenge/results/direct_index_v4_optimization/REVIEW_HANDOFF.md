@@ -1,3 +1,20 @@
+> **SUPERSEDED — historical worker record, preserved unedited below.**
+>
+> The lead review at [REVIEW.md](REVIEW.md) recorded **CHANGES_REQUIRED** on
+> 2026-09-20 and found three reproducible defects (R1, R2, R3) plus required
+> reporting corrections (R4). **The summary below stating that all eleven gates
+> pass is superseded by that review and must not be cited.** Several numbers in
+> it are corrected there and in the repair handoff: the "714x slower" figure
+> corresponds to no statistic, the "2,100 direct rows" count includes the
+> classical arm and should be 1,680, the 82.5% / 1.21x ceiling was a heuristic
+> rather than a decomposition, and the claim that further constant-factor work
+> on the search is "ruled out" is withdrawn.
+>
+> The repair and its evidence are in
+> [../direct_index_v4_optimization_repair/REPAIR_HANDOFF.md](../direct_index_v4_optimization_repair/REPAIR_HANDOFF.md).
+> Nothing below this line has been edited; it is kept as the record of what was
+> claimed at the time.
+
 # Optimization phase — handoff for lead review
 
 Worker: Claude Opus 5, working linearly without subagents.

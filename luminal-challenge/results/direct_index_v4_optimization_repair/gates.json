@@ -1,0 +1,243 @@
+{
+  "status": "READY_FOR_REVIEW",
+  "note": "READY_FOR_REVIEW describes handoff completeness, not success. Both engineering targets remain missed. Only the lead accepts.",
+  "responds_to": "results/direct_index_v4_optimization/REVIEW.md, verdict CHANGES_REQUIRED",
+  "plan": "plan/OPTIMIZATION_PHASE_PLAN.md version 1.1",
+  "worker": "Claude Opus 5, working linearly without subagents",
+  "date": "2026-09-20",
+  "findings": [
+    {
+      "finding": "R1",
+      "title": "deadline bypass on the final conflicting cover",
+      "severity": "P2",
+      "state": "CLOSED",
+      "before": "solve returned UNSAT with elapsed=2.0 against a 1.0 s budget",
+      "after": "UNKNOWN, reason 'time budget exhausted'; an in-budget query still returns UNSAT",
+      "repair": "clock read after every leaf scan and before the terminal UNSAT; same rule applied to relation_cover's completed cover",
+      "granularity": "bounded by one cover scan, itself capped at max_cover and validated before the search starts",
+      "regressions": 8,
+      "regressions_failing_on_reviewed_code": 1,
+      "evidence": [
+        "reproduction/probes_before_repair.json",
+        "reproduction/repair_probes.json",
+        "tests_direct/test_schema_index.py::TerminalDeadlineTests"
+      ]
+    },
+    {
+      "finding": "R2",
+      "title": "benchmark detects a failed control but exits successfully",
+      "severity": "P2",
+      "state": "CLOSED",
+      "before": "phase_final recorded 90 historical integer discrepancies and returned exit 0",
+      "after": "exit 1 on the same injection; exit 2 before measuring when the mandatory corpus is skipped without --diagnostic; exit 2 before measuring on a frozen-snapshot mismatch",
+      "repair": "acceptance_gates() defines one mandatory conjunction for both phases and report_gates() derives the exit status from it alone",
+      "mandatory_gates": [
+        "membership",
+        "rows_valid",
+        "frozen_classical_integers",
+        "per_program_product_nonregression",
+        "bootstrap_metrics_identical",
+        "score_floor",
+        "extra_corpus_evaluated",
+        "extra_corpus_membership"
+      ],
+      "not_a_gate": "a missed engineering speed target is a reported outcome, not a correctness failure",
+      "regressions": 11,
+      "mutations_caught": [
+        "report_gates ignores the conjunction (3 failures)",
+        "snapshot mismatch not refused (1 failure)"
+      ],
+      "evidence": [
+        "reproduction/repair_probes.json",
+        "tests_direct/test_benchmark_harness.py::MandatoryGateTests",
+        "tests_direct/test_benchmark_harness.py::PhaseExitCodeTests"
+      ]
+    },
+    {
+      "finding": "R3",
+      "title": "evidence checker accepts missing or corrupted evidence",
+      "severity": "P2",
+      "state": "CLOSED",
+      "before": "all four lead mutations left all_passed True",
+      "after": "control passes with 42 checks; six mutations rejected with the expected failing check",
+      "repair": "contract fixed in the checker and the pinned inputs rather than read from the report; exports hashed from disk; scores, products, aggregates, confidence intervals and target decisions recomputed from raw rows; stored gate flags recomputed; extra corpus fully audited; positive finite timings required; --baseline accepts an external frozen baseline",
+      "regressions": 24,
+      "evidence": [
+        "evidence_checks.json",
+        "reproduction/repair_probes.json",
+        "tests_direct/test_evidence_checker.py"
+      ]
+    },
+    {
+      "finding": "R4",
+      "title": "reporting corrections",
+      "state": "DONE",
+      "corrections": [
+        "'Ruled out: further constant-factor work on the search' is withdrawn in full",
+        "geometric means of per-program median ratios and pooled medians separated, labelled and derived from unrounded raw data; the v4 '714x' corresponded to no statistic",
+        "the 82.5%/1.21x ceiling is withdrawn and replaced by a measured per-query attribution",
+        "final-phase direct rows corrected from 2,100 to 1,680 (2,100 includes the classical arm)",
+        "'all eleven gates pass' superseded by the lead review; the v4 handoff preserved with a supersession header only"
+      ]
+    }
+  ],
+  "corrected_ratios": {
+    "note": "two distinct statistics, never mixed; inverted for readability",
+    "candidate_full_vs_classical": {
+      "geomean_inverted": 513.236,
+      "pooled_median_inverted": 663.3804
+    },
+    "candidate_bootstrap_vs_classical": {
+      "geomean_inverted": 1.5207,
+      "pooled_median_inverted": 2.1774
+    },
+    "frozen_full_vs_classical": {
+      "geomean_inverted": 1002.6701,
+      "pooled_median_inverted": 1610.9009
+    },
+    "frozen_bootstrap_vs_classical": {
+      "geomean_inverted": 1.7306,
+      "pooled_median_inverted": 2.549
+    },
+    "caveat": "the classical arm was anomalously slow on parallel_memory and scalar_selects in this run, so classical-relative ratios must be read with their run"
+  },
+  "measured_attribution": {
+    "source": "attribution/attribution.json",
+    "method": "the optimiser's own enumeration replayed outside the production path, each query timed individually; production code neither modified nor instrumented",
+    "UNKNOWN_visited_cube_cap": {
+      "queries": 25,
+      "share": 0.62
+    },
+    "UNKNOWN_time_budget": {
+      "queries": 4,
+      "share": 0.2268
+    },
+    "UNSAT_completed": {
+      "queries": 35,
+      "share": 0.1513
+    },
+    "INFEASIBLE": {
+      "queries": 194,
+      "share": 0.0018
+    },
+    "caveat": "a single in-process diagnostic run; not a performance result and not a bound"
+  },
+  "gates": [
+    {
+      "gate": 1,
+      "name": "existing direct tests pass, plus new optimization tests",
+      "result": "PASS",
+      "reason": "300 tests, exit 0, 0 failures; was 253. 47 added this round, none removed and no assertion weakened."
+    },
+    {
+      "gate": 2,
+      "name": "verify_direct.py --stage all --timeout 20",
+      "result": "PASS",
+      "reason": "exit 0, overall PASS, 0 failing. schema 65, contract 31, constraints 43, construction 22, optimizer 22, independence 13, export 33, benchmark 47, evidence 24; 142/142 corpus programs in isolated processes, 277/277 cases, public suite exactly 11, CLI on all eight."
+    },
+    {
+      "gate": 3,
+      "name": "export fresh, standalone, hash recorded",
+      "result": "PASS",
+      "export_sha256": "d14bf39b450aaa5fe73c41a3236980e219089e527ae43007781d78e0059a5864",
+      "export_lines": 2652
+    },
+    {
+      "gate": 4,
+      "name": "all direct outputs pass the pinned machine validator",
+      "result": "PASS",
+      "reason": "142 programs and 277 cases in isolated processes; every one of the 1,680 direct benchmark rows validated after its timer; 0 discrepancies."
+    },
+    {
+      "gate": 5,
+      "name": "the exact seven comparison gates over three repetitions",
+      "result": "PASS",
+      "reason": "72 runs, exit 0, all seven PASS; classical 1.9013791212645499 in every repetition."
+    },
+    {
+      "gate": 6,
+      "name": "per-program product not above frozen v3; score floor; bootstrap metrics identical",
+      "result": "PASS",
+      "reason": "zero violations; every per-program product identical. Score 2.008466202284657 for all four direct arms.",
+      "per_program_regressions": "none on the public programs; one of 100 evaluation-corpus programs (additional_351501) is slower on the bootstrap path and is retained and reported"
+    },
+    {
+      "gate": 7,
+      "name": "no mislabelled exhausted query, no bypassed budget; regressions for every cache and pruning change",
+      "result": "PASS",
+      "reason": "R1 closed the one known bypass. No pruning introduced; attempted queries unchanged at 3,270 and infeasible at 2,475. The cover cache is charged the visits and records its miss cost."
+    },
+    {
+      "gate": 8,
+      "name": "timing reported for bootstrap and full-direct separately",
+      "result": "PASS"
+    },
+    {
+      "gate": 9,
+      "name": "scoped git diff --check passes; unrelated files untouched",
+      "result": "PASS",
+      "reason": "exit 0, no output. Lead documentation, the review, lead_review/ and the unrelated 0xPARC, README and plans changes are untouched and in no worker commit."
+    },
+    {
+      "gate": 10,
+      "name": "harness regressions reject injected corruption; a failed subprocess exits nonzero",
+      "result": "PASS",
+      "reason": "47 harness tests plus 24 evidence-checker tests; every mandatory gate driven to failure individually and the real phase entry points checked for exit codes 0, 1 and 2."
+    },
+    {
+      "gate": 11,
+      "name": "report whether each numerical engineering target was met",
+      "result": "REPORTED",
+      "reason": "Both missed. No target was adjusted."
+    }
+  ],
+  "performance_targets_met": {
+    "full_direct_geomean_speedup_vs_fresh_v3": {
+      "target": 2.0,
+      "measured": 1.9536237334,
+      "interval_low": 1.950285,
+      "interval_high": 1.956661,
+      "met": false,
+      "v4_defective_value": 1.9889,
+      "note": "fell about 1.8% from the defective v4 value because R1's repair restores clock reads that version skipped"
+    },
+    "bootstrap_speedup_vs_fresh_v3": {
+      "target": 1.2,
+      "measured": 1.1379993429,
+      "interval_low": 1.132591,
+      "interval_high": 1.141105,
+      "met": false
+    },
+    "faster_than_classical": {
+      "met": false,
+      "note": "not claimed; see corrected_ratios"
+    }
+  },
+  "counts": {
+    "direct_tests": 300,
+    "direct_tests_before_repair": 253,
+    "corpus_programs": 142,
+    "corpus_cases": 277,
+    "comparison_runs": 72,
+    "final_phase_rows_total": 2100,
+    "final_phase_rows_direct": 1680,
+    "final_public_rows": 600,
+    "final_public_direct_rows": 480,
+    "final_corpus_rows": 1500,
+    "final_corpus_direct_rows": 1200,
+    "benchmark_failures": 0,
+    "evidence_checks": 42,
+    "evidence_checks_failing": 0
+  },
+  "exit_codes": {
+    "python3 -m unittest discover -s tests_direct -p 'test_*.py'": 0,
+    "python3 export_direct.py": 0,
+    "python3 verify_direct.py --stage all --timeout 20": 0,
+    "python3 compare_direct.py --repeats 3 --timeout 20": 0,
+    "python3 benchmark_optimization.py --phase final --repeats 15 --seed 20260920": 0,
+    "python3 check_optimization_evidence.py --root ..._repair --baseline .../baseline": 0,
+    "reproduction/repair_probes.py": 0,
+    "attribution/measure_attribution.py": 0,
+    "git diff --check -- luminal-challenge": 0
+  }
+}
