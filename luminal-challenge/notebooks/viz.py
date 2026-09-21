@@ -148,6 +148,151 @@ def show_lifetimes(facts, addresses, life, span, title) -> None:
 # --------------------------------------------------------------------------
 
 
+def show_sharing_rule(
+    life: Dict[str, Tuple[int, int]],
+    pairs: Sequence[Tuple[str, str]],
+    span: int,
+    title: str,
+) -> None:
+    """Rule 4 drawn: which pairs of values may take turns in one locker.
+
+    One panel per pair. Each value is a bar over the cycles it is live, from the
+    cycle it is written to the cycle it is last read, both ends inclusive. A
+    cycle where the two bars touch is marked, because touching is the whole
+    rule: writes commit at the start of a cycle, before any read, so a newcomer
+    writing on the reader's own cycle destroys the value first.
+
+    Overlap is decided here by the same inclusive test the compiler uses, not by
+    eye: ``start_a <= end_b and start_b <= end_a``.
+    """
+
+    fig, axes = plt.subplots(
+        len(pairs), 1,
+        figsize=(max(5.5, 0.72 * span + 2.2), 1.85 * len(pairs) + 0.6),
+        squeeze=False,
+    )
+    for axis, (first, second) in zip(axes[:, 0], pairs):
+        (start_a, end_a), (start_b, end_b) = life[first], life[second]
+        clash = start_a <= end_b and start_b <= end_a
+        contact = sorted(set(range(start_a, end_a + 1)) & set(range(start_b, end_b + 1)))
+
+        for row, name in enumerate((first, second)):
+            start, end = life[name]
+            for cycle in range(span):
+                axis.add_patch(Rectangle((cycle, row), 1, 1, linewidth=1,
+                                         edgecolor="white", facecolor=EMPTY))
+            colour = EXCLUDED if clash else FILL
+            axis.add_patch(Rectangle((start, row + 0.08), end - start + 1, 0.84,
+                                     facecolor=colour, edgecolor=EDGE, linewidth=1.3))
+            axis.text(start + (end - start + 1) / 2, row + 0.5,
+                      f"{name}  live {start}..{end}", ha="center", va="center",
+                      fontsize=8)
+
+        for cycle in contact:
+            axis.add_patch(Rectangle((cycle, 0), 1, 2, linewidth=1.8,
+                                     edgecolor="#b4453c", facecolor="none"))
+
+        if clash:
+            verdict = (f"MAY NOT SHARE  —  both live at cycle "
+                       f"{', '.join(str(c) for c in contact)}")
+            if start_b > start_a:
+                # The newcomer's write lands on a cycle the incumbent still
+                # needs: this is the "strictly after" half of the rule.
+                note = (f"{second} would write at the start of cycle {start_b}, "
+                        f"before {first} is read there")
+            elif start_a > start_b:
+                note = (f"{first} would write at the start of cycle {start_a}, "
+                        f"before {second} is read there")
+            else:
+                # Neither is a newcomer; they simply coexist.
+                note = (f"both hold a value throughout cycle "
+                        f"{', '.join(str(c) for c in contact)} — one locker "
+                        f"cannot hold two numbers")
+        else:
+            gap = max(start_a, start_b) - min(end_a, end_b)
+            verdict = f"MAY SHARE  —  intervals never touch (gap of {gap} cycle)"
+            note = (f"{second} writes at {start_b}, strictly after {first} "
+                    f"is last read at {end_a}")
+
+        axis.set_xlim(0, span)
+        axis.set_ylim(0, 2)
+        axis.set_xticks([c + 0.5 for c in range(span)], [str(c) for c in range(span)])
+        axis.set_yticks([])
+        axis.set_title(verdict, fontsize=9,
+                       color="#b4453c" if clash else "#2e6b2a")
+        axis.set_xlabel(note, fontsize=8)
+        axis.invert_yaxis()
+
+    fig.suptitle(title, y=1.0)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_memory_ordering(program: dict, title: str) -> None:
+    """Rule 5 drawn: which pairs of memory operations are forced into an order.
+
+    Every pair of memory operations is put through the three tests the frozen
+    ``machine.memory_predecessors`` applies, and the verdict column is checked
+    against that function rather than recomputed independently: a row is ordered
+    exactly when the earlier operation appears in the later one's predecessor
+    list.
+    """
+
+    memory = [op for op in program["operations"] if op["op"] in machine.MEMORY_OPS]
+    rows: List[tuple] = []
+    for index, earlier in enumerate(memory):
+        for later in memory[index + 1:]:
+            same = earlier["buffer"] == later["buffer"]
+            overlap = same and machine._memory_ranges_overlap(earlier, later)
+            both_loads = (earlier["op"] in machine.LOAD_OPS
+                          and later["op"] in machine.LOAD_OPS)
+            ordered = earlier["id"] in machine.memory_predecessors(
+                program, later["id"])
+            rows.append((earlier, later, same, overlap, both_loads, ordered))
+
+    columns = ["same\nbuffer?", "ranges\noverlap?", "both\nloads?", "ORDERED?"]
+    fig, ax = plt.subplots(figsize=(7.6, 0.56 * len(rows) + 1.9))
+
+    for r, (earlier, later, same, overlap, both_loads, ordered) in enumerate(rows):
+        label = (f"op{earlier['id']} {earlier['op']} {earlier['buffer']}"
+                 f"[{earlier['offset']}]   →   "
+                 f"op{later['id']} {later['op']} {later['buffer']}[{later['offset']}]")
+        ax.text(-0.15, r + 0.5, label, ha="right", va="center", fontsize=8,
+                family="monospace")
+        for c, value in enumerate((same, overlap, both_loads, ordered)):
+            # Shaded always means "yes" so the row reads left to right without
+            # the eye having to relearn the code at the last column. The verdict
+            # column is shaded in the constraint colour rather than the plain
+            # one, because a "yes" there is a restriction on the schedule.
+            if not value:
+                face = EMPTY
+            else:
+                face = EXCLUDED if c == 3 else FILL
+            ax.add_patch(Rectangle((c, r), 1, 1, linewidth=1,
+                                   edgecolor="white", facecolor=face))
+            ax.text(c + 0.5, r + 0.5, "yes" if value else "no", ha="center",
+                    va="center", fontsize=8,
+                    fontweight="bold" if c == 3 else "normal")
+
+    for c, name in enumerate(columns):
+        ax.text(c + 0.5, -0.18, name, ha="center", va="bottom", fontsize=8,
+                fontweight="bold")
+
+    ax.set_xlim(0, len(columns))
+    ax.set_ylim(0, len(rows))
+    ax.set_xticks([])
+    ax.set_yticks([])
+    # The column headers are drawn inside the axes above row zero, so the title
+    # needs clearance for two lines of them or it lands on top.
+    ax.set_title(title, fontsize=10, pad=40)
+    ax.set_xlabel("ordered = same buffer AND ranges overlap AND not both loads;\n"
+                  "an ordered pair must also sit in two different cycles",
+                  fontsize=8)
+    ax.invert_yaxis()
+    fig.tight_layout()
+    plt.show()
+
+
 def show_universe(
     groups: Sequence[Tuple[str, Sequence[si.Cube]]],
     n: int,
