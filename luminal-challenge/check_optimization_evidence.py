@@ -2,7 +2,9 @@
 
 Section 7a of ``plan/OPTIMIZATION_PHASE_PLAN.md``, rewritten after the lead
 review of 2026-09-20 recorded in
-``results/direct_index_v4_optimization/REVIEW.md`` (finding R3).
+``results/direct_index_v4_optimization/REVIEW.md`` (finding R3) and again after
+the re-review in ``results/direct_index_v4_optimization_repair/REVIEW.md``
+(findings F1 and F2).
 
 This tool trusts **nothing** a report says about itself. In particular it does
 not read a stored gate flag, a stored confidence interval, a stored score, a
@@ -12,9 +14,23 @@ rejected when the recomputation disagrees.
 
 The contract it checks against is fixed **here and in the pinned inputs**, never
 taken from the report under examination. Arms come from the harness module,
-programs from the pinned reference directory, repetition counts and corpus size
-from the plan. A report that measured a reduced contract therefore fails rather
-than defining its own.
+programs from the pinned reference directory, repetition counts, corpus size,
+verification stages and the bootstrap protocol from the plan. A report that
+measured a reduced contract therefore fails rather than defining its own.
+
+That last point was the substance of F1 and F2:
+
+* F1 — the resample count and seed used to recompute a paired interval were
+  read out of the interval being audited. An experiment run at one resample was
+  therefore recomputed at one resample, agreed with itself, and passed. Both are
+  now fixed here, a run declaring anything else is rejected before any interval
+  is recomputed, and there is no longer a command-line option that can lower
+  them, because an option must not be able to relax an acceptance check.
+* F2 — the recorded verification was required only to carry a positive total
+  test count and the corpus totals, so whole stages could be deleted without
+  rejection. Exactly one record is now required for every declared stage and
+  for each of the three acceptance steps, each with its own log, its own count
+  and the artifacts behind its totals.
 
 What it verifies:
 
@@ -31,12 +47,18 @@ What it verifies:
   discrepancy and no module leak;
 * that every classical measurement reproduces its protected historical
   per-program cycles and scratch — which a product-preserving drift does not;
-* combined scores, per-program products, bootstrap metric equality, aggregate
-  ratios, paired confidence intervals and target decisions, all recomputed;
+* that every paired interval declares the fixed protocol, and that the bounds,
+  the aggregates and every target decision recompute from the raw rows under
+  that protocol rather than under the report's;
+* that each declared engineering target carries a complete declaration, so an
+  omission cannot bypass the comparison;
 * the extra corpus: every input present, re-hashed, and its score distribution
   recomputed;
-* that the comparison's seven gates and the verifier's stages really passed,
-  recomputed from their raw rows.
+* that the comparison's seven gates really passed, recomputed from raw rows;
+* that the verification carries every declared stage exactly once, that each
+  ran a positive number of tests consistent with its own log, and that the
+  corpus, public-suite and CLI acceptance steps are present, complete and
+  supported by the artifacts they reference.
 
 Exit status is zero only when every check passes.
 """
@@ -44,10 +66,12 @@ Exit status is zero only when every check passes.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import math
 from pathlib import Path
+import re
 import statistics
 import sys
 from typing import Dict, List, Optional, Sequence
@@ -57,6 +81,7 @@ sys.path.insert(0, str(ROOT))
 
 import compare_direct as official  # noqa: E402
 import benchmark_optimization as bench  # noqa: E402
+import verify_direct as verifier  # noqa: E402
 
 # --------------------------------------------------------------------------
 # The fixed contract. None of this is read from the report being checked.
@@ -71,6 +96,51 @@ EXPECTED_PUBLIC_PROGRAMS = 8
 EXPECTED_CORPUS_PROGRAMS = 142
 EXPECTED_CORPUS_CASES = 277
 EXPECTED_COMPARISON_REPEATS = 3
+
+# The bootstrap protocol of section 1 of the plan. Fixed here, enforced against
+# the report, and used for every recomputation. Not an argument, not a default,
+# and not something the evidence under examination may choose.
+EXPECTED_BOOTSTRAP_RESAMPLES = 10000
+EXPECTED_BOOTSTRAP_SEED = 20260920
+
+REQUIRED_INTERVAL_FIELDS = ("low", "high", "median", "resamples", "seed")
+REQUIRED_TARGET_FIELDS = (
+    "target",
+    "criterion",
+    "measured",
+    "interval_low",
+    "interval_high",
+    "met",
+)
+
+# Every stage the verifier declares, plus the three acceptance steps. Written
+# out here rather than derived, so that a stage silently dropped from the
+# verifier is caught as readily as one dropped from a summary.
+REQUIRED_TEST_STAGES = (
+    "schema",
+    "contract",
+    "constraints",
+    "construction",
+    "optimizer",
+    "independence",
+    "export",
+    "benchmark",
+    "evidence",
+)
+REQUIRED_ACCEPTANCE_STEPS = ("corpus", "public_suite", "cli")
+EXPECTED_PUBLIC_TESTS = 11
+
+# The log stem each record's output was written under.
+STAGE_LOG_STEMS = {"public_suite": "acceptance_public_suite"}
+LOGGED_RECORDS = REQUIRED_TEST_STAGES + ("public_suite",)
+
+RAN_PATTERN = re.compile(r"^Ran (\d+) tests? in", re.MULTILINE)
+
+# Paired intervals are a pure, deterministic function of the rows and the fixed
+# protocol. Several checker runs inside one process — the regression suite —
+# ask for the same interval from the same rows; memoising the result changes no
+# verdict and keeps that suite bounded.
+_BOOTSTRAP_CACHE: Dict[str, dict] = {}
 
 ACCEPTED_DIRECT_SCORE = 2.0084662022846573
 ACCEPTED_CLASSICAL_SCORE = 1.9013791212645499
@@ -375,6 +445,94 @@ class Checker:
         )
         return ok_membership and not invalid and not bad_fields
 
+    # -- the bootstrap protocol ------------------------------------------
+
+    def bootstrap(self, runs: Sequence[dict], programs: Sequence[str],
+                  baseline_arm: str, candidate_arm: str, repeats: int) -> dict:
+        """Recompute a paired interval under the **fixed** protocol.
+
+        The count and the seed are this module's constants. Reading them from
+        the interval under audit, as this did before F1, made the check
+        self-confirming: a one-resample experiment was recomputed at one
+        resample and agreed with itself.
+        """
+
+        key = hashlib.sha256(
+            json.dumps(
+                [
+                    [
+                        [run.get("arm"), run.get("program"), run.get("repeat"),
+                         run.get("compile_seconds")]
+                        for run in runs
+                    ],
+                    list(programs),
+                    baseline_arm,
+                    candidate_arm,
+                    repeats,
+                ],
+                sort_keys=True,
+                default=str,
+            ).encode("utf-8")
+        ).hexdigest()
+        cached = _BOOTSTRAP_CACHE.get(key)
+        if cached is None:
+            cached = bench.paired_bootstrap(
+                runs, programs, baseline_arm, candidate_arm, repeats,
+                seed=EXPECTED_BOOTSTRAP_SEED,
+                resamples=EXPECTED_BOOTSTRAP_RESAMPLES,
+            )
+            _BOOTSTRAP_CACHE[key] = cached
+        return cached
+
+    def check_bootstrap_protocol(self, label: str, payload: dict) -> None:
+        """The declared protocol must be the contract's, in every place."""
+
+        problems: List[dict] = []
+        if bench.BOOTSTRAP_RESAMPLES != EXPECTED_BOOTSTRAP_RESAMPLES:
+            problems.append(
+                {"where": "harness", "resamples": bench.BOOTSTRAP_RESAMPLES}
+            )
+        if bench.DEFAULT_SEED != EXPECTED_BOOTSTRAP_SEED:
+            problems.append({"where": "harness", "seed": bench.DEFAULT_SEED})
+        run_seed = payload.get("seed")
+        if run_seed != EXPECTED_BOOTSTRAP_SEED:
+            problems.append({"where": "report", "seed": run_seed})
+
+        ratios = payload.get("analysis", {}).get("ratios", {})
+        for name, _, _ in bench.RATIOS:
+            entry = ratios.get(name)
+            if not isinstance(entry, dict):
+                problems.append({"ratio": name, "error": "absent from the report"})
+                continue
+            interval = entry.get("paired_bootstrap_95")
+            if not isinstance(interval, dict):
+                problems.append({"ratio": name, "error": "no paired interval"})
+                continue
+            absent = [f for f in REQUIRED_INTERVAL_FIELDS if f not in interval]
+            if absent:
+                problems.append({"ratio": name, "missing": absent})
+                continue
+            if interval["resamples"] != EXPECTED_BOOTSTRAP_RESAMPLES:
+                problems.append({"ratio": name, "resamples": interval["resamples"]})
+            if interval["seed"] != EXPECTED_BOOTSTRAP_SEED:
+                problems.append({"ratio": name, "seed": interval["seed"]})
+            elif interval["seed"] != run_seed:
+                problems.append(
+                    {"ratio": name, "error": "interval seed disagrees with the run seed"}
+                )
+
+        self.record(
+            f"bootstrap_protocol:{label}",
+            not problems,
+            (
+                f"the enforced protocol is {EXPECTED_BOOTSTRAP_RESAMPLES} paired "
+                f"resamples at seed {EXPECTED_BOOTSTRAP_SEED}, fixed in this checker; "
+                f"{len(bench.RATIOS)} contract ratios and the run seed were checked "
+                f"against it; {len(problems)} declarations disagree"
+            ),
+            problems=problems[:10],
+        )
+
     # -- recomputed statistics -------------------------------------------
 
     def metric_sets(self, runs: Sequence[dict], programs: Sequence[str], arm: str):
@@ -491,14 +649,16 @@ class Checker:
         )
 
     def check_aggregates_and_intervals(self, label: str, payload: dict,
-                                       programs: Sequence[str], repeats: int,
-                                       resamples: int) -> None:
+                                       programs: Sequence[str],
+                                       repeats: int) -> None:
         analysis = payload["analysis"]
         runs = payload["runs"]
-        seed = payload.get("seed")
         mismatched = []
         interval_mismatched = []
         target_mismatched = []
+        recomputed_targets: Dict[str, bool] = {}
+        recomputed_measured: Dict[str, float] = {}
+        recomputed_bounds: Dict[str, dict] = {}
 
         expected_ratios = {name for name, _, _ in bench.RATIOS}
         reported_ratios = set(analysis.get("ratios", {}))
@@ -533,16 +693,15 @@ class Checker:
                 mismatched.append({"ratio": name, "recomputed": recomputed,
                                    "reported": entry["geometric_mean_of_per_program_medians"]})
 
-            # The interval is recomputed from the raw timings with the declared
-            # seed. A forged interval cannot survive this. The resample count
-            # is taken from the report itself, so recomputation is exact and
-            # the --resamples option cannot be used to weaken the comparison.
-            reported_interval = entry.get("paired_bootstrap_95", {})
-            interval = bench.paired_bootstrap(
-                runs, programs, baseline_arm, candidate_arm, repeats,
-                seed=reported_interval.get("seed", seed),
-                resamples=reported_interval.get("resamples") or resamples,
+            # The interval is recomputed from the raw timings under the fixed
+            # protocol — this checker's resample count and seed, never the
+            # report's. A forged interval cannot survive this, and neither can
+            # an honestly computed one from a weakened experiment.
+            reported_interval = entry.get("paired_bootstrap_95") or {}
+            interval = self.bootstrap(
+                runs, programs, baseline_arm, candidate_arm, repeats
             )
+            recomputed_bounds[name] = interval
             for bound in ("low", "high"):
                 if not math.isclose(
                     interval[bound], reported_interval.get(bound, float("nan")),
@@ -557,18 +716,76 @@ class Checker:
             if name in bench.TARGETS:
                 target = bench.TARGETS[name]
                 met = bool(recomputed >= target and interval["low"] > 1.0)
+                recomputed_targets[name] = met
+                recomputed_measured[name] = recomputed
                 if met != bool(entry.get("target_met")):
                     target_mismatched.append(
                         {"ratio": name, "recomputed_met": met,
                          "reported_met": entry.get("target_met")}
                     )
-                reported_target = payload.get("performance_targets", {}).get(name, {})
-                if reported_target and met != bool(reported_target.get("met")):
+                if entry.get("target") != target:
                     target_mismatched.append(
-                        {"ratio": name, "recomputed_met": met,
-                         "reported_met": reported_target.get("met"),
-                         "where": "performance_targets"}
+                        {"ratio": name, "declared_target": entry.get("target"),
+                         "contract_target": target, "where": "analysis.ratios"}
                     )
+
+        # Every declared target must carry a complete declaration. Before F1 an
+        # omitted or truncated entry was simply skipped, so leaving a target out
+        # of the report was enough to avoid being compared against it.
+        reported_targets = payload.get("performance_targets")
+        if not isinstance(reported_targets, dict):
+            target_mismatched.append({"error": "no performance_targets section"})
+            reported_targets = {}
+        for name, target in bench.TARGETS.items():
+            reported = reported_targets.get(name)
+            if not isinstance(reported, dict):
+                target_mismatched.append(
+                    {"ratio": name, "error": "no performance_targets entry"}
+                )
+                continue
+            absent = [f for f in REQUIRED_TARGET_FIELDS if f not in reported]
+            if absent:
+                target_mismatched.append({"ratio": name, "missing": absent})
+                continue
+            if reported["target"] != target:
+                target_mismatched.append(
+                    {"ratio": name, "declared_target": reported["target"],
+                     "contract_target": target, "where": "performance_targets"}
+                )
+            if name not in recomputed_targets:
+                target_mismatched.append(
+                    {"ratio": name,
+                     "error": "no decision could be recomputed for this target"}
+                )
+                continue
+            if bool(reported["met"]) != recomputed_targets[name]:
+                target_mismatched.append(
+                    {"ratio": name, "recomputed_met": recomputed_targets[name],
+                     "reported_met": reported["met"], "where": "performance_targets"}
+                )
+            if not math.isclose(
+                reported["measured"], recomputed_measured[name],
+                rel_tol=1e-12, abs_tol=0,
+            ):
+                target_mismatched.append(
+                    {"ratio": name, "recomputed_measured": recomputed_measured[name],
+                     "reported_measured": reported["measured"]}
+                )
+            for bound, field in (("low", "interval_low"), ("high", "interval_high")):
+                if not math.isclose(
+                    reported[field], recomputed_bounds[name][bound],
+                    rel_tol=1e-9, abs_tol=0,
+                ):
+                    target_mismatched.append(
+                        {"ratio": name, "bound": field,
+                         "recomputed": recomputed_bounds[name][bound],
+                         "reported": reported[field]}
+                    )
+        invented = sorted(set(reported_targets) - set(bench.TARGETS))
+        if invented:
+            target_mismatched.append(
+                {"error": "targets declared outside the contract", "names": invented}
+            )
 
         self.record(
             f"aggregates:{label}", not mismatched,
@@ -577,13 +794,15 @@ class Checker:
         )
         self.record(
             f"confidence_intervals:{label}", not interval_mismatched,
-            f"paired intervals recomputed from raw timings with seed {seed} and "
-            f"{resamples} resamples; {len(interval_mismatched)} bounds disagree",
+            f"paired intervals recomputed from raw timings under the enforced "
+            f"protocol, {EXPECTED_BOOTSTRAP_RESAMPLES} resamples at seed "
+            f"{EXPECTED_BOOTSTRAP_SEED}; {len(interval_mismatched)} bounds disagree",
             mismatched=interval_mismatched[:10],
         )
         self.record(
             f"target_decisions:{label}", not target_mismatched,
-            f"{len(bench.TARGETS)} target decisions recomputed; "
+            f"{len(bench.TARGETS)} contract targets recomputed and their "
+            f"declarations checked for completeness; "
             f"{len(target_mismatched)} disagree", mismatched=target_mismatched,
         )
 
@@ -802,29 +1021,306 @@ class Checker:
         )
 
     def check_verification(self, payload: dict) -> None:
+        """The whole verification contract, stage by stage.
+
+        Before F2 this required a positive *total* test count and the corpus
+        totals, so a summary holding only ``schema`` and ``corpus`` passed. What
+        is required now is one record per declared stage and per acceptance
+        step, each consistent with its own log and with the artifacts its totals
+        are drawn from.
+        """
+
+        directory = self.root / "verification"
         records = payload.get("records", [])
-        failing = [r for r in records if r.get("status") != "PASS"]
-        tests = sum(r.get("tests", 0) or 0 for r in records)
-        corpus = [r for r in records if r.get("step") == "corpus"]
-        programs = corpus[0]["programs_checked"] if corpus else 0
-        cases = corpus[0]["cases_checked"] if corpus else 0
+        labels = [record.get("step") or record.get("stage") for record in records]
+        required = list(REQUIRED_TEST_STAGES) + list(REQUIRED_ACCEPTANCE_STEPS)
+
         self.record(
-            "verification",
-            payload.get("status") == "PASS" and not failing and tests > 0,
-            f"{len(records)} stage records, {tests} tests, {programs} corpus programs, "
-            f"{cases} cases; {len(failing)} failing",
+            "verification_stage_contract",
+            tuple(verifier.TEST_STAGES) == REQUIRED_TEST_STAGES
+            and verifier.EXPECTED_PUBLIC_TESTS == EXPECTED_PUBLIC_TESTS,
+            (
+                f"the verifier declares {len(verifier.TEST_STAGES)} test stages and "
+                f"{verifier.EXPECTED_PUBLIC_TESTS} public tests; this checker "
+                f"requires {len(REQUIRED_TEST_STAGES)} named stages and "
+                f"{EXPECTED_PUBLIC_TESTS}"
+            ),
+        )
+
+        counts = Counter(labels)
+        missing = [name for name in required if counts.get(name, 0) != 1]
+        duplicated = sorted(name for name, count in counts.items() if count > 1)
+        unexpected = sorted(set(labels) - set(required))
+        self.record(
+            "verification_stages",
+            not missing and not duplicated and not unexpected,
+            (
+                f"{len(required)} records required, one for each of "
+                f"{len(REQUIRED_TEST_STAGES)} test stages and the acceptance steps "
+                f"{REQUIRED_ACCEPTANCE_STEPS}; {len(records)} present; absent or not "
+                f"exactly once {missing or 'none'}; duplicated {duplicated or 'none'}; "
+                f"outside the contract {unexpected or 'none'}"
+            ),
+        )
+
+        first: Dict[str, dict] = {}
+        for record, label in zip(records, labels):
+            first.setdefault(label, record)
+
+        bad_status = []
+        for record, label in zip(records, labels):
+            if record.get("status") != "PASS":
+                bad_status.append({"record": label, "status": record.get("status")})
+            if record.get("exit_code") not in (None, 0):
+                bad_status.append({"record": label, "exit_code": record["exit_code"]})
+            if record.get("timed_out"):
+                bad_status.append({"record": label, "error": "timed out"})
+        stages_run = set(payload.get("stages_run") or [])
+        expected_run = set(REQUIRED_TEST_STAGES) | {"acceptance"}
+        self.record(
+            "verification_status",
+            payload.get("status") == "PASS"
+            and not payload.get("failures")
+            and not bad_status
+            and stages_run == expected_run,
+            (
+                f"summary status {payload.get('status')!r} with "
+                f"{len(payload.get('failures') or [])} recorded failures; "
+                f"{len(bad_status)} records not passing cleanly; stages run "
+                f"{sorted(stages_run)} against {sorted(expected_run)}"
+            ),
+            bad_status=bad_status[:10],
+        )
+
+        zero = []
+        for stage in REQUIRED_TEST_STAGES:
+            record = first.get(stage)
+            if record is None:
+                zero.append({"stage": stage, "error": "record absent"})
+                continue
+            count = record.get("tests")
+            if not isinstance(count, int) or count <= 0:
+                zero.append({"stage": stage, "tests": count})
+        self.record(
+            "verification_test_counts",
+            not zero,
+            (
+                f"{len(REQUIRED_TEST_STAGES)} test stages must each have run a "
+                f"positive number of tests; {len(zero)} did not"
+            ),
+            zero=zero,
+        )
+
+        log_problems = []
+        for label in LOGGED_RECORDS:
+            record = first.get(label)
+            if record is None:
+                log_problems.append({"record": label, "error": "record absent"})
+                continue
+            log = directory / "logs" / f"{STAGE_LOG_STEMS.get(label, label)}.stderr.txt"
+            if not log.exists():
+                log_problems.append({"record": label, "error": f"{log.name} is missing"})
+                continue
+            text = log.read_text(encoding="utf-8", errors="replace")
+            match = RAN_PATTERN.search(text)
+            in_log = int(match.group(1)) if match else None
+            if in_log != record.get("tests"):
+                log_problems.append(
+                    {"record": label, "log_says": in_log,
+                     "summary_says": record.get("tests")}
+                )
+                continue
+            tail = record.get("stderr_tail")
+            if tail and not text.endswith(tail):
+                log_problems.append(
+                    {"record": label,
+                     "error": "the recorded tail is not this log's tail"}
+                )
+        self.record(
+            "verification_logs",
+            not log_problems,
+            (
+                f"{len(LOGGED_RECORDS)} records checked against the log each one "
+                f"names, on the reported test count and the recorded tail; "
+                f"{len(log_problems)} disagree"
+            ),
+            problems=log_problems[:10],
+        )
+
+        public = first.get("public_suite")
+        self.record(
+            "verification_public_suite",
+            public is not None
+            and public.get("tests") == EXPECTED_PUBLIC_TESTS
+            and public.get("expected_tests") == EXPECTED_PUBLIC_TESTS
+            and public.get("exit_code") == 0
+            and not public.get("timed_out")
+            and public.get("status") == "PASS",
+            (
+                f"the frozen public suite must run exactly {EXPECTED_PUBLIC_TESTS} "
+                f"tests; the record reports {(public or {}).get('tests')} against a "
+                f"declared expectation of {(public or {}).get('expected_tests')}"
+            ),
+        )
+
+        self.check_verification_corpus(directory, first.get("corpus"))
+        self.check_verification_cli(first.get("cli"))
+
+        export = payload.get("export") or {}
+        on_disk = sha256(official.EXPORT)
+        lines = (
+            len(official.EXPORT.read_text(encoding="utf-8").splitlines())
+            if official.EXPORT.exists()
+            else None
         )
         self.record(
+            "verification_export",
+            export.get("sha256") == on_disk
+            and export.get("status") == "PASS"
+            and export.get("lines") == lines,
+            (
+                f"the verified export is recorded as {str(export.get('sha256'))[:16]}… "
+                f"over {export.get('lines')} lines; on disk it is "
+                f"{str(on_disk)[:16]}… over {lines}"
+            ),
+        )
+
+    def check_verification_corpus(self, directory: Path, record: Optional[dict]) -> None:
+        """The corpus totals, and the evidence file they are drawn from."""
+
+        problems: List[dict] = []
+        if record is None:
+            self.record(
+                "verification_corpus", False,
+                "the isolated-corpus acceptance record is absent",
+            )
+            return
+
+        if record.get("programs_checked") != EXPECTED_CORPUS_PROGRAMS:
+            problems.append({"programs_checked": record.get("programs_checked")})
+        if record.get("programs_expected") != EXPECTED_CORPUS_PROGRAMS:
+            problems.append({"programs_expected": record.get("programs_expected")})
+        if record.get("cases_checked") != EXPECTED_CORPUS_CASES:
+            problems.append({"cases_checked": record.get("cases_checked")})
+        if record.get("failures"):
+            problems.append({"failures": record["failures"][:5]})
+        if record.get("discrepancies"):
+            problems.append({"discrepancies": record["discrepancies"][:5]})
+
+        name = Path(str(record.get("evidence", ""))).name
+        if name != "isolated_corpus.json":
+            problems.append({"evidence": record.get("evidence")})
+            evidence = None
+        else:
+            evidence = self.require(directory / name)
+
+        if evidence is not None:
+            runs = evidence.get("runs") or []
+            for field, expected in (
+                ("programs", EXPECTED_CORPUS_PROGRAMS),
+                ("expected", EXPECTED_CORPUS_PROGRAMS),
+                ("passed", EXPECTED_CORPUS_PROGRAMS),
+                ("cases", EXPECTED_CORPUS_CASES),
+            ):
+                if evidence.get(field) != expected:
+                    problems.append(
+                        {"evidence_field": field, "value": evidence.get(field),
+                         "required": expected}
+                    )
+            if evidence.get("failures"):
+                problems.append({"evidence_failures": evidence["failures"][:5]})
+            if len(runs) != EXPECTED_CORPUS_PROGRAMS:
+                problems.append({"evidence_rows": len(runs)})
+            if record.get("cases_checked") != evidence.get("cases"):
+                problems.append(
+                    {"error": "the summary's case count is not the evidence's"}
+                )
+            bad = [
+                run.get("program") for run in runs
+                if run.get("status") != "PASS"
+                or run.get("exit_code") != 0
+                or (run.get("result") or {}).get("discrepancy_count")
+                or (run.get("result") or {}).get("validation_errors")
+                or (run.get("result") or {}).get("leaked")
+                or (run.get("result") or {}).get("target_discrepancies")
+            ]
+            if bad:
+                problems.append({"failing_programs": bad[:5], "count": len(bad)})
+            counted = sum((run.get("result") or {}).get("cases", 0) for run in runs)
+            if counted != EXPECTED_CORPUS_CASES:
+                problems.append({"cases_summed_from_rows": counted})
+            if evidence.get("export_sha256") != sha256(official.EXPORT):
+                problems.append(
+                    {"error": "the corpus was checked against a different export",
+                     "recorded": str(evidence.get("export_sha256"))[:16]}
+                )
+
+            manifest = self.require(directory / "corpus_manifest.json")
+            if manifest is not None:
+                declared = set(manifest.get("files") or [])
+                observed = {run.get("program") for run in runs}
+                if declared != observed:
+                    problems.append(
+                        {"error": "the measured programs are not the materialised set",
+                         "only_declared": sorted(declared - observed)[:5],
+                         "only_measured": sorted(observed - declared)[:5]}
+                    )
+                if len(declared) != EXPECTED_CORPUS_PROGRAMS:
+                    problems.append({"manifest_files": len(declared)})
+                absent = [
+                    entry for entry in sorted(declared)
+                    if not (directory / "corpus" / entry).exists()
+                ]
+                if absent:
+                    problems.append({"missing_inputs": absent[:5]})
+
+        self.record(
             "verification_corpus",
-            programs == EXPECTED_CORPUS_PROGRAMS and cases == EXPECTED_CORPUS_CASES,
-            f"{programs} of {EXPECTED_CORPUS_PROGRAMS} corpus programs and "
-            f"{cases} of {EXPECTED_CORPUS_CASES} cases",
+            not problems,
+            (
+                f"{EXPECTED_CORPUS_PROGRAMS} corpus programs and "
+                f"{EXPECTED_CORPUS_CASES} cases required, checked against the "
+                f"isolated-corpus evidence and the materialised inputs rather than "
+                f"against the summary's totals alone; {len(problems)} disagree"
+            ),
+            problems=problems[:10],
+        )
+
+    def check_verification_cli(self, record: Optional[dict]) -> None:
+        """The documented command line, one fresh process per public program."""
+
+        expected = sorted(
+            path.name for path in (official.REFERENCE / "programs").glob("*.json")
+        )
+        entries = (record or {}).get("programs") or []
+        observed = sorted(entry.get("program") for entry in entries)
+        bad = [
+            entry.get("program") for entry in entries
+            if entry.get("status") != "PASS"
+            or entry.get("exit_code") != 0
+            or not entry.get("stdout_is_json")
+            or entry.get("timed_out")
+        ]
+        self.record(
+            "verification_cli",
+            record is not None
+            and record.get("status") == "PASS"
+            and len(expected) == EXPECTED_PUBLIC_PROGRAMS
+            and observed == expected
+            and not bad,
+            (
+                f"{len(expected)} pinned public programs must each run under the "
+                f"documented command line and emit JSON alone; {len(entries)} "
+                f"recorded, {len(bad)} not passing cleanly; "
+                f"{'the recorded set is the pinned set' if observed == expected else 'the recorded set is not the pinned set'}"
+            ),
+            failing=bad[:8],
         )
 
     # -- driver ----------------------------------------------------------
 
-    def check_phase(self, label: str, path: Path, phase: str, repeats: int,
-                    resamples: int) -> None:
+    def check_phase(self, label: str, path: Path, phase: str,
+                    repeats: int) -> None:
         payload = self.require(path)
         if payload is None:
             return
@@ -851,6 +1347,9 @@ class Checker:
 
         self.check_recorded_hashes(label, provenance)
         self.check_exports(label, provenance)
+        # The declared protocol is checked whatever the rows turn out to be: a
+        # weakened experiment is a finding in its own right, not a consequence.
+        self.check_bootstrap_protocol(label, payload)
         rows_ok = self.check_rows(
             label, payload["runs"], payload["failures"], programs, repeats
         )
@@ -858,9 +1357,7 @@ class Checker:
         if rows_ok:
             self.check_scores(label, payload["runs"], analysis, programs)
             self.check_products_and_bootstrap(label, payload["runs"], programs)
-            self.check_aggregates_and_intervals(
-                label, payload, programs, repeats, resamples
-            )
+            self.check_aggregates_and_intervals(label, payload, programs, repeats)
         else:
             # Recomputing an aggregate from rows already known to be corrupt
             # would report a second, derived failure and could raise on the way.
@@ -876,7 +1373,7 @@ class Checker:
             label, payload, phase, bool(payload.get("extra_corpus"))
         )
 
-    def run(self, resamples: int = bench.BOOTSTRAP_RESAMPLES) -> dict:
+    def run(self) -> dict:
         self.check_pinned_material()
         if self.external_baseline:
             # A repair round reuses an earlier round's frozen baseline rather
@@ -904,11 +1401,11 @@ class Checker:
         else:
             self.check_phase(
                 "baseline", self.baseline / "runs.json", "baseline",
-                EXPECTED_REPEATS, resamples,
+                EXPECTED_REPEATS,
             )
         self.check_phase(
             "final", self.root / "final" / "runs.json", "final",
-            EXPECTED_REPEATS, resamples,
+            EXPECTED_REPEATS,
         )
 
         comparison = self.require(self.root / "comparison" / "runs.json")
@@ -933,7 +1430,16 @@ class Checker:
                 "comparison_repetitions": EXPECTED_COMPARISON_REPEATS,
                 "corpus_programs": EXPECTED_CORPUS_PROGRAMS,
                 "corpus_cases": EXPECTED_CORPUS_CASES,
+                "bootstrap_resamples": EXPECTED_BOOTSTRAP_RESAMPLES,
+                "bootstrap_seed": EXPECTED_BOOTSTRAP_SEED,
+                "verification_stages": list(REQUIRED_TEST_STAGES),
+                "verification_acceptance_steps": list(REQUIRED_ACCEPTANCE_STEPS),
+                "public_suite_tests": EXPECTED_PUBLIC_TESTS,
                 "note": "fixed here and in the pinned inputs; never read from the report",
+                "enforced": (
+                    "these are the settings actually used for every recomputation; "
+                    "no command-line option can change them"
+                ),
             },
             "checks": self.checks,
             "scope": (
@@ -954,10 +1460,9 @@ def main(argv) -> int:
         "defaults to <root>/baseline",
     )
     parser.add_argument("--output")
-    parser.add_argument(
-        "--resamples", type=int, default=bench.BOOTSTRAP_RESAMPLES,
-        help="resamples used when recomputing the paired intervals",
-    )
+    # There is deliberately no option for the resample count or the seed. They
+    # are the acceptance protocol; an option that could lower them would be an
+    # option that could weaken an acceptance check, which is how F1 arose.
     arguments = parser.parse_args(argv)
 
     root = Path(arguments.root).resolve()
@@ -966,7 +1471,7 @@ def main(argv) -> int:
         return 2
     baseline = Path(arguments.baseline).resolve() if arguments.baseline else None
 
-    payload = Checker(root, baseline).run(arguments.resamples)
+    payload = Checker(root, baseline).run()
     destination = Path(arguments.output) if arguments.output else root / "evidence_checks.json"
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(
