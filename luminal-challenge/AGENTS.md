@@ -4,6 +4,12 @@ Read [the canonical direct-index plan](plan/INDEX_ONLY_PLAN.md) and
 [task status](plan/STATUS.md) before implementing or reviewing this challenge.
 These documents are self-contained; do not depend on conversation history.
 
+For the runtime optimization assignment, also read
+[OPTIMIZATION_PHASE_PLAN.md](plan/OPTIMIZATION_PHASE_PLAN.md), version 1.1.
+It defines worker scope, executable benchmark requirements, and final lead
+review. V3 remains the frozen baseline. V4 repair2 received lead acceptance with
+limitations: see [final review](results/direct_index_v4_optimization_repair2/REVIEW.md).
+
 - Follow the definitions, task ownership, interfaces, budgets, acceptance gates,
   and implementation/reviewer prompts in the plan.
 - The new solution uses direct decimal-anchor/free-mask/sumandos operations.

@@ -1,10 +1,11 @@
 # Final lead review — direct-index Luminal compiler
 
 Date: 2026-09-20. Plan: **1.1**. Reviewed base: `7bdac4c`.
-Verdict: **PENDING LEAD SIGN-OFF**. The final rerun specified below is complete
-and every command passed; the measured results were filled in by the worker on
-2026-09-20 at 08:52 and are marked as such. The verdict line itself remains the
-lead's to set — nothing here is self-accepted.
+Verdict: **ACCEPTED**. The final rerun specified below is complete and every
+command passed. Acceptance applies to the final working tree recorded by commit
+`35d2608`, including the lead's cache correction, and to the local Luminal
+acceptance contract only. It does not claim private-grader success or authorize
+submission.
 
 Scope is the local implementation and the public/independent acceptance contract.
 It does not include external submission or private-grader success. Previous
@@ -26,8 +27,8 @@ reference, classical implementation, and success criteria are unchanged.
 
 Two scoped read-only reviewers independently audited comparison safeguards and
 schema budget accounting. The lead reviewed their findings, exercised old defect
-probes, inspected integration changes and ran final acceptance. No open concrete
-defect remains in that reviewed scope, subject to the final rerun below.
+probes, inspected integration changes and ran the final acceptance matrix. No
+open concrete defect remains in that reviewed scope.
 
 ## Small regression found and fixed by the lead
 
@@ -56,7 +57,7 @@ first run under `lead_review/verification/` started before the cache correction
 and is superseded; it is not used to establish the final source/export
 correspondence. See [preliminary-run explanation](lead_review/PRELIMINARY_RUN.md).
 
-**Final rerun, all four commands exit 0** (worker-filled, 2026-09-20 08:52):
+**Final rerun, all four commands exit 0** (2026-09-20 08:52):
 
 | Command | Result |
 |---|---|
