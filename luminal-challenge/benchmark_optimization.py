@@ -755,6 +755,218 @@ def bootstrap_equals_full(runs: Sequence[dict], programs: Sequence[str], label: 
     }
 
 
+# The score the lead accepted for v3. A candidate may not fall below it.
+ACCEPTED_DIRECT_SCORE = 2.0084662022846573
+ACCEPTED_CLASSICAL_SCORE = 1.9013791212645499
+SCORE_TOLERANCE = 1e-12
+
+
+def acceptance_gates(analysis: dict, phase: str, extra_corpus_present: bool) -> dict:
+    """The mandatory conjunction a measured run must satisfy to be acceptable.
+
+    Every gate here is a *correctness or control* gate. A run that fails any one
+    of them is not evidence, whatever its timings say, and the phase runner
+    exits nonzero on it.
+
+    Missing an engineering speed target is deliberately **not** in this
+    conjunction. An unmet target is a reported outcome of the experiment, not a
+    defect in the measurement; it is recorded under ``performance_targets``.
+
+    Detecting a failed control and then exiting successfully is the defect this
+    function exists to prevent: helper-level rejection is worth nothing unless
+    the release path consults it.
+    """
+
+    gates: Dict[str, dict] = {}
+    programs = analysis["programs"]
+    arms = analysis["arms"]
+
+    membership = analysis["membership"]
+    gates["membership"] = {
+        "passed": bool(membership["passed"]),
+        "detail": membership["detail"],
+    }
+    gates["rows_valid"] = {
+        "passed": not membership["invalid_rows"] and not membership["execution_failures"],
+        "detail": (
+            f"{len(membership['invalid_rows'])} invalid rows, "
+            f"{len(membership['execution_failures'])} execution failures"
+        ),
+    }
+
+    integers = analysis["frozen_classical_integers"]
+    gates["frozen_classical_integers"] = {
+        "passed": bool(integers["passed"]),
+        "detail": integers["detail"],
+    }
+
+    # Per-program product nonregression, candidate against frozen.
+    regressions = []
+    comparable = 0
+    metrics = {arm: analysis["scores"].get(arm, {}).get("metrics") for arm in arms}
+    for mode in ("bootstrap", "full"):
+        frozen = metrics.get(f"frozen_{mode}")
+        candidate = metrics.get(f"candidate_{mode}")
+        if not frozen or not candidate:
+            continue
+        for program in programs:
+            frozen_cycles = frozen["cycles"].get(program) or []
+            frozen_scratch = frozen["scratch"].get(program) or []
+            cand_cycles = candidate["cycles"].get(program) or []
+            cand_scratch = candidate["scratch"].get(program) or []
+            if not (frozen_cycles and frozen_scratch and cand_cycles and cand_scratch):
+                continue
+            comparable += 1
+            frozen_product = max(frozen_cycles) * max(frozen_scratch)
+            candidate_product = max(cand_cycles) * max(cand_scratch)
+            if candidate_product > frozen_product:
+                regressions.append(
+                    {
+                        "mode": mode,
+                        "program": program,
+                        "frozen_product": frozen_product,
+                        "candidate_product": candidate_product,
+                    }
+                )
+    gates["per_program_product_nonregression"] = {
+        "passed": not regressions and comparable > 0,
+        "detail": (
+            f"{comparable} per-program products compared between the frozen and "
+            f"candidate arms; {len(regressions)} regressed"
+        ),
+        "regressions": regressions,
+    }
+
+    # The candidate bootstrap must reproduce the frozen bootstrap exactly.
+    mismatches = []
+    frozen_boot = metrics.get("frozen_bootstrap")
+    cand_boot = metrics.get("candidate_bootstrap")
+    if frozen_boot and cand_boot:
+        for program in programs:
+            if frozen_boot["cycles"].get(program) != cand_boot["cycles"].get(program) or (
+                frozen_boot["scratch"].get(program) != cand_boot["scratch"].get(program)
+            ):
+                mismatches.append(program)
+    gates["bootstrap_metrics_identical"] = {
+        "passed": bool(frozen_boot and cand_boot) and not mismatches,
+        "detail": (
+            f"{len(programs)} programs compared; {len(mismatches)} differ between "
+            f"the frozen and candidate bootstrap arms"
+        ),
+        "mismatches": mismatches,
+    }
+
+    # Score floor, where a protected serial baseline defines a score at all.
+    below = []
+    scored = 0
+    for arm in arms:
+        entry = analysis["scores"].get(arm, {})
+        score = entry.get("combined_score")
+        if score is None:
+            continue
+        scored += 1
+        if arm == "classical":
+            if not math.isclose(
+                score, ACCEPTED_CLASSICAL_SCORE, rel_tol=0, abs_tol=1e-9
+            ):
+                below.append({"arm": arm, "score": score, "floor": ACCEPTED_CLASSICAL_SCORE})
+        elif score < ACCEPTED_DIRECT_SCORE - SCORE_TOLERANCE:
+            below.append({"arm": arm, "score": score, "floor": ACCEPTED_DIRECT_SCORE})
+    gates["score_floor"] = {
+        "passed": not below and scored > 0,
+        "detail": (
+            f"{scored} arms scored; {len(below)} below their floor "
+            f"(direct {ACCEPTED_DIRECT_SCORE!r} within {SCORE_TOLERANCE:g}, "
+            f"classical {ACCEPTED_CLASSICAL_SCORE!r} within 1e-9)"
+        ),
+        "below_floor": below,
+    }
+
+    if phase == "final":
+        gates["extra_corpus_evaluated"] = {
+            "passed": bool(extra_corpus_present),
+            "detail": (
+                "the frozen evaluation corpus was measured"
+                if extra_corpus_present
+                else "the frozen evaluation corpus was skipped, so this run "
+                "cannot support acceptance"
+            ),
+        }
+
+    gates["all_passed"] = {
+        "passed": all(gate["passed"] for gate in gates.values()),
+        "detail": "every mandatory gate above",
+    }
+    return gates
+
+
+def performance_targets(analysis: dict) -> dict:
+    """Whether each declared engineering target was reached.
+
+    Reported, never enforced. Missing a speed target is an outcome of the
+    experiment; it is not a defect in the measurement and must not fail a run.
+    """
+
+    out: Dict[str, dict] = {}
+    for label, target in TARGETS.items():
+        entry = analysis["ratios"].get(label)
+        if entry is None:
+            out[label] = {"target": target, "met": None, "note": "not measured"}
+            continue
+        interval = entry["paired_bootstrap_95"]
+        out[label] = {
+            "target": target,
+            "criterion": (
+                "geometric mean of per-program median ratios >= target, with the "
+                "paired 95% interval lower bound above 1.0"
+            ),
+            "measured": entry["geometric_mean_of_per_program_medians"],
+            "interval_low": interval["low"],
+            "interval_high": interval["high"],
+            "met": bool(entry.get("target_met")),
+        }
+    return out
+
+
+def report_gates(payload: dict) -> int:
+    """Print every mandatory gate and derive the exit status from all of them.
+
+    A run that detects a failed control and then exits zero is worse than one
+    that never checked: it converts a defect into a passing record. The exit
+    status is the conjunction, and nothing else.
+    """
+
+    gates = payload["acceptance_gates"]
+    for name, gate in gates.items():
+        if name == "all_passed":
+            continue
+        print(
+            f"gate {name}: {'PASS' if gate['passed'] else 'FAIL'} — {gate['detail']}",
+            file=sys.stderr,
+        )
+    for label, entry in payload.get("performance_targets", {}).items():
+        if entry.get("met") is None:
+            continue
+        print(
+            f"target {label}: {'MET' if entry['met'] else 'NOT MET'} — measured "
+            f"{entry['measured']:.4f}x against {entry['target']}x "
+            f"(reported, not a gate)",
+            file=sys.stderr,
+        )
+    if not payload.get("acceptance_claimed", True):
+        print(
+            "THIS IS A DIAGNOSTIC RUN AND IS NOT ACCEPTANCE EVIDENCE",
+            file=sys.stderr,
+        )
+    passed = gates["all_passed"]["passed"]
+    if not passed:
+        print(
+            "mandatory gates FAILED; this run is not valid measurement evidence",
+            file=sys.stderr,
+        )
+    return 0 if passed else 1
+
+
 def analyse(
     runs: Sequence[dict],
     failures: Sequence[dict],
@@ -828,6 +1040,11 @@ def analyse(
         for run in entries:
             for name, count in (run.get("optimiser", {}).get("statuses") or {}).items():
                 statuses[name] = statuses.get(name, 0) + count
+        optimiser_seconds = [
+            run["optimiser"]["seconds"]
+            for run in entries
+            if run.get("optimiser", {}).get("seconds") is not None
+        ]
         optimiser[arm] = {
             "accepted_total": sum(
                 run.get("optimiser", {}).get("accepted", 0) for run in entries
@@ -836,16 +1053,11 @@ def analyse(
                 run.get("optimiser", {}).get("attempted", 0) for run in entries
             ),
             "statuses": statuses,
+            # Guarded on the filtered values, not on the rows: an arm whose
+            # rows carry no optimiser timing has no median, and asking for one
+            # raised rather than reporting its absence.
             "median_optimiser_seconds": (
-                statistics.median(
-                    [
-                        run["optimiser"]["seconds"]
-                        for run in entries
-                        if run.get("optimiser", {}).get("seconds") is not None
-                    ]
-                )
-                if entries
-                else None
+                statistics.median(optimiser_seconds) if optimiser_seconds else None
             ),
         }
 
@@ -1209,11 +1421,14 @@ def phase_baseline(arguments) -> int:
             "harness's own noise floor rather than any code change"
         ),
     }
+    payload["acceptance_gates"] = acceptance_gates(analysis, "baseline", True)
+    payload["performance_targets"] = performance_targets(analysis)
+    payload["acceptance_claimed"] = True
     write_json(output / "runs.json", payload)
     report_lines(payload, output / "BASELINE_MEASUREMENTS.md")
     print(summarise(payload), file=sys.stderr)
     print(str(output / "runs.json"))
-    return 0 if analysis["membership"]["passed"] else 1
+    return report_gates(payload)
 
 
 def profile_search(path: Path, output: Path, seconds: float = 120.0) -> List[dict]:
@@ -1377,6 +1592,30 @@ def phase_final(arguments) -> int:
     )
     write_json(output / "provenance.json", record)
 
+    # Refused before a single measurement is taken. Measuring first and
+    # recording the mismatch afterwards produces a dataset that looks complete
+    # and compares the candidate against the wrong frozen build.
+    if not record["frozen_snapshot_matches_baseline"]:
+        print(
+            "the frozen export to be measured is not the one the baseline phase "
+            "snapshotted; refusing to measure",
+            file=sys.stderr,
+        )
+        return 2
+    # ``getattr`` rather than attribute access: the lead's retained probe
+    # scripts build their own Namespace, and a new option must not make an
+    # older caller crash. The default is the strict one, so nothing is
+    # weakened by an omitted flag.
+    diagnostic = getattr(arguments, "diagnostic", False)
+    if not diagnostic and arguments.skip_extra_corpus:
+        print(
+            "--skip-extra-corpus omits the mandatory frozen evaluation corpus; "
+            "rerun without it, or pass --diagnostic to label the run as "
+            "non-acceptance",
+            file=sys.stderr,
+        )
+        return 2
+
     paths = public_paths()
     programs = [program_name_of(path) for path in paths]
     history = historical_metrics()
@@ -1443,14 +1682,38 @@ def phase_final(arguments) -> int:
         "failures": failures,
         "extra_corpus": extra,
     }
+    payload["acceptance_gates"] = acceptance_gates(analysis, "final", extra is not None)
+    payload["performance_targets"] = performance_targets(analysis)
+    if extra is not None:
+        payload["acceptance_gates"]["extra_corpus_membership"] = {
+            "passed": bool(extra["analysis"]["membership"]["passed"])
+            and bool(extra["integrity"]["passed"]),
+            "detail": (
+                f"{extra['analysis']['membership']['detail']}; corpus integrity "
+                f"{'verified' if extra['integrity']['passed'] else 'FAILED'} over "
+                f"{extra['integrity']['checked']} programs"
+            ),
+        }
+        payload["acceptance_gates"]["all_passed"] = {
+            "passed": all(
+                gate["passed"]
+                for name, gate in payload["acceptance_gates"].items()
+                if name != "all_passed"
+            ),
+            "detail": "every mandatory gate above",
+        }
+    payload["acceptance_claimed"] = not diagnostic
+    if diagnostic:
+        payload["note"] = (
+            "DIAGNOSTIC RUN — NOT AN ACCEPTANCE RUN. It was started with "
+            "--diagnostic, so parts of the mandatory evaluation may have been "
+            "skipped and no gate result here may be cited as acceptance evidence."
+        )
     write_json(output / "runs.json", payload)
     report_lines(payload, output / "FINAL_MEASUREMENTS.md")
     print(summarise(payload), file=sys.stderr)
     print(str(output / "runs.json"))
-    ok = analysis["membership"]["passed"] and (
-        extra is None or extra["analysis"]["membership"]["passed"]
-    )
-    return 0 if ok else 1
+    return report_gates(payload)
 
 
 def extra_score_distribution(
@@ -1610,6 +1873,12 @@ def main(argv) -> int:
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--allow-existing", action="store_true")
     parser.add_argument("--skip-extra-corpus", action="store_true")
+    parser.add_argument(
+        "--diagnostic",
+        action="store_true",
+        help="label the run as non-acceptance evidence and permit mandatory "
+        "evaluation steps to be skipped",
+    )
     arguments = parser.parse_args(argv)
 
     if arguments.worker:

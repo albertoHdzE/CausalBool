@@ -16,9 +16,11 @@ from __future__ import annotations
 
 import ast
 import copy
+import json
 from pathlib import Path
 import sys
 import unittest
+import unittest.mock
 
 ROOT = Path(__file__).resolve().parents[1]
 for entry in (str(ROOT / ".reference"), str(ROOT)):
@@ -416,3 +418,260 @@ class SingleOwnerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# --------------------------------------------------------------------------
+# R2: a detected failure must reach the exit code
+# (lead review of 2026-09-20, results/direct_index_v4_optimization/REVIEW.md)
+# --------------------------------------------------------------------------
+
+
+def analysis_for(runs, failures=(), programs=PROGRAMS, repeats=REPEATS):
+    return bench.analyse(
+        list(runs), list(failures), list(programs), list(ARMS), repeats,
+        {"classical": {p: {"cycles": 10, "scratch": 8} for p in programs},
+         "serial": {p: {"cycles": 20, "scratch": 16} for p in programs}},
+        bench.DEFAULT_SEED, resamples=50,
+    )
+
+
+class MandatoryGateTests(unittest.TestCase):
+    """Every control the harness evaluates must be able to fail the run.
+
+    The defect this replaces was not a missing check. The frozen-integer
+    control was computed correctly and recorded a real failure, and the phase
+    returned success anyway. A detected failure that does not reach the exit
+    code is worse than an absent one: it turns a defect into a passing record.
+
+    These fixtures are small synthetic datasets, so the score floors are scoped
+    to what this fixture scores rather than to the real accepted values. What is
+    under test is the conjunction, not the constants; the constants are
+    exercised against real measured rows in ``PhaseExitCodeTests``.
+    """
+
+    def setUp(self):
+        # serial 20x16 against an arm's 10x8 gives a combined score of exactly 2.
+        for name in ("ACCEPTED_DIRECT_SCORE", "ACCEPTED_CLASSICAL_SCORE"):
+            patcher = unittest.mock.patch.object(bench, name, 2.0)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def test_a_clean_dataset_passes_every_mandatory_gate(self):
+        gates = bench.acceptance_gates(analysis_for(dataset()), "baseline", True)
+        self.assertTrue(gates["all_passed"]["passed"], gates)
+
+    def test_a_product_preserving_classical_drift_fails_the_conjunction(self):
+        runs = dataset()
+        for record in runs:
+            if record["arm"] == "classical" and record["program"] == "alpha":
+                record["cycles"], record["scratch"] = 20, 4
+        gates = bench.acceptance_gates(analysis_for(runs), "baseline", True)
+        self.assertFalse(gates["frozen_classical_integers"]["passed"])
+        self.assertFalse(gates["all_passed"]["passed"])
+
+    def test_a_missing_row_fails_the_conjunction(self):
+        runs = dataset()
+        runs.pop()
+        gates = bench.acceptance_gates(analysis_for(runs), "baseline", True)
+        self.assertFalse(gates["membership"]["passed"])
+        self.assertFalse(gates["all_passed"]["passed"])
+
+    def test_an_invalid_row_fails_the_conjunction(self):
+        runs = dataset()
+        runs[0]["discrepancy_count"] = 1
+        gates = bench.acceptance_gates(analysis_for(runs), "baseline", True)
+        self.assertFalse(gates["rows_valid"]["passed"])
+        self.assertFalse(gates["all_passed"]["passed"])
+
+    def test_a_per_program_product_regression_fails_the_conjunction(self):
+        runs = dataset()
+        for record in runs:
+            if record["arm"] == "candidate_full" and record["program"] == "alpha":
+                record["scratch"] = 16  # product 160 against the frozen 80
+        gates = bench.acceptance_gates(analysis_for(runs), "baseline", True)
+        self.assertFalse(gates["per_program_product_nonregression"]["passed"])
+        self.assertFalse(gates["all_passed"]["passed"])
+
+    def test_a_bootstrap_metric_change_fails_the_conjunction(self):
+        runs = dataset()
+        for record in runs:
+            if record["arm"] == "candidate_bootstrap" and record["program"] == "beta":
+                record["cycles"] = 9  # a better product, but not identical
+        gates = bench.acceptance_gates(analysis_for(runs), "baseline", True)
+        self.assertFalse(gates["bootstrap_metrics_identical"]["passed"])
+        self.assertFalse(gates["all_passed"]["passed"])
+
+    def test_a_score_below_the_accepted_floor_fails_the_conjunction(self):
+        runs = dataset()
+        for record in runs:
+            if record["arm"].startswith("candidate"):
+                record["cycles"] = 40  # a far worse score than the v3 floor
+        gates = bench.acceptance_gates(analysis_for(runs), "baseline", True)
+        self.assertFalse(gates["score_floor"]["passed"])
+        self.assertFalse(gates["all_passed"]["passed"])
+
+    def test_a_skipped_evaluation_corpus_fails_a_final_run(self):
+        gates = bench.acceptance_gates(analysis_for(dataset()), "final", False)
+        self.assertFalse(gates["extra_corpus_evaluated"]["passed"])
+        self.assertFalse(gates["all_passed"]["passed"])
+        # The same dataset is acceptable once the corpus is present.
+        gates = bench.acceptance_gates(analysis_for(dataset()), "final", True)
+        self.assertTrue(gates["all_passed"]["passed"])
+
+    def test_a_missed_speed_target_is_not_a_gate(self):
+        """An unmet engineering target is an outcome, not a correctness failure."""
+
+        runs = dataset()
+        for record in runs:
+            # Make the candidate no faster than the frozen arm at all.
+            if record["arm"].startswith("candidate"):
+                record["compile_seconds"] = 1.0
+            if record["arm"].startswith("frozen"):
+                record["compile_seconds"] = 1.0
+        analysis = analysis_for(runs)
+        targets = bench.performance_targets(analysis)
+        self.assertFalse(targets["full_candidate_vs_frozen"]["met"])
+        self.assertFalse(targets["bootstrap_candidate_vs_frozen"]["met"])
+        gates = bench.acceptance_gates(analysis, "baseline", True)
+        self.assertTrue(
+            gates["all_passed"]["passed"],
+            "a missed speed target must not fail a correctness conjunction",
+        )
+
+    def test_report_gates_derives_the_exit_code_from_the_conjunction(self):
+        import contextlib
+        import io
+
+        payload = {
+            "acceptance_gates": bench.acceptance_gates(
+                analysis_for(dataset()), "baseline", True
+            ),
+            "performance_targets": {},
+            "acceptance_claimed": True,
+        }
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(bench.report_gates(payload), 0)
+        payload["acceptance_gates"]["all_passed"]["passed"] = False
+        with contextlib.redirect_stderr(io.StringIO()) as captured:
+            self.assertEqual(bench.report_gates(payload), 1)
+        self.assertIn("not valid measurement evidence", captured.getvalue())
+
+    def test_a_diagnostic_run_is_labelled_as_non_acceptance(self):
+        import contextlib
+        import io
+
+        payload = {
+            "acceptance_gates": bench.acceptance_gates(
+                analysis_for(dataset()), "baseline", True
+            ),
+            "performance_targets": {},
+            "acceptance_claimed": False,
+        }
+        with contextlib.redirect_stderr(io.StringIO()) as captured:
+            bench.report_gates(payload)
+        self.assertIn("NOT ACCEPTANCE EVIDENCE", captured.getvalue())
+
+
+class PhaseExitCodeTests(unittest.TestCase):
+    """The real phase entry points, driven with injected failures."""
+
+    def phase_final(self, rows, **overrides):
+        import argparse
+        import contextlib
+        import io
+        import tempfile
+        from unittest.mock import patch
+
+        results = ROOT / "results" / "direct_index_v4_optimization"
+        with tempfile.TemporaryDirectory() as temp:
+            options = dict(
+                output=temp, baseline=str(results / "baseline"), allow_existing=False,
+                timeout=20.0, seed=bench.DEFAULT_SEED, repeats=15, quiet=True,
+                skip_extra_corpus=True, diagnostic=True, extra_repeats=3,
+            )
+            options.update(overrides)
+            args = argparse.Namespace(**options)
+            with patch.object(bench.Bench, "run", return_value=(rows, [], [])), \
+                 patch.object(bench, "paired_bootstrap",
+                              return_value={"low": 1.0, "high": 1.0}), \
+                 contextlib.redirect_stdout(io.StringIO()), \
+                 contextlib.redirect_stderr(io.StringIO()):
+                code = bench.phase_final(args)
+            written = Path(temp) / "runs.json"
+            report = json.loads(written.read_text()) if written.exists() else None
+        return code, report
+
+    def real_rows(self):
+        import copy
+
+        path = (ROOT / "results" / "direct_index_v4_optimization"
+                / "final" / "runs.json")
+        if not path.exists():
+            self.skipTest("the v4 measured rows are not present in this checkout")
+        return copy.deepcopy(json.loads(path.read_text())["runs"])
+
+    def test_the_lead_probe_now_exits_nonzero(self):
+        """Doubling classical cycles and halving scratch preserves the product.
+
+        Every aggregate, ratio and score is therefore untouched, which is
+        exactly why an aggregate check cannot see it and the per-program
+        integer control must.
+        """
+
+        rows = self.real_rows()
+        drifted = 0
+        for row in rows:
+            if row["arm"] == "classical" and row["scratch"] % 2 == 0:
+                row["cycles"] *= 2
+                row["scratch"] //= 2
+                drifted += 1
+        self.assertGreater(drifted, 0)
+        code, report = self.phase_final(rows)
+        self.assertEqual(code, 1, "a failed historical control exited successfully")
+        self.assertFalse(report["analysis"]["frozen_classical_integers"]["passed"])
+        self.assertFalse(report["acceptance_gates"]["all_passed"]["passed"])
+
+    def test_an_unmodified_replay_passes_its_correctness_gates(self):
+        rows = self.real_rows()
+        code, report = self.phase_final(rows)
+        gates = report["acceptance_gates"]
+        for name in ("membership", "rows_valid", "frozen_classical_integers",
+                     "per_program_product_nonregression",
+                     "bootstrap_metrics_identical", "score_floor"):
+            self.assertTrue(gates[name]["passed"], f"{name}: {gates[name]['detail']}")
+        # It still exits nonzero, because a diagnostic run skipped the corpus.
+        self.assertEqual(code, 1)
+        self.assertFalse(gates["extra_corpus_evaluated"]["passed"])
+        self.assertFalse(report["acceptance_claimed"])
+
+    def test_skipping_the_corpus_without_the_diagnostic_flag_is_refused(self):
+        rows = self.real_rows()
+        code, report = self.phase_final(rows, diagnostic=False)
+        self.assertEqual(code, 2, "a mandatory evaluation step was silently skipped")
+        self.assertIsNone(report, "no report may be written for a refused run")
+
+    def test_a_frozen_snapshot_mismatch_is_refused_before_measuring(self):
+        import argparse
+        import contextlib
+        import io
+        import tempfile
+        from unittest.mock import patch
+
+        results = ROOT / "results" / "direct_index_v4_optimization"
+        if not (results / "baseline" / "provenance.json").exists():
+            self.skipTest("the v4 baseline is not present in this checkout")
+        measured = []
+        with tempfile.TemporaryDirectory() as temp:
+            args = argparse.Namespace(
+                output=temp, baseline=str(results / "baseline"), allow_existing=False,
+                timeout=20.0, seed=bench.DEFAULT_SEED, repeats=15, quiet=True,
+                skip_extra_corpus=False, diagnostic=False, extra_repeats=3,
+            )
+            with patch.object(bench, "digest", return_value="0" * 64), \
+                 patch.object(bench.Bench, "run",
+                              side_effect=lambda *a, **k: measured.append(1) or ([], [], [])), \
+                 contextlib.redirect_stdout(io.StringIO()), \
+                 contextlib.redirect_stderr(io.StringIO()):
+                code = bench.phase_final(args)
+        self.assertEqual(code, 2)
+        self.assertEqual(measured, [], "measurement started despite a bad snapshot")
