@@ -1,0 +1,195 @@
+{
+  "acceptance_gates": {
+    "all_passed": true,
+    "bootstrap_metrics_identical": true,
+    "extra_corpus_evaluated": true,
+    "extra_corpus_membership": true,
+    "frozen_classical_integers": true,
+    "membership": true,
+    "per_program_product_nonregression": true,
+    "rows_valid": true,
+    "score_floor": true
+  },
+  "changed_files": [
+    "check_optimization_evidence.py",
+    "tests_direct/test_evidence_checker.py"
+  ],
+  "comparison_gates": {
+    "all_passed": true,
+    "all_runs_present": true,
+    "direct_arm_isolated": true,
+    "direct_beats_baseline": true,
+    "frozen_classical_control": true,
+    "frozen_integer_metrics": true,
+    "metrics_valid": true,
+    "no_candidate_discrepancies": true
+  },
+  "evidence_checker": {
+    "all_passed": true,
+    "checks": 50,
+    "enforced_contract": {
+      "arms": [
+        "classical",
+        "frozen_bootstrap",
+        "frozen_full",
+        "candidate_bootstrap",
+        "candidate_full"
+      ],
+      "bootstrap_resamples": 10000,
+      "bootstrap_seed": 20260920,
+      "comparison_repetitions": 3,
+      "corpus_cases": 277,
+      "corpus_programs": 142,
+      "enforced": "these are the settings actually used for every recomputation; no command-line option can change them",
+      "extra_corpus_size": 100,
+      "extra_repetitions": 3,
+      "note": "fixed here and in the pinned inputs; never read from the report",
+      "public_programs": 8,
+      "public_suite_tests": 11,
+      "repetitions": 15,
+      "verification_acceptance_steps": [
+        "corpus",
+        "public_suite",
+        "cli"
+      ],
+      "verification_stages": [
+        "schema",
+        "contract",
+        "constraints",
+        "construction",
+        "optimizer",
+        "independence",
+        "export",
+        "benchmark",
+        "evidence"
+      ]
+    },
+    "exit": 0
+  },
+  "export_sha256": "d14bf39b450aaa5fe73c41a3236980e219089e527ae43007781d78e0059a5864",
+  "findings": {
+    "F1_report_controlled_interval_protocol": {
+      "after": {
+        "omit_target_declaration": {
+          "all_passed": false,
+          "failing": [
+            "target_decisions:final"
+          ]
+        },
+        "one_resample": {
+          "all_passed": false,
+          "failing": [
+            "bootstrap_protocol:final",
+            "confidence_intervals:final"
+          ]
+        },
+        "wrong_bootstrap_seed": {
+          "all_passed": false,
+          "failing": [
+            "bootstrap_protocol:final",
+            "confidence_intervals:final"
+          ]
+        }
+      },
+      "before": "one_resample mutation -> all_passed True (lead's probe)",
+      "closed": true,
+      "enforced": {
+        "cli_option_removed": "--resamples no longer exists",
+        "resamples": 10000,
+        "seed": 20260920
+      }
+    },
+    "F2_removable_verification_stages": {
+      "after": {
+        "drop_cli_program": {
+          "all_passed": false,
+          "failing": [
+            "verification_cli"
+          ]
+        },
+        "duplicate_stage_for_a_missing_one": {
+          "all_passed": false,
+          "failing": [
+            "verification_stages",
+            "verification_test_counts",
+            "verification_logs"
+          ]
+        },
+        "missing_verification_stages": {
+          "all_passed": false,
+          "failing": [
+            "verification_stages",
+            "verification_test_counts",
+            "verification_logs",
+            "verification_public_suite",
+            "verification_cli"
+          ]
+        },
+        "zero_test_stage": {
+          "all_passed": false,
+          "failing": [
+            "verification_test_counts",
+            "verification_logs"
+          ]
+        }
+      },
+      "before": "missing_verification_stages mutation -> all_passed True (lead's probe)",
+      "closed": true,
+      "required_records": 12
+    }
+  },
+  "frozen_export_sha256": "c0574395d339dae3b24e819955795c2a6165953c5966e46062c9bf9b18a50ce2",
+  "performance_targets_reported_not_enforced": {
+    "bootstrap_candidate_vs_frozen": {
+      "interval_high": 1.14276883869051,
+      "interval_low": 1.1279533284716352,
+      "measured": 1.1337217370094306,
+      "met": false,
+      "target": 1.2
+    },
+    "full_candidate_vs_frozen": {
+      "interval_high": 1.9509229569025006,
+      "interval_low": 1.9395976657269622,
+      "measured": 1.9471052761230607,
+      "met": false,
+      "target": 2.0
+    }
+  },
+  "probe_control": {
+    "all_passed": true,
+    "failing": []
+  },
+  "probe_mutations_rejected": 13,
+  "probe_mutations_total": 13,
+  "production_code_changed": false,
+  "r1_still_closed": {
+    "counters": {
+      "intersections": 3,
+      "records": 6,
+      "visited": 3
+    },
+    "elapsed": 2.0,
+    "reason": "time budget exhausted",
+    "status": "UNKNOWN",
+    "visited": 3
+  },
+  "responding_to": "results/direct_index_v4_optimization_repair/REVIEW.md",
+  "round": "F1/F2 evidence-only repair of the lead re-review",
+  "scores": {
+    "candidate_bootstrap": 2.008466202284657,
+    "candidate_full": 2.008466202284657,
+    "classical": 1.9013791212645499,
+    "frozen_bootstrap": 2.008466202284657,
+    "frozen_full": 2.008466202284657
+  },
+  "status": "READY_FOR_REVIEW",
+  "verdict_authority": "only the lead may accept; this file records measurements, not a verdict",
+  "verification": {
+    "corpus_cases": 277,
+    "corpus_programs": 142,
+    "direct_tests": 340,
+    "public_tests": 11,
+    "records": 12,
+    "status": "PASS"
+  }
+}

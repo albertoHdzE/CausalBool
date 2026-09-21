@@ -328,3 +328,151 @@ def test_connectivity_recovered_exactly():
         original = net.connected_inputs(k)
         # Degenerate gates can drop an input; symmetric non-constant gates keep all.
         assert recovered == original, (k, original, recovered)
+
+
+# ---------------------------------------------------------------------------
+# Symbolic backend: the same three steps, without enumerating 2**n states
+#
+# These are parity tests, not independent tests.  The exhaustive path above is
+# the definition; every assertion here says the symbolic path returns the same
+# object.  Each one prints or asserts its denominator, because "all agree" over
+# an empty case list is the failure this file exists to prevent.
+# ---------------------------------------------------------------------------
+
+import itertools
+
+import pytest
+
+from causalbool import repertoire as _repertoire
+from deconvolution import (
+    _candidate_gates, deconvolve_root, essential_variables_symbolic,
+    evaluate_root, gate_root, identify_gate_symbolic, network_roots,
+    reduced_table_symbolic, symbolic_manager, verify_forward_symbolic,
+)
+
+
+def test_restrict_matches_the_exhaustive_cofactor():
+    # Every Boolean function of one, two and three variables.
+    checked = 0
+    for n in (1, 2, 3):
+        manager = symbolic_manager(n)
+
+        def build(table, prefix=0, level=0):
+            if level == n:
+                return (table >> prefix) & 1
+            return manager.mk(level, build(table, prefix, level + 1),
+                              build(table, prefix | (1 << level), level + 1))
+
+        for table in range(1 << (1 << n)):
+            root = build(table)
+            for i in range(n):
+                for b in (0, 1):
+                    got = manager.restrict(root, i, b)
+                    cofactor = 0
+                    for x in range(1 << n):
+                        y = (x & ~(1 << i)) | (b << i)
+                        if (table >> y) & 1:
+                            cofactor |= 1 << x
+                    assert got == build(cofactor)
+                    checked += 1
+    # Every function of n variables (2**2**n of them), every coordinate, both
+    # values: 4*1*2 + 16*2*2 + 256*3*2.
+    assert checked == sum((1 << (1 << n)) * n * 2 for n in (1, 2, 3)) == 1608
+
+
+@pytest.mark.parametrize("arity", (1, 2, 3, 4))
+def test_symbolic_gate_construction_matches_apply_gate(arity):
+    manager = symbolic_manager(arity)
+    coordinates = list(range(arity))
+    candidates = _candidate_gates(arity)
+    assert candidates, "no candidate gates offered; the parity claim would be vacuous"
+    for candidate in candidates:
+        root = gate_root(manager, candidate.gate, coordinates, candidate.params)
+        assert reduced_table_symbolic(manager, root, coordinates) == \
+            truth_table(candidate.gate, arity, candidate.params)
+
+
+@pytest.mark.parametrize("arity", (1, 2, 3))
+def test_symbolic_extension_families_match_apply_gate(arity):
+    manager = symbolic_manager(arity)
+    coordinates = list(range(arity))
+    for table in range(1 << (1 << arity)):
+        bits = [(table >> y) & 1 for y in range(1 << arity)]
+        root = gate_root(manager, "LUT", coordinates, {"table": bits})
+        assert reduced_table_symbolic(manager, root, coordinates) == bits
+    for size in range(arity + 1):
+        for activators in itertools.combinations(range(arity), size):
+            params = {"activators": list(activators), "arity": arity}
+            root = gate_root(manager, "REGULATORY", coordinates, params)
+            assert reduced_table_symbolic(manager, root, coordinates) == \
+                truth_table("REGULATORY", arity, params)
+
+
+def test_symbolic_and_exhaustive_deconvolution_agree():
+    """Identical essential sets, canonical gates and match classes."""
+    nodes = 0
+    for seed in range(25):
+        net = random_network(n=6, seed=seed, gate_pool="all")
+        exhaustive = deconvolve(_repertoire(net))[1]
+
+        manager = symbolic_manager(net.n)
+        roots = network_roots(manager, net)
+        symbolic = [deconvolve_root(manager, roots[k], k) for k in range(net.n)]
+
+        for left, right in zip(exhaustive, symbolic):
+            assert left.connected_inputs == right.connected_inputs
+            assert left.canonical.gate == right.canonical.gate
+            assert left.canonical.params == right.canonical.params
+            assert left.reduced_truth_table == right.reduced_truth_table
+            assert sorted(m.as_dict().items().__str__() for m in left.matches) == \
+                sorted(m.as_dict().items().__str__() for m in right.matches)
+            nodes += 1
+    assert nodes == 25 * 6, f"parity asserted over {nodes} nodes"
+
+
+def test_symbolic_forward_replay_is_exact_without_enumeration():
+    net = random_network(n=7, seed=11, gate_pool="symmetric")
+    manager = symbolic_manager(net.n)
+    roots = network_roots(manager, net)
+    reports = [deconvolve_root(manager, roots[k], k) for k in range(net.n)]
+    recovered = Network(
+        n=net.n,
+        C=[[1 if i in r.connected_inputs else 0 for i in range(net.n)] for r in reports],
+        gates=[r.canonical.gate for r in reports],
+        params=[dict(r.canonical.params) for r in reports],
+    )
+    result = verify_forward_symbolic(manager, roots, recovered)
+    assert result["exact"] and not result["mismatched_nodes"]
+    assert result["states_covered"] == 2 ** net.n
+    assert result["states_enumerated"] == 0
+
+
+def test_symbolic_essential_variables_ignore_a_disconnected_coordinate():
+    # Node 0 reads coordinates 1 and 2 only; coordinate 3 must never be essential.
+    manager = symbolic_manager(4)
+    root = gate_root(manager, "XOR", [1, 2], {})
+    assert essential_variables_symbolic(manager, root) == [1, 2]
+    assert manager.restrict(root, 3, 0) == manager.restrict(root, 3, 1)
+
+
+def test_symbolic_naming_survives_a_width_beyond_tabulation():
+    # 24 inputs is 16.7M rows the exhaustive path would have to build; the
+    # symbolic path names the gate by root identity and never tabulates.
+    manager = symbolic_manager(24)
+    root = gate_root(manager, "KOFN", list(range(24)), {"k": 9, "strict": False})
+    report = deconvolve_root(manager, root, 0, max_table_bits=8)
+    assert report.connected_inputs == list(range(24))
+    assert report.canonical.gate == "KOFN" and report.canonical.params["k"] == 9
+    assert report.reduced_truth_table is None
+    assert evaluate_root(manager, root, {i: 1 for i in range(9)}) == 1
+    assert evaluate_root(manager, root, {i: 1 for i in range(8)}) == 0
+
+
+def test_identify_gate_symbolic_reports_the_ambiguity_class():
+    # A single coordinate is simultaneously AND, OR, XOR, MAJORITY and KOFN(1).
+    manager = symbolic_manager(1)
+    root = gate_root(manager, "AND", [0], {})
+    matches, canonical = identify_gate_symbolic(manager, root, [0])
+    names = {m.gate for m in matches}
+    assert {"AND", "OR", "XOR", "MAJORITY", "KOFN"} <= names
+    assert canonical.gate == "AND"

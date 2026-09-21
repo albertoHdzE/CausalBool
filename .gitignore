@@ -74,3 +74,9 @@ results/tests/section-*/
 # is therefore evidence, Done.txt only marks that a run reached its last line. It
 # is deleted and rewritten on every run and carries no claim, so it is not tracked.
 results/**/Done.txt
+
+# Step-35 scale pilot and repair probe runs. These are regenerable per-case
+# result dumps: 241 files, ~1.55 GB, of which 14 individually exceed 10 MB.
+# LARGE_BINARIES forbids regenerable results of that size in history, so they
+# are reached by rerunning the producer, not by clone.
+results/step35_*/

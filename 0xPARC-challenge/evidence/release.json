@@ -1,0 +1,182 @@
+{
+  "status": "PASS",
+  "command": "PYTHONPATH=src .venv/bin/python -m oxparc_challenge verify-release",
+  "source_sha256": {
+    "src/oxparc_challenge/release.py": "5192a373089a6bb24de66c159fec7f9e33c4db60abe35790e00e02d6512674ad",
+    "src/oxparc_challenge/recovery.py": "7621907ea18754fc8291e03bcd9ff19635a9e7d354b74bbc1dc916afff0ad719",
+    "src/oxparc_challenge/gadgets.py": "4e93aa00ec326333a26d1a83146326bf2173814570e3b52f5ddc437f8b4b8b06",
+    "src/oxparc_challenge/__init__.py": "b3c61e5de3b38e0d2ee9be34d75d80c9e384e76aa8da78e83b0bd77207406349",
+    "src/oxparc_challenge/row_evaluator.py": "32a7844a04d8a141ecb698ccfc54d1d74e84042466290ebcf1bfd1970f822b55",
+    "src/oxparc_challenge/symbolic.py": "fefdb0523a04b822404537a4a581562296150a9bab7aa4b8de032a45700408e7",
+    "src/oxparc_challenge/boolean.py": "87fa78b76012970056003b014cb59dca58882d577edfa8e0ad95c4cf64f17988",
+    "src/oxparc_challenge/fourier_validation.py": "4bdf10efab5b1f888eb5ba18af7c8840dc14dd104967a24f06a7c54dc5d6ab9e",
+    "src/oxparc_challenge/pytest_evidence.py": "98726d4bd17dc9cd424cf49798ea03eb113f68818e5fd06412734c62b6d4684d",
+    "src/oxparc_challenge/discrete_evidence.py": "07a8f0ed5ff3b04448a21035b500711dc393d6fea2a9f721b7e2a0b0f496c641",
+    "src/oxparc_challenge/constraints.py": "aab64ac6a34dec80298c2fd0efba996e68313df475efeded5a66cd4113eaed98",
+    "src/oxparc_challenge/circom.py": "70ec744f68e75bb72d6d02db9b96ea501efd679cbfc5f7e4dceaac6fbd5c91ea",
+    "src/oxparc_challenge/modular.py": "f739c96fa4e9872fd615c88c30504ad938a349c6fac88ada12e6faba50c7b1b9",
+    "src/oxparc_challenge/compiled_audit.py": "a1195e697735ad6b0e9cd9a6a7bcadaf121817f7888e76e917d062662725b161",
+    "src/oxparc_challenge/fourier.py": "ee3eecda3b2163409a1b21c8de962813e0e297beb305b88fcc7eaf2e5fdfe804",
+    "src/oxparc_challenge/fourier_search.py": "d5c940abd50fa85993e38397436df8259ba9a72b7619eacb78c8b871d6226812",
+    "src/oxparc_challenge/__main__.py": "ddd8027092e8464adf5997fb108d29a9807d82a12abce9e9791ceac373e45ada",
+    "tests/test_discrete.py": "d5b36958c64531c0f25183bf53bd6c8920bfd54abbe858c476e73d65b31849b6",
+    "tests/test_symbolic.py": "4f15b1e6b438fd712aa9aca06e91558d41fb5864deddbdd8aeb8a7095a0d6abc",
+    "tests/test_gadgets.py": "c072ea50bae2c75ea97b9a4054d733946aeef33b75e70fb2c91085bb0d40dd98",
+    "tests/test_fourier.py": "ab9a6a4ade341d980891d615707c5afe24c010873f92a13161c8ff27815d9a0e",
+    "tests/test_rows.py": "4d2dc1a83ba8d5c5fa3cd7c06c95373904f6f754104849dc6bd41fd9321707bf",
+    "tests/test_release_contracts.py": "e98def7fc594fc81085e5fde3814c0de3955d6b9ad94878fddff3c4366bec0f8",
+    "tools/bootstrap.py": "71ce7c69cbdded6189d200ee119d2ddee96012c62601301573d4555b36308f03",
+    "tools/build_paper.py": "6841b73bdd4f4ec1e990a94f0b83e00adb3651096571989633c26bd98fd03732"
+  },
+  "checks": [
+    {
+      "test_id": "acceptance",
+      "command": [
+        "/private/tmp/oxparc-response-v1/0xPARC-challenge/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "oxparc_challenge.pytest_evidence",
+        "tests",
+        "-q"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_seconds": 11.739654292003252,
+      "peak_child_rss_bytes": 187711488,
+      "resource_outcome": "within limits"
+    },
+    {
+      "test_id": "legacy",
+      "command": [
+        "/private/tmp/oxparc-response-v1/0xPARC-challenge/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-p",
+        "oxparc_challenge.pytest_evidence",
+        "../index-deconvolution/tests/test_deconvolution.py",
+        "../doppel-challenge/tests/test_repertoire_program.py",
+        "-k",
+        "not wolfram_gate_parity and not bdm_preserves_matrix_shape",
+        "-q"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_seconds": 1.9782343750048312,
+      "peak_child_rss_bytes": 187711488,
+      "resource_outcome": "within limits"
+    },
+    {
+      "test_id": "compiled",
+      "command": [
+        "/private/tmp/oxparc-response-v1/0xPARC-challenge/.venv/bin/python",
+        "-m",
+        "oxparc_challenge.compiled_audit",
+        "evidence",
+        ".build/compiled"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_seconds": 53.98798395799531,
+      "peak_child_rss_bytes": 2326102016,
+      "resource_outcome": "within limits"
+    },
+    {
+      "test_id": "fourier_32768",
+      "command": [
+        "/private/tmp/oxparc-response-v1/0xPARC-challenge/.venv/bin/python",
+        "-m",
+        "oxparc_challenge.fourier_validation",
+        "32768",
+        "evidence"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_seconds": 26.400769540996407,
+      "peak_child_rss_bytes": 2326102016,
+      "resource_outcome": "within limits"
+    },
+    {
+      "test_id": "fourier_65536",
+      "command": [
+        "/private/tmp/oxparc-response-v1/0xPARC-challenge/.venv/bin/python",
+        "-m",
+        "oxparc_challenge.fourier_validation",
+        "65536",
+        "evidence"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_seconds": 120.48114033399906,
+      "peak_child_rss_bytes": 2326102016,
+      "resource_outcome": "within limits"
+    },
+    {
+      "test_id": "paper",
+      "command": [
+        "/private/tmp/oxparc-response-v1/0xPARC-challenge/.venv/bin/python",
+        "tools/build_paper.py"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_seconds": 0.9173754160001408,
+      "peak_child_rss_bytes": 2326102016,
+      "resource_outcome": "within limits"
+    }
+  ],
+  "requirements": {
+    "Q1": "PASS",
+    "Q2": "PASS",
+    "Q3": "PASS",
+    "Q4": "PASS",
+    "Q5": "PASS",
+    "Q6": "PASS",
+    "Q7": "PASS",
+    "Q8": "PASS"
+  },
+  "environment": {
+    "python": "3.13.12 (main, Mar  7 2026, 16:31:40) [Clang 17.0.0 (clang-1700.6.4.2)]",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "dependencies": {
+      "iniconfig": "2.3.0",
+      "numpy": "2.4.3",
+      "packaging": "26.3",
+      "pluggy": "1.6.0",
+      "Pygments": "2.21.0",
+      "pytest": "9.1.1",
+      "setuptools": "82.0.1"
+    },
+    "node": "v25.8.1",
+    "npm": "11.11.0",
+    "pdflatex": "pdfTeX 3.141592653-2.6-1.40.29 (TeX Live 2026)",
+    "compiler_sha256": "e006332b3fe225f11c3b87bd2debbf5d7f568d6efbde25e5a6a12cd6988c8ecb",
+    "tools": [
+      {
+        "command": [
+          "/private/tmp/oxparc-response-v1/0xPARC-challenge/.tools/circom",
+          "--version"
+        ],
+        "exit": 0,
+        "elapsed": 0.0029048750002402812,
+        "stdout": "circom compiler 2.2.3\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "/private/tmp/oxparc-response-v1/0xPARC-challenge/.tools/node_modules/.bin/snarkjs",
+          "--version"
+        ],
+        "exit": 99,
+        "elapsed": 0.08218637499521719,
+        "stdout": "snarkjs@0.7.6\n        Copyright (C) 2018  0kims association\n        This program comes with ABSOLUTELY NO WARRANTY;\n        This is free software, and you are welcome to redistribute it\n        under certain conditions; see the COPYING file in the official\n        repo directory at  https://github.com/iden3/snarkjs \n\nUsage:\n        snarkjs <full command> ...  <options>\n   or   snarkjs <shortcut> ...  <options>\n\nType snarkjs <command> --help to get more information for that command\n\nFull Command                  Description\n============                  =================\npowersoftau new               Starts a powers of tau ceremony\n     Usage:  snarkjs ptn <curve> <power> [powersoftau_0000.ptau]\npowersoftau contribute        creates a ptau file with a new contribution\n     Usage:  snarkjs ptc <powersoftau.ptau> <new_powersoftau.ptau>\npowersoftau export challenge  Creates a challenge\n     Usage:  snarkjs ptec <powersoftau_0000.ptau> [challenge]\npowersoftau challenge contributeContribute to a challenge\n     Usage:  snarkjs ptcc <curve> <challenge> [response]\npowersoftau import response   import a response to a ptau file\n     Usage:  snarkjs ptir <powersoftau_old.ptau> <response> <<powersoftau_new.ptau>\npowersoftau beacon            adds a beacon\n     Usage:  snarkjs ptb <old_powersoftau.ptau> <new_powersoftau.ptau> <beaconHash(Hex)> <numIterationsExp>\npowersoftau prepare phase2    Prepares phase 2. \n     Usage:  snarkjs pt2 <powersoftau.ptau> <new_powersoftau.ptau>\npowersoftau convert           Convert ptau\n     Usage:  snarkjs ptcv <old_powersoftau.ptau> <new_powersoftau.ptau>\npowersoftau truncate          Generate different powers of tau with smaller sizes \n     Usage:  snarkjs ptt <powersoftau.ptau>\npowersoftau verify            verifies a powers of tau file\n     Usage:  snarkjs ptv <powersoftau.ptau>\npowersoftau export json       Exports a power of tau file to a JSON\n     Usage:  snarkjs ptej <powersoftau_0000.ptau> <powersoftau_0000.json>\nr1cs info                     Print statistiscs of a circuit\n     Usage:  snarkjs ri [circuit.r1cs]\nr1cs print                    Print the constraints of a circuit\n     Usage:  snarkjs rp [circuit.r1cs] [circuit.sym]\nr1cs export json              Export r1cs to JSON file\n     Usage:  snarkjs rej [circuit.r1cs] [circuit.json]\nwtns calculate                Caclculate specific witness of a circuit given an input\n     Usage:  snarkjs wc [circuit.wasm] [input.json] [witness.wtns]\nwtns debug                    Calculate the witness with debug info.\n     Usage:  snarkjs wd [circuit.wasm] [input.json] [witness.wtns] [circuit.sym]\nwtns export json              Calculate the witness with debug info.\n     Usage:  snarkjs wej [witness.wtns] [witnes.json]\nwtns check                    Check if a specific witness of a circuit fulfills the r1cs constraints\n     Usage:  snarkjs wchk [circuit.r1cs] [[witness.wtns]\nzkey contribute               creates a zkey file with a new contribution\n     Usage:  snarkjs zkc <circuit_old.zkey> <circuit_new.zkey>\nzkey export bellman           Export a zKey to a MPCParameters file compatible with kobi/phase2 (Bellman)\n     Usage:  snarkjs zkeb <circuit_xxxx.zkey> [circuit.mpcparams]\nzkey bellman contribute       contributes to a challenge file in bellman format\n     Usage:  snarkjs zkbc <curve> <circuit.mpcparams> <circuit_response.mpcparams>\nzkey import bellman           Export a zKey to a MPCParameters file compatible with kobi/phase2 (Bellman) \n     Usage:  snarkjs zkib <circuit_old.zkey> <circuit.mpcparams> <circuit_new.zkey>\nzkey beacon                   adds a beacon\n     Usage:  snarkjs zkb <circuit_old.zkey> <circuit_new.zkey> <beaconHash(Hex)> <numIterationsExp>\nzkey verify r1cs              Verify zkey file contributions and verify that matches with the original circuit.r1cs and ptau\n     Usage:  snarkjs zkv [circuit.r1cs] [powersoftau.ptau] [circuit_final.zkey]\nzkey verify init              Verify zkey file contributions and verify that matches with the original circuit.r1cs and ptau\n     Usage:  snarkjs zkvi [circuit_0000.zkey] [powersoftau.ptau] [circuit_final.zkey]\nzkey export verificationkey   Exports a verification key\n     Usage:  snarkjs zkev [circuit_final.zkey] [verification_key.json]\nzkey export json              Exports a circuit key to a JSON file\n     Usage:  snarkjs zkej [circuit_final.zkey] [circuit_final.zkey.json]\nzkey export solidityverifier  Creates a verifier in solidity\n     Usage:  snarkjs zkesv [circuit_final.zkey] [verifier.sol]\nzkey export soliditycalldata  Generates call parameters ready to be called.\n     Usage:  snarkjs zkesc [public.json] [proof.json]\ngroth16 setup                 Creates an initial groth16 pkey file with zero contributions\n     Usage:  snarkjs g16s [circuit.r1cs] [powersoftau.ptau] [circuit_0000.zkey]\ngroth16 prove                 Generates a zk Proof from witness\n     Usage:  snarkjs g16p [circuit_final.zkey] [witness.wtns] [proof.json] [public.json]\ngroth16 fullprove             Generates a zk Proof from input\n     Usage:  snarkjs g16f [input.json] [circuit_final.wasm] [circuit_final.zkey] [proof.json] [public.json]\ngroth16 verify                Verify a zk Proof\n     Usage:  snarkjs g16v [verification_key.json] [public.json] [proof.json]\nplonk setup                   Creates an initial PLONK pkey \n     Usage:  snarkjs pks [circuit.r1cs] [powersoftau.ptau] [circuit.zkey]\nplonk prove                   Generates a PLONK Proof from witness\n     Usage:  snarkjs pkp [circuit.zkey] [witness.wtns] [proof.json] [public.json]\nplonk fullprove               Generates a PLONK Proof from input\n     Usage:  snarkjs pkf [input.json] [circuit.wasm] [circuit.zkey] [proof.json] [public.json]\nplonk verify                  Verify a PLONK Proof\n     Usage:  snarkjs pkv [verification_key.json] [public.json] [proof.json]\nfflonk setup                  BETA version. Creates a FFLONK zkey from a circuit\n     Usage:  snarkjs ffs [circuit.r1cs] [powersoftau.ptau] [circuit.zkey]\nfflonk prove                  BETA version. Generates a FFLONK Proof from witness\n     Usage:  snarkjs ffp [circuit.zkey] [witness.wtns] [proof.json] [public.json]\nfflonk fullprove              BETA version. Generates a witness and the FFLONK Proof in the same command\n     Usage:  snarkjs fff [witness.json] [circuit.wasm] [circuit.zkey] [proof.json] [public.json]\nfflonk verify                 BETA version. Verify a FFLONK Proof\n     Usage:  snarkjs ffv [verification_key.json] [public.json] [proof.json]\nfile info                     Check info of a binary file\n     Usage:  snarkjs fi [binary.file]\n",
+        "stderr": ""
+      }
+    ],
+    "requirements_lock_sha256": "ff4adfc60bb55bb38f2c6981d8b89fafb2f98647d241726fc1cc2c6841611a6a",
+    "npm_lock_sha256": "3aeed4ed60e66d09ca72630e61a4f76ecd0048e310957553b9c152b6291ad9fe"
+  },
+  "legacy_exclusions": [
+    "Wolfram backend parity (not modified)",
+    "BDM matrix backend (not used by challenge)"
+  ]
+}

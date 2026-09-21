@@ -1,0 +1,1770 @@
+{
+  "arms": [
+    "serial",
+    "classical",
+    "direct_index"
+  ],
+  "export_freshness": "matches the current assembly",
+  "export_sha256": "c0574395d339dae3b24e819955795c2a6165953c5966e46062c9bf9b18a50ce2",
+  "failures": [],
+  "gates": {
+    "all_passed": {
+      "detail": "every gate above",
+      "passed": true
+    },
+    "all_runs_present": {
+      "detail": "expected 72 unique (arm, program, repetition) keys over 8 programs, observed 72 rows and 72 unique; 0 duplicated, 0 missing, 0 unexpected, 0 execution failures; rows per arm {'serial': 24, 'classical': 24, 'direct_index': 24}",
+      "duplicates": [],
+      "missing": [],
+      "passed": true,
+      "unexpected": []
+    },
+    "direct_arm_isolated": {
+      "detail": "0 direct runs loaded a prohibited module",
+      "passed": true
+    },
+    "direct_beats_baseline": {
+      "detail": "direct combined scores per repetition: [2.008466202284657, 2.008466202284657, 2.008466202284657]; each must exceed 1.0 and all 3 must be present",
+      "passed": true
+    },
+    "frozen_classical_control": {
+      "detail": "classical aggregates for repetitions [0, 1, 2] (all of [0, 1, 2] required): [1.9013791212645499, 1.9013791212645499, 1.9013791212645499], each within 1e-9 of the historical 1.9013791212645499",
+      "passed": true
+    },
+    "frozen_integer_metrics": {
+      "detail": "48 serial and classical measurements checked against the protected historical per-program integers; 0 disagree",
+      "drift": [],
+      "passed": true
+    },
+    "metrics_valid": {
+      "detail": "0 runs with non-positive or unvalidated metrics",
+      "passed": true
+    },
+    "no_candidate_discrepancies": {
+      "detail": "0 measured compilations reported a query/validator discrepancy",
+      "passed": true
+    }
+  },
+  "historical_metrics": {
+    "classical": {
+      "mixed_broadcast": {
+        "cycles": 9,
+        "scratch": 17
+      },
+      "parallel_memory": {
+        "cycles": 14,
+        "scratch": 56
+      },
+      "scalar_dual_chain": {
+        "cycles": 9,
+        "scratch": 5
+      },
+      "scalar_pipeline": {
+        "cycles": 14,
+        "scratch": 6
+      },
+      "scalar_selects": {
+        "cycles": 9,
+        "scratch": 6
+      },
+      "vector_axpy": {
+        "cycles": 10,
+        "scratch": 32
+      },
+      "vector_bitmix": {
+        "cycles": 10,
+        "scratch": 40
+      },
+      "vector_reduction": {
+        "cycles": 12,
+        "scratch": 40
+      }
+    },
+    "serial": {
+      "mixed_broadcast": {
+        "cycles": 11,
+        "scratch": 42
+      },
+      "parallel_memory": {
+        "cycles": 21,
+        "scratch": 128
+      },
+      "scalar_dual_chain": {
+        "cycles": 12,
+        "scratch": 9
+      },
+      "scalar_pipeline": {
+        "cycles": 18,
+        "scratch": 15
+      },
+      "scalar_selects": {
+        "cycles": 20,
+        "scratch": 16
+      },
+      "vector_axpy": {
+        "cycles": 14,
+        "scratch": 73
+      },
+      "vector_bitmix": {
+        "cycles": 16,
+        "scratch": 89
+      },
+      "vector_reduction": {
+        "cycles": 19,
+        "scratch": 137
+      }
+    }
+  },
+  "limitations": [
+    "Eight public programs only; the private grader is unavailable.",
+    "compile_seconds excludes interpreter start, imports and validation; process_seconds includes them and is what the 20 s limit governs.",
+    "Peak resident memory includes the interpreter and its imports.",
+    "No claim of global optimality follows from any of these numbers."
+  ],
+  "per_repeat": {
+    "classical": [
+      {
+        "combined_score": 1.9013791212645499,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "repeat": 0,
+        "scratch_reduction_geomean": 2.420448679801976
+      },
+      {
+        "combined_score": 1.9013791212645499,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "repeat": 1,
+        "scratch_reduction_geomean": 2.420448679801976
+      },
+      {
+        "combined_score": 1.9013791212645499,
+        "cycle_speedup_geomean": 1.4936249600948057,
+        "repeat": 2,
+        "scratch_reduction_geomean": 2.420448679801976
+      }
+    ],
+    "direct_index": [
+      {
+        "combined_score": 2.008466202284657,
+        "cycle_speedup_geomean": 1.5098681603519506,
+        "repeat": 0,
+        "scratch_reduction_geomean": 2.6717143864928192
+      },
+      {
+        "combined_score": 2.008466202284657,
+        "cycle_speedup_geomean": 1.5098681603519506,
+        "repeat": 1,
+        "scratch_reduction_geomean": 2.6717143864928192
+      },
+      {
+        "combined_score": 2.008466202284657,
+        "cycle_speedup_geomean": 1.5098681603519506,
+        "repeat": 2,
+        "scratch_reduction_geomean": 2.6717143864928192
+      }
+    ],
+    "serial": [
+      {
+        "combined_score": 1.0,
+        "cycle_speedup_geomean": 1.0,
+        "repeat": 0,
+        "scratch_reduction_geomean": 1.0
+      },
+      {
+        "combined_score": 1.0,
+        "cycle_speedup_geomean": 1.0,
+        "repeat": 1,
+        "scratch_reduction_geomean": 1.0
+      },
+      {
+        "combined_score": 1.0,
+        "cycle_speedup_geomean": 1.0,
+        "repeat": 2,
+        "scratch_reduction_geomean": 1.0
+      }
+    ]
+  },
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "program_names": [
+    "scalar_pipeline",
+    "scalar_dual_chain",
+    "vector_axpy",
+    "vector_bitmix",
+    "mixed_broadcast",
+    "parallel_memory",
+    "scalar_selects",
+    "vector_reduction"
+  ],
+  "protected_sha256": {
+    "../GOVERNANCE/GLOSSARY.md": "c3d0402150fefcb1e72339ef986e9f124754c2370c0c55f3c741b311795b2b3e",
+    "common.py": "5b3ae21c5a6c3a73380069ac685fdde7d3cee2fb7bc7704b610d5e24b0056fab",
+    "reference.json": "ef6042ce4acc2cfe531d974afb666b6ad40656e15828ad5f814d6cbb338875f0",
+    "results/comparison.json": "f070a6691c57c78395e67f4054928cddd753b5aa0265fe1386bb7da27f9cc535"
+  },
+  "python": "3.13.12 (main, Mar  7 2026, 16:31:40) [Clang 17.0.0 (clang-1700.6.4.2)]",
+  "reference_commit": "573b8a85f4bdb8c3d8ba9f180d5f98dac875c902",
+  "repetitions": 3,
+  "runs": [
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 2.2374999844032573e-05,
+      "correctness": "PASS",
+      "cycles": 18,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25247744,
+      "process_seconds": 0.03617537499985701,
+      "program": "scalar_pipeline",
+      "repeat": 0,
+      "scratch": 15,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.0002969160000247939,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03593937499999811,
+      "program": "scalar_pipeline",
+      "repeat": 0,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 14,
+        "footprint": 6
+      },
+      "cases": 2,
+      "compile_seconds": 0.20124883299968133,
+      "correctness": "PASS",
+      "cycles": 14,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 30720000,
+      "process_seconds": 0.24158462500008682,
+      "program": "scalar_pipeline",
+      "queries": {
+        "accepted": 0,
+        "attempted": 18,
+        "statuses": {
+          "INFEASIBLE": 16,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 0
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 0,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.0002952499999082647,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25575424,
+      "process_seconds": 0.03530791599996519,
+      "program": "scalar_pipeline",
+      "repeat": 1,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 14,
+        "footprint": 6
+      },
+      "cases": 2,
+      "compile_seconds": 0.20128962499984482,
+      "correctness": "PASS",
+      "cycles": 14,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24625152,
+      "process_seconds": 0.22944391700002598,
+      "program": "scalar_pipeline",
+      "queries": {
+        "accepted": 0,
+        "attempted": 18,
+        "statuses": {
+          "INFEASIBLE": 16,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 0
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 1,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 2.3041000076773344e-05,
+      "correctness": "PASS",
+      "cycles": 18,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.034933207999984006,
+      "program": "scalar_pipeline",
+      "repeat": 1,
+      "scratch": 15,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 14,
+        "footprint": 6
+      },
+      "cases": 2,
+      "compile_seconds": 0.20126754099965183,
+      "correctness": "PASS",
+      "cycles": 14,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24674304,
+      "process_seconds": 0.22929820799981826,
+      "program": "scalar_pipeline",
+      "queries": {
+        "accepted": 0,
+        "attempted": 18,
+        "statuses": {
+          "INFEASIBLE": 16,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 0
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 2,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 2.1332999949663645e-05,
+      "correctness": "PASS",
+      "cycles": 18,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03569216599998981,
+      "program": "scalar_pipeline",
+      "repeat": 2,
+      "scratch": 15,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.00029345900020416593,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25608192,
+      "process_seconds": 0.03532679099998859,
+      "program": "scalar_pipeline",
+      "repeat": 2,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 1.808399974834174e-05,
+      "correctness": "PASS",
+      "cycles": 12,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25542656,
+      "process_seconds": 0.034860666999975365,
+      "program": "scalar_dual_chain",
+      "repeat": 0,
+      "scratch": 9,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.00018033300011666142,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25264128,
+      "process_seconds": 0.035134084000219445,
+      "program": "scalar_dual_chain",
+      "repeat": 0,
+      "scratch": 5,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 8,
+        "footprint": 3
+      },
+      "cases": 2,
+      "compile_seconds": 0.21688466700015852,
+      "correctness": "PASS",
+      "cycles": 8,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24166400,
+      "process_seconds": 0.24463941700014402,
+      "program": "scalar_dual_chain",
+      "queries": {
+        "accepted": 0,
+        "attempted": 24,
+        "statuses": {
+          "INFEASIBLE": 19,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 3
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 0,
+      "scratch": 3,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.00018199999976786785,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25608192,
+      "process_seconds": 0.035828291999678186,
+      "program": "scalar_dual_chain",
+      "repeat": 1,
+      "scratch": 5,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 8,
+        "footprint": 3
+      },
+      "cases": 2,
+      "compile_seconds": 0.216993999999886,
+      "correctness": "PASS",
+      "cycles": 8,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24248320,
+      "process_seconds": 0.24513791599974866,
+      "program": "scalar_dual_chain",
+      "queries": {
+        "accepted": 0,
+        "attempted": 24,
+        "statuses": {
+          "INFEASIBLE": 19,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 3
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 1,
+      "scratch": 3,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 1.8500000351195922e-05,
+      "correctness": "PASS",
+      "cycles": 12,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25198592,
+      "process_seconds": 0.034868458000346436,
+      "program": "scalar_dual_chain",
+      "repeat": 1,
+      "scratch": 9,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 8,
+        "footprint": 3
+      },
+      "cases": 2,
+      "compile_seconds": 0.21695558300007178,
+      "correctness": "PASS",
+      "cycles": 8,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24035328,
+      "process_seconds": 0.2446116669998446,
+      "program": "scalar_dual_chain",
+      "queries": {
+        "accepted": 0,
+        "attempted": 24,
+        "statuses": {
+          "INFEASIBLE": 19,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 3
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 2,
+      "scratch": 3,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 1.699999984339229e-05,
+      "correctness": "PASS",
+      "cycles": 12,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.034751541999867186,
+      "program": "scalar_dual_chain",
+      "repeat": 2,
+      "scratch": 9,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.00018249999993713573,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03504466599997613,
+      "program": "scalar_dual_chain",
+      "repeat": 2,
+      "scratch": 5,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 1.9999999949504854e-05,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03509283299990784,
+      "program": "vector_axpy",
+      "repeat": 0,
+      "scratch": 73,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.0001934580000124697,
+      "correctness": "PASS",
+      "cycles": 10,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03491149999990739,
+      "program": "vector_axpy",
+      "repeat": 0,
+      "scratch": 32,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 24
+      },
+      "cases": 1,
+      "compile_seconds": 0.2293350830000236,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24756224,
+      "process_seconds": 0.25722512499987715,
+      "program": "vector_axpy",
+      "queries": {
+        "accepted": 0,
+        "attempted": 28,
+        "statuses": {
+          "INFEASIBLE": 22,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 4
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 0,
+      "scratch": 24,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.0001966660001926357,
+      "correctness": "PASS",
+      "cycles": 10,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25198592,
+      "process_seconds": 0.035062292000020534,
+      "program": "vector_axpy",
+      "repeat": 1,
+      "scratch": 32,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 24
+      },
+      "cases": 1,
+      "compile_seconds": 0.2294428750001316,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24756224,
+      "process_seconds": 0.25741283399975146,
+      "program": "vector_axpy",
+      "queries": {
+        "accepted": 0,
+        "attempted": 28,
+        "statuses": {
+          "INFEASIBLE": 22,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 4
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 1,
+      "scratch": 24,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 2.1249999917927198e-05,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25198592,
+      "process_seconds": 0.03466766600013216,
+      "program": "vector_axpy",
+      "repeat": 1,
+      "scratch": 73,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 24
+      },
+      "cases": 1,
+      "compile_seconds": 0.22927512500018565,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24805376,
+      "process_seconds": 0.2569587500001944,
+      "program": "vector_axpy",
+      "queries": {
+        "accepted": 0,
+        "attempted": 28,
+        "statuses": {
+          "INFEASIBLE": 22,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 2,
+          "UNSAT": 4
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 2,
+      "scratch": 24,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 1.9915999928343808e-05,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.03499116700004379,
+      "program": "vector_axpy",
+      "repeat": 2,
+      "scratch": 73,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.00019670900019264081,
+      "correctness": "PASS",
+      "cycles": 10,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25542656,
+      "process_seconds": 0.03570975000002363,
+      "program": "vector_axpy",
+      "repeat": 2,
+      "scratch": 32,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 2.312499964318704e-05,
+      "correctness": "PASS",
+      "cycles": 16,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25509888,
+      "process_seconds": 0.0355559589997938,
+      "program": "vector_bitmix",
+      "repeat": 0,
+      "scratch": 89,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.00023895799995443667,
+      "correctness": "PASS",
+      "cycles": 10,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25575424,
+      "process_seconds": 0.03514416699999856,
+      "program": "vector_bitmix",
+      "repeat": 0,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.4475012920001973,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24985600,
+      "process_seconds": 0.47547379199977513,
+      "program": "vector_bitmix",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 24,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 4
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 0,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.00023712500023975736,
+      "correctness": "PASS",
+      "cycles": 10,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03540833300030499,
+      "program": "vector_bitmix",
+      "repeat": 1,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.44766699999991033,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 25001984,
+      "process_seconds": 0.4758595409998634,
+      "program": "vector_bitmix",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 24,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 4
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 1,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 2.3625000267202267e-05,
+      "correctness": "PASS",
+      "cycles": 16,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03576116700014609,
+      "program": "vector_bitmix",
+      "repeat": 1,
+      "scratch": 89,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.44757991599999514,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24821760,
+      "process_seconds": 0.47542550000025585,
+      "program": "vector_bitmix",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 24,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 4
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 2,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 2.3083000087353867e-05,
+      "correctness": "PASS",
+      "cycles": 16,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.034992625000086264,
+      "program": "vector_bitmix",
+      "repeat": 2,
+      "scratch": 89,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.0002516660001674609,
+      "correctness": "PASS",
+      "cycles": 10,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25575424,
+      "process_seconds": 0.03582329099981507,
+      "program": "vector_bitmix",
+      "repeat": 2,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 1.6040999980759807e-05,
+      "correctness": "PASS",
+      "cycles": 11,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03674520799995662,
+      "program": "mixed_broadcast",
+      "repeat": 0,
+      "scratch": 42,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.0001604589997441508,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.03693808300022283,
+      "program": "mixed_broadcast",
+      "repeat": 0,
+      "scratch": 17,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 24
+      },
+      "cases": 2,
+      "compile_seconds": 0.66071354099995,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24412160,
+      "process_seconds": 0.689845208999941,
+      "program": "mixed_broadcast",
+      "queries": {
+        "accepted": 0,
+        "attempted": 20,
+        "statuses": {
+          "INFEASIBLE": 10,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 5,
+          "UNSAT": 5
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 0,
+      "scratch": 24,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.0001532920000499871,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.03598845800024719,
+      "program": "mixed_broadcast",
+      "repeat": 1,
+      "scratch": 17,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 24
+      },
+      "cases": 2,
+      "compile_seconds": 0.660995499999899,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24576000,
+      "process_seconds": 0.6892745000000104,
+      "program": "mixed_broadcast",
+      "queries": {
+        "accepted": 0,
+        "attempted": 20,
+        "statuses": {
+          "INFEASIBLE": 10,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 5,
+          "UNSAT": 5
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 1,
+      "scratch": 24,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 1.4917000044079032e-05,
+      "correctness": "PASS",
+      "cycles": 11,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25542656,
+      "process_seconds": 0.03580000000010841,
+      "program": "mixed_broadcast",
+      "repeat": 1,
+      "scratch": 42,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 10,
+        "footprint": 24
+      },
+      "cases": 2,
+      "compile_seconds": 0.660568708000028,
+      "correctness": "PASS",
+      "cycles": 10,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24576000,
+      "process_seconds": 0.6897663339996143,
+      "program": "mixed_broadcast",
+      "queries": {
+        "accepted": 0,
+        "attempted": 20,
+        "statuses": {
+          "INFEASIBLE": 10,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 5,
+          "UNSAT": 5
+        },
+        "stopped_because": "pass_complete"
+      },
+      "repeat": 2,
+      "scratch": 24,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 1.5584000266244402e-05,
+      "correctness": "PASS",
+      "cycles": 11,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.035570874999848456,
+      "program": "mixed_broadcast",
+      "repeat": 2,
+      "scratch": 42,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.00015895900014584186,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.03558820799980822,
+      "program": "mixed_broadcast",
+      "repeat": 2,
+      "scratch": 17,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 3.11669996335695e-05,
+      "correctness": "PASS",
+      "cycles": 21,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.034849874999963504,
+      "program": "parallel_memory",
+      "repeat": 0,
+      "scratch": 128,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.00035991699996884563,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25542656,
+      "process_seconds": 0.035723999999845546,
+      "program": "parallel_memory",
+      "repeat": 0,
+      "scratch": 56,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 13,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.4148166670001956,
+      "correctness": "PASS",
+      "cycles": 13,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 26394624,
+      "process_seconds": 0.44298966600035783,
+      "program": "parallel_memory",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 25,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 0,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.00036633299987443024,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03576620900003036,
+      "program": "parallel_memory",
+      "repeat": 1,
+      "scratch": 56,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 13,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.4145472080003856,
+      "correctness": "PASS",
+      "cycles": 13,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 26624000,
+      "process_seconds": 0.4428555409999717,
+      "program": "parallel_memory",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 25,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 1,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 3.1582999781676335e-05,
+      "correctness": "PASS",
+      "cycles": 21,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.035218457999690145,
+      "program": "parallel_memory",
+      "repeat": 1,
+      "scratch": 128,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 13,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.4147377089998372,
+      "correctness": "PASS",
+      "cycles": 13,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 26705920,
+      "process_seconds": 0.4428696670001955,
+      "program": "parallel_memory",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 25,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 2,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 3.179199984515435e-05,
+      "correctness": "PASS",
+      "cycles": 21,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25608192,
+      "process_seconds": 0.03558620800004064,
+      "program": "parallel_memory",
+      "repeat": 2,
+      "scratch": 128,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.0003619170001911698,
+      "correctness": "PASS",
+      "cycles": 14,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25329664,
+      "process_seconds": 0.036584625000159576,
+      "program": "parallel_memory",
+      "repeat": 2,
+      "scratch": 56,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 3.0917000003682915e-05,
+      "correctness": "PASS",
+      "cycles": 20,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25575424,
+      "process_seconds": 0.035451000000193744,
+      "program": "scalar_selects",
+      "repeat": 0,
+      "scratch": 16,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.00034329100026297965,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25214976,
+      "process_seconds": 0.035155999999915366,
+      "program": "scalar_selects",
+      "repeat": 0,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 9,
+        "footprint": 6
+      },
+      "cases": 2,
+      "compile_seconds": 0.5276366660000349,
+      "correctness": "PASS",
+      "cycles": 9,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 25673728,
+      "process_seconds": 0.5558377079996717,
+      "program": "scalar_selects",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 24,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 5,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 0,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.0003410829999666021,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25280512,
+      "process_seconds": 0.0361084999999548,
+      "program": "scalar_selects",
+      "repeat": 1,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 9,
+        "footprint": 6
+      },
+      "cases": 2,
+      "compile_seconds": 0.5274997500000609,
+      "correctness": "PASS",
+      "cycles": 9,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 25542656,
+      "process_seconds": 0.5557573749997573,
+      "program": "scalar_selects",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 24,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 5,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 1,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 3.12500001200533e-05,
+      "correctness": "PASS",
+      "cycles": 20,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.03552016699995875,
+      "program": "scalar_selects",
+      "repeat": 1,
+      "scratch": 16,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 9,
+        "footprint": 6
+      },
+      "cases": 2,
+      "compile_seconds": 0.5274196669997764,
+      "correctness": "PASS",
+      "cycles": 9,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 25722880,
+      "process_seconds": 0.5559422090000226,
+      "program": "scalar_selects",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 24,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 5,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 2,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 2,
+      "compile_seconds": 3.07089999296295e-05,
+      "correctness": "PASS",
+      "cycles": 20,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25542656,
+      "process_seconds": 0.03579516699983287,
+      "program": "scalar_selects",
+      "repeat": 2,
+      "scratch": 16,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 2,
+      "compile_seconds": 0.00034341699983997387,
+      "correctness": "PASS",
+      "cycles": 9,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.035481333000007,
+      "program": "scalar_selects",
+      "repeat": 2,
+      "scratch": 6,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 3.029200024684542e-05,
+      "correctness": "PASS",
+      "cycles": 19,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.03508650000003399,
+      "program": "vector_reduction",
+      "repeat": 0,
+      "scratch": 137,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.00038841599962324835,
+      "correctness": "PASS",
+      "cycles": 12,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25624576,
+      "process_seconds": 0.03555283399964537,
+      "program": "vector_reduction",
+      "repeat": 0,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 12,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.43372416699958194,
+      "correctness": "PASS",
+      "cycles": 12,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 25149440,
+      "process_seconds": 0.46164108299990403,
+      "program": "vector_reduction",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 25,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 0,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.00038779199985583546,
+      "correctness": "PASS",
+      "cycles": 12,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25591808,
+      "process_seconds": 0.035211291999985406,
+      "program": "vector_reduction",
+      "repeat": 1,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 12,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.43393179199983933,
+      "correctness": "PASS",
+      "cycles": 12,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 24952832,
+      "process_seconds": 0.46192983299988555,
+      "program": "vector_reduction",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 25,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 1,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 2.9042000278423075e-05,
+      "correctness": "PASS",
+      "cycles": 19,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25559040,
+      "process_seconds": 0.035783125000307336,
+      "program": "vector_reduction",
+      "repeat": 1,
+      "scratch": 137,
+      "timed_out": false
+    },
+    {
+      "arm": "direct_index",
+      "bootstrap": {
+        "cycles": 12,
+        "footprint": 40
+      },
+      "cases": 1,
+      "compile_seconds": 0.4344226670000353,
+      "correctness": "PASS",
+      "cycles": 12,
+      "discrepancy_count": 0,
+      "exit_code": 0,
+      "identity": "/var/folders/54/tt8_6d357691t8wwz7yxv9880000gn/T/direct-arm-t784vnyh/compiler.py",
+      "leaked": [],
+      "peak_rss_bytes": 25133056,
+      "process_seconds": 0.4626779580003131,
+      "program": "vector_reduction",
+      "queries": {
+        "accepted": 0,
+        "attempted": 32,
+        "statuses": {
+          "INFEASIBLE": 25,
+          "SAT": 0,
+          "UNKNOWN_CONSTRUCTION": 0,
+          "UNKNOWN_SEARCH": 4,
+          "UNSAT": 3
+        },
+        "stopped_because": "query_cap"
+      },
+      "repeat": 2,
+      "scratch": 40,
+      "timed_out": false
+    },
+    {
+      "arm": "serial",
+      "cases": 1,
+      "compile_seconds": 2.9332999929465586e-05,
+      "correctness": "PASS",
+      "cycles": 19,
+      "exit_code": 0,
+      "identity": "machine.serial_compile",
+      "peak_rss_bytes": 25526272,
+      "process_seconds": 0.03556008400028077,
+      "program": "vector_reduction",
+      "repeat": 2,
+      "scratch": 137,
+      "timed_out": false
+    },
+    {
+      "arm": "classical",
+      "cases": 1,
+      "compile_seconds": 0.0003872080001201539,
+      "correctness": "PASS",
+      "cycles": 12,
+      "exit_code": 0,
+      "identity": "common.classical_compile",
+      "peak_rss_bytes": 25624576,
+      "process_seconds": 0.03557129199998599,
+      "program": "vector_reduction",
+      "repeat": 2,
+      "scratch": 40,
+      "timed_out": false
+    }
+  ],
+  "source_sha256": {
+    "common.py": "5b3ae21c5a6c3a73380069ac685fdde7d3cee2fb7bc7704b610d5e24b0056fab",
+    "direct_compiler.py": "4b0c531d1d060af2a43ca4f5140c291afddedfa0301ec62975f7dadc01b780be",
+    "direct_constraints.py": "7d34dbbddd3a2237b7f089024e1dd68e62ee96ce70d813540ef2e8fd9c860c90",
+    "direct_contract.py": "3b37ad0e7f5feb8ac464b074ebd8e8c6ab079c79ada3ab1bacc4b2a9f1a83fa8",
+    "direct_optimizer.py": "bdbc0dd71b785d283cc7a64c36518dc13a4a0ba7673010ae274d0c69e787de68",
+    "schema_index.py": "0620b9862c1c25a82aa96885a87edb470e9e6dcf818122ae6f1c5b34ded3d2a3"
+  },
+  "summary": {
+    "classical": {
+      "combined_score_max": 1.9013791212645499,
+      "combined_score_mean": 1.9013791212645499,
+      "combined_score_min": 1.9013791212645499,
+      "complete": true,
+      "cycle_speedup_geomean": 1.4936249600948057,
+      "deterministic_metrics": true,
+      "max_peak_rss_bytes": 25624576,
+      "max_process_seconds": 0.03693808300022283,
+      "median_compile_seconds": 0.0002725625001858134,
+      "median_process_seconds": 0.03556206299981568,
+      "scratch_reduction_geomean": 2.420448679801976
+    },
+    "direct_index": {
+      "combined_score_max": 2.008466202284657,
+      "combined_score_mean": 2.008466202284657,
+      "combined_score_min": 2.008466202284657,
+      "complete": true,
+      "cycle_speedup_geomean": 1.5098681603519506,
+      "deterministic_metrics": true,
+      "max_peak_rss_bytes": 30720000,
+      "max_process_seconds": 0.689845208999941,
+      "median_compile_seconds": 0.42427041699988877,
+      "median_process_seconds": 0.45231537450013093,
+      "scratch_reduction_geomean": 2.6717143864928192
+    },
+    "serial": {
+      "combined_score_max": 1.0,
+      "combined_score_mean": 1.0,
+      "combined_score_min": 1.0,
+      "complete": true,
+      "cycle_speedup_geomean": 1.0,
+      "deterministic_metrics": true,
+      "max_peak_rss_bytes": 25608192,
+      "max_process_seconds": 0.03674520799995662,
+      "median_compile_seconds": 2.3062000082063605e-05,
+      "median_process_seconds": 0.035485583500076245,
+      "scratch_reduction_geomean": 1.0
+    }
+  },
+  "timeout_seconds": 20.0
+}

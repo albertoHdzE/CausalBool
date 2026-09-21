@@ -1,0 +1,1539 @@
+{
+  "tasks": [
+    {
+      "task_id": "P00",
+      "requirement_ids": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Persist baseline and isolated environment",
+      "owner_role": "lead",
+      "prerequisite_tasks": [],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/plan",
+        "0xPARC-challenge/pyproject.toml",
+        "0xPARC-challenge/.gitignore"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Persist baseline and isolated environment",
+        "Validate against corresponding A-Q1-Q8 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q1-Q8"
+      ],
+      "exact_test_commands": [
+        "python3.13 tools/bootstrap.py"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "plan/",
+        "pyproject.toml",
+        ".gitignore"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "requirements.lock",
+        "npm-tools.lock.json",
+        "pyproject.toml",
+        "tools/bootstrap.py"
+      ],
+      "reviewed_revision": {
+        "requirements.lock": "ff4adfc60bb55bb38f2c6981d8b89fafb2f98647d241726fc1cc2c6841611a6a",
+        "npm-tools.lock.json": "3aeed4ed60e66d09ca72630e61a4f76ecd0048e310957553b9c152b6291ad9fe",
+        "pyproject.toml": "7d59216c4bda67e31945283eccd511b2245ce6d873447546e27705215e18561d",
+        "tools/bootstrap.py": "71ce7c69cbdded6189d200ee119d2ddee96012c62601301573d4555b36308f03"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "P01",
+      "requirement_ids": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Freeze mathematical arguments",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "P00"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/plan/MASTER.md",
+        "0xPARC-challenge/paper/proofs.md"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Freeze mathematical arguments",
+        "Validate against corresponding A-Q1-Q8 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q1-Q8"
+      ],
+      "exact_test_commands": [
+        "PYTHONPATH=src .venv/bin/python -m oxparc_challenge verify-release"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "plan/MASTER.md",
+        "paper/proofs.md"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "paper/response.tex",
+        "paper/response.md",
+        "plan/MASTER.md"
+      ],
+      "reviewed_revision": {
+        "paper/response.tex": "39465a403ea609c7e2049595ed104a81a665484fb3f3954a479f3c4d4731a1cf",
+        "paper/response.md": "20c75d3350b4c52f81101eaae59e37a49bba9fb4037623e9b26488bc7ac6455f",
+        "plan/MASTER.md": "3b896470b48d2eac1a7f90bf0b84fb145b305cb20db4c0c425e8c69c74fcad1b"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "P02",
+      "requirement_ids": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Freeze executable interfaces and fixtures",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "P01"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/__init__.py",
+        "0xPARC-challenge/tests",
+        "0xPARC-challenge/plan"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Freeze executable interfaces and fixtures",
+        "Validate against corresponding A-Q1-Q8 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q1-Q8"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/__init__.py",
+        "tests/",
+        "plan/"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/__init__.py",
+        "src/oxparc_challenge/constraints.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/__init__.py": "b3c61e5de3b38e0d2ee9be34d75d80c9e384e76aa8da78e83b0bd77207406349",
+        "src/oxparc_challenge/constraints.py": "aab64ac6a34dec80298c2fd0efba996e68313df475efeded5a66cd4113eaed98"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "N01",
+      "requirement_ids": [
+        "Q1"
+      ],
+      "objective": "Exact oracle recovery",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "P02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json",
+        "plan/DISCRETE.md",
+        "tests/test_discrete.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/recovery.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "plan/DISCRETE.md exact function/type contract v1",
+      "implementation_steps": [
+        "Implement assigned module following exact algorithm in MASTER.md and DISCRETE.md",
+        "Run specified acceptance tests",
+        "Return per-task handoff with SHA256; prerequisite-dependent work sequential"
+      ],
+      "acceptance_test_ids": [
+        "A-Q1"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_discrete.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/recovery.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/recovery.py",
+        "tests/test_discrete.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/recovery.py": "7621907ea18754fc8291e03bcd9ff19635a9e7d354b74bbc1dc916afff0ad719",
+        "tests/test_discrete.py": "d5b36958c64531c0f25183bf53bd6c8920bfd54abbe858c476e73d65b31849b6"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "N02",
+      "requirement_ids": [
+        "Q4"
+      ],
+      "objective": "Exact small-field verification",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "P02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json",
+        "plan/DISCRETE.md",
+        "tests/test_discrete.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/modular.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "plan/DISCRETE.md exact function/type contract v1",
+      "implementation_steps": [
+        "Implement assigned module following exact algorithm in MASTER.md and DISCRETE.md",
+        "Run specified acceptance tests",
+        "Return per-task handoff with SHA256; prerequisite-dependent work sequential"
+      ],
+      "acceptance_test_ids": [
+        "A-Q4"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_discrete.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/modular.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/modular.py",
+        "tests/test_discrete.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/modular.py": "f739c96fa4e9872fd615c88c30504ad938a349c6fac88ada12e6faba50c7b1b9",
+        "tests/test_discrete.py": "d5b36958c64531c0f25183bf53bd6c8920bfd54abbe858c476e73d65b31849b6"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "B01",
+      "requirement_ids": [
+        "Q2"
+      ],
+      "objective": "Sparse Boolean representation and CausalBool adapter",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "P02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json",
+        "plan/DISCRETE.md",
+        "tests/test_discrete.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/boolean.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "plan/DISCRETE.md exact function/type contract v1",
+      "implementation_steps": [
+        "Implement assigned module following exact algorithm in MASTER.md and DISCRETE.md",
+        "Run specified acceptance tests",
+        "Return per-task handoff with SHA256; prerequisite-dependent work sequential"
+      ],
+      "acceptance_test_ids": [
+        "A-Q2"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_discrete.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/boolean.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/boolean.py",
+        "tests/test_discrete.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/boolean.py": "87fa78b76012970056003b014cb59dca58882d577edfa8e0ad95c4cf64f17988",
+        "tests/test_discrete.py": "d5b36958c64531c0f25183bf53bd6c8920bfd54abbe858c476e73d65b31849b6"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "B02",
+      "requirement_ids": [
+        "Q2"
+      ],
+      "objective": "Deterministic bounded majority builder",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "B01"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json",
+        "plan/DISCRETE.md",
+        "tests/test_discrete.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/boolean.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "plan/DISCRETE.md exact function/type contract v1",
+      "implementation_steps": [
+        "Implement assigned module following exact algorithm in MASTER.md and DISCRETE.md",
+        "Run specified acceptance tests",
+        "Return per-task handoff with SHA256; prerequisite-dependent work sequential"
+      ],
+      "acceptance_test_ids": [
+        "A-Q2"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_discrete.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/boolean.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/boolean.py",
+        "tests/test_discrete.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/boolean.py": "87fa78b76012970056003b014cb59dca58882d577edfa8e0ad95c4cf64f17988",
+        "tests/test_discrete.py": "d5b36958c64531c0f25183bf53bd6c8920bfd54abbe858c476e73d65b31849b6"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "B03",
+      "requirement_ids": [
+        "Q2"
+      ],
+      "objective": "Additive symbolic equivalence and legacy compatibility",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "B02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/symbolic.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Additive symbolic equivalence and legacy compatibility",
+        "Validate against corresponding A-Q2 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q2"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_symbolic.py tests/test_release_contracts.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/symbolic.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/symbolic.py",
+        "tests/test_symbolic.py",
+        "tests/test_release_contracts.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/symbolic.py": "fefdb0523a04b822404537a4a581562296150a9bab7aa4b8de032a45700408e7",
+        "tests/test_symbolic.py": "4f15b1e6b438fd712aa9aca06e91558d41fb5864deddbdd8aeb8a7095a0d6abc",
+        "tests/test_release_contracts.py": "e98def7fc594fc81085e5fde3814c0de3955d6b9ad94878fddff3c4366bec0f8"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "R01",
+      "requirement_ids": [
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Explicit constraint representation",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "P02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/constraints.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Explicit constraint representation",
+        "Validate against corresponding A-Q5-Q8 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q5-Q8"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_rows.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/constraints.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/constraints.py",
+        "tests/test_rows.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/constraints.py": "aab64ac6a34dec80298c2fd0efba996e68313df475efeded5a66cd4113eaed98",
+        "tests/test_rows.py": "4d2dc1a83ba8d5c5fa3cd7c06c95373904f6f754104849dc6bd41fd9321707bf"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "R02",
+      "requirement_ids": [
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Independent literal row evaluator",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "R01"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "src/oxparc_challenge/constraints.py",
+        "tests/test_rows.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/row_evaluator.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "check_rows(system_dict,witness_dict)->list[str] failing labels; require exact declared signal set and canonical Python int values (bool forbidden). check_compiled_rows(exported_r1cs_dict,witness_list)->list[int] failing row indices; snarkjs rows are [A,B,C] dictionaries index->decimal coefficient, witness[0]=1; nVars length; canonical values. Require challenge prime. No imports from constraints/gadgets/witness code; only standard library and FIELD_PRIME.",
+      "implementation_steps": [
+        "Read serialized-row schema and lead tests",
+        "Implement independent literal evaluation with input validation",
+        "Run tests/test_rows.py; hand off hashes and failures"
+      ],
+      "acceptance_test_ids": [
+        "A-Q5-Q8"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_rows.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/row_evaluator.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/row_evaluator.py",
+        "tests/test_rows.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/row_evaluator.py": "32a7844a04d8a141ecb698ccfc54d1d74e84042466290ebcf1bfd1970f822b55",
+        "tests/test_rows.py": "4d2dc1a83ba8d5c5fa3cd7c06c95373904f6f754104849dc6bd41fd9321707bf"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "R03",
+      "requirement_ids": [
+        "Q5",
+        "Q6",
+        "Q7"
+      ],
+      "objective": "Range inverse and factor64 gadgets",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "R01"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json",
+        "plan/ARITHMETIC.md",
+        "src/oxparc_challenge/constraints.py",
+        "tests/test_gadgets.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/gadgets.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "Exact ARITHMETIC.md v1 interface and naming",
+      "implementation_steps": [
+        "Implement fixed equations and exact signal names in ARITHMETIC.md",
+        "Validate allowed subset; report stage prerequisite before continuing",
+        "Return complete handoff; no heavy compilation concurrently"
+      ],
+      "acceptance_test_ids": [
+        "A-Q5-Q7"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_gadgets.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/gadgets.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/gadgets.py",
+        "tests/test_gadgets.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/gadgets.py": "4e93aa00ec326333a26d1a83146326bf2173814570e3b52f5ddc437f8b4b8b06",
+        "tests/test_gadgets.py": "c072ea50bae2c75ea97b9a4054d733946aeef33b75e70fb2c91085bb0d40dd98"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "R04",
+      "requirement_ids": [
+        "Q8"
+      ],
+      "objective": "Bounded limb multiplication",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "R03"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json",
+        "plan/ARITHMETIC.md",
+        "src/oxparc_challenge/constraints.py",
+        "tests/test_gadgets.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/gadgets.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "Exact ARITHMETIC.md v1 interface and naming",
+      "implementation_steps": [
+        "Implement fixed equations and exact signal names in ARITHMETIC.md",
+        "Validate allowed subset; report stage prerequisite before continuing",
+        "Return complete handoff; no heavy compilation concurrently"
+      ],
+      "acceptance_test_ids": [
+        "A-Q8"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_gadgets.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/gadgets.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/gadgets.py",
+        "tests/test_gadgets.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/gadgets.py": "4e93aa00ec326333a26d1a83146326bf2173814570e3b52f5ddc437f8b4b8b06",
+        "tests/test_gadgets.py": "c072ea50bae2c75ea97b9a4054d733946aeef33b75e70fb2c91085bb0d40dd98"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "R05",
+      "requirement_ids": [
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Generic Circom export and execution",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "R01"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json",
+        "plan/ARITHMETIC.md",
+        "src/oxparc_challenge/constraints.py",
+        "tests/test_gadgets.py"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/circom.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "Exact ARITHMETIC.md v1 interface and naming",
+      "implementation_steps": [
+        "Implement fixed equations and exact signal names in ARITHMETIC.md",
+        "Validate allowed subset; report stage prerequisite before continuing",
+        "Return complete handoff; no heavy compilation concurrently"
+      ],
+      "acceptance_test_ids": [
+        "A-Q5-Q8"
+      ],
+      "exact_test_commands": [
+        "PYTHONPATH=src .venv/bin/python -m oxparc_challenge.compiled_audit evidence .build/compiled"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/circom.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/circom.py",
+        "tests/test_release_contracts.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/circom.py": "70ec744f68e75bb72d6d02db9b96ea501efd679cbfc5f7e4dceaac6fbd5c91ea",
+        "tests/test_release_contracts.py": "e98def7fc594fc81085e5fde3814c0de3955d6b9ad94878fddff3c4366bec0f8"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "R06",
+      "requirement_ids": [
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Compiled constraint audit",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "R02",
+        "R04",
+        "R05"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/tests/test_compiled.py",
+        "0xPARC-challenge/evidence"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Compiled constraint audit",
+        "Validate against corresponding A-Q5-Q8 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q5-Q8"
+      ],
+      "exact_test_commands": [
+        "PYTHONPATH=src .venv/bin/python -m oxparc_challenge.compiled_audit evidence .build/compiled"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "tests/test_compiled.py",
+        "evidence/"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/compiled_audit.py",
+        "evidence/compiled_audit.json"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/compiled_audit.py": "a1195e697735ad6b0e9cd9a6a7bcadaf121817f7888e76e917d062662725b161",
+        "evidence/compiled_audit.json": "1722c56a7026f9da87aaf748af4d6105c4d72c499fafcdccf9ea671379f7b164"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "F00",
+      "requirement_ids": [
+        "Q3"
+      ],
+      "objective": "Freeze sparse factorization",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "P01",
+        "P02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/plan/FOURIER.md"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Freeze sparse factorization",
+        "Validate against corresponding A-Q3 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q3"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_fourier.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "plan/FOURIER.md"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "plan/FOURIER.md"
+      ],
+      "reviewed_revision": {
+        "plan/FOURIER.md": "9b0fd9464b4b358c5150dc2d0b6d83f6d9226356027bee503255e2d879263f90"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "F01",
+      "requirement_ids": [
+        "Q3"
+      ],
+      "objective": "Explicit packed circuit and lazy execution",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "F00"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/fourier.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Explicit packed circuit and lazy execution",
+        "Validate against corresponding A-Q3 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q3"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_fourier.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/fourier.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead implementation; Luna review; lead final acceptance",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/fourier.py",
+        "tests/test_fourier.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/fourier.py": "ee3eecda3b2163409a1b21c8de962813e0e297beb305b88fcc7eaf2e5fdfe804",
+        "tests/test_fourier.py": "ab9a6a4ade341d980891d615707c5afe24c010873f92a13161c8ff27815d9a0e"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "F02",
+      "requirement_ids": [
+        "Q3"
+      ],
+      "objective": "Complete schedule ledger",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "F01"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/fourier_search.py"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Complete schedule ledger",
+        "Validate against corresponding A-Q3 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q3"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python -m pytest tests/test_fourier.py -q"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/fourier_search.py"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead implementation; Luna review; lead final acceptance",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/fourier_search.py",
+        "tests/test_fourier.py"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/fourier_search.py": "d5c940abd50fa85993e38397436df8259ba9a72b7619eacb78c8b871d6226812",
+        "tests/test_fourier.py": "ab9a6a4ade341d980891d615707c5afe24c010873f92a13161c8ff27815d9a0e"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "F03",
+      "requirement_ids": [
+        "Q3"
+      ],
+      "objective": "Full-size independent checks",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "F02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/tests/test_fourier.py",
+        "0xPARC-challenge/evidence"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Full-size independent checks",
+        "Validate against corresponding A-Q3 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q3"
+      ],
+      "exact_test_commands": [
+        "PYTHONPATH=src .venv/bin/python -m oxparc_challenge verify-release"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "tests/test_fourier.py",
+        "evidence/"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/fourier_validation.py",
+        "evidence/fourier_32768_validation.json",
+        "evidence/fourier_65536_validation.json"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/fourier_validation.py": "4bdf10efab5b1f888eb5ba18af7c8840dc14dd104967a24f06a7c54dc5d6ab9e",
+        "evidence/fourier_32768_validation.json": "907ba6858fd4c3da4f9767946a84ebe7f32e0301b0ff897739f42ada40666c5d",
+        "evidence/fourier_65536_validation.json": "0e1baa7c8bec203e8b33b9277a5e5a96bd181e0ae6e18a73d4d1b468a3cb5a03"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "D01",
+      "requirement_ids": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Response paper and ASCII companion",
+      "owner_role": "Luna worker",
+      "prerequisite_tasks": [
+        "B03",
+        "R06",
+        "F03",
+        "N01",
+        "N02"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/paper",
+        "0xPARC-challenge/README.md"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Response paper and ASCII companion",
+        "Validate against corresponding A-Q1-Q8 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q1-Q8"
+      ],
+      "exact_test_commands": [
+        ".venv/bin/python tools/build_paper.py"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "paper/",
+        "README.md"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "gpt-5.6-luna",
+      "accepted_artifacts": [
+        "paper/response.tex",
+        "paper/response.md",
+        "paper/results.tex",
+        "paper/response.pdf",
+        "README.md"
+      ],
+      "reviewed_revision": {
+        "paper/response.tex": "39465a403ea609c7e2049595ed104a81a665484fb3f3954a479f3c4d4731a1cf",
+        "paper/response.md": "20c75d3350b4c52f81101eaae59e37a49bba9fb4037623e9b26488bc7ac6455f",
+        "paper/results.tex": "28b8732d6a2a23b63f28eff725112395fa2eea1ddd6701e563b46fed0cf0bf36",
+        "paper/response.pdf": "8ddbd89dd40312aa0df3741decc6a0265fef51ebd786a49fb686f21bcca14eb8",
+        "README.md": "0edb6b214a7ad6f8f3baf4917671b67a4098e9e78a38b307caec7f9f99cf93c8"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    },
+    {
+      "task_id": "I00",
+      "requirement_ids": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8"
+      ],
+      "objective": "Final integration PDF CI and manifest",
+      "owner_role": "lead",
+      "prerequisite_tasks": [
+        "D01"
+      ],
+      "base_revision": "37dae1623295f168017789e58b08eadfe0c12aa8",
+      "contract_version": "v1",
+      "required_reading": [
+        "plan/MASTER.md",
+        "plan/TASKS.yaml",
+        "plan/STATE.json"
+      ],
+      "allowed_write_paths": [
+        "0xPARC-challenge/src/oxparc_challenge/release.py",
+        "0xPARC-challenge/src/oxparc_challenge/__main__.py",
+        "0xPARC-challenge/evidence",
+        "0xPARC-challenge/plan",
+        "0xPARC-challenge/tools"
+      ],
+      "forbidden_changes": [
+        "No acceptance-test changes",
+        "No shared-interface changes",
+        "No changes outside allowed paths",
+        "No commits or publication",
+        "Do not revert others work"
+      ],
+      "input_and_output_contract": "MASTER.md frozen interfaces; additional executable contract required before assignment",
+      "implementation_steps": [
+        "Final integration PDF CI and manifest",
+        "Validate against corresponding A-Q1-Q8 acceptance gate",
+        "Write evidence handoff with source SHA256"
+      ],
+      "acceptance_test_ids": [
+        "A-Q1-Q8"
+      ],
+      "exact_test_commands": [
+        "PYTHONPATH=src .venv/bin/python -m oxparc_challenge verify-release"
+      ],
+      "resource_limits": {
+        "seconds": 300,
+        "memory_GiB": 4,
+        "workers_max": 2
+      },
+      "required_artifacts": [
+        "src/oxparc_challenge/release.py",
+        "src/oxparc_challenge/__main__.py",
+        "evidence/",
+        "plan/",
+        "tools/"
+      ],
+      "stop_conditions": [
+        "Contract ambiguity: report before dependent change",
+        "Resource/dependency failure: report UNKNOWN"
+      ],
+      "handoff_requirements": [
+        "Task/base/contract",
+        "Changed files",
+        "Commands and exit codes",
+        "SHA256 artifacts",
+        "Failed/skipped/unexecuted checks",
+        "Limitations and contract changes"
+      ],
+      "execution_record": "lead",
+      "accepted_artifacts": [
+        "src/oxparc_challenge/release.py",
+        "src/oxparc_challenge/__main__.py",
+        "src/oxparc_challenge/pytest_evidence.py",
+        "tools/build_paper.py",
+        "evidence/release.json"
+      ],
+      "reviewed_revision": {
+        "src/oxparc_challenge/release.py": "5192a373089a6bb24de66c159fec7f9e33c4db60abe35790e00e02d6512674ad",
+        "src/oxparc_challenge/__main__.py": "ddd8027092e8464adf5997fb108d29a9807d82a12abce9e9791ceac373e45ada",
+        "src/oxparc_challenge/pytest_evidence.py": "98726d4bd17dc9cd424cf49798ea03eb113f68818e5fd06412734c62b6d4684d",
+        "tools/build_paper.py": "6841b73bdd4f4ec1e990a94f0b83e00adb3651096571989633c26bd98fd03732",
+        "evidence/release.json": "ac6f35ee4c4f9af7f376961c33b4d04e8c6b29eca6717544b0bd4c2264f45fd7"
+      },
+      "handoff_evidence": "evidence/release.json; plan/LEAD_REVIEW.md",
+      "final_acceptance": "All relevant required gates passed; lead-reviewed mathematical arguments in paper/response.tex."
+    }
+  ]
+}

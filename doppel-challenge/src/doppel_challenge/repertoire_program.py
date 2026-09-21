@@ -106,6 +106,39 @@ class _Manager:
     def negate(self, root):
         return self.apply("xor", root, 1)
 
+    def restrict(self, root, coordinate, value):
+        """Cofactor of ``root`` with ``coordinate`` fixed to ``value``.
+
+        Coordinates are ordered increasing, so a node labelled above
+        ``coordinate`` cannot mention it and is returned unchanged. Because the
+        unique table is canonical, the two cofactors are equal as node
+        references exactly when the coordinate does not influence the function:
+        that identity is the non-exhaustive essential-variable test, costing
+        one pass over the diagram rather than 2**n evaluations.
+        """
+        _integer(coordinate, "coordinate")
+        if coordinate >= self.n:
+            raise ValueError("coordinate is outside the program")
+        if value not in (0, 1):
+            raise ValueError("value must be 0 or 1")
+        memo = {}
+        stack = [(root, False)]
+        while stack:
+            self.check()
+            current, ready = stack.pop()
+            if current < 2 or current in memo:
+                continue
+            v, low, high = self.nodes[current-2]
+            if v > coordinate:
+                memo[current] = current
+            elif v == coordinate:
+                memo[current] = high if value else low
+            elif ready:
+                memo[current] = self.mk(v, memo.get(low, low), memo.get(high, high))
+            else:
+                stack.extend(((current, True), (high, False), (low, False)))
+        return memo.get(root, root)
+
     def threshold(self, coordinates, threshold):
         if threshold <= 0:
             return 1

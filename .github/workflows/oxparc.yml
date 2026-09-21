@@ -1,0 +1,30 @@
+name: 0xPARC response verification
+on:
+  push:
+    paths: ['0xPARC-challenge/**', 'index-deconvolution/src/causalbool.py', 'doppel-challenge/src/doppel_challenge/repertoire_program.py', '.github/workflows/oxparc.yml']
+  pull_request:
+    paths: ['0xPARC-challenge/**', 'index-deconvolution/src/causalbool.py', 'doppel-challenge/src/doppel_challenge/repertoire_program.py', '.github/workflows/oxparc.yml']
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: sudo apt-get update && sudo apt-get install -y texlive-latex-extra texlive-fonts-recommended lmodern poppler-utils
+      - run: python tools/bootstrap.py
+        working-directory: 0xPARC-challenge
+      - run: PYTHONPATH=src .venv/bin/python -m oxparc_challenge verify-release
+        working-directory: 0xPARC-challenge
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oxparc-verification
+          path: |
+            0xPARC-challenge/evidence/
+            0xPARC-challenge/paper/response.pdf

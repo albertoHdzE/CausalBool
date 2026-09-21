@@ -1,6 +1,13 @@
 # Causal Boolean Integration
 A deterministic, physics‑inspired programme of algorithmic information theory for interacting entities. It develops short, elegant, and exact formulae that reproduce and explain the behaviour of Boolean causal networks. The emphasis is on canonical derivations, ordering‑aware invariances, and closed‑form index algebra that reconstruct network outputs without probabilistic assumptions. The resulting theory enables prediction and forecasting with reduced memory, computation, and time, and scales beyond regimes where probabilistic or enumeration‑heavy approaches break down.
 
+## Luminal challenge
+
+The independent direct-index compiler is governed by the self-contained
+[implementation and review plan](luminal-challenge/plan/INDEX_ONLY_PLAN.md).
+Agents should read the [challenge instructions](luminal-challenge/AGENTS.md) and
+[task status](luminal-challenge/plan/STATUS.md) before starting or reviewing work.
+
 ## Scientific Overview
 - Theory first: ordered repertoires and closed‑form index sets per gate compose to reconstruct the synchronous network map exactly, with formal policies for ordering and bit‑reversal invariance.
 - Algorithmic framing: the programme is an instance of algorithmic information theory applied to deterministic mechanisms, prioritising compressive, compositional formulae over probabilistic models.

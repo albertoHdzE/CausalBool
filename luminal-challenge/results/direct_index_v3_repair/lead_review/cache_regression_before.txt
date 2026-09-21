@@ -1,0 +1,25 @@
+test_retry_after_failed_charge_stays_unknown (tests_direct.test_schema_index.IncomingExpressionBudgetTests.test_retry_after_failed_charge_stays_unknown) ... FAIL
+test_cached_expression_cannot_bypass_later_exhaustion (tests_direct.test_schema_index.IncomingExpressionBudgetTests.test_cached_expression_cannot_bypass_later_exhaustion) ... FAIL
+
+======================================================================
+FAIL: test_retry_after_failed_charge_stays_unknown (tests_direct.test_schema_index.IncomingExpressionBudgetTests.test_retry_after_failed_charge_stays_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/tests_direct/test_schema_index.py", line 469, in test_retry_after_failed_charge_stays_unknown
+    self.assertTrue(retry.is_unknown, "a failed charge must not authorize a retry")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : a failed charge must not authorize a retry
+
+======================================================================
+FAIL: test_cached_expression_cannot_bypass_later_exhaustion (tests_direct.test_schema_index.IncomingExpressionBudgetTests.test_cached_expression_cannot_bypass_later_exhaustion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/tests_direct/test_schema_index.py", line 480, in test_cached_expression_cannot_bypass_later_exhaustion
+    self.assertTrue(retry.is_unknown, "cached work cannot revive an exhausted meter")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : cached work cannot revive an exhausted meter
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+FAILED (failures=2)
