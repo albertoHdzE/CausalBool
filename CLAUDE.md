@@ -38,10 +38,18 @@ Both are canonical, with distinct scopes — regenerate their numbers via
 
 ### Branch status
 
-Live branch: **`fixing`** (AUDIT04-H, anchor `fc003f8` of 2026-09-08). `main` is
-stale by policy until plan task T0.4 retags it; do not trust `main` for current
-state. The `clean` branch holds the scientific work up to `b839bfd` (Level 9)
-and is not where verification is currently done.
+Live branch: **`main`**, and since 2026-09-21 the only branch. The consolidation
+merge `f58d01c` folded the chain `clean` → `fixing` → `doppel` →
+`luminal-direct-index` into `main`; the first three were strict ancestors of the
+last, so the promotion was three fast-forwards and one real merge. All four
+branches are deleted locally and on `origin`. Their tips survive as tags
+`archive/pre-merge-<branch>-20260921`, and every one of them is an ancestor of
+`main`, so nothing depends on the tags for reachability.
+
+Until that merge this paragraph named `fixing` as live and told the reader not
+to trust `main`. That is no longer true and the inversion is deliberate: `main`
+is now the superset of everything, including AUDIT04-H2.5, the 0xPARC challenge
+package and the closed Luminal optimization phase.
 
 ### Plan lineage (added AUDIT04-H, 2026-09-08)
 
