@@ -148,6 +148,125 @@ def show_lifetimes(facts, addresses, life, span, title) -> None:
 # --------------------------------------------------------------------------
 
 
+def show_violations(panels: Sequence[dict], span: int, title: str) -> None:
+    """The three ways a compilation is rejected, each drawn as its collision.
+
+    One panel per violation, all on the same cycle axis so they can be compared.
+    Red is always the thing that breaks the rule; green is the moment that would
+    have made it legal.
+
+    Each panel is an explicit descriptor rather than something inferred, because
+    the point is to draw one specific illegal arrangement, not to search for
+    illegality:
+
+    * ``latency``  -- keys ``value, issued, lands, reader, reads_at``
+    * ``capacity`` -- keys ``cycle, engine, ops, limit``
+    * ``sharing``  -- keys ``word, first, second`` where each is ``(name, lo, hi)``
+
+    Every panel also carries ``message``, which is the validator's own words.
+    """
+
+    fig, axes = plt.subplots(
+        len(panels), 1, figsize=(max(6.0, 0.78 * span + 2.6), 2.5 * len(panels)),
+        squeeze=False,
+    )
+
+    for axis, panel in zip(axes[:, 0], panels):
+        kind = panel["kind"]
+
+        if kind == "latency":
+            rows = [panel["value"], panel["reader"]]
+            for row in range(2):
+                for cycle in range(span):
+                    axis.add_patch(Rectangle((cycle, row), 1, 1, linewidth=1,
+                                             edgecolor="white", facecolor=EMPTY))
+            issued, lands = panel["issued"], panel["lands"]
+            axis.add_patch(Rectangle((issued, 0.1), 1, 0.8, facecolor=EDGE,
+                                     edgecolor=EDGE))
+            axis.text(issued + 0.5, 0.5, "issue", ha="center", va="center",
+                      fontsize=7, color="white", fontweight="bold")
+            if lands > issued + 1:
+                axis.add_patch(Rectangle((issued + 1, 0.3), lands - issued - 1, 0.4,
+                                         facecolor=FILL, edgecolor=EDGE,
+                                         linestyle="--", linewidth=0.9))
+                axis.text((issued + 1 + lands) / 2, 0.5, "in flight — does not exist yet",
+                          ha="center", va="center", fontsize=7)
+            axis.add_patch(Rectangle((lands, 0.1), 1, 0.8, facecolor=CHOSEN,
+                                     edgecolor="#2e6b2a"))
+            axis.text(lands + 0.5, 0.5, "exists", ha="center", va="center", fontsize=7)
+
+            reads = panel["reads_at"]
+            axis.add_patch(Rectangle((reads, 1.1), 1, 0.8, facecolor=EXCLUDED,
+                                     edgecolor="#b4453c", linewidth=1.8))
+            axis.text(reads + 0.5, 1.5, "reads it", ha="center", va="center",
+                      fontsize=7, fontweight="bold")
+            # The axis is inverted, so a smaller y sits higher: the arrow and its
+            # label go in the gap between the two rows, not across the red box.
+            axis.annotate("", xy=(lands + 0.5, 1.04), xytext=(reads + 0.5, 1.04),
+                          arrowprops=dict(arrowstyle="-|>", color="#b4453c",
+                                          linewidth=1.5, linestyle=":"))
+            axis.text((reads + lands) / 2 + 0.5, 0.97,
+                      f"{lands - reads} cycle too early", ha="center",
+                      va="bottom", fontsize=7.5, color="#b4453c",
+                      fontweight="bold")
+            axis.set_ylim(0, 2)
+            axis.set_yticks([0.5, 1.5], rows, fontsize=8)
+
+        elif kind == "capacity":
+            ops, limit, cycle = panel["ops"], panel["limit"], panel["cycle"]
+            for slot in range(len(ops)):
+                for column in range(span):
+                    axis.add_patch(Rectangle((column, slot), 1, 1, linewidth=1,
+                                             edgecolor="white", facecolor=EMPTY))
+            for slot, op_id in enumerate(ops):
+                over = slot >= limit
+                axis.add_patch(Rectangle((cycle, slot + 0.1), 1, 0.8,
+                                         facecolor=EXCLUDED if over else FILL,
+                                         edgecolor="#b4453c" if over else EDGE,
+                                         linewidth=1.8 if over else 1.0))
+                axis.text(cycle + 0.5, slot + 0.5, f"op{op_id}", ha="center",
+                          va="center", fontsize=7,
+                          fontweight="bold" if over else "normal")
+            axis.axhline(limit, color="#b4453c", linestyle="--", linewidth=1.4)
+            axis.text(span - 0.1, limit, f"  {panel['engine']} limit = {limit}",
+                      ha="right", va="bottom", fontsize=7, color="#b4453c")
+            axis.set_ylim(0, len(ops))
+            axis.set_yticks([s + 0.5 for s in range(len(ops))],
+                            [f"slot {s}" if s < limit else "overflow"
+                             for s in range(len(ops))], fontsize=8)
+
+        elif kind == "sharing":
+            (first, lo1, hi1), (second, lo2, hi2) = panel["first"], panel["second"]
+            for column in range(span):
+                axis.add_patch(Rectangle((column, 0), 1, 1, linewidth=1,
+                                         edgecolor="white", facecolor=EMPTY))
+            # Inverted axis: the first-named value is given the smaller y so it
+            # is drawn on top, matching the order it is described in.
+            axis.add_patch(Rectangle((lo1, 0.1), hi1 - lo1 + 1, 0.35,
+                                     facecolor=EXCLUDED, edgecolor=EDGE))
+            axis.text(lo1 + (hi1 - lo1 + 1) / 2, 0.28, f"{first}  {lo1}..{hi1}",
+                      ha="center", va="center", fontsize=7)
+            axis.add_patch(Rectangle((lo2, 0.55), hi2 - lo2 + 1, 0.35,
+                                     facecolor=EXCLUDED, edgecolor=EDGE))
+            axis.text(lo2 + (hi2 - lo2 + 1) / 2, 0.72, f"{second}  {lo2}..{hi2}",
+                      ha="center", va="center", fontsize=7)
+            for cycle in sorted(set(range(lo1, hi1 + 1)) & set(range(lo2, hi2 + 1))):
+                axis.add_patch(Rectangle((cycle, 0), 1, 1, linewidth=2.0,
+                                         edgecolor="#b4453c", facecolor="none"))
+            axis.set_ylim(0, 1)
+            axis.set_yticks([0.5], [f"scratch word {panel['word']}"], fontsize=8)
+
+        axis.set_xlim(0, span)
+        axis.set_xticks([c + 0.5 for c in range(span)], [str(c) for c in range(span)])
+        axis.set_title(panel["message"], fontsize=8.5, color="#b4453c")
+        axis.invert_yaxis()
+
+    axes[-1, 0].set_xlabel("cycle")
+    fig.suptitle(title, y=1.0)
+    fig.tight_layout()
+    plt.show()
+
+
 def show_execution_trace(
     program: dict,
     compilation: dict,
