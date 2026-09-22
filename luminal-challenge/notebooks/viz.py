@@ -58,6 +58,7 @@ __all__ = [
     "narrate",
     "show_timeline",
     "show_lifetimes",
+    "show_cube_anatomy",
     "show_universe",
     "show_cover_blocks",
     "show_index_layout",
@@ -641,6 +642,103 @@ def show_memory_ordering(program: dict, title: str) -> None:
                   "an ordered pair must also sit in two different cycles",
                   fontsize=8)
     ax.invert_yaxis()
+    fig.tight_layout()
+    plt.show()
+
+
+def show_cube_anatomy(cube: si.Cube, title: str, max_members: int = 16) -> None:
+    """Take one cube's printed label apart, coordinate by coordinate.
+
+    The upper panel stacks the label string over the two integers it is printed
+    from, one column per coordinate, LSB-first so that x0 sits on the left
+    exactly as ``Cube.label`` writes it. The lower panel adds each sumando to
+    the anchor and recovers a member.
+
+    Every value drawn is asked of the cube: ``label`` supplies the marks,
+    ``members`` supplies the set, and each sumando is read back as
+    ``member - anchor``. This function decides nothing about what a cube
+    denotes; it only lays out what ``schema_index`` already said.
+    """
+
+    marks = cube.label().split(":")[1]
+    free_positions = [i for i, mark in enumerate(marks) if mark == "*"]
+    members = list(cube.members())[:max_members]
+    sumandos = [member - cube.anchor for member in members]
+
+    gutter = 3.0
+    columns = max(cube.n, 1)
+    rows = len(members) + 1
+    fig, (top, bottom) = plt.subplots(
+        2, 1,
+        figsize=(max(6.0, 0.86 * columns + gutter + 1.0), 2.5 + 0.34 * rows),
+        gridspec_kw={"height_ratios": [5, max(rows, 3)]},
+    )
+
+    # ---- upper panel: the label over the integers it is printed from -------
+    legend = [
+        ("coordinate", [f"x{i}" for i in range(cube.n)], None),
+        ("weight  2**i", [str(1 << i) for i in range(cube.n)], None),
+        ("anchor bits", [str((cube.anchor >> i) & 1) for i in range(cube.n)],
+         lambda i: FILL if (cube.anchor >> i) & 1 else EMPTY),
+        ("free mask bits", [str((cube.free_mask >> i) & 1) for i in range(cube.n)],
+         lambda i: CHOSEN if (cube.free_mask >> i) & 1 else EMPTY),
+        ("printed label", list(marks),
+         lambda i: CHOSEN if marks[i] == "*" else FILL if marks[i] == "1" else EMPTY),
+    ]
+    for row, (name, cells, colour) in enumerate(legend):
+        top.text(-0.2, row + 0.5, name, ha="right", va="center", fontsize=8.5)
+        for i, text in enumerate(cells):
+            if colour is not None:
+                top.add_patch(Rectangle((i, row + 0.08), 1, 0.84, linewidth=1,
+                                        edgecolor="white", facecolor=colour(i)))
+            top.text(i + 0.5, row + 0.5, text, ha="center", va="center",
+                     fontsize=11 if name == "printed label" else 9,
+                     family="monospace" if name == "printed label" else None,
+                     fontweight="bold" if name == "printed label" else "normal")
+    top.set_xlim(-gutter, columns)
+    top.set_ylim(0, len(legend))
+    top.set_xticks([])
+    top.set_yticks([])
+    top.invert_yaxis()
+    top.set_title(f"{title}\n{cube.label()}   "
+                  f"anchor={cube.anchor}  free_mask={cube.free_mask}  "
+                  f"size={cube.size}", fontsize=10)
+
+    # ---- lower panel: anchor + sumando = member ----------------------------
+    width = 1 + len(free_positions) + 2
+    headers = ["anchor"] + [f"x{p}  (+{1 << p})" for p in free_positions] + ["=", "member"]
+    for column, text in enumerate(headers):
+        bottom.text(column + 0.5, 0.5, text, ha="center", va="center", fontsize=8.5)
+    for row, (member, sumando) in enumerate(zip(members, sumandos), start=1):
+        bottom.add_patch(Rectangle((0, row + 0.08), 1, 0.84, linewidth=1,
+                                   edgecolor="white", facecolor=FILL))
+        bottom.text(0.5, row + 0.5, str(cube.anchor), ha="center", va="center",
+                    fontsize=9)
+        for column, position in enumerate(free_positions, start=1):
+            on = (sumando >> position) & 1
+            bottom.add_patch(Rectangle((column, row + 0.08), 1, 0.84, linewidth=1,
+                                       edgecolor="white",
+                                       facecolor=CHOSEN if on else EMPTY))
+            bottom.text(column + 0.5, row + 0.5,
+                        f"+{1 << position}" if on else "+0",
+                        ha="center", va="center", fontsize=9,
+                        color="#1b3a4b" if on else "#9aa5b1")
+        bottom.text(width - 1.5, row + 0.5, "=", ha="center", va="center", fontsize=9)
+        bottom.add_patch(Rectangle((width - 1, row + 0.08), 1, 0.84, linewidth=1,
+                                   edgecolor=EDGE, facecolor=FILL))
+        bottom.text(width - 0.5, row + 0.5, str(member), ha="center", va="center",
+                    fontsize=9, fontweight="bold")
+    bottom.set_xlim(-gutter, width)
+    bottom.set_ylim(0, rows)
+    bottom.set_xticks([])
+    bottom.set_yticks([])
+    bottom.invert_yaxis()
+    bottom.text(-0.2, 0.5, "the sumandos", ha="right", va="center", fontsize=8.5)
+    shown = len(members)
+    bottom.set_xlabel(
+        f"every subset of the {len(free_positions)} free weights, added to the "
+        f"anchor: {shown} of {cube.size} members drawn", fontsize=8)
+
     fig.tight_layout()
     plt.show()
 
