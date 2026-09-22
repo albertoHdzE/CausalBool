@@ -148,6 +148,147 @@ def show_lifetimes(facts, addresses, life, span, title) -> None:
 # --------------------------------------------------------------------------
 
 
+def show_inflight(
+    facts,
+    times: Dict[int, int],
+    op_ids: Sequence[int],
+    span: int,
+    title: str,
+) -> None:
+    """A slot is used at the issue cycle only, not for the whole latency.
+
+    One row per operation. The solid square is the cycle the operation is handed
+    over, which is the only cycle it consumes a slot. The pale bar after it is
+    the time it spends in flight, consuming nothing. The strip along the bottom
+    counts slots actually used per cycle, so it can be read against the engine's
+    limit.
+
+    This exists because "the slot stays busy until the result lands" is the most
+    natural wrong guess about the machine, and a timeline of issue cycles alone
+    does not contradict it.
+    """
+
+    engines = {facts.engine[op_id] for op_id in op_ids}
+    limit = min(machine.ENGINE_LIMITS[e] for e in engines)
+
+    fig, (ax, bar) = plt.subplots(
+        2, 1, figsize=(max(5.5, 0.78 * span + 2.4), 0.62 * len(op_ids) + 2.4),
+        gridspec_kw={"height_ratios": [len(op_ids), 1.15]}, sharex=True,
+    )
+
+    used = {cycle: 0 for cycle in range(span)}
+    for row, op_id in enumerate(op_ids):
+        issue = times[op_id]
+        latency = facts.latency[op_id]
+        used[issue] = used.get(issue, 0) + 1
+        for cycle in range(span):
+            ax.add_patch(Rectangle((cycle, row), 1, 1, linewidth=1,
+                                   edgecolor="white", facecolor=EMPTY))
+        ax.add_patch(Rectangle((issue, row + 0.1), 1, 0.8,
+                               facecolor=EDGE, edgecolor=EDGE))
+        ax.text(issue + 0.5, row + 0.5, "issue", ha="center", va="center",
+                fontsize=7, color="white", fontweight="bold")
+        if latency > 1:
+            ax.add_patch(Rectangle((issue + 1, row + 0.26), latency - 1, 0.48,
+                                   facecolor=FILL, edgecolor=EDGE,
+                                   linestyle="--", linewidth=0.9))
+            ax.text(issue + 1 + (latency - 1) / 2, row + 0.5, "in flight — no slot",
+                    ha="center", va="center", fontsize=7)
+        ax.add_patch(Rectangle((issue + latency, row + 0.1), 1, 0.8,
+                               facecolor=CHOSEN, edgecolor="#2e6b2a"))
+        ax.text(issue + latency + 0.5, row + 0.5, "lands", ha="center",
+                va="center", fontsize=7)
+
+    ax.set_xlim(0, span)
+    ax.set_ylim(0, len(op_ids))
+    ax.set_yticks([r + 0.5 for r in range(len(op_ids))],
+                  [f"op{op_id} {facts.opcode[op_id]}" for op_id in op_ids])
+    ax.set_title(title, fontsize=10)
+    ax.invert_yaxis()
+
+    for cycle in range(span):
+        count = used.get(cycle, 0)
+        bar.add_patch(Rectangle((cycle, 0), 1, 1, linewidth=1, edgecolor="white",
+                                facecolor=FILL if count else EMPTY))
+        bar.text(cycle + 0.5, 0.5, str(count), ha="center", va="center", fontsize=8,
+                 fontweight="bold" if count else "normal")
+    bar.set_xlim(0, span)
+    bar.set_ylim(0, 1)
+    bar.set_yticks([0.5], [f"slots used\n(limit {limit})"], fontsize=7)
+    bar.set_xticks([c + 0.5 for c in range(span)], [str(c) for c in range(span)])
+    bar.set_xlabel("cycle")
+
+    fig.tight_layout()
+    plt.show()
+
+
+def show_memory_chain(program: dict, title: str) -> None:
+    """The ordering edges between memory operations, direct and implied.
+
+    Solid arrows are the edges ``machine.memory_predecessors`` actually reports.
+    The dashed arrow is an ordering that holds as a consequence of following two
+    solid ones, which no single row of the three-test table can show. A pair may
+    be exempt from a direct edge and still be forced into an order this way.
+    """
+
+    memory = [op for op in program["operations"] if op["op"] in machine.MEMORY_OPS]
+    index = {op["id"]: position for position, op in enumerate(memory)}
+
+    direct = {op["id"]: list(machine.memory_predecessors(program, op["id"]))
+              for op in memory}
+
+    # Orderings that hold only by following two or more solid edges.
+    implied = []
+    for op in memory:
+        reached = set()
+        stack = list(direct[op["id"]])
+        while stack:
+            current = stack.pop()
+            if current in reached:
+                continue
+            reached.add(current)
+            stack.extend(direct.get(current, []))
+        for earlier in sorted(reached - set(direct[op["id"]])):
+            implied.append((earlier, op["id"]))
+
+    fig, ax = plt.subplots(figsize=(1.9 * len(memory) + 2.0, 3.4))
+    for op in memory:
+        x = index[op["id"]]
+        ax.add_patch(Rectangle((x - 0.42, -0.3), 0.84, 0.6,
+                               facecolor=FILL if op["op"] in machine.LOAD_OPS
+                               else EXCLUDED, edgecolor=EDGE))
+        ax.text(x, 0.0, f"op{op['id']}\n{op['op']}\n{op['buffer']}[{op['offset']}]",
+                ha="center", va="center", fontsize=8)
+
+    # Anchored at the box centres rather than their edges: over one step the
+    # gap between two boxes is too narrow for an arc to be visible at all.
+    for later, earlier_list in direct.items():
+        for earlier in earlier_list:
+            ax.annotate("", xy=(index[later], 0.32), xytext=(index[earlier], 0.32),
+                        arrowprops=dict(arrowstyle="-|>", color="#b4453c",
+                                        linewidth=1.7, shrinkA=2, shrinkB=2,
+                                        connectionstyle="arc3,rad=-0.55"))
+    for earlier, later in implied:
+        ax.annotate("", xy=(index[later], -0.32), xytext=(index[earlier], -0.32),
+                    arrowprops=dict(arrowstyle="-|>", color="#6b7684",
+                                    linewidth=1.4, linestyle="--",
+                                    shrinkA=2, shrinkB=2,
+                                    connectionstyle="arc3,rad=0.42"))
+
+    ax.text(0.0, 1.02, "solid, above: a direct ordering the rule reports",
+            transform=ax.transAxes, fontsize=8, color="#b4453c")
+    ax.text(0.0, -0.16, "dashed, below: implied by following two solid arrows",
+            transform=ax.transAxes, fontsize=8, color="#6b7684")
+
+    ax.set_xlim(-0.8, len(memory) - 0.2)
+    ax.set_ylim(-1.0, 1.0)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_title(title, fontsize=10, pad=22)
+    fig.tight_layout()
+    plt.show()
+
+
 def show_sharing_rule(
     life: Dict[str, Tuple[int, int]],
     pairs: Sequence[Tuple[str, str]],
