@@ -148,6 +148,98 @@ def show_lifetimes(facts, addresses, life, span, title) -> None:
 # --------------------------------------------------------------------------
 
 
+def show_execution_trace(
+    program: dict,
+    compilation: dict,
+    states: Sequence[object],
+    title: str,
+    scratch_words: Optional[int] = None,
+) -> None:
+    """The whole machine, cycle by cycle: what issued, the scratchpad, the buffers.
+
+    One column per cycle. The top strip names the operations handed over. Below
+    it is every scratch word the allocation uses, then every buffer word. A cell
+    holds the number stored there at the *end* of that cycle, so reading a row
+    left to right is the life of one word.
+
+    Green marks a change made during that cycle -- a value committing to the
+    scratchpad, or a store reaching a buffer. Everything else is carried over
+    from the cycle before.
+
+    ``states`` comes from ``trace.replay``, which checks itself against
+    ``machine.run_compilation`` before returning, so what is drawn here has
+    already been agreed with the validator.
+    """
+
+    if scratch_words is None:
+        scratch_words = machine.scratch_footprint(program, compilation)
+    span = len(states)
+
+    buffer_slots: List[Tuple[str, int]] = []
+    for name, length in program["buffers"].items():
+        for offset in range(length):
+            buffer_slots.append((name, offset))
+
+    rows = 1 + scratch_words + len(buffer_slots)
+    fig, ax = plt.subplots(figsize=(max(6.0, 0.86 * span + 3.0), 0.42 * rows + 1.8))
+
+    def cell(column, row, text, face, weight="normal"):
+        ax.add_patch(Rectangle((column, row), 1, 1, linewidth=1,
+                               edgecolor="white", facecolor=face))
+        if text:
+            ax.text(column + 0.5, row + 0.5, text, ha="center", va="center",
+                    fontsize=7, fontweight=weight)
+
+    labels: List[str] = ["issued"]
+    for word in range(scratch_words):
+        labels.append(f"scratch {word}")
+    for name, offset in buffer_slots:
+        labels.append(f"{name}[{offset}]")
+
+    for column, state in enumerate(states):
+        ids = state.issued_ids
+        cell(column, 0, ",".join(f"{i}" for i in ids) if ids else "·",
+             FILL if ids else EMPTY, "bold")
+
+        landed_here = {}
+        for name, words in state.landed:
+            base = compilation["scratch"][name]
+            for k, word in enumerate(words):
+                landed_here[base + k] = name
+
+        for word in range(scratch_words):
+            row = 1 + word
+            value = state.scratch[word]
+            if word in landed_here:
+                cell(column, row, f"{landed_here[word]}\n{value}", CHOSEN, "bold")
+            else:
+                cell(column, row, str(value) if value else "",
+                     FILL if value else EMPTY)
+
+        written = {(b, o + k) for b, o, words in state.stored
+                   for k in range(len(words))}
+        for index, (name, offset) in enumerate(buffer_slots):
+            row = 1 + scratch_words + index
+            value = state.memory[name][offset]
+            face = CHOSEN if (name, offset) in written else (
+                "#e8eef4" if value else EMPTY)
+            cell(column, row, str(value), face,
+                 "bold" if (name, offset) in written else "normal")
+
+    ax.axhline(1, color="#5d8fb3", linewidth=1.4)
+    ax.axhline(1 + scratch_words, color="#5d8fb3", linewidth=1.4)
+
+    ax.set_xlim(0, span)
+    ax.set_ylim(0, rows)
+    ax.set_xticks([c + 0.5 for c in range(span)], [str(c) for c in range(span)])
+    ax.set_yticks([r + 0.5 for r in range(rows)], labels, fontsize=7)
+    ax.set_xlabel("cycle")
+    ax.set_title(title, fontsize=10)
+    ax.invert_yaxis()
+    fig.tight_layout()
+    plt.show()
+
+
 def show_inflight(
     facts,
     times: Dict[int, int],
