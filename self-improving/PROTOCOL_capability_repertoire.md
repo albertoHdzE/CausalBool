@@ -18,6 +18,10 @@ compositions never sampled**. Each of the three can fail independently, and the
 controls below are fixed so that search over knobs cannot manufacture a
 positive.
 
+Place in the programme: this is the first technical-correctness stage toward
+the goal stated in `README.md`, a local quantised model rediscovering index-set
+deconvolution without clues.
+
 Positioning: Zenil, Uthamacumaran and Ozelim (arXiv:2601.05280, local copy
 `paper/`) argue that next-token objectives are lossy Shannon compressors and
 that progress requires symbolic model synthesis. This is a measurement of the

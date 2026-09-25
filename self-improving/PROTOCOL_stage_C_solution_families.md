@@ -18,6 +18,18 @@ failed one.
 
 ## 0. The idea, stated so that it can fail
 
+**Place in the programme.** Stage C is the technical-correctness rung toward
+the goal in `README.md`: a small local model rediscovering index-set
+deconvolution without clues (Stage D). Stage C proves the following on a
+problem whose every answer we can check:
+- plan genotypes;
+- exact verifiers;
+- schema-directed variation;
+- fusion as crossover;
+- the archive.
+
+Stage D reuses all of them.
+
 Repeated sampling finds a correct answer by waiting for the model's own
 probability mass to land on it [1, 2]. Evolutionary systems built on LLMs make
 the model the **mutation operator** and a program the genotype [9, 10, 11], and LLM-driven
