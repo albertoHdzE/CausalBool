@@ -39,8 +39,11 @@ for _entry in (str(ROOT / ".reference"), str(ROOT)):
 
 import machine  # noqa: E402  -- the frozen owner of execution semantics
 
+import common  # noqa: E402  -- the owner of the greedy list scheduler
 
-__all__ = ["CycleState", "TraceMismatch", "replay"]
+
+__all__ = ["CycleState", "TraceMismatch", "replay",
+           "QueueEntry", "ListStep", "replay_list_schedule"]
 
 
 class TraceMismatch(AssertionError):
@@ -138,3 +141,89 @@ def replay(program: dict, compilation: dict, case: dict) -> List[CycleState]:
             f"replay={replayed} official={official}"
         )
     return states
+
+
+# --------------------------------------------------------------------------
+# The greedy list scheduler, decision by decision
+# --------------------------------------------------------------------------
+#
+# ``common.classical_compile`` owns the greedy baseline, and its bytes are
+# pinned by SHA-256 in ``compare_direct.py`` because the comparison evidence was
+# measured against them. It therefore cannot be enriched with a hook either. As
+# with ``replay`` above, only the bookkeeping loop is repeated here, so that the
+# ready queue of every cycle can be kept; the dependency graph comes from
+# ``common.dependencies`` and the slot limits from ``machine.ENGINE_LIMITS``.
+# The guard is the same: the finished schedule must equal the one the owner
+# returns, or nothing is returned at all.
+
+
+@dataclass
+class QueueEntry:
+    """One operation in a cycle's ready queue, and what the rule did with it."""
+
+    op_id: int
+    opcode: str
+    engine: str
+    priority: int      # longest latency-weighted path from this op to the end
+    fanout: int        # number of direct consumers, the first tie-break
+    placed: bool       # False means its engine's slots were already full
+
+
+@dataclass
+class ListStep:
+    """One cycle of the greedy scheduler."""
+
+    cycle: int
+    queue: List[QueueEntry]          # ready operations, in priority order
+    waiting: List[int]               # pending operations whose inputs are not ready
+    used: Dict[str, int]             # slots taken per engine after this cycle
+
+
+def replay_list_schedule(program: dict) -> Tuple[List[ListStep], dict]:
+    """Run the critical-path list scheduler, keeping every cycle's ready queue.
+
+    Returns the steps and the compilation ``common.classical_compile`` produced.
+    Raises ``TraceMismatch`` if the replayed issue cycles differ from the
+    owner's, which includes the case where the owner fell back to the serial
+    schedule.
+    """
+
+    ops = program["operations"]
+    preds = common.dependencies(program)
+    successors: List[List[Tuple[int, int]]] = [[] for _ in ops]
+    for i, ps in enumerate(preds):
+        for p, lag in ps.items():
+            successors[p].append((i, lag))
+    heights = [0] * len(ops)
+    for i in reversed(range(len(ops))):
+        heights[i] = max((lag + heights[j] for j, lag in successors[i]), default=0)
+
+    times: Dict[int, int] = {}
+    pending, cycle = set(range(len(ops))), 0
+    steps: List[ListStep] = []
+    while pending:
+        ready = [i for i in pending if all(p in times and times[p] + lag <= cycle
+                                          for p, lag in preds[i].items())]
+        used = dict.fromkeys(machine.ENGINE_LIMITS, 0)
+        queue: List[QueueEntry] = []
+        for i in sorted(ready, key=lambda i: (-heights[i], -len(successors[i]), i)):
+            engine = machine.OP_SPECS[ops[i]["op"]]["engine"]
+            placed = used[engine] < machine.ENGINE_LIMITS[engine]
+            if placed:
+                times[i] = cycle
+                pending.remove(i)
+                used[engine] += 1
+            queue.append(QueueEntry(i, ops[i]["op"], engine, heights[i],
+                                    len(successors[i]), placed))
+        steps.append(ListStep(cycle, queue,
+                              sorted(pending - set(ready)),
+                              {e: n for e, n in used.items() if n}))
+        cycle += 1
+
+    compiled = common.classical_compile(program)
+    if common.issue_times(compiled) != times:
+        raise TraceMismatch(
+            "replay disagrees with common.classical_compile: "
+            f"replay={times} official={common.issue_times(compiled)}"
+        )
+    return steps, compiled

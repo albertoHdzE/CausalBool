@@ -1,0 +1,182 @@
+{
+ "buffers": {
+  "data": 16,
+  "mask": 16,
+  "out": 16
+ },
+ "cases": [
+  {
+   "data": [
+    3,
+    5,
+    8,
+    13,
+    21,
+    34,
+    55,
+    89,
+    144,
+    233,
+    377,
+    610,
+    987,
+    1597,
+    2584,
+    4181
+   ],
+   "mask": [
+    4294967295,
+    0,
+    17,
+    31,
+    63,
+    127,
+    255,
+    511,
+    1023,
+    2047,
+    4095,
+    8191,
+    16383,
+    32767,
+    65535,
+    131071
+   ],
+   "out": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ ],
+ "name": "vector_bitmix",
+ "operations": [
+  {
+   "dest": "shift",
+   "id": 0,
+   "op": "const",
+   "value": 5
+  },
+  {
+   "args": [
+    "shift"
+   ],
+   "dest": "vshift",
+   "id": 1,
+   "op": "splat"
+  },
+  {
+   "buffer": "data",
+   "dest": "data0",
+   "id": 2,
+   "offset": 0,
+   "op": "vload"
+  },
+  {
+   "buffer": "mask",
+   "dest": "mask0",
+   "id": 3,
+   "offset": 0,
+   "op": "vload"
+  },
+  {
+   "buffer": "data",
+   "dest": "data1",
+   "id": 4,
+   "offset": 8,
+   "op": "vload"
+  },
+  {
+   "buffer": "mask",
+   "dest": "mask1",
+   "id": 5,
+   "offset": 8,
+   "op": "vload"
+  },
+  {
+   "args": [
+    "data0",
+    "mask0"
+   ],
+   "dest": "mixed0",
+   "id": 6,
+   "op": "vxor"
+  },
+  {
+   "args": [
+    "data1",
+    "mask1"
+   ],
+   "dest": "mixed1",
+   "id": 7,
+   "op": "vxor"
+  },
+  {
+   "args": [
+    "mixed0",
+    "vshift"
+   ],
+   "dest": "shifted0",
+   "id": 8,
+   "op": "vshl"
+  },
+  {
+   "args": [
+    "mixed1",
+    "vshift"
+   ],
+   "dest": "shifted1",
+   "id": 9,
+   "op": "vshl"
+  },
+  {
+   "args": [
+    "shifted0",
+    "data0"
+   ],
+   "dest": "result0",
+   "id": 10,
+   "op": "vadd"
+  },
+  {
+   "args": [
+    "shifted1",
+    "data1"
+   ],
+   "dest": "result1",
+   "id": 11,
+   "op": "vadd"
+  },
+  {
+   "args": [
+    "result0"
+   ],
+   "buffer": "out",
+   "id": 12,
+   "offset": 0,
+   "op": "vstore"
+  },
+  {
+   "args": [
+    "result1"
+   ],
+   "buffer": "out",
+   "id": 13,
+   "offset": 8,
+   "op": "vstore"
+  }
+ ]
+}

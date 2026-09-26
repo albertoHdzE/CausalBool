@@ -1,0 +1,112 @@
+======================================================================
+ERROR: test_construction_interruptions_are_separate (research_tests.test_next_round_search.InterruptionAccounting.test_construction_interruptions_are_separate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 267, in test_construction_interruptions_are_separate
+    self.assertEqual(record["interrupted_validation_total"], 0)
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'interrupted_validation_total'
+
+======================================================================
+ERROR: test_learner_path_counts_once (research_tests.test_next_round_search.InterruptionAccounting.test_learner_path_counts_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 233, in test_learner_path_counts_once
+    self._check(result)
+    ~~~~~~~~~~~^^^^^^^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 181, in _check
+    self.assertEqual(record["interrupted_validation_total"], result["internal"])
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'interrupted_validation_total'
+
+======================================================================
+ERROR: test_learner_path_query_deadline_only (research_tests.test_next_round_search.InterruptionAccounting.test_learner_path_query_deadline_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 239, in test_learner_path_query_deadline_only
+    self._check(result)
+    ~~~~~~~~~~~^^^^^^^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 181, in _check
+    self.assertEqual(record["interrupted_validation_total"], result["internal"])
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'interrupted_validation_total'
+
+======================================================================
+ERROR: test_zero_interruption_controls (research_tests.test_next_round_search.InterruptionAccounting.test_zero_interruption_controls)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 248, in test_zero_interruption_controls
+    _, _, record = nrs.multiscale_optimise(
+                   ~~~~~~~~~~~~~~~~~~~~~~~^
+        program, facts, times, addresses, budget_seconds=1e6, query_seconds=1e6,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        slice_seconds=1e6, clock=_Clock(1e-7), catalog=catalog,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        traversal=traversal, node_ceiling=20_000)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: multiscale_optimise() got an unexpected keyword argument 'catalog'
+
+======================================================================
+FAIL: test_before_validation_global_deadline_no_learner (research_tests.test_next_round_search.InterruptionAccounting.test_before_validation_global_deadline_no_learner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 205, in test_before_validation_global_deadline_no_learner
+    record = self._check(result, expected_status_prefix="UNKNOWN_DEADLINE")
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 180, in _check
+    self.assertEqual(returned_count(record), result["internal"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_before_validation_query_deadline_only (research_tests.test_next_round_search.InterruptionAccounting.test_before_validation_query_deadline_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 219, in test_before_validation_query_deadline_only
+    self._check(result, expected_status_prefix="UNKNOWN_ALLOWANCE")
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 180, in _check
+    self.assertEqual(returned_count(record), result["internal"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_during_validation_global_deadline_no_learner (research_tests.test_next_round_search.InterruptionAccounting.test_during_validation_global_deadline_no_learner)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 197, in test_during_validation_global_deadline_no_learner
+    record = self._check(result, expected_status_prefix="UNKNOWN_DEADLINE")
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 180, in _check
+    self.assertEqual(returned_count(record), result["internal"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_during_validation_query_deadline_only (research_tests.test_next_round_search.InterruptionAccounting.test_during_validation_query_deadline_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 213, in test_during_validation_query_deadline_only
+    record = self._check(result, expected_status_prefix="UNKNOWN_ALLOWANCE")
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 180, in _check
+    self.assertEqual(returned_count(record), result["internal"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_multiple_interrupted_validations_across_queries (research_tests.test_next_round_search.InterruptionAccounting.test_multiple_interrupted_validations_across_queries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 226, in test_multiple_interrupted_validations_across_queries
+    record = self._check(result, expected_status_prefix="UNKNOWN_ALLOWANCE")
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research_tests/test_next_round_search.py", line 180, in _check
+    self.assertEqual(returned_count(record), result["internal"])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 9
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.216s
+
+FAILED (failures=5, errors=4)
+----------------------------------------------------------------------
+Ran 9 tests in 6.381s
+
+OK

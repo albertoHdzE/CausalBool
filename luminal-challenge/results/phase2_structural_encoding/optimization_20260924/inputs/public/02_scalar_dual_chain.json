@@ -1,0 +1,141 @@
+{
+ "buffers": {
+  "a": 1,
+  "b": 1,
+  "c": 1,
+  "d": 1,
+  "out": 2
+ },
+ "cases": [
+  {
+   "a": [
+    13
+   ],
+   "b": [
+    5
+   ],
+   "c": [
+    21
+   ],
+   "d": [
+    9
+   ],
+   "out": [
+    0,
+    0
+   ]
+  },
+  {
+   "a": [
+    1
+   ],
+   "b": [
+    2
+   ],
+   "c": [
+    3
+   ],
+   "d": [
+    4
+   ],
+   "out": [
+    99,
+    99
+   ]
+  }
+ ],
+ "name": "scalar_dual_chain",
+ "operations": [
+  {
+   "buffer": "a",
+   "dest": "a0",
+   "id": 0,
+   "offset": 0,
+   "op": "load"
+  },
+  {
+   "buffer": "b",
+   "dest": "b0",
+   "id": 1,
+   "offset": 0,
+   "op": "load"
+  },
+  {
+   "buffer": "c",
+   "dest": "c0",
+   "id": 2,
+   "offset": 0,
+   "op": "load"
+  },
+  {
+   "buffer": "d",
+   "dest": "d0",
+   "id": 3,
+   "offset": 0,
+   "op": "load"
+  },
+  {
+   "args": [
+    "a0",
+    "b0"
+   ],
+   "dest": "left_product",
+   "id": 4,
+   "op": "mul"
+  },
+  {
+   "args": [
+    "c0",
+    "d0"
+   ],
+   "dest": "right_product",
+   "id": 5,
+   "op": "mul"
+  },
+  {
+   "args": [
+    "a0",
+    "c0"
+   ],
+   "dest": "cross",
+   "id": 6,
+   "op": "add"
+  },
+  {
+   "args": [
+    "left_product",
+    "cross"
+   ],
+   "dest": "left",
+   "id": 7,
+   "op": "add"
+  },
+  {
+   "args": [
+    "right_product",
+    "cross"
+   ],
+   "dest": "right",
+   "id": 8,
+   "op": "xor"
+  },
+  {
+   "args": [
+    "left"
+   ],
+   "buffer": "out",
+   "id": 9,
+   "offset": 0,
+   "op": "store"
+  },
+  {
+   "args": [
+    "right"
+   ],
+   "buffer": "out",
+   "id": 10,
+   "offset": 1,
+   "op": "store"
+  }
+ ]
+}

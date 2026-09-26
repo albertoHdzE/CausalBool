@@ -1,0 +1,287 @@
+{
+  "architecture": {
+    "findings": [],
+    "limits": "The AST scan detects a duplicate definition or a restated machine constant. It does not and cannot prove the semantic absence of duplication: a reimplementation under a different name passes it. The runtime check observes the module graph after import and is what closes the oracle boundary.",
+    "runtime": {
+      "leaked": [],
+      "modules": 82
+    },
+    "scanned": [
+      "__init__.py",
+      "check_structural_evidence.py",
+      "classical_measurement_worker.py",
+      "physical_probes.py",
+      "run_structural_experiments.py",
+      "structural_encoding.py",
+      "structural_evidence.py",
+      "structural_models.py",
+      "structural_oracle.py",
+      "structural_search.py"
+    ],
+    "scanned_count": 10,
+    "status": "PASS"
+  },
+  "artifacts_complete": false,
+  "artifacts_internally_consistent": false,
+  "checks_run": 66,
+  "contract": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/plan/phase2",
+  "finding_count": 22,
+  "findings": [
+    {
+      "check": "p1.physical_codec_rows",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json/1649: recorded four-codec evidence differs"
+    },
+    {
+      "check": "p1.physical_status",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json/1649: recorded INTERRUPTED, recomputed VALIDATED_COMPLETE"
+    },
+    {
+      "check": "p1.physical_codec_counts",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json/1649: four codec counters differ"
+    },
+    {
+      "check": "p1.physical_summary",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json: physical counts/identities do not reconcile"
+    },
+    {
+      "check": "p1.physical_codec_totals",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json: codec totals were erased or forged"
+    },
+    {
+      "check": "p1.physical_diversity",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json: time/address/objective diversity differs"
+    },
+    {
+      "check": "p1.physical_codec_rows",
+      "detail": null,
+      "reason": "07_scalar_selects.json/1773: recorded four-codec evidence differs"
+    },
+    {
+      "check": "p1.physical_status",
+      "detail": null,
+      "reason": "07_scalar_selects.json/1773: recorded INTERRUPTED, recomputed VALIDATED_COMPLETE"
+    },
+    {
+      "check": "p1.physical_codec_counts",
+      "detail": null,
+      "reason": "07_scalar_selects.json/1773: four codec counters differ"
+    },
+    {
+      "check": "p1.physical_summary",
+      "detail": null,
+      "reason": "07_scalar_selects.json: physical counts/identities do not reconcile"
+    },
+    {
+      "check": "p1.physical_codec_totals",
+      "detail": null,
+      "reason": "07_scalar_selects.json: codec totals were erased or forged"
+    },
+    {
+      "check": "p1.physical_diversity",
+      "detail": null,
+      "reason": "07_scalar_selects.json: time/address/objective diversity differs"
+    },
+    {
+      "check": "p1.physical_accounting",
+      "detail": null,
+      "reason": "physical proposal statuses do not partition attempts"
+    },
+    {
+      "check": "p1.coverage_recount",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json: reported 1254 distinct completions, the raw rows hold 1255"
+    },
+    {
+      "check": "p1.coverage_recount",
+      "detail": null,
+      "reason": "07_scalar_selects.json: reported 1254 distinct completions, the raw rows hold 1255"
+    },
+    {
+      "check": "p1.amended_coverage_count",
+      "detail": null,
+      "reason": "01_scalar_pipeline.json: amended union count differs"
+    },
+    {
+      "check": "p1.amended_coverage_count",
+      "detail": null,
+      "reason": "07_scalar_selects.json: amended union count differs"
+    },
+    {
+      "check": "gates.reconciliation",
+      "detail": null,
+      "reason": "p1 is recorded PASS while its evidence derives only FAIL: 17 finding(s): p1.physical_codec_rows"
+    },
+    {
+      "check": "gates.reconciliation",
+      "detail": null,
+      "reason": "p2 is recorded PASS while its evidence derives only FAIL: evidence exists while its dependencies p1 do not pass"
+    },
+    {
+      "check": "gates.reconciliation",
+      "detail": null,
+      "reason": "p3 is recorded PASS while its evidence derives only FAIL: evidence exists while its dependencies p1 do not pass"
+    },
+    {
+      "check": "gates.reconciliation",
+      "detail": null,
+      "reason": "p4 is recorded INCONCLUSIVE while its evidence derives only FAIL: evidence exists while its dependencies p1, p3 do not pass"
+    },
+    {
+      "check": "gates.reconciliation",
+      "detail": null,
+      "reason": "p5 is recorded PASS while its evidence derives only FAIL: evidence exists while its dependencies p1, p2 do not pass"
+    }
+  ],
+  "hypotheses": {
+    "H1": "supported",
+    "H2": "supported",
+    "H3": "supported",
+    "H4": "inconclusive"
+  },
+  "imported_dependencies": {},
+  "inconclusive": [],
+  "inconclusive_count": 0,
+  "note": "Every stage verdict in stage_outcomes is derived from this run's evidence; stage_status is what the run wrote down, kept beside it. artifacts_complete and scientific_success are different statements: a reproducible null result has the first true and the second false.",
+  "required_failed": [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5"
+  ],
+  "required_stages": [
+    "preflight",
+    "p0",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5"
+  ],
+  "required_unmet": [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5"
+  ],
+  "run": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/phase2_structural_encoding/recovery_campaign_20260923_r2",
+  "scientific_success": false,
+  "stage_outcomes": [
+    {
+      "evidence": {
+        "findings": 0,
+        "inconclusive": 0,
+        "summary": true
+      },
+      "imported_from": null,
+      "reason": "its evidence passes every applicable check",
+      "recorded": "PASS",
+      "required": true,
+      "stage": "preflight",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": {
+        "findings": 0,
+        "inconclusive": 0,
+        "summary": true
+      },
+      "imported_from": null,
+      "reason": "its evidence passes every applicable check",
+      "recorded": "PASS",
+      "required": true,
+      "stage": "p0",
+      "verdict": "PASS"
+    },
+    {
+      "evidence": {
+        "findings": 17,
+        "inconclusive": 0,
+        "summary": true
+      },
+      "imported_from": null,
+      "reason": "17 finding(s): p1.physical_codec_rows",
+      "recorded": "PASS",
+      "required": true,
+      "stage": "p1",
+      "verdict": "FAIL"
+    },
+    {
+      "evidence": {
+        "findings": 0,
+        "inconclusive": 0,
+        "summary": true
+      },
+      "imported_from": null,
+      "reason": "evidence exists while its dependencies p1 do not pass",
+      "recorded": "PASS",
+      "required": true,
+      "stage": "p2",
+      "verdict": "FAIL"
+    },
+    {
+      "evidence": {
+        "findings": 0,
+        "inconclusive": 0,
+        "summary": true
+      },
+      "imported_from": null,
+      "reason": "evidence exists while its dependencies p1 do not pass",
+      "recorded": "PASS",
+      "required": true,
+      "stage": "p3",
+      "verdict": "FAIL"
+    },
+    {
+      "evidence": {
+        "findings": 0,
+        "inconclusive": 0,
+        "summary": true
+      },
+      "imported_from": null,
+      "reason": "evidence exists while its dependencies p1, p3 do not pass",
+      "recorded": "INCONCLUSIVE",
+      "required": true,
+      "stage": "p4",
+      "verdict": "FAIL"
+    },
+    {
+      "evidence": {
+        "findings": 0,
+        "inconclusive": 0,
+        "summary": true
+      },
+      "imported_from": null,
+      "reason": "evidence exists while its dependencies p1, p2 do not pass",
+      "recorded": "PASS",
+      "required": true,
+      "stage": "p5",
+      "verdict": "FAIL"
+    }
+  ],
+  "stage_status": {
+    "p0": "PASS",
+    "p1": "PASS",
+    "p2": "PASS",
+    "p3": "PASS",
+    "p4": "INCONCLUSIVE",
+    "p5": "PASS",
+    "preflight": "PASS"
+  },
+  "stage_verdicts": {
+    "p0": "PASS",
+    "p1": "FAIL",
+    "p2": "FAIL",
+    "p3": "FAIL",
+    "p4": "FAIL",
+    "p5": "FAIL",
+    "preflight": "PASS"
+  }
+}

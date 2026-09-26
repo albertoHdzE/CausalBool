@@ -20,6 +20,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+from phase2_evidence import generate as generate_phase2_evidence
 
 TEAL, ORANGE, INK, GREY = '#007F86', '#C86428', '#243340', '#77818D'
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 9,
@@ -223,6 +224,10 @@ metrics={'public_scores': scores, 'extra_scores': d['extra_corpus']['score_distr
     'classical_relative_slowdown':{m:gm(median('candidate_'+m,p)/median('classical',p) for p in programs) for m in ['bootstrap','full']}}
 assert len(metrics['extra_improved_programs']) == 6
 (OUT/'metrics.json').write_text(json.dumps(metrics,indent=2)+'\n')
+phase2_metrics = generate_phase2_evidence()
+INPUTS['paper/phase2_evidence.py'] = hashlib.sha256((HERE / 'phase2_evidence.py').read_bytes()).hexdigest()
+INPUTS.update(phase2_metrics['source_sha256'])
+INPUTS.update(phase2_metrics['raw_artifact_sha256_verified_against_p1_summary'])
 (OUT/'input_manifest.json').write_text(json.dumps({'inputs_sha256': INPUTS,
     'candidate_export_sha256':prov['export_sha256'], 'frozen_export_sha256':prov['frozen_export_sha256'],
     'matplotlib':matplotlib.__version__, 'numpy':np.__version__,

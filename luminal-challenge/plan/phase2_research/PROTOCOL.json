@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "protocol_id": "luminal-objective-index-research-1.0",
+  "plan": "plan/CLAUDE_PHASE2_RESEARCH_PROTOCOL.md",
+  "supersedes_pending_campaign": "plan/CLAUDE_PHASE2_OPTIMIZATION_PLAN.md",
+  "research_note": "plan/PHASE2_SCIENTIFIC_RESEARCH.md",
+  "arms": [
+    "A0_frozen_phase2",
+    "A1_deadline_control",
+    "A2_product_search",
+    "A3_propagated_search",
+    "A4_multiscale_search"
+  ],
+  "budgets_seconds": [
+    0.01,
+    0.1,
+    1.0
+  ],
+  "primary_budget_seconds": 0.1,
+  "external_seconds": 20,
+  "limits": {
+    "aggregate_nodes": 1000000,
+    "aggregate_validation_attempts": 100000,
+    "query_active_seconds": 0.1,
+    "slice_seconds": 0.002,
+    "slice_nodes": 2048,
+    "frontier_per_query": 4096,
+    "resident_queries": 8
+  },
+  "seeds": {
+    "pool": 2026092501,
+    "shuffled_labels": 2026092502,
+    "split": 2026092503,
+    "bootstrap": 2026092504,
+    "arm_order": 2026092505,
+    "random_order": [
+      2026092510,
+      2026092511,
+      2026092512,
+      2026092513,
+      2026092514,
+      2026092515,
+      2026092516,
+      2026092517,
+      2026092518,
+      2026092519
+    ]
+  },
+  "cohorts": {
+    "development": {
+      "first": 800000,
+      "last": 800099,
+      "count": 100
+    },
+    "compiler_evaluation": {
+      "first": 910000,
+      "last": 910199,
+      "count": 200
+    },
+    "model_development_pool": {
+      "first": 920000,
+      "last": 920199,
+      "qualified_per_family": 3
+    },
+    "model_evaluation_pool": {
+      "first": 930000,
+      "last": 930399,
+      "qualified_per_family": 6
+    }
+  },
+  "ranker": {
+    "max_depth": 3,
+    "minimum_training": 20,
+    "minimum_child": 4,
+    "split": "max exact weighted Gini reduction; lowest coordinate tie-break",
+    "leaf_score": "(positive_count+1)/(count+2)",
+    "elite_fraction": 0.1,
+    "pool_hamming_count_max": 256,
+    "pool_random_count_max": 256,
+    "pool_random_draws_max": 8192,
+    "hard_pruning": false,
+    "model_scope": "one immutable domain hash"
+  },
+  "counts": {
+    "development_compiler": 5700,
+    "development_model": 2025,
+    "evaluation_model_wall": 20250,
+    "evaluation_model_work": 450,
+    "evaluation_compiler": 63000,
+    "public_compiler": 2520,
+    "public_serial": 120,
+    "conditional_compiler_tree": 9360,
+    "conditional_compiler_shuffled": 9360,
+    "nonmodel_export": 624,
+    "each_conditional_export": 624
+  },
+  "statistics": {
+    "bootstrap_resamples": 10000,
+    "three_comparison_percentiles": [
+      0.008333333333333333,
+      0.9916666666666667
+    ],
+    "conditional_compiler_learning_percentiles": [
+      0.0125,
+      0.9875
+    ],
+    "descriptive_percentiles": [
+      0.025,
+      0.975
+    ],
+    "learning_controls": [
+      "hamming",
+      "random",
+      "shuffled_tree"
+    ],
+    "solver_primary_controls": [
+      "A0_frozen_phase2",
+      "accepted_budgeted",
+      "classical"
+    ],
+    "primary_unit": "program; repetitions and seeds averaged within program; equal family weights",
+    "public_formula": "sqrt(GM(C_serial/C_arm)*GM(S_serial/S_arm))"
+  },
+  "fixed_work_checkpoints": [
+    8,
+    32,
+    128
+  ],
+  "results_prefix": "results/phase2_structural_encoding/objective_index_20260924",
+  "claim_status": "proposed research method, not measured superiority; original results immutable"
+}

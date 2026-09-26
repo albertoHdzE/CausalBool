@@ -1,0 +1,163 @@
+--- research/efficiency_search.py (R0)
++++ research/third_round_candidate.py (C1)
+@@ -1,4 +1,15 @@
+-"""EFFICIENCY BASELINE R0: versioned successor of ``research/next_round_search.py``.
++"""THIRD-ROUND CANDIDATE C1: R0 with the BS1 shared branch state (resume protocol 1.0).
++
++Version ``third_round_candidate C1``. A byte copy of R0 ``research/efficiency_search.py``
++(sha256 ``C1_PARENT_SHA256`` below) whose ONLY functional change is ``Expander``: a
++search node's ``D`` slot holds a BS1 ``TimeState`` and its ``A`` slot an
++``AddressState``; propagation goes through ``third_round_kernel.SharedPropagation``
++(class bodies unchanged, sha256 ``BS1_KERNEL_SHA256``). Catalog, traversal, pruning
++mathematics, product caps, acceptor, query budgets and deadline accounting are R0's,
++statement for statement. The minimal diff is retained in the resume run
++(``candidate/C1.diff``). R0's own header follows.
++
++EFFICIENCY BASELINE R0: versioned successor of ``research/next_round_search.py``.
+ 
+ Version ``efficiency_search R0``. A byte-for-byte copy of the next-round
+ successor ``research/next_round_search.py`` (sha256 ``PARENT_SOURCE_SHA256``
+@@ -108,6 +119,7 @@
+ from research import run_structural_experiments as rse
+ from research import structural_encoding as se
+ from research import structural_search as ss
++from research import third_round_kernel as tk
+ 
+ 
+ __all__ = [
+@@ -118,7 +130,10 @@
+     "multiscale_optimise", "optimise",
+ ]
+ 
+-VERSION = "efficiency_search R0"
++VERSION = "third_round_candidate C1"
++C1_PARENT = "research/efficiency_search.py"
++C1_PARENT_SHA256 = "d0fcd441886cc5c3d34a6e1df7b2828ea219b6575ffd2049913b4d4901b92fbf"
++BS1_KERNEL_SHA256 = "77c373e1d4e6a328c70c590d46ffdf5b5a82ec8ccd38f82de246821f2da5ff85"
+ PARENT_SOURCE = "research/next_round_search.py"
+ PARENT_SOURCE_SHA256 = "b982d4cf62e63d54235237e7032175f893f9f519802f36ff87f7111c5db9c647"
+ FROZEN_SOURCE ="research/objective_index_search.py"
+@@ -709,7 +724,7 @@
+         self.mode = mode
+         self.stats = stats
+         self.report = report
+-        self.prop = Propagation(domain, stats) if mode == "propagate" else None
++        self.prop = tk.SharedPropagation(domain, stats) if mode == "propagate" else None
+         self.filtered = 0
+         self.root_state: Optional[se.State] = None
+         # Tests only: ``audit(event)`` sees every propagated child with its
+@@ -746,18 +761,18 @@
+         if self.mode == "ss_bound":
+             return _Node(state, None, None, None, "time", 0, None, (), 0, 0)
+         D = {op: tuple(self.domain.time_domains[op]) for op in self.domain.selected_operations}
+-        D = self.prop.times_fixpoint(D)
+-        if D is None:
++        S = self.prop.time_root(D)
++        if S is None:
+             self._audit("inconsistent", state, None, None)
+             self.report.dead_ends += 1
+             return None
+-        pruned, lb = self.prop.prune(D, None, best)
+-        self._audit("pruned" if pruned else "kept", state, D, None)
++        pruned, lb = self.prop.prune_state(S, None, best)
++        self._audit("pruned" if pruned else "kept", state, S.D, None)
+         if pruned:
+             self.report.pruned += 1
+             return None
+         self.root_state = state
+-        return _Node(state, D, None, None, "time", 0, None, (), 0, lb)
++        return _Node(state, S, None, None, "time", 0, None, (), 0, lb)
+ 
+     # -- children -------------------------------------------------------------
+ 
+@@ -790,17 +805,17 @@
+                 return
+             pairs = self.prop.address_pairs(state.lifetimes)
+             A = {name: tuple(domain.address_domains[name]) for name in self.prop.selected_values}
+-            A = self.prop.addresses_fixpoint(A, pairs)
+-            if A is None:
++            AS = self.prop.address_root(A, pairs)
++            if AS is None:
+                 self._audit("inconsistent", state, None, None)
+                 self.report.dead_ends += 1
+                 return
+-            pruned, lb = self.prop.prune(node.D, A, best_ref())
+-            self._audit("pruned" if pruned else "kept", state, node.D, A)
++            pruned, lb = self.prop.prune_state(node.D, AS.A, best_ref())
++            self._audit("pruned" if pruned else "kept", state, node.D.D, AS.A)
+             if pruned:
+                 self.report.pruned += 1
+                 return
+-            yield _Node(state, node.D, A, pairs, "address", 0, order, node.ranks, node.disc, lb)
++            yield _Node(state, node.D, AS, pairs, "address", 0, order, node.ranks, node.disc, lb)
+             return
+ 
+         if node.phase == "time":
+@@ -809,7 +824,7 @@
+             if not legal:
+                 self.report.dead_ends += 1
+                 return
+-            allowed = None if self.mode == "ss_bound" else set(node.D[op])
++            allowed = None if self.mode == "ss_bound" else set(node.D.D[op])
+             for rank, value in enumerate(legal):
+                 if allowed is not None and value not in allowed:
+                     self.filtered += 1
+@@ -824,19 +839,17 @@
+                     yield _Node(nxt, None, None, None, "time", node.position + 1, None, ranks,
+                                 disc, 0)
+                     continue
+-                D2 = dict(node.D)
+-                D2[op] = (value,)
+-                D2 = self.prop.times_fixpoint(D2)
+-                if D2 is None:
++                S2 = self.prop.time_child(node.D, op, value)
++                if S2 is None:
+                     self._audit("inconsistent", nxt, None, None)
+                     self.report.dead_ends += 1
+                     continue
+-                pruned, lb = self.prop.prune(D2, None, best_ref())
+-                self._audit("pruned" if pruned else "kept", nxt, D2, None)
++                pruned, lb = self.prop.prune_state(S2, None, best_ref())
++                self._audit("pruned" if pruned else "kept", nxt, S2.D, None)
+                 if pruned:
+                     self.report.pruned += 1
+                     continue
+-                yield _Node(nxt, D2, None, None, "time", node.position + 1, None, ranks, disc, lb)
++                yield _Node(nxt, S2, None, None, "time", node.position + 1, None, ranks, disc, lb)
+             return
+ 
+         # address phase
+@@ -849,7 +862,7 @@
+             live_width = ss.peak_live_width(facts, state.lifetimes)
+             allowed = None
+         else:
+-            allowed = set(node.A[name])
++            allowed = set(node.A.A[name])
+         for rank, value in enumerate(legal):
+             if allowed is not None and value not in allowed:
+                 self.filtered += 1
+@@ -864,19 +877,17 @@
+                 yield _Node(nxt, None, None, None, "address", node.position + 1, node.order,
+                             ranks, disc, 0)
+                 continue
+-            A2 = dict(node.A)
+-            A2[name] = (value,)
+-            A2 = self.prop.addresses_fixpoint(A2, node.pairs)
+-            if A2 is None:
++            AS2 = self.prop.address_child(node.A, name, value)
++            if AS2 is None:
+                 self._audit("inconsistent", nxt, None, None)
+                 self.report.dead_ends += 1
+                 continue
+-            pruned, lb = self.prop.prune(node.D, A2, best_ref())
+-            self._audit("pruned" if pruned else "kept", nxt, node.D, A2)
++            pruned, lb = self.prop.prune_state(node.D, AS2.A, best_ref())
++            self._audit("pruned" if pruned else "kept", nxt, node.D.D, AS2.A)
+             if pruned:
+                 self.report.pruned += 1
+                 continue
+-            yield _Node(nxt, node.D, A2, node.pairs, "address", node.position + 1, node.order,
++            yield _Node(nxt, node.D, AS2, node.pairs, "address", node.position + 1, node.order,
+                         ranks, disc, lb)
+ 
+ 

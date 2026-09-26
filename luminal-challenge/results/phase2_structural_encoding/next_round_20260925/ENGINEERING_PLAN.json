@@ -1,0 +1,39 @@
+{
+  "expected_saving": {
+    "geometric_median_compile_time_at_0.1s": "about 15-25% lower, uncertain; the gate is 10%",
+    "optimisation_time_fraction_profiled": "about 0.30-0.40 (fixpoint work cut by 60-80%)",
+    "quality": "unchanged at equal work; at wall budgets more work may fit, so J can only change where the 0.1 s budget binds"
+  },
+  "freeze_rule": "variant only if correct, development mean log J at 0.1 s not worse, and geometric median compile time at 0.1 s at least 10% lower; else the parent",
+  "if_parity_cannot_be_shown": "INELIGIBLE (not a pure speedup); the parent is frozen",
+  "largest_measured_cost_component": {
+    "category": "propagation",
+    "share_at_0.1s": 0.751,
+    "source": "stages/D_profile (10 profiling programs, cProfile tottime, reconciliation 0.999)",
+    "within_propagation": "times_fixpoint + _t + addresses_fixpoint + _a own time = 38.3% of profiled time; dict.get (14.3%) and len (3.2%) are called mainly from the same accessors"
+  },
+  "mechanism": "Incremental (worklist) revision in Propagation.times_fixpoint and Propagation.addresses_fixpoint. The frozen code re-sweeps EVERY edge/pair after any deletion, and a child call starts from a parent domain that is already a fixpoint, so at least one full sweep per child re-checks edges that cannot fire. The variant keeps a queue of edges (pairs) incident to operations (values) whose domain changed, starting from the assigned decision for a child call and from every edge at the root; the engine-capacity rule is applied after each edge quiescence exactly as before. Accessor calls are replaced by one merged lookup table. All rules are deletion-only and monotone, so the greatest fixpoint (or the proof of inconsistency) is unique: surviving domains, prunes, children and bounds are unchanged; only the ORDER and grouping of emitted certificates may change.",
+  "not_changed": [
+    "catalog",
+    "traversal",
+    "variable order",
+    "bounds",
+    "validation",
+    "aggregate guards",
+    "slices",
+    "resident queries",
+    "budget",
+    "no cross-program cache"
+  ],
+  "parent_arm": "cell_a4cat_dfs",
+  "parity_required_before_measurement": [
+    "identical candidate sequence (per-query pop order) at equal work on development programs",
+    "identical pruning decisions and child domains on exhaustive fixtures",
+    "identical incumbents/statuses/aggregate nodes and validations",
+    "every emitted certificate still replays as sound"
+  ],
+  "protocol_id": "luminal-phase2-next-round-1.0",
+  "stage": "E engineering candidate (plan section 5), written BEFORE implementation or measurement",
+  "variant_arm": "cell_a4cat_dfs+engineered",
+  "written_utc": "2026-09-25T15:36:32Z"
+}

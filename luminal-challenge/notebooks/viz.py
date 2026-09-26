@@ -23,10 +23,12 @@ every figure in both notebooks:
 * ``EDGE`` -- the outline of an occupied region.
 * ``EXCLUDED`` -- removed by a constraint: a blocked cycle, a taken address.
 * ``CHOSEN`` -- the witness the method actually returned.
+* ``DEAD`` -- a code whose legal prefix has no legal continuation (notebook 02).
 """
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 import sys
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
@@ -58,6 +60,7 @@ __all__ = [
     "narrate",
     "show_timeline",
     "show_lifetimes",
+    "show_list_schedule",
     "show_cube_anatomy",
     "show_universe",
     "show_cover_blocks",
@@ -65,6 +68,16 @@ __all__ = [
     "show_expression_tree",
     "show_search_economy",
     "show_program_results",
+    "show_code_statuses",
+    "show_decode_steps",
+    "show_decision_icicle",
+    "show_stacked_outcomes",
+    "show_objective_plane",
+    "show_effects",
+    "show_domain_filtering",
+    "show_window_catalog",
+    "show_index_scores",
+    "show_bars",
 ]
 
 
@@ -75,6 +88,9 @@ EMPTY = "#f2f4f7"
 EDGE = "#5d8fb3"
 EXCLUDED = "#f0d5d5"
 CHOSEN = "#a8d5a2"
+# Added for notebooks 02 and 03. A dead end is not the same failure as an
+# invalid code, so it gets its own neutral grey rather than a second red.
+DEAD = "#aeb3ba"
 
 
 # --------------------------------------------------------------------------
@@ -139,6 +155,64 @@ def show_lifetimes(facts, addresses, life, span, title) -> None:
     ax.set_yticks([r + 0.5 for r in range(rows)], [f"word {r}" for r in range(rows)])
     ax.set_xlabel("cycle")
     ax.set_title(title)
+    ax.invert_yaxis()
+    fig.tight_layout()
+    plt.show()
+
+
+def show_list_schedule(steps: Sequence[object], title: str) -> None:
+    """The greedy list scheduler, one row per cycle, read like a queue at a till.
+
+    Each row is the ready queue of that cycle -- every operation whose inputs
+    have landed -- sorted left to right by the rule's priority. The rule walks
+    the row once: green cards got a slot and issue this cycle; red cards found
+    their engine already full and go back into next cycle's queue. The note at
+    the right counts the operations still waiting for data, which is why a
+    row can be empty.
+
+    ``steps`` comes from ``trace.replay_list_schedule``, which checks itself
+    against ``common.classical_compile`` before returning.
+    """
+
+    width = max(len(step.queue) for step in steps)
+    rows = len(steps)
+    fig, ax = plt.subplots(figsize=(2.0 * width + 4.2, 0.72 * rows + 1.6))
+
+    for row, step in enumerate(steps):
+        if not step.queue:
+            ax.text(width / 2, row + 0.5,
+                    "queue empty — nothing ready, results still in flight",
+                    ha="center", va="center", fontsize=8, style="italic",
+                    color="#7a7f87")
+        for col, entry in enumerate(step.queue):
+            face, edge = (CHOSEN, "#2e6b2a") if entry.placed else (EXCLUDED, "#b35d5d")
+            ax.add_patch(Rectangle((col + 0.05, row + 0.08), 0.9, 0.84,
+                                   facecolor=face, edgecolor=edge))
+            ax.text(col + 0.5, row + 0.36, f"op{entry.op_id} {entry.opcode}",
+                    ha="center", va="center", fontsize=8, fontweight="bold")
+            ax.text(col + 0.5, row + 0.68,
+                    f"prio {entry.priority} · feeds {entry.fanout}",
+                    ha="center", va="center", fontsize=7)
+            if not entry.placed:
+                ax.text(col + 0.5, row + 0.18, f"{entry.engine} full",
+                        ha="center", va="center", fontsize=6, color="#8a2f2f")
+        slots = ", ".join(f"{e} {n}/{machine.ENGINE_LIMITS[e]}"
+                          for e, n in step.used.items())
+        note = f"slots: {slots}" if slots else "slots: none used"
+        if step.waiting:
+            note += f"\nwaiting for data: {len(step.waiting)} ops"
+        ax.text(width + 0.15, row + 0.5, note, ha="left", va="center", fontsize=7)
+
+    ax.set_xlim(0, width + 2.2)
+    ax.set_ylim(0, rows)
+    ax.set_xticks([c + 0.5 for c in range(width)], [f"#{c + 1}" for c in range(width)])
+    ax.xaxis.set_ticks_position("top")
+    ax.set_xlabel("position in the ready queue (highest priority first)")
+    ax.xaxis.set_label_position("top")
+    ax.set_yticks([r + 0.5 for r in range(rows)], [f"cycle {s.cycle}" for s in steps])
+    for side in ("right", "bottom"):
+        ax.spines[side].set_visible(False)
+    ax.set_title(title, fontsize=10, pad=28)
     ax.invert_yaxis()
     fig.tight_layout()
     plt.show()
@@ -960,5 +1034,468 @@ def show_program_results(
     ax.set_ylabel(ylabel, fontsize=9)
     ax.set_title(title, fontsize=10)
     ax.legend(fontsize=8)
+    fig.tight_layout()
+    plt.show()
+
+
+# --------------------------------------------------------------------------
+# Renders for 02-structural-encoding and 03-objective-index-search
+# --------------------------------------------------------------------------
+
+
+_STATUS_COLOUR = {
+    "COMPLETE": FILL,
+    "INVALID_CODE": EXCLUDED,
+    "DEAD_END": DEAD,
+    "INTERRUPTED": "#fff2c6",
+}
+
+
+def show_code_statuses(
+    panels: Sequence[Tuple[str, Sequence[str]]],
+    title: str,
+    per_row: int = 32,
+    marked: Iterable[int] = (),
+) -> None:
+    """Every code of a bit universe, coloured by what the decoder returned.
+
+    ``panels`` holds one ``(label, statuses)`` pair per codec, where
+    ``statuses[z]`` is the status the decoder returned for code ``z``. Nothing
+    here decodes; the caller passes the decoder's own answers. ``marked`` codes
+    are drawn in the chosen colour, for example the elite members.
+    """
+
+    marked = set(marked)
+    size = max(len(statuses) for _, statuses in panels)
+    rows = (size + per_row - 1) // per_row
+    columns = min(size, per_row)
+    fig, axes = plt.subplots(
+        len(panels), 1,
+        figsize=(0.36 * columns + 1.8, (0.36 * rows + 1.0) * len(panels)),
+        squeeze=False,
+    )
+    for axis, (label, statuses) in zip(axes[:, 0], panels):
+        counts: Dict[str, int] = {}
+        for code, status in enumerate(statuses):
+            counts[status] = counts.get(status, 0) + 1
+            row, column = divmod(code, per_row)
+            colour = CHOSEN if (status == "COMPLETE" and code in marked) \
+                else _STATUS_COLOUR.get(status, EMPTY)
+            axis.add_patch(Rectangle((column, row), 1, 1, linewidth=0.8,
+                                     edgecolor="white", facecolor=colour))
+            if status == "COMPLETE":
+                axis.text(column + 0.5, row + 0.5, str(code), ha="center",
+                          va="center", fontsize=6.5, color="#1b3a4b")
+        axis.set_xlim(0, columns)
+        axis.set_ylim(0, rows)
+        axis.set_xticks([])
+        axis.set_yticks([])
+        axis.invert_yaxis()
+        summary = ", ".join(f"{name} {counts[name]}" for name in
+                            ("COMPLETE", "INVALID_CODE", "DEAD_END", "INTERRUPTED")
+                            if name in counts)
+        axis.set_title(f"{label}  --  {summary}  (of {len(statuses)} codes)", fontsize=10)
+    handles = [Rectangle((0, 0), 1, 1, facecolor=_STATUS_COLOUR[name], edgecolor=EDGE)
+               for name in ("COMPLETE", "INVALID_CODE", "DEAD_END")]
+    names = ["COMPLETE (a legal compilation)", "INVALID_CODE (rank past the legal list)",
+             "DEAD_END (no legal option left)"]
+    if marked:
+        handles.append(Rectangle((0, 0), 1, 1, facecolor=CHOSEN, edgecolor=EDGE))
+        names.append("COMPLETE and marked")
+    fig.legend(handles, names, loc="lower center", ncol=len(names), fontsize=8,
+               frameon=False, bbox_to_anchor=(0.5, -0.02))
+    fig.suptitle(title, y=1.0)
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    plt.show()
+
+
+def show_decode_steps(steps: Sequence[dict], title: str) -> None:
+    """One row per decision of a decode: declared values, legal ones, the pick.
+
+    Each step is a dict with ``label``, ``declared`` (the declared domain, in
+    ascending order), ``options`` (the ordered legal option list the codec built
+    at that prefix), ``bits`` (the field's bits as printed, LSB-first), ``rank``
+    and ``chosen``. Declared values that are not legal are drawn as excluded;
+    each legal value carries its rank in the option list above it.
+    """
+
+    width = max(len(step["declared"]) for step in steps)
+    fig, ax = plt.subplots(figsize=(0.62 * width + 7.2, 0.95 * len(steps) + 1.1))
+    for row, step in enumerate(steps):
+        y = len(steps) - 1 - row
+        ax.text(-0.3, y + 0.4, step["label"], ha="right", va="center", fontsize=10,
+                fontweight="bold")
+        options = list(step["options"])
+        for column, value in enumerate(step["declared"]):
+            legal = value in options
+            colour = EMPTY if legal else EXCLUDED
+            edge = EDGE
+            if step.get("chosen") == value:
+                colour, edge = CHOSEN, "#2e6b2a"
+            ax.add_patch(Rectangle((column, y), 0.9, 0.8, facecolor=colour,
+                                   edgecolor=edge, linewidth=1.4 if colour == CHOSEN else 0.8))
+            ax.text(column + 0.45, y + 0.4, str(value), ha="center", va="center", fontsize=9)
+            if legal:
+                ax.text(column + 0.45, y + 0.92, f"r{options.index(value)}", ha="center",
+                        va="bottom", fontsize=6.5, color="#4a6b82")
+        listing = "[" + ", ".join(str(v) for v in options) + "]"
+        if step.get("chosen") is None:
+            verdict = step.get("verdict", "stops here")
+        else:
+            verdict = f"rank {step['rank']}  ->  {step['chosen']}"
+        ax.text(width + 0.4, y + 0.4,
+                f"O(s) = {listing}     bits {step['bits']}  ->  {verdict}",
+                ha="left", va="center", fontsize=9, family="monospace")
+    ax.set_xlim(-2.2, width + 9.5)
+    ax.set_ylim(-0.3, len(steps) + 0.1)
+    ax.axis("off")
+    ax.set_title(title, fontsize=10)
+    handles = [Rectangle((0, 0), 1, 1, facecolor=c, edgecolor=EDGE)
+               for c in (EMPTY, EXCLUDED, CHOSEN)]
+    ax.legend(handles, ["declared and legal now (rN = its rank)",
+                        "declared but illegal at this prefix", "the value the bits select"],
+              loc="lower center", bbox_to_anchor=(0.5, -0.28), ncol=3, fontsize=8,
+              frameon=False)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_decision_icicle(
+    paths: Sequence[Tuple[Tuple[str, ...], int]],
+    title: str,
+    depth_labels: Sequence[str],
+    notes: Optional[Dict[Tuple[str, ...], str]] = None,
+    excluded: Iterable[Tuple[str, ...]] = (),
+    best: Optional[int] = None,
+) -> None:
+    """The legal decision tree drawn as an icicle: one band per decision.
+
+    ``paths`` is one ``(choices, product)`` pair per complete legal decode, in
+    the order the codec enumerates them. A prefix becomes one rectangle spanning
+    the leaves beneath it, so the width of a node is the number of complete
+    compilations it still contains. ``notes`` adds a text under a prefix (a
+    bound, for example); ``excluded`` prefixes are shaded as removed; leaves
+    whose product equals ``best`` are drawn in the chosen colour.
+    """
+
+    notes = notes or {}
+    excluded = set(excluded)
+    depth = max(len(choices) for choices, _ in paths)
+    leaves = len(paths)
+    fig, ax = plt.subplots(figsize=(max(7.0, 0.34 * leaves + 2.4), 1.05 * (depth + 1) + 0.8))
+    for level in range(depth):
+        start = 0
+        while start < leaves:
+            prefix = paths[start][0][: level + 1]
+            end = start
+            while end < leaves and paths[end][0][: level + 1] == prefix:
+                end += 1
+            colour = EXCLUDED if prefix in excluded else EMPTY
+            ax.add_patch(Rectangle((start, depth - level), end - start, 0.9,
+                                   facecolor=colour, edgecolor=EDGE, linewidth=0.8))
+            text = prefix[-1]
+            if prefix in notes:
+                text += "\n" + notes[prefix]
+            ax.text(start + (end - start) / 2, depth - level + 0.45, text, ha="center",
+                    va="center", fontsize=7 if end - start > 1 else 6)
+            start = end
+    for index, (_, product) in enumerate(paths):
+        colour = CHOSEN if best is not None and product == best else FILL
+        ax.add_patch(Rectangle((index, 0), 1, 0.9, facecolor=colour, edgecolor=EDGE,
+                               linewidth=0.8))
+        ax.text(index + 0.5, 0.45, str(product), ha="center", va="center", fontsize=7,
+                rotation=90 if leaves > 24 else 0)
+    for level, label in enumerate(depth_labels[:depth]):
+        ax.text(-0.4, depth - level + 0.45, label, ha="right", va="center", fontsize=8)
+    ax.text(-0.4, 0.45, "J = C x S", ha="right", va="center", fontsize=8)
+    ax.set_xlim(-3.0, leaves)
+    ax.set_ylim(0, depth + 1)
+    ax.axis("off")
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_stacked_outcomes(
+    labels: Sequence[str],
+    stacks: Dict[str, Sequence[float]],
+    title: str,
+    xlabel: str = "count",
+    colours: Optional[Dict[str, str]] = None,
+    totals: bool = True,
+) -> None:
+    """Horizontal stacked bars: what every attempt of every row turned into.
+
+    ``stacks`` maps an outcome name to one value per label. The total is printed
+    at the end of each bar so no bar can be read without its denominator.
+    """
+
+    palette = ["#cfe3f3", "#f0d5d5", "#d6d9de", "#a8d5a2", "#f3e2cf", "#e3d5ef",
+               "#fff2c6", "#d5eeee"]
+    colours = colours or {}
+    fig, ax = plt.subplots(figsize=(8.6, 0.46 * len(labels) + 1.5))
+    left = [0.0] * len(labels)
+    for index, (name, values) in enumerate(stacks.items()):
+        colour = colours.get(name, _STATUS_COLOUR.get(name, palette[index % len(palette)]))
+        ax.barh(range(len(labels)), values, left=left, color=colour, edgecolor=EDGE,
+                linewidth=0.6, label=name)
+        left = [a + b for a, b in zip(left, values)]
+    if totals:
+        for row, total in enumerate(left):
+            ax.text(total, row, f"  {total:,.0f}" if total >= 10 else f"  {total:g}",
+                    va="center", fontsize=8)
+    ax.set_yticks(range(len(labels)), labels, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xlabel(xlabel, fontsize=9)
+    ax.set_title(title, fontsize=10)
+    ax.set_xlim(0, max(left) * 1.12 if max(left) > 0 else 1)
+    handles, names = ax.get_legend_handles_labels()
+    fig.legend(handles, names, fontsize=8, loc="lower center", ncol=min(5, len(stacks)),
+               frameon=False)
+    fig.tight_layout(rect=(0, 0.42 / (0.46 * len(labels) + 1.5), 1, 1))
+    plt.show()
+
+
+def show_objective_plane(
+    incumbent: Tuple[int, int],
+    title: str,
+    targets: Sequence[Tuple[int, int]] = (),
+    points: Sequence[Tuple[str, Tuple[int, int]]] = (),
+    caps: Optional[dict] = None,
+    c_range: Tuple[int, int] = (1, 20),
+    s_range: Tuple[int, int] = (1, 20),
+) -> None:
+    """The (cycles, scratch) plane an improvement has to land in.
+
+    Every integer point with ``C*S <= J0 - 1`` is a strict improvement; they are
+    drawn as small dots under the curve ``C*S = J0``. Each target rectangle is
+    the set of points the old controller could ask for: ``C <= Ct`` and
+    ``S <= St``. ``caps`` (keys ``LC``, ``LS``, ``Ccap``, ``Scap``) draws the box
+    the integer-cap lemma keeps. The caller supplies every number.
+    """
+
+    c0, s0 = incumbent
+    j0 = c0 * s0
+    fig, ax = plt.subplots(figsize=(6.6, 5.4))
+    lo_c, hi_c = c_range
+    lo_s, hi_s = s_range
+    improving = [(c, s) for c in range(lo_c, hi_c + 1) for s in range(lo_s, hi_s + 1)
+                 if c * s <= j0 - 1]
+    if caps is not None:
+        ax.add_patch(Rectangle((caps["LC"] - 0.5, caps["LS"] - 0.5),
+                               caps["Ccap"] - caps["LC"] + 1, caps["Scap"] - caps["LS"] + 1,
+                               facecolor="#eef6ea", edgecolor="#2e6b2a", linestyle="--",
+                               linewidth=1.2, label="kept by the integer caps"))
+    for index, (tc, ts) in enumerate(targets):
+        ax.add_patch(Rectangle((lo_c - 0.5, lo_s - 0.5), tc - lo_c + 1, ts - lo_s + 1,
+                               facecolor="none", edgecolor=EDGE, linewidth=1.2,
+                               label="old target rectangles" if index == 0 else None))
+        ax.text(tc + 0.5, ts + 0.4, f"({tc},{ts})", fontsize=7, color=EDGE)
+    xs = [c for c, _ in improving]
+    ys = [s for _, s in improving]
+    ax.scatter(xs, ys, s=6, color="#9aa5b1", label=f"every strict improvement, C*S <= {j0 - 1}")
+    curve_c = [c / 10 for c in range(lo_c * 10, hi_c * 10 + 1)]
+    ax.plot(curve_c, [j0 / c for c in curve_c], color="#b24a4a", linewidth=1.0,
+            label=f"C*S = {j0} (the incumbent's product)")
+    ax.scatter([c0], [s0], s=70, marker="s", color="#1b3a4b", zorder=5,
+               label=f"incumbent ({c0}, {s0})")
+    for label, (c, s) in points:
+        ax.scatter([c], [s], s=80, marker="*", color="#2e6b2a", zorder=6)
+        ax.annotate(f"{label} ({c},{s})  J={c * s}", (c, s), textcoords="offset points",
+                    xytext=(6, 6), fontsize=8, color="#2e6b2a")
+    ax.set_xlim(lo_c - 0.5, hi_c + 0.5)
+    ax.set_ylim(lo_s - 0.5, hi_s + 0.5)
+    ax.set_xlabel("C, cycles")
+    ax.set_ylabel("S, scratch words")
+    ax.set_title(title, fontsize=10)
+    ax.legend(fontsize=7.5, loc="upper right")
+    fig.tight_layout()
+    plt.show()
+
+
+def show_effects(
+    rows: Sequence[Tuple[str, float, float, float]],
+    title: str,
+    xlabel: str = "mean paired log(J_control / J_candidate)   (> 0: candidate has lower J)",
+) -> None:
+    """A forest plot of paired log-ratio effects, each with its own interval.
+
+    Rows are ``(label, estimate, low, high)`` read from the frozen evidence. The
+    zero line is drawn because an interval touching it is not a result. Each
+    row also prints its estimate as a percentage change in geometric J.
+    """
+
+    fig, ax = plt.subplots(figsize=(8.8, 0.5 * len(rows) + 1.4))
+    for index, (label, estimate, low, high) in enumerate(rows):
+        clear = low > 0 or high < 0
+        colour = "#2e6b2a" if clear else "#6b7684"
+        ax.plot([low, high], [index, index], color=colour, linewidth=2.2)
+        ax.scatter([estimate], [index], color=colour, s=36, zorder=3)
+        percent = (1 - math.exp(-estimate)) * 100
+        ax.text(max(high, 0) + 0.004, index,
+                f"{estimate:+.4f} [{low:+.4f}, {high:+.4f}]  ~{percent:+.1f}% J",
+                va="center", fontsize=7.5)
+    ax.axvline(0, color="#b24a4a", linewidth=1.0)
+    ax.set_yticks(range(len(rows)), [row[0] for row in rows], fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xlabel(xlabel, fontsize=8.5)
+    ax.set_title(title, fontsize=10)
+    span_low = min(min(row[2] for row in rows), 0)
+    span_high = max(max(row[3] for row in rows), 0)
+    ax.set_xlim(span_low - 0.01, span_high + (span_high - span_low) * 0.9 + 0.02)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_domain_filtering(
+    rows: Sequence[Tuple[str, Sequence[int], Sequence[int], Dict[int, str]]],
+    title: str,
+) -> None:
+    """Each variable's domain before and after propagation, value by value.
+
+    A row is ``(label, declared, kept, reasons)``: ``reasons`` maps a removed
+    value to the short rule tag that removed it, read from the propagator's own
+    certificates. Nothing here decides what is removed.
+    """
+
+    width = max(len(declared) for _, declared, _, _ in rows)
+    fig, ax = plt.subplots(figsize=(0.55 * width + 3.4, 0.62 * len(rows) + 1.3))
+    for row, (label, declared, kept, reasons) in enumerate(rows):
+        y = len(rows) - 1 - row
+        ax.text(-0.3, y + 0.4, label, ha="right", va="center", fontsize=9)
+        for column, value in enumerate(declared):
+            alive = value in kept
+            ax.add_patch(Rectangle((column, y), 0.9, 0.8, facecolor=FILL if alive else EXCLUDED,
+                                   edgecolor=EDGE, linewidth=0.7))
+            ax.text(column + 0.45, y + 0.5, str(value), ha="center", va="center", fontsize=8)
+            if not alive and value in reasons:
+                ax.text(column + 0.45, y + 0.14, reasons[value], ha="center", va="center",
+                        fontsize=5.5, color="#8a2f2f")
+    ax.set_xlim(-2.4, width + 0.2)
+    ax.set_ylim(-0.3, len(rows))
+    ax.axis("off")
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_window_catalog(
+    entries: Sequence[Tuple[str, Sequence[int]]],
+    operations: int,
+    title: str,
+) -> None:
+    """Which operations each query releases: one row per query, one column per op.
+
+    Rows are ``(label, window)`` in the order the controller would ask them.
+    A filled cell is an operation whose issue time (and result address) the query
+    may change; every blank cell stays exactly where the incumbent put it.
+    """
+
+    palette = ["#cfe3f3", "#dfe8d5", "#f3e2cf", "#e3d5ef", "#d5eeee"]
+    tags: Dict[str, str] = {}
+    fig, ax = plt.subplots(figsize=(0.36 * operations + 4.2, 0.3 * len(entries) + 1.3))
+    for row, (label, window) in enumerate(entries):
+        tag = label.split(" ")[0]
+        colour = tags.setdefault(tag, palette[len(tags) % len(palette)])
+        for op in range(operations):
+            inside = op in window
+            ax.add_patch(Rectangle((op, row), 1, 1, linewidth=0.5, edgecolor="white",
+                                   facecolor=colour if inside else EMPTY))
+            if inside:
+                ax.add_patch(Rectangle((op, row), 1, 1, linewidth=0.5, edgecolor=EDGE,
+                                       facecolor="none"))
+        ax.text(-0.3, row + 0.5, label, ha="right", va="center", fontsize=7)
+    for op in range(operations):
+        ax.text(op + 0.5, -0.4, str(op), ha="center", va="center", fontsize=6.5,
+                color="#6b7684")
+    ax.set_xlim(-9.0, operations)
+    ax.set_ylim(len(entries), -1)
+    ax.axis("off")
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_index_scores(
+    bits: int,
+    scores: Dict[int, float],
+    title: str,
+    outlined: Optional[Dict[str, Iterable[int]]] = None,
+    per_row: int = 32,
+) -> None:
+    """Every code of a bit universe shaded by a score in [0, 1], with outlined sets.
+
+    ``scores`` gives the score of each code (codes absent are drawn blank; an
+    empty mapping draws membership outlines only, without a colour bar).
+    ``outlined`` maps a legend label to a set of codes drawn with a coloured
+    outline -- the training elites, say, or the unseen test objects.
+    """
+
+    outline_colours = ["#2e6b2a", "#b24a4a", "#1b3a4b", "#b27a1b"]
+    outlined = {label: set(codes) for label, codes in (outlined or {}).items()}
+    size = 1 << bits
+    rows = (size + per_row - 1) // per_row
+    columns = min(size, per_row)
+    cmap = plt.get_cmap("Blues")
+    fig, ax = plt.subplots(figsize=(0.34 * columns + 2.4, 0.34 * rows + 1.6))
+    for code in range(size):
+        row, column = divmod(code, per_row)
+        score = scores.get(code)
+        colour = EMPTY if score is None else cmap(0.12 + 0.8 * score)
+        ax.add_patch(Rectangle((column, row), 1, 1, linewidth=0.5, edgecolor="white",
+                               facecolor=colour))
+        for index, (label, codes) in enumerate(outlined.items()):
+            if code in codes:
+                inset = 0.08 + 0.1 * index
+                ax.add_patch(Rectangle((column + inset, row + inset), 1 - 2 * inset,
+                                       1 - 2 * inset, linewidth=1.3, facecolor="none",
+                                       edgecolor=outline_colours[index % 4]))
+    handles = [Rectangle((0, 0), 1, 1, facecolor="none", edgecolor=outline_colours[i % 4],
+                         linewidth=1.3) for i in range(len(outlined))]
+    if handles:
+        ax.legend(handles, list(outlined), fontsize=7.5, loc="lower center",
+                  bbox_to_anchor=(0.5, -0.12 - 0.5 / max(rows, 1)), ncol=len(handles),
+                  frameon=False)
+    if scores:
+        mappable = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(0, 1))
+        fig.colorbar(mappable, ax=ax, fraction=0.025, pad=0.02, label="predicted score")
+    for code in range(size):
+        row, column = divmod(code, per_row)
+        ax.text(column + 0.5, row + 0.5, str(code), ha="center", va="center", fontsize=4.5,
+                color="#6b7684")
+    ax.set_xlim(0, columns)
+    ax.set_ylim(0, rows)
+    ax.invert_yaxis()
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_bars(
+    labels: Sequence[str],
+    values: Sequence[float],
+    title: str,
+    ylabel: str,
+    reference: Optional[Tuple[str, float]] = None,
+    fmt: str = "{:.3g}",
+    log: bool = False,
+) -> None:
+    """Plain bars with the value printed on each, and an optional reference line."""
+
+    fig, ax = plt.subplots(figsize=(max(5.0, 1.1 * len(labels) + 2.2), 3.4))
+    ax.bar(range(len(labels)), values, color=FILL, edgecolor=EDGE)
+    for index, value in enumerate(values):
+        ax.text(index, value, fmt.format(value), ha="center", va="bottom", fontsize=8)
+    if reference is not None:
+        ax.axhline(reference[1], color="#b24a4a", linewidth=1.0, linestyle="--")
+        ax.text(len(labels) - 0.5, reference[1], reference[0], ha="right", va="bottom",
+                fontsize=8, color="#b24a4a")
+    if log:
+        ax.set_yscale("log")
+    ax.set_xticks(range(len(labels)), labels, rotation=20, ha="right", fontsize=8)
+    ax.set_ylabel(ylabel, fontsize=9)
+    ax.set_title(title, fontsize=10)
     fig.tight_layout()
     plt.show()

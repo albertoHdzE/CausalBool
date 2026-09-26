@@ -1,0 +1,509 @@
+{
+  "checker_calls": 2,
+  "differences": [
+    {
+      "after": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/runs/control",
+      "before": "/private/tmp/eff_snapshot.eW03/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/runs/control",
+      "path": "/run"
+    }
+  ],
+  "errors": 0,
+  "failures": 1,
+  "reports": [
+    {
+      "command": [
+        "/Users/alberto/Documents/projects/CausalBool/venv/bin/python",
+        "-m",
+        "research.check_structural_evidence",
+        "--run",
+        "/private/tmp/eff_snapshot.eW03/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/runs/control",
+        "--contract",
+        "/private/tmp/eff_snapshot.eW03/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/contract"
+      ],
+      "exit": 2,
+      "report": {
+        "architecture": {
+          "findings": [],
+          "limits": "The AST scan detects a duplicate definition or a restated machine constant. It does not and cannot prove the semantic absence of duplication: a reimplementation under a different name passes it. The runtime check observes the module graph after import and is what closes the oracle boundary.",
+          "runtime": {
+            "leaked": [],
+            "modules": 82
+          },
+          "scanned": [
+            "__init__.py",
+            "check_structural_evidence.py",
+            "classical_measurement_worker.py",
+            "next_round_acceptance.py",
+            "next_round_acquisition.py",
+            "next_round_analysis.py",
+            "next_round_audit.py",
+            "next_round_checker.py",
+            "next_round_common.py",
+            "next_round_engineered.py",
+            "next_round_export.py",
+            "next_round_learning.py",
+            "next_round_profile.py",
+            "next_round_ranker.py",
+            "next_round_report.py",
+            "next_round_runner.py",
+            "next_round_search.py",
+            "next_round_worker.py",
+            "objective_index_analysis.py",
+            "objective_index_audit.py",
+            "objective_index_checker.py",
+            "objective_index_common.py",
+            "objective_index_export.py",
+            "objective_index_fixtures.py",
+            "objective_index_learned.py",
+            "objective_index_ranker_worker.py",
+            "objective_index_replay.py",
+            "objective_index_report.py",
+            "objective_index_runner.py",
+            "objective_index_search.py",
+            "objective_index_stage_a.py",
+            "objective_index_validation.py",
+            "objective_index_worker.py",
+            "optimization_analysis.py",
+            "optimization_audit.py",
+            "optimization_checker.py",
+            "optimization_common.py",
+            "optimization_export.py",
+            "optimization_export_validation.py",
+            "optimization_fixtures.py",
+            "optimization_frozen_worker.py",
+            "optimization_model_worker.py",
+            "optimization_models.py",
+            "optimization_profile.py",
+            "optimization_report.py",
+            "optimization_runner.py",
+            "optimization_search.py",
+            "optimization_stage_a.py",
+            "optimization_worker.py",
+            "physical_probes.py",
+            "run_structural_experiments.py",
+            "schema_ranker.py",
+            "structural_encoding.py",
+            "structural_evidence.py",
+            "structural_models.py",
+            "structural_oracle.py",
+            "structural_search.py"
+          ],
+          "scanned_count": 57,
+          "status": "PASS"
+        },
+        "artifacts_complete": false,
+        "artifacts_internally_consistent": true,
+        "checks_run": 27,
+        "contract": "/private/tmp/eff_snapshot.eW03/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/contract",
+        "finding_count": 0,
+        "findings": [],
+        "hypotheses": {
+          "H1": "inconclusive",
+          "H2": "NOT_RUN",
+          "H3": "NOT_RUN",
+          "H4": "NOT_RUN"
+        },
+        "imported_dependencies": {},
+        "inconclusive": [
+          {
+            "check": "p1.coverage",
+            "detail": {
+              "consequence": "P1's public coverage requirement applies before P2-P5, so those stages are correctly BLOCKED_BY_GATE. Revising the domain or the sampling policy needs a lead amendment.",
+              "programs": [
+                "01_scalar_pipeline.json",
+                "02_scalar_dual_chain.json",
+                "03_vector_axpy.json",
+                "04_vector_bitmix.json",
+                "05_mixed_broadcast.json",
+                "06_parallel_memory.json",
+                "07_scalar_selects.json",
+                "08_vector_reduction.json"
+              ]
+            },
+            "reason": "8 public programs below 100 distinct completions: ['01_scalar_pipeline.json', '02_scalar_dual_chain.json', '03_vector_axpy.json', '04_vector_bitmix.json', '05_mixed_broadcast.json', '06_parallel_memory.json', '07_scalar_selects.json', '08_vector_reduction.json']"
+          }
+        ],
+        "inconclusive_count": 1,
+        "note": "Every stage verdict in stage_outcomes is derived from this run's evidence; stage_status is what the run wrote down, kept beside it. artifacts_complete and scientific_success are different statements: a reproducible null result has the first true and the second false.",
+        "required_failed": [],
+        "required_stages": [
+          "preflight",
+          "p0",
+          "p1",
+          "p2",
+          "p3",
+          "p4",
+          "p5"
+        ],
+        "required_unmet": [
+          "p1",
+          "p2",
+          "p3",
+          "p4",
+          "p5"
+        ],
+        "run": "/private/tmp/eff_snapshot.eW03/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/runs/control",
+        "scientific_success": false,
+        "stage_outcomes": [
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": true
+            },
+            "imported_from": null,
+            "reason": "its evidence passes every applicable check",
+            "recorded": "PASS",
+            "required": true,
+            "stage": "preflight",
+            "verdict": "PASS"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": true
+            },
+            "imported_from": null,
+            "reason": "its evidence passes every applicable check",
+            "recorded": "PASS",
+            "required": true,
+            "stage": "p0",
+            "verdict": "PASS"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 1,
+              "summary": true
+            },
+            "imported_from": null,
+            "reason": "8 public programs below 100 distinct completions: ['01_scalar_pipeline.json', '02_scalar_dual_chain.json', '03_vector_axpy.json', '04_vector_bitmix.json', '05_mixed_broadcast.json', '06_parallel_memory.json', '07_scalar_selects.json', '08_vector_reduction.json']",
+            "recorded": "INCONCLUSIVE",
+            "required": true,
+            "stage": "p1",
+            "verdict": "INCONCLUSIVE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p2",
+            "verdict": "BLOCKED_BY_GATE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p3",
+            "verdict": "BLOCKED_BY_GATE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1, p3",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p4",
+            "verdict": "BLOCKED_BY_GATE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1, p2",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p5",
+            "verdict": "BLOCKED_BY_GATE"
+          }
+        ],
+        "stage_status": {
+          "p0": "PASS",
+          "p1": "INCONCLUSIVE",
+          "p2": "BLOCKED_BY_GATE",
+          "p3": "BLOCKED_BY_GATE",
+          "p4": "BLOCKED_BY_GATE",
+          "p5": "BLOCKED_BY_GATE",
+          "preflight": "PASS"
+        },
+        "stage_verdicts": {
+          "p0": "PASS",
+          "p1": "INCONCLUSIVE",
+          "p2": "BLOCKED_BY_GATE",
+          "p3": "BLOCKED_BY_GATE",
+          "p4": "BLOCKED_BY_GATE",
+          "p5": "BLOCKED_BY_GATE",
+          "preflight": "PASS"
+        }
+      }
+    },
+    {
+      "command": [
+        "/Users/alberto/Documents/projects/CausalBool/venv/bin/python",
+        "-m",
+        "research.check_structural_evidence",
+        "--run",
+        "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/runs/control",
+        "--contract",
+        "/private/tmp/eff_snapshot.eW03/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/contract"
+      ],
+      "exit": 2,
+      "report": {
+        "architecture": {
+          "findings": [],
+          "limits": "The AST scan detects a duplicate definition or a restated machine constant. It does not and cannot prove the semantic absence of duplication: a reimplementation under a different name passes it. The runtime check observes the module graph after import and is what closes the oracle boundary.",
+          "runtime": {
+            "leaked": [],
+            "modules": 82
+          },
+          "scanned": [
+            "__init__.py",
+            "check_structural_evidence.py",
+            "classical_measurement_worker.py",
+            "next_round_acceptance.py",
+            "next_round_acquisition.py",
+            "next_round_analysis.py",
+            "next_round_audit.py",
+            "next_round_checker.py",
+            "next_round_common.py",
+            "next_round_engineered.py",
+            "next_round_export.py",
+            "next_round_learning.py",
+            "next_round_profile.py",
+            "next_round_ranker.py",
+            "next_round_report.py",
+            "next_round_runner.py",
+            "next_round_search.py",
+            "next_round_worker.py",
+            "objective_index_analysis.py",
+            "objective_index_audit.py",
+            "objective_index_checker.py",
+            "objective_index_common.py",
+            "objective_index_export.py",
+            "objective_index_fixtures.py",
+            "objective_index_learned.py",
+            "objective_index_ranker_worker.py",
+            "objective_index_replay.py",
+            "objective_index_report.py",
+            "objective_index_runner.py",
+            "objective_index_search.py",
+            "objective_index_stage_a.py",
+            "objective_index_validation.py",
+            "objective_index_worker.py",
+            "optimization_analysis.py",
+            "optimization_audit.py",
+            "optimization_checker.py",
+            "optimization_common.py",
+            "optimization_export.py",
+            "optimization_export_validation.py",
+            "optimization_fixtures.py",
+            "optimization_frozen_worker.py",
+            "optimization_model_worker.py",
+            "optimization_models.py",
+            "optimization_profile.py",
+            "optimization_report.py",
+            "optimization_runner.py",
+            "optimization_search.py",
+            "optimization_stage_a.py",
+            "optimization_worker.py",
+            "physical_probes.py",
+            "run_structural_experiments.py",
+            "schema_ranker.py",
+            "structural_encoding.py",
+            "structural_evidence.py",
+            "structural_models.py",
+            "structural_oracle.py",
+            "structural_search.py"
+          ],
+          "scanned_count": 57,
+          "status": "PASS"
+        },
+        "artifacts_complete": false,
+        "artifacts_internally_consistent": true,
+        "checks_run": 27,
+        "contract": "/private/tmp/eff_snapshot.eW03/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/contract",
+        "finding_count": 0,
+        "findings": [],
+        "hypotheses": {
+          "H1": "inconclusive",
+          "H2": "NOT_RUN",
+          "H3": "NOT_RUN",
+          "H4": "NOT_RUN"
+        },
+        "imported_dependencies": {},
+        "inconclusive": [
+          {
+            "check": "p1.coverage",
+            "detail": {
+              "consequence": "P1's public coverage requirement applies before P2-P5, so those stages are correctly BLOCKED_BY_GATE. Revising the domain or the sampling policy needs a lead amendment.",
+              "programs": [
+                "01_scalar_pipeline.json",
+                "02_scalar_dual_chain.json",
+                "03_vector_axpy.json",
+                "04_vector_bitmix.json",
+                "05_mixed_broadcast.json",
+                "06_parallel_memory.json",
+                "07_scalar_selects.json",
+                "08_vector_reduction.json"
+              ]
+            },
+            "reason": "8 public programs below 100 distinct completions: ['01_scalar_pipeline.json', '02_scalar_dual_chain.json', '03_vector_axpy.json', '04_vector_bitmix.json', '05_mixed_broadcast.json', '06_parallel_memory.json', '07_scalar_selects.json', '08_vector_reduction.json']"
+          }
+        ],
+        "inconclusive_count": 1,
+        "note": "Every stage verdict in stage_outcomes is derived from this run's evidence; stage_status is what the run wrote down, kept beside it. artifacts_complete and scientific_success are different statements: a reproducible null result has the first true and the second false.",
+        "required_failed": [],
+        "required_stages": [
+          "preflight",
+          "p0",
+          "p1",
+          "p2",
+          "p3",
+          "p4",
+          "p5"
+        ],
+        "required_unmet": [
+          "p1",
+          "p2",
+          "p3",
+          "p4",
+          "p5"
+        ],
+        "run": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/results/phase2_structural_encoding/_unit_repair_6hutf8p5/runs/control",
+        "scientific_success": false,
+        "stage_outcomes": [
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": true
+            },
+            "imported_from": null,
+            "reason": "its evidence passes every applicable check",
+            "recorded": "PASS",
+            "required": true,
+            "stage": "preflight",
+            "verdict": "PASS"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": true
+            },
+            "imported_from": null,
+            "reason": "its evidence passes every applicable check",
+            "recorded": "PASS",
+            "required": true,
+            "stage": "p0",
+            "verdict": "PASS"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 1,
+              "summary": true
+            },
+            "imported_from": null,
+            "reason": "8 public programs below 100 distinct completions: ['01_scalar_pipeline.json', '02_scalar_dual_chain.json', '03_vector_axpy.json', '04_vector_bitmix.json', '05_mixed_broadcast.json', '06_parallel_memory.json', '07_scalar_selects.json', '08_vector_reduction.json']",
+            "recorded": "INCONCLUSIVE",
+            "required": true,
+            "stage": "p1",
+            "verdict": "INCONCLUSIVE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p2",
+            "verdict": "BLOCKED_BY_GATE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p3",
+            "verdict": "BLOCKED_BY_GATE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1, p3",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p4",
+            "verdict": "BLOCKED_BY_GATE"
+          },
+          {
+            "evidence": {
+              "findings": 0,
+              "inconclusive": 0,
+              "summary": false
+            },
+            "imported_from": null,
+            "reason": "blocked by p1, p2",
+            "recorded": "BLOCKED_BY_GATE",
+            "required": true,
+            "stage": "p5",
+            "verdict": "BLOCKED_BY_GATE"
+          }
+        ],
+        "stage_status": {
+          "p0": "PASS",
+          "p1": "INCONCLUSIVE",
+          "p2": "BLOCKED_BY_GATE",
+          "p3": "BLOCKED_BY_GATE",
+          "p4": "BLOCKED_BY_GATE",
+          "p5": "BLOCKED_BY_GATE",
+          "preflight": "PASS"
+        },
+        "stage_verdicts": {
+          "p0": "PASS",
+          "p1": "INCONCLUSIVE",
+          "p2": "BLOCKED_BY_GATE",
+          "p3": "BLOCKED_BY_GATE",
+          "p4": "BLOCKED_BY_GATE",
+          "p5": "BLOCKED_BY_GATE",
+          "preflight": "PASS"
+        }
+      }
+    }
+  ],
+  "tests": 1
+}

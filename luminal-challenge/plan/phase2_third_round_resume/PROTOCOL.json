@@ -1,0 +1,126 @@
+{
+  "protocol_id": "luminal-phase2-third-improvement-resume-1.0",
+  "version": "1.0",
+  "plan": "plan/CLAUDE_PHASE2_THIRD_ROUND_RESUME.md",
+  "status": "READY_FOR_EXECUTION_NOT_DISPATCHED",
+  "parent_protocol": "plan/phase2_third_round/PROTOCOL.json",
+  "parent_run": "results/phase2_structural_encoding/third_round_20260925",
+  "lead_review": "results/phase2_structural_encoding/lead_third_round_review_20260925/REVIEW.md",
+  "disposition": "CHANGES_REQUIRED; post-hoc development scope correction admissible; D remains conditional on repaired M",
+  "ownership": [
+    "research/third_round_resume_*.py",
+    "research/third_round_candidate.py",
+    "research_tests/test_third_round_resume_*.py",
+    "research_tests/test_third_round_candidate*.py",
+    "results/phase2_structural_encoding/third_round_20260925_resume[_N]/"
+  ],
+  "preserved_mechanism": {
+    "id": "BS1_branch_state_with_change_record",
+    "source": "research/third_round_kernel.py",
+    "sha256": "77c373e1d4e6a328c70c590d46ffdf5b5a82ec8ccd38f82de246821f2da5ff85",
+    "max_designs": 1,
+    "max_compiler_candidates": 1
+  },
+  "accounting": {
+    "label": "post-hoc development correction; original result retained",
+    "old_conservative_ratio": 0.8268222321783514,
+    "matched_scope_ratio_with_old_adapter": 0.7638230784259178,
+    "replay_only_ratio_sensitivity": 0.7422848903946956,
+    "matched_timer_components": [
+      "tfix_shell",
+      "tfix_copy",
+      "precedence",
+      "issue_capacity",
+      "bounds_live",
+      "bounds_product",
+      "address_support",
+      "child_domain_copy",
+      "certificates",
+      "propagation_setup",
+      "address_pairs"
+    ],
+    "O": "min(original baseline replay median, sum(matched timer exclusive seconds)/original timer inflation)",
+    "N": "original shared replay median + max(original adapter median, repaired adapter median) + nonnegative itemized upper estimate of other integration costs",
+    "conservative": "T0 - O + 1.5*N",
+    "aggregation": "equal-family geometric mean of per-program predicted total-cost ratios",
+    "conservative_ratio_max": 0.8,
+    "overhead_multiplier": 1.5
+  },
+  "adapter": {
+    "stage": "R_adapter",
+    "arm_id": "adapter",
+    "mode_key": "adapter",
+    "first_seed": 800000,
+    "last_seed": 800029,
+    "programs": 30,
+    "repetitions": 3,
+    "repetition_base": 0,
+    "expected_rows": 90,
+    "max_implementations": 1,
+    "spec_and_code_frozen_before_timing": true,
+    "inputs": "original frozen diagnostic workloads, no new search",
+    "order_seed": 2026092801,
+    "external_timeout_seconds": 20,
+    "failed_row_retry_allowed": false
+  },
+  "evidence_repairs": [
+    "strict_jsonl_including_extra_final_fragment",
+    "measured_source_and_transitive_hashes",
+    "protocol_derived_expected_membership",
+    "M0_and_M2_fingerprint_and_parity_prerequisites",
+    "output_and_emission_lengths_and_certificate_stream",
+    "explicit_stage_state_and_dependency_matrix",
+    "numerical_field_coverage",
+    "raw_streams_and_ledgers",
+    "correct_kernel_speedup_median"
+  ],
+  "narrow_source_dispositions": [
+    {
+      "file": "research/third_round_common.py",
+      "before": "bd3a7b48d7d9535dea20fe5a8a70a17b993c292a476f67838981acb868d72f6d",
+      "after": "3a0e4163eb450adc08d2860d68a28ca9c7fdb0d67bf77a82c0f27f0b77542632",
+      "scope": "remove exactly Callable, Iterable, List from one typing import; reconstructed bytes must hash to before"
+    }
+  ],
+  "corrected_kernel_speedup_median": 2.3649168298633314,
+  "inherited_expected_rows": {
+    "D_fixed_work": 600,
+    "D_wall": 600,
+    "D_memory": 60,
+    "C_acceptance": 284,
+    "C_fixed_work": 2000,
+    "C_wall": 6000,
+    "C_public": 280,
+    "C_export": 1248
+  },
+  "inherited_confirmation_seeds": [
+    980000,
+    980199
+  ],
+  "inherited_confirmation_gate": {
+    "fixed_work_compile_ratio_upper_max": 0.8,
+    "wall_primary_J_ratio_upper_max": 1.01
+  },
+  "inherited_development_gate": {
+    "fixed_work_compile_ratio_max": 0.9,
+    "wall_primary_mean_log_J_ratio_max": 0
+  },
+  "combined_budget": {
+    "measurement_wall_hours": 24,
+    "active_development_hours": 16,
+    "include_parent_run": true
+  },
+  "authorization": {
+    "new_measurements_only_after_frozen_adapter_spec": true,
+    "conditional_D_and_C_after_repair_and_M_pass": true,
+    "new_mechanism": false,
+    "new_learning": false,
+    "production": false,
+    "paper_edits": false,
+    "paper_handoff": true,
+    "subagents": false,
+    "commit_push": false,
+    "publication": false
+  },
+  "results_prefix": "results/phase2_structural_encoding/third_round_20260925_resume"
+}

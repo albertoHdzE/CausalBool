@@ -1,0 +1,344 @@
+--- research/objective_index_search.py	2026-09-24 18:14:37
++++ research/next_round_search.py	2026-09-25 09:01:04
+@@ -1,4 +1,27 @@
+-"""The A1-A4 solver ladder of the objective-index research protocol 1.0.
++"""SUCCESSOR VERSION of ``research/objective_index_search.py`` (next round 1.0).
++
++Version ``next_round_search 1.1``. A byte-for-byte copy of the frozen owner
++``research/objective_index_search.py`` (sha256 ``FROZEN_SOURCE_SHA256`` below,
++authored in the objective-index research protocol 1.0 and measured there),
++with only these changes, all listed in ``next_round_20260925/repair/``:
++
++R1 (reporting repair, plan section 3). ``multiscale_optimise.finish`` counted
++   a query's interrupted candidate validations only inside the learner branch,
++   so the non-model A4 returned zero. They are now accounted for every query:
++   ``interrupted_validation_total`` (validations), ``interrupted_validation_
++   queries`` (affected queries) and a per-query list, with construction
++   interruptions kept separately. Search decisions are unchanged.
++R2 (reporting). Each accepted improvement carries its elapsed time, so the
++   time-to-target diagnostics of section 4 need no second run.
++D  (plan section 4). ``multiscale_optimise`` takes ``catalog`` (``"a4"`` the
++   existing ``build_catalog``, or ``"a3"`` ``product_window_plan`` at radius 2)
++   and ``traversal`` (``"heap"`` the existing discrepancy heap, or ``"dfs"``
++   canonical depth-first, low rank first). Defaults are the repaired A4; the
++   default path is the frozen one statement for statement.
++
++The frozen module is untouched and its measured rows keep describing it.
++
++The A1-A4 solver ladder of the objective-index research protocol 1.0.
+ 
+ Protocol sections 3-6. Every arm starts from the same original direct-index
+ bootstrap, accepts only fully validated strict improvements of J = C*S, and
+@@ -61,6 +84,12 @@
+     "propagated_search", "sequential_optimise", "build_catalog", "memory_group",
+     "multiscale_optimise", "optimise",
+ ]
++
++VERSION = "next_round_search 1.1"
++FROZEN_SOURCE = "research/objective_index_search.py"
++FROZEN_SOURCE_SHA256 = "8cda157f465b1d23bb3894d8b3226437210d537f03cffd6ed8db523b12c4c7f5"
++CATALOGS = ("a4", "a3")
++TRAVERSALS = ("heap", "dfs")
+ 
+ ARM_LABELS = oic.NEW_ARMS
+ CODEC = "structural_rank"
+@@ -1422,6 +1451,54 @@
+     return catalog
+ 
+ 
++def a3_catalog(facts: dc.ProgramFacts, times: Dict[int, int],
++               addresses: Dict[str, int]) -> List[dict]:
++    """Ablation catalog level 0: A3's ``product_window_plan`` at radius 2, in order."""
++
++    return [{"window": tuple(window), "radius": BASE_RADIUS, "policy": "a3_product_window",
++             "queue": 0} for window in product_window_plan(facts, times, addresses)]
++
++
++def dfs_enumerate(domain: se.Domain, incumbent: dict, threshold: int,
++                  frontier_limit: int = 10**9, max_nodes: int = 10**8) -> dict:
++    """Tests only: the ablation's stack traversal run to exhaustion in collect mode.
++
++    Same expander, propagation and child order as ``multiscale_optimise`` with
++    ``traversal="dfs"``; no clock. Returns every completion with ``J <
++    threshold`` and the pop order (ranks), for comparison with ``lds_enumerate``
++    and with a recursive depth-first reference.
++    """
++
++    report = _new_report(domain, "dfs_collect", incumbent)
++    meter = si.Budget(seconds=1e9, max_visited=max_nodes, max_records=10**9).start()
++    acceptor = _Acceptor(domain, report, meter, lambda: None, time.perf_counter, collect=True)
++    acceptor.threshold = threshold
++    expander = Expander(domain, "propagate", PropagationStats(), report)
++    stack: List[_Node] = []
++    order: List[tuple] = []
++    root = expander.root(threshold)
++    if root is not None:
++        stack.append(root)
++    status = "EXHAUSTED"
++    while stack:
++        node = stack.pop()
++        order.append((node.disc, node.lb, node.ranks))
++        report.nodes += 1
++        if report.nodes > max_nodes:
++            status = "UNKNOWN_NODE_LIMIT"
++            break
++        if expander.is_leaf(node):
++            acceptor.consider(node.state)
++            continue
++        children = list(expander.children(node, lambda: threshold))
++        if len(stack) + len(children) > frontier_limit:
++            status = "UNKNOWN_FRONTIER_LIMIT"
++            break
++        stack.extend(reversed(children))
++    return {"status": status, "collected": acceptor.collected, "nodes": report.nodes,
++            "pop_order": order}
++
++
+ def heap_key(node: _Node) -> tuple:
+     """Section 6 order: (discrepancy, product lower bound, -depth, canonical ranks)."""
+ 
+@@ -1496,6 +1573,7 @@
+         self.phase = "search"
+         self.frontier_limited = False
+         self.model_pair = None
++        self.construction_interrupted = False
+ 
+     def summary(self) -> dict:
+         report = self.report
+@@ -1510,6 +1588,8 @@
+                           self.caps.get("Scap")] if self.caps else None),
+                 "nodes": report.nodes if report else 0,
+                 "validations": report.validations if report else 0,
++                "interrupted_validations": report.interrupted_validations if report else 0,
++                "construction_interrupted": self.construction_interrupted,
+                 "pruned": report.pruned if report else 0,
+                 "completions": report.completions if report else 0,
+                 "domain_sha256": self.digest}
+@@ -1535,16 +1615,43 @@
+     memo: bool = True,
+     trace: Optional[List[tuple]] = None,
+     learner_factory: Optional[Callable[[se.Domain], object]] = None,
++    catalog: str = "a4",
++    traversal: str = "heap",
++    timers: Optional[Dict[str, float]] = None,
+ ) -> Tuple[Dict[int, int], Dict[str, int], dict]:
+     """A4: A3's propagation, the five-queue catalog and resumable LDS queries.
+ 
++    Successor parameters (plan section 4). ``catalog="a3"`` replaces the
++    five-queue catalog by ``product_window_plan`` at radius 2, one query per
++    window in that order. ``traversal="dfs"`` replaces the discrepancy heap by
++    a stack popped in canonical depth-first order, lowest rank first. Every
++    other element -- caps, propagation, variable order, validation, aggregate
++    guards, eight resident queries, round-robin slices, epoch restart, the
++    per-query frontier limit counted as queued prefixes -- is shared.
++
++    ``timers`` (economics diagnostic only) accumulates query construction
++    seconds under ``"construction"`` and counts constructions; ``None`` adds
++    no clock reading at all.
++
+     ``learner_factory`` (conditional learned compiler only) gives each query a
+     search phase for the first half of its active allowance, observing every
+     distinct completion, then a model phase that is itself sliced. Without
+     enough validated data, or once the model's pool is exhausted, the query
+     resumes its own discrepancy search for whatever allowance remains.
+     """
++
++    if catalog not in CATALOGS or traversal not in TRAVERSALS:
++        raise ValueError(f"unknown ablation cell {catalog!r}/{traversal!r}")
++    # R2: the last clock reading is remembered so an accepted improvement can
++    # carry its elapsed time without an extra reading (a deterministic test
++    # clock therefore advances exactly as it does for the frozen owner).
++    raw_clock = clock
++    last_read = [0.0]
+ 
++    def clock() -> float:
++        last_read[0] = raw_clock()
++        return last_read[0]
++
+     limits = dict(PER_QUERY_LIMITS if limits is None else limits)
+     stats = stats if stats is not None else PropagationStats()
+     cache: Optional[dict] = {} if memo else None
+@@ -1553,6 +1660,8 @@
+     aggregate = _Aggregate(node_ceiling, validation_ceiling)
+     best_times, best_addresses = dict(times), dict(addresses)
+     status_counts: Dict[str, int] = {}
++    interrupted_by_query: List[dict] = []
++    construction_interruptions: List[dict] = []
+     improvements: List[dict] = []
+     rejected: List[dict] = []
+     interrupted: List[dict] = []
+@@ -1572,9 +1681,18 @@
+         if query.learner is not None:
+             aggregate.totals["validations"] += query.learner.validations
+             rejected.extend(query.learner.rejected)
+-            if query.report.interrupted_validations:
+-                interrupted.append({"phase": "validation", "window": list(query.entry["window"]),
+-                                    "count": query.report.interrupted_validations})
++        # R1: interrupted candidate validations are counted for every query,
++        # with or without a learner (the frozen owner kept them only above).
++        if query.report is not None and query.report.interrupted_validations:
++            item = {"phase": "validation", "window": list(query.entry["window"]),
++                    "count": query.report.interrupted_validations}
++            interrupted.append(item)
++            interrupted_by_query.append(dict(item, query=query.index, epoch=epochs,
++                                             policy=query.entry["policy"], status=status))
++        if query.construction_interrupted:
++            construction_interruptions.append({"query": query.index, "epoch": epochs,
++                                               "window": list(query.entry["window"]),
++                                               "status": status})
+         if len(query_log) < 4096:
+             query_log.append(query.summary())
+ 
+@@ -1596,8 +1714,16 @@
+         # comparable without ever comparing two nodes, and it never reorders
+         # distinct keys.
+         sequence[0] += 1
+-        heapq.heappush(heap, (heap_key(node), sequence[0], node))
++        if traversal == "heap":
++            heapq.heappush(heap, (heap_key(node), sequence[0], node))
++        else:
++            heap.append(node)
+ 
++    def pop(heap: list) -> _Node:
++        if traversal == "heap":
++            return heapq.heappop(heap)[2]
++        return heap.pop()
++
+     def initialize(query: _Query, epoch_times, epoch_addresses, product: int) -> Optional[str]:
+         """Build caps, domain and root inside the query's allowance."""
+ 
+@@ -1693,15 +1819,27 @@
+ 
+         slice_started = clock()
+         query.slices += 1
++        just_initialized = False
+         if not query.initialized:
+             query.initialized = True
++            just_initialized = True
+             query.allowance = min(query_seconds, deadline - slice_started)
+             if query.allowance <= 0:
++                query.construction_interrupted = True
+                 finish(query, "NOT_STARTED_DEADLINE", "no overall time at initialization")
+                 return "finished"
+             query.hard_deadline = min(deadline, slice_started + query.allowance)
+             try:
+-                outcome = initialize(query, epoch_times, epoch_addresses, product)
++                if timers is None:
++                    outcome = initialize(query, epoch_times, epoch_addresses, product)
++                else:
++                    built = raw_clock()
++                    try:
++                        outcome = initialize(query, epoch_times, epoch_addresses, product)
++                    finally:
++                        timers["construction"] = (timers.get("construction", 0.0)
++                                                  + raw_clock() - built)
++                        timers["constructions"] = timers.get("constructions", 0) + 1
+             except dk.Infeasible as exc:
+                 query.used += clock() - slice_started
+                 finish(query, "INFEASIBLE", str(exc))
+@@ -1739,6 +1877,9 @@
+             while True:
+                 now = clock()
+                 if now >= query.hard_deadline:
++                    if just_initialized and report.nodes == nodes_at_start:
++                        # Construction consumed the allowance before any node.
++                        query.construction_interrupted = True
+                     if now >= deadline:
+                         raise _Stop("the overall deadline expired", "UNKNOWN_DEADLINE")
+                     if learned_search:
+@@ -1750,7 +1891,7 @@
+                     raise _Stop("the declared domain holds no strict improvement", "UNSAT")
+                 if aggregate.node_ceiling - live_nodes() < 2:
+                     raise _Stop("aggregate node ceiling", "UNKNOWN_AGGREGATE_NODES")
+-                _, _, node = heapq.heappop(query.heap)
++                node = pop(query.heap)
+                 report.nodes += 1
+                 try:
+                     query.meter.visit()
+@@ -1761,14 +1902,28 @@
+                 if expander.is_leaf(node):
+                     acceptor.consider(node.state)
+                     continue
++                # The stack receives a node's children only once all are
++                # generated, reversed so the lowest rank is popped first; the
++                # frontier limit counts the generated children as queued.
++                pending_children: List[_Node] = []
+                 for child in expander.children(node, lambda: product):
+-                    push(query.heap, child)
+-                    if len(query.heap) > frontier_limit:
++                    if traversal == "heap":
++                        push(query.heap, child)
++                        queued = len(query.heap)
++                    else:
++                        pending_children.append(child)
++                        queued = len(query.heap) + len(pending_children)
++                    if queued > frontier_limit:
++                        if traversal == "dfs":
++                            query.heap.extend(reversed(pending_children))
+                         if learned_search:
+                             query.frontier_limited = True
+                             raise _Switch()
+                         raise _Stop("more than the permitted queued prefixes",
+                                     "UNKNOWN_FRONTIER_LIMIT")
++                if pending_children:
++                    for child in reversed(pending_children):
++                        push(query.heap, child)
+                 query.frontier_peak = max(query.frontier_peak, len(query.heap))
+         except _Improved:
+             outcome = "improved"
+@@ -1804,9 +1959,12 @@
+         memory = dc.footprint(facts, best_addresses)
+         product = cycles * memory
+         epoch_times, epoch_addresses = dict(best_times), dict(best_addresses)
+-        catalog = build_catalog(facts, epoch_times, epoch_addresses)
+-        catalog_sizes.append(len(catalog))
+-        pending = deque(_Query(entry, i) for i, entry in enumerate(catalog))
++        if catalog == "a4":
++            entries = build_catalog(facts, epoch_times, epoch_addresses)
++        else:
++            entries = a3_catalog(facts, epoch_times, epoch_addresses)
++        catalog_sizes.append(len(entries))
++        pending = deque(_Query(entry, i) for i, entry in enumerate(entries))
+         resident = deque()
+         while pending and len(resident) < resident_limit:
+             resident.append(pending.popleft())
+@@ -1837,7 +1995,9 @@
+                                      "source": "model" if query.phase == "model" else "search",
+                                      "from_CS": [cycles, memory],
+                                      "to_CS": [max(best_times.values()) + 1,
+-                                               dc.footprint(facts, best_addresses)]})
++                                               dc.footprint(facts, best_addresses)],
++                                     "elapsed_seconds": last_read[0] - started,
++                                     "epoch": epochs, "query": query.index})
+                 improved = True
+                 break
+             if pending:
+@@ -1857,8 +2017,12 @@
+     elapsed = clock() - started
+     unknown = sum(n for s, n in status_counts.items() if s.startswith("UNKNOWN"))
+     record = {
+-        "controller": "objective_index_search.multiscale_optimise",
++        "controller": "next_round_search.multiscale_optimise",
++        "version": VERSION,
++        "frozen_source_sha256": FROZEN_SOURCE_SHA256,
+         "arm": "A4_multiscale_search",
++        "catalog": catalog,
++        "traversal": traversal,
+         "budget_seconds": budget_seconds,
+         "query_seconds": query_seconds,
+         "epochs": epochs,
+@@ -1876,6 +2040,14 @@
+         "overshoot_seconds": elapsed - budget_seconds,
+         "interrupted_attempts": interrupted,
+         "interrupted_attempt_count": len(interrupted),
++        # R1: unambiguous names. Totals count validations; ``_queries`` counts
++        # affected queries; construction interruptions are separate and never
++        # counted as validations.
++        "interrupted_validation_total": sum(i["count"] for i in interrupted_by_query),
++        "interrupted_validation_queries": len(interrupted_by_query),
++        "interrupted_validations_per_query": interrupted_by_query[:4096],
++        "construction_interruption_count": len(construction_interruptions),
++        "construction_interruptions": construction_interruptions[:4096],
+         "aggregate": dict(aggregate.totals),
+         "ceilings": {"nodes": node_ceiling, "validations": validation_ceiling},
+         "limits": {"slice_seconds": slice_seconds, "slice_nodes": slice_nodes,

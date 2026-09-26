@@ -1,0 +1,238 @@
+{
+  "protocol_id": "luminal-phase2-third-improvement-1.0",
+  "version": "1.0",
+  "plan": "plan/CLAUDE_PHASE2_THIRD_ROUND.md",
+  "status": "READY_FOR_EXECUTION_NOT_DISPATCHED",
+  "baseline": {
+    "arm": "R0",
+    "solver": "research/efficiency_search.py",
+    "sha256": "d0fcd441886cc5c3d34a6e1df7b2828ea219b6575ffd2049913b4d4901b92fbf",
+    "export": "results/phase2_structural_encoding/efficiency_20260925/r0_export/compiler.py",
+    "export_sha256": "74c87b69e63063595d3283bb66986162297519bb1a8a2a87f2853fd7134d9ea9",
+    "catalog": "a4",
+    "traversal": "dfs"
+  },
+  "candidate": {
+    "arm": "C1",
+    "max_designs": 1,
+    "max_integrated_candidates": 1,
+    "max_development_selections": 1,
+    "max_confirmation_cohorts": 1,
+    "mechanism": "query-local shared domain state with reusable derived facts",
+    "minimum_consumer_operations": 2,
+    "exact_decision_and_certificate_parity_required": true
+  },
+  "ownership": [
+    "research/third_round_*.py",
+    "research_tests/test_third_round_*.py",
+    "results/phase2_structural_encoding/third_round_20260925[_N]/"
+  ],
+  "stages": [
+    "M_diagnosis",
+    "M_kernel",
+    "D_fixed_work",
+    "D_wall",
+    "D_memory",
+    "C_acceptance",
+    "C_fixed_work",
+    "C_wall",
+    "C_public",
+    "C_export"
+  ],
+  "families": [
+    "scalar",
+    "vector",
+    "mixed",
+    "dependency",
+    "aliasing"
+  ],
+  "repetition_base": 0,
+  "diagnostic": {
+    "first_seed": 800000,
+    "last_seed": 800029,
+    "programs": 30,
+    "per_family": 6,
+    "time_repetitions": 3,
+    "other_modes": [
+      "exclusive_timers",
+      "workload_trace",
+      "peak_memory",
+      "instrumentation_parity"
+    ],
+    "other_mode_repetitions": 1,
+    "kernel_repetitions": 3,
+    "kernel_versions": [
+      "baseline_kernel",
+      "shared_state_kernel"
+    ]
+  },
+  "development": {
+    "first_seed": 800000,
+    "last_seed": 800099,
+    "programs": 100,
+    "per_family": 20,
+    "repetitions": 3,
+    "memory_programs": 30,
+    "memory_repetitions": 1
+  },
+  "confirmation": {
+    "first_seed": 980000,
+    "last_seed": 980199,
+    "programs": 200,
+    "per_family": 40,
+    "repetitions": 5,
+    "previous_reservation_untouched_must_verify": true,
+    "no_silent_reseeding": true,
+    "no_development_exposure": true,
+    "hash_rules": {
+      "row_identity": "tests_direct.generate_programs.program_digest: full program",
+      "semantic_identity": "research.structural_encoding.program_semantic_digest: remove only top-level name",
+      "compilation_input_identity": "sha256 of canonical JSON excluding top-level name and cases; all other fields preserved"
+    },
+    "duplicate_compilation_inputs_invalidate": true
+  },
+  "wall_budgets_seconds": [
+    0.01,
+    0.1,
+    1
+  ],
+  "primary_wall_budget_seconds": 0.1,
+  "wall_budget_scope": "optimization allowance; complete compile-call measured separately",
+  "wall_limits": {
+    "aggregate_nodes": 1000000,
+    "aggregate_validations": 100000,
+    "query_active_seconds": 0.1,
+    "slice_seconds": 0.002,
+    "slice_nodes": 2048,
+    "resident_queries": 8,
+    "frontier_per_query": 4096
+  },
+  "per_query_limits": {
+    "query_max_cover": 4096,
+    "search_max_nodes": 1000000,
+    "search_max_candidate_validations": 100000,
+    "query_max_visited": 50000
+  },
+  "fixed_work": {
+    "aggregate_nodes": 10000,
+    "aggregate_validations": 100000,
+    "slice_nodes": 2048,
+    "logical_clock": "constant",
+    "query_global_slice_wall_expiry_disabled": true,
+    "all_non_time_limits_unchanged": true,
+    "total_compile_clock": "separate real perf_counter"
+  },
+  "mechanism_gate": {
+    "conservative_predicted_compile_ratio_max": 0.8,
+    "replacement_and_extra_overhead_multiplier": 1.5,
+    "kernel_parity_required": true,
+    "all_programs_in_denominator": true
+  },
+  "development_gate": {
+    "fixed_work_compile_ratio_max": 0.9,
+    "wall_primary_mean_log_J_ratio_max": 0,
+    "semantic_and_fingerprint_parity_required": true,
+    "complete_no_failed_rows_required": true
+  },
+  "confirmation_gate": {
+    "fixed_work_compile_ratio_upper_max": 0.8,
+    "wall_primary_J_ratio_upper_max": 1.01,
+    "joint_pass_required": true,
+    "no_Pareto_claim": true
+  },
+  "statistics": {
+    "resamples": 10000,
+    "percentiles": [
+      0.0125,
+      0.9875
+    ],
+    "interval_level": 0.975,
+    "endpoints": 2,
+    "adjustment": "Bonferroni",
+    "sampling_unit": "program within family",
+    "family_weight": "equal",
+    "paired_program_resampling_across_endpoints": true,
+    "within_family_order": "program_sha256 ascending",
+    "quantile": "linear interpolation at (N-1)*p",
+    "cost": "log ratio of per-program median total compile-call times",
+    "quality": "paired repetition log J ratios averaged within program",
+    "report_scale": "exponentiated mean log ratios and endpoints"
+  },
+  "seeds": {
+    "arm_order": 2026092801,
+    "bootstrap": 2026092802
+  },
+  "stable_seed": "sha256(compact sorted-key JSON, ensure_ascii=False, allow_nan=False); first 16 hex digits as unsigned integer",
+  "order_key": [
+    "arm_order_seed",
+    "stage_id",
+    "program_sha256",
+    "repetition",
+    "arm_id",
+    "mode_key"
+  ],
+  "order_tiebreak": [
+    "arm_id",
+    "mode_key"
+  ],
+  "row_key_fields": [
+    "stage_id",
+    "program_sha256",
+    "repetition",
+    "arm_id",
+    "mode_key"
+  ],
+  "mode_keys": [
+    "work:10000",
+    "wall:0.01",
+    "wall:0.1",
+    "wall:1.0",
+    "serial",
+    "kernel",
+    "exclusive_timers",
+    "workload_trace",
+    "peak_memory",
+    "instrumentation_parity"
+  ],
+  "export": {
+    "arms": [
+      "R0",
+      "C1"
+    ],
+    "confirmation_programs": 208,
+    "repetitions": 3,
+    "optimisation_seconds": 0.1,
+    "inheritance_corpus_programs": 142,
+    "inheritance_corpus_cases": 277,
+    "inheritance_repetitions": 1
+  },
+  "expected_rows": {
+    "M_diagnosis": 210,
+    "M_kernel": 180,
+    "D_fixed_work": 600,
+    "D_wall": 600,
+    "D_memory": 60,
+    "C_acceptance": 284,
+    "C_fixed_work": 2000,
+    "C_wall": 6000,
+    "C_public": 280,
+    "C_export": 1248
+  },
+  "external_timeout_seconds": 20,
+  "measurement_wall_cap_hours": 24,
+  "active_development_cap_hours": 16,
+  "max_concurrent_measurement_workers": 1,
+  "failed_row_retry_allowed": false,
+  "authorization": {
+    "new_learning_experiment": false,
+    "historical_ranker_replay": false,
+    "production_integration": false,
+    "manuscript_edits": false,
+    "paper_handoff": true,
+    "subagents": false,
+    "commit_push": false,
+    "external_publication": false
+  },
+  "paper_transition": "after independent lead review, whether practical target succeeds or fails",
+  "results_prefix": "results/phase2_structural_encoding/third_round_20260925"
+}

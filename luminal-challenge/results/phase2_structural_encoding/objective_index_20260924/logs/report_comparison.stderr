@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research/objective_index_report.py", line 312, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research/objective_index_report.py", line 302, in main
+    payload = {"learning": learning, "comparison": comparison, "public": public}[args.part](run)
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research/objective_index_report.py", line 169, in comparison
+    absolute = {f"{arm}@{budget}": oa.absolute_times(rows, arm, budget)
+                                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research/optimization_analysis.py", line 191, in absolute_times
+    out["attempted_queries"] = summary([o["attempted_queries"] for o in opt
+                               ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                        if "attempted_queries" in o])
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research/optimization_analysis.py", line 177, in summary
+    return {"median": statistics.median(values), "p95": rse.percentile(values, 0.95),
+                      ~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/Users/alberto/.pyenv/versions/3.13.12/lib/python3.13/statistics.py", line 637, in median
+    raise StatisticsError("no median for empty data")
+statistics.StatisticsError: no median for empty data

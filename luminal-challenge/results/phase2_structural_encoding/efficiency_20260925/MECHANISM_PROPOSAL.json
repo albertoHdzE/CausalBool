@@ -1,0 +1,114 @@
+{
+  "estimated_overhead": {
+    "memory": "one frozenset per engine per Propagation (<= horizon ints) and one small set per sweep; negligible against the measured tracemalloc peaks",
+    "per_op_scan_filter_ns": 128.0,
+    "source": "timeit of two frozenset.isdisjoint calls on a 7-value tuple (measured 128 ns) against 619 ns for the current comprehension on the same input"
+  },
+  "gate": {
+    "decision": "NO_JUSTIFIED_OPTIMIZATION",
+    "met": false,
+    "required": "plausible >= 20% reduction of TOTAL fixed-work compile-call time after overhead (fixed-work ratio <= 0.80)"
+  },
+  "measured_avoided_work": {
+    "futile_fraction": 0.9947921504221748,
+    "rule2_full_hits": 23998,
+    "rule2_op_scans": 730224,
+    "rule2_value_checks": 4608044,
+    "scan_cost_model_least_squares": {
+      "per_op_scan_ns": 323.5673302313933,
+      "per_value_check_ns": 58.63053049343403,
+      "programs": 10,
+      "source": "timers_split exclusive seconds vs count-mode counters"
+    },
+    "scan_share_of_unprofiled_time": {
+      "800000": 0.11206292754787865,
+      "800001": 0.2516165233508861,
+      "800002": 0.0037352083129897915,
+      "800003": 0.004190633793905515,
+      "800004": 0.3260790064470221,
+      "800005": 0.30661752347294186,
+      "800006": 0.1406147721083033,
+      "800007": 0.01180547359018895,
+      "800008": 0.25237917764189133,
+      "800009": 0.30758721702587566
+    }
+  },
+  "mechanism": {
+    "cache": "none across calls (S_e is a per-Propagation constant derived from the domain; nothing crosses programs)",
+    "certificates_unchanged": true,
+    "class": "representation-level reduction of repeated domain work (plan section 4)",
+    "description": "Per Propagation, precompute per engine the frozenset S_e of cycles full from fixed issues alone (base >= limit); per sweep, derive from the singles map the set Dyn_e of cycles made full by selected singletons. For a non-singleton op of engine e, full is empty iff its domain is disjoint from S_e | Dyn_e (C-level isdisjoint); only then is the scan skipped. Otherwise the ORIGINAL comprehension runs unchanged, so full, the EF certificates, their order and kept are identical.",
+    "exactness_argument": "c is full iff base(e,c) + n_singles(e,c) >= limit; if n_singles = 0 this is base >= limit, i.e. c in S_e; if n_singles > 0, (e,c) is a singles key and c is in Dyn_e iff the same inequality holds. Hence F_e = S_e | Dyn_e exactly.",
+    "id": "M1_rule2_candidate_cycles",
+    "no_new_pruning_rule": true,
+    "search_order_unchanged": true,
+    "where": "efficiency_search.Propagation.times_fixpoint, rule 2 second loop (EF scan)"
+  },
+  "other_components_zero_cost_ceilings": {
+    "encoding_digest": 0.9837332346681374,
+    "frontier_options": 0.958371440018686,
+    "prop_address_support": 0.8463360882325512,
+    "prop_bounds": 0.8049842373463125,
+    "prop_certificates": 0.9334596989626204,
+    "prop_issue_capacity_scan": 0.8187882485465329,
+    "prop_issue_capacity_singles_eo": 0.9277556994133959,
+    "prop_precedence": 0.8646493628720938,
+    "state_copy": 0.9862777298725441,
+    "times_fixpoint_all_rules": 0.5815386188210627,
+    "validation": 0.9657237252678934
+  },
+  "prediction": {
+    "fixed_work_compile_ratio_equal_family_predicted": 0.9394823790772112,
+    "note": "a prediction from measured counts and a measured cost model, not a guaranteed speedup",
+    "per_program_saving_fraction_predicted": {
+      "800000": 0.02507224446503079,
+      "800001": 0.09423858409022037,
+      "800002": 0.00038085174496644577,
+      "800003": 0.0007727634026379159,
+      "800004": 0.1245885186452516,
+      "800005": 0.11899207380947921,
+      "800006": 0.025280689295324097,
+      "800007": 0.0015004877133385668,
+      "800008": 0.08635694411661507,
+      "800009": 0.11446594230561132
+    },
+    "zero_cost_ceiling_if_the_scan_vanished": 0.8187882485465329
+  },
+  "protocol_id": "luminal-phase2-assurance-efficiency-1.0",
+  "repeat_work_for_caches": {
+    "addresses_fixpoint": {
+      "calls": 1142,
+      "exact_repeats_in_domain": 24,
+      "fraction": 0.021015761821366025
+    },
+    "compulsory_peak": {
+      "calls": 56734,
+      "exact_repeats_in_domain": 1471,
+      "fraction": 0.025928014946945393
+    },
+    "product_bound": {
+      "calls": 56734,
+      "exact_repeats_in_domain": 381,
+      "fraction": 0.006715549758522226
+    },
+    "prune": {
+      "calls": 56734,
+      "exact_repeats_in_domain": 381,
+      "fraction": 0.006715549758522226
+    },
+    "times_fixpoint": {
+      "calls": 55728,
+      "exact_repeats_in_domain": 185,
+      "fraction": 0.003319695664656905
+    }
+  },
+  "stage": "Gate P mechanism proposal (one mechanism)",
+  "why_no_other_mechanism": [
+    "Every single component has a zero-cost ceiling above 0.80 (bounds 0.805, rule-2 scan 0.819, address support 0.846, precedence 0.865): even deleting one entirely at no cost cannot reach a 20% total saving.",
+    "Only the whole times_fixpoint (precedence + rule 2) has a ceiling below 0.80 (0.582). A change-driven reformulation of that fixpoint is the worklist mechanism already measured at 4.8% (next_round_20260925 ENGINEERING_DECISION.json); the plan forbids assuming another worklist wins.",
+    "Caches are not justified: exact repeated inputs within one domain are 0.33% of times_fixpoint calls, 2.6% of compulsory_peak calls, 0.67% of prune calls and 2.1% of addresses_fixpoint calls.",
+    "The plan forbids trying several mechanisms until one looks favourable; no second proposal is written."
+  ],
+  "written_before_any_candidate_code": true,
+  "written_utc": "2026-09-25T20:19:00Z"
+}

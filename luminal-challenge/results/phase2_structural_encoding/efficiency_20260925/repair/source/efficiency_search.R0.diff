@@ -1,0 +1,250 @@
+--- research/next_round_search.py	2026-09-25 09:01:04
++++ research/efficiency_search.py	2026-09-25 13:32:01
+@@ -1,5 +1,38 @@
+-"""SUCCESSOR VERSION of ``research/objective_index_search.py`` (next round 1.0).
++"""EFFICIENCY BASELINE R0: versioned successor of ``research/next_round_search.py``.
+ 
++Version ``efficiency_search R0``. A byte-for-byte copy of the next-round
++successor ``research/next_round_search.py`` (sha256 ``PARENT_SOURCE_SHA256``
++below), with assurance repairs only (plan ``CLAUDE_PHASE2_EFFICIENCY_PHASE.md``
++section 3, R1). The minimal diff is retained in
++``efficiency_20260925/repair/source/``. Search decisions are unchanged: the
++repaired code reads the clock exactly as often as the parent, in the same order.
++
++R1a (construction exits). Every initialization exit -- a cap proof
++   (``NO_STRICT_IMPROVEMENT``), a root conflict or prune (``UNSAT``),
++   ``Infeasible``, ``DomainError`` and a normal return -- is timed by one clock
++   reading taken when initialization ends. Per query the report now carries
++   ``construction_seconds``, ``construction_deadline_exceeded`` (that reading
++   is at or past the query's hard deadline), ``interrupted_before_search`` (no
++   node was expanded before the query's deadline), ``terminal_reason`` (the
++   mathematical or construction outcome, whenever one was derived) and the
++   final in-budget ``status``. A terminal outcome derived at or after the
++   deadline is NOT an in-budget result: the status becomes
++   ``UNKNOWN_DEADLINE`` (the overall deadline expired) or
++   ``UNKNOWN_ALLOWANCE`` (only the query allowance expired), and the proof is
++   kept as ``late_terminal_reason`` diagnostic evidence. Each query is counted
++   at most once in ``construction_overrun_count`` and at most once in
++   ``construction_interruption_count``.
++R1b (model-phase late validations). The inherited learner counts a candidate
++   whose validation finished after its hard deadline in
++   ``info["late_validations"]``; the parent's totals omitted it. It is now
++   part of ``interrupted_validation_total``, split into
++   ``interrupted_validation_search_total`` and
++   ``interrupted_validation_model_total``.
++
++The parent's own header follows.
++
++SUCCESSOR VERSION of ``research/objective_index_search.py`` (next round 1.0).
++
+ Version ``next_round_search 1.1``. A byte-for-byte copy of the frozen owner
+ ``research/objective_index_search.py`` (sha256 ``FROZEN_SOURCE_SHA256`` below,
+ authored in the objective-index research protocol 1.0 and measured there),
+@@ -85,8 +118,10 @@
+     "multiscale_optimise", "optimise",
+ ]
+ 
+-VERSION = "next_round_search 1.1"
+-FROZEN_SOURCE = "research/objective_index_search.py"
++VERSION = "efficiency_search R0"
++PARENT_SOURCE = "research/next_round_search.py"
++PARENT_SOURCE_SHA256 = "b982d4cf62e63d54235237e7032175f893f9f519802f36ff87f7111c5db9c647"
++FROZEN_SOURCE ="research/objective_index_search.py"
+ FROZEN_SOURCE_SHA256 = "8cda157f465b1d23bb3894d8b3226437210d537f03cffd6ed8db523b12c4c7f5"
+ CATALOGS = ("a4", "a3")
+ TRAVERSALS = ("heap", "dfs")
+@@ -1106,6 +1141,13 @@
+         self.totals["filtered"] += filtered
+ 
+ 
++def _count_by(labels: List[str]) -> Dict[str, int]:
++    out: Dict[str, int] = {}
++    for label in labels:
++        out[label] = out.get(label, 0) + 1
++    return dict(sorted(out.items()))
++
++
+ def _status_key(status: str) -> str:
+     return {"SAT": "SAT", "UNSAT": "UNSAT", "UNKNOWN": "UNKNOWN_SEARCH", "FAIL": "FAIL"}[status]
+ 
+@@ -1574,6 +1616,13 @@
+         self.frontier_limited = False
+         self.model_pair = None
+         self.construction_interrupted = False
++        # R1a: initialization accounting (see the module header).
++        self.construction_seconds: Optional[float] = None
++        self.construction_deadline: Optional[float] = None
++        self.construction_overrun = False
++        self.construction_late_by = 0.0
++        self.terminal_reason: Optional[str] = None
++        self.late_terminal_reason: Optional[str] = None
+ 
+     def summary(self) -> dict:
+         report = self.report
+@@ -1590,6 +1639,12 @@
+                 "validations": report.validations if report else 0,
+                 "interrupted_validations": report.interrupted_validations if report else 0,
+                 "construction_interrupted": self.construction_interrupted,
++                "interrupted_before_search": self.construction_interrupted,
++                "construction_seconds": self.construction_seconds,
++                "construction_deadline_exceeded": self.construction_overrun,
++                "construction_past_deadline_seconds": self.construction_late_by,
++                "terminal_reason": self.terminal_reason,
++                "late_terminal_reason": self.late_terminal_reason,
+                 "pruned": report.pruned if report else 0,
+                 "completions": report.completions if report else 0,
+                 "domain_sha256": self.digest}
+@@ -1662,6 +1717,7 @@
+     status_counts: Dict[str, int] = {}
+     interrupted_by_query: List[dict] = []
+     construction_interruptions: List[dict] = []
++    construction_overruns: List[dict] = []
+     improvements: List[dict] = []
+     rejected: List[dict] = []
+     interrupted: List[dict] = []
+@@ -1689,10 +1745,30 @@
+             interrupted.append(item)
+             interrupted_by_query.append(dict(item, query=query.index, epoch=epochs,
+                                              policy=query.entry["policy"], status=status))
++        # R1b: a model-phase candidate validated after its hard deadline.
++        # A learner without ``info`` (a test double) has no model phase counts.
++        late_model = ((getattr(query.learner, "info", None) or {}).get("late_validations", 0)
++                      if query.learner is not None else 0)
++        if late_model:
++            item = {"phase": "model_validation", "window": list(query.entry["window"]),
++                    "count": late_model}
++            interrupted.append(item)
++            interrupted_by_query.append(dict(item, query=query.index, epoch=epochs,
++                                             policy=query.entry["policy"], status=status))
+         if query.construction_interrupted:
+             construction_interruptions.append({"query": query.index, "epoch": epochs,
+                                                "window": list(query.entry["window"]),
+-                                               "status": status})
++                                               "status": status,
++                                               "overrun": query.construction_overrun,
++                                               "late_terminal_reason":
++                                                   query.late_terminal_reason})
++        if query.construction_overrun:
++            construction_overruns.append({"query": query.index, "epoch": epochs,
++                                          "window": list(query.entry["window"]),
++                                          "status": status,
++                                          "construction_seconds": query.construction_seconds,
++                                          "past_deadline_seconds": query.construction_late_by,
++                                          "late_terminal_reason": query.late_terminal_reason})
+         if len(query_log) < 4096:
+             query_log.append(query.summary())
+ 
+@@ -1820,6 +1896,7 @@
+         slice_started = clock()
+         query.slices += 1
+         just_initialized = False
++        first_now: Optional[float] = None
+         if not query.initialized:
+             query.initialized = True
+             just_initialized = True
+@@ -1841,22 +1918,42 @@
+                                                   + raw_clock() - built)
+                         timers["constructions"] = timers.get("constructions", 0) + 1
+             except dk.Infeasible as exc:
+-                query.used += clock() - slice_started
+-                finish(query, "INFEASIBLE", str(exc))
+-                return "finished"
++                terminal = ("INFEASIBLE", str(exc))
+             except se.DomainError as exc:
+-                query.used += clock() - slice_started
+-                finish(query, "UNKNOWN_CONSTRUCTION", str(exc))
+-                return "finished"
+-            if outcome is not None:
+-                query.used += clock() - slice_started
+-                if outcome == "NO_STRICT_IMPROVEMENT":
+-                    finish(query, "NO_STRICT_IMPROVEMENT", query.caps["reason"])
++                terminal = ("UNKNOWN_CONSTRUCTION", str(exc))
++            else:
++                if outcome is None:
++                    terminal = None
++                elif outcome == "NO_STRICT_IMPROVEMENT":
++                    terminal = ("NO_STRICT_IMPROVEMENT", query.caps["reason"])
+                 elif outcome in ("UNSAT_CONFLICT", "UNSAT_ROOT"):
+-                    finish(query, "UNSAT", outcome.lower())
++                    terminal = ("UNSAT", outcome.lower())
+                 else:
+-                    finish(query, outcome, "")
++                    terminal = (outcome, "")
++            # R1a: ONE reading closes initialization on every exit. The parent
++            # read the clock here on terminal exits and at the top of the
++            # search loop otherwise; ``first_now`` hands this reading to the
++            # loop, so the number and order of clock readings are unchanged.
++            ended = clock()
++            query.construction_seconds = ended - slice_started
++            query.construction_deadline = query.hard_deadline
++            if ended >= query.hard_deadline:
++                query.construction_overrun = True
++                query.construction_late_by = ended - query.hard_deadline
++                query.construction_interrupted = True
++            if terminal is not None:
++                query.used += ended - slice_started
++                query.terminal_reason = terminal[0]
++                if query.construction_overrun:
++                    # Derived at or after the deadline: late diagnostic
++                    # evidence only, never an in-budget query result.
++                    query.late_terminal_reason = f"{terminal[0]}: {terminal[1]}"
++                    late = ("UNKNOWN_DEADLINE" if ended >= deadline else "UNKNOWN_ALLOWANCE")
++                    finish(query, late, "initialization ended at or after the deadline")
++                else:
++                    finish(query, terminal[0], terminal[1])
+                 return "finished"
++            first_now = ended
+         stats.current_domain = query.digest
+         remaining_allowance = query.allowance - query.used
+         full_deadline = min(deadline, slice_started + remaining_allowance)
+@@ -1875,7 +1972,10 @@
+         outcome = "paused"
+         try:
+             while True:
+-                now = clock()
++                if first_now is not None:
++                    now, first_now = first_now, None
++                else:
++                    now = clock()
+                 if now >= query.hard_deadline:
+                     if just_initialized and report.nodes == nodes_at_start:
+                         # Construction consumed the allowance before any node.
+@@ -2017,7 +2117,7 @@
+     elapsed = clock() - started
+     unknown = sum(n for s, n in status_counts.items() if s.startswith("UNKNOWN"))
+     record = {
+-        "controller": "next_round_search.multiscale_optimise",
++        "controller": "efficiency_search.multiscale_optimise",
+         "version": VERSION,
+         "frozen_source_sha256": FROZEN_SOURCE_SHA256,
+         "arm": "A4_multiscale_search",
+@@ -2044,10 +2144,28 @@
+         # affected queries; construction interruptions are separate and never
+         # counted as validations.
+         "interrupted_validation_total": sum(i["count"] for i in interrupted_by_query),
+-        "interrupted_validation_queries": len(interrupted_by_query),
++        # R1b: the total includes model-phase late validations; the split is
++        # exact. ``_queries`` counts distinct affected queries.
++        "interrupted_validation_search_total": sum(
++            i["count"] for i in interrupted_by_query if i["phase"] == "validation"),
++        "interrupted_validation_model_total": sum(
++            i["count"] for i in interrupted_by_query if i["phase"] == "model_validation"),
++        "interrupted_validation_queries": len({(i["epoch"], i["query"])
++                                               for i in interrupted_by_query}),
+         "interrupted_validations_per_query": interrupted_by_query[:4096],
++        # R1a: an interruption is a query that expanded no node before its
++        # deadline (including no time left at initialization); an overrun is
++        # an initialization that itself ended at or after its deadline. Each
++        # query is counted at most once in each.
+         "construction_interruption_count": len(construction_interruptions),
+         "construction_interruptions": construction_interruptions[:4096],
++        "construction_overrun_count": len(construction_overruns),
++        "construction_overrun_past_deadline_seconds": sum(
++            o["past_deadline_seconds"] for o in construction_overruns),
++        "construction_overruns": construction_overruns[:4096],
++        "late_terminal_reasons": _count_by([o["late_terminal_reason"].split(":")[0]
++                                            for o in construction_overruns
++                                            if o["late_terminal_reason"]]),
+         "aggregate": dict(aggregate.totals),
+         "ceilings": {"nodes": node_ceiling, "validations": validation_ceiling},
+         "limits": {"slice_seconds": slice_seconds, "slice_nodes": slice_nodes,

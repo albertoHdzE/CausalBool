@@ -1,0 +1,158 @@
+{
+  "before": {
+    "construction": {
+      "module": "research.next_round_search",
+      "version": "next_round_search 1.1",
+      "construction_interruption_count": 0,
+      "construction_overrun_count": "<absent>",
+      "construction_overrun_past_deadline_seconds": "<absent>",
+      "late_terminal_reasons": "<absent>",
+      "overshoot_seconds": 0.9,
+      "statuses": {
+        "NO_STRICT_IMPROVEMENT": 1,
+        "UNKNOWN_DEADLINE": 8,
+        "UNSAT": 1
+      },
+      "accepted": 0,
+      "late_queries": [
+        {
+          "window": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "radius": 4,
+          "phase": "search",
+          "model": null,
+          "policy": "k4_latest",
+          "status": "NO_STRICT_IMPROVEMENT",
+          "reason": "caps (5, 2) fall below lower bounds (6, 3)",
+          "active_seconds": 1.0,
+          "allowance_seconds": 0.1,
+          "slices": 1,
+          "frontier_peak": 0,
+          "frontier_left": 0,
+          "caps": [
+            6,
+            3,
+            5,
+            2
+          ],
+          "nodes": 0,
+          "validations": 0,
+          "interrupted_validations": 0,
+          "construction_interrupted": false,
+          "pruned": 0,
+          "completions": 0,
+          "domain_sha256": null
+        }
+      ]
+    },
+    "false_gate": {
+      "auditor": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research/next_round_audit.py",
+      "mutation": "false mechanism/component PASS and fabricated learning upper intervals",
+      "status": "PASS",
+      "checks": 52013,
+      "finding_codes": {},
+      "findings_first": [],
+      "not_audited": [],
+      "complete_coverage_claimed": null
+    }
+  },
+  "after": {
+    "construction": {
+      "module": "research.efficiency_search",
+      "version": "efficiency_search R0",
+      "construction_interruption_count": 1,
+      "construction_overrun_count": 1,
+      "construction_overrun_past_deadline_seconds": 0.9,
+      "late_terminal_reasons": {
+        "NO_STRICT_IMPROVEMENT": 1
+      },
+      "overshoot_seconds": 0.9,
+      "statuses": {
+        "UNKNOWN_DEADLINE": 9,
+        "UNSAT": 1
+      },
+      "accepted": 0,
+      "late_queries": [
+        {
+          "window": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "radius": 4,
+          "phase": "search",
+          "model": null,
+          "policy": "k4_latest",
+          "status": "UNKNOWN_DEADLINE",
+          "reason": "initialization ended at or after the deadline",
+          "active_seconds": 1.0,
+          "allowance_seconds": 0.1,
+          "slices": 1,
+          "frontier_peak": 0,
+          "frontier_left": 0,
+          "caps": [
+            6,
+            3,
+            5,
+            2
+          ],
+          "nodes": 0,
+          "validations": 0,
+          "interrupted_validations": 0,
+          "construction_interrupted": true,
+          "interrupted_before_search": true,
+          "construction_seconds": 1.0,
+          "construction_deadline_exceeded": true,
+          "construction_past_deadline_seconds": 0.9,
+          "terminal_reason": "NO_STRICT_IMPROVEMENT",
+          "late_terminal_reason": "NO_STRICT_IMPROVEMENT: caps (5, 2) fall below lower bounds (6, 3)",
+          "pruned": 0,
+          "completions": 0,
+          "domain_sha256": null
+        }
+      ]
+    },
+    "false_gate": {
+      "auditor": "/Users/alberto/Documents/projects/CausalBool/luminal-challenge/research/efficiency_audit.py",
+      "mutation": "false mechanism/component PASS and fabricated learning upper intervals",
+      "status": "FAIL",
+      "checks": 162982,
+      "finding_codes": {
+        "LEARNING_CONTRASTS": 6
+      },
+      "findings_first": [
+        {
+          "code": "LEARNING_CONTRASTS",
+          "detail": "LEARNING_FEASIBILITY.json::contrasts.tree_minus_hamming.interval_98_333.1: 999.0 vs -0.084375"
+        },
+        {
+          "code": "LEARNING_CONTRASTS",
+          "detail": "LEARNING_FEASIBILITY.json::contrasts.tree_minus_hamming.passes: True vs False"
+        },
+        {
+          "code": "LEARNING_CONTRASTS",
+          "detail": "LEARNING_FEASIBILITY.json::contrasts.tree_minus_random_mean.interval_98_333.1: 999.0 vs 0.0975"
+        },
+        {
+          "code": "LEARNING_CONTRASTS",
+          "detail": "LEARNING_FEASIBILITY.json::contrasts.tree_minus_shuffled_tree.interval_98_333.1: 999.0 vs 0.06666666666666667"
+        },
+        {
+          "code": "LEARNING_CONTRASTS",
+          "detail": "LEARNING_FEASIBILITY.json::contrasts.tree_minus_shuffled_tree.passes: True vs False"
+        },
+        {
+          "code": "LEARNING_CONTRASTS",
+          "detail": "LEARNING_FEASIBILITY.json::contrasts.mechanism_signal: 'PASS' vs 'FAIL_OR_INCONCLUSIVE'"
+        }
+      ],
+      "not_audited": null,
+      "complete_coverage_claimed": false
+    }
+  }
+}

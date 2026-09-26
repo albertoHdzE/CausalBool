@@ -1,0 +1,95 @@
+{
+  "M_repaired_gate": "PASS",
+  "R1_adapter": {
+    "finding": "the old estimate read one attribute per event; the repaired skeleton (node construction holding the state reference, reads, dispatch, streaming release, epoch disposal) is about 20x larger (per-program medians 1.0e-05-4.4e-02 s), at most 0.075 of the kernel replay",
+    "freeze": "ADAPTER_FREEZE.json",
+    "rows": "stages/R_adapter (90/90, 0 failed, full raw streams)",
+    "spec": "ADAPTER_SPEC.json (written before code)",
+    "status": "CLOSED",
+    "unmeasured_upper_estimate": "0 s with the itemised accounting in ADAPTER_SPEC.json (every C1 call-site change is exercised or identical to R0)"
+  },
+  "R2_auditor": {
+    "further_mutations": [
+      "blank line",
+      "NaN value",
+      "changed adapter payload vs raw stdout",
+      "duplicate row",
+      "hidden retry",
+      "ledger charge removed",
+      "frozen keys edited",
+      "kernel parity part false",
+      "missing STAGE_STATES",
+      "dependent launched without gate",
+      "false gate",
+      "fabricated aggregate",
+      "old speedup median",
+      "unmapped field",
+      "adapter spec changed"
+    ],
+    "lead_probes": {
+      "extra_torn_row": "old PASS / successor FAIL (STRICT)",
+      "false_M0_parity": "old PASS / successor FAIL (M0)",
+      "missing_NOT_RUN": "old PASS / successor FAIL (STAGES)",
+      "zeroed_kernel_freeze_hash": "old PASS / successor FAIL (SOURCES)"
+    },
+    "old_auditor": "unchanged; its PASS outputs on the probes are asserted in the tests, not hidden",
+    "result": {
+      "by_area": {
+        "FIELD_MAP": 466,
+        "LEDGER": 3,
+        "M0": 150,
+        "M2": 180,
+        "MEMBERSHIP:M_diagnosis": 1476,
+        "MEMBERSHIP:M_kernel": 1266,
+        "MEMBERSHIP:R_adapter": 906,
+        "NUMBERS": 407,
+        "REPLAY": 60,
+        "R_adapter": 90,
+        "SOURCES": 85,
+        "STAGES": 46,
+        "STRICT": 1929,
+        "WORKLOADS": 91
+      },
+      "status": "PASS",
+      "total_checks": 7155
+    },
+    "status": "CLOSED",
+    "successor": "research/third_round_resume_audit.py",
+    "tests": "research_tests/test_third_round_resume_audit.py (22 tests)"
+  },
+  "R3_speedup_median": {
+    "addendum": "SPEEDUP_ADDENDUM.md",
+    "cause": "the parent used sorted(values)[15] (upper median of 30) instead of the mean of the two middle values",
+    "corrected": 2.3649168298633314,
+    "old": 2.3947613512067907,
+    "range": [
+      0.9201184422758165,
+      4.360785651353614
+    ],
+    "status": "CLOSED"
+  },
+  "label": "post-hoc development accounting correction (lead-approved); original 0.8268 result and NO_JUSTIFIED_MECHANISM record retained; a development forecast, not a compile-call measurement",
+  "predictions": {
+    "corrected_scope_old_adapter_conservative": 0.7638230784259178,
+    "family": {
+      "aliasing": 0.7671028485518266,
+      "dependency": 0.9003558233070246,
+      "mixed": 0.7268044532109035,
+      "scalar": 0.8312877482022674,
+      "vector": 0.7208840556844576
+    },
+    "gate_max": 0.8,
+    "gate_met": true,
+    "original_registered_conservative": 0.8268222321783514,
+    "recalibrated_conservative": 0.78643064888711,
+    "recalibrated_point": 0.6061181323165558,
+    "replay_only_sensitivity": 0.7650299284537118
+  },
+  "protocol_id": "luminal-phase2-third-improvement-resume-1.0",
+  "source_dispositions": {
+    "kernel_prefix": "spec hash = first 17,377 bytes of the measured kernel; chronology NOT compliant with the original M1 order (retained deviation)",
+    "raw_stdout": "parent raw files not kept; payloads reconstructed from rows match all 390 recorded hashes (checked by the successor); full historical stderr not recoverable",
+    "third_round_common.py": "exact pair bd3a7b48 -> 3a0e4163, old bytes reconstructed and retained (provenance/)"
+  },
+  "written_utc": "2026-09-26T01:28:09Z"
+}

@@ -1,0 +1,85 @@
+{
+  "commands": [
+    {
+      "artifact": "PACKAGE.json",
+      "command": "../venv/bin/python plan/phase2_efficiency/verify_package.py",
+      "exit": 0
+    },
+    {
+      "artifact": "TESTS.log",
+      "command": "PYTHONPATH=.reference:. ../venv/bin/python -m unittest discover -s research_tests -p 'test_efficiency_*.py'",
+      "exit": 0,
+      "skips": 0,
+      "tests": 93
+    },
+    {
+      "artifact": "audit/SUCCESSOR_AUDIT.json",
+      "command": "python3 research/efficiency_audit.py --run results/phase2_structural_encoding/next_round_20260925 --output results/phase2_structural_encoding/lead_efficiency_review_20260925/audit",
+      "exit": 0
+    },
+    {
+      "artifact": "checker/EFFICIENCY_CHECKER.json",
+      "command": "PYTHONPATH=.reference:. ../venv/bin/python -m research.efficiency_checker --run results/phase2_structural_encoding/efficiency_20260925 --audit results/phase2_structural_encoding/lead_efficiency_review_20260925/audit/SUCCESSOR_AUDIT.json --output results/phase2_structural_encoding/lead_efficiency_review_20260925/checker",
+      "exit": 0
+    },
+    {
+      "artifact": "probes/LEAD_PROBES_BEFORE_AFTER.json",
+      "command": "PYTHONPATH=.reference:. ../venv/bin/python -m research.efficiency_probes --out results/phase2_structural_encoding/lead_efficiency_review_20260925/probes",
+      "exit": 0
+    },
+    {
+      "artifact": "export/acceptance/ACCEPTANCE.json",
+      "command": "PYTHONPATH=.reference:. ../venv/bin/python -m research.efficiency_export --variant R0 --out results/phase2_structural_encoding/lead_efficiency_review_20260925/export --run results/phase2_structural_encoding/lead_efficiency_review_20260925",
+      "exit": 0
+    },
+    {
+      "artifact": "RECOUNT.json",
+      "command": "../venv/bin/python results/phase2_structural_encoding/lead_efficiency_review_20260925/recount.py",
+      "exit": 0
+    }
+  ],
+  "fresh_performance_comparison": false,
+  "full_536_test_suite_rerun_by_lead": false,
+  "lead_recount_corrections": [
+    "Normalize serialized ordering indices to integers before hashing, matching the declared ordering digest.",
+    "Use equal-family aggregation for component timers, including components whose absent calls omit a seed."
+  ],
+  "limits": [
+    "No new candidate implemented.",
+    "No new confirmation outcomes.",
+    "Profile evidence supports a local stop, not a general impossibility bound."
+  ],
+  "ranker_reexecutions": 0,
+  "snapshot_diagnosis": {
+    "corrected_snapshot": "1 run, 1 pass, no skip; reports identical",
+    "files": [
+      "SNAPSHOT_DIAGNOSIS.json",
+      "CLEAN_SNAPSHOT_TEST.log",
+      "CLEAN_SNAPSHOT_RETEST.json",
+      "CLEAN_SNAPSHOT_RETEST.log"
+    ],
+    "first_clean_attempt": "0 run, 1 skip; lacked historical evidence; not a pass",
+    "original_test": "1 run, 1 failure; reports differ only at /run",
+    "script_exit_note": "snapshot_probe.py retains unittest outcomes in JSON; its own exit is not a test verdict",
+    "source_view": "74 hash-equal original research/test files; no efficiency modules",
+    "temporary_results_directory": "real directory, while historical result entries remain symlinks"
+  },
+  "source_hashes": {
+    "research/efficiency_audit.py": "b80ef2ed386cf6d4194954ab3b428019a88237969e4ae5198873d3e39d07040d",
+    "research/efficiency_checker.py": "7dc8a7c7737f0cff5d0dfeee663e0c114525ecb9ba1688c927347d8d32afbef2",
+    "research/efficiency_common.py": "9ae2e5822237cea2cbd130fe8a1caee81009e47b0a70b1ad9fea9d2a5b437ff6",
+    "research/efficiency_export.py": "a08e851c26d401fe1f4885a880fcbfa560a3eb8e4d4ee4ae407355fe07c17f1e",
+    "research/efficiency_probes.py": "983e5e2c68b2ef18814883695ae8765c66f797f40126b158b691bb58ea585ad4",
+    "research/efficiency_ranker.py": "6805c1b5bf891cfb8cb19e37c33d94e890ecb115a16430fbd937bdcbe282d31a",
+    "research/efficiency_replay.py": "3ed60c40d84c2dd76e107e4655c22db0bc874d04da963e486b9e223292a5f5bd",
+    "research/efficiency_search.py": "d0fcd441886cc5c3d34a6e1df7b2828ea219b6575ffd2049913b4d4901b92fbf",
+    "research/efficiency_snapshot.py": "e6d2c4108e0519dc45ec625cec8124587835b8bfac82f6c84abcd8a7701d6c99",
+    "research_tests/test_efficiency_audit.py": "8f75b28083ddeb4ce21e4e82f6756a8787a5895a0a92de4e40ae7951951b94b4",
+    "research_tests/test_efficiency_checker.py": "6f3d6e2b594c53603950c59126b0b9c73b9053d93ef1f06a5423c7332e59a254",
+    "research_tests/test_efficiency_inherited.py": "88ba99f6a2a136fa26cfca8d6e77814b34409b6baeff5f0fcedd1877f32c140a",
+    "research_tests/test_efficiency_learner_closure.py": "b7ecc5030722f4eb47a6c912dd08e3842a491bbf097fa8de4b141a62cb735fbe",
+    "research_tests/test_efficiency_ranker.py": "0a26e7a9d668c97d2bdc645acbbec3640e29b8674907abecc02eec67c8a37e4f",
+    "research_tests/test_efficiency_search.py": "57179432981d67db2f59d1adebdeeb87d6234701a11b0bd5fabc69ce1e2a2f3d"
+  },
+  "status": "ACCEPTED_WITH_LIMITATIONS"
+}

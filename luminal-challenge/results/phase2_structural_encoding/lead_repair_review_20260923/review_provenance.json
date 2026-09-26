@@ -1,0 +1,66 @@
+{
+  "reviewed_head": "1aef90681e3dead3ab1f560da8b7823ab66dabf4",
+  "commands": [
+    {
+      "command": "python3 plan/phase2/verify_package.py",
+      "exit_code": 0,
+      "log": "package.log",
+      "log_sha256": "fd2a2cbd644e9ae4054de3cda29477168581872fc1b32b06c8d1705105c97917"
+    },
+    {
+      "command": "PYTHONPATH=.reference:. python3 -m unittest discover -s research_tests -v",
+      "exit_code": 0,
+      "log": "tests.log",
+      "log_sha256": "c78f7904a1e69854f7c129c9ca93f3bf84d5f41848052584e272a2351f693384"
+    },
+    {
+      "command": "checker on phase2_repair_20260923b",
+      "exit_code": 2,
+      "log": "worker_checker.log",
+      "log_sha256": "cd00a5c90561c2d4a1203d2a894114252072d1f61539849504a39f02c20a97ca"
+    },
+    {
+      "command": "runner --stage all --run-id lead_repair_replay_20260923",
+      "exit_code": 2,
+      "log": "replay.log",
+      "log_sha256": "cd27045ff8105680c2f3888ca44135f5181231950841977fde76c744cf1af219"
+    },
+    {
+      "command": "checker on lead_repair_replay_20260923",
+      "exit_code": 2,
+      "log": "replay_checker.log",
+      "log_sha256": "42580189e9c4f450882dedd5779eec212b05b75cc464774a637b598f65391a64"
+    },
+    {
+      "command": "python3 export_direct.py",
+      "exit_code": 0,
+      "log": "export.log",
+      "log_sha256": "21000452c7e59df24bd8c34ce77d80682a83bd13ee42266b0f9562a49ee0319d"
+    },
+    {
+      "command": "python3 verify_direct.py --stage all",
+      "exit_code": 0,
+      "log": "production_verification.log",
+      "log_sha256": "36d58134406f9b10c7bea7904c324e7e66a254a9460f1bd7b4639389e3ebc6f8"
+    },
+    {
+      "command": "python3 compare_direct.py --repeats 3 --timeout 20",
+      "exit_code": 0,
+      "log": "production_comparison.log",
+      "log_sha256": "94561842bf5328710b958c0d52ef92dece403a9c8796790bbab68dc4a6f76dd2"
+    },
+    {
+      "command": "probes.py",
+      "exit_code": 0,
+      "log": "probes.log",
+      "log_sha256": "555df7d6aaa08e9cccf7616c3a99375a754c2b213786ff2d1da0fb63c5af3ded"
+    },
+    {
+      "command": "raw_probe.py",
+      "exit_code": 0,
+      "log": "raw_probe.log",
+      "log_sha256": "544db951ba020ab8c731b8d86c83b31ffb262b90b03dd3d466000bcce1c4d4c1"
+    }
+  ],
+  "note": "Initial probe attempt failed on temporary output outside ROOT; final retained script uses a temporary directory beneath review root. Source hashes in source_hashes.json. STATUS.md is the only existing file edited by this review."
+}

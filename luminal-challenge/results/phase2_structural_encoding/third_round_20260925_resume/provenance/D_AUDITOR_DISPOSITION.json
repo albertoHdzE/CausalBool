@@ -1,0 +1,19 @@
+{
+  "D_audit_with_frozen_bytes": {
+    "findings": [
+      [
+        "D_FREEZE",
+        "research/third_round_resume_audit.py"
+      ]
+    ],
+    "status": "FAIL",
+    "total_checks": 22550
+  },
+  "current_sha256_at_disposition": "d226a2bacbdcd31a602baa8ef3b92a44c55116403f02502c761aa15e1572ca9b",
+  "deviation": "the plan requires zero silent re-hashing of frozen checker/auditor sources; this is disclosed, not re-hashed. Lead to rule.",
+  "file": "research/third_round_resume_audit.py",
+  "frozen_is_exact_prefix_bytes": 36768,
+  "frozen_sha256": "883a3d82dc425892f83e4c20b55cf0bcd8e2f9af2758310f55eade2ffff60f92",
+  "interpretation": "the only finding is the D_FREEZE hash of this file itself, i.e. exactly this append; every other D check (rows, raw streams, ledger, parity, gate numbers, field map) passes",
+  "what_changed": "Stage C audit functions APPENDED after the development freeze, while D rows were being measured (no D function edited); the file is not imported by any measured worker"
+}

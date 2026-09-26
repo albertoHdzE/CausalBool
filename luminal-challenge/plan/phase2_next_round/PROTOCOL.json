@@ -1,0 +1,147 @@
+{
+  "protocol_id": "luminal-phase2-next-round-1.0",
+  "version": "1.0",
+  "plan": "plan/CLAUDE_PHASE2_NEXT_ROUND.md",
+  "status": "READY_FOR_EXECUTION_NOT_DISPATCHED",
+  "stages": [
+    "R_repair",
+    "D_factorial_diagnosis",
+    "E_one_engineering_candidate",
+    "C_confirmation",
+    "L_learning_pilot"
+  ],
+  "budgets_seconds": [
+    0.01,
+    0.1,
+    1.0
+  ],
+  "primary_budget_seconds": 0.1,
+  "budget_scope": "optimization allowance; bootstrap and total compile measured separately",
+  "external_timeout_seconds": 20,
+  "measurement_wall_cap_hours": 24,
+  "development": {
+    "seeds": [
+      800000,
+      800099
+    ],
+    "programs": 100,
+    "repetitions": 3
+  },
+  "confirmation": {
+    "seeds": [
+      960000,
+      960199
+    ],
+    "programs": 200,
+    "repetitions": 5,
+    "semantic_disjointness_required": true
+  },
+  "learning": {
+    "development_fixtures": "original objective-index development 15, treated as exposed development",
+    "fresh_pool_seeds": [
+      970000,
+      970399
+    ],
+    "evaluation_fixtures": 30,
+    "per_family": 6,
+    "training_count": 20,
+    "primary_prefix": 32,
+    "primary_endpoint": "novel held-out feasible elite objects / 32",
+    "minimum_informative_development": 10,
+    "minimum_informative_evaluation": 20,
+    "minimum_informative_evaluation_per_family": 3,
+    "minimum_acquisition_program_fraction": 0.1,
+    "minimum_yield_difference": 0.05,
+    "ordering_count": 14
+  },
+  "seeds": {
+    "arm_order": 2026092601,
+    "bootstrap": 2026092602,
+    "training_draw": 2026092603,
+    "pool": 2026092604,
+    "shuffled_labels": 2026092605,
+    "random_order": [
+      2026092610,
+      2026092611,
+      2026092612,
+      2026092613,
+      2026092614,
+      2026092615,
+      2026092616,
+      2026092617,
+      2026092618,
+      2026092619
+    ]
+  },
+  "stable_seed": "SHA256 of compact sorted-key ensure_ascii=False allow_nan=False JSON; first 16 hex digits as unsigned integer",
+  "seed_keys": {
+    "arm_order": [
+      "arm_order_seed",
+      "program_sha256",
+      "repetition",
+      "arm_id",
+      "budget_or_null"
+    ],
+    "training_draw": [
+      "training_draw_seed",
+      "fixture_sha256"
+    ],
+    "pool": [
+      "pool_seed",
+      "domain_sha256"
+    ],
+    "shuffled_labels": [
+      "shuffled_labels_seed",
+      "domain_sha256"
+    ],
+    "random_order": [
+      "random_order_seed",
+      "domain_sha256"
+    ]
+  },
+  "statistics": {
+    "resamples": 10000,
+    "primary_head_to_head_percentiles": [
+      0.025,
+      0.975
+    ],
+    "new_candidate_four_endpoints_percentiles": [
+      0.00625,
+      0.99375
+    ],
+    "learning_three_contrasts_percentiles": [
+      0.008333333333333333,
+      0.9916666666666667
+    ],
+    "sampling_unit": "program or fixture, stratified by family; equal family means",
+    "repetitions": "average paired quality logs inside program; median times inside program; never independent samples"
+  },
+  "practical_targets": {
+    "quality_route": {
+      "upper_J_ratio": 0.98,
+      "upper_compile_ratio": 1.1
+    },
+    "efficiency_route": {
+      "upper_compile_ratio": 0.8,
+      "upper_J_ratio": 1.01
+    },
+    "must_hold_against_both_references": true
+  },
+  "expected_rows": {
+    "development_factorial": 4500,
+    "fixed_work_diagnostic": 120,
+    "engineering_candidate_max": 900,
+    "compiler_confirmation_two_arms": 6000,
+    "compiler_confirmation_three_arms": 9000,
+    "compiler_classical_bootstrap": 2000,
+    "public_two_arms": 360,
+    "public_three_arms": 480,
+    "export": 624,
+    "learning_acquisition_diagnostic": 100,
+    "learning_evaluation_orderings": 420,
+    "learning_timing_max": 2100
+  },
+  "learned_compiler_confirmation_authorized": false,
+  "production_integration_authorized": false,
+  "results_prefix": "results/phase2_structural_encoding/next_round_20260925"
+}

@@ -1,0 +1,105 @@
+{
+  "review_date": "2026-09-23",
+  "verdict": "CHANGES_REQUIRED",
+  "head": "1aef90681e3dead3ab1f560da8b7823ab66dabf4",
+  "status": " M luminal-challenge/plan/PHASE2_STRUCTURAL_ENCODING_PLAN.md\n M luminal-challenge/plan/STATUS.md\n?? luminal-challenge/plan/phase2/\n?? luminal-challenge/research/\n?? luminal-challenge/results/phase2_structural_encoding/\n?? luminal-challenge/tests_direct/test_phase2_encoding.py\n?? luminal-challenge/tests_direct/test_phase2_evidence.py\n?? luminal-challenge/tests_direct/test_phase2_models.py\n?? luminal-challenge/tests_direct/test_phase2_search.py\n?? plans/take-as-input-the-sparkling-prism.md\n",
+  "reviewed_files": {
+    "research/README.md": "e188e86d270b10cedf0a13fd0ea59ee3767d9e09905c1808986342b6c401d238",
+    "research/__init__.py": "5b335135f07095abc1ea486647db599fdbc030a709bf982510b77fdd3ae96378",
+    "research/check_structural_evidence.py": "3a04fca45f0d81e5d4edc35fac3b2e169c0f94b8ef9f0f108fa7521c7b77c5de",
+    "research/run_structural_experiments.py": "6573c0cd64ce3fb34734c525bd8c1516b31cb9b6e8833b32a66bbefb05abfed4",
+    "research/structural_encoding.py": "5b4d2736f0703881f18abe10f3d30f767fabc6050128688a7079d723df3ccef1",
+    "research/structural_models.py": "0edc512af779efa7e04524c78aebf44f7a26ab6e9501425c8b73ee9e2c6403ed",
+    "research/structural_oracle.py": "7978a6fa5c0ab9c1a3177638acf425ccd896a3951e858355481417d40aeb4106",
+    "research/structural_search.py": "fd35e07941db013272d23dc9b002b38da6c6ee887db8febab89ecaddd0744839",
+    "tests_direct/test_phase2_encoding.py": "a1203e41ac84335a54be217bc09c529d69062890ca616a4357d13f82c421df0d",
+    "tests_direct/test_phase2_evidence.py": "6fe1f87d7f023a3ee3377a0bbf7856e8d1fccb2798db81db8929c9cb888a7c0b",
+    "tests_direct/test_phase2_models.py": "c6cbde8d3261d801e14e45687e36cab74ec16537533ad8e88b34583e266ec15f",
+    "tests_direct/test_phase2_search.py": "26929b7c34c5d8ab92c61b0d82b331c3189a65170e7ab01248709189a3b9b6eb"
+  },
+  "reviewed_files_manifest_sha256": "b8a9ad71e08a45ccf4165523f76b6b60530b6f4a1c4a81876d399ce52b614c64",
+  "tracked_diff_sha256": "5e32299313189de840b17e72c01b572b898a00685b62d7974dc047c5d4f192f9",
+  "note": "Worker files are untracked; their full contents are retained in reviewed_source, not merely the tracked diff.",
+  "commands": [
+    {
+      "command": "python3 plan/phase2/verify_package.py",
+      "exit": 0
+    },
+    {
+      "command": "PYTHONPATH=.reference:. python3 -m unittest tests_direct.test_phase2_encoding tests_direct.test_phase2_search tests_direct.test_phase2_models tests_direct.test_phase2_evidence -v",
+      "exit": 0,
+      "log": "tests.log",
+      "tests": 162
+    },
+    {
+      "command": "PYTHONPATH=.reference:. python3 -m research.run_structural_experiments --stage all --run-id lead_replay_20260923 --contract plan/phase2",
+      "exit": 2,
+      "log": "replay.log"
+    },
+    {
+      "command": "PYTHONPATH=.reference:. python3 results/phase2_structural_encoding/lead_review_20260923/probes.py",
+      "exit": 0,
+      "log": "probes.log"
+    },
+    {
+      "command": "PYTHONPATH=.reference:. python3 results/phase2_structural_encoding/lead_review_20260923/independent_checks.py",
+      "exit": 0,
+      "log": "independent_checks.log"
+    },
+    {
+      "command": "python3 export_direct.py",
+      "exit": 0,
+      "log": "export.log"
+    },
+    {
+      "command": "python3 verify_direct.py --stage all --output results/phase2_structural_encoding/lead_review_20260923/production_verification",
+      "exit": 1,
+      "log": "production_verification.log"
+    },
+    {
+      "command": "python3 compare_direct.py --repeats 3 --timeout 20 --output results/phase2_structural_encoding/lead_review_20260923/production_comparison",
+      "exit": 0,
+      "log": "production_comparison.log"
+    }
+  ],
+  "comparison_runs": 72,
+  "comparison_failures": [],
+  "comparison_gates": {
+    "all_passed": {
+      "detail": "every gate above",
+      "passed": true
+    },
+    "all_runs_present": {
+      "detail": "expected 72 unique (arm, program, repetition) keys over 8 programs, observed 72 rows and 72 unique; 0 duplicated, 0 missing, 0 unexpected, 0 execution failures; rows per arm {'serial': 24, 'classical': 24, 'direct_index': 24}",
+      "duplicates": [],
+      "missing": [],
+      "passed": true,
+      "unexpected": []
+    },
+    "direct_arm_isolated": {
+      "detail": "0 direct runs loaded a prohibited module",
+      "passed": true
+    },
+    "direct_beats_baseline": {
+      "detail": "direct combined scores per repetition: [2.008466202284657, 2.008466202284657, 2.008466202284657]; each must exceed 1.0 and all 3 must be present",
+      "passed": true
+    },
+    "frozen_classical_control": {
+      "detail": "classical aggregates for repetitions [0, 1, 2] (all of [0, 1, 2] required): [1.9013791212645499, 1.9013791212645499, 1.9013791212645499], each within 1e-9 of the historical 1.9013791212645499",
+      "passed": true
+    },
+    "frozen_integer_metrics": {
+      "detail": "48 serial and classical measurements checked against the protected historical per-program integers; 0 disagree",
+      "drift": [],
+      "passed": true
+    },
+    "metrics_valid": {
+      "detail": "0 runs with non-positive or unvalidated metrics",
+      "passed": true
+    },
+    "no_candidate_discrepancies": {
+      "detail": "0 measured compilations reported a query/validator discrepancy",
+      "passed": true
+    }
+  }
+}

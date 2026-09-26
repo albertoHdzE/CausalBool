@@ -1,0 +1,51 @@
+{
+  "C1": "not implemented; R0 remains the baseline",
+  "analysis_defect_found_after_outcome": {
+    "evidence_of_scope": "baseline replay median / scope-matched timer estimate (REPLACED + certificates + propagation_setup + address_pairs, deflated) lies in [0.90, 1.07] over 30 programs",
+    "sensitivity_not_used_for_the_decision": {
+      "O_equal_min_replay_and_scope_matched_timer": 0.7638230784259178,
+      "O_equal_replay_median": 0.7422848903946956
+    },
+    "what": "MECHANISM_SPEC.json defines O = min(baseline replay median, timer-exclusive replaced seconds / timer inflation). The timer arm (REPLACED components of third_round_analysis) excludes certificate emission, Propagation construction and address_pairs, which the timer ownership map charges to other components; N (the shared-kernel replay) INCLUDES the same emissions, construction and address_pairs. The min() therefore selected the timer arm on all 30 programs and charged work that is not replaced (emission is identical in both versions) at 1.5x on top of T0.",
+    "why_not_applied": "found only after the registered result was observed; plan sections 3 and 6 forbid changing a gate computation or lowering a target after outcomes. The correction is disclosed for the lead to rule on; no dependent stage was run on it."
+  },
+  "claim_limit": "development model on 30 development programs with a replay of captured work; a kernel speedup is not a compiler speedup; not a confidence bound",
+  "decided_utc": "2026-09-26T00:58:06Z",
+  "decision": "NO_JUSTIFIED_MECHANISM",
+  "dependents": {
+    "C_acceptance": "NOT_RUN (depends on D)",
+    "C_export": "NOT_RUN (depends on D)",
+    "C_fixed_work": "NOT_RUN (depends on D)",
+    "C_public": "NOT_RUN (depends on D)",
+    "C_wall": "NOT_RUN (depends on D)",
+    "D_fixed_work": "NOT_RUN (M gate failed)",
+    "D_memory": "NOT_RUN (M gate failed)",
+    "D_wall": "NOT_RUN (M gate failed)"
+  },
+  "design": "BS1_branch_state_with_change_record (MECHANISM_SPEC.json)",
+  "family_conservative_geomean": {
+    "aliasing": 0.7984883495924188,
+    "dependency": 0.9593297791495927,
+    "mixed": 0.748967601678747,
+    "scalar": 0.8740491513112243,
+    "vector": 0.7705934827924971
+  },
+  "gate": {
+    "conservative_ratio_max": 0.8,
+    "kernel_parity_all_30": true,
+    "met": false,
+    "registered_conservative_ratio": 0.8268222321783514,
+    "registered_point_ratio": 0.6542766737140769
+  },
+  "kernel_evidence": {
+    "kernel_speedup_on_replaced_work_median": 2.3947613512067907,
+    "kernel_speedup_range": [
+      0.9201184422758165,
+      4.360785651353614
+    ],
+    "rows": 180
+  },
+  "protocol_id": "luminal-phase2-third-improvement-1.0",
+  "reason": "the conservative predicted fixed-work compile ratio computed by the formula registered in MECHANISM_SPEC.json is 0.8268 > 0.80",
+  "stage": "M2 mechanism decision"
+}

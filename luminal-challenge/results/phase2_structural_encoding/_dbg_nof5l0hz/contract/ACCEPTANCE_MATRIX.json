@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "checks": [
+    {
+      "id": "C01",
+      "stage": "P0",
+      "requirement": "Baseline and package hashes",
+      "probe": "Alter a protected hash or plan byte",
+      "expected": "preflight fails before candidate execution"
+    },
+    {
+      "id": "C02",
+      "stage": "P0",
+      "requirement": "Twelve exact fixture inputs",
+      "probe": "Delete or duplicate a fixture",
+      "expected": "membership check fails"
+    },
+    {
+      "id": "C03",
+      "stage": "P0",
+      "requirement": "Held-out corpus exact membership and provenance",
+      "probe": "Replace a program with a renamed duplicate",
+      "expected": "corpus freeze fails"
+    },
+    {
+      "id": "C04",
+      "stage": "P1",
+      "requirement": "Fixed offsets and inverse maps",
+      "probe": "Change the decoded scheduling order of two values",
+      "expected": "address offsets remain fixed and round trips hold"
+    },
+    {
+      "id": "C05",
+      "stage": "P1",
+      "requirement": "Rank cardinality and B=0",
+      "probe": "Use three/five choices, excess ranks and zero-width constants",
+      "expected": "out-of-range is INVALID_CODE; empty local options DEAD_END"
+    },
+    {
+      "id": "C06",
+      "stage": "P1",
+      "requirement": "Source and external dependencies",
+      "probe": "Move selected op before producer or after fixed successor bound",
+      "expected": "no illegal COMPLETE result"
+    },
+    {
+      "id": "C07",
+      "stage": "P1",
+      "requirement": "Inclusive endpoints and pending writes",
+      "probe": "Reuse address at equal last-read/write cycle",
+      "expected": "reject conflict; adjacent nonoverlap accepted"
+    },
+    {
+      "id": "C08",
+      "stage": "P1",
+      "requirement": "External lifetime changes",
+      "probe": "Move selected reader to extend two fixed values into conflict",
+      "expected": "DEAD_END before COMPLETE"
+    },
+    {
+      "id": "C09",
+      "stage": "P1",
+      "requirement": "Vector geometry",
+      "probe": "Misalign, exceed address 255, introduce scalar/vector overlap or holes",
+      "expected": "exact validator agreement including footprint"
+    },
+    {
+      "id": "C10",
+      "stage": "P1",
+      "requirement": "Exact domain equivalence",
+      "probe": "Compare all twelve oracle Cartesian domains and encode all feasible objects",
+      "expected": "set equality and successful-code inverse"
+    },
+    {
+      "id": "C11",
+      "stage": "P1",
+      "requirement": "Public sampling denominators",
+      "probe": "Hide invalid, dead-end or interrupted attempts",
+      "expected": "checker rejects totals; low coverage INCONCLUSIVE"
+    },
+    {
+      "id": "C12",
+      "stage": "P1",
+      "requirement": "Candidate discrepancy visibility",
+      "probe": "Inject a fully decoded invalid compilation",
+      "expected": "stage FAIL; candidate and validator message retained"
+    },
+    {
+      "id": "C13",
+      "stage": "P2",
+      "requirement": "Admissible lower bounds",
+      "probe": "Compare each prefix bound with every tiny-domain completion",
+      "expected": "no bound exceeds any completion objective"
+    },
+    {
+      "id": "C14",
+      "stage": "P2",
+      "requirement": "Budget/verdict integrity",
+      "probe": "Exhaust time or each work counter during build/search/validation",
+      "expected": "UNKNOWN or INTERRUPTED; no fabricated UNSAT or accepted unchecked candidate"
+    },
+    {
+      "id": "C15",
+      "stage": "P2",
+      "requirement": "Comparison membership",
+      "probe": "Duplicate one row while omitting a different program/arm",
+      "expected": "exact expected-key check fails"
+    },
+    {
+      "id": "C16",
+      "stage": "P3",
+      "requirement": "Exact cover and serialization",
+      "probe": "Alter free mask, padding, ordering, duplicate pair or varint length",
+      "expected": "exactness/serialization checker rejects"
+    },
+    {
+      "id": "C17",
+      "stage": "P3",
+      "requirement": "Ties and control denominators",
+      "probe": "Drop threshold ties or one of 100 controls",
+      "expected": "checker rejects frozen counts and triage"
+    },
+    {
+      "id": "C18",
+      "stage": "P3",
+      "requirement": "Construction budget",
+      "probe": "Interrupt cover merging",
+      "expected": "INCONCLUSIVE; no exact/compressed-success claim"
+    },
+    {
+      "id": "C19",
+      "stage": "P4",
+      "requirement": "No empirical-cover discovery",
+      "probe": "Sample from exact elite cover",
+      "expected": "zero unseen discoveries; control exhausts"
+    },
+    {
+      "id": "C20",
+      "stage": "P4",
+      "requirement": "Hidden-label isolation",
+      "probe": "Make learner read oracle or test labels without a paid query",
+      "expected": "guard/test fails; leakage reported"
+    },
+    {
+      "id": "C21",
+      "stage": "P4",
+      "requirement": "Novelty and duplicate accounting",
+      "probe": "Relabel training or repeated index as unseen",
+      "expected": "checker rejects discovery totals"
+    },
+    {
+      "id": "C22",
+      "stage": "P4",
+      "requirement": "Advancement intervals",
+      "probe": "Replace 97.5% gate intervals with 95% or mutate seeds/resamples",
+      "expected": "checker rejects protocol deviation"
+    },
+    {
+      "id": "C23",
+      "stage": "P5",
+      "requirement": "Complete held-out failures",
+      "probe": "Remove crashed, timed-out or slower rows",
+      "expected": "membership/failure gate blocks success"
+    },
+    {
+      "id": "C24",
+      "stage": "ALL",
+      "requirement": "Architecture ownership",
+      "probe": "Plant duplicate Cube/codec owner or prohibited import in temporary copy",
+      "expected": "guard rejects intended violation; unmutated control passes"
+    },
+    {
+      "id": "C25",
+      "stage": "ALL",
+      "requirement": "Evidence provenance",
+      "probe": "Change source snapshot, command exit or validator case count",
+      "expected": "checker rejects targeted discrepancy"
+    },
+    {
+      "id": "C26",
+      "stage": "ALL",
+      "requirement": "Gate dependency truth",
+      "probe": "Mark P4 PASS after P3 miss or omit independent non-model P5",
+      "expected": "checker rejects dependency inconsistency"
+    },
+    {
+      "id": "C27",
+      "stage": "ALL",
+      "requirement": "Frozen production controls",
+      "probe": "Run existing verifier/export/comparator",
+      "expected": "all existing gates retain original definitions"
+    },
+    {
+      "id": "C28",
+      "stage": "ALL",
+      "requirement": "Empty/malformed input",
+      "probe": "Empty scan, NaN metrics, missing file, foreign result identity",
+      "expected": "nonzero exit with explicit reason"
+    },
+    {
+      "id": "C29",
+      "stage": "P2",
+      "requirement": "Clock overshoot and incumbent retention",
+      "probe": "Interrupt after bootstrap and during candidate validation",
+      "expected": "retain prior validated incumbent; report overshoot and interrupted candidate"
+    },
+    {
+      "id": "C30",
+      "stage": "P1",
+      "requirement": "Canonical object and exact operation set",
+      "probe": "Insert duplicate/missing op, lane alias or trailing empty bundle",
+      "expected": "canonical encode rejects or normalises only as specified; oracle set agreement"
+    }
+  ]
+}

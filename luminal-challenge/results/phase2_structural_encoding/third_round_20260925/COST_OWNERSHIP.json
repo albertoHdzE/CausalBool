@@ -1,0 +1,53 @@
+{
+  "dependency_map": {
+    "affected domains": "the change record of the child call; every derived fact reads only the domains named in its dependency: edge (u,v) -> max(D_v), min(D_u); rule-2 key (e,c) -> singles; EF op -> newly full cycles of its engine; value interval -> producer bounds and consumer minima; pair (u,v) -> min/max(A_v)",
+    "branch / sibling / resume": "states are immutable after construction; a child builds a NEW state (copy-on-write of D, A, singles, contrib); siblings and later resumptions read the unchanged parent; DFS backtracking restores by reference, no undo log",
+    "fixed context": "fixed times/addresses/base usage are Propagation constants (R0's own)",
+    "incumbent-sensitive data": "only prune's `best`; it is an argument, never cached; PB certificates are emitted by the unchanged comparison",
+    "partial times -> fixed lifetimes -> address search": "the time leaf's TimeState (with its cached peak) is reused by every address-phase prune of that leaf; address states are rebuilt from the leaf's pairs tuple (PairInfo built once per leaf, charged to the address root)",
+    "program / query / epoch": "a Propagation is built per query domain (program, window, caps, incumbent epoch); all masks and states belong to it and die with the query; nothing is shared across Propagations or compilations",
+    "roots": "time root: R0's own times_fixpoint then singles from its output; address root: emulation with every pair dirty (identical to R0's first sweep)"
+  },
+  "not_touched": [
+    "state_copy",
+    "options",
+    "validation",
+    "encoding",
+    "untimed_remainder"
+  ],
+  "re_performed_identically_by_BS1": [
+    "certificates (same stream)",
+    "address_pairs",
+    "propagation_setup (+ BS1 masks)"
+  ],
+  "reconciliation": "sum(exclusive) + untimed remainder = timed wall on every program (DIAGNOSIS.json 'reconciliation' = 1.0000); timer inflation over unprofiled T0 1.01-1.52",
+  "replaced_by_BS1": [
+    "precedence",
+    "issue_capacity",
+    "tfix_shell",
+    "tfix_copy",
+    "child_domain_copy",
+    "bounds_live",
+    "bounds_product",
+    "address_support"
+  ],
+  "stage": "M0 cost-ownership map (exclusive timers; nested calls charged once)",
+  "timer_components": {
+    "address_pairs": "address_pairs",
+    "address_support": "addresses_fixpoint",
+    "bounds_live": "compulsory_peak + _static_max (one component with product_bound: live/product bounds)",
+    "bounds_product": "prune + product_bound own time (LC/LS loops)",
+    "certificates": "PropagationStats.emit (charged here, not to the emitting rule)",
+    "child_domain_copy": "dict(node.D)/dict(node.A) in Expander.children",
+    "encoding": "_new_report",
+    "issue_capacity": "_capacity_singles (singles map + EO) and _capacity_scan (EF scan)",
+    "options": "structural_encoding.options",
+    "precedence": "SplitPropagation._precedence (rule 1 body of times_fixpoint)",
+    "propagation_setup": "Propagation.__init__",
+    "state_copy": "State.copy in children",
+    "tfix_copy": "dict(D) inside times_fixpoint",
+    "tfix_shell": "times_fixpoint loop shell",
+    "untimed_remainder": "everything else (search loop, catalog, acceptor, bootstrap)",
+    "validation": "machine.check_compilation / check_case"
+  }
+}

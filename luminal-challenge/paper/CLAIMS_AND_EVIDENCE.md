@@ -81,3 +81,33 @@ The manuscript may now be drafted around these bounded claims. Further attempts
 to beat classical compilation time are not a
 prerequisite for an honest empirical paper. Publication readiness and scientific
 novelty remain separate questions from local implementation acceptance.
+
+## Phase 2 structural-encoding feasibility (23 September 2026)
+
+This is a separate campaign from an accepted isolated research implementation,
+not a production compiler result or a new production benchmark. Its scientific
+result is inconclusive. Authoritative evidence is
+`../results/phase2_structural_encoding/phase2_repair_20260923c/`: `LEAD_ACCEPTANCE.md`,
+`manifest.json`, `gates.json`, `hypotheses.json`, `checker.json`, `p0/summary.json`,
+`p1/summary.json`, and the five raw files named by that P1 summary. The locked
+design is in `../plan/phase2/PROTOCOL.json` and
+`../plan/PHASE2_STRUCTURAL_ENCODING_PLAN.md`. The paper-local derivation is
+`phase2_evidence.py`; generated values, source SHA256 values and raw-artifact
+hash verification are retained in `generated/phase2_metrics.json`.
+
+P0 passed its declared provenance/domain/oracle diagnostics. P1 is INCONCLUSIVE:
+its fixed streams retained 160,000 attempts, 819 completed draws and 1,356 case
+checks with zero observed discrepancies, but four of eight public programs fell
+below the required 100 distinct completions. All raw-bit streams produced zero
+completions. P2-P5 are BLOCKED_BY_GATE and unmeasured. The checker found zero
+findings and internally consistent retained artifacts, while
+`artifacts_complete=false` and `scientific_success=false` remain explicit. These
+are finite-fixture checks, sampled executions and checker results with different
+denominators; zero observed defects is not a general proof. No compression,
+scaling, discovery or performance benefit is established. A new sampling policy
+requires a separate protocol amendment and fresh evidence.
+
+The 113 MB raw-attempt file remains local because repository packaging is
+unresolved. This evidence is not portable, published or fully archived. The
+accepted production measurements and September 20 tests remain separate from
+the September 23 Phase 2 campaign.

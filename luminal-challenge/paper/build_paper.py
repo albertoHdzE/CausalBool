@@ -32,7 +32,8 @@ if issues:
     raise RuntimeError('Resolve LaTeX issues before delivering the PDF:\n' + '\n'.join(issues))
 shutil.copyfile(BUILD / 'main.pdf', HERE / 'main.pdf')
 artifacts = [HERE / 'main.tex', HERE / 'main.pdf', HERE / 'generate_figures.py',
-             HERE / 'build_paper.py', *sorted((HERE / 'generated').iterdir())]
+             HERE / 'phase2_evidence.py', HERE / 'build_paper.py',
+             *sorted((HERE / 'generated').iterdir())]
 manifest = {str(p.relative_to(HERE)): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in artifacts if p.is_file()}
 report = {'status': 'PASS', 'commands': commands,

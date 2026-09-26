@@ -1,0 +1,200 @@
+diff --color -ru starting_source/research/check_structural_evidence.py final_source/research/check_structural_evidence.py
+--- starting_source/research/check_structural_evidence.py	2026-09-24 07:11:45
++++ final_source/research/check_structural_evidence.py	2026-09-24 07:22:55
+@@ -1983,7 +1983,7 @@
+                 )
+             recomputed = runner.paired_log_ratio_analysis(
+                 rows, families, baseline, candidate, budget, self.contract,
+-                paired_repetitions=(label.startswith("p5") and self.amendment is not None),
++                paired_repetitions=(label.startswith(("p2", "p5")) and self.amendment is not None),
+             )
+             checked += 1
+             for field in ("status", "programs", "wins", "ties", "losses"):
+@@ -2845,7 +2845,7 @@
+     def check_hypotheses(self, summaries: Dict[str, Optional[dict]]) -> Dict[str, dict]:
+         """Recompute the hypothesis labels from the summaries and compare."""
+ 
+-        recomputed = runner.hypothesis_dispositions(self.root)
++        recomputed = runner.hypothesis_dispositions(self.root, amended=self.amendment is not None)
+         recorded = self.load("hypotheses.json") or {}
+         if set(recorded) != set(recomputed):
+             self.fail(
+diff --color -ru starting_source/research/run_structural_experiments.py final_source/research/run_structural_experiments.py
+--- starting_source/research/run_structural_experiments.py	2026-09-24 07:11:45
++++ final_source/research/run_structural_experiments.py	2026-09-24 07:22:55
+@@ -3231,15 +3231,18 @@
+         "candidate_arm": candidate,
+         "budget_seconds": budget,
+         "programs": len(per_program),
+-        **({"paired_repetitions_per_program": pair_counts,
+-            "endpoint": "mean paired log(J_control / J_candidate) over repetitions, then seeds, then programs"}
+-           if paired_repetitions else {}),
+         "wins": wins,
+         "ties": ties,
+         "losses": losses,
+         "per_program_log_ratio": per_program,
+         "interval": interval,
+         "endpoint": "paired log(J_control / J_candidate); positive favours the candidate",
++        # Listed last so that, under the amendment, the estimand actually used
++        # is the one the artifact names (a dict literal keeps the final key).
++        **({"paired_repetitions_per_program": pair_counts,
++            "endpoint": "mean paired log(J_control / J_candidate) over repetitions, then seeds, "
++                        "then programs; positive favours the candidate"}
++           if paired_repetitions else {}),
+     }
+ 
+ 
+@@ -3331,7 +3334,8 @@
+     primary = contract.budgets["primary_seconds"]
+     comparisons = {
+         f"{candidate}_vs_{baseline}@{budget}": paired_log_ratio_analysis(
+-            rows, families, baseline, candidate, budget, contract
++            rows, families, baseline, candidate, budget, contract,
++            paired_repetitions=run.amendment is not None,
+         )
+         for budget in contract.budgets["optimisation_seconds"]
+         for baseline, candidate in (
+@@ -4256,6 +4260,8 @@
+                 entries.append({
+                     "corpus": corpus, "budget_seconds": budget, "candidate": candidate,
+                     "control": control, "n_programs": len(log_quality),
++                    "expected_programs": len(families),
++                    "unpaired_programs": sorted(set(families) - set(log_quality)),
+                     "quality_log_control_over_candidate": q_interval,
+                     "paired_repetitions_per_program": pair_counts,
+                     "wins": wins, "ties": ties, "losses": losses,
+@@ -4288,6 +4294,8 @@
+                   "baseline_arm": "accepted_budgeted", "candidate_arm": candidate,
+                   "budget_seconds": primary_budget,
+                   "programs": len(primary_analysis),
++                  "expected_programs": len(heldout_families),
++                  "unpaired_programs": sorted(set(heldout_families) - set(primary_analysis)),
+                   "wins": sum(value > 0 for value in primary_analysis.values()),
+                   "ties": sum(value == 0 for value in primary_analysis.values()),
+                   "losses": sum(value < 0 for value in primary_analysis.values()),
+@@ -4359,6 +4367,8 @@
+ def comparison_markdown(comparison: dict) -> str:
+     lines = ["# Phase 2 recovery comparison", "",
+              "Quality is paired log(control J / candidate J); positive values favor the candidate. Runtime ratios are candidate / control, so values above 1 are slower. Quality and cost are reported separately. Secondary intervals are descriptive, unadjusted 95%; null-crossing intervals are inconclusive. Public and held-out programs are not pooled.", "",
++             *_primary_markdown(comparison.get("primary_h2") or {}),
++             "## Descriptive matrix (24 entries)", "",
+              "| Corpus | Budget | Control | Programs | Quality log ratio (95% interval) | W/T/L | Mean C/S/J candidate vs control | Process ratio | Compile ratio | Peak RSS ratio | Failures | Interpretation |",
+              "|---|---:|---|---:|---|---:|---|---:|---:|---:|---:|---|"]
+     for row in comparison["entries"]:
+@@ -4376,11 +4386,41 @@
+         fmt = lambda value: "n/a" if value is None else f"{value:.4g}"
+         process_text = "n/a" if values[0] is None else f"{values[0]:.4g} [{process_ci[0]:.4g}, {process_ci[1]:.4g}]"
+         compile_text = "n/a" if values[1] is None else f"{values[1]:.4g} [{compile_ci[0]:.4g}, {compile_ci[1]:.4g}]"
+-        lines.append(f"| {row['corpus']} | {row['budget_seconds']} | {row['control']} | {row['n_programs']} | {text} | {row['wins']}/{row['ties']}/{row['losses']} | {csj} | {process_text} | {compile_text} | {fmt(values[2])} | {sum(row['failures'].values())} | {row['interpretation']} |")
+-    lines.extend(["", "Primary H2 is the fixed `structural_bound` versus `accepted_budgeted` comparison at 0.1 s, with the original confirmatory P2 interval. All other contrasts in this table are descriptive and unadjusted. `J=C×S`; the official composite score is not substituted for this endpoint.", ""])
++        lines.append(f"| {row['corpus']} | {row['budget_seconds']} | {row['control']} | {row['n_programs']}/{row.get('expected_programs', 'n/a')} | {text} | {row['wins']}/{row['ties']}/{row['losses']} | {csj} | {process_text} | {compile_text} | {fmt(values[2])} | {sum(row['failures'].values())} | {row['interpretation']} |")
++    lines.extend(["", "Primary H2 is the fixed held-out P5 `structural_bound` versus `accepted_budgeted` comparison at 0.1 s, reported above with its family-stratified 95% interval. Every entry of this matrix, including the public ones, is descriptive and unadjusted. Programs are shown as paired/expected; a program without a complete paired schedule is listed in COMPARISON.json `unpaired_programs`, never silently dropped. `J=C×S`; the official composite score is not substituted for this endpoint.", ""])
+     return "\n".join(lines)
+ 
+ 
++def _primary_markdown(primary: dict) -> List[str]:
++    """The confirmatory H2 section of COMPARISON.md, rendered from primary_h2."""
++    analysis = primary.get("analysis") or {}
++    interval = (analysis.get("interval") or {})
++    bounds = (interval.get("intervals") or {}).get("0.025-0.975")
++    point = interval.get("point_estimate")
++    estimate = ("n/a" if point is None or bounds is None
++                else f"{point:.4g} [{bounds[0]:.4g}, {bounds[1]:.4g}]")
++    if bounds is None:
++        reading = "not estimable"
++    elif bounds[0] > 0:
++        reading = "interval above zero: the candidate has lower J"
++    elif bounds[1] < 0:
++        reading = "interval below zero: the candidate has higher J"
++    else:
++        reading = "interval crosses zero: inconclusive, not equivalence"
++    return [
++        "## Primary H2 (confirmatory)", "",
++        f"Corpus `{primary.get('corpus')}`, budget {primary.get('budget_seconds')} s, "
++        f"`{analysis.get('candidate_arm')}` versus `{primary.get('control')}`. "
++        f"Endpoint: {analysis.get('endpoint')}.", "",
++        "| Programs (paired/expected) | Families | Estimate [95% interval] | W/T/L | Reading |",
++        "|---:|---|---|---:|---|",
++        f"| {analysis.get('programs')}/{analysis.get('expected_programs', 'n/a')} | "
++        f"{interval.get('families')} | {estimate} | "
++        f"{analysis.get('wins')}/{analysis.get('ties')}/{analysis.get('losses')} | {reading} |",
++        "",
++    ]
++
++
+ # --------------------------------------------------------------------------
+ # Evidence documents
+ # --------------------------------------------------------------------------
+@@ -4700,7 +4740,7 @@
+         "\n".join(hypothesis_lines),
+     )
+     filled = filled.replace(
+-        "Implementer/model:", f"Implementer/model: Claude Code (Opus 5), run `{run.run_id}`"
++        "Implementer/model:", f"Implementer/model: Claude Code (Opus 5.5), run `{run.run_id}`"
+     ).replace(
+         "Source HEAD, dirty diff SHA256, source snapshot SHA256:",
+         "Source HEAD, dirty diff SHA256, source snapshot SHA256: "
+@@ -4711,7 +4751,6 @@
+     )
+     if run.amendment is not None:
+         filled = filled.replace("READY_FOR_REVIEW", "READY_FOR_LEAD_REVIEW")
+-        filled = filled.replace("Claude Code (Opus 5)", "Codex delegated research implementation")
+         filled += (
+             "\n\n## Recovery amendment evidence\n\n"
+             f"Policy: `{run.amendment['id']}`. Diagnosis: "
+@@ -4722,7 +4761,7 @@
+     (run.root / "HANDOFF.md").write_text(filled)
+ 
+ 
+-def hypothesis_dispositions(root: Path) -> Dict[str, dict]:
++def hypothesis_dispositions(root: Path, amended: bool = False) -> Dict[str, dict]:
+     """The hypothesis labels a run's stage summaries imply.
+ 
+     Takes a run root rather than a ``Run`` so the evidence checker can recompute
+@@ -4758,7 +4797,35 @@
+             ),
+         }
+ 
+-    if p2 is None:
++    if amended:
++        # The recovery amendment fixes H2 as the held-out P5 contrast at the
++        # primary budget. Public P2 is descriptive and never labels H2.
++        comparison_path = root / "COMPARISON.json"
++        gates_path = root / "gates.json"
++        p5_gate = (json.loads(gates_path.read_text()).get("p5", {}).get("status")
++                   if gates_path.is_file() else None)
++        primary = (json.loads(comparison_path.read_text()).get("primary_h2")
++                   if comparison_path.is_file() else None)
++        if not primary:
++            result["H2"] = {"status": NOT_RUN, "evidence": (
++                "the held-out P5 primary was not measured; public P2 contrasts are "
++                "descriptive and do not label H2")}
++        else:
++            analysis = primary.get("analysis") or {}
++            interval = (analysis.get("interval") or {}).get("intervals", {}).get("0.025-0.975")
++            if p5_gate != PASS:
++                status = "inconclusive"
++            elif not interval or interval[0] <= 0 <= interval[1]:
++                status = "inconclusive"
++            else:
++                status = "supported" if interval[0] > 0 else "unsupported"
++            result["H2"] = {"status": status, "evidence": (
++                f"held-out P5 primary structural_bound vs {primary.get('control')} at "
++                f"{primary.get('budget_seconds')} s: {analysis.get('wins')} wins / "
++                f"{analysis.get('ties')} ties / {analysis.get('losses')} losses over "
++                f"{analysis.get('programs')}/{analysis.get('expected_programs')} programs, "
++                f"95% interval {interval}; P5 gate {p5_gate}. Public P2 is descriptive.")}
++    elif p2 is None:
+         result["H2"] = {"status": NOT_RUN, "evidence": "P2 did not produce a summary"}
+     else:
+         key = f"structural_bound_vs_accepted_budgeted@{p2['primary_budget_seconds']}"
+@@ -5013,7 +5080,7 @@
+         run.close_work(stage)
+     write_jsonl(run.root / "commands.jsonl", run.harness.commands)
+     write_json(run.root / "gates.json", run.gates)
+-    hypotheses = hypothesis_dispositions(run.root)
++    hypotheses = hypothesis_dispositions(run.root, amended=run.amendment is not None)
+     write_json(run.root / "hypotheses.json", hypotheses)
+     manifest = write_manifest(run, stages_run, stage_digests)
+     write_json(run.root / "manifest.json", manifest)
+Only in final_source/research_tests: test_phase2_release.py

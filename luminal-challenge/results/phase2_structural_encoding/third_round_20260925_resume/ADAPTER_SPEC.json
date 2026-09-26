@@ -1,0 +1,107 @@
+{
+  "N_formula": "N = original shared replay median + max(original adapter-estimate median, R_adapter median) + 0",
+  "adapter_skeleton": {
+    "conservatism": "full _Node construction is timed although R0 constructs the same nodes (only the stored reference differs): an upper bound on the additional work",
+    "inputs": "the frozen M0 workload of each diagnostic program; BS1 states produced by an UNTIMED shared replay in the same process (no search is run, BS1 is not changed)",
+    "module": "research/third_round_resume_adapter.py",
+    "timed_operations_per_event": {
+      "A child": "read node.A.A[name]; read AS2.A; construct es._Node; push",
+      "A root": "read AS.A; construct es._Node holding node.D and AS; push",
+      "L": "none beyond R0",
+      "P": "read node state (and AS.A when in the address phase) through the adapter method",
+      "T child": "read parent node's state reference and state.D (node.D.D[op]); construct es._Node holding the child TimeState; push",
+      "T root": "construct es._Node holding the TimeState (slot write), push to the query frontier",
+      "dispatch": "every event goes through one bound method of an adapter object (the C1 call-site indirection)",
+      "release": "a node is released when the DFS expansion of its parent node ends (streaming: the first event that expands a different parent), unexpanded nodes at query (Propagation) end = epoch disposal; no future last-use knowledge is used"
+    }
+  },
+  "already_in_timed_shared_replay": [
+    "SharedPropagation construction (masks)",
+    "time_root/time_child/prune_state/address_pairs/address_root/address_child",
+    "state object creation and release after last use",
+    "replay-only bookkeeping (dict of outputs, release lists) which C1 does not do: kept in N as a conservative surplus"
+  ],
+  "candidate_integration": {
+    "C1": "research/third_round_candidate.py = R0 (research/efficiency_search.py) with ONLY Expander changed: the node's D slot holds a BS1 TimeState, the A slot an AddressState; propagation calls go to third_round_kernel.SharedPropagation (class bodies unchanged, sha 77c373e1...).",
+    "call_site_diff_vs_R0": [
+      {
+        "C1": "SharedPropagation(domain, stats)",
+        "R0": "Propagation(domain, stats)",
+        "in_timed_shared_replay": true,
+        "note": "mask construction included in replay (per Propagation)",
+        "site": "Expander.__init__"
+      },
+      {
+        "C1": "S=time_root(D); prune_state(S,None,best); _Node(state, S, ...)",
+        "R0": "D=times_fixpoint(D); prune(D,None,best); _Node(state, D, ...)",
+        "in_timed_shared_replay": "time_root, prune_state yes; node slot write: adapter",
+        "site": "root"
+      },
+      {
+        "C1": "allowed=set(node.D.D[op]); S2=time_child(node.D, op, v); prune_state(S2,..); _Node(nxt, S2, ...)",
+        "R0": "allowed=set(node.D[op]); D2=dict(node.D); D2[op]=(v,); times_fixpoint(D2); prune(D2,..); _Node(nxt, D2, ...)",
+        "additional": "one attribute read (node.D.D) per expansion, a state-reference slot write per yielded child, the reference read node.D passed to time_child",
+        "site": "time child"
+      },
+      {
+        "C1": "AS=address_root(A, pairs); prune_state(node.D, AS.A, ..); _Node(state, node.D, AS, pairs, ...)",
+        "R0": "addresses_fixpoint(A, pairs); prune(node.D, A, ..); _Node(state, node.D, A, pairs, ...)",
+        "additional": "AS.A read, state-reference slot writes",
+        "site": "time leaf -> address root"
+      },
+      {
+        "C1": "allowed=set(node.A.A[name]); AS2=address_child(node.A, name, v); prune_state(node.D, AS2.A, ..); _Node(nxt, node.D, AS2, ...)",
+        "R0": "allowed=set(node.A[name]); A2=dict(node.A); ...; addresses_fixpoint(A2, node.pairs); prune(node.D, A2, ..)",
+        "additional": "node.A.A read, AS2.A read, slot writes",
+        "site": "address child"
+      },
+      {
+        "C1": "passes S.D / AS.A",
+        "additional": "zero in measured runs: guarded by `if self.audit is None: return` exactly as R0",
+        "site": "_audit (tests only; audit is None in measured runs)"
+      }
+    ]
+  },
+  "gate": "corrected conservative ratio (scope-matched min O, this N, 1.5x, equal-family) <= 0.80 AND 90/90 adapter rows AND parity (original M2 rows) AND successor audit PASS",
+  "one_implementation": true,
+  "protocol_id": "luminal-phase2-third-improvement-resume-1.0",
+  "rows": {
+    "arm_id": "adapter",
+    "expected": 90,
+    "mode_key": "adapter",
+    "order": "parent stable_seed order key with stage R_adapter",
+    "programs": 30,
+    "repetitions": [
+      0,
+      1,
+      2
+    ],
+    "stage": "R_adapter",
+    "timeout_seconds": 20
+  },
+  "stage": "R_adapter specification, written before the adapter code",
+  "unmeasured_itemized": [
+    {
+      "evidence": "identical statements in R0 and C1 (call_site_diff_vs_R0 lists every changed line); not replaced work, present in T0",
+      "item": "Expander control flow (mode checks, rank/disc bookkeeping, options, state.copy)",
+      "upper_estimate_seconds": 0
+    },
+    {
+      "evidence": "audit is None in measured runs; same guard as R0",
+      "item": "_audit hook",
+      "upper_estimate_seconds": 0
+    },
+    {
+      "evidence": "unchanged code outside Expander",
+      "item": "wall-clock checks, slices, epochs, acceptor, validation",
+      "upper_estimate_seconds": 0
+    },
+    {
+      "evidence": "exercised by the skeleton's node lifetimes (nodes hold state references until their expansion ends / epoch disposal)",
+      "item": "memory lifetime of states in the frontier",
+      "upper_estimate_seconds": 0
+    }
+  ],
+  "unmeasured_total_seconds_per_program": 0,
+  "written_utc": "2026-09-26T01:21:45Z"
+}

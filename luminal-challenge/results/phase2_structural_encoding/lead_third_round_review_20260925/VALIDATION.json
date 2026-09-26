@@ -1,0 +1,48 @@
+{
+  "compiler_candidate_created": false,
+  "fresh_confirmation_generated": false,
+  "historical_artifacts_changed": false,
+  "kernel_replay": {
+    "artifact": "KERNEL_PARITY.json",
+    "captured_events": 829993,
+    "programs": 30,
+    "scope": "Correctness replay; no fresh performance estimates",
+    "versions": [
+      "baseline",
+      "shared"
+    ]
+  },
+  "lead_probes": {
+    "artifact": "PROBES.json",
+    "command": "PYTHONPATH=.reference:. ../venv/bin/python results/phase2_structural_encoding/lead_third_round_review_20260925/probes.py",
+    "exit_code": 0
+  },
+  "production_edits": false,
+  "row_recount": {
+    "artifact": "ROW_CHECK.json",
+    "generator_hashes_checked": 390,
+    "stdout_payload_digests_reconstructed": 390
+  },
+  "source_hashes": {
+    "research/third_round_analysis.py": "b510d56603b66003a642f2faae6d2df106c2799f1a9501e6a6cb6447beb92799",
+    "research/third_round_audit.py": "c9971792030cc594e6554b1f36c5edbac8c2e1e2be611bd8de57e28afb096661",
+    "research/third_round_common.py": "3a0e4163eb450adc08d2860d68a28ca9c7fdb0d67bf77a82c0f27f0b77542632",
+    "research/third_round_diagnosis.py": "47819e1a182e29cc90f6c96ed4f1aac051a9b7f5c592167a40d4ffd085496749",
+    "research/third_round_kernel.py": "77c373e1d4e6a328c70c590d46ffdf5b5a82ec8ccd38f82de246821f2da5ff85",
+    "research/third_round_mkernel.py": "f07351d52a8d8d06cf4320bc5d89d75ec195dbe26e4d72a514a06956d3f6e054",
+    "research/third_round_workload.py": "f8c8646b31b31dc23b1f4774fcdb6f4c05fdef7038c53d88d87c865e98e8dfdf"
+  },
+  "status": "CHANGES_REQUIRED",
+  "tests": {
+    "command": "PYTHONPATH=.reference:. ../venv/bin/python -s -m pytest -q --tb=short -p no:cacheprovider research_tests/test_third_round_kernel.py research_tests/test_third_round_audit.py",
+    "exit_code": 0,
+    "log": "TESTS.log",
+    "passed": 26,
+    "skipped": 0
+  },
+  "worker_audit": {
+    "command": "PYTHONPATH=.reference:. ../venv/bin/python -s -m research.third_round_audit --run results/phase2_structural_encoding/third_round_20260925 --out results/phase2_structural_encoding/lead_third_round_review_20260925/AUDIT.json",
+    "exit_code": 0,
+    "scope": "Reports PASS on original data but fails four lead negative controls."
+  }
+}

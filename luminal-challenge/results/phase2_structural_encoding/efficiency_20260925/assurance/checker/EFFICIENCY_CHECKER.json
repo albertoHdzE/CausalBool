@@ -1,0 +1,93 @@
+{
+  "approved_historical_deviations": {
+    "FROZEN_SOURCE_CHANGED": 1,
+    "ORACLE_LEAK": 420
+  },
+  "dispositions": {
+    "D1": {
+      "approved": true,
+      "matched_findings": 1,
+      "preconditions": {
+        "affected_fields_are_control_costs_only": true,
+        "at_freeze_hash": true,
+        "disclosure_names_this_change_only": true,
+        "exact_scope": true,
+        "freeze_records_at_freeze_hash": true,
+        "live_hash_as_disclosed": true,
+        "successor_audit_pass": true
+      }
+    },
+    "D2": {
+      "approved": true,
+      "keys_equal_the_420_ordering_rows": true,
+      "matched_findings": 420,
+      "preconditions": {
+        "guard_refused_planted_violations": true,
+        "replay_complete": true,
+        "replay_keys_equal_source": true,
+        "replay_pass": true,
+        "replay_rows_unchanged": true,
+        "replayed_extraction_is_live": true
+      }
+    }
+  },
+  "evidence": {
+    "D1": {
+      "affected_descriptive_fields": [
+        "COMPARISON.json::costs.classical@None.bootstrap_seconds"
+      ],
+      "at_freeze_sha256": "a5ba29881bc1a0f4458937122307d58c9fa50ed3827149231fb9327ebf9df6b8",
+      "freeze_reporting_sha256": "a5ba29881bc1a0f4458937122307d58c9fa50ed3827149231fb9327ebf9df6b8",
+      "live_sha256": "b6b6968428b4faefc421ce451d49590d162942b51eb212851756736902217bd7",
+      "post_freeze_record": [
+        {
+          "file": "research/next_round_analysis.py",
+          "hash_after": "b6b6968428b4faefc421ce451d49590d162942b51eb212851756736902217bd7",
+          "hash_at_freeze": "a5ba29881bc1a0f4458937122307d58c9fa50ed3827149231fb9327ebf9df6b8"
+        }
+      ],
+      "scope": {
+        "changed_definitions": [
+          "per_program_median"
+        ],
+        "exact_scope": true,
+        "none_skips_removed": 1,
+        "per_program_median_equal_after_removing_the_skip": true,
+        "same_top_level_names": true
+      },
+      "successor_audit_primary_or_candidate_findings": [],
+      "successor_audit_status": "PASS"
+    },
+    "D2": {
+      "guard_controls": "PASS",
+      "live_ranker_sha256": "6805c1b5bf891cfb8cb19e37c33d94e890ecb115a16430fbd937bdcbe282d31a",
+      "replay_keys_equal_source": true,
+      "replay_passed": 420,
+      "replay_rows": 420,
+      "replay_rows_sha256_now": "0f3964ee694f7078e5d25a1e5af324301da04de0e405036f0a5690ea9d513428",
+      "replay_rows_sha256_recorded": "0f3964ee694f7078e5d25a1e5af324301da04de0e405036f0a5690ea9d513428",
+      "replay_status": "PASS",
+      "workspace_ranker_sha256": "6805c1b5bf891cfb8cb19e37c33d94e890ecb115a16430fbd937bdcbe282d31a"
+    }
+  },
+  "historical_checker": {
+    "checks": 113996,
+    "exit_code": 0,
+    "finding_codes": {
+      "FROZEN_SOURCE_CHANGED": 1,
+      "ORACLE_LEAK": 420
+    },
+    "findings_total": 421,
+    "note": "unchanged historical checker; its FAIL stands and is not rewritten",
+    "status": "FAIL"
+  },
+  "immutability": {
+    "changed_results": [],
+    "changed_sources": [],
+    "results_checked": 877,
+    "sources_checked": 109
+  },
+  "status": "PASS_WITH_APPROVED_HISTORICAL_DEVIATIONS",
+  "unapproved": [],
+  "unapproved_count": 0
+}

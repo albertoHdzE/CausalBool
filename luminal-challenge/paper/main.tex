@@ -30,7 +30,7 @@
 \makeatother
 \title{Direct Boolean Index Schemata for\\Scheduling and Scratch Allocation\\[5pt]\large A reproducible Luminal compiler case study}
 \author{Alberto Hernandez-Espinosa}
-\date{21 September 2026\\\small Research draft for internal review}
+\date{23 September 2026\\\small Research draft for internal review}
 
 \begin{document}
 \maketitle
@@ -53,6 +53,8 @@ Connections to Shannon decomposition, information bounds and Wolfram's account
 of memory retrieval are separated by their actual role. The resulting artifact
 is a basis for a controlled complexity study, not evidence of a general
 complexity advantage.
+The structural-encoding feasibility campaign did not meet its declared
+coverage gate, leaving all subsequent experiments unmeasured.
 \end{abstract}
 
 \section{Question and contribution}
@@ -527,6 +529,72 @@ fractions are unsupported because queries can encounter different kinds of
 limits after optimization. No measured slowdown here proves that the method
 can never beat a particular classical implementation.
 
+\section{Structural-encoding feasibility}
+\label{sec:structural-feasibility}
+
+The compiler case study above evaluates one production implementation. A
+separate, predeclared campaign asked whether exact structural encodings of
+whole-program schedule/address choices could be sampled and then used in further experiments.
+This feasibility question matters because rank encodings and structural
+representations require a well-defined finite domain of legal completions.
+The campaign's result is inconclusive: its public sampler did not attain the
+specified minimum coverage, so the dependent comparisons were not measured.
+
+\subsection{Sampling design and finite checks}
+The locked domain fixes the issue-time fields by operation ID and then the
+selected scratch-address fields by producer ID, with least-significant-bit-first
+coordinates. Two distinct streams sampled each public program. Raw-bit sampling
+draws uniform fixed-width bit strings and decodes them; strings may be invalid
+or may identify dead ends. Option-path sampling chooses uniformly among the
+available physical choices at each decision, stopping at a dead end. These are
+different distributions, and neither is assumed to be uniform over feasible
+schedules. The domain uses issue cycles from zero through one less than the
+program horizon and all legal physical scratch bases. The incumbent is first in
+the option order when available, followed by remaining choices in ascending
+order. Each stream requested 10,000 attempts per program,
+with a 60-second per-program, per-stream limit and no invisible retries.
+Coverage is the union of distinct completed compilations across both streams;
+the gate requires at least 100 per program. This threshold is a sampling
+criterion, not an estimate of the total feasible set.
+
+Finite fixture checks covered 12 locked programs and all four declared codecs.
+Across those fixtures, 24 small code universes were exhausted and 564
+round-trip checks were performed. These denominators do not imply that every
+codec's complete code universe was exhausted on every fixture. The checks found
+no round-trip failures or finite-domain discrepancies for the tested objects.
+
+\subsection{Public coverage and disposition}
+Table~\ref{tab:phase2-coverage} reports completed draws by stream and the
+distinct union across streams. Stream counts may include repeated compilations;
+the union deduplicates them. These are not case-execution counts.
+All raw-bit streams produced zero completions. The campaign retained 160,000
+attempts in 16 streams, 819 completed draws, and 1,356 case checks; it observed
+zero validator discrepancies. Four programs fell below the 100-completion
+threshold.
+
+\begin{table}[htbp]\centering\small
+\begin{tabularx}{\linewidth}{Xrrrl}\toprule
+Program & \shortstack{Raw-bit\\completions} & \shortstack{Option-path\\completions} & \shortstack{Distinct\\union} & Gate \\\midrule
+\tableinput{generated/phase2_coverage_rows.tex}
+\bottomrule\end{tabularx}
+\caption{Phase 2 P1 public sampling coverage. Each stream made 10,000 attempts
+per program. The union deduplicates compilation identities across streams.}
+\label{tab:phase2-coverage}
+\end{table}
+
+P0 passed its declared provenance, domain and oracle diagnostics. P1 is
+INCONCLUSIVE because four public programs missed the declared coverage minimum.
+P2--P5 are blocked by the gate and remain unmeasured. The evidence checker
+reported zero findings and found the retained artifacts internally consistent,
+while its record says the evidence is incomplete and scientific success was not
+established. Checker consistency is not scientific success, and zero observed
+defects is not a proof of universal correctness.
+This result does not establish that structural encoding is impossible; it
+shows that this fixed sampler did not pass its coverage gate. A changed domain
+or sampling policy requires a separately specified amendment and fresh
+evidence. The present campaign establishes no compression, scaling, discovery,
+or performance benefit.
+
 \section{Relation to prior ideas and complexity}
 \subsection{Boolean covers and integrated compilation}
 A cube is a conjunction of fixed literals; a flat cube cover is a disjunctive
@@ -662,6 +730,17 @@ output directories and the commands in the final lead review. Never overwrite
 the historical measurement trees. The standalone compiler needs Python 3.10+
 and the supplied machine module; plotting additionally uses NumPy and
 Matplotlib, and the paper uses a standard pdf\LaTeX{} toolchain.
+
+The separate Phase 2 evidence root is
+\path{results/phase2_structural_encoding/phase2_repair_20260923c/}.
+Its retained acceptance, manifest, gate and hypothesis records, checker output,
+and P0/P1 summaries are the sources for the feasibility section;
+\path{paper/generated/phase2_metrics.json} records their source digests and
+derived denominators. The P1 raw-attempt file is approximately 113 MB and
+remains local. Packaging and a portable storage representation are unresolved,
+so this evidence is not described as portable, published or fully archived.
+The production measurements above remain the accepted 20 September evidence;
+the Phase 2 checks are dated 23 September and are not pooled with them.
 
 \clearpage
 \section{Per-program compiler-call medians}

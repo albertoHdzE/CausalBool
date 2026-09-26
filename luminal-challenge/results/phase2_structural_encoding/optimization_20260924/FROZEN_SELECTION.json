@@ -1,0 +1,183 @@
+{
+  "controls": {
+    "accepted_bootstrap": "production v4",
+    "accepted_budgeted": "production v4",
+    "accepted_default": "production v4",
+    "classical": "common.classical_compile via the accepted isolated worker",
+    "frozen_phase2": "accepted final_source_v2 structural_bound via the frozen workspace",
+    "serial": "machine.serial_compile (score denominator)"
+  },
+  "expected_matrices": {
+    "C_model_evaluation": {
+      "conditional": false,
+      "count": 17550,
+      "sha256": "50cedf22fec7afab82547e81774f096cf574dba7ee47bbc1b5fc385cac5c8a34"
+    },
+    "D_fresh_compiler": {
+      "conditional": false,
+      "count": 36000,
+      "sha256": "3e0103695c04dc030653a38e771da885609db0a0cf086956a3a5c6db2a30a35e"
+    },
+    "D_fresh_model_compiler": {
+      "conditional": true,
+      "count": 9000,
+      "sha256": "73c5a2e495389244c168082b3aa31d3124b06fb5e1cb813f997743e0201a6b68"
+    },
+    "D_public": {
+      "conditional": false,
+      "count": 1560,
+      "sha256": "1f5eaaa1c07a760b090a4b1bd8c0c8d7b7d111c730e08736ca89a081718243a4"
+    },
+    "D_public_model_compiler": {
+      "conditional": true,
+      "count": 360,
+      "sha256": "42ea116f454e6ad958e1ec4bc30b90ac8b3e3092899d506d5b11edbcd7abb638"
+    },
+    "export_nonmodel": {
+      "count": 624
+    }
+  },
+  "exposure": {
+    "legality_and_oracle_qualification": "done before this freeze",
+    "new_candidate_outcomes_observed_on_evaluation_cohorts": false
+  },
+  "fixture_manifests": {
+    "development": {
+      "path": "fixtures/development/MANIFEST.json",
+      "sha256": "6ad71e9cb70a3dfebd036a961482843964873b72edf65bb74fdb84814ee9667b",
+      "status": "PASS"
+    },
+    "evaluation": {
+      "path": "fixtures/evaluation/MANIFEST.json",
+      "sha256": "3296e3520d10a81208d513609b446136861d2e9e204a4c4ea04953b6baa22775",
+      "status": "PASS"
+    }
+  },
+  "fixture_recipe_sha256": "bba6dde366e9e7a6ae891121ca97a5e2494c3fbe352ed0b7f9cf23b9adc0447e",
+  "fresh_cohort": {
+    "path": "FRESH_COHORT.json",
+    "sha256": "0e9312c71705ede4580f775b9cc49dc842bc4f734a68e3618ecfe422c9304bb2"
+  },
+  "frozen_utc": "2026-09-24T19:56:50Z",
+  "inference": {
+    "H4_NEW": "selected_model vs one_bit and vs uniform_bits at 0.1 s; best_test_J = min(min_training_J, validated new TEST objects); repetitions then uniform seeds then fixtures, equal family weights; 97.5% bootstrap (.0125/.9875) 10000 seed 2026092403; PASS iff all 30 fixtures accounted, >=3 informative families, zero defects, both lower bounds > 0",
+    "conditional_model_compiler": "only if H4_NEW passes: selected_model_compiler vs selected_nonmodel at 0.1 s, 95% interval",
+    "primary": "mean paired log(J_frozen_phase2/J_selected_nonmodel) at 0.1 s on the fresh cohort; repetitions within program; equal family weights; family-stratified program bootstrap 10000 seed 2026092403; two-sided 95%; lower>0 improvement, upper<0 degradation, else INCONCLUSIVE",
+    "public": "exact suite score per repetition; strict gain iff every paired ratio > 1+1e-12; descriptive",
+    "runtime": "per-program median over repetitions, log ratio, family-weighted, programs resampled within family"
+  },
+  "model": {
+    "descriptive_depth1": false,
+    "evaluation_arms": [
+      "empirical_cover",
+      "selected_model",
+      "one_bit",
+      "uniform_bits x 10 seeds"
+    ],
+    "h4_new_eligible_to_run": true,
+    "selected_depth": 1
+  },
+  "package_lock_sha256": "19eff5339331c1df58622a13678c3013c4f9e5a15d2725c6e3b160ff9ee7182b",
+  "protocol_id": "luminal-phase2-optimization-1.0",
+  "search": {
+    "aggregate_ceilings": {
+      "nodes": 1000000,
+      "validations": 100000
+    },
+    "arm": "selected_nonmodel",
+    "build": "cached",
+    "config": "cap512_wider",
+    "optimisation_query_seconds": 0.1,
+    "outcome": "SELECTED"
+  },
+  "seeds": {
+    "arm_order": 2026092401,
+    "bootstrap": 2026092403,
+    "fixture_split": 2026092402,
+    "uniform_search": [
+      2026092410,
+      2026092411,
+      2026092412,
+      2026092413,
+      2026092414,
+      2026092415,
+      2026092416,
+      2026092417,
+      2026092418,
+      2026092419
+    ]
+  },
+  "selection_files_sha256": {
+    "ablation": "2c789c11b09ddde2d7fdde61cbb71357f1576b2c6be59014df8c939dd56b16ec",
+    "engineering": "ad70d12f56daa041c034a653871cfd05a6ea6c7f53ccdc6545145fac49bd9086",
+    "model": "42317eab4f69eb4c21a5ef33a8128702caffd744169c6427dc33409ba34f8452",
+    "search": "cd2e1882017e5b7909dba4297ae949574151fb4f05a16d6aaaa2e911b69901a8"
+  },
+  "sources": {
+    "frozen_snapshot": {
+      "research/__init__.py": "5b335135f07095abc1ea486647db599fdbc030a709bf982510b77fdd3ae96378",
+      "research/check_structural_evidence.py": "b7a240c91172608f4460d8b7262152513780cc10f9c73ab93d56e1f8db17d7c4",
+      "research/classical_measurement_worker.py": "68c714b9e5b41474529df0064225c2f2e5e5118f737dbdbbfffbcada3ebc63ff",
+      "research/physical_probes.py": "36886e643b2d64866e000de352104752d83dfc45aa3eed7e190dc8acdedeab3e",
+      "research/run_structural_experiments.py": "b1ca41759e5cb2942490757228db96b4e764c11d200889dad48ed7dfed90fe4d",
+      "research/structural_encoding.py": "5b4d2736f0703881f18abe10f3d30f767fabc6050128688a7079d723df3ccef1",
+      "research/structural_evidence.py": "b1e7d8bbe9f225aa3472b40d34091dce8bca882e0f657cad432435554f392b5d",
+      "research/structural_models.py": "a2a8e9162f28324145c0fe71520ead4dd8be8e3d9ebb026320e87785000bec1d",
+      "research/structural_oracle.py": "7978a6fa5c0ab9c1a3177638acf425ccd896a3951e858355481417d40aeb4106",
+      "research/structural_search.py": "e187fa0926a84c8dd00bc963d96aec5a07660810647c81773a5e793c0e1317af"
+    },
+    "frozen_workspace_worker": "0b3a2f6ce10014247d27a6bbb494a7aca2b097472ce36cd6da4ca1bbe62f9697",
+    "production": {
+      ".reference/compiler.py": "1fe33a417d283662515edaa7b4014e59089cfd69c4a537301de59f702c63c7b4",
+      ".reference/machine.py": "ff0c53161a39713035662064beaa5268d5018dbc807643ed80b02e2b70431f00",
+      ".reference/score.py": "9674ae8875fe7ec08b5e808700b8d61b45af8daf541b41a488381ffc96db6d3c",
+      ".reference/tests/test_machine.py": "5f2c3436b77c02f2aabb5c27d2f794323f65413462742d96a7b31e5624495016",
+      ".reference/tests/test_public_programs.py": "e4dd6d5adbb4eceef44b4905d4fac2d83a6b85d7ecfcf7f8af822b489cc509a7",
+      "common.py": "5b3ae21c5a6c3a73380069ac685fdde7d3cee2fb7bc7704b610d5e24b0056fab",
+      "compare_direct.py": "a0eb3c66317ccb8fe628c41032d4174c8fac183cbb5144b63125348b9fd33bce",
+      "direct_compiler.py": "523fccd16b6d7dd9d4c9589e3a8ea3caeacc29decce0a470582dd8d7be60fe7a",
+      "direct_constraints.py": "8743e82f75356de4be8b622a73c0f24e9c58536e2695184b87f5d3470299f376",
+      "direct_contract.py": "3b37ad0e7f5feb8ac464b074ebd8e8c6ab079c79ada3ab1bacc4b2a9f1a83fa8",
+      "direct_optimizer.py": "a5f71a407418121a39c98e5ccc87036ef7732df2e81c2082fad285869e755d27",
+      "export_direct.py": "984ffb653535772bbf7ed18cbb122b9ed1fa78b74960281122808214def2cb72",
+      "schema_index.py": "f7bec20681cec044bc0c550b319dddee6acd325e2338a11810209c972e660820",
+      "tests_direct/generate_programs.py": "e6f56e70dab1d2b3d1e10bf86f22d8eb4af8112bc28bd3a2dd523c1a8ecfa7b8",
+      "verify_direct.py": "fb435a9bcf55ab1f56fc4d1bd9fbf586898ac9b89ad0dc6f4a4ca6bf9f40c041"
+    },
+    "research": {
+      "research/__init__.py": "5b335135f07095abc1ea486647db599fdbc030a709bf982510b77fdd3ae96378",
+      "research/check_structural_evidence.py": "b7a240c91172608f4460d8b7262152513780cc10f9c73ab93d56e1f8db17d7c4",
+      "research/classical_measurement_worker.py": "68c714b9e5b41474529df0064225c2f2e5e5118f737dbdbbfffbcada3ebc63ff",
+      "research/optimization_analysis.py": "1c8addef2af621465ff0e64de38632fdfbe675088068774a9195e4daad8e354e",
+      "research/optimization_common.py": "7e38e26871a1e550c0e428a08ed6a89bd42b3916d4ab5b53848b6e677b698695",
+      "research/optimization_export.py": "178a1ae4248f92d8cb95c6753f9762e8d01895d1d85799097d2716cd4700345b",
+      "research/optimization_fixtures.py": "bba6dde366e9e7a6ae891121ca97a5e2494c3fbe352ed0b7f9cf23b9adc0447e",
+      "research/optimization_frozen_worker.py": "0b3a2f6ce10014247d27a6bbb494a7aca2b097472ce36cd6da4ca1bbe62f9697",
+      "research/optimization_model_worker.py": "a54ed4344ba05df27cc07e1e8c92cc17520df1efcafc32f3e2035a35eece4413",
+      "research/optimization_models.py": "7103fd9a6240a278a8ad283d33aaa0a9df403f9dfde8d306c8d1c4ce58d3d3b0",
+      "research/optimization_profile.py": "7760130dcdd476e46baa699b2ad08f629b7b43c068e080b8b695d57c8f7566d2",
+      "research/optimization_report.py": "ad61ebce8e2180fc9341611a877dd7d0a821cd982ea7af2a97555cc479439cb2",
+      "research/optimization_runner.py": "bc18ed080db944c55330d3ff2469973114bdf04d43ef6c87bcb402fe4a214034",
+      "research/optimization_search.py": "296ecd2de750b5959cf207010ca82fe4bd337a8c5b656e3c9866bee284933224",
+      "research/optimization_stage_a.py": "40a939a26ed493398ad66824df31cd351c780dd2ee01d9869b33469639d45f0a",
+      "research/optimization_worker.py": "56224509250a4d7f725eca829104a973277428d38ab9b7a3bef62c85ec1123ed",
+      "research/physical_probes.py": "36886e643b2d64866e000de352104752d83dfc45aa3eed7e190dc8acdedeab3e",
+      "research/run_structural_experiments.py": "19ebfa97e276ca557386106e68cd4b34ffed9eb103ffa2f314844b13d6344159",
+      "research/structural_encoding.py": "224d4d520c19672e0dd433a814eea9781e31fe87e307d11bfda65c317ff45971",
+      "research/structural_evidence.py": "b1e7d8bbe9f225aa3472b40d34091dce8bca882e0f657cad432435554f392b5d",
+      "research/structural_models.py": "a2a8e9162f28324145c0fe71520ead4dd8be8e3d9ebb026320e87785000bec1d",
+      "research/structural_oracle.py": "7978a6fa5c0ab9c1a3177638acf425ccd896a3951e858355481417d40aeb4106",
+      "research/structural_search.py": "e187fa0926a84c8dd00bc963d96aec5a07660810647c81773a5e793c0e1317af",
+      "research_tests/__init__.py": "705e9d649e9efa0477c812d350ecb9806d65c5d5b2c8bd6317b12acd09d485f3",
+      "research_tests/test_phase2_encoding.py": "a1203e41ac84335a54be217bc09c529d69062890ca616a4357d13f82c421df0d",
+      "research_tests/test_phase2_evidence.py": "e79cfff5db39a3f02111993e8a4a3d02f1c83900413595481317bd47bff6b73f",
+      "research_tests/test_phase2_models.py": "b19e27f06af17b2209f35eaf5113fc6b0de02d1e6b773f977f3ed5ce9ee1474f",
+      "research_tests/test_phase2_optimization.py": "ab2baced8b290c4222923eaf9545397f3905894c1ed83ef461267a4685a0a99a",
+      "research_tests/test_phase2_recovery.py": "af2660170cfcae361fb16ca5510325c171a978fdc4435c40b8e57c6a1003d9db",
+      "research_tests/test_phase2_release.py": "945ea693f19ccf1194c5e66d8af7b03cd65d646b191cc14c995f0e6feae9d27f",
+      "research_tests/test_phase2_repair.py": "76a78ec5035415e0e64823cff9e16e00f1ecd616cf2e868b3abb7bde4ddd0a31",
+      "research_tests/test_phase2_search.py": "26929b7c34c5d8ab92c61b0d82b331c3189a65170e7ab01248709189a3b9b6eb"
+    },
+    "source_tar_sha256": "d3bb4fa38eb8f267b440409c2dabf9e112b736e9427bfd48f4c67d1177c9ee34"
+  }
+}

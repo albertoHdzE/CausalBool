@@ -1,0 +1,106 @@
+{
+  "protocol_id": "luminal-phase2-assurance-efficiency-1.0",
+  "version": "1.0",
+  "plan": "plan/CLAUDE_PHASE2_EFFICIENCY_PHASE.md",
+  "status": "READY_FOR_EXECUTION_NOT_DISPATCHED",
+  "baseline_policy": "cell_a4cat_dfs; reporting/deadline successor R0 of next_round_search.py",
+  "phases": [
+    "R_assurance",
+    "P_avoidance_profile",
+    "E_one_candidate",
+    "C_conditional_confirmation"
+  ],
+  "ownership": [
+    "research/efficiency_*.py",
+    "research_tests/test_efficiency_*.py",
+    "results/phase2_structural_encoding/efficiency_20260925[_N]/"
+  ],
+  "development": {
+    "first_seed": 800000,
+    "last_seed": 800099,
+    "programs": 100,
+    "repetitions": 3
+  },
+  "confirmation": {
+    "first_seed": 980000,
+    "last_seed": 980199,
+    "programs": 200,
+    "families": 5,
+    "per_family": 40,
+    "repetitions": 5,
+    "semantic_disjointness_required": true,
+    "no_reseeding": true
+  },
+  "wall_budgets_seconds": [
+    0.01,
+    0.1,
+    1.0
+  ],
+  "primary_wall_budget_seconds": 0.1,
+  "wall_budget_scope": "optimization allowance; full compile-call and bootstrap measured separately",
+  "fixed_work": {
+    "aggregate_nodes": 10000,
+    "aggregate_validations": 100000,
+    "query_wall_expiry_disabled": true,
+    "global_wall_expiry_disabled": true,
+    "slice_wall_expiry_disabled": true,
+    "slice_nodes": 2048,
+    "existing_non_time_limits_unchanged": true,
+    "require_matched_decisions_and_charged_work": true,
+    "time_clock": "separate real clock measures complete compile-call"
+  },
+  "external_timeout_seconds": 20,
+  "measurement_wall_cap_hours": 24,
+  "proposal_gate": "measured avoidable work justifies plausible 20 percent total fixed-work saving; one mechanism only",
+  "development_gate": {
+    "fixed_work_compile_ratio_max": 0.9,
+    "wall_primary_mean_log_J_ratio_max": 0.0,
+    "all_semantic_gates_required": true
+  },
+  "confirmation_gate": {
+    "fixed_work_compile_ratio_upper_max": 0.8,
+    "wall_primary_J_ratio_upper_max": 1.01,
+    "no_claim_of_Pareto_dominance": true
+  },
+  "seeds": {
+    "arm_order": 2026092701,
+    "bootstrap": 2026092702
+  },
+  "stable_seed": "sha256(compact sorted-key JSON, ensure_ascii=False, allow_nan=False); first 16 hex digits as unsigned integer",
+  "arm_order_key": [
+    "arm_order_seed",
+    "program_sha256",
+    "repetition",
+    "arm_id",
+    "mode_key"
+  ],
+  "mode_keys": [
+    "work:10000",
+    "wall:0.01",
+    "wall:0.1",
+    "wall:1.0",
+    "serial"
+  ],
+  "statistics": {
+    "resamples": 10000,
+    "two_endpoint_percentiles": [
+      0.0125,
+      0.9875
+    ],
+    "sampling_unit": "program within family; equal family weights",
+    "quality": "paired repetition logs averaged per program",
+    "cost": "log ratio of per-program median total compile-call times"
+  },
+  "expected_rows": {
+    "ranker_isolation_replay": 420,
+    "development_fixed_work": 600,
+    "development_wall_primary": 600,
+    "confirmation_fixed_work": 2000,
+    "confirmation_wall": 6000,
+    "public": 280,
+    "export": 624
+  },
+  "new_learning_experiment_authorized": false,
+  "production_integration_authorized": false,
+  "results_prefix": "results/phase2_structural_encoding/efficiency_20260925"
+}

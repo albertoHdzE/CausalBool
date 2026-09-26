@@ -1,0 +1,58 @@
+439a440
+>     time_slack: int = dk.TIME_SLACK,
+472,473c473,476
+<         low = max(0, times[op_id] - dk.TIME_SLACK)
+<         high = min(times[op_id] + dk.TIME_SLACK, ceiling)
+---
+>         # ``time_slack`` defaults to the accepted query's slack. Optimization
+>         # protocol 1.0 passes 4 only for its appended eight-operation windows.
+>         low = max(0, times[op_id] - time_slack)
+>         high = min(times[op_id] + time_slack, ceiling)
+272c272,282
+<     def from_record(record: dict) -> "Domain":
+---
+>     def from_record(record: dict, memo: Optional[dict] = None) -> "Domain":
+>         """Build and check one declared domain.
+> 
+>         ``memo`` is an optional per-compilation cache (optimization protocol
+>         1.0, engineering build). It never crosses a program: the program is
+>         keyed by object identity and re-validated if a different object is
+>         passed, and an incumbent is keyed by its canonical bytes, so the cached
+>         answer is the one the uncached path would compute for the same bytes.
+>         Without ``memo`` the behaviour is unchanged.
+>         """
+> 
+281,282c291,298
+<         machine.validate_program(program)
+<         facts = dc.derive(program)
+---
+>         if memo is not None and memo.get("program") is program:
+>             facts = memo["facts"]
+>         else:
+>             machine.validate_program(program)
+>             facts = dc.derive(program)
+>             if memo is not None:
+>                 memo.clear()
+>                 memo.update(program=program, facts=facts, incumbents={})
+356,360c372,386
+<             try:
+<                 machine.check_compilation(program, incumbent)
+<             except (machine.CompileError, machine.ProgramError) as exc:
+<                 raise DomainError(f"the incumbent is not a legal compilation: {exc}") from exc
+<             incumbent_times = issue_cycles_of(program, incumbent["bundles"])
+---
+>             known = None
+>             if memo is not None:
+>                 incumbent_key = canonical_json(incumbent)
+>                 known = memo["incumbents"].get(incumbent_key)
+>             if known is None:
+>                 try:
+>                     machine.check_compilation(program, incumbent)
+>                 except (machine.CompileError, machine.ProgramError) as exc:
+>                     raise DomainError(
+>                         f"the incumbent is not a legal compilation: {exc}"
+>                     ) from exc
+>                 known = issue_cycles_of(program, incumbent["bundles"])
+>                 if memo is not None:
+>                     memo["incumbents"][incumbent_key] = known
+>             incumbent_times = dict(known)

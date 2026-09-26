@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "protocol_id": "luminal-phase2-optimization-1.0",
+  "plan": "plan/CLAUDE_PHASE2_OPTIMIZATION_PLAN.md",
+  "historical_run": "results/phase2_structural_encoding/recovery_campaign_20260923_r3",
+  "primary_budget_seconds": 0.1,
+  "budgets_seconds": [
+    0.01,
+    0.1,
+    1.0
+  ],
+  "external_timeout_seconds": 20,
+  "search_grid": {
+    "query_caps": [
+      32,
+      128,
+      512,
+      null
+    ],
+    "domain_policies": [
+      "matched",
+      "wider"
+    ],
+    "window_sizes": [
+      4,
+      8
+    ],
+    "time_slack": [
+      2,
+      4
+    ]
+  },
+  "new_aggregate_limits": {
+    "search_nodes": 1000000,
+    "candidate_validations": 100000
+  },
+  "seeds": {
+    "arm_order": 2026092401,
+    "fixture_split": 2026092402,
+    "bootstrap": 2026092403,
+    "uniform_search": [
+      2026092410,
+      2026092411,
+      2026092412,
+      2026092413,
+      2026092414,
+      2026092415,
+      2026092416,
+      2026092417,
+      2026092418,
+      2026092419
+    ]
+  },
+  "cohorts": {
+    "development": {
+      "first": 800000,
+      "last": 800099,
+      "programs": 100
+    },
+    "compiler_evaluation": {
+      "first": 810000,
+      "last": 810199,
+      "programs": 200,
+      "per_family": 40
+    },
+    "model_development_pool": {
+      "first": 820000,
+      "last": 820199,
+      "qualified_per_family": 3
+    },
+    "model_evaluation_pool": {
+      "first": 830000,
+      "last": 830399,
+      "qualified_per_family": 6
+    }
+  },
+  "fixture_eligibility": {
+    "cartesian_max": 65536,
+    "feasible_min": 40,
+    "feasible_max": 512,
+    "structural_bits_max": 20,
+    "distinct_products_min": 2,
+    "minimum_families": 3,
+    "required_families": 5,
+    "domain_candidates_per_seed_max": 12
+  },
+  "repetitions": {
+    "development": 3,
+    "evaluation": 15,
+    "export": 3
+  },
+  "expected_rows": {
+    "search_development_candidates": 7200,
+    "search_development_controls": 2100,
+    "engineering_pair": 1800,
+    "bound_ablation": 1800,
+    "model_depth_development": 270,
+    "model_evaluation": 17550,
+    "optional_depth1_control": 1350,
+    "compiler_evaluation_nonmodel": 36000,
+    "public_nonmodel": 1440,
+    "optional_model_compiler_evaluation": 9000,
+    "optional_model_compiler_public": 360,
+    "serial_public": 120,
+    "export_nonmodel": 624,
+    "optional_export_model": 624
+  },
+  "statistics": {
+    "primary": "heldout selected_nonmodel versus frozen_phase2 at 0.1 s",
+    "effect": "mean paired log(J_control/J_candidate), repetitions within program, equal family weights",
+    "bootstrap_resamples": 10000,
+    "primary_interval_percentiles": [
+      0.025,
+      0.975
+    ],
+    "model_gate_interval_percentiles": [
+      0.0125,
+      0.9875
+    ],
+    "model_controls": [
+      "one_bit",
+      "uniform_bits"
+    ],
+    "model_gate": "both lower bounds strictly positive; complete qualified matrix; no defects",
+    "secondary_intervals": "descriptive unadjusted 95 percent",
+    "score_formula": "sqrt(GM(C_serial/C_arm)*GM(S_serial/S_arm))",
+    "public_strict_gain": "every paired score ratio > 1 + 1e-12",
+    "public_inference": "fixed-suite descriptive only"
+  },
+  "ownership": {
+    "source": "research/optimization_*.py, research_tests/test_phase2_optimization*.py; minimal backward-compatible research module parameterization permitted",
+    "results": "fresh results/phase2_structural_encoding/optimization_20260924[_N]",
+    "prohibited": [
+      "production source changes",
+      "historical artifact edits",
+      "policy changes",
+      "paper edits",
+      "classical or serial candidate seeding",
+      "post-evaluation tuning",
+      "commit",
+      "push",
+      "publish",
+      "numeric PID signaling"
+    ]
+  }
+}

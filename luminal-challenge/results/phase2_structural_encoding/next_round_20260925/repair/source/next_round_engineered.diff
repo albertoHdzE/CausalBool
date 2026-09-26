@@ -1,0 +1,265 @@
+--- research/next_round_search.py	2026-09-25 09:01:04
++++ research/next_round_engineered.py	2026-09-25 09:37:12
+@@ -1,5 +1,27 @@
+-"""SUCCESSOR VERSION of ``research/objective_index_search.py`` (next round 1.0).
++"""ENGINEERED VARIANT of ``research/next_round_search.py`` (next round 1.0, Stage E).
+ 
++Version ``next_round_engineered 1.0``: a byte-for-byte copy of the successor
++``research/next_round_search.py`` (sha256 ``PARENT_SOURCE_SHA256`` below) with
++ONE engineering change, written in ``ENGINEERING_PLAN.json`` before it was
++implemented or measured:
++
++E1. ``Propagation.times_fixpoint`` and ``Propagation.addresses_fixpoint`` revise
++    incrementally from a worklist of edges (pairs) incident to operations
++    (values) whose domain changed, instead of re-sweeping every edge (pair)
++    after any deletion; a child call starts from the assigned decision only,
++    because its parent's domains are already a fixpoint. Accessors read one
++    merged table. The rules are deletion-only and monotone, so the surviving
++    domains -- or the proof of inconsistency -- are the unique greatest
++    fixpoint: children, prunes and bounds are unchanged. Only the order and
++    grouping of emitted certificates may differ (each certificate is still a
++    sound, replayable deletion).
++
++Everything below this paragraph is the parent's text except the two fixpoint
++methods, ``Propagation.__init__`` (incidence lists) and the four call sites
++that pass ``changed``. The parent's own header follows.
++
++SUCCESSOR VERSION of ``research/objective_index_search.py`` (next round 1.0).
++
+ Version ``next_round_search 1.1``. A byte-for-byte copy of the frozen owner
+ ``research/objective_index_search.py`` (sha256 ``FROZEN_SOURCE_SHA256`` below,
+ authored in the objective-index research protocol 1.0 and measured there),
+@@ -85,7 +107,9 @@
+     "multiscale_optimise", "optimise",
+ ]
+ 
+-VERSION = "next_round_search 1.1"
++VERSION = "next_round_engineered 1.0"
++PARENT_SOURCE = "research/next_round_search.py"
++PARENT_SOURCE_SHA256 = "b982d4cf62e63d54235237e7032175f893f9f519802f36ff87f7111c5db9c647"
+ FROZEN_SOURCE = "research/objective_index_search.py"
+ FROZEN_SOURCE_SHA256 = "8cda157f465b1d23bb3894d8b3226437210d537f03cffd6ed8db523b12c4c7f5"
+ CATALOGS = ("a4", "a3")
+@@ -343,6 +367,13 @@
+                 if u in selected or v in selected:
+                     edges.append((u, v, lag))
+         self.edges = tuple(sorted(edges))
++        # E1: edges incident to each operation, in edge order.
++        incident: Dict[int, List[int]] = {}
++        for i, (u, v, _) in enumerate(self.edges):
++            incident.setdefault(u, []).append(i)
++            if v != u:
++                incident.setdefault(v, []).append(i)
++        self.incident = {op: tuple(ids) for op, ids in incident.items()}
+         self.fixed_times = dict(domain.fixed_times)
+         base_usage: Dict[Tuple[str, int], List[int]] = {}
+         for op, cycle in sorted(self.fixed_times.items()):
+@@ -400,17 +431,44 @@
+             return (self.fixed_times[op],)
+         return values
+ 
+-    def times_fixpoint(self, D: Dict[int, Tuple[int, ...]]) -> Optional[Dict[int, Tuple[int, ...]]]:
+-        """Rules 1 and 2 to a fixed point; ``None`` proves the branch impossible."""
++    def times_fixpoint(self, D: Dict[int, Tuple[int, ...]],
++                       changed: Optional[Sequence[int]] = None
++                       ) -> Optional[Dict[int, Tuple[int, ...]]]:
++        """Rules 1 and 2 to a fixed point; ``None`` proves the branch impossible.
+ 
++        E1: ``changed=None`` revises every edge (root); otherwise only edges
++        incident to ``changed`` start in the queue, which is sound because
++        the caller's other domains are a fixpoint of the same rules.
++        """
++
+         facts = self.facts
+         emit = self.stats.emit
+         D = dict(D)
+-        changed = True
+-        while changed:
+-            changed = False
+-            for u, v, lag in self.edges:
+-                du, dv = self._t(D, u), self._t(D, v)
++        edges = self.edges
++        incident = self.incident
++        fixed = self.fixed_times
++        if changed is None:
++            queue = deque(range(len(edges)))
++        else:
++            queue = deque(sorted({i for op in changed for i in incident.get(op, ())}))
++        queued = set(queue)
++
++        def domain_of(op):
++            values = D.get(op)
++            return (fixed[op],) if values is None else values
++
++        def touch(op):
++            for i in incident.get(op, ()):
++                if i not in queued:
++                    queued.add(i)
++                    queue.append(i)
++
++        while True:
++            while queue:
++                i = queue.popleft()
++                queued.discard(i)
++                u, v, lag = edges[i]
++                du, dv = domain_of(u), domain_of(v)
+                 high = dv[-1] - lag
+                 if du[-1] > high:
+                     kept = du[:bisect.bisect_right(du, high)]
+@@ -423,7 +481,7 @@
+                         emit(("EMPTY", "time", u))
+                         return None
+                     D[u] = du = kept
+-                    changed = True
++                    touch(u)
+                 low = du[0] + lag
+                 if dv[0] < low:
+                     kept = dv[bisect.bisect_left(dv, low):]
+@@ -436,11 +494,8 @@
+                         emit(("EMPTY", "time", v))
+                         return None
+                     D[v] = kept
+-                    changed = True
+-            # Rule 2: issue capacity of singleton domains, counted as issues.
+-            # Fixed issues never overflow (the root conflict check proved it),
+-            # so only cycles holding a selected singleton can overflow, and a
+-            # cycle is full when fixed plus selected singletons reach the limit.
++                    touch(v)
++            # Rule 2 exactly as the parent applies it after an edge sweep.
+             base = self.base_count
+             singles: Dict[Tuple[str, int], List[int]] = {}
+             for op in self.selected:
+@@ -453,6 +508,7 @@
+                     emit(("EO", engine, cycle,
+                           tuple(sorted(self.base_usage.get((engine, cycle), []) + ops)), limit))
+                     return None
++            changed_here = False
+             for op in self.selected:
+                 values = D[op]
+                 if len(values) == 1:
+@@ -471,8 +527,10 @@
+                     emit(("EMPTY", "time", op))
+                     return None
+                 D[op] = kept
+-                changed = True
+-        return D
++                touch(op)
++                changed_here = True
++            if not changed_here and not queue:
++                return D
+ 
+     # -- bounds -----------------------------------------------------------
+ 
+@@ -584,42 +642,68 @@
+             return (self.fixed_addresses[name],)
+         return values
+ 
+-    def addresses_fixpoint(self, A: Dict[str, Tuple[int, ...]], pairs: Sequence[tuple]
++    def addresses_fixpoint(self, A: Dict[str, Tuple[int, ...]], pairs: Sequence[tuple],
++                           changed: Optional[Sequence[str]] = None
+                            ) -> Optional[Dict[str, Tuple[int, ...]]]:
+         """Rule 3 (all times fixed): a_u needs a disjoint block in A_v.
+ 
+         ``a_u`` has support iff ``min(A_v)+w_v <= a_u`` or ``max(A_v) >= a_u+w_u``;
+         the unsupported values are exactly ``[max(A_v)-w_u+1, min(A_v)+w_v-1]``.
++
++        E1: a pair ``(u, v)`` can delete only after ``A_v`` changed, so a
++        deletion from ``A_x`` re-queues the pairs whose supporting value is
++        ``x``; ``changed=None`` revises every pair, otherwise the pairs that
++        mention a changed value in either position start in the queue.
+         """
+ 
+         facts = self.facts
+         emit = self.stats.emit
+         A = dict(A)
+-        changed = True
+-        while changed:
+-            changed = False
+-            for u, v in pairs:
+-                au, av = self._a(A, u), self._a(A, v)
+-                lo = av[-1] - facts.width[u] + 1
+-                hi = av[0] + facts.width[v] - 1
+-                if lo > hi:
+-                    continue
+-                left = bisect.bisect_left(au, lo)
+-                right = bisect.bisect_right(au, hi)
+-                if left >= right:
+-                    continue
+-                removed = au[left:right]
+-                inputs = (u, v, av[-1], av[0], facts.width[u], facts.width[v])
+-                if u not in A:
+-                    emit(("EMPTY", "address", u, ("AL",) + inputs))
+-                    return None
+-                kept = au[:left] + au[right:]
+-                emit(("AL",) + inputs + (removed,), len(removed))
+-                if not kept:
+-                    emit(("EMPTY", "address", u))
+-                    return None
+-                A[u] = kept
+-                changed = True
++        fixed = self.fixed_addresses
++        by_support: Dict[str, List[int]] = {}
++        mentions: Dict[str, List[int]] = {}
++        for i, (u, v) in enumerate(pairs):
++            by_support.setdefault(v, []).append(i)
++            mentions.setdefault(u, []).append(i)
++            mentions.setdefault(v, []).append(i)
++        if changed is None:
++            queue = deque(range(len(pairs)))
++        else:
++            queue = deque(sorted({i for name in changed for i in mentions.get(name, ())}))
++        queued = set(queue)
++        while queue:
++            i = queue.popleft()
++            queued.discard(i)
++            u, v = pairs[i]
++            au = A.get(u)
++            if au is None:
++                au = (fixed[u],)
++            av = A.get(v)
++            if av is None:
++                av = (fixed[v],)
++            lo = av[-1] - facts.width[u] + 1
++            hi = av[0] + facts.width[v] - 1
++            if lo > hi:
++                continue
++            left = bisect.bisect_left(au, lo)
++            right = bisect.bisect_right(au, hi)
++            if left >= right:
++                continue
++            removed = au[left:right]
++            inputs = (u, v, av[-1], av[0], facts.width[u], facts.width[v])
++            if u not in A:
++                emit(("EMPTY", "address", u, ("AL",) + inputs))
++                return None
++            kept = au[:left] + au[right:]
++            emit(("AL",) + inputs + (removed,), len(removed))
++            if not kept:
++                emit(("EMPTY", "address", u))
++                return None
++            A[u] = kept
++            for j in by_support.get(u, ()):
++                if j not in queued:
++                    queued.add(j)
++                    queue.append(j)
+         return A
+ 
+ 
+@@ -791,7 +875,7 @@
+                     continue
+                 D2 = dict(node.D)
+                 D2[op] = (value,)
+-                D2 = self.prop.times_fixpoint(D2)
++                D2 = self.prop.times_fixpoint(D2, changed=(op,))
+                 if D2 is None:
+                     self._audit("inconsistent", nxt, None, None)
+                     self.report.dead_ends += 1
+@@ -831,7 +915,7 @@
+                 continue
+             A2 = dict(node.A)
+             A2[name] = (value,)
+-            A2 = self.prop.addresses_fixpoint(A2, node.pairs)
++            A2 = self.prop.addresses_fixpoint(A2, node.pairs, changed=(name,))
+             if A2 is None:
+                 self._audit("inconsistent", nxt, None, None)
+                 self.report.dead_ends += 1

@@ -1,10 +1,11 @@
 # Luminal paper draft
 
 [Read the PDF](main.pdf) · [Edit the manuscript](main.tex) ·
-[Build validation](BUILD_VALIDATION.json) · [Claims contract](CLAIMS_AND_EVIDENCE.md)
+[Build validation](BUILD_VALIDATION.json) · [Claims contract](CLAIMS_AND_EVIDENCE.md) ·
+[21 September baseline](baselines/20260921/BASELINE_MANIFEST.json)
 
 **Direct Boolean Index Schemata for Scheduling and Scratch Allocation: A
-Reproducible Luminal Compiler Case Study**, 21 September 2026.
+Reproducible Luminal Compiler Case Study**, revised 23 September 2026.
 
 The draft includes the machine and score definition, cube algebra with proofs,
 bootstrap existence arguments, bounded joint constraints and pseudocode,
@@ -70,6 +71,22 @@ python3 check_optimization_evidence.py \
 To run new experiments, use the final review's commands with **new output
 directories**. Preserve historical runs. Source changes require the affected
 compiler verification before updating the manuscript's results.
+
+## Phase 2 feasibility evidence
+
+The separate 23 September campaign is reported in the manuscript's structural-
+encoding feasibility section. The generator reads the accepted run at
+`../results/phase2_structural_encoding/phase2_repair_20260923c/`, records source
+SHA256 digests, verifies raw-file SHA256 values against the P1 summary, and derives `generated/phase2_coverage_rows.tex` and
+`generated/phase2_metrics.json`. It does not rerun the campaign. P1 is
+INCONCLUSIVE under the declared 100-distinct-completions-per-program gate; P2-P5
+remain blocked and unmeasured. The evidence record keeps
+`artifacts_complete=false` and `scientific_success=false` explicit.
+
+The 113 MB raw-attempt file remains local because storage packaging is
+unresolved. The Phase 2 evidence is not portable, published or fully archived.
+It is dated separately from the accepted production measurements and September
+20 production tests; the two campaigns are not pooled.
 
 ## Review status
 

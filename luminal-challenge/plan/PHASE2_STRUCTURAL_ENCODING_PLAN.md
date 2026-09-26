@@ -1,781 +1,680 @@
-# Luminal phase 2: structural encoding and model-building search
+# Luminal phase 2: structural decision encoding and schema-guided search
 
-Version: **1.0**. Date: **2026-09-22**. Status: **PROPOSED — NOT AUTHORISED FOR
-IMPLEMENTATION.** Owner: author (Alberto Hernández Espinosa). Evaluation and
-drafting: Claude Code, acting as reviewer, not as lead.
+Version: **2.1**. Date: **2026-09-22**.
+Owner: **Alberto Hernández Espinosa**. Scientific and execution specification.
+Status: **DELEGATION SPECIFIED; EXPERIMENTS NOT YET RUN**.
 
-This document supplements `INDEX_ONLY_PLAN.md` v1.1 and
-`OPTIMIZATION_PHASE_PLAN.md` v1.1. It does not replace the correctness contract,
-the accepted v3/v4 implementation, or any frozen evidence. Nothing here
-authorises a code change, a benchmark claim, a submission or a paper sentence.
+Implementation is delegated to Claude Code under the author's instruction, with
+Codex retaining independent review. The [delegation package](phase2/README.md)
+and [implementation contract](phase2/IMPLEMENTATION_CONTRACT.md) fix the remaining
+operational choices and provide immutable inputs. Version 2.1 clarifies fixed
+bit offsets versus schedule-dependent traversal, decoder status precedence,
+stage dependencies, proposal policies and multiplicity control. No experimental
+result or production change accompanies this amendment.
 
-Its purpose is to record, at the same level of rigour as the earlier plans, an
-evaluation of a research direction proposed by the author, including every
-objection raised against it, the author's rebuttal, which objections were
-withdrawn and which survive, and the cheapest experiments that would decide the
-question.
+The author authorised replacing version 1.0 with this specification. Its source
+is preserved in git at `1aef906`. This revision supersedes its mathematical
+claims, experiment sequence, stopping rules and implementation handoff. It
+preserves the author's research question: can an encoding of compilation
+choices expose reusable structure that direct index schemata can exploit?
 
----
+This document specifies future research. Approval to rewrite it is not evidence
+that any hypothesis has passed, nor a change to the accepted compiler. Execution
+can be authorised as one bounded campaign; the gates below then govern progress
+without repeated permission requests. Production integration has a separate
+acceptance gate. Publication and external submission remain separate actions.
 
-## 0. What this document is, and what it is not
+## 1. Research objective and scope
 
-**It is** a faithful record of a technical conversation held on 2026-09-22,
-promoted to a plan so that it can be read, disputed and executed later.
+Investigate whether **state-relative coordinates for compiler decisions** improve
+bounded joint scheduling and scratch-allocation search, and whether **schema
+models provide additional value beyond the decoder and search policy**.
 
-**It is not** a claim that the proposed direction works. Section 10 states the
-weaknesses at the same length as the strengths deliberately. The single most
-likely outcome of section 12 is a negative result obtained in one afternoon,
-and that outcome is treated here as a success of the protocol.
+There are three independently testable contributions:
 
-Every number quoted below carries its provenance. Estimates are labelled
-**ESTIMATE** and are not to be repeated without the measurement that section 12
-prescribes.
+1. A precise encoding with proven soundness and a stated coverage domain.
+2. A search improvement attributable to the encoding or its admissible bounds.
+3. A model that discovers previously unseen, independently validated good
+   compilations more efficiently than matched search without that model.
 
----
+Success at one level does not establish the next. A legal decoder can be useful
+without learning. A compact set can be expensive to construct. A model can
+compress known solutions without discovering any new solution. Negative and
+inconclusive outcomes are valid deliverables with different meanings.
 
-## 1. Provenance
+The initial implementation is an isolated research path. The accepted direct
+compiler, reference validator, classical comparator, frozen results and paper
+remain the controls. No BDD, SAT/SMT solver, classical seed or fallback enters
+the production direct path. Small exhaustive reference enumerators are allowed
+only as independent experimental oracles.
 
-### 1.1 The teaching sequence that preceded this plan
+Read [INDEX_ONLY_PLAN.md](INDEX_ONLY_PLAN.md),
+[OPTIMIZATION_PHASE_PLAN.md](OPTIMIZATION_PHASE_PLAN.md),
+[STATUS.md](STATUS.md), [AGENTS.md](../AGENTS.md), and the
+[glossary](../../GOVERNANCE/GLOSSARY.md) before execution. The pinned machine
+is authoritative for legality. This plan adds a research protocol; it does not
+silently relax the original method or release contract.
 
-Phase 1 closed with two executed notebooks. During 2026-09-21 and 2026-09-22 the
-author read them and reported, repeatedly and precisely, where the explanation
-failed. Four defects were found and repaired. They are recorded here because the
-last of them is what exposed the gap this plan addresses.
+## 2. Established evidence and its limits
 
-| # | Defect | Repair | Commit |
-|---|---|---|---|
-| 1 | The rule 5 caption asserted that `op0` and `op4` were "still free to reorder". False: the ordering arrives transitively through `op0 → op3 → op4`. | Caption corrected; `viz.show_memory_chain` added to draw the transitive edge. | `738be96` |
-| 2 | §7 case 1 was labelled "too early (latency)" but reported an allocation overlap, because it re-derived the allocation from the broken schedule. | Case reuses the starter's private-locker map; a comment records why. | `29c107a` |
-| 3 | §2 of notebook 01 printed `x0..x3:*10*` without ever stating what the string is made of, that it is a printed view rather than stored state, or that it runs LSB-first while the anchor beside it prints MSB-first. | `viz.show_cube_anatomy` added; §2.1 gives the grammar and the disjointness invariant; §2.2 shows membership as one AND and one comparison. | `90c401b` |
-| 4 | §2 never connected the cube to either compiler question; the connection first appears in §4, two sections later, when `Field` arrives. The author reported being unable to see any connection at all. | §2.3 added: the act of deciding what a coordinate means, the same cube read as cycles and as addresses, and a table mapping each constraint to its set operation. | `625aceb` |
-| 5 | The notebook opened at the compiler's two questions and reached the representation three cells later. A reader without the LSB-first convention had no foothold. | §0 added: eight boxes, three yes/no questions, the star, the two stored integers, then the three compiler moves and alignment — no compiler vocabulary until §0.4. | `f481ca8` |
+The accepted baseline is v4 repair2, accepted with limitations; v3 remains the
+historical optimisation baseline. Record the actual source and export hashes at
+execution rather than identifying production code by the current branch name.
 
-Defect 4 is the relevant one. The notebook had been presenting a representation
-without its interpretation step, and the interpretation step — *decide what a
-coordinate means* — is precisely the degree of freedom this plan proposes to
-exploit.
+The retained [public comparison](../results/direct_index_v4_optimization_repair2/comparison/COMPARISON.md)
+contains 72 runs: eight programs, three arms, three repetitions, zero failures.
+Its [raw measurements](../results/direct_index_v4_optimization_repair2/comparison/runs.json)
+report:
 
-### 1.2 The author's notes
-
-Source: `~/Downloads/COMPILER.pdf`, nine handwritten A4 pages, iOS scan dated
-2026-09-22 19:47, unfinished. The notes are a page-by-page reading of notebooks
-00 and 01 with four passages marked **IDEA**.
-
-**Assessment of the notes as an account of phase 1: accurate throughout.** The
-five rules, the three memory-ordering tests, the live-interval reasoning, the
-slot-versus-pipeline distinction ("a slot is a doorway, not a parking space"),
-the hand-built eight-cycle schedule and its arithmetic (`left = 65 + 34 = 99`,
-`right = 189 xor 34 = 159`) are all correct. No misunderstanding in the notes
-required repair. The only sentence this review would strike is the one about
-solving an NP-hard problem, addressed in section 3.
-
----
-
-## 2. The four IDEA blocks, transcribed
-
-Transcribed from the handwriting, lightly repunctuated, not paraphrased.
-
-**IDEA 1 (page 3).** *"What if a set of conditions at specific time can be
-expressed as a string of bits where each of conditions is expressed as a binary
-code. Let us say, what if I set: two numbers in memory ('01' code) with address
-1 and 2 (10, 01) with a sum operation ('00') coming, with restrictions on
-condition (00, 01, 10) → `011001000001 10`, all above together as a binary
-string. This is an output of a network. If I know and I can enumerate the most
-logical strings I can have a sampling of the possible conditions. Then I could,
-by deconvolution, create or generate the known outputs. [...] By our
-deconvolution method now we can ask for certain conditions, if exists as output
-and by index will tell us if exist. But this queries would ask for a subset of
-required conditions where schemata plays an important role. Then an allocation
-would be the tree that generates in order the execution that generates the
-subset of outputs that represents the compilation then execution of the
-program."*
-
-**IDEA 2 (page 4).** *"Retaken the above idea, and combining it with Chaitin
-algorithm: what Chaitin does is to consider the graph as the memory
-representation, literal map to the colour-the-graph problem between countries.
-Then you have to start from an initial graph and play (perturb) it to find the
-optimal. But our idea goes in other direction I would like to prove. Let us
-represent a string as the graph in the JSON above shown. If load is a code as
-001, and uses slots 0 and one I have something like 00001 which corresponds to
-`"load": [0,1]`. Then we can create a string that represents the Chaitin or the
-JSON or the graph. Then we might have a population of possible solutions, just
-in the same spirit of an individual in genetic algorithms, in which such genome
-represents a solution. But in our case we will look by deconvolution the network
-that creates the behaviour of the individuals. [...] Currently we have methods
-that, given a query, we can ask: 'is this behaviour possible', which is the
-same: is our network capable to compute this pattern? [...] If so, the function
-returns the indexes where such desired pattern is."*
-
-**IDEA 3 (page 5).** *"See the section '2. A real program' in notebook, how a
-program is represented by a graph. This graph could be for us our desired output
-that should be deconvolved, taking into account the rules mentioned in section
-'3. The five rules stated exactly'. For us, maybe, the compilation or the program
-shown in section 2 as a table with columns id, op, engine, lat, dest, args could
-be a basin, a cycle inside the network behaviour. Our first approach of
-configuration of our network, or our basin, could be what is shown in section 4
-of notebook 00, 'The starter compiler and what it costs'."*
-
-**IDEA 4 (page 9, unfinished).** *"At this point, the scratchpad represents an
-indexed memory where a value must be set. In the above examples, we load a
-number…"*
-
-**Synthesis.** Encode an entire compilation as one binary string whose fields are
-the individual decisions; treat the space of such strings as the output
-repertoire of a Boolean network; use index-set deconvolution to recover the
-network that generates the good ones; use the existing query machinery, with
-schemata expressing partial conditions, to ask whether a desired compilation
-exists. Allocation becomes a basin or attractor of that network rather than the
-output of a colouring heuristic.
-
----
-
-## 3. Evaluation part 1 — the complexity claim
-
-The author asked directly whether this problem is NP-hard and whether the method
-is on the road to solving it.
-
-### 3.1 What is true
-
-- **Register allocation is NP-complete.** Chaitin et al. (1981) reduced it to
-  graph colouring. The author's map-colouring analogy on page 3 of the notes is
-  the standard one and is drawn correctly.
-- **Resource-constrained instruction scheduling is independently NP-hard.** The
-  notes assert hardness only for allocation. Both halves are hard.
-- **The phase-coupling observation is correct and is the strongest single
-  remark in the notes.** From page 2: *"the moment you change the schedule,
-  every lifetime moves, and the allocation problem you were solving becomes a
-  different problem."* This is the phase-ordering problem and it remains
-  unsolved in production compilers.
-
-### 3.2 What is not true, with measured evidence
-
-The method does not dissolve the exponential, and the evidence is inside the
-repository rather than in the literature.
-
-**Evidence A — the budget and the UNKNOWN verdict.** `si.solve` accepts a
-`si.Budget` and may return `UNKNOWN`. Notebook 01 §10 starves it deliberately on
-a window of four operations of `02_scalar_dual_chain`:
-
-```
- max_visited  verdict     visited  reason
-       50000  UNSAT        33,983  -
-       33000  UNKNOWN      33,001  visited-cube budget exhausted
-       30000  UNKNOWN      30,001  visited-cube budget exhausted
-       25000  UNKNOWN      25,001  visited-cube budget exhausted
-       20000  UNKNOWN      20,001  stopped while building
-```
-
-If the exponential had been defeated, no budget would be needed and `UNKNOWN`
-would not exist as a verdict. `UNKNOWN` is the hardness, surfacing in our own
-machinery, on a four-operation window.
-
-**Evidence B — the joint optimiser resolves almost nothing.** Over the eight
-public programs (notebook 01 §11.2, regenerated live):
-
-| program | queries | SAT | UNSAT | UNKNOWN | accepted |
-|---|---:|---:|---:|---:|---:|
-| 01_scalar_pipeline | 18 | 0 | 0 | 2 | 0 |
-| 02_scalar_dual_chain | 24 | 0 | 5 | 0 | 0 |
-| 03_vector_axpy | 28 | 0 | 4 | 2 | 0 |
-| 04_vector_bitmix | 32 | 0 | 4 | 4 | 0 |
-| 05_mixed_broadcast | 20 | 0 | 5 | 5 | 0 |
-| 06_parallel_memory | 32 | 0 | 3 | 4 | 0 |
-| 07_scalar_selects | 32 | 0 | 3 | 5 | 0 |
-| 08_vector_reduction | 32 | 0 | 3 | 4 | 0 |
-| **total** | **218** | **0** | **27** | **26** | **0** |
-
-Two hundred and eighteen queries attempted; **fifty-three reached a verdict**;
-**one hundred and sixty-five were abandoned during construction** as infeasible;
-**zero were satisfiable**; **zero improvements were accepted.**
-
-**Evidence C — the cost.** From
-`results/direct_index_v4_optimization_repair2/comparison/runs.json`, 72 runs,
-3 repetitions, all gates passed:
-
-| arm | combined score | median compile |
+| Arm | Combined score relative to serial | Median compiler time |
 |---|---:|---:|
-| serial | 1.000000 | 0.000023 s |
-| classical | 1.901379 | 0.000270 s |
-| direct_index | 2.008466 | 0.174400 s |
-
-A 5.63% better score bought at **646 times** the compile time.
-
-**Conclusion of 3.2.** The correct formulation is: *a representation in which the
-statement of the problem stays small and the admission of defeat is explicit.*
-Not: *a route to solving an NP-hard problem.* The first is defensible and
-publishable. The second would not survive one round of review.
-
-### 3.3 What the method does provide
-
-1. **A compact statement of a structured constraint set.** Cubes are an
-   implicant-cover representation. They compress structured sets extremely well
-   and do not change worst-case complexity at all; an unstructured set requires
-   one cube per element. This is the same bargain reduced ordered decision
-   diagrams make, and the `doppel-challenge` documentation already says so
-   explicitly (`doc/06-shared-program.md`: *"parity can have exponentially many
-   accepting schema paths despite a small shared graph"*).
-2. **An auditable failure mode.** `UNSAT` is a proof that a declared domain was
-   exhausted. A greedy heuristic cannot produce that statement; it can only say
-   "I did not find one", which is `UNKNOWN` wearing a confident face. The
-   refusal to conflate the two is the most defensible property of the method and
-   it exists *because* the problem is hard.
-
----
-
-## 4. Evaluation part 2 — the author's structural observation
-
-The author stated that the heart of the method remains the starter of notebook
-00 §4: a queue, a per-cycle evaluation of system state, issue and react.
-
-**This is correct and it is measured.** Evidence B above: the entire public
-result comes from `direct_compiler.bootstrap`. The optimiser accepts nothing on
-the public corpus. The cube algebra currently *restates* a greedy bootstrap in
-set language; it does not currently beat it. The optimiser only pays on the
-generated extra corpus (18 accepted improvements over 3 repetitions, recorded in
-the v4 evidence).
-
-This matters for phase 2 because it identifies where the remaining value is: not
-in the representation, which is built and correct, but in the search that would
-justify it.
-
----
-
-## 5. Evaluation part 3 — what IDEA 2 already has
-
-The author proposes constructing *"a string that represents the Chaitin or the
-JSON or the graph"*. **That string is built and running.** Notebook 01 §8:
-
-```
-window          : (1, 2, 3, 7)
-index width     : 56 bits
-
-   t1         bits   0..4   width 5      when operation 1 issues
-   a_b0       bits   5..12  width 8      where value b0 lives
-   l1         bits  13..13  width 1      lane bit
-   t2         bits  14..18  width 5
-   a_c0       bits  19..26  width 8
-   l2         bits  27..27  width 1
-   t3         bits  28..32  width 5
-   a_d0       bits  33..40  width 8
-   l3         bits  41..41  width 1
-   t7         bits  42..46  width 5
-   a_left     bits  47..54  width 8
-   l7         bits  55..55  width 1
-
-assignments this index can express: 2**56 = 72,057,594,037,927,936
-```
-
-One integer holding every scheduling and allocation decision for a window at
-once, with named field access. Owner: `direct_constraints.JointQuery`.
-
-Two differences from the note: the index covers **a window**, not a whole
-program, and it is used to **verify a target** rather than to carry a
-population. The first half of IDEA 2 is therefore not a proposal; it is a fact
-that can be executed today. What is new is the second half.
-
----
-
-## 6. Evaluation part 4 — what is genuinely new, and its family
-
-The novel proposal is: *keep a population of such strings and, instead of
-perturbing a graph as Chaitin does, recover by deconvolution the network that
-generates the good ones, then generate from that network.*
-
-### 6.1 The family, named
-
-Learning a generative model from a selected population and sampling from the
-model rather than mutating the population is an **estimation-of-distribution
-algorithm** (EDA); the model-building genetic algorithm literature (BOA, cGA and
-relatives) is the reference class. A reviewer will identify this within a
-paragraph. Naming it first is protection, not concession.
-
-### 6.2 Where the novelty actually lies
-
-Every EDA in that literature learns a **probabilistic** model — a Bayesian
-network with conditional probability tables. The proposal learns a
-**deterministic, algorithmic** one: schemata. The cost argument is already
-developed elsewhere in this programme (`imp-prices`): a conditional probability
-table costs `3^k (3-1)` parameters estimated from finite data; a gate costs
-zero. A schema-model EDA has **no parameters, no probabilities and no estimation
-error**; it either admits an assignment or it does not.
-
-This is consistent with the author directive of 2026-09-07 (no Shannon quantity
-may be one of our complexity measures) and with pinned decision #96 (one
-explicit algorithmic measure, no hybrids). The direction is therefore coherent
-with the wider programme rather than an excursion from it.
-
-The contrast with Chaitin is clean and is the author's own: Chaitin starts from
-one graph and perturbs towards a colouring; this method states the set of
-acceptable colourings and asks it for a member.
-
----
-
-## 7. The two objections raised
-
-### 7.1 Objection 1 — circularity
-
-*The constraint set is already known in closed form. The five rules are the
-generator. Learning a network that reproduces a set one can already write down
-exactly buys nothing unless the learned object answers queries more cheaply than
-the exact one.*
-
-Proposed acceptance test at the time: the model must answer a query that
-`si.solve` cannot answer within budget.
-
-### 7.2 Objection 2 — legality is not the hard part
-
-*The bootstrap produces a legal compilation in 0.27 milliseconds (classical) and
-the direct bootstrap in the same order. Nobody needs a generative model of legal
-compilations. The hard part is the optimal one. A model must therefore be built
-from the selected population — the top fraction by cycles × words — and rebuilt
-after each selection. Without the selection step the result is a sampler, not a
-search.*
-
----
-
-## 8. The author's rebuttal, and its assessment
-
-### 8.1 The rebuttal
-
-> *"The five rules, in my idea, are not the generator, but part of a valid
-> string that was generated by a network whose steps of generation already
-> validated the rules or constraints. See what we did in the project 0xPARC and
-> doppel; we used such strategy to avoid redundancy. Same for legal
-> compilations: the current state of the system can be part of the string we
-> consider and that the dynamics of the network considers. Then one string not
-> only says it is legal but the schedule also, the correct one."*
-
-### 8.2 The construction, named from the author's own repositories
-
-The rebuttal is not an intuition; it is a technique the author has already
-implemented twice in this repository.
-
-**`doppel-challenge`** represents a Boolean repertoire as a reduced ordered
-decision diagram in **canonical form**, and the decoder *rejects* anything that
-is not a canonical object. From `doc/06-shared-program.md`:
-
-> *"It rejects truncation, extra bytes, nonzero padding, out-of-range
-> references, forward references, inconsistent coordinate order,
-> redundant/duplicate/unreachable nodes, and noncanonical numbering."*
-
-and from `src/doppel_challenge/repertoire_program.py:223`:
-
-```python
-if _integer(v, "coordinate") >= n or low == high:
-    raise ValueError("invalid or redundant decision")
-```
-
-**`0xPARC-challenge`** does the arithmetisation form of the same move: row
-constraints admit only valid witnesses (`row_evaluator.check_rows`).
-
-The shared discipline is: **one string per object, and no string for a
-non-object.** Validity is a property of the representation, not the outcome of a
-check applied afterwards.
-
-### 8.3 Does the discipline transfer to the five rules? Rule by rule
-
-| rule | structural encoding | free by construction? |
-|---|---|---|
-| **1 — slots**: each engine starts at most *n* operations per cycle | write each cycle as a bundle with a fixed number of slot fields per engine | **Yes.** Three operations cannot be written into a two-slot field. Note that the author's own page-4 sketch (`"load": [0,1]`) is already this shape. |
-| **2 — latency**: an operation issued at *c* completes at *c + latency*; readers must issue no earlier | decode as a sequence of decisions against a carried ready-set; a field selects among operations whose inputs have landed | **Yes**, provided the string is decoded as decisions against state rather than as absolute values. This is exactly the author's second point. |
-| **3a — capacity**: 256 words | address fields index the scratchpad | Yes, trivially. |
-| **3b — alignment**: a vector occupies 8 consecutive words and must start on a multiple of 8 | store `address / 8` for a vector, not `address` | **Yes.** A misaligned vector becomes unrepresentable rather than rejected. |
-| **4 — sharing**: two values may share a word only if their live intervals do not overlap | encode an address as *an index into the list of currently free lockers*, not as an absolute word number | **Yes**, and additionally this removes locker-renaming symmetry. This is the same discipline as a restricted-growth string for set partitions. |
-| **5 — memory ordering**: same-buffer, overlapping-range, not-both-loads pairs must occupy different cycles in program order | the same carried state as rule 2: such pairs are only offerable in program order | **Yes.** |
-
-Row 4 is the load-bearing one. By naming *the choice among what is currently
-available* rather than the thing chosen, every string becomes legal **and** two
-strings that differ only by renaming become impossible. Both halves of the
-`doppel` property — no invalid members, no redundant members — are obtained.
-
-### 8.4 Disposition of the objections
-
-**Objection 1 (circularity): WITHDRAWN.** It was raised against a
-generate-and-test design. The author proposed a correct-by-construction design.
-Under a state-relative encoding the five rules are not checked, learned or
-reproduced; they are absent from the search entirely because violating strings
-do not exist. The objection does not apply.
-
-**Objection 2 (legality is not optimality): SUSTAINED, and narrowed.** Making
-the encoding structural removes infeasibility. It does not order the feasible
-points. Every string in the proposed space satisfies all five rules; they do not
-have equal cost; minimising cycles × words over them remains NP-hard; and a
-canonical encoding provides no gradient.
-
-What the rebuttal does buy, and it is substantial: **no repair operator, no
-penalty term, no invalid offspring.** Every mutation of a valid string is a
-valid string. This is the standard failure mode of population methods on
-constrained combinatorial problems, and the encoding removes it structurally.
-The precedent in the genetic-algorithm literature is the decoder-based or
-indirect encoding (random-key and Grefenstette encodings for routing problems).
-The design is principled and has a track record.
-
----
-
-## 9. The design that follows
-
-### 9.1 State-relative encoding (the core proposal)
-
-Decode a bit string as an ordered sequence of decisions taken against the
-machine state that the prefix of the string has already established:
-
-1. Maintain the machine state the starter already maintains: ready set, engine
-   slot occupancy for the current cycle, free-locker list, buffer-write history.
-2. At each decision point, enumerate the **currently legal options** in a
-   **canonical order**.
-3. Read `ceil(log2(number of options))` bits and take that option.
-4. Advance the state.
-
-Every legal compilation has at least one encoding; no illegal compilation has
-any. With canonical option ordering and symmetry-free option lists, every legal
-compilation has exactly one encoding.
-
-### 9.2 Estimated width — **ESTIMATE, to be measured, not to be quoted**
-
-Current window index, `02_scalar_dual_chain`, window `(1, 2, 3, 7)`:
-4 operations × (5 cycle bits + 8 address bits + 1 lane bit) = **56 bits**, of
-which **32 bits are absolute addresses over a 256-word scratchpad in a
-compilation whose entire footprint is 3 words**.
-
-Under the state-relative encoding, per operation:
-
-- cycle offset from the earliest legal cycle, over a window of at most 8
-  cycles → 3 bits;
-- address as an index into the free-locker list, where the footprint is 3 words
-  so at most 4 lockers are ever offered → 2 bits;
-- lane bit → 1 bit.
-
-4 × 6 = **24 bits**, giving a declared domain of 2²⁴ ≈ 16.8 million in place of
-2⁵⁶ ≈ 7.2 × 10¹⁶, with the additional property that **every point of the smaller
-domain is a legal compilation** whereas almost no point of the larger one is.
-
-This arithmetic is a paper estimate on one window of one program. Its purpose is
-to justify measuring, not to be reported. Experiment **E2** replaces it.
-
-### 9.3 The origin property
-
-Order every option list so that index `0` is the option the starter would take.
-Then **the all-zeros string decodes to the bootstrap compilation exactly**, and
-Hamming distance from the origin measures departure from greedy.
-
-Given section 4 — the bootstrap produces the entire public result and the
-optimiser accepts nothing — this is the correct shape for the problem. The
-starter ceases to be the answer and becomes the coordinate system, and the
-search becomes a controlled expansion outwards from a known-good origin with a
-single interpretable budget parameter: the radius.
-
----
-
-## 10. Feasibility assessment
-
-### 10.1 Strengths
-
-1. **The representation already exists and is correct.** `schema_index`,
-   `direct_contract`, `direct_constraints` and `direct_compiler` are accepted,
-   tested and frozen-reference-validated. Phase 2 changes an encoding, not a
-   theory.
-2. **The correct-by-construction discipline is proven in this repository
-   twice** (`doppel-challenge`, `0xPARC-challenge`), by the same author, with
-   decoders that reject non-canonical input. This is not a borrowed technique.
-3. **The hardest constraint is the one the encoding handles best.** Rule 4 —
-   sharing, the graph-colouring core — becomes both automatic and
-   symmetry-free under a free-list index.
-4. **The origin property gives the search a principled starting point** and an
-   interpretable budget, and it converts a measured weakness (section 4) into
-   the design's coordinate system.
-5. **The model class is consistent with the programme's standing directives** —
-   algorithmic, not Shannon; one measure, no hybrids.
-6. **A plausible near-term practical payoff independent of the research
-   question.** The current optimiser spends 165 of 218 queries failing during
-   construction over a 56-bit domain of mostly illegal points. A compact legal
-   domain may change that without any new theory. See enhancement E-1.
-
-### 10.2 Weaknesses
-
-1. **Optimality remains NP-hard and the encoding gives no gradient.** This is
-   sustained objection 2 and it is not repairable by encoding.
-2. **The compression claim is unproven.** Cubes compress structured sets. That
-   the set of *good* compilations is structured in this encoding is a
-   conjecture, and it is the conjecture on which everything else rests.
-   Experiment **E3** is designed to refute it cheaply.
-3. **Canonical enumeration of legal options at each decision point costs
-   time.** The encoding buys a smaller domain by paying per decision. Given the
-   existing 646× compile-time deficit, a decoder that is slower per candidate
-   could erase the benefit. This must be measured, not assumed.
-4. **One encoding per compilation requires proof, not assertion.** Uniqueness
-   depends on canonical option ordering at every decision point, including ties.
-   `doppel` needed an explicit canonicalisation pass (`_canonical`) and an
-   explicit rejection list to achieve it. The same discipline will be required
-   here and it is where subtle defects live.
-5. **The deconvolution step remains the least specified part of the proposal.**
-   IDEA 1 and IDEA 2 describe recovering "the network that generates the good
-   individuals" without stating the network's state space, update rule, or what
-   an attractor corresponds to. The Boolean-network reading of *basin →
-   allocation* (IDEA 3) is evocative but is not yet a definition.
-6. **The attractor framing has a known failure mode.** If a dynamics whose
-   attractors are good compilations is constructed, this is an energy-descent
-   method in the Hopfield–Tank sense, whose documented weaknesses on colouring
-   and routing problems are spurious attractors and local minima. The framing
-   must acknowledge that literature rather than rediscover it.
-7. **Scope risk.** Phase 1 is complete, submitted and defensible. Phase 2 is
-   research with a genuine probability of a null result. It must not be allowed
-   to destabilise phase 1 artefacts or delay the outstanding push.
-
-### 10.3 What would kill the project, stated in advance
-
-- **E1 fails**: any decoded string that `machine.check_compilation` rejects.
-  The correct-by-construction claim is then simply false and everything above
-  collapses. This is the first experiment for that reason.
-- **E3 returns a cover ratio near 1**: the good compilations are a scatter, not
-  a structured set; schemata have nothing to grip; the model-building step has
-  no object. Stop, and report the negative result.
-- **E2 shows no meaningful width reduction**: the domain does not shrink, so the
-  search space is unchanged and only the validity property is gained. That is a
-  smaller result but not necessarily a fatal one; re-scope to enhancement E-1
-  alone.
-
-### 10.4 Points to consider
-
-1. **Decide the acceptance test before writing the encoder.** Proposed: the
-   encoding must produce, on at least one public program, an accepted
-   improvement that the current optimiser does not find, or a measured
-   compile-time reduction, with the existing seven comparison gates intact.
-2. **The frozen reference and the validator are not negotiable.** Every
-   candidate is judged by `machine.check_compilation` and by case execution.
-   The encoder is never its own judge.
-3. **`UNKNOWN` semantics survive unchanged.** A budget that actually exhausts
-   returns `UNKNOWN`. A smaller domain may legitimately convert former
-   `UNKNOWN` verdicts into proven `SAT`/`UNSAT`; that is a result to record, not
-   a licence to shorten a search.
-4. **Do not tune on the extra corpus.** The frozen evaluation corpus (seed
-   20260921) is for final evaluation only, per `OPTIMIZATION_PHASE_PLAN.md` §4.
-5. **Publication framing.** If this works, it is *a parameter-free,
-   schema-model estimation-of-distribution algorithm over a correct-by-
-   construction encoding of VLIW compilations*. It is not a solution to an
-   NP-hard problem. The distinction must appear in the abstract, not in a
-   footnote.
-6. **One owner per concept.** The encoder is one module. Under the
-   `monolithic-code` law its owner must be located or declared before a line is
-   written, and the guard that keeps it single must ship in the same commit.
-   `machine.py` is frozen and may not be enriched; `direct_contract` already
-   owns derived program facts and is the natural host for state enumeration.
-
----
-
-## 11. Proposed enhancements
-
-Ordered by cost, lowest first. **E-1 is independent of the research question and
-may have standalone value.**
-
-**E-1. Replace absolute address fields with free-list indices in the existing
-joint query.** No population, no deconvolution, no new theory: only a narrower
-`JointQuery` index. Rationale: 165 of 218 queries currently abort during
-construction, and 32 of 56 bits describe a 256-word space for a 3-word
-footprint. This is a contained change to `direct_constraints` with the existing
-gates as its test.
-
-**E-2. Encode `address / 8` for vector values.** Alignment becomes
-unrepresentable rather than constraint-checked, removing one intersection per
-vector value from every query.
-
-**E-3. Canonical option ordering with greedy-first.** Delivers the origin
-property of §9.3 and makes Hamming radius the search budget.
-
-**E-4. Carry the partial objective in the decoder state.** Cycles consumed and
-words occupied are known at each decision point, so a prefix whose partial cost
-already exceeds the incumbent can be refused before completion. This is
-branch-and-bound over the encoding and is the most likely source of a real
-speed-up.
-
-**E-5. Report search radius rather than visited-cube counts in the public
-report.** A radius is interpretable by a reader; a cube count is not.
-
-**E-6. Only if E3 succeeds: the schema model.** Build the cube cover of the
-selected population, sample from the cover, re-select, re-cover. This is the
-EDA loop with a schema model class and no probabilities. The deconvolution
-framing of IDEA 1 and IDEA 2 becomes concrete here and nowhere earlier.
-
----
-
-## 12. Experimental programme
-
-Every experiment obeys the standing gates: **refuse on empty input** (exit 2),
-**print the denominator**, and **never report a ratio without the counts behind
-it**. No experiment may modify `machine.py`, the pinned reference, or any
-existing `results/` directory. New artefacts go to
-`results/phase2_structural_encoding/`.
-
-### E1 — the refutation gate (do this first, and stop if it fails)
-
-**Question.** Does the state-relative encoding produce only legal compilations?
-
-**Method.** Implement the decoder for `02_scalar_dual_chain`. Draw K = 10,000
-uniform random bit strings of the decoder's declared width. Decode each. Submit
-every decoded compilation to `machine.check_compilation` and to
-`machine.check_case` for all program cases.
-
-**Report.** K drawn; number decoded; number accepted; number rejected, with the
-validator's exact message for every rejection.
-
-**Gate.** Rejections must be **zero**. One rejection refutes the design as
-specified. Do not repair by filtering; repair the encoding or report failure.
-
-### E2 — measured width
-
-**Question.** How wide is the encoding actually, against 56 bits?
-
-**Method.** Instrument the decoder to record `log2(options)` at every decision
-point across the same K strings and across the eight public programs.
-
-**Report.** Per program: declared width, mean and maximum realised width, and
-the current `JointQuery` width for the same window. State the domain sizes as
-powers of two, not as decimal approximations.
-
-**Gate.** None; this is a measurement. It replaces the **ESTIMATE** in §9.2,
-which must not be quoted until this runs.
-
-### E3 — the structure conjecture (the decisive experiment)
-
-**Question.** Are the *good* compilations a structured set in this encoding, or
-a scatter?
-
-**Method.** For `02_scalar_dual_chain` and at least two other public programs:
-generate a population of legal compilations (E1's decoder, uniform sampling plus
-a Hamming ball around the origin), deduplicate, score each by cycles × words
-using the validator's own counts, take the top decile, and compute a cube cover
-of the top decile's index set using `schema_index`.
-
-**Report.** Population size; distinct count; decile size; cubes in the cover;
-the ratio `cubes / decile size`; and the same ratio for a **control** — a
-uniformly random subset of the same cardinality drawn from the legal population.
-
-**Gate.** The control is what makes this a measurement rather than a number. If
-the top decile's ratio is not materially below the control's ratio, there is no
-structure to learn and the programme stops here with a reportable negative
-result.
-
-### E4 — the origin property and a like-for-like search comparison
-
-**Question.** Does a radius-bounded search from the origin find what the current
-optimiser does not?
-
-**Method.** Verify that the all-zeros string decodes to the bootstrap
-compilation, byte for byte, on all eight public programs. Then run a
-radius-bounded search under a budget matched to the current optimiser's, and
-compare accepted improvements against the measured baseline of **0 accepted over
-218 queries**.
-
-**Report.** Per program: bootstrap metrics, best found, radius reached, budget
-consumed, wall-clock. All eight programs, including the losses.
-
-**Gate.** No claim of improvement without the full three-repetition comparison
-and all seven existing gates, per `OPTIMIZATION_PHASE_PLAN.md` §4.
-
-### E5 — conditional: the schema model
-
-Runs **only** if E3 passes its gate. Specification deferred: it must be written
-after E3's numbers exist, not before, and it must state the network's state
-space, update rule and attractor interpretation in operational terms rather than
-by analogy.
-
----
-
-## 13. Non-negotiable constraints
-
-- `machine.py`, the pinned reference, `common.py`, `results/comparison.json` and
-  all accepted v1–v4 evidence are immutable.
-- `compiler.compile_program(program)` keeps its signature and its return
-  contract.
-- No BDD backend, SAT/SMT solver, exhaustive production enumeration or classical
-  fallback enters the production direct path. A decoder that enumerates *legal
-  options at one decision point* is not exhaustive enumeration of the space;
-  this distinction must be stated explicitly in any implementation handoff.
-- Exact verdict semantics are preserved. Actual exhaustion returns `UNKNOWN`.
-- No test is weakened, no timeout enlarged, no score formula altered, no public
-  corpus changed.
-- The 0xPARC manuscript, the doppel package and all notebook work outside
-  `luminal-challenge` are out of scope.
-- No push, submission or paper claim is authorised by this plan.
-
----
-
-## 14. Decision points
-
-| point | decision | who |
-|---|---|---|
-| After E1 | Proceed, or report the design refuted. | author |
-| After E2 | Proceed, or re-scope to enhancement E-1 alone. | author |
-| After E3 | Proceed to E4/E5, or stop and report the negative result. | author |
-| After E4 | Whether any production change is proposed at all. | author, as lead review |
-
-The reviewer's recommendation is that **E1 and E3 be run before anything else is
-written**, and that the encoder built for E1 be treated as a throwaway probe
-rather than as production code until E3 has returned.
-
----
-
-## 15. What this plan does not authorise
-
-It does not authorise implementation. It does not authorise a benchmark claim,
-a change to the production path, a notebook section presenting the idea as
-result, a paper sentence, or a push. It records an evaluation and a protocol.
-
----
-
-## 16. Delegation prompt
-
-To be used only after the author authorises E1.
-
-> Implement experiment E1 only, from
-> `luminal-challenge/plan/PHASE2_STRUCTURAL_ENCODING_PLAN.md`.
->
-> You are the implementing worker, not the lead reviewer. Read `AGENTS.md`,
-> `INDEX_ONLY_PLAN.md`, `OPTIMIZATION_PHASE_PLAN.md`, `STATUS.md` and this
-> complete plan before editing. Before writing any code, answer the four
-> `monolithic-code` questions in the handoff: where the core that owns machine
-> state enumeration lives, whether it already exists under another name, why a
-> new definition beats enriching `direct_contract`, and what guard keeps it
-> single. The guard ships in the same commit and is verified by planting a copy.
->
-> Build the state-relative decoder for `02_scalar_dual_chain` as a probe, not as
-> production code. Do not modify `machine.py`, the pinned reference, the
-> production direct path, or any existing results directory. Write new artefacts
-> to `results/phase2_structural_encoding/`.
->
-> Draw 10,000 uniform random bit strings, decode each, and submit every decoded
-> compilation to `machine.check_compilation` and to `machine.check_case` for
-> every program case. The experiment refuses on an empty scan and prints its
-> denominator: strings drawn, decoded, accepted, rejected. Report every
-> rejection with the validator's exact message. Do not filter, retry or repair a
-> rejected candidate; a single rejection is the result.
->
-> Report the outcome factually, including a failure, and stop. Do not proceed to
-> E2 or E3, do not touch the production compiler, do not claim any improvement,
-> and do not push. End the handoff with `READY_FOR_REVIEW`.
-
----
-
-## 17. Reviewer's closing assessment
-
-The proposal is **not a dream, and it is not a solution to an NP-hard problem.**
-It is a well-founded encoding change with one genuinely novel component and one
-unproven conjecture.
-
-- The encoding change (§9.1, §9.2) is sound, is proven twice in this author's
-  own repositories, and I expect it to work.
-- The origin property (§9.3) is elegant and converts a measured weakness into a
-  coordinate system. I expect it to work.
-- The conjecture — that the *good* compilations form a schema-structured set
-  (§12, E3) — is the whole research content, and I do not know whether it is
-  true. Nor does the literature, because no one has asked the question in this
-  representation.
-
-That is a good position for a research phase: two components likely to work, one
-question genuinely open, and an experiment costing one afternoon that can refute
-the open question before anything expensive is built.
-
-The single greatest risk is not technical. It is that a correct encoding and an
-elegant origin property feel like progress, and the conjecture never gets tested
-because the surrounding machinery is enjoyable to build. E1 and E3 exist to
-prevent exactly that, and they should be run in that order, early, and reported
-whatever they say.
+| Serial | 1.000000 | 0.023 ms |
+| Classical | 1.901379 | 0.270 ms |
+| Direct index | 2.008466 | 174.400 ms |
+
+These measurements imply approximately 5.63% higher composite score and a
+646-fold ratio of the displayed median compile times versus classical. The
+latter is a ratio of aggregate medians, not a paired geometric-mean slowdown.
+Neither is a new measurement or a claim about private programs. Compiler timing
+excludes interpreter startup and validation; the external process limit includes
+them. Fresh comparisons must retain both measurements.
+
+The public optimiser has produced no accepted improvement in the cited evidence;
+the direct bootstrap supplies its public output quality. This does not prove
+that the bootstrap is optimal or that the representation contributes nothing.
+The search has limited windows, targets and budgets. Generated-corpus successes
+must be reported separately and must not be counted again across repetitions as
+distinct successful programs.
+
+Version 1.0's attribution of 165 out of 218 attempts to construction difficulty
+is withdrawn as a causal argument. In `direct_optimizer.optimise`, `INFEASIBLE`
+means a fixed decision contradicts the requested target; `UNKNOWN_CONSTRUCTION`
+means a construction budget was exhausted. They are different events. Recompute
+all status totals from raw reports before using that example. Report attempted,
+SAT, UNSAT, INFEASIBLE, UNKNOWN_CONSTRUCTION and UNKNOWN_SEARCH separately.
+A different encoding cannot make a genuinely impossible fixed context feasible
+without changing that context.
+
+## 3. Mathematical object and machine semantics
+
+For a validated program p, a compilation is a pair x = (t, a): an issue cycle
+t_i for every operation i and a scratch base a_v for every produced value v.
+Normalise emitted bundles by increasing operation ID within each engine and
+omit trailing empty bundles. Lane labels are auxiliary representations of
+capacity and are not part of the compilation object.
+
+Let w_v be the value width, l_i the operation latency, and consumers(v) its
+consuming operations. Define:
+
+- write(v) = t_producer(v) + l_producer(v).
+- end(v) = max({write(v)} union {t_j : j in consumers(v)}).
+- live(v) = [write(v), end(v)], with **inclusive** endpoints.
+- C(x) = 1 + max_i t_i, the number of emitted bundles.
+- S(x) = max_v(a_v + w_v), including alignment holes.
+- J(x) = C(x) S(x), the optimisation objective on the positive-footprint domain.
+
+Every operation appears exactly once. Each engine's capacity constrains issues
+in a cycle, not in-flight operations. Data readers issue no earlier than the
+producer's write. Ordered overlapping memory accesses issue in strict program
+order when at least one is a store. Scalars occupy one word; vectors occupy
+eight consecutive words with an eight-word-aligned base. All blocks lie inside
+256 words. Overlapping live intervals require disjoint address blocks. Even
+unused values write and occupy memory for their write cycle. Writes precede
+reads, so same-cycle last-read/new-write reuse is forbidden.
+
+Fix a finite domain specification d = (p, incumbent, window, time domains,
+address domains, fixed decisions, normalisation rule). Define F_d to be all
+normalised compilations satisfying this domain and the pinned machine rules.
+For an objective threshold q, define G_d(q) = {x in F_d : J(x) <= q}.
+The domain and threshold are part of every result, including UNSAT.
+
+Two study modes are permitted:
+
+- **Matched window:** exactly the same window, external decisions, domains and
+  targets as `JointQuery`. This isolates representation and search costs.
+- **Expanded domain:** explicitly enlarged windows or whole-program domains.
+  This evaluates practical reach, but cannot attribute gains to encoding alone.
+
+A finite codec cannot represent all schedules with arbitrary idle cycles.
+Completeness always means completeness over the declared F_d. A new domain
+restriction, symmetry quotient or schedule policy must have its own name and
+coverage statement. Never compare a whole-program width with a window width as
+though they encoded the same objects.
+
+## 4. Claims corrected from version 1.0
+
+| Earlier assertion | Contract in version 2.0 |
+|---|---|
+| Every fixed-width bit string becomes one distinct legal compilation. | Not generally possible: a finite feasible set need not have power-of-two cardinality. Define validity and failure codes explicitly. |
+| A free-list index removes address-renaming symmetry. | Ranking available addresses does not quotient renamings. Address geometry, alignment and footprint can make renamings inequivalent. |
+| Legal next choices guarantee a complete solution. | A locally legal prefix may have no legal completion. Detect and report dead ends; prove extendibility before claiming their absence. |
+| Constraints disappear from the search. | Option construction and state transitions enforce constraints; their computational cost remains chargeable. |
+| Deterministic schemata have no parameters or estimation error. | The model has structural choices and hyperparameters. Exactness on observed examples does not imply accuracy on unseen assignments. |
+| An exact cover can generate new good individuals. | An exact cover of a finite observed set generates only that set. Novel proposals require explicit generalisation or exploration. |
+| A near-unit sampled cover ratio refutes structure. | Sparse observations can miss adjacent members of a large cube. This may be inadequate sampling rather than absence of structure. |
+| UNKNOWN demonstrates NP-hardness. | UNKNOWN demonstrates exhaustion of a particular budget. Complexity claims require a formal problem family and proof. |
+| Register allocation is uniformly NP-complete. | General allocation formulations can be hard; fixed-schedule scalar live intervals admit interval colouring. Mixed widths and joint scheduling require separate analysis. |
+| All mutations remain valid and Hamming radius measures semantic distance. | Neither follows from state-relative encoding; one prefix change can reinterpret many subsequent fields. |
+| Prior canonical decoders prove this construction. | They motivate the discipline. Their correctness proofs do not transfer automatically to a different object and transition system. |
+
+The core proposal survives these corrections. Its scientific question becomes
+whether paying for explicit state and domain structure yields a net benefit.
+No claim of a new complexity class, universal optimality, parameter-free learning
+or first-ever use of the idea is part of this plan.
+
+## 5. Reference structural codec
+
+### 5.1 A partial, fixed-layout encoding
+
+The first codec is deliberately **partial** on binary strings. It provides a
+well-defined coordinate system for schemata without concealing invalid codes.
+For a fixed d, declare a width B and functions:
+
+    decode_d : {0,1}^B -> F_d union {INVALID_CODE, DEAD_END}
+    encode_d : F_d -> {0,1}^B
+
+Budget interruption is a separate execution status, not a mathematical output
+of these functions. A completed decode must satisfy the machine contract;
+invalid binary codes are expected and counted. A decoded compilation rejected
+by the independent validator is a correctness defect.
+
+At each decision, construct a deterministic ordered option list O(s) from the
+prefix state s. A fixed field stores the rank r. If O(s) is empty, return
+DEAD_END. Otherwise, if r >= |O(s)|, return INVALID_CODE; else apply O(s)[r].
+Choose each field width from a proven maximum option count for that field over
+the declared domain, not from the observed count on one path. A constant field
+needs no bits and must be handled without constructing a zero-width `si.Field`.
+No modulo mapping, silent clipping, retry, default choice or ignored padding is
+allowed in this codec.
+
+Concretely, if field j has maximum option count M_j, reserve
+b_j = ceil(log2(max(1, M_j))) bits and set B = sum_j b_j. Use the declared
+time-domain size as a safe scheduling bound and the declared aligned address
+count as a safe allocation bound. State dependence can reduce branching without
+reducing these fixed widths. Measure both; do not promise a width reduction.
+
+For example, three choices require two bits and leave rank 3 invalid. Padding
+the list by duplicating an option would make decoding total at this point but
+would destroy injectivity and bias uniform-bit sampling. Both designs are
+possible; they are different experiments. A total decoder would additionally
+need a proof that every chosen prefix can be completed, including capacity and
+horizon restrictions. It is not an acceptance requirement of this first phase.
+
+The first reference order is:
+
+1. Assign selected issue times in increasing operation ID. Offer all values in
+   that operation's declared domain that respect constraints whose participants
+   are already fixed, including external operations and issue capacity. Constraints
+   involving later selected operations remain obligations for later decisions.
+2. Once all issue times are fixed, obtain complete lifetimes from
+   `direct_contract.lifetimes`. Assign selected vector addresses first, then
+   scalar addresses, in a stable order declared in the domain manifest.
+   Offer every aligned in-bounds address compatible with fixed and already
+   assigned live blocks. An empty list is a dead end.
+3. Assemble the canonical compilation and check any remaining domain predicates.
+
+Use increasing `(write cycle, producer ID)` within each width class for the
+reference allocation order, matching the bootstrap convention. This order is
+schedule-dependent but fully determined before address decoding starts.
+Field offsets remain fixed: all selected time fields by operation ID, then all
+selected address fields by producer ID. Traversal reads those preassigned fields;
+it never repacks their offsets according to the decoded schedule.
+Selected allocations must respect all fixed external allocations, including
+values whose lifetime changed because a selected consumer moved.
+
+This is a reference experiment in state-relative coordinates, not a claim to
+have implemented the more ambitious online network in the author's notes. It
+still searches pairs (t, a), and each complete schedule admits allocation
+branches; it is not limited to one greedy allocation per schedule.
+
+### 5.2 Proof obligations
+
+Before scaling, supply short arguments and exhaustive small-domain checks for:
+
+| Obligation | Required argument or evidence |
+|---|---|
+| Termination | A fixed finite number of decision fields; finite option lists. |
+| Soundness | State invariants imply all machine rules for every completed decode. |
+| Completeness over F_d | Every target x in F_d has its next choice in O(s); induction constructs its encoding. |
+| Round trip | decode_d(encode_d(x)) = x for every x in F_d. |
+| Injectivity | encode_d(decode_d(z)) = z for every successfully decoded z; no ignored bits or auxiliary lane multiplicity. |
+| Domain equivalence | Independent enumeration yields the same normalised F_d for absolute and structural codecs. |
+| Origin | If the incumbent belongs to F_d and its next choice is ordered first whenever available, decode_d(0) equals that incumbent. |
+
+Completeness requires offering all declared locally compatible choices. Restricting
+to active schedules, lowest free addresses or earliest issue times changes F_d.
+Removing lane permutations is safe only with a capacity-equivalence argument.
+Address canonicalisation requires a separate equivalence relation and proof that
+legality and J are invariant; none is assumed here.
+
+The intended completeness argument is constructive: follow any x in F_d in
+the prescribed decision order. Its next decision belongs to its declared domain
+and cannot violate a constraint against already fixed decisions, since x is
+legal. It therefore appears in the option list. The unique sequence of ranks
+encodes x. Soundness follows by checking each constraint once all its arguments
+are fixed, with a final assertion that none remains unchecked. Injectivity
+follows by induction on the deterministic prefix and distinct options. These
+arguments are implementation obligations: a shortcut that removes options,
+changes field layout or misses a constraint must re-establish them.
+
+The origin property is conditional. An improvement target may exclude the
+incumbent. Define the codec over an incumbent-containing domain and apply the
+improvement predicate separately when studying distance from the origin.
+Measure Hamming distance alongside changed decisions, changed issue cycles and
+changed addresses; do not interpret it as a metric on compilation quality.
+
+### 5.3 Online construction is a later extension
+
+A chronological decoder must represent pending writes, remaining consumers,
+current-cycle reads, memory predecessors and future reservations. A locker free
+now is not necessarily free when an in-flight result arrives. Releasing at the
+last read requires the inclusive endpoint rule. Scalar choices can fragment
+aligned vector blocks. A capacity-feasible prefix may block future completion.
+
+Such a decoder requires new invariants and comparison with the reference codec.
+If it excludes legal schedules, report that restriction. A state-relative
+free-list cannot be substituted for the current affine address field in
+`JointQuery` without translating the dependent predicates. The old E-1 is
+therefore withdrawn as a presumed small drop-in change.
+
+Vector block indices, a_v = 8 b_v, are a separate static encoding ablation.
+They remove misalignment codes but require exact scaled arithmetic and
+nonwrapping overlap predicates. They do not justify an online decoder.
+
+## 6. Search, bounds and verdicts
+
+Use exact direct schema operations wherever a candidate production path claims
+the canonical direct-index method. The research reference codec may enumerate
+local options and small oracles may enumerate complete domains, but neither is
+automatically admissible as the production solver. Integration must show how
+scheduling and allocation witnesses come from direct schema queries.
+
+Investigate deterministic branching over structural decisions, with and without
+admissible lower bounds. The full compiler objective stays J = C S. Bounds can
+combine a dependency/engine lower bound on C with a proven lower bound on S.
+For a completed schedule, peak simultaneous live width is a scratch lower bound;
+it need not be achievable under vector alignment. For a partial schedule, do
+not treat lifetimes from the incumbent as immutable lower bounds.
+
+If L_C <= C(x) and L_S <= S(x) for every completion x and both are nonnegative,
+then L_C L_S <= J(x). Prune a prefix seeking strict improvement only if this
+bound is at least the incumbent product. Record the bound and reason. Current
+live occupancy alone is neither footprint nor necessarily a valid bound after
+unassigned decisions change lifetimes. Every proposed bound must be checked
+against all completions of the tiny oracle domains.
+
+Verdicts are scoped as follows:
+
+- SAT: a complete independently validated witness meets the declared target.
+- UNSAT: the entire declared finite domain has been exhausted or excluded by
+  sound bounds. Exhausting a radius excludes only that radius.
+- UNKNOWN: a resource budget prevented completing the existence decision.
+- INFEASIBLE: a direct fixed-context contradiction, with the reason retained;
+  logically this excludes that particular query, not a broader domain.
+- INVALID_CODE / DEAD_END: decoder outcomes; they are not global solver verdicts.
+
+An unvalidated model's rejection of candidates cannot prove UNSAT. Bounded
+heuristic search reports best found and budget consumed, not optimality. Report
+wall time, CPU time, visited states/cubes, option-construction work, validation
+work, cache costs and memory. Radius supplements these measurements; it never
+replaces them. Charge construction and model building to the same budget as
+search, including failed attempts.
+
+## 7. Schema structure, learning and deconvolution
+
+For a fixed codec, define V_d = {z : decode_d(z) is a compilation} and
+A_d(q) = {z in V_d : J(decode_d(z)) <= q}. A cube is the canonical
+`Cube(B, anchor, free_mask)`. Coordinates are LSB-first; free coordinates and
+their sumandos belong to each schema. An exact cover K of A_d(q) satisfies:
+
+    union(denotation(c) for c in K) = A_d(q).
+
+A cover of observed elite indices E alone reconstructs E. Repeatedly sampling
+that cover, selecting and covering cannot introduce an index outside E.
+This is the key distinction between lossless deconvolution of a known repertoire
+and discovery of an unknown good repertoire.
+
+Study two separate model operations:
+
+1. **Exact reconstruction:** on completely known small domains, build and verify
+   an exact cover. This measures representability and construction cost.
+2. **Proposal generalisation:** remove fixed coordinates or combine patterns
+   under an explicitly frozen rule to propose unseen indices. Either certify
+   the entire proposed cube against A_d(q), or mark it uncertified and validate
+   each decoded candidate. Sample agreement is not a certificate.
+
+The first conditional proposal algorithm is deterministic: start from the
+training elite cover, try freeing one fixed coordinate in ascending coordinate
+order, deduplicate proposed cubes, and retrieve previously unqueried members in
+ascending index order under a shared budget. Record every invalid, dead-end,
+nonelite and improving outcome. Compare against direct one-bit exploration from
+the same training examples and against matched-budget random proposals. A more
+elaborate learner requires a dated protocol amendment before its evaluation.
+
+A deterministic cover still has model structure and design choices. Uniform
+sampling from disjoint cubes weights cubes by their cardinalities; choosing
+cubes uniformly induces a different distribution. Overlapping covers require
+an explicit deduplication or union-sampling rule. Determinism of membership does
+not eliminate sampling distributions or generalisation error.
+
+No attractor or basin claim is needed for these experiments. Recovering an
+acceptance set does not uniquely identify a Boolean network. A future dynamics
+study must specify state, update map, boundary conditions, encoding of a
+compilation, fixed points/cycles and basins, and then test soundness and reachability.
+It needs evidence beyond a static cover. There is no theorem here that every
+such dynamics is an energy-descent system or that every attractor is optimal.
+
+## 8. Hypotheses and experimental order
+
+The following defaults are prospective experimental choices, not measurements.
+Freeze them in a machine-readable manifest before collecting confirmatory data.
+Exploratory repairs retain their failed outputs and receive new run identifiers.
+
+| ID | Question | Evidence required | Failure interpretation |
+|---|---|---|---|
+| H1 | Is the structural codec sound, canonical and complete over F_d? | Proof obligations plus exact tiny-domain equivalence and independent validation. | A correctness counterexample blocks dependent experiments until repaired. |
+| H2 | Does it reduce total effort on matched problems? | Equal-domain, equal-budget comparisons including construction. | No practical encoding advantage under tested conditions. |
+| H3 | Are good sets more compact in these coordinates than controls? | Complete-domain structure experiments and representation controls. | No demonstrated compactness for this representation/domain; not a universal impossibility. |
+| H4 | Does generalisation improve discovery of unseen good compilations? | Held-out outcomes and matched no-model baselines. | Model contribution unsupported even if compression works. |
+
+### P0 — provenance, domains and feasibility diagnostic
+
+Record source commit, dirty diff, full hashes, interpreter/platform, pinned
+reference manifest and all experimental parameters. Preserve accepted baselines.
+Recompute optimiser status totals and identify the fixed decisions responsible
+for INFEASIBLE cases. Freeze at least twelve tiny fixtures, including scalar,
+vector, mixed-width, aliasing, unused-result and inclusive-boundary examples.
+Each oracle Cartesian domain must contain at most 65,536 assignments. Record
+all bounds and exact sizes before running the candidate codec.
+
+Include cases with three and five legal choices, no legal choices, a locally
+legal prefix with no completion, simultaneous last read/new write, pending
+writes, fixed external consumers, alignment fragmentation and address holes.
+Empty feasible domains are legitimate fixtures; an empty fixture collection or
+missing measurements must refuse with exit code 2.
+
+Deliverable: manifest, fresh baseline diagnostics and explicit task ownership.
+Gate: baseline hashes and frozen integer controls agree; domain definitions and
+oracle independence are reviewable.
+
+### P1 — codec correctness and coverage
+
+Enumerate each tiny oracle domain independently using the pinned validator;
+compare complete normalised solution sets, round trips and target verdicts.
+Do not call candidate transition logic from the oracle. Exhaust the codec bit
+universe where B <= 16; otherwise round-trip every feasible oracle object and
+add budgeted raw-bit and decision-path probes.
+
+On all eight public programs, draw 10,000 raw strings per program using seed
+20260922, and separately draw 10,000 sequential uniform-option paths per program
+using seed 20260923. Use the declared whole-program domain with issue cycles
+0 through facts.horizon - 1 and all legal physical scratch bases; keep the
+incumbent for option ordering. This domain contains the bootstrap but can have
+dead ends. The two sampling distributions are different and neither is assumed
+uniform over compilations. Record attempted, completed, INVALID_CODE, DEAD_END,
+interrupted, distinct compilations and multiplicities for each stream. No
+retries that disappear from the denominator. Give this diagnostic 60 seconds
+per program and stream; retain partial counts and label the stream incomplete
+if its time cap prevents 10,000 attempts.
+
+Check every completed compilation with `machine.check_compilation` and every
+case with `machine.check_case`. Retain the offending index and full prefix trace
+for every discrepancy. Zero completed decodes is inadequate evidence, not a pass;
+require at least 100 distinct completed compilations per program across the two
+streams or explicitly report the smaller exhaustively established F_d. Failure
+to meet coverage under the cap is INCONCLUSIVE and triggers a documented domain
+or sampling revision before dependent public experiments.
+
+Gate: zero validator discrepancies, exact oracle agreement and all proof
+obligations discharged for the implemented domain. Random tests support but do
+not prove universal correctness. A defect refutes this implementation or claimed
+invariant; it does not refute all possible structural encodings.
+
+### P2 — representation and search attribution
+
+Compare absolute physical fields, static compact domain ranks, vector block
+indices where applicable, and state-relative ranks on identical F_d. Report B,
+valid-code count where known, feasible object count, duplicate count, option
+counts, decoder time and total query time. A sum of log2(option counts) along a
+path is not fixed width or log2(number of leaves). No Shannon quantity becomes
+a complexity measure.
+
+Run ablations: baseline direct bootstrap; accepted full optimiser; structural
+search without pruning; the same search with admissible pruning. Keep incumbent,
+target policy, window policy and domain constant for the matched comparison.
+Then report expanded-domain search in a separate table. Both full and bootstrap
+baselines are mandatory: removing ineffective work cannot be attributed to a
+better search algorithm.
+
+Gate: H1 remains satisfied. Classify H2 as supported, unsupported or inconclusive
+from the full cost/quality results. Continue the inexpensive complete-domain
+structure study even if runtime has not improved; H3 is a separate question.
+
+### P3 — complete-domain structure experiment
+
+Use all P0 fixtures with nonempty F_d. Score every feasible object. Set q to
+the smallest integer objective at which at least 10% of objects have J <= q;
+include all threshold ties and report the actual count. Mark all-equal objectives
+and empty sets as uninformative for elite discrimination.
+
+Construct exact covers of A_d(q) and of 100 uniformly sampled subsets of V_d
+with the same cardinality, seed 20260924. Use the same cover algorithm and
+budget for every arm. Also compare absolute/static/structural representations
+of the same objects. Freeze the cover procedure: start with minterms; repeatedly
+merge equal-mask cubes differing in one fixed coordinate, choosing the smallest
+`(coordinate, anchor, free_mask)` eligible pair, until no merge remains. Verify
+exact equality and disjointness by expansion on these small universes. This is
+a reproducible cover heuristic, not a minimum-cover theorem.
+
+The primary representation measure is one declared algorithmic description
+length: the length in bits of an actual deterministic lossless serialisation.
+For the initial format use unsigned base-128 varints for B and cube count;
+then sorted `(anchor, free_mask)` pairs as two little-endian, ceil(B/8)-byte
+integers per cube, with zero padding. Reject duplicates, malformed integers,
+extra bytes and nonzero padding. Compare with the same format using minterms.
+Decoder and domain-manifest bytes are reported separately and included in any
+claim about total standalone storage. Time and memory are separate engineering
+measures, not blended into an invented complexity score. Cube count is a
+structural diagnostic, with its denominator, not a second complexity definition.
+
+A preregistered exploratory signal for proceeding with H4 is at least 20% shorter
+elite-cover encoding than the median cardinality-matched control in at least
+half of informative fixtures spanning three fixture families. This is a research
+triage threshold, not statistical proof of novelty. Report every fixture and
+its control distribution. If fewer than three families are informative, report
+insufficient coverage. A missed gate suspends this model experiment; it leaves
+correct encoding and search results intact.
+
+### P4 — discovery beyond observed examples
+
+Only after P1 and the P3 triage gate pass, split each complete small domain's
+feasible objects into disjoint training/validation/test partitions using a
+seeded permutation (seed 20260925; 50%/25%/25% with deterministic rounding).
+Compute the elite threshold from training only. The learner sees only training
+labels. Use validation only for choices explicitly listed in the manifest;
+freeze them before revealing test labels. Report splits too small to support
+evaluation rather than silently reallocating members.
+
+Run the proposal procedure in section 7. Use the complete oracle only as the
+hidden evaluator. Report test-set unseen proposals, unique legal proposals,
+precision at the training threshold, improvement discoveries, oracle calls,
+duplicates, construction time and validation time. Compare the model with an
+exact empirical-cover sampler (which cannot discover unseen indices), one-bit
+exploration and random proposals under the same budgets. Training objectives
+and previously evaluated indices are shared fairly across arms.
+
+Advance to large-domain model search only if the frozen test results show a
+positive discovery advantage over both exploration controls under section 9's
+paired analysis. For these two advancement contrasts use Bonferroni-adjusted
+97.5% intervals, while retaining descriptive 95% intervals. The delegation
+contract fixes the small-domain split rules and the sole large-domain model
+extension before any test outcomes are observed.
+If advancement intervals include no advantage, label H4 inconclusive or
+unsupported and stop model expansion. Compression alone is insufficient.
+
+### P5 — external validity and release decision
+
+P5's non-model comparison depends on P1/P2, not on a positive P3 or P4 outcome.
+Only its model arm is conditional on H4. Missing public P1 coverage blocks later
+stages and requires a lead-reviewed amendment; it cannot be silently waived.
+
+Evaluate the surviving search algorithm on the public corpus and new held-out
+program families. Reuse the existing corpus generator; freeze its code and a
+new manifest of seeds before candidate tuning, excluding all previous
+optimisation training/evaluation seeds and duplicate program digests. Use at
+least 20 new programs per existing family and report sizes and all exclusions.
+The previously evaluated 20260921 corpus remains a regression corpus, not a new
+untouched test set. Public programs are development evidence, not holdout data.
+
+Release requires all canonical correctness, isolation, export, frozen control,
+score and external-timeout gates, plus an independent review of the new method
+boundary. Research success alone does not switch the production compiler.
+
+## 9. Budgets, statistics and success criteria
+
+For performance comparisons use candidate optimisation budgets of 0.01, 0.1
+and 1.0 seconds per program, always including decoder/model construction and
+validation used by search. The 0.1-second point is primary; other points are
+sensitivity analyses. Use the same legal incumbent and budget for matched
+search arms. Retain the unmodified accepted default compiler as an additional
+reference arm, whose different total budget is labelled explicitly. No timeout
+or existing acceptance gate is enlarged. Research oracle preprocessing time is
+reported separately and can never be supplied free to the candidate solver.
+
+Use ten fixed search seeds, 20261001 through 20261010. Deterministic methods do
+not acquire ten independent solution-quality observations from repeated seeds.
+Perform fifteen fresh-process timing repetitions with balanced random arm order,
+seed 20261020. Log startup/import/compile/validation/process times separately;
+retain all timeouts and failures. Honour the official 20-second external limit
+for every compiler acceptance process; diagnostic oracle jobs use their own
+explicit limits and are never reported as compiler runtime.
+
+The primary quality endpoint is paired log(J_control / J_candidate) at the
+primary budget on held-out programs, comparing against structural search without
+the model for H4 and the accepted search policy for H2. Report program-level
+wins/ties/losses, C and S individually, and quality-versus-time curves. Aggregate
+seeds and repetitions within each program first; do not treat them as independent
+programs. Report a paired 95% bootstrap interval, 10,000 resamples, seed 20261021,
+resampling programs within family and weighting families equally. The scope is
+the sampled families, not arbitrary compilers or the private grader. Public
+results remain descriptive and receive the official three-repeat comparison.
+
+For stochastic quality, average the paired log ratios across search seeds
+within each program; repeated timing runs of the same seed are technical
+replicates, averaged within that seed first. For runtime, use per-program
+medians and their paired log ratios. This family-stratified interval targets
+variation among the sampled programs. Also retain the optimisation contract's
+paired within-program repetition bootstrap for timing uncertainty on a fixed
+suite; identify the two intervals separately. At an orderly optimisation
+deadline, retain the validated incumbent and count all work. A crashed process,
+missing output or invalid incumbent is a failed row and blocks a success claim,
+not a timing outlier or an observation to impute away.
+
+A quality advantage requires the primary interval lower bound above zero, zero
+correctness discrepancies, and all failed/incomplete runs accounted for. A
+runtime advantage requires equal-or-better validated quality and a paired speedup
+interval above one, with all necessary computation included. A positive estimate
+with an interval crossing the null is inconclusive. Any additional confirmatory
+comparisons need a prespecified multiplicity adjustment; unplanned comparisons
+are exploratory. Report effect sizes even when a gate is missed.
+
+No post-hoc corpus deletion, target change, seed search or time-budget extension
+can rescue the same confirmatory run. A revised protocol creates a new run and
+retains the previous one. A local optimum or a successful public example is
+valuable evidence, but does not support a general superiority claim.
+
+## 10. Ownership, evidence and implementation boundaries
+
+The pinned `machine` module owns hardware semantics and independent acceptance.
+`direct_contract` owns derived program facts, lifetimes, assembly and footprint.
+`schema_index` owns cubes and exact set/query operations. `direct_constraints`
+owns the existing absolute-field query. The research codec owns only its
+coordinate layout, transition state and encode/decode operations; the experiment
+runner owns sampling, comparison and evidence generation.
+
+Proposed new source locations are `research/structural_encoding.py`,
+`research/run_structural_experiments.py`, and dedicated tests under
+`tests_direct/`. Before implementation, search for existing owners and answer:
+where does each new concept live, does it already exist, why is a new owner
+needed, and what executable guard prevents duplication? Reuse program facts
+rather than restating machine rules. An ownership/import guard must fail when
+a prohibited copy/import is deliberately planted in a temporary test fixture.
+This is an architectural check, not evidence of mathematical correctness.
+
+Write new measurements under
+`results/phase2_structural_encoding/<run_id>/`; refuse overwrite. Each run keeps:
+
+- Plan version/hash, git commit, dirty diff, full source/export/reference hashes,
+  Python/platform, command, start/end times and exit codes.
+- Domain/corpus manifests, seeds, budgets, arm order and actual membership keys.
+- Raw per-attempt statuses and objective counts, independent validator outcomes,
+  all case denominators and minimal counterexamples with traces.
+- Proof notes, oracle comparisons, model bytes and construction costs.
+- Per-program comparisons, analysis script/configuration, intervals and failures.
+- A handoff stating supported claims, limitations and explicit gate outcomes.
+
+The evidence checker must recompute aggregates from raw rows, reject missing or
+duplicate keys, refuse empty scans, verify codec round trips and detect omitted
+failures. Test it with deliberately corrupted counts, hashes, statuses, budgets,
+model membership and missing programs. Keep logs and exact exit codes. No output
+banner alone establishes acceptance. A timeout is retained, never dropped from
+a denominator. A zero denominator is undefined, never reported as zero error.
+
+## 11. Execution handoff and acceptance checklist
+
+When execution is authorised, implement P0 and P1 first, then proceed through
+the declared dependency gates. Stop on a correctness counterexample, preserve
+it, repair in a new identified run and repeat the affected gates. Report missed
+research gates without building dependent machinery. No author consultation is
+needed for routine choices already fixed here; scientific scope changes require
+a dated amendment before collecting the affected confirmatory data.
+
+The final reviewer checks:
+
+1. The exact object, finite domain and objective are explicit and immutable
+   within a comparison; oracle and candidate have independent acceptance paths.
+2. No totality, symmetry, completeness or optimality claim exceeds its proof.
+3. Invalid codes, dead ends, incomplete searches and defects remain distinct.
+4. Address lifetimes include external consumers, unused results and pending
+   writes; code widths and vector scaling introduce no arithmetic truncation.
+5. Model novelty is tested on unseen indices; exact reconstruction is not
+   mistaken for generalisation; overlap and sampling bias are disclosed.
+6. Construction, certification, validation and duplicate work are paid for.
+7. Matched-domain and expanded-domain results remain distinguishable; both
+   bootstrap and full accepted controls are present.
+8. Historical evidence remains intact; scientific findings and production
+   acceptance are recorded separately.
+
+The final handoff is `READY_FOR_REVIEW`, with a table for H1–H4 and P0–P5.
+Only measured gates receive PASS. Unrun stages are NOT_RUN, incomplete evidence
+is INCONCLUSIVE, correctness failures are FAIL, and research null results are
+reported as such. Acceptance does not require a positive scientific result.
+
+## 12. Related work and defensible contribution
+
+Decoder-based evolutionary scheduling already exists. Gonçalves and Resende's
+[primary report on random-key job-shop scheduling](https://optimization-online.org/2011/04/2995/)
+constructs schedules from chromosomes and applies local search. Structural
+validity by decoding is therefore context, not a novelty claim by itself.
+
+Pelikan, Goldberg and Cantú-Paz's BOA is documented in
+[the author's publication record](https://martinpelikan.net/publications.html);
+[Pelikan's account of BOA and hBOA](https://link.springer.com/book/10.1007/b10910)
+describes learning and sampling Bayesian networks. These establish a relevant
+model-building comparison class, without implying that every EDA uses the same
+model or that a deterministic cover avoids model-selection errors.
+
+The [Saarland SSA allocation project](https://www.compilers.cs.uni-saarland.de/projects/ssara/)
+provides the relevant qualification to blanket graph-colouring hardness claims.
+For this pinned straight-line machine, the fixed-schedule scalar subproblem can
+also be analysed directly as interval colouring; joint scheduling and aligned
+mixed-width placement require their own arguments. No hardness theorem for this
+precise bounded machine is asserted by citation to a different formulation.
+
+The potential contribution is a measured relationship between **decision
+coordinates, exact schema structure and search efficiency** under independently
+checked compiler semantics. The strong result would be a model that generalises
+to unseen good compilations and earns back its construction cost. A weaker but
+useful result would be a correct representation or a faster bounded search. A
+carefully delimited negative result would establish where this representation
+and model fail, with reproducible counterexamples and costs.

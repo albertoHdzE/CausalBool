@@ -1,0 +1,132 @@
+{
+  "change_record": "while a child propagates: the ops (values) whose minimum rose or maximum fell, and the ops that became singletons; built as a side effect of each deletion, read by every consumer",
+  "consumers": [
+    {
+      "components": [
+        "precedence",
+        "issue_capacity"
+      ],
+      "operation": "Propagation.times_fixpoint (child calls)",
+      "reuse": "parent's fixpoint (every edge satisfied, every non-singleton domain disjoint from the full cycles of the parent's last rule-2 snapshot) and parent's singles map",
+      "rule": "evaluate only edges dirtied by the change record, in R0's sweep order (later index: same sweep; earlier: next sweep); rule 2 only on new singletons: EO over their (engine, cycle) keys in sorted order, EF only for NEWLY full cycles, ops in selected order, values in domain order"
+    },
+    {
+      "components": [
+        "live_and_product_bounds"
+      ],
+      "operation": "Propagation.compulsory_peak via product_bound/prune (one component)",
+      "reuse": "parent's per-value contributions and peak",
+      "rule": "recompute the contribution of a dynamic value only if an op it reads (producer, consumer) changed; if none changed reuse the parent's peak; else rebuild the difference array from contributions and run R0's segment scan unchanged. Address-phase prunes reuse the time leaf's cached peak (same D)"
+    },
+    {
+      "components": [
+        "address_support"
+      ],
+      "operation": "Propagation.addresses_fixpoint",
+      "reuse": "parent's address fixpoint (every pair satisfied) and the leaf's pair incidence",
+      "rule": "evaluate only pairs (u, v) whose A_v minimum rose or maximum fell, in R0's sweep order; root call = R0's first sweep with every pair dirty"
+    },
+    {
+      "components": [
+        "fixpoint_shell_and_copies"
+      ],
+      "operation": "Expander.children",
+      "reuse": "the parent state object is shared by all siblings, read-only",
+      "rule": "one dict copy per child (R0 copies twice: children and times_fixpoint)"
+    }
+  ],
+  "dependencies_and_invalidation": {
+    "affected domains": "the change record of the child call; every derived fact reads only the domains named in its dependency: edge (u,v) -> max(D_v), min(D_u); rule-2 key (e,c) -> singles; EF op -> newly full cycles of its engine; value interval -> producer bounds and consumer minima; pair (u,v) -> min/max(A_v)",
+    "branch / sibling / resume": "states are immutable after construction; a child builds a NEW state (copy-on-write of D, A, singles, contrib); siblings and later resumptions read the unchanged parent; DFS backtracking restores by reference, no undo log",
+    "fixed context": "fixed times/addresses/base usage are Propagation constants (R0's own)",
+    "incumbent-sensitive data": "only prune's `best`; it is an argument, never cached; PB certificates are emitted by the unchanged comparison",
+    "partial times -> fixed lifetimes -> address search": "the time leaf's TimeState (with its cached peak) is reused by every address-phase prune of that leaf; address states are rebuilt from the leaf's pairs tuple (PairInfo built once per leaf, charged to the address root)",
+    "program / query / epoch": "a Propagation is built per query domain (program, window, caps, incumbent epoch); all masks and states belong to it and die with the query; nothing is shared across Propagations or compilations",
+    "roots": "time root: R0's own times_fixpoint then singles from its output; address root: emulation with every pair dirty (identical to R0's first sweep)"
+  },
+  "design_id": "BS1_branch_state_with_change_record",
+  "distinct_cost_components": [
+    "precedence",
+    "issue_capacity",
+    "live_and_product_bounds",
+    "address_support"
+  ],
+  "distinct_from": {
+    "efficiency_M1_rule2_filter": "the rejected filter skipped a rule-2 op scan when the domain was disjoint from all full cycles (recomputed each sweep); BS1 never recomputes the singles map or full sets: it derives only NEWLY full cycles from new singletons and reuses everything else from the parent; it also covers precedence, live bounds and address support",
+    "next_round_worklist_E1": "E1 re-queued edges of changed ops in arbitrary queue order (certificate order changed), kept R0's full rule-2 scan and full compulsory peak, carried no state between parent and child beyond domains; BS1 emulates R0's sweep order exactly (identical certificate stream), and reuses the parent's singles, full-cycle knowledge, interval contributions and peak"
+  },
+  "kernel_protocol": {
+    "integration_costs_not_in_kernel": "measured in each kernel row: one extra node slot write and one extra method dispatch per event (adapter upper estimate); multiplied by 1.5 with the rest of N in the conservative prediction",
+    "parity": "per event: output digest and emitted-certificate count equal to the capture; final certificate stream digest equal",
+    "rows": "30 programs x 3 repetitions x 2 versions = 180 fresh processes",
+    "timed_region": "Propagation construction (with the kernel's masks), every event, output release after last use; domain reconstruction and JSON decoding excluded from both",
+    "versions": {
+      "baseline_kernel": "research.third_round_workload.replay_baseline (R0's own methods, the child copy included)",
+      "shared_state_kernel": "research.third_round_kernel.SharedPropagation driven over the same events"
+    },
+    "workload": "the 30 captured M0 workloads (hashes in DIAGNOSIS.json), fixed before any kernel timing"
+  },
+  "kernel_source_at_spec": {
+    "path": "research/third_round_kernel.py",
+    "sha256": "10b612430e22e713aecec83f0703c34217ea5f279bddbacaacaf5607f8116ed1"
+  },
+  "keys": "no cache keyed by digests or values: reuse is by object reference parent -> child inside the search tree; equality is never inferred from a digest",
+  "m0_evidence": {
+    "capacity_op_scans_that_fire": 0.07598394977049974,
+    "capacity_op_scans_unchanged": 0.7685857178872174,
+    "children_with_all_intervals_unchanged": 0.02229692752716754,
+    "edge_evaluations_that_fire": 0.036642290396752666,
+    "edge_evaluations_with_unchanged_inputs": 0.8738472942188423,
+    "family_mean_replaced_share_of_timed_wall": {
+      "aliasing": 0.7427501615275415,
+      "dependency": 0.47046341597746577,
+      "mixed": 0.6447836762963232,
+      "scalar": 0.6917664871411561,
+      "vector": 0.804206899836047
+    },
+    "pair_evaluations_that_fire": 0.03049802744805032,
+    "pair_evaluations_unchanged": 0.8407676386118492,
+    "per_family_opportunity": "scalar/vector/aliasing and most dependency/mixed programs: precedence + issue capacity + live bounds; mixed 800002/800007, dependency 800003/800018, vector 800011/800026, scalar 800010: address support. Programs with little search (800023: 13 events) have almost none and stay in the denominator",
+    "programs": 30,
+    "rows": 210,
+    "value_intervals_unchanged_after_child": 0.7608996560388774
+  },
+  "name": "immutable per-node branch state with a single change record driving four consumers",
+  "not_consumers": [
+    "product_bound's LC loop (recomputed as in R0)",
+    "address_pairs",
+    "options",
+    "validation",
+    "certificate emission (identical stream)"
+  ],
+  "order_and_witnesses": "rule order, canonical ranks, tie-breaking and witness selection are R0's: skipped work is exactly work whose R0 evaluation emits nothing and changes nothing (edge satisfied / scan with no full value / unchanged interval); every emitted certificate is produced by the same expression at the same point of R0's order",
+  "ordering_disclosure": "An unexecuted draft of research/third_round_kernel.py was written while the M0 rows were being measured, before this file. It had not been imported, run or timed when this specification was written; its sha256 at this moment is recorded under kernel_source_at_spec. Any later change to it is a correctness fix within this design and is retained in KERNEL_ATTEMPTS.jsonl.",
+  "prediction": {
+    "N": "shared-kernel replay median + measured integration upper estimate",
+    "O": "exclusively owned replaced R0 work per program = min(baseline-kernel replay median, timer-exclusive replaced seconds / timer inflation); must satisfy 0 <= O <= T0",
+    "T_pred": "T0 - O + N",
+    "T_pred_conservative": "T0 - O + 1.5 N",
+    "aggregate": "equal-family geometric mean of T_pred/T0 over all 30 programs (zero-call programs contribute 1)",
+    "gate": "conservative ratio <= 0.80 and kernel parity on all 30 workloads; else NO_JUSTIFIED_MECHANISM"
+  },
+  "protocol_id": "luminal-phase2-third-improvement-1.0",
+  "representation": {
+    "AddressState": {
+      "A": "address domains of the node",
+      "info": "PairInfo of the time leaf's pairs tuple: for each value v, the bitmask of pair indices whose SECOND element is v"
+    },
+    "Propagation extras (per query domain, built once)": "in_mask[op] (edges (w, op)), out_mask[op] (edges (op, w)), engine_of, values_of[op] (dynamic value indices whose interval reads op's bounds)",
+    "TimeState": {
+      "D": "time domains of the node (the same sorted tuples R0 keeps; no new value-set encoding)",
+      "contrib": "compulsory-lifetime contribution (start_hi, end_lo, width) or None per dynamic value, in R0's dynamic_values order",
+      "parent/changed": "transient: parent state and the set of ops whose domain differs from the parent's, dropped once contrib is derived",
+      "peak": "(peak, earliest cycle) of R0's compulsory_peak(D)",
+      "singles": "selected singleton issues per (engine, cycle), equal to R0's last rule-2 snapshot of the node"
+    },
+    "bitmaps": "Python ints over CONSTRAINT indices of one Propagation (edges) or one pairs tuple (pairs); never over value sets, never a codec free-coordinate mask, no complement is taken (only the sub-mask m ^ (m >> (i+1) << (i+1)) of a mask m); width = len(edges) or len(pairs); no full-program assignment is enumerated"
+  },
+  "stage": "M1 mechanism nomination (one design)",
+  "storage_and_eviction": "per live node: one D dict (R0 also keeps one), one singles dict (new only when new singletons appear), one contrib list (len(dynamic_values)); per address node one A dict; per time leaf one PairInfo; freed with the node (no eviction policy needed: lifetime = node lifetime; frontier bounded by R0's 4096 limit)",
+  "written_before": "any kernel execution, parity check or timing (see ordering_disclosure)",
+  "written_utc": "2026-09-26T00:52:59Z"
+}

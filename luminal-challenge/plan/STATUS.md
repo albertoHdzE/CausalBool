@@ -1,7 +1,7 @@
 # Luminal direct-index task status
 
 Canonical contract: [INDEX_ONLY_PLAN.md](INDEX_ONLY_PLAN.md), version **1.1**.
-Last updated: **2026-09-21**.
+Last updated: **2026-09-25**.
 
 The repair implementation has received independent lead re-review.
 **ACCEPTED**: F1, F2 and F3 are closed, including the lead-found expression-cache
@@ -9,6 +9,260 @@ regression. The final local acceptance matrix and evidence audit are recorded in
 the [accepted review](../results/direct_index_v3_repair/REVIEW.md). This is local
 acceptance only; no external submission or private-grader result is claimed.
 Earlier reviews and worker records remain historical evidence.
+
+### Current priority: finish the third round after accounting/audit repair — 2026-09-25
+
+Claude completed Stage M of `third_round_20260925` and stopped before C1. The
+[lead review](../results/phase2_structural_encoding/lead_third_round_review_20260925/REVIEW.md)
+records **CHANGES_REQUIRED**. All 26 focused tests pass and both kernels reproduce
+30 captured workloads / 829,993 events. The registered conservative prediction
+0.826822 has a cost-scope mismatch; the lead independently reproduces 0.763823
+under matching scope, using the old adapter estimate. That estimate omits its
+claimed slot write and must be calibrated before a repaired M gate can pass.
+
+The auditor also accepts an extra torn row, a false measured kernel hash, a false
+M0 instrumentation-parity result and a missing NOT_RUN file. The lead reproduced
+each failure mode without altering historical evidence. The correct median kernel
+replay speedup is 2.364917, not the handoff's 2.394761; no compiler speedup exists yet.
+
+The lead permits an explicitly post-hoc development accounting correction, with
+all original targets unchanged. The [continuation plan](CLAUDE_PHASE2_THIRD_ROUND_RESUME.md)
+and [Claude prompt](phase2_third_round_resume/CLAUDE_PROMPT.md) are
+**READY_FOR_EXECUTION, NOT DISPATCHED**. They repair assurance, measure one actual
+adapter, and allow the sole BS1 candidate through original D/C only if the repaired
+M gate passes. This finishes the same third round; it is not a fourth campaign.
+R0 remains accepted; fresh confirmation is untouched. Paper revision follows
+independent review of the completed round or a properly supported stop.
+
+### Previous priority: third improvement round prepared — 2026-09-25
+
+The user requested one more planned improvement round before moving to the paper.
+The [third-round plan](CLAUDE_PHASE2_THIRD_ROUND.md) and
+[Claude prompt](phase2_third_round/CLAUDE_PROMPT.md) are
+**READY_FOR_EXECUTION, NOT DISPATCHED**. Preparing this package has not launched
+Claude or an experiment.
+
+The assignment starts from accepted R0 and permits one query-local shared-state
+mechanism spanning multiple propagation costs. Measured kernel evidence must
+justify a conservative 20% total-cost prediction before integration. Exact search
+and certificate parity, complete development matrices, and conditional fresh
+confirmation then determine whether the practical target is met. The untouched
+980000–980199 reservation is reused only after a new exposure/collision check.
+
+This is a bounded final improvement decision before a paper readiness handoff:
+one design/candidate, at most 16 hours of active development and 24 hours of
+measurement processes. No learning campaign, production promotion or manuscript
+editing is authorized. Success or a justified negative outcome both lead to
+independent review and an evidence-based paper handoff; no fourth round is automatic.
+
+### Previous priority: efficiency-phase lead review — 2026-09-25
+
+Claude completed `efficiency_20260925`. The [lead review](../results/phase2_structural_encoding/lead_efficiency_review_20260925/REVIEW.md)
+records **ACCEPTED_WITH_LIMITATIONS** after independent verification of the construction and auditor repairs,
+standalone R0 acceptance on 142 programs / 277 cases, the exact historical
+deviation dispositions, and the justified **NO_JUSTIFIED_OPTIMIZATION** stop.
+All 93 focused tests pass, including inherited semantic tests explicitly bound
+to R0. No release-blocking finding remains. This accepts the bounded research
+release and its stop decision; it does not claim a new performance gain.
+
+The lead reproduced the snapshot-only inherited test failure and isolated its
+cause to differing symlink/resolved run paths in otherwise identical checker
+reports. The unchanged test passes in a corrected original-source snapshot with
+a real temporary-results directory. The retained profile contains 90 rows, not
+the 80 named in Claude's profile text; the review records that correction.
+
+No E1 or confirmation campaign was run. The earlier practical enhancement target
+remains **TARGET_NOT_REACHED**, and the current per-query learner remains retired.
+The profile supports stopping this attempt; it does not establish an impossibility
+result for other propagation or learning designs. No new assignment is delegated
+by this review. Production and manuscript remain outside its scope.
+
+### Previous priority: next-round review and assurance/efficiency handoff — 2026-09-25
+
+Claude completed `next_round_20260925`. The [independent lead review](../results/phase2_structural_encoding/lead_next_round_review_20260925/REVIEW.md)
+closes original R1 but records **CHANGES_REQUIRED** for incomplete construction
+interruption accounting and an auditor that accepts a false learning PASS.
+The lead reran all 51 new tests and isolated export acceptance on 142 programs /
+277 cases, and independently recounted compiler scores and learning yields.
+The checker still flags the disclosed report source edit and oracle-capability
+imports; the review gives their narrow dispositions without erasing those results.
+
+The frozen A4-catalog/DFS candidate scores 2.187956501380014 on the public suite.
+Its generated J is 4.14% below the earlier optimizer and 1.10% below heap A4,
+with the practical 2%/20% routes still **TARGET_NOT_REACHED**. The informative
+learning test loses to Hamming on all 30 fixtures. The lead also identifies a
+structural incompatibility: first-improvement restart prevents collecting the
+20 valid observations before first model preparation. This per-query learner
+is closed for the next phase; faster propagation alone does not resolve it.
+
+The [assurance and efficiency plan](CLAUDE_PHASE2_EFFICIENCY_PHASE.md) and
+[Claude prompt](phase2_efficiency/CLAUDE_PROMPT.md) are
+**READY_FOR_EXECUTION, NOT DISPATCHED**. They require assurance closure first,
+then at most one measured propagation optimization of a repaired DFS baseline,
+with identical-work cost and equal-time quality assessed separately. No new
+learning campaign, production promotion, manuscript change or external submission
+is authorized. Preparing the assignment has not started Claude.
+
+### Previous priority: bounded next research round prepared — 2026-09-25
+
+The user requested a decision on further enhancement and another research round
+aimed at the current obstacles. The [next-round execution plan](CLAUDE_PHASE2_NEXT_ROUND.md)
+and [Claude prompt](phase2_next_round/CLAUDE_PROMPT.md) are
+**READY_FOR_EXECUTION, NOT DISPATCHED**. Preparing these files does not start a
+Claude session or implement the repair.
+
+The assignment repairs interruption accounting in a versioned successor, compares
+the earlier optimizer with repaired A4 on the same fresh cohort, isolates catalog
+versus traversal, and allows one cost-focused engineering candidate. Learning is
+a bounded matched-pool ranking/economics pilot with explicit sensitivity checks
+and stop rules. A large learned-compiler campaign is not part of this round.
+The source/protocol lock and verifier protect the previous experiments. Only
+independent lead review can accept future results; production and manuscript
+remain unchanged.
+
+### Review of both completed Claude assignments — 2026-09-25
+
+Claude completed both `optimization_20260924` and the superseding
+`objective_index_20260924` assignments. The [focused lead review](../results/phase2_structural_encoding/lead_objective_review_20260925/REVIEW.md)
+records **CHANGES_REQUIRED** for lost interrupted-validation accounting in
+non-model A4; a deterministic probe reproduces it while confirming that the late
+candidate is rejected. Frozen source and historical measurements are preserved.
+This is not full independent acceptance of either release.
+
+All 392 research tests pass in the lead's rerun. The new package verifier,
+evidence checker and numerical auditor pass. An
+independent raw-row recount confirms A4's 6.04% lower geometric J against frozen
+Phase 2 on the new 200-program cohort, at 11.65× compile time. Its fixed public
+score is 2.088945490290080; the earlier selected optimizer records
+2.102746654351309. The newer protocol therefore does not establish replacement
+superiority over that earlier candidate. The cohorts differ.
+
+All 30 new learning fixtures already contain a training solution at least as
+good as their best test solution. H_LEARN fails and its compiler pair correctly
+remains blocked; the endpoint cannot resolve a learning benefit on these splits.
+The review retains concrete next steps and validation scope. No paper revision,
+production integration, commit, push or new measurement campaign was performed.
+
+### Previous priority: objective-directed index research protocol — 2026-09-24
+
+**ACCEPTED_WITH_LIMITATIONS** following independent Codex review of Claude's
+`recovery_campaign_20260923_r3`. The [lead review](../results/phase2_structural_encoding/lead_release_review_20260924/REVIEW.md)
+retains independent test, policy, source-hash, checker and raw-row statistical
+validation. All 286 research tests pass. The full checker reports zero findings
+and internally consistent evidence; exit 2 and `artifacts_complete=false` remain
+because P4/H4 is scientifically INCONCLUSIVE. This is acceptance of the bounded
+experimental release, not success of every hypothesis.
+
+The full required 33,120 measurement rows are present. At the frozen primary
+0.1 s budget on 100 generated held-out programs, structural_bound versus
+accepted_budgeted has mean paired log(J control / J candidate) 0.0438923
+[0.0251331, 0.0659551]: about 4.3% lower geometric J, 26 wins / 74 ties / 0 losses.
+Against classical the secondary descriptive reduction is about 8.4%, with
+53 wins / 35 ties / 12 losses, but compile time is about 7.3 times higher.
+J is cycles × scratch, not the official composite score. Population inference from the public suite remains inconclusive; production remains unchanged.
+An independent exact-score recount now confirms fixed-public-suite scores of
+2.0327602339438613 (Phase 2), 2.0084662022846573 (original direct) and
+1.9013791212645499 (classical): gains of 1.21% and 6.91%, respectively.
+See [the recount](../results/phase2_structural_encoding/lead_release_review_20260924/PUBLIC_SCORE_RECOUNT.json)
+and the correction appended to the lead review. These are local reconstructed
+scores, not a standalone Phase 2 export or private-grader result.
+
+H4 has only one informative fixture/family against the required three; no model
+advantage is established and its conditional P5 arm correctly did not run.
+Original random-stream P1 remains INCONCLUSIVE; local coverage passes under the
+recovery amendment. H3 is supported as protocol-defined triage only.
+
+The latest user request calls for scientific research into overcoming the
+remaining limitations. The new [research diagnosis](PHASE2_SCIENTIFIC_RESEARCH.md)
+derives an equivalence: one-coordinate expansion of an exact elite cover and
+one-bit mutation have identical novel candidate sets (and the current sorted
+implementations have identical novel order). The lead verified 278 exhaustive
+small sets and 500 larger sampled sets. This is an analytic limitation of the
+old proposed learner, not a negative result about all possible learning.
+
+The [new execution protocol](CLAUDE_PHASE2_RESEARCH_PROTOCOL.md) and
+[Claude handoff prompt](phase2_research/CLAUDE_PROMPT.md) supersede the pending
+optimization campaign's solver grid and expansion-learning experiment. They
+specify product-cut domains, sound propagation, multiscale resumable search and
+a supervised schema ranker with matched-pool/shuffled-label controls, fresh
+compiler seeds and explicit superiority/cost criteria. None of these new solver
+improvements has yet been empirically established. Earlier Claude optimization
+work appeared during preparation and must be preserved and safely handed over;
+the lead did not stop its processes or overwrite research implementation.
+
+The user has chosen further optimization and evaluation before manuscript work.
+The earlier [optimization plan](CLAUDE_PHASE2_OPTIMIZATION_PLAN.md) and
+[its prompt](phase2_optimization/CLAUDE_PROMPT.md) specified a
+bounded development grid, frozen fresh evaluation, exact public scoring,
+standalone export validation and a separately qualified model-learning study.
+The earlier optimization package is now superseded as specified above; any work
+already performed under it remains historical/development evidence.
+The manuscript remains unchanged; its later revision must preserve the lead
+review qualifications and the old draft. No production integration, commit,
+push, publication or private-grader success is implied by this acceptance.
+
+Historical recovery: the first campaign was ABORTED_FOR_REPAIR; `_r2` is retained
+as checker-repair/replication evidence and is not pooled with `_r3`. The original
+[repair review](../results/phase2_structural_encoding/recovery_lead_review_20260923/REPAIR_REVIEW.md),
+[Claude release contract](CLAUDE_PHASE2_RELEASE_PLAN.md), and
+[process incident record](../results/phase2_structural_encoding/recovery_diagnosis_20260923/PROCESS_INCIDENT.md)
+remain preserved. Earlier entries below describe earlier evidence states.
+
+### Paper revision incorporating Phase 2 — 2026-09-23
+
+The [revision plan](PAPER_PHASE2_REVISION_PLAN.md) was implemented by Luna and
+[accepted by the lead as an internal draft revision](../paper/PHASE2_REVISION_REVIEW.md).
+The original draft is preserved with file hashes in `paper/baselines/20260921/`.
+The revised manuscript adds the inconclusive feasibility campaign and generated
+public coverage table; production metrics are unchanged. The PDF build passes
+without LaTeX warnings. P1 remains INCONCLUSIVE and P2–P5 remain unmeasured;
+publication review and research-artifact packaging remain outstanding.
+
+### Phase 2 repair — final lead acceptance, 2026-09-23
+
+**ACCEPTED for the isolated research implementation.** The final
+[lead acceptance](../results/phase2_structural_encoding/phase2_repair_20260923c/LEAD_ACCEPTANCE.md)
+closes L1, R1–R6 and the four remaining evidence/gate findings. 243 research
+tests pass; the checker reports zero findings; unchanged production verification
+passes all twelve stages and the fresh 72-run comparison passes all seven gates.
+The scientific outcome remains P1 **INCONCLUSIVE**: four public programs miss the
+frozen coverage minimum. P2–P5 remain blocked and unmeasured. This acceptance
+covers evidence integrity and the isolated research implementation only; it makes
+no structural-encoding performance or production-integration claim. The 113 MB
+uncapped raw-attempt file remains local pending an approved storage representation.
+
+### Phase 2 repair re-review — 2026-09-23
+
+**CHANGES_REQUIRED** for `phase2_repair_20260923b`. The
+[repair re-review](../results/phase2_structural_encoding/lead_repair_review_20260923/LEAD_REVIEW.md)
+confirms 236 passing research tests, a fresh P1 INCONCLUSIVE campaign, all twelve
+production verification stages passing, and a 72-run comparison with all seven
+gates passing. Research-test placement and reference-manifest verification are
+repaired. Four remaining evidence/gate defects are reproduced: false PASS despite
+recomputed missing coverage; imported metadata allowing P2 entry on that failed
+coverage; erased finite-domain decoder rows accepted as consistent; and permissive
+command/log validation. Implementation acceptance remains withheld; production
+acceptance and scientific gates are unchanged. The
+[next repair assignment](../results/phase2_structural_encoding/lead_repair_review_20260923/REPAIR_HANDOFF.md)
+is ready for Claude Code. Earlier reviews below are historical.
+
+### Phase 2 structural encoding — independent review, 2026-09-23
+
+**CHANGES_REQUIRED** for the research implementation handed off as
+`phase2_20260922_final`. The [lead review](../results/phase2_structural_encoding/lead_review_20260923/LEAD_REVIEW.md)
+records six reproduced findings, independent raw evidence and a separate
+lead-owned test-placement conflict. The [repair handoff](../results/phase2_structural_encoding/lead_review_20260923/REPAIR_HANDOFF.md)
+authorises relocating research tests to `research_tests/` while preserving
+historical tests, production source and the original locked delegation package.
+
+Independent review: 162 new tests pass; all twelve finite fixture domains agree
+with a separate oracle; 160,000 public draws yield 819 completions with 1,356
+case executions and no discrepancies. P1 still misses coverage on four public
+programs, so H1 is INCONCLUSIVE and P2–P5 remain blocked/unmeasured. The fresh
+72-run production comparison passes all gates. Canonical verification reproduces
+the historical test-provenance conflict; it is not a compiler regression.
+No production integration is accepted or proposed. The accepted v4 disposition
+below remains unchanged.
 
 ### Runtime optimization — current disposition
 
