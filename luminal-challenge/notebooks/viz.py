@@ -1499,3 +1499,74 @@ def show_bars(
     ax.set_title(title, fontsize=10)
     fig.tight_layout()
     plt.show()
+
+
+def show_ratio_intervals(
+    rows: Sequence[Tuple[str, float, float, float, Optional[float]]],
+    title: str,
+    xlabel: str = "ratio candidate / control   (< 1: candidate is lower)",
+) -> None:
+    """Ratios with their intervals, each against its own registered gate.
+
+    A row is ``(label, point, low, high, gate)``, read from frozen evidence. The
+    line at 1 is "no difference"; the dashed mark on a row is the ceiling its
+    upper bound had to stay under, so a reader sees the margin, not a verdict.
+    """
+
+    fig, ax = plt.subplots(figsize=(7.4, 0.75 * len(rows) + 1.5))
+    for index, (label, point, low, high, gate) in enumerate(rows):
+        ax.plot([low, high], [index, index], color=EDGE, linewidth=2.2)
+        ax.plot([point], [index], "o", color=EDGE)
+        ax.text(high, index + 0.18, f"  {point:.3f} [{low:.3f}, {high:.3f}]", fontsize=8,
+                va="bottom")
+        if gate is not None:
+            ax.plot([gate, gate], [index - 0.3, index + 0.3], color="#b24a4a",
+                    linestyle="--", linewidth=1.2)
+            ax.text(gate, index - 0.32, f"gate {gate:g}", color="#b24a4a", fontsize=7,
+                    ha="center", va="top")
+    ax.axvline(1.0, color=DEAD, linewidth=1.0)
+    ax.set_yticks(range(len(rows)), [row[0] for row in rows], fontsize=8)
+    ax.set_ylim(-0.8, len(rows) - 0.3)
+    ax.invert_yaxis()
+    ax.set_xlabel(xlabel, fontsize=9)
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
+
+
+def show_ratio_scatter(
+    points: Sequence[Tuple[float, float, str]],
+    title: str,
+    xlabel: str,
+    ylabel: str = "ratio candidate / control",
+    reference: Optional[Tuple[str, float]] = None,
+) -> None:
+    """One dot per unit (``x``, ``ratio``, group), log x, with the line at 1.
+
+    Groups are coloured in order of first appearance. ``reference`` adds a named
+    horizontal line (for example the pooled estimate). The caller computes every
+    value; this function only places them.
+    """
+
+    palette = ["#5d8fb3", "#b24a4a", "#6aa36f", "#c49a3a", "#8a6bb5", "#7a7f87"]
+    groups: List[str] = []
+    for _, _, group in points:
+        if group not in groups:
+            groups.append(group)
+    fig, ax = plt.subplots(figsize=(7.4, 4.2))
+    for index, group in enumerate(groups):
+        xs = [x for x, _, g in points if g == group]
+        ys = [y for _, y, g in points if g == group]
+        ax.scatter(xs, ys, s=16, alpha=0.75, color=palette[index % len(palette)], label=group)
+    ax.axhline(1.0, color=DEAD, linewidth=1.0)
+    if reference is not None:
+        ax.axhline(reference[1], color="#b24a4a", linestyle="--", linewidth=1.0)
+        ax.text(max(x for x, _, _ in points), reference[1],
+                f"{reference[0]} ", color="#b24a4a", fontsize=8, ha="right", va="bottom")
+    ax.set_xscale("log")
+    ax.set_xlabel(xlabel, fontsize=9)
+    ax.set_ylabel(ylabel, fontsize=9)
+    ax.legend(fontsize=8, frameon=False, ncol=min(len(groups), 5))
+    ax.set_title(title, fontsize=10)
+    fig.tight_layout()
+    plt.show()
