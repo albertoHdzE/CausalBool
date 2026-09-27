@@ -1,0 +1,446 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=24mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage{lmodern,microtype,amsmath,amssymb,booktabs,tabularx,graphicx,array}
+\usepackage{xcolor,caption,placeins,textcomp}
+\definecolor{ink}{HTML}{243340}
+\definecolor{figteal}{HTML}{007F86}
+\definecolor{light}{HTML}{F2F5F7}
+\usepackage[colorlinks=true,linkcolor=figteal,citecolor=figteal,urlcolor=figteal]{hyperref}
+\hypersetup{pdftitle={Reopen and resolve: an answer to the Luminal compiler challenge},pdfauthor={Alberto Hern\'andez-Espinosa}}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{3em}
+\graphicspath{{generated/}}
+\makeatletter
+\newcommand{\tableinput}[1]{\@@input #1 }
+\makeatother
+\input{generated/values.tex}
+\newcommand{\ci}[2]{[#1,\,#2]}
+\newcommand{\keybox}[1]{\par\smallskip\noindent\colorbox{light}{\parbox{\dimexpr\linewidth-2\fboxsep}{\small #1}}\par\smallskip}
+
+\title{Reopen and resolve\\[4pt]
+\large An answer to the Luminal compiler challenge:\\ exact, explainable search over scheduling and memory decisions}
+\author{Alberto Hern\'andez-Espinosa}
+\date{Technical report, September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The Luminal challenge asks for a compiler backend that schedules a straight-line
+program on a small VLIW machine and places its values in a shared scratchpad, so
+that the program runs in as few cycles and as few scratch words as possible. We
+answer it with two compilers. The first is a strong \emph{classical} solution,
+critical-path list scheduling followed by first-fit allocation, which we treat as
+our benchmark. The second is the compiler we propose, which takes a causal view of
+the problem: it asks which few decisions are responsible for the current cost,
+reopens exactly those decisions, and solves them again exactly, keeping a checkable
+reason for every option it rules out. On the eight public programs the classical
+compiler scores \V{rTwoPubClassical} and ours \V{tPubSixC1B}, a gain of
+\V{rpGainPct}\%, against the serial baseline's score of one. Ours is better on
+\V{rpBetter} programs and equal on \V{rpEqual}, and it is correct on every supplied
+case. The gain comes from memory: it reduces scratch by \V{rpScrCOne} times against
+the classical \V{rpScrCl} times, while giving up a little in cycles
+(\V{rpCycCOne} against \V{rpCycCl} times). The price is compile time: our compiler
+spends its budget of \V{bB}\,s, where the classical one needs well under a
+millisecond; both are far inside the grader's allowance of 20\,s.
+\end{abstract}
+
+\keybox{\textbf{The answer in four lines.}
+(1)~\emph{Baseline}: the serial compiler, score one by definition.
+(2)~\emph{Classical benchmark}: critical-path list scheduling and aligned first-fit
+allocation, score \V{rTwoPubClassical}.
+(3)~\emph{Our proposal}: build a correct first answer from exact queries, then
+repeatedly reopen the decisions that cause the cost and re-solve them exactly,
+score \V{tPubSixC1B}.
+(4)~\emph{Trade-off}: \V{rpGainPct}\% higher score and \V{rpJRed}\% lower
+geometric-mean $C\times S$ than classical, paid for with roughly \V{bB}\,s of
+compilation per program.}
+
+\section{The problem in one page}\label{sec:problem}
+
+Luminal builds compilers for AI inference, where performance depends on how
+tightly work is packed in time and how little memory it occupies while it
+waits~\cite{talent}. The take-home challenge~\cite{luminal} is a small, exact
+version of that problem. A program is a list of operations in dependency order:
+loads, scalar and vector arithmetic, selects and stores. The machine issues one
+\emph{bundle} per cycle, and each bundle may contain up to two load, two scalar and
+two vector operations, one store and one flow operation. An operation's result can
+be read only after its \emph{latency}: one cycle for an add, three for a scalar
+load, four for a vector load. Every result lives in a scratchpad of 256 words of
+32 bits; vectors take eight consecutive words starting at a multiple of eight. Two
+values may share words only if their lifetimes do not overlap.
+
+The compiler must decide two things for every operation: \emph{when} it issues
+(its cycle) and \emph{where} its result lives (its scratch address). Two numbers
+measure the result: the number of cycles $C$, and the footprint $S$, the highest
+scratch word used. The score compares both with a frozen serial compiler,
+\begin{equation}\label{eq:score}
+\text{score}=\sqrt{\;\underbrace{\operatorname{geomean}_p\frac{C^{\text{serial}}_p}{C_p}}_{\text{cycle speedup}}\;\times\;
+\underbrace{\operatorname{geomean}_p\frac{S^{\text{serial}}_p}{S_p}}_{\text{scratch reduction}}\;} ,
+\end{equation}
+so time and memory weigh exactly the same. For a single program, improving the
+score is the same as reducing the product
+\begin{equation}\label{eq:j}
+J = C\times S .
+\end{equation}
+This observation shapes our whole approach: a cycle saved and a proportional amount
+of scratch saved are worth the same, so a good compiler should be willing to trade
+one for the other whenever the product falls.
+
+The two decisions pull against each other. Packing a schedule tightly makes many
+values alive at once, which raises $S$; packing memory tightly forces values to wait
+for each other, which raises $C$. This coupling is what makes the problem
+interesting, and it is where a greedy compiler leaves the most on the table.
+
+\section{Three compilers, three ideas}\label{sec:three}
+
+\paragraph{The baseline: serial.} The challenge supplies a serial compiler that
+issues one operation per bundle and gives every value a fresh address. It is always
+correct, never good, and it defines a score of one. On the public programs the
+supplied starter compiler produces exactly the same schedules and footprints.
+
+\paragraph{The classical benchmark.} Our classical compiler is what an experienced
+compiler engineer would write first, and what the challenge's own hints point
+towards. It schedules with a \emph{critical-path list scheduler}~\cite{graham1969,gibbons1986}:
+at each cycle it issues the ready operations that head the longest remaining chain
+of latencies, filling every free slot. It then computes each value's live interval
+and places values by \emph{aligned first fit}~\cite{poletto1999}: each value takes
+the lowest address that is free for its whole lifetime, vectors on multiples of
+eight. It tries three fixed orders of the values and keeps the best. This compiler
+is fast, simple and strong; it scores \V{rTwoPubClassical}. Its limitation is
+structural: it decides once, in order, and never revisits a decision. It also
+optimises time first and memory second, even though the score weighs them equally.
+
+\paragraph{Our proposal: reopen and resolve.} The compiler we propose starts from
+a different question. Instead of asking ``what is the best next step?'', it asks
+``which decisions are responsible for the cost I have now, and is there any way
+to set them differently that lowers $J$?'' It answers that question exactly, for
+small groups of decisions at a time, and repeats. We call this \emph{reopen and
+resolve}; internally the final version is named C1.
+
+The idea comes from causal deconvolution in algorithmic information
+dynamics~\cite{zenil2019deconvolution,zenil2019calculus,hernandez2019aid}: an
+observed outcome is explained by separating it into the contributions of the
+mechanisms that produced it, and each mechanism is studied by intervening on it
+while the rest is held fixed. Here the outcome is a compiled program, its cost is
+$C\times S$, and the mechanisms are groups of decisions. The last operations to
+issue produce $C$; the values alive at the memory peak produce $S$. Reopening one
+such group while freezing everything else is an intervention, and solving it
+exactly tells us whether that group can do better. The compiler does not run a
+general deconvolution algorithm; it borrows this causal stance and applies it to
+scheduling.
+
+One ingredient makes this practical: the set of legal choices for a group of
+decisions is kept as an exact and compact description, which can be asked
+questions such as ``what is the smallest legal cycle?'' or ``is any assignment
+with $J$ below the current value legal?'' without listing its members one by one.
+How that description is built is not needed to follow this report; what matters is
+that every answer is exact and every rejected option has a stated cause.
+
+\section{Our approach, step by step}\label{sec:steps}
+
+\paragraph{Step 1: a correct first answer.} Operations are taken in order. For each,
+the compiler describes the cycles it could use, from the moment its inputs are
+ready up to a safe horizon, removes the cycles in which its engine is already full,
+and takes the earliest survivor. Addresses are chosen the same way: the aligned
+addresses minus those held by values whose lifetimes overlap, and the lowest
+survivor. Each choice is the answer to an exact question about a set, so it is legal
+by construction. This first answer is decent but never revisits anything.
+
+\paragraph{Step 2: find the decisions that cause the cost.} The compiler builds a
+\emph{catalogue} of groups of related operations, called windows, each allowed to
+move its issue cycles within a radius while everything outside the window stays
+fixed. The catalogue deliberately targets the causes of cost: the $k$ latest
+operations, which determine $C$; the $k$ operations around the memory peak, which
+determine $S$; contiguous blocks; small groups of four; and the whole program when
+it is small. This is large neighbourhood search~\cite{shaw1998}: move several
+related decisions together, because useful improvements rarely come one decision
+at a time.
+
+\paragraph{Step 3: say exactly what ``better'' must look like.} With the rest of
+the program fixed, a window's answer cannot use fewer than $L_C$ cycles or fewer
+than $L_S$ words. If the current cost is $J_0$, a strict improvement must satisfy
+$C\times S\le J_0-1$, and therefore
+\begin{equation}\label{eq:box}
+C\le\Bigl\lfloor\frac{J_0-1}{L_S}\Bigr\rfloor ,\qquad
+S\le\Bigl\lfloor\frac{J_0-1}{L_C}\Bigr\rfloor .
+\end{equation}
+Every improvement lies inside this box, so the search is confined to it without
+losing any. If a bound falls below its minimum, the window provably holds no
+improvement and is answered without searching. This is how the objective of
+Equation~\eqref{eq:j} enters the search directly: the compiler never asks for
+fewer cycles or fewer words in isolation, only for a smaller product.
+
+\paragraph{Step 4: delete impossible options, each with a reason.} Before
+searching, the compiler removes choices that cannot be part of any legal answer.
+If $v$ reads the result of $u$ and $u$ has latency $\ell$, then $v$ cannot issue
+before $u$'s earliest cycle plus $\ell$, and $u$ cannot issue after $v$'s latest
+cycle minus $\ell$. If an engine's slots in a cycle are all taken, that cycle is
+removed from every other operation on that engine. Every removal records a short
+\emph{certificate} that anyone holding the program can check in one line, in the
+spirit of explained propagation in constraint solvers~\cite{ohrimenko2009}. These
+are the causes in the causal reading: not only ``this option is gone'', but ``this
+option is gone because $v$ reads $u$ with latency $\ell$''.
+
+\paragraph{Step 5: search exactly, keep the first validated improvement, repeat.}
+What remains is searched exactly, depth first, abandoning any branch whose best
+possible $J$ is no better than the current one. A controller keeps \V{resident}
+windows open at once and gives each a short turn of at most \V{sliceMs}\,ms, so no
+single hard window can consume the budget. The first window to find a strict
+improvement wins: its answer is checked by the challenge's own validator, becomes
+the new current answer, and a new round starts from it. The submitted compiler stops
+after \V{bB}\,s or when a whole round finds nothing. This is the combinatorial view of
+scheduling and allocation of Casta\~neda Lozano and colleagues~\cite{castaneda2019},
+applied to small, well-chosen neighbourhoods rather than to the whole program at once.
+
+\paragraph{An engineering refinement.} A search node differs from its parent by a
+single decision, yet a naive implementation re-checks every constraint at every
+node. The final version keeps, at each node, the facts its parent had already
+derived and re-examines only the constraints that the new decision can reach.
+Measured on \V{tPrograms} fresh programs at identical search work
+(\V{tNodes} nodes), it makes exactly the same decisions as the version without the
+refinement in \V{tParityPairs} of \V{tParityPairs} paired runs, and its compile call
+takes \V{tCost} of the time (\V{lvThree}\% interval \ci{\V{tCostLo}}{\V{tCostHi}}). Because
+it is faster, it explores more within the same wall-clock budget; at \V{bB}\,s its
+geometric-mean $J$ is \V{tQual} of the unrefined version's (interval
+\ci{\V{tQualLo}}{\V{tQualHi}}).
+
+\section{A worked example: \texttt{05\_mixed\_broadcast}}\label{sec:worked}
+
+We now follow one public program from the challenge repository through every
+compiler. Figure~\ref{fig:program} shows it: \V{weOps} operations, three loads, two
+\texttt{splat}s that copy a scalar into all eight lanes of a vector, a vector
+multiply, a vector add and a vector store. Its difficulty is easy to see. The
+vector load is slow, several eight-word vectors are alive together, and the order
+in which the vectors are created decides how much scratch they need.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_program.pdf}
+\caption{\textbf{The worked example.} (A)~Operations and their dependences; each
+arrow is labelled with the latency that must pass before the consumer may issue.
+(B)~Issue slots per cycle for each engine.}\label{fig:program}
+\end{figure}
+
+\paragraph{Serial.} One operation per cycle and a fresh address for everything:
+$C=\V{weSerialC}$, $S=\V{weSerialS}$, $J=\V{weSerialJ}$. This is the yardstick.
+
+\paragraph{Classical.} The list scheduler issues the three loads as early as the
+two load slots allow, starts the vector work as soon as inputs arrive, and first
+fit reuses words as soon as values die: $C=\V{weClassicalC}$, $S=\V{weClassicalS}$,
+$J=\V{weClassicalJ}$. It is a big improvement over serial, and on this program the
+greedy choices are good.
+
+\paragraph{Our Step 1.} The first answer takes, for every operation, the earliest
+legal cycle; for instance operation~\V{weQTop} could issue anywhere in cycles
+\V{weQTlo} to \V{weQThi}, cycle \V{weQTlo} is already full on the load engine, and so
+it takes cycle \V{weQTchosen}. It then gives each value the lowest legal address.
+The result is $C=\V{weDirectphase1C}$, $S=\V{weDirectphase1S}$,
+$J=\V{weDirectphase1J}$: legal, but \emph{worse than classical}. Issuing every
+vector as early as possible keeps two eight-word vectors alive together, and that
+costs memory. A compiler that stops here loses to the classical one on this program.
+
+\paragraph{Our Steps 2 to 5.} The compiler now reopens. It builds a catalogue of
+\V{weCatalogue} windows (Figure~\ref{fig:pipeline}B). For the window that releases
+the latest operations, the fixed part implies at least \V{weCapLC} cycles and
+\V{weCapLS} words, and the box of Equation~\eqref{eq:box}, with the cycle bound also
+limited by the search horizon, becomes $C\le\V{weCapCcap}$ and $S\le\V{weCapScap}$.
+Inside it, the declared combinations of issue cycles number \V{weCombDeclared};
+propagation with \V{weRootCerts} certificates reduces them to \V{weCombRoot} before
+any search begins. The search then walks the path shown in
+Figure~\ref{fig:pipeline}C:
+\begin{itemize}
+\item the first round, through the window of the latest operations, keeps the same
+number of cycles and cuts the footprint: $\V{weStepAC}\times\V{weStepAS}$;
+\item the second round, through the same window, saves a cycle:
+$\V{weStepBC}\times\V{weStepBS}$, level with classical;
+\item the third round, through a small window of four operations that had nothing to
+offer at the start, saves one more word: $\V{weStepCC}\times\V{weStepCS}$.
+\end{itemize}
+The final answer, $C=\V{weC1C}$, $S=\V{weC1S}$, $J=\V{weC1J}$, beats the classical
+compiler. It took \V{weEpochs} rounds and \V{weNodes} search nodes, and every
+intermediate answer was validated by the challenge's checker. Notice the pattern:
+a large window opened the way and a small one finished it. Neither kind of move
+alone reaches this answer.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_pipeline.pdf}
+\caption{\textbf{Reopen and resolve on the worked example.} (A)~One round, with
+the counts that the real compiler produces. (B)~The catalogue: each row is one
+window and each filled cell an operation it may move. (C)~The current answer, round
+by round, in the $(C,S)$ plane; the curve is the starting value of $J$, the shaded
+region the box of Equation~\eqref{eq:box}.}\label{fig:pipeline}
+\end{figure}
+
+Figure~\ref{fig:methods} puts the schedules and memory layouts side by side. The
+difference between classical and ours is visible in the lower panels. Both keep
+the vectors inside two eight-word blocks; the difference lies in the scalars. The
+classical layout places one scalar above the vector blocks, which raises the
+footprint by one word. Ours issues the scalar loads so that each scalar lives in
+words that no vector occupies at that moment, and the footprint closes exactly at
+the top of the second block.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_methods.pdf}
+\caption{\textbf{Every compiler on the same program.} Top: engine by cycle, with the
+operations issued in each slot. Bottom: scratch words by cycle; each value occupies
+its words from its write to its last read, and the dashed line is the footprint $S$.
+``Original direct'' is our Step~1 alone; ``C1'' is the full compiler. Every layout
+was produced by running the compiler and checked by the challenge's validator.}
+\label{fig:methods}
+\end{figure}
+
+\section{Results against the classical benchmark}\label{sec:results}
+
+\subsection{The public programs}
+Table~\ref{tab:public} gives every public program. Our compiler is better than
+classical in $J$ on \V{rpBetter} programs and equal on \V{rpEqual}; it is never
+worse. Its geometric-mean $J$ is \V{rpJRed}\% below classical, and its score is
+\V{tPubSixC1B} against \V{rTwoPubClassical}.
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lrrrrrr}\toprule
+& \multicolumn{3}{c}{$C\times S$} & \multicolumn{3}{c}{$J$}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Program & Serial & Classical & Ours & Serial & Classical & Ours\\\midrule
+\tableinput{generated/tab_public.tex}
+\midrule
+\multicolumn{4}{l}{Cycle speedup over serial} & 1 & \V{rpCycCl} & \V{rpCycCOne}\\
+\multicolumn{4}{l}{Scratch reduction over serial} & 1 & \V{rpScrCl} & \V{rpScrCOne}\\
+\multicolumn{4}{l}{\textbf{Combined score} (Equation~\ref{eq:score})} & 1 & \V{rTwoPubClassical} & \textbf{\V{tPubSixC1B}}\\
+\bottomrule\end{tabular}
+\caption{The eight public programs. ``Ours'' is the submitted configuration, with a
+\V{bB}\,s search budget; bold marks the lowest $J$ in each row. Every value was
+identical in each of \V{tReps} fresh-process repetitions, and every compilation
+passed the challenge's validator on all supplied cases.}\label{tab:public}
+\end{table}
+
+The split between the two halves of the score is the most instructive part of the
+table. Our compiler uses fewer scratch words than classical on \V{rpScrBetter} of the
+eight programs, but fewer cycles on only \V{rpCycBetter}, and more cycles on
+\V{rpCycWorse}. On \texttt{vector\_axpy}, for example, it accepts one more cycle to
+halve the footprint. That is not an accident; it is the objective at work. Because
+the score weighs time and memory equally, one extra cycle on a program of about ten
+cycles is a good trade for half the memory, and a compiler that searches the product
+$C\times S$ finds such trades, where one that optimises cycles first cannot see them.
+
+\subsection{Programs never seen during development}
+The public programs were visible while we built the compiler, so they show exact
+results on eight fixed programs, not an estimate of performance on unseen ones. To
+test generalisation we generated fresh programs in five families (scalar, vector,
+mixed, dependency-heavy and memory-aliasing) only after each version was frozen.
+The direct predecessor of our final compiler, which runs the same catalogue and the
+same depth-first search, was compared with the classical compiler on \V{tPrograms}
+such programs with a \V{bB}\,s budget: its geometric-mean $J$ was
+\V{rTwoDfsClRed}\% lower (a descriptive comparison, without an interval), with \V{rTwoDfsClW} programs better, \V{rTwoDfsClT} equal and
+\V{rTwoDfsClL} worse. An earlier version with the same catalogue, on another fresh
+cohort of \V{tPrograms} programs, was \V{rOneClRed}\% lower (\V{lvOne}\% interval \V{rOneClLo}\% to
+\V{rOneClHi}\%), with \V{rOneClwins} better, \V{rOneClties} equal and \V{rOneCllosses}
+worse. The final compiler adds only the engineering refinement of
+Section~\ref{sec:steps}, which makes the same decisions at equal work; it was not
+itself re-measured against classical on a fresh cohort, and we do not multiply
+results across rounds.
+
+\subsection{What it costs}
+Compile time is the price. The classical compiler compiles a public program in a
+median of \V{rpClCallMed}\,ms. Ours is designed to use its budget: its median compile
+call is \V{rpC1CallMed}\,ms, and the slowest of its \V{rpC1Runs} public runs took
+\V{rpC1ProcMax}\,s as a whole process, including interpreter start. On the fresh
+cohort of round one, the search took \V{rOneClTime} times the classical compile time.
+The grader allows 20\,s per program, so both are far inside the limit; the
+difference is that the classical compiler leaves almost all of that allowance
+unused, while ours converts a small part of it into better output.
+
+\section{Why this approach}\label{sec:why}
+
+\paragraph{It optimises what is scored.} Every question the search asks is framed
+in terms of $J=C\times S$, the quantity the score rewards. Trades between time and
+memory are therefore found, not forbidden.
+
+\paragraph{It explains itself.} Every option the compiler rejects carries a
+certificate that states its cause, and every accepted change is validated by the
+challenge's own checker before it is kept. One can ask of any output why a cycle
+was not used or why a value moved, and receive a concrete answer.
+
+\paragraph{It proves when to stop looking.} When a window's box is empty, or its
+exact search finishes without an improvement, that window provably has nothing
+better to offer given the rest of the program. Effort goes to windows that can
+still pay.
+
+\paragraph{It is anytime and budget-aware.} A correct answer exists after Step~1,
+and every later round only improves it, so the compiler can be stopped at any moment
+with a valid schedule. A larger budget buys more quality; a smaller one still
+returns something good. On the public programs even a budget of \V{bA}\,s scores
+\V{tPubSixC1A}.
+
+\paragraph{It generalises by construction.} Nothing refers to program names,
+operation identifiers or constants; the catalogue is derived from the structure of
+each program. For a company that compiles whole models into single kernels, where a
+scheduler must place work in time and memory together, a search that can reopen
+any group of decisions and explain each change seems to us the right foundation to
+build on.
+
+\section{Correctness and reproducibility}\label{sec:correct}
+
+The submitted compiler is a single standard-library Python file that exposes
+\texttt{compile\_program} and follows the challenge's command-line contract. It
+passes the unchanged public test suite. Beyond the public programs it was run on a
+corpus of \V{tAccPrograms} programs and \V{tAccCases} cases, including regression,
+generated and stress programs that fill the 256-word scratchpad, and passed every
+case. All \V{tExportRows} command-line runs of the
+exported compiler on fresh and public programs were re-validated with the challenge's
+own evaluator. Every number in this report is generated from frozen result files by
+the report's build script, which re-derives each value from its source and refuses
+to compile if any digit in the text is typed by hand.
+
+\section{Limitations}\label{sec:limits}
+
+The public programs were visible during development, and there is no result on the
+private grader. The comparison with classical on unseen programs was made for the
+direct predecessor of the final compiler, not for the final build itself. All timings come
+from one local machine. Under a real clock, a faster search can take a different
+path and occasionally end at a worse answer: at \V{bB}\,s the final version was better
+than its predecessor in \V{tWTLBW} paired runs, equal in \V{tWTLBT} and worse in
+\V{tWTLBL}, so quality claims are about the distribution, not about every program.
+Finally, the classical compiler remains several hundred times faster to compile
+(median \V{rpClCallMed}\,ms against \V{rpC1CallMed}\,ms); if
+compile time mattered more than output quality, it would be the better choice.
+
+\section*{Tools and assistance}
+Claude Code assisted with implementation, review and the preparation of this report;
+every claim was checked by running the compilers and the challenge's validator.
+
+\begin{thebibliography}{99}\raggedright\small
+\bibitem{luminal} Luminal. \emph{Compiler take-home}, pinned revision
+573b8a85f4bdb8c3d8ba9f180d5f98dac875c902.
+\url{https://github.com/luminal-ai/interview}.
+\bibitem{talent} 3Blue1Brown Talent, \emph{Luminal: AI inference compilers}.
+\url{https://www.3blue1brown.com/talent/}.
+\bibitem{graham1969} R. L. Graham, \emph{Bounds on multiprocessing timing
+anomalies}, SIAM Journal on Applied Mathematics 17(2), 416--429 (1969).
+\bibitem{gibbons1986} P. B. Gibbons and S. S. Muchnick, \emph{Efficient
+instruction scheduling for a pipelined architecture}, Proc. SIGPLAN '86 Symposium
+on Compiler Construction, 11--16 (1986).
+\bibitem{poletto1999} M. Poletto and V. Sarkar, \emph{Linear scan register
+allocation}, ACM TOPLAS 21(5), 895--913 (1999).
+\bibitem{shaw1998} P. Shaw, \emph{Using constraint programming and local search
+methods to solve vehicle routing problems}, CP98, LNCS 1520, 417--431 (1998).
+\bibitem{castaneda2019} R. Casta\~neda Lozano, M. Carlsson, G. Hjort Blindell and
+C. Schulte, \emph{Combinatorial register allocation and instruction scheduling},
+ACM TOPLAS 41(3), Article 17 (2019).
+\bibitem{ohrimenko2009} O. Ohrimenko, P. J. Stuckey and M. Codish,
+\emph{Propagation via lazy clause generation}, Constraints 14(3), 357--391 (2009).
+\bibitem{zenil2019deconvolution} H. Zenil, N. A. Kiani, A. A. Zea and J. Tegn\'er,
+\emph{Causal deconvolution by algorithmic generative models}, Nature Machine
+Intelligence 1, 58--66 (2019).
+\bibitem{zenil2019calculus} H. Zenil, N. A. Kiani, F. Marabita et al., \emph{An
+algorithmic information calculus for causal discovery and reprogramming systems},
+iScience 19, 1160--1172 (2019).
+\bibitem{hernandez2019aid} A. Hern\'andez-Espinosa, H. Zenil, N. A. Kiani and
+J. Tegn\'er, \emph{Estimations of integrated information based on algorithmic
+complexity and dynamic querying}, arXiv:1904.10393 (2019).
+\end{thebibliography}
+\end{document}
