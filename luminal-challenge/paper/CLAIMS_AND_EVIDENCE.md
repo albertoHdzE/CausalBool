@@ -1,113 +1,68 @@
-# Paper foundation: direct-index compilation for the Luminal machine
+# Claims and evidence: the Luminal paper, version 2 (26 September 2026)
 
-Prepared by the lead, 2026-09-20. This is a writing contract and evidence map,
-not a finished manuscript. Final implementation disposition is recorded in
-`../results/direct_index_v4_optimization_repair2/REVIEW.md`.
-The lead has recorded **ACCEPTED WITH LIMITATIONS**; drafting may begin.
+This file maps every claim of `main.tex` and `supplementary.tex` to one evidence
+file. It holds no numbers of its own. Each claim names ledger keys; the value,
+source file and field of every key are in the generated
+[claim table](generated/claim_table.md) and in Supplementary Section S10. Both are
+written by `generate_figures.py` through `phase2_evidence.Ledger`, and
+`verify_ledger` re-derives every pointer and derived entry from disk on every build.
 
-## Working scope and title
+The previous contract, for the 20 September Phase 1 draft, is preserved in
+`baselines/20260921/CLAIMS_AND_EVIDENCE.md` and in git history.
 
-**Direct Boolean Index Schemata for Scheduling and Scratch Allocation: A
-Reproducible Luminal Compiler Case Study**
+## Binding sources
 
-Present the representation, executable compiler, mathematical invariants,
-validation, and measured quality/cost tradeoff. Do not frame these experiments
-as a general complexity breakthrough or proof of asymptotic superiority.
+| Source | Status |
+|---|---|
+| `results/phase2_structural_encoding/lead_resume_review_20260926/REVIEW.md` | Acceptance ruling for C1. **Self-review.** Errata E1–E2 and qualifications Q1–Q3 are binding. |
+| `.../third_round_20260925_resume/PAPER_HANDOFF.md` | Evidence classes, claims 1–8 and limits. |
+| `.../third_round_20260925_resume/RELEASE_HANDOFF.md` | Contains two known errors (E1: wrong C1 hash; E2: inaccurate D-auditor disclosure). Never cited for either. |
+| `lead_{objective,next_round,efficiency,third_round}_review_20260925/REVIEW.md` | Earlier rulings still in force. |
+| `results/direct_index_v4_optimization_repair2/REVIEW.md` | Phase 1 acceptance. |
 
-## Claims supported by the implementation
+## Evidence classes (kept apart in the text)
 
-1. A cube represented by an integer anchor and free-bit mask denotes a set of
-   decision indices; exact intersections, differences and restrictions support
-   scheduling/allocation queries without materializing the full assignment set.
-2. Bootstrap obtains issue times and scratch addresses as minimum witnesses of
-   direct-schema queries. It does not seed from the classical or serial compiler.
-3. Joint queries encode bounded schedule/address neighborhoods and target
-   criteria. Accepted witnesses are independently validated. UNSAT is local to
-   those domains; resource exhaustion is UNKNOWN.
-4. On the eight pinned public programs, the direct implementation's combined
-   score is 2.008466202284657 versus 1.9013791212645499 for the frozen classical
-   implementation. This is about 5.63% higher on that composite metric, not
-   5.63% less execution time. Report cycles and scratch separately.
-5. Optimizer-on/off must be reported separately. The public score gains already
-   occur in bootstrap; joint optimization improves some generated cases.
-6. Representation and reuse changes reduce this implementation's compile time
-   relative to frozen v3. Use the final reviewed run's exact figures, intervals,
-   source/export hashes and baseline, not the best result selected across runs.
+| Class | Keys | Evidence file | May support |
+|---|---|---|---|
+| (a) historical registered M result | `tMReg`, `tMGate` | `third_round_20260925/MECHANISM_DECISION.json` | History only; the model was scope-defective. |
+| (b) post-hoc development forecast | `tMCons`, `tMPoint`, `tMFam*`, `tMOldAdapter`, `tMReplayOnly` | `third_round_20260925_resume/RECALIBRATED_PREDICTION.json` | A forecast; neither a measurement nor an interval. |
+| (c) kernel-only replay | `tKernelMed`, `tKernelMin`, `tKernelMax` | same file (`kernel_speedup_*`) | Not a compiler speed-up. The median is the corrected value, not the upper median. |
+| (d) real compiler, development | `tDev*`, `tMem*` | `third_round_20260925_resume/DEVELOPMENT.json` | Descriptive. |
+| (d) real compiler, confirmation | `tCost*`, `tQual*`, `tParity*`, `tWTL*` | `third_round_20260925_resume/COMPARISON.json` | **The only inferential evidence.** |
 
-## Evidence and limits
+## Claims
 
-- Correctness: complete direct suite, unchanged 11-test public suite, 142-program
-  acceptance corpus / 277 cases, standalone export and independent machine checks.
-- Performance: 15 paired repetitions on eight public programs; separate frozen
-  100-program evaluation corpus, five arms and three repetitions each.
-- Source of final lead evidence:
-  `../results/direct_index_v4_optimization_repair2/lead_review/`.
-  Retain earlier rounds as repair history, not independent statistical samples.
-- One machine and a fixed challenge corpus limit generalization. The generated
-  evaluation set shares its generator with development inputs. Repeated timing
-  measurements do not create additional independent programs.
-- Within-run bootstrap intervals do not quantify between-run system variation.
-  The classical timing changes on two public programs are unexplained; include
-  per-program values and avoid diagnosing a cause without evidence.
-- Direct compilation remains slower than the frozen classical implementation.
-  Better output score and lower compile time are different objectives.
-- The classical comparison is an implementation comparison. Its differing
-  heuristics mean the score gain cannot be attributed solely to representation.
-  Matched-heuristic ablations would be needed for that stronger causal claim.
-- No global optimality, private-grader result, universal compression ratio,
-  polynomial worst-case complexity, or general advantage over modern compiler
-  optimizers has been established. Do not transfer the 1.2% representation figure
-  from other challenges to Luminal.
+| # | Claim (as worded in the paper) | Keys | Evidence file |
+|---|---|---|---|
+| 1 | C1 makes the same decisions as R0 at equal work; parity holds on the tested inputs and is not a proof. | `tParityPairs`, `tParityMismatch`, `tSubstantive`, `tZeroNode`, `tTraces`, `tCertMedian` | `COMPARISON.json`; row counts from `stages/C_fixed_work/rows.jsonl` |
+| 2 | At fixed work C1's compile call costs `tCost` of R0's (97.5% interval). | `tCost`, `tCostLo`, `tCostHi`, `tGateCost`, `tNodes`, `tResamples`, `tSeed`, `tPctLo`, `tPctHi`, `lvThree` | `COMPARISON.json`; `plan/phase2_third_round/PROTOCOL.json` |
+| 3 | At 0.1 s C1's J is not worse within the registered margin. | `tQual`, `tQualLo`, `tQualHi`, `tGateQual`, `tWTLB*`, `tProg*` | `COMPARISON.json`; `lead_resume_review_20260926/RECOMPUTE.json` |
+| 4 | Robustness probes: import and process scope, order, drift, per-program spread, search-size thirds, wall-mode time. | `tImport`, `tProcess`, `tOrder*`, `tDrift*`, `tPP*`, `tTer*`, `tSummed`, `tWallTime*`, `tAltSeed*` | `RECOMPUTE.json` |
+| 5 | Q1: quality is not monotone in speed; losses at 1 s; program 980183. | `tLossRuns`, `tLossPrograms`, `tLossNoUnknown`, `tLossUnknown*`, `tSeed980183*`, `weQone980183*`, `tQoneSeed` | `stages/C_wall/rows.jsonl`; first answer from `worked_example.py` |
+| 6 | Q2: the speed-up is an engineering property of one Python implementation on one machine; no claim of beating classical compile time. | text only; supporting `rOneClTime`, `pOneSlowFull`, `aZeroClTime` | `objective_index_20260924/COMPARISON.json`; Phase 1 `final/runs.json`; `recovery_campaign_20260923_r3/COMPARISON.json` |
+| 7 | Q3: memory, development programs only. | `tMemMed`, `tMemMax`, `tMemPrograms` | `DEVELOPMENT.json`; `stages/D_memory/rows.jsonl` |
+| 8 | Public scores of every method. | `tabPubSerial`, `weStarterScore`, `rTwoPub*`, `pOneScore`, `aZeroPub`, `rOnePub*`, `tPubSix*` | `next_round_20260925/PUBLIC_SCORE.json`, `objective_index_20260924/PUBLIC_SCORE.json`, `lead_release_review_20260924/PUBLIC_SCORE_RECOUNT.json`, `COMPARISON.json`, `worked_example.py` |
+| 9 | Per-program C, S and J on the public programs. | `tabPP*` | `next_round_20260925/PUBLIC_SCORE.json`; `stages/C_public/rows.jsonl` |
+| 10 | Every measured pair, each with its own comparator. | `rOne*`, `rTwo*`, `aZero*`, `pOneExtra*`, `lad*` | round 1, round 2 and Phase 2 `COMPARISON.json` files |
+| 11 | Compile-time costs; C1 against classical was never measured. | `rOne*Time*`, `rTwoTime`, `rTwoDfs*T`, `aZero*Time`, `pOneSlow*` | as in 10 |
+| 12 | Correctness: exports, acceptance corpus, re-validation, audits, tests. | `tAccPrograms`, `tAccCases`, `tExportRows`, `tExportValid`, `tAuditC`, `tAuditD`, `tAuditM`, `tPytest`, `tInherited`, `tRawStdout` | `stages/C_acceptance/rows.jsonl`, `RECOMPUTE.json`, `checks/AUDIT_*.json`, `D_AUDIT_BOTH.json`, `PYTEST.log`, `INHERITED.log` |
+| 13 | Negative results: ladder, factorial, reversal, TARGET_NOT_REACHED, worklist, rule-2 filter, learner, H_LEARN. | `lad*`, `fac*`, `rTwoPubCap`, `rTwoPubHeap`, `rTwoQRoute`, `rTwoERoute`, `rTwoWorklist*`, `effPred`, `effCeil`, `lrn*`, `rOneLearn*` | `objective_index_20260924/{COMPARISON,LEARNING}.json`, `next_round_20260925/{COMPARISON,FACTORIAL,ENGINEERING_DECISION,LEARNING_FEASIBILITY,PUBLIC_SCORE}.json`, `efficiency_20260925/MECHANISM_PROPOSAL.json`, `plan/phase2_next_round/PROTOCOL.json` |
+| 14 | Worked example (illustrative, one program): every method's C, S, J; queries; catalogue; caps; propagation; shared state; epochs. | `we*` | `generated/worked_example.json`, produced by running the real modules; cross-checked against notebook 04's recorded outputs |
+| 15 | Worked-example compile times (frozen, never measured by the build). | `weTime*`, `wePub*` | Phase 1 `comparison/runs.json` and `final/runs.json`; `stages/C_public/rows.jsonl` |
+| 16 | Errata E1 and E2; self-review. | `hCOne`, `tAuditD` | `CONFIRMATION_FREEZE.json`, `research/third_round_candidate.py`, `D_AUDIT_BOTH.json` |
+| 17 | Phase 1 details. | `pOne*` | `results/direct_index_v4_optimization_repair2/{lead_review,final}/...` |
+| 18 | Structural-encoding feasibility (inconclusive). | `fe*` | `phase2_repair_20260923c/p1/summary.json` |
+| 19 | Machine definition. | `mWords`, `mVlen`, `mBits`, `mTwoSlot`, `mOneSlot`, `mPublic` | `.reference/machine.py`, `.reference/programs` |
 
-## Manuscript structure and work before publication
+## Forbidden or superseded content (the build rejects it)
 
-1. Define the machine, objective, reference revision and scope of comparison.
-2. Define cube semantics and prove the algebra and minimum-witness properties;
-   distinguish mathematical proofs from exhaustive tests on small domains.
-3. Specify bootstrap, joint constraints, deterministic ordering and budgets with
-   pseudocode that corresponds to the accepted implementation.
-4. Explain validation, frozen controls, corpus construction, timing boundaries,
-   paired measurement design and failure handling.
-5. Report per-program score components, both compilation modes, ablations,
-   generated-case optimizer benefits, memory/resource cost and negative results.
-6. Discuss related work and limitations. Verify primary literature before making
-   novelty claims about cube covers, symbolic constraint processing, register
-   allocation or scheduling; the vocabulary alone does not establish novelty.
-7. Provide exact reproduction commands and an artifact manifest linked to the
-   accepted source/export. Independently review proofs, citations, tables and
-   scope before publication.
+- `2.3948` (the retracted upper median); `5ccbaaa3` (E1);
+- `0.827` used as a verdict;
+- "identical decisions" without "at equal work";
+- runtime superiority over classical;
+- Shannon or entropy wording;
+- any detail of the index-deconvolution construction.
 
-The manuscript may now be drafted around these bounded claims. Further attempts
-to beat classical compilation time are not a
-prerequisite for an honest empirical paper. Publication readiness and scientific
-novelty remain separate questions from local implementation acceptance.
-
-## Phase 2 structural-encoding feasibility (23 September 2026)
-
-This is a separate campaign from an accepted isolated research implementation,
-not a production compiler result or a new production benchmark. Its scientific
-result is inconclusive. Authoritative evidence is
-`../results/phase2_structural_encoding/phase2_repair_20260923c/`: `LEAD_ACCEPTANCE.md`,
-`manifest.json`, `gates.json`, `hypotheses.json`, `checker.json`, `p0/summary.json`,
-`p1/summary.json`, and the five raw files named by that P1 summary. The locked
-design is in `../plan/phase2/PROTOCOL.json` and
-`../plan/PHASE2_STRUCTURAL_ENCODING_PLAN.md`. The paper-local derivation is
-`phase2_evidence.py`; generated values, source SHA256 values and raw-artifact
-hash verification are retained in `generated/phase2_metrics.json`.
-
-P0 passed its declared provenance/domain/oracle diagnostics. P1 is INCONCLUSIVE:
-its fixed streams retained 160,000 attempts, 819 completed draws and 1,356 case
-checks with zero observed discrepancies, but four of eight public programs fell
-below the required 100 distinct completions. All raw-bit streams produced zero
-completions. P2-P5 are BLOCKED_BY_GATE and unmeasured. The checker found zero
-findings and internally consistent retained artifacts, while
-`artifacts_complete=false` and `scientific_success=false` remain explicit. These
-are finite-fixture checks, sampled executions and checker results with different
-denominators; zero observed defects is not a general proof. No compression,
-scaling, discovery or performance benefit is established. A new sampling policy
-requires a separate protocol amendment and fresh evidence.
-
-The 113 MB raw-attempt file remains local because repository packaging is
-unresolved. This evidence is not portable, published or fully archived. The
-accepted production measurements and September 20 tests remain separate from
-the September 23 Phase 2 campaign.
+`build_paper.py` checks both manuscripts and the generated tables for all of the
+above, rejects any digit in the LaTeX sources that does not come from the ledger,
+and verifies that every cited value appears in the PDF text.

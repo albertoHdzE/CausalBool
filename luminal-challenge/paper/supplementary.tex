@@ -1,0 +1,417 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,booktabs,tabularx,graphicx,array,longtable}
+\usepackage{xcolor,caption,placeins,textcomp,url,seqsplit}
+\definecolor{figteal}{HTML}{007F86}
+\usepackage[colorlinks=true,linkcolor=figteal,citecolor=figteal,urlcolor=figteal]{hyperref}
+\usepackage{xr-hyper}
+\def\UrlBreaks{\do\A\do\B\do\C\do\D\do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L\do\M\do\N\do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X\do\Y\do\Z\do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j\do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t\do\u\do\v\do\w\do\x\do\y\do\z\do\0\do\1\do\2\do\3\do\4\do\5\do\6\do\7\do\8\do\9\do\/\do\_\do\.\do\-\do\:\do\,\do\(\do\)\do\[\do\]}
+\Urlmuskip=0mu plus 1mu
+\externaldocument[M-]{build/main}
+\hypersetup{pdftitle={Compiling by exact queries over index sets: Supplementary Information},pdfauthor={Alberto Hern\'andez-Espinosa}}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{3em}
+\graphicspath{{generated/}}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\newtheorem{proposition}{Proposition}
+\renewcommand{\theproposition}{S\arabic{proposition}}
+\newcommand{\bits}{\{0,1\}}
+\makeatletter
+\newcommand{\tableinput}[1]{\@@input #1 }
+\makeatother
+\input{generated/values.tex}
+\newcommand{\ci}[2]{[#1,\,#2]}
+\makeatletter\renewcommand*\l@section{\@dottedtocline{1}{0em}{2.6em}}\makeatother
+
+\title{Compiling by exact queries over index sets\\[4pt]\large Supplementary Information}
+\author{Alberto Hern\'andez-Espinosa}
+\date{September 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Cube algebra and queries}\label{sec:algebra}
+
+This section completes the algebra of Section~\ref{M-sec:index} of the main text.
+Cubes, covers and their notation are as defined there.
+
+\begin{proposition}[Exact disjoint difference]
+Subtracting a cube $d$ from a cube $c$ of the same width yields an exact disjoint
+cover of $c\setminus d$ with at most $n$ cubes when they intersect, and $c$
+itself when they do not.
+\end{proposition}
+\begin{proof}
+Consider, in ascending order, the coordinates that are free in $c$ but fixed in
+$d$. At each, emit the part of the current cube that takes the value opposite to
+$d$, and continue with the part that agrees. Emitted parts first disagree with $d$
+at different coordinates and are therefore disjoint. Every member of $c\setminus
+d$ has exactly one first such disagreement, and the final agreeing part lies
+inside $d$ and is discarded. There are at most $n$ split coordinates; with none,
+$c\subseteq d$ and the result is empty.
+\end{proof}
+
+Restricting a coordinate is intersection with that coordinate's literal cube. An
+integer interval of a field is decomposed into aligned binary blocks, each a cube
+over the field with all other coordinates free. Covers may overlap, so their
+sizes cannot in general be added to obtain the size of a union.
+
+\begin{proposition}[Query soundness and conditional completeness]
+If every leaf denotes its predicate exactly, every cube returned by the
+depth-first solver is contained in the denotation of the query. If the finite
+search is exhausted without a resource limit, the absence of an accepting branch
+proves the query unsatisfiable in its declared universe.
+\end{proposition}
+\begin{proof}
+The current cube starts as the universe. A leaf intersection keeps exactly the
+indices that satisfy the leaf; AND requires every child and OR enumerates the
+union of its children. By induction over the pending expression each branch
+preserves these set identities, so a completed branch contains only satisfying
+indices, and exhausting all branches accounts for the whole expression.
+\end{proof}
+
+The first depth-first witness is not guaranteed to be the globally smallest
+index; the first answer of the main text uses complete covers and their smallest
+anchors, which Proposition~\ref{M-prop:algebra} of the main text makes exact. A
+timeout or a count limit is reported as unknown, never as unsatisfiable, and
+unsatisfiability refers only to the declared domains and the fixed context.
+
+\section{A representation limit: parity}\label{sec:parity}
+
+\begin{proposition}[Parity needs an exponential flat cube cover]
+For $n\geq1$, every exact union of cubes equal to the set of odd-parity indices
+consists of $2^{n-1}$ singleton cubes.
+\end{proposition}
+\begin{proof}
+A cube with a free coordinate contains two indices that differ only there, and
+they have opposite parity, so it is not a subset of the odd-parity set. In an
+exact union every cube must be such a subset, since a union cannot cancel an
+unwanted member. Every cube is therefore a singleton, and there are $2^{n-1}$
+odd-parity indices.
+\end{proof}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.8\linewidth]{representation_limits.pdf}
+\caption{Analytic illustration, not a compiler measurement: an unconstrained
+family is one cube, while an exact flat cover of odd parity needs exponentially
+many. The bound is specific to flat unions of cubes; it does not establish the
+same growth for factored expressions or decision diagrams.}\label{fig:parity}
+\end{figure}
+
+A cube with $k$ free coordinates describes $2^k$ indices with two integers, but
+that is a saving of representation, not $2^k$ answers computed at constant cost;
+expanding the members takes at least their number, and for unbounded widths the
+integer operations themselves scale with the number of machine words. Compression
+must therefore be stated for a named representation and a named family of
+predicates, and the parity example is why.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.8\linewidth]{schema_example.pdf}
+\caption{A four-coordinate example of the cube algebra: anchor \V{exAnchor} with free mask \V{exFree}
+denotes \V{exAnchor} plus each of \{\V{exMembers}\}; intersecting it with the indices up to \V{exRangeHi} leaves
+\V{exAnchor} plus each of \{\V{exResult}\}, which is again a cube. The dots expand the sets for reading.}
+\label{fig:schema}
+\end{figure}
+
+\section{Round one: the ladder}\label{sec:ladder}
+
+Round one fixed five solvers before measuring anything, each adding one
+mechanism to the one below, so that adjacent arms form an ablation. A0 is the
+structural-encoding search of Phase~2; A1 removes its query cap; A2 replaces the
+target rectangles by one strict-product domain per window~\cite{castaneda2019}; A3
+adds four certified propagation rules~\cite{ohrimenko2009}; A4 adds a multiscale
+catalogue of related windows~\cite{shaw1998} and a discrepancy-ordered
+traversal~\cite{harvey1995}. The arm with the largest mean paired
+$\log(J_{\mathrm{A0}}/J_{\mathrm{arm}})$ at \V{bB}\,s on \V{tDevPrograms} development
+programs was selected (A4, development effect \V{rOneDevEffect}), frozen, and then
+measured on \V{tPrograms} fresh programs.
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{lrrrr}\toprule
+Step (\V{tPrograms} fresh, \V{bB}\,s) & Mean log $J$ ratio & \V{lvStd}\% interval & W / T / L & Time ratio\\\midrule
+A1 over A0 & \V{ladOneQ} & \ci{\V{ladOneLo}}{\V{ladOneHi}} & \V{ladOnewins} / \V{ladOneties} / \V{ladOnelosses} & \V{ladOneT}\\
+A2 over A1 & \V{ladTwoQ} & \ci{\V{ladTwoLo}}{\V{ladTwoHi}} & \V{ladTwowins} / \V{ladTwoties} / \V{ladTwolosses} & \V{ladTwoT}\\
+A3 over A2 & \V{ladThreeQ} & \ci{\V{ladThreeLo}}{\V{ladThreeHi}} & \V{ladThreewins} / \V{ladThreeties} / \V{ladThreelosses} & \V{ladThreeT}\\
+A4 over A3 & \V{ladFourQ} & \ci{\V{ladFourLo}}{\V{ladFourHi}} & \V{ladFourwins} / \V{ladFourties} / \V{ladFourlosses} & \V{ladFourT}\\
+\bottomrule\end{tabular}
+\caption{Each step against the one below it. Positive log ratios mean the step
+lowered $J$. Time ratios are geometric means of per-program median compile times,
+step over previous.}\label{tab:ladder}
+\end{table}
+
+A2 did not raise quality because the gaps in the target rectangles, though real
+in geometry, rarely held improvements on this generator; it did replace a
+heuristic refusal by a proof of emptiness and made each query cheaper. A3 changed
+no answer at all, which is what a sound propagator should do when every query
+already finishes: it can change when an answer is found but not which. The whole
+gain of the round is the last step, which bundles two mechanisms; round two took
+them apart. The primary comparisons of the round, with Bonferroni-adjusted \V{lvOne}\%
+intervals, are in Table~\ref{M-tab:pairs} of the main text; A4 had the best average
+output quality among A0, the accepted Phase~1 optimiser and the classical compiler
+at \V{bB}\,s on that population, but lost to classical on \V{rOneCllosses} programs and
+took \V{rOneClTime} times its compile time.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{supp_ladder_factorial.pdf}
+\caption{(A)~The round-one ladder, each step against the one below it, with its
+compile-time ratio. (B)~The round-two factorial on development programs: the
+catalogue lowers $\log J$ and its interval excludes zero; the traversal and the
+interaction intervals span zero. The generator checks both statements before
+rendering.}\label{fig:ladder}
+\end{figure}
+
+\section{Round two: repair, reversal and the factorial}\label{sec:round2}
+
+Review of round one found that interrupted candidate validations were not counted
+when no learner was attached; decisions were unaffected, but the report said
+zero where the truth was one or more. The repair lives in a versioned successor
+that makes the same decisions node for node on a deterministic clock.
+
+\paragraph{A reversal.} On \V{tPrograms} fresh programs the repaired A4 beat the
+earlier \texttt{cap512\_wider} optimiser (the Phase~2 controller with a larger query
+cap and wider windows): mean log $J$ ratio \V{rTwoLog}, \V{lvStd}\% interval
+\ci{\V{rTwoLo}}{\V{rTwoHi}}, J ratio \V{rTwoJ}, with \V{rTwoWTLW} programs better,
+\V{rTwoWTLT} equal and \V{rTwoWTLL} worse, at \V{rTwoTime} times its compile time. On
+the public suite the order reversed: \V{rTwoPubCap} for \texttt{cap512\_wider}
+against \V{rTwoPubHeap} for A4. Both results are exact; one concerns a generator
+population and the other eight fixed programs.
+
+\paragraph{The factorial.} Crossing catalogue (A3's small windows or A4's
+multiscale catalogue) with traversal (depth-first or discrepancy heap) on
+\V{facPrograms} development programs gave a catalogue effect of \V{facCat} in log
+$J$ (\ci{\V{facCatLo}}{\V{facCatHi}}), a traversal effect of \V{facTrav}
+(\ci{\V{facTravLo}}{\V{facTravHi}}) and an interaction of \V{facInt}
+(\ci{\V{facIntLo}}{\V{facIntHi}}). The catalogue explains the gain; the traversal
+is not shown to contribute, although its interval does not exclude a small effect.
+
+\paragraph{The selected candidate.} The development rule selected
+\texttt{cell\_a4cat\_dfs}, A4's catalogue with depth-first search. On the fresh
+cohort its $J$ ratio against heap A4 was \V{rTwoDfsHJ} (\V{lvTwo}\% interval
+\ci{\V{rTwoDfsHLo}}{\V{rTwoDfsHHi}}) and against \texttt{cap512\_wider} \V{rTwoDfsEJ}.
+Both registered routes to a ``better'' claim required either an upper $J$ bound of at
+most \V{rTwoQRoute} or an upper compile-time bound of at most \V{rTwoERoute} at no
+loss of quality; neither was met, and the verdict was TARGET\_NOT\_REACHED. The
+candidate became R0 after the assurance round.
+
+\paragraph{Learning.} A depth-three schema tree over the code's own
+bits~\cite{breiman1984}, used as a guide for exact search in the spirit
+of~\cite{gasse2019}, was compared with Hamming order, random order and a tree fitted
+on shuffled labels. It beat random order (\V{lrnRand}) and shuffled labels
+(\V{lrnShuf}, below the registered minimum), but lost to Hamming order on all
+\V{lrnHamNeg} of \V{lrnFixtures} fixtures (\V{lrnHam}). Inside real compilations, not
+one of \V{lrnEcoPrograms} programs had a query that reached the required number of
+validated observations, and only \V{lrnBoundary} of \V{lrnQueries} learner queries
+reached the decision point: ECONOMICALLY\_UNAVAILABLE. The review showed why: under
+sound bounds only strict improvements reach the observation hook, and the first
+accepted improvement ends the epoch, so at most one observation can exist when the
+learner is first prepared. Round one's learning hypothesis had failed by design,
+since none of its \V{rOneLearnOf} fixtures contained a test solution better than the
+training minimum. The per-query learner is retired for this architecture; other
+learning architectures are not ruled out.
+
+\paragraph{Engineering.} Propagation became about three-quarters of profiled
+compile time with the multiscale catalogue. A worklist fixed point saved
+\V{rTwoWorklist}\% of compile time against a gate of \V{rTwoWorklistGate}\%, and the
+parent was kept. The following assurance round proposed a filter on the capacity
+rule whose predicted fixed-work ratio was \V{effPred} (with a ceiling of
+\V{effCeil} had the scan vanished entirely), against a gate of \V{tGateCost}:
+NO\_JUSTIFIED\_OPTIMIZATION.
+
+\section{The third round in detail}\label{sec:third}
+
+\paragraph{The mechanism decision.} Before any integration, a cost model predicted
+C1's fixed-work ratio from replays of captured propagation work. The registered
+formula gave a conservative \V{tMReg} against a gate of \V{tMGate} and stopped the
+round. Review found that the subtracted term covered a narrower scope than the
+replayed work, so that overlapping work was charged twice, and that the adapter
+cost had been estimated with a loop that did not perform the real operations. The
+correction, admitted by the lead reviewer as post-hoc development accounting,
+re-measured the adapter in \V{tAdapterRows} fresh processes and gave a conservative
+\V{tMCons} (point \V{tMPoint}); the same scope correction with the old adapter gave
+\V{tMOldAdapter}, and a replay-only sensitivity \V{tMReplayOnly}. By family the
+corrected conservative forecasts were \V{tMFamscalar} (scalar), \V{tMFamvector}
+(vector), \V{tMFammixed} (mixed), \V{tMFamdependency} (dependency) and
+\V{tMFamaliasing} (aliasing). These are forecasts on \V{tMWorkloads} development
+programs, not measurements or confidence bounds. The replay itself reproduced R0's
+outputs and certificate streams identically, with a median kernel speed-up of
+\V{tKernelMed} (range \V{tKernelMin} to \V{tKernelMax}); an earlier summary had
+reported the upper median of the \V{tMWorkloads} values instead.
+
+\paragraph{Development.} On \V{tDevPrograms} development programs, \V{tDevParity}
+fixed-work pairs were identical, the fixed-work cost ratio was \V{tDevCost} against a
+gate of \V{tDevGate}, and the mean log $J$ ratio at \V{bB}\,s was \V{tDevLogJ} with
+\V{tDevWTLW} programs better, \V{tDevWTLT} equal and \V{tDevWTLL} worse. At equal wall
+time C1 completed more search (median \V{tDevNodesC} nodes against \V{tDevNodesR}).
+
+\paragraph{Confirmation by family.} The cost ratio was \V{tCFamscalar} (scalar),
+\V{tCFamvector} (vector), \V{tCFammixed} (mixed), \V{tCFamdependency} (dependency) and
+\V{tCFamaliasing} (aliasing); the quality ratio was \V{tQFamscalar}, \V{tQFamvector},
+\V{tQFammixed}, \V{tQFamdependency} and \V{tQFamaliasing} in the same order. Median
+fixed-work compile calls were \V{tFixedMedC1}\,s for C1 and \V{tFixedMedR0}\,s for R0,
+with ninety-fifth percentiles of \V{tFixedPctC1}\,s and \V{tFixedPctR0}\,s. By search-size
+third, R0's median compile call was \V{tTerAms}\,ms on the smallest third,
+\V{tTerBs}\,s on the middle third and \V{tTerCs}\,s on the largest; the summed-seconds
+ratio was \V{tSummed}. Other allowances: $J$ ratio \V{tJrA} at \V{bA}\,s (\V{tWTLAW}
+better, \V{tWTLAT} equal, \V{tWTLAL} worse) and \V{tJrC} at \V{bC}\,s (\V{tWTLCW}, \V{tWTLCT},
+\V{tWTLCL}).
+
+\section{Phase 1: the original direct compiler}\label{sec:phase1}
+
+The first version was accepted with limitations after an independent lead review
+of its implementation and evidence. Its verifier passed \V{pOneTests} recorded tests
+and its standalone export passed the acceptance corpus. On the public suite its
+score was \V{pOneScore} against \V{pOneClassical} for classical, a composite-score
+advantage of \V{pOneGain}\% that already arises in the first answer; the bounded
+optimiser added nothing on the public programs and improved \V{pOneImproved} of
+\V{pOneExtraN} generated programs. The score gain is not an execution speed-up and
+cannot be attributed to the representation alone, because the two compilers also
+use different heuristics.
+
+Implementation refinements then reduced its full compile time by a factor of
+\V{pOneSpeedFull} relative to its previous version (paired \V{lvStd}\% interval
+\ci{\V{pOneSpeedFullLo}}{\V{pOneSpeedFullHi}}, \V{pOneReps} repetitions per program), and
+bootstrap time by \V{pOneSpeedBoot}; an earlier run of the same code gave
+\V{pOneWorkerFull} and \V{pOneWorkerBoot}, so within-run intervals understate
+between-run variation. Compilation remained much slower than classical: the
+geometric means of per-program median candidate/classical ratios were
+\V{pOneSlowBoot} for bootstrap and \V{pOneSlowFull} for full compilation.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.85\linewidth]{output_quality.pdf}
+\caption{Phase 1, public programs: cycles and scratch words of the original direct
+compiler against classical. Lower is better on both axes.}\label{fig:p1quality}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.85\linewidth]{compile_times.pdf}
+\caption{Phase 1: median compile-call times over \V{pOneReps} repetitions per public
+program for classical and both versions of the direct compiler.}\label{fig:p1times}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.85\linewidth]{optimizer_ablation.pdf}
+\caption{Phase 1: the generated programs improved by the bounded optimiser, with the
+product before and after.}\label{fig:p1ablation}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.85\linewidth]{run_variability.pdf}
+\caption{Phase 1: three runs of the same production code. Error bars are
+within-run paired intervals and do not describe variation between runs.}
+\label{fig:p1var}
+\end{figure}
+\FloatBarrier
+
+\section{Structural-encoding feasibility}\label{sec:feasibility}
+
+A separate, pre-declared campaign asked whether exact structural encodings of
+whole-program choices could be sampled well enough to support later experiments.
+Finite checks covered \V{feFixtures} fixtures, \V{feExhausted} exhausted code
+universes and \V{feRoundTrips} round trips, with no failures. Two sampling streams per
+public program retained \V{feAttempts} attempts in \V{feStreams} streams,
+\V{feCompletions} completed draws and \V{feCaseChecks} case checks with
+\V{feDiscrepancies} discrepancies; raw-bit sampling produced no completions. The gate
+required \V{feMinimum} distinct completions per program, and \V{feBelow} programs fell
+below it (Table~\ref{tab:feasibility}). The campaign is inconclusive: this sampler
+did not pass its gate, which neither shows that structural encoding is impossible
+nor establishes any compression or performance benefit. The later stages were
+blocked and never measured.
+
+\begin{table}[htbp]\centering\small
+\begin{tabularx}{\linewidth}{Xrrrl}\toprule
+Program & Raw-bit & Option-path & Distinct union & Gate\\\midrule
+\tableinput{generated/phase2_coverage_rows.tex}
+\bottomrule\end{tabularx}
+\caption{Completed draws per stream and the distinct union across streams, by
+public program.}\label{tab:feasibility}
+\end{table}
+
+\section{Review, errata and deviations}\label{sec:errata}
+
+\paragraph{Self-review.} The acceptance of C1 was performed by the implementer
+because the designated lead reviewer was unavailable; it is disclosed as a
+self-review, and an independent re-review would supersede it.
+
+\paragraph{Erratum E1.} The release handoff of the final round quotes a hash for C1
+that matches no file or record in the repository; it was a transcription error.
+The measured C1 is the file with SHA-256
+\par\noindent{\small\texttt{\V{hCOne}}}\par\noindent which appears in both
+freezes, the final source manifest and the export manifest.
+
+\paragraph{Erratum E2.} The handoff states that the frozen development auditor is
+an exact prefix of the current file. A later edit, made before the confirmation
+freeze, changed two places inside that prefix. Running the development audit from
+both files gives the same \V{tAuditD} checks in each case, with the frozen file's
+own hash as the only finding, so the edit does not change the development audit.
+
+\paragraph{Disclosed deviations.} The kernel draft preceded its specification; an
+auditor was extended after the development freeze (E2); a false positive in the
+cohort inventory was corrected before any outcome; one unused variable was left in
+a frozen file to preserve its hash; development rows ran in a different order from
+confirmation rows; two auditor tests were re-targeted, not weakened; a few smoke
+runs were not charged to the ledger and are not evidence; and the cost-model
+correction of Section~\ref{sec:third} is post hoc. None changes a gate.
+
+\paragraph{Checks.} The confirmation audit passed \V{tAuditC} checks with no
+findings and the repaired model audit \V{tAuditM}. The review ran \V{tPytest} tests of
+the final round and \V{tInherited} inherited semantic tests, all passing, and checked
+\V{tRawStdout} raw output streams against their rows.
+
+\section{Artefacts and reproduction}\label{sec:artefacts}
+
+The measured C1 source is \path{research/third_round_candidate.py}, with SHA-256
+\par\noindent{\small\texttt{\V{hCOne}}}\par\noindent R0 is \path{research/efficiency_search.py}. The evidence of the
+final round is under
+\path{results/phase2_structural_encoding/third_round_20260925_resume/} and its review
+under \path{results/phase2_structural_encoding/lead_resume_review_20260926/}. The
+paper is rebuilt, without any new timing, by
+\begin{verbatim}
+venv/bin/python luminal-challenge/paper/build_paper.py
+\end{verbatim}
+which regenerates the figures, the tables and the value ledger, runs the worked
+example through the real compilers, re-derives every ledger entry from its source
+file, compiles both documents, and rejects unresolved references, overfull boxes
+and any digit in the manuscript that does not come from the ledger. The challenge
+asks that the exercise and its solution not be shared publicly, so these artefacts
+are kept local.
+
+\section{The claim ledger}\label{sec:ledger}
+
+Every number in the main text and in this document is a macro whose value is
+recorded below with the file it comes from and the field or derivation that
+produces it. Pointer entries are re-read from disk and derived entries are
+recomputed on every build; entries computed by the generators (the worked example
+and the Phase 1 checks) are reproduced by rerunning them. Paths abbreviate
+\path{results/phase2_structural_encoding/} as \path{p2/}.
+
+{\scriptsize
+\begin{longtable}{>{\raggedright\arraybackslash}p{32mm}>{\raggedright\arraybackslash}p{24mm}>{\raggedright\arraybackslash}p{53mm}>{\raggedright\arraybackslash}p{38mm}}
+\toprule
+Key & Value & Source & Field or derivation\\\midrule\endhead
+\tableinput{generated/tab_ledger.tex}
+\bottomrule
+\end{longtable}}
+
+\begin{thebibliography}{9}\raggedright\small
+\bibitem{shaw1998} P. Shaw, \emph{Using Constraint Programming and Local Search
+Methods to Solve Vehicle Routing Problems}, in \emph{Principles and Practice of
+Constraint Programming -- CP98}, LNCS 1520 (Springer, 1998), pp. 417--431.
+\url{https://doi.org/10.1007/3-540-49481-2_30}.
+\bibitem{harvey1995} W. D. Harvey and M. L. Ginsberg, \emph{Limited Discrepancy
+Search}, in \emph{Proceedings of IJCAI-95}, Vol. 1, pp. 607--613 (1995).
+\bibitem{castaneda2019} R. Castañeda Lozano, M. Carlsson, G. Hjort Blindell and
+C. Schulte, \emph{Combinatorial Register Allocation and Instruction Scheduling},
+\emph{ACM TOPLAS} 41(3), Article 17 (2019). \url{https://doi.org/10.1145/3332373}.
+\bibitem{ohrimenko2009} O. Ohrimenko, P. J. Stuckey and M. Codish,
+\emph{Propagation via lazy clause generation}, \emph{Constraints} 14(3),
+357--391 (2009). \url{https://doi.org/10.1007/s10601-008-9064-x}.
+\bibitem{gasse2019} M. Gasse, D. Chételat, N. Ferroni, L. Charlin and A. Lodi,
+\emph{Exact Combinatorial Optimization with Graph Convolutional Neural Networks},
+NeurIPS 2019. \url{https://arxiv.org/abs/1906.01629}.
+\bibitem{breiman1984} L. Breiman, J. H. Friedman, R. A. Olshen and C. J. Stone,
+\emph{Classification and Regression Trees} (Wadsworth, 1984).
+\end{thebibliography}
+\end{document}

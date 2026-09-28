@@ -1,792 +1,893 @@
 \documentclass[11pt,a4paper]{article}
-\usepackage[margin=25mm]{geometry}
+\usepackage[margin=24mm]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[british]{babel}
-\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,booktabs,tabularx,graphicx}
-\usepackage{xcolor,caption,placeins,tikz,listings}
-\usetikzlibrary{arrows.meta,positioning}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,booktabs,tabularx,graphicx,array}
+\usepackage{xcolor,caption,placeins,listings,textcomp}
 \definecolor{ink}{HTML}{243340}
 \definecolor{figteal}{HTML}{007F86}
-\definecolor{warm}{HTML}{C86428}
-\definecolor{pale}{HTML}{D8EEF0}
 \definecolor{light}{HTML}{F2F5F7}
 \usepackage[colorlinks=true,linkcolor=figteal,citecolor=figteal,urlcolor=figteal]{hyperref}
-\hypersetup{pdftitle={Direct Boolean Index Schemata for Scheduling and Scratch Allocation},pdfauthor={Alberto Hernandez-Espinosa}}
+\usepackage{xr-hyper}
+\externaldocument[S-]{build/supplementary}
+\hypersetup{pdftitle={Compiling by exact queries over index sets},pdfauthor={Alberto Hern\'andez-Espinosa}}
 \captionsetup{font=small,labelfont=bf}
-\setlength{\parskip}{4pt}
-\setlength{\parindent}{0pt}
-\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{3em}
 \graphicspath{{generated/}}
 \lstset{basicstyle=\ttfamily\footnotesize,backgroundcolor=\color{light},breaklines=true,columns=fullflexible,keepspaces=true,showstringspaces=false}
 \newtheorem{proposition}{Proposition}
 \newcommand{\bits}{\{0,1\}}
 \newcommand{\den}[1]{[\![#1]\!]}
-\newcommand{\SAT}{\mathsf{SAT}}
-\newcommand{\UNSAT}{\mathsf{UNSAT}}
-\newcommand{\UNKNOWN}{\mathsf{UNKNOWN}}
 \makeatletter
 \newcommand{\tableinput}[1]{\@@input #1 }
 \makeatother
-\title{Direct Boolean Index Schemata for\\Scheduling and Scratch Allocation\\[5pt]\large A reproducible Luminal compiler case study}
-\author{Alberto Hernandez-Espinosa}
-\date{23 September 2026\\\small Research draft for internal review}
+\input{generated/values.tex}
+\newcommand{\ci}[2]{[#1,\,#2]}
+
+\title{Compiling by exact queries over index sets\\[4pt]
+\large A validated answer to the Luminal compiler challenge,\\and evidence for a different way of computing}
+\author{Alberto Hern\'andez-Espinosa}
+\date{September 2026}
 
 \begin{document}
 \maketitle
+
 \begin{abstract}
-We study an executable compiler whose scheduling and scratch-allocation
-decisions are witnesses of exact Boolean-set queries. Integer anchors and
-free-coordinate masks represent families of candidate decisions; intersections,
-differences and restrictions operate directly on these families. An independent
-greedy construction supplies an incumbent, and bounded joint queries combine
-legality with a strict cycle--scratch product target. We establish the elementary
-algebra and construction invariants and evaluate a standalone implementation on
-the pinned Luminal machine. On eight public programs, the combined score is
-2.008466 relative to serial, versus 1.901379 for the frozen classical compiler.
-The public gain already occurs in construction; joint optimization improves six
-of 100 additional generated programs. Implementation refinements reduce full
-compilation time by 2.1320 times relative to the previous direct version in the
-final reviewed run, but compilation remains substantially slower than classical.
-We report both outcomes, between-run variation, and representation limits.
-Connections to Shannon decomposition, information bounds and Wolfram's account
-of memory retrieval are separated by their actual role. The resulting artifact
-is a basis for a controlled complexity study, not evidence of a general
-complexity advantage.
-The structural-encoding feasibility campaign did not meet its declared
-coverage gate, leaving all subsequent experiments unmeasured.
+This paper has two aims. The first is practical: to give a working, validated
+answer to the Luminal compiler challenge, which asks a compiler to schedule a
+straight-line program on a small very-long-instruction-word machine and to place
+its values in a shared scratchpad, minimising both the number of cycles and the
+scratch footprint. The second, which matters more to us, is to offer evidence
+that a different way of computing is worth pursuing now that accelerators expose
+every scheduling decision to the compiler and compilation is increasingly
+searched or learned. In the compiler we describe, every scheduling and allocation
+choice is the witness of an exact query over sets of decision indices, written as
+cubes, and every later improvement is found by reopening related groups of
+decisions, deleting impossible options with a replayable certificate, and
+searching the remainder exactly. The index-set method is work in progress,
+grounded in the author's published research on algorithmic information dynamics,
+and we report the whole programme, including the stages that did not work. The final proposal, C1, makes the same decisions as its
+predecessor R0 when both are given the same search work: \V{tParityPairs} of
+\V{tParityPairs} paired runs on \V{tPrograms} fresh programs are identical. At
+that fixed work, of \V{tNodes} search nodes, C1's complete compile call takes
+\V{tCost} of R0's time (\V{lvThree}\% interval \ci{\V{tCostLo}}{\V{tCostHi}}), and at a
+wall-clock allowance of \V{bB}\,s its output is not worse within the registered
+margin (J ratio \V{tQual}, \V{lvThree}\% interval \ci{\V{tQualLo}}{\V{tQualHi}}). On the
+eight public programs, which were visible during development, the method
+scores \V{tPubSixC1B} against \V{rTwoPubClassical} for a classical list scheduler
+with first-fit allocation. That gain is paid for in compile time; the classical
+compiler remains far faster to compile, and on a fresh population it still wins
+on some programs. We also report that, under a real clock, a faster search can end
+at a worse local optimum, a form of path dependence that any anytime local search
+inherits. The acceptance of C1 was a self-review.
 \end{abstract}
 
-\section{Question and contribution}
-Can a compiler construct and improve a schedule by querying exact families of
-Boolean decision indices, without first obtaining a schedule from a conventional
-compiler? This case study answers that implementation question on a small,
-precisely specified machine. The key operation is to intersect the set of legal
-decisions with an objective threshold and retrieve a witness. Representing that
-intersection can avoid enumerating individual assignments, when the predicates
-admit useful structure.
+\section{Introduction}\label{sec:intro}
 
-The contributions are a direct integer-mask realization, an independently
-constructed incumbent, bounded joint schedule/address queries, and a retained
-evaluation with explicit correctness and evidence gates. Cube algebra and
-constraint-based compilation have substantial prior art. Our contribution is
-the particular construction and its measured behaviour, rather than a claim
-that symbolic sets or integrated compilation are new.
+Accelerators built for machine learning have returned the compiler to the
+centre of performance. Their cores are frequently very-long-instruction-word
+(VLIW) machines, in which several functional units issue in the same cycle and
+the hardware makes no scheduling decisions of its own; every placement in time
+and in memory is the compiler's responsibility~\cite{fisher1983}. At the same
+time the programs to be compiled are increasingly generated rather than written,
+and compilation itself is more and more often searched or learned, with neural
+policies guiding exact solvers~\cite{gasse2019}. In that setting the question of
+\emph{how} a compiler represents its decisions is not an implementation detail.
+A representation that can state, exactly and compactly, which choices are legal,
+which are better, and why an option was discarded, supports a kind of search and
+a kind of explanation that a sequence of greedy commitments or a trained policy
+does not.
 
-Three costs must remain distinct throughout: the execution cycles of the
-compiled program, its scratch footprint, and the time and memory used to compile
-it. The direct method improves the aggregate public output score while spending
-more compilation time. Even the output improvement is not uniform across
-programs. An aggregate score cannot replace the component measurements.
+The Luminal compiler challenge~\cite{luminal} is a small and precise instance of
+this problem. A program is a list of operations in dependence order; the machine
+has five engines with fixed issue capacities, latencies that delay when a result
+may be read, and a scratchpad of \V{mWords} words of \V{mBits} bits in which
+eight-word vectors must be aligned. The compiler must decide when each operation
+issues and where each value lives, and it is scored by the geometric mean, over
+programs, of how many times fewer cycles and scratch words it needs than a serial
+compiler. The two decisions are coupled: packing a schedule tightly lengthens the
+time during which values overlap, and packing memory tightly constrains when
+values may be written.
 
-\section{Machine and objective}
-The experiment pins the Luminal interview repository at revision
-\texttt{573b8a85}~\cite{luminal}; the bibliography gives the full identifier.
-Inputs are straight-line operations in SSA dependency order, with consecutive
-operation identifiers, static buffer ranges and supplied input cases. The
-compiler must emit every operation exactly once. No instruction rewriting,
-spilling or extra moves are allowed. Source arithmetic wraps modulo $2^{32}$;
-schedule and address bookkeeping uses nonwrapping integers.
+We answer the challenge with a compiler in which every decision is the witness
+of an exact query over index sets. This paper is also an argument. The index-set
+method is \emph{work in progress}, built on the author's earlier published work on
+algorithmic information dynamics~\cite{hernandez2019aid,hernandez2021aid}, and
+the Luminal machine is a controlled setting in which to ask whether the method
+earns its keep against conventional engineering. We therefore report the whole
+programme and not only its last stage: the external benchmarks, our first and
+second versions, the intermediate stages and ablations, the final proposal, and
+the attempts that failed.
 
-The scratchpad contains 256 words of 32 bits. Scalars occupy one word; vectors
-occupy eight consecutive words at an address divisible by eight. Per-cycle issue
-capacities are two for each of the load, scalar and vector engines, and one for
-each of the store and flow engines. Latency controls result availability, not
-how long an issue slot is reserved. If $i$ produces an argument of $j$,
-\begin{equation}
- t_j\geq t_i+\ell_i.
-\end{equation}
-Overlapping memory accesses to the same buffer preserve source order when at
-least one is a store: the later access issues at least one cycle after the
-earlier. Two loads, or accesses to disjoint ranges, need no such ordering.
+\paragraph{Contributions.}
+\begin{enumerate}
+\item A compiler whose first answer is built entirely from exact index-set
+queries (Section~\ref{sec:index}) and whose improvement phase reopens related
+windows of decisions, confines each question to the region where a strict
+improvement can exist, deletes impossible options with replayable certificates
+and searches exactly (Section~\ref{sec:c1}).
+\item A shared branch state that lets each search node reuse the facts derived at
+its parent while reproducing its predecessor's certificate stream in the same
+order; its decisions are identical at equal work on every tested input, and it is
+measurably faster (Section~\ref{sec:results}).
+\item A worked example that runs every compared method on one public program and
+renders what each one actually did (Section~\ref{sec:worked}).
+\item A complete account of the measured gains, costs, losses and negative
+results, with each number tied to its comparator, population and interval
+(Sections~\ref{sec:results} and~\ref{sec:negative}, and Supplementary
+Section~\ref{S-sec:ledger}).
+\end{enumerate}
 
-For a value $v$, let $b_v=t_{\operatorname{prod}(v)}+\ell_{\operatorname{prod}(v)}$
-be its write cycle. Its lifetime is the \emph{inclusive} interval
-\begin{equation}
- I_v=[b_v,e_v],\qquad
- e_v=\max\bigl(\{b_v\}\cup\{t_j:j\text{ consumes }v\}\bigr).
-\end{equation}
-An unused result still occupies its write cycle. Reuse requires strict temporal
-separation because writes precede reads within a cycle. Scratch footprint $S$
-is the largest allocated end address, including holes. Scored cycles $C$ are
-the number of emitted bundles; they need not include the final completion cycle
-of an unused result.
+\paragraph{Four kinds of evidence.}
+The final round produced evidence of four kinds, which we keep apart
+throughout. (a)~A historical registered result: a pre-registered cost model
+predicted a conservative ratio of \V{tMReg} against a gate of \V{tMGate} and
+stopped the round with NO\_JUSTIFIED\_MECHANISM; review later found a scope defect
+in one of its terms. (b)~A post-hoc development forecast after that defect was
+corrected, of \V{tMCons} (conservative) and \V{tMPoint} (point); it is neither a
+measurement nor an interval. (c)~A kernel-only replay of captured propagation
+work, with a median speed-up of \V{tKernelMed} over \V{tMWorkloads} workloads
+(range \V{tKernelMin} to \V{tKernelMax}); it is not a compiler speed-up. (d)~Real
+compiler measurements: a development stage on \V{tDevPrograms} programs and a
+confirmation on \V{tPrograms} fresh programs. Only the confirmation is
+inferential.
 
-Let $(C_p^0,S_p^0)$ denote serial metrics for program $p$. For $m$ programs,
-the official composite score is
+\section{The machine and the objective}\label{sec:machine}
+
+The experiment pins the challenge repository at a fixed revision~\cite{luminal}.
+Inputs are straight-line operations in single-assignment dependence order, with
+static buffer ranges and supplied test cases. Each operation must be emitted
+exactly once; there is no rewriting, spilling or extra movement. The load, scalar
+and vector engines may each issue \V{mTwoSlot} operations per cycle and the store
+and flow engines \V{mOneSlot}. If operation $i$ produces an argument of $j$, then
+$t_j\geq t_i+\ell_i$, where $\ell_i$ is the latency of $i$. Overlapping memory
+accesses to one buffer keep their source order when at least one of them is a
+store.
+
+For a value $v$ written by operation $p(v)$, its lifetime is the inclusive
+interval $I_v=[b_v,e_v]$ with $b_v=t_{p(v)}+\ell_{p(v)}$ and $e_v$ the latest of
+$b_v$ and the issue cycles of its readers. Two values may share scratch words only
+if their lifetimes are disjoint. Scalars take one word; vectors take \V{mVlen}
+consecutive words starting at a multiple of \V{mVlen}. The scored cycle count $C$
+is the number of emitted bundles, and the footprint $S$ is the largest allocated
+end address. With $(C^0_p,S^0_p)$ the serial compiler's metrics for program $p$,
+the score over $m$ programs is
 \begin{equation}\label{eq:score}
- Q=\sqrt{\left(\prod_{p=1}^{m}\frac{C_p^0}{C_p}\right)^{1/m}
-              \left(\prod_{p=1}^{m}\frac{S_p^0}{S_p}\right)^{1/m}}
-   =\left(\prod_{p=1}^{m}\frac{C_p^0S_p^0}{C_pS_p}\right)^{1/(2m)}.
+Q=\left(\prod_{p=1}^{m}\frac{C^0_pS^0_p}{C_pS_p}\right)^{1/(2m)} ,
 \end{equation}
-For one fixed program, maximizing its score is equivalent to minimizing
-$P=CS$. One component may worsen while the product improves. This is a declared
-objective tradeoff, not a claim that memory reductions are execution speedups.
-Only the eight visible programs are evaluated as the public challenge suite;
-no private-grader result is available.
+so that, for one program, maximising the score is the same as minimising the
+product $J=C\times S$. Every search in this paper minimises $J$. Only the
+\V{mPublic} public programs are available; no private-grader result exists.
 
-\section{Direct index schemata}
-\subsection{Semantics and elementary algebra}
-Use $n$ Boolean coordinates with least-significant-bit-first weights $2^i$.
-Let $U=2^n-1$. A cube is $c=(n,a,f)$, with $a,f\in[0,U]$ and
-$a\mathbin{\&}f=0$. Its anchor $a$ fixes the one bits and its mask $f$ marks
-free coordinates. Its denotation is
+\section{The methods compared}\label{sec:methods}
+
+Several compilers appear in this paper, and they play different roles.
+Table~\ref{tab:methods} names each one, what it decides, how, and where it lives.
+The serial compiler is the yardstick that defines the score. The challenge's
+starter compiler is the provided starting point; it places vectors and then
+scalars at fresh addresses and issues one operation per bundle, and on all eight
+public programs it reproduces the serial compiler's cycles and footprint exactly,
+so its score is \V{weStarterScore}. The classical compiler is the external
+benchmark: critical-path list scheduling~\cite{graham1969,gibbons1986}, followed by
+aligned first-fit allocation over live intervals~\cite{poletto1999}. The rest are
+stages of our own programme, from the first direct-index compiler to C1.
+
+\begin{table}[htbp]\centering\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{24mm}>{\raggedright\arraybackslash}p{20mm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{36mm}}
+\toprule
+Method & Role & What it decides, and how & Source or frozen snapshot\\\midrule
+Serial & yardstick; score one by definition & one operation per bundle, a fresh address per value; a fixed rule & \path{.reference/machine.py}, \path{serial_compile}\\
+Starter & provided starting point & fresh addresses, vectors first; one operation per bundle; a fixed rule & \path{.reference/compiler.py}\\
+Classical & external benchmark & critical-path list scheduling, then aligned first fit over inclusive live intervals in three fixed orders; greedy, never revisits a decision & \path{common.py}, \path{classical_compile}, \path{allocate}\\
+Original direct (Phase~1) & our first version & each cycle and address is the smallest member of an exact cube query; a bounded four-operation joint-query optimiser & \path{direct_compiler.py}, \path{direct_optimizer.py}; export \texttt{\V{hPOne}}\\
+A0, structural encoding & our second version & decisions encoded as ranks among legal options; windowed search against target rectangles & \path{research/structural_search.py}; run \path{recovery_campaign_20260923_r3}\\
+A1--A4, \texttt{cap512\_wider}, \texttt{cell\_a4cat\_dfs} & intermediate stages and ablations & each adds one mechanism: no query cap, product domains, certified propagation, a multiscale catalogue with discrepancy or depth-first traversal & \path{research/objective_index_search.py}, \path{research/next_round_search.py}\\
+R0 & accepted baseline before the last round & A4's catalogue with depth-first search and repaired accounting & \path{research/efficiency_search.py} (\texttt{\V{hRZero}}); export \texttt{\V{hExpRZero}}\\
+\textbf{C1} & \textbf{final proposal} & R0 with a shared branch state in the search & \path{research/third_round_candidate.py}; export \texttt{\V{hExpCOne}}\\
+\bottomrule
+\end{tabularx}
+\caption{Every compiler that appears in the paper. The first three are fixed
+external references; the rest are stages of one programme. Hashes are the first
+sixteen hexadecimal digits of the SHA-256 of the file; the full hash of C1 is in
+Supplementary Section~\ref{S-sec:artefacts}.}\label{tab:methods}
+\end{table}
+
+Comparisons are made only between pairs that were actually measured together.
+C1 was measured against R0; R0's predecessors were measured against A0, the
+accepted Phase~1 optimiser and the classical compiler in their own rounds. Where a
+pair was never measured directly, for example C1 against the classical compiler on
+a fresh population, we say so and do not multiply ratios across rounds.
+
+\section{Decisions as exact queries over index sets}\label{sec:index}
+
+\subsection{Cubes and covers}
+Fix $n$ Boolean coordinates with weights $2^i$ and let $U=2^n-1$. A \emph{cube}
+is a pair of integers $(a,f)$ with $a\mathbin{\&}f=0$: the anchor $a$ fixes the
+coordinates equal to one, and the free mask $f$ marks the coordinates that may
+take either value. It stands for the set
 \begin{equation}\label{eq:cube}
- \den{c}=\left\{a+\sum_{i:f_i=1}\epsilon_i2^i:
-                         \epsilon_i\in\bits\right\}.
+\den{(a,f)}=\Bigl\{a+\sum_{i:\,f_i=1}\epsilon_i2^i:\ \epsilon_i\in\bits\Bigr\},
 \end{equation}
-The free-coordinate subset sums are the project's \emph{sumandos}. Freedom is
-local to a schema; a free coordinate can represent a connected variable.
-An index encodes an entire assignment of query fields. It is not itself a
-physical scratch address, although one decoded field may be an address.
-The broader project's \emph{index deconvolution} reconstructs an index family
-from decimal anchors and their sumandos. Here, queries restrict those compact
-families before decoding a witness. This is unrelated to inversion of a signal
-convolution or to a physical memory operation.
-For $n=0$, the denotation contains the empty assignment, index zero.
+of size $2^{\operatorname{popcount}(f)}$, whose smallest member is $a$ itself. A
+\emph{cover} is a finite union of cubes. An index encodes a whole assignment of
+decision fields, such as an issue cycle or a scratch address; it is not itself a
+physical address.
 
-\begin{proposition}[Intersection, size and minimum]\label{prop:algebra}
-For equal-width cubes $(n,a,f)$ and $(n,b,g)$, the intersection is empty exactly
-when
-\[
- (a\mathbin{\oplus}b)\mathbin{\&}\bigl(U\mathbin{\oplus}(f\mathbin{|}g)\bigr)
- \ne 0.
-\]
-Otherwise it is $(n,a\mathbin{|}b,f\mathbin{\&}g)$.
-A cube has $2^{\operatorname{popcount}(f)}$ members and minimum member $a$.
-The minimum of a nonempty finite cube union is the minimum of its anchors.
+\begin{proposition}[Intersection and minimum]\label{prop:algebra}
+Two cubes $(a,f)$ and $(b,g)$ of width $n$ intersect if and only if
+$(a\oplus b)\mathbin{\&}\bigl(U\oplus(f\mathbin{|}g)\bigr)=0$, and then their
+intersection is the cube $(a\mathbin{|}b,\,f\mathbin{\&}g)$. The smallest member
+of a non-empty cover is the smallest anchor among its cubes.
 \end{proposition}
 \begin{proof}
-An assignment lies in both cubes precisely when it satisfies their fixed
-coordinates. A conflict occurs at a coordinate fixed differently in both,
-which is exactly the displayed mask test. In the compatible case a coordinate
-is free in the intersection only if it is free in both; fixed ones are their
-union. Each free coordinate has two independent choices, proving the size.
-All free weights are positive and disjoint from the anchor, so their minimum
-sum is zero. Taking the minimum over a union proves the last assertion.
+An index lies in both cubes exactly when it agrees with every fixed coordinate of
+each. A conflict is a coordinate fixed in both with different values, which is
+what the displayed mask detects. Otherwise the fixed coordinates of the
+intersection are the union of both sets of fixed coordinates, and a coordinate is
+free only when it is free in both. Free weights are positive and disjoint from the
+anchor, so a cube's smallest member is its anchor, and the smallest member of a
+union is the least of these.
 \end{proof}
 
-\begin{proposition}[Exact disjoint difference]\label{prop:difference}
-Subtracting cube $d$ from cube $c$ produces an exact disjoint cover with at most
-$n$ cubes when they intersect. If they do not intersect, the answer is $c$.
-\end{proposition}
-\begin{proof}
-For an intersecting pair, consider coordinates free in $c$ but fixed in $d$,
-in ascending order. At each coordinate emit the part opposite to $d$, and
-continue with the matching part. Emitted parts have different first mismatches
-and are disjoint. Every member of $c\setminus d$ has one such first mismatch;
-the final matching part lies inside $d$ and is discarded. There are at most
-$n$ split coordinates. With none, $c$ is contained in $d$ and the result is
-empty.
-\end{proof}
-Restriction to a coordinate value is intersection with that coordinate's
-literal cube. Integer intervals are decomposed into aligned binary blocks and
-embedded in their fields, with all other coordinates free. Covers may overlap;
-their sizes cannot in general be added to obtain union cardinality.
+Set difference produces an exact disjoint cover with at most $n$ cubes, and an
+integer interval decomposes into aligned binary blocks
+(Supplementary Section~\ref{S-sec:algebra}). A query is an AND/OR expression whose
+leaves are covers; a depth-first traversal returns a cube only when every
+predicate has been discharged, a timeout or count limit is reported as unknown
+and never as unsatisfiable, and an exhausted search proves unsatisfiability only
+within the declared domain. The representation is not free of limits: exact flat
+covers of parity need exponentially many cubes, a lower bound we prove and state
+alongside every compression claim (Supplementary
+Section~\ref{S-sec:parity}).
 
-\begin{figure}[htbp]
-\centering\includegraphics[width=\linewidth]{schema_example.pdf}
-\caption{Exact four-coordinate example, with coordinate $i$ weighted by $2^i$.
-Anchor 1 and free mask 10 denote $1+\{0,2,8,10\}$. Intersecting with indices
-0 through 7 leaves $1+\{0,2\}$. The dots are a pedagogical expansion, not an
-enumeration required by the implementation.}\label{fig:cube}
+\subsection{The first answer}
+The first answer processes operations in order. For each operation it forms the
+cover of cycles between its precedence bound and a safe horizon, subtracts the
+cycles on which its engine is already full, and takes the smallest survivor. It
+then computes exact lifetimes and, for each value in a fixed order, forms the
+cover of aligned addresses, subtracts the blocks held by values whose lifetimes
+overlap, and again takes the smallest survivor. No serial or classical schedule
+seeds it, and no external solver is used. Figure~\ref{fig:index} shows both
+queries as the real code evaluates them on the worked example of
+Section~\ref{sec:worked}.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_index_queries.pdf}
+\caption{\textbf{Two queries of the first answer, as the code evaluates them on
+\texttt{05\_mixed\_broadcast}.} Each row of the upper panels is a cube over the
+coordinates $x_0,x_1,\dots$ (teal $1$, grey $0$, orange $*$ free). (A)~Operation~\V{weQTop} may
+issue in cycles \V{weQTlo} to \V{weQThi}, one cube; cycle \V{weQTlo} is removed
+because the load engine is already full there, which leaves \V{weQTsurv} cubes
+whose smallest member, cycle \V{weQTchosen}, is chosen. (B)~The vector
+\texttt{vgate} may start at any aligned address up to \V{weQAhi}; the blocks held
+by the two vectors whose lifetimes overlap it are removed, and the smallest
+surviving aligned address, \V{weQAchosen}, is chosen. The lower strips expand the
+same sets for reading; the implementation never enumerates them. Every cover
+shown is recorded from the real run and checked for exactness before rendering.}
+\label{fig:index}
 \end{figure}
 
-\subsection{Queries and arithmetic}
-A query is an AND/OR expression whose leaves are exact cube covers. The solver
-maintains a current cube and pending predicates. AND adds requirements, OR
-branches, and a leaf intersects each alternative with the current cube.
-Alternatives have deterministic order. A depth-first traversal returns a cube
-only after every required predicate is discharged. This avoids eagerly forming
-the Cartesian product of all covers; it does not guarantee a small search.
+\section{From the first answer to C1}\label{sec:c1}
 
-\begin{proposition}[Query soundness and conditional completeness]
-If leaves denote their predicates exactly, every returned accepting cube is
-contained in the expression's denotation. If the finite search is exhausted
-without a resource cutoff, absence of an accepting branch proves the expression
-unsatisfiable in its declared universe.
-\end{proposition}
-\begin{proof}
-Initially the current cube is the universe. Each leaf intersection preserves
-exactly the assignments satisfying that leaf. AND requires all children and OR
-enumerates their union. Induction over the pending expression and search
-branches preserves these set identities. A completed branch therefore contains
-only satisfying assignments. Exhausting all branches accounts for the whole
-expression and proves emptiness if none accepts.
-\end{proof}
-The anchor of a returned cube is a witness; the first depth-first witness is
-\emph{not} guaranteed to be the globally smallest index. Bootstrap explicitly
-uses minimum anchors over complete feasible covers. A timeout or count cutoff
-is $\UNKNOWN$, never $\UNSAT$. The latter refers only to the current domains
-and fixed context, not all possible schedules.
+The first answer never revisits a decision. Everything after it does, and it does
+so by asking a sequence of exact questions, each of which is small enough to
+answer completely. Figure~\ref{fig:pipeline} follows one epoch of this process
+on the worked example.
 
-Comparison leaves handle fields or constants with integer offsets. On a partial
-cube, minimum and maximum operand values can settle an inequality for every
-filling, or exclude every filling. An unresolved comparison splits the free bit
-of greatest significance within either operand, breaking ties by highest
-absolute coordinate; zero is explored first. Equality, disequality, constants
-and identical fields are simplified exactly. All offsets are nonwrapping.
-This is Boolean cofactoring: the identity
-\begin{equation}\label{eq:shannon}
- F=(\neg x_i\wedge F|_{x_i=0})\vee(x_i\wedge F|_{x_i=1})
-\end{equation}
-underlies the partition, rather than a Shannon channel-capacity calculation.
+\paragraph{Windows.} Reopening every decision at once is hopeless, and reopening
+one at a time finds almost nothing, because useful changes move several
+operations together. Following Shaw's large neighbourhood search~\cite{shaw1998},
+C1 builds a catalogue of \emph{windows}: groups of related operations whose issue
+cycles may move within a radius, with everything else held fixed. The catalogue
+mixes the four-operation windows of the first version, the $k$ latest-issued
+operations (which decide $C$), the $k$ operations around the memory peak (which
+decide $S$), contiguous blocks of $k$, and the whole program when it is small.
 
-\section{Compiler construction and bounded improvement}
-\subsection{Independent bootstrap}
-Let $H_0=\sum_i\ell_i$. Process operations in source order. For each, form a
-time interval from its precedence lower bound to a safe upper bound below
-$H_0$, subtract cycles with a full engine, and select the minimum feasible
-index. The implementation tightens this upper bound using the number of blocked
-cycles and the prefix latency sum; this preserves the earliest feasible cycle.
-After scheduling, compute exact lifetimes. Allocate vectors before scalars and
-sort each group by write cycle and producer ID. Exclude addresses colliding
-with previously allocated values whose lifetimes overlap, then select the
-minimum aligned address.
+\paragraph{Product caps.} For a window, the fixed decisions alone give lower
+bounds $L_C$ and $L_S$ on any completion. A strict improvement needs
+$C\,S\leq J_0-1$, hence $C\leq\lfloor (J_0-1)/L_S\rfloor$ and
+$S\leq\lfloor (J_0-1)/L_C\rfloor$. Every strict improvement lies in this box, so
+the domain may be cut to it without losing any; when a cap falls below its lower
+bound the window is proved empty. This replaced the target rectangles of the
+first version, which leave parts of the region below the hyperbola unexamined.
 
-\begin{proposition}[Existence of the bootstrap choices]
-For a legal nonempty input with positive latencies and total distinct-result
-width at most 256 words, each scheduling and allocation choice exists,
-provided query construction completes within its budget.
-\end{proposition}
-\begin{proof}
-Write $h_i=\sum_{j<i}\ell_j$. Inductively $t_j\leq h_j$. Thus every data
-predecessor is available by $h_i$, every ordered memory predecessor issues
-before $h_i$, and no earlier operation issues at $h_i$. Consequently $h_i$ is
-feasible and $h_i<H_0$. A minimum query cannot choose a later time.
+\paragraph{Certified propagation.} Inside the box, each reopened operation has an
+ordered list of candidate cycles whose first entry is its current cycle.
+Propagation removes values that cannot appear in any solution, and every removal
+emits a \emph{certificate}: a tuple that anyone holding the program can check in
+one line. A precedence certificate records that $v$ reads $u$ with lag $\ell$, so
+that $v$ cannot issue before $\min D_u+\ell$ (\textsf{PL}) and $u$ cannot issue
+after $\max D_v-\ell$ (\textsf{PU}); capacity certificates remove cycles whose
+slots are all occupied (\textsf{EF}) or prove a branch impossible (\textsf{EO}).
+This discipline of explained propagation is taken from lazy clause
+generation~\cite{ohrimenko2009}; clause learning itself is not used.
 
-For allocation, suppose $k$ vectors have already been placed. Inductively their
-end addresses are at most $8k$, since each lowest-address choice could have
-used the next fresh eight-word block. That block is therefore available for
-the next vector regardless of temporal overlap. After all vectors, each scalar
-could use the next fresh word. Reuse can reduce this high-water bound. Total
-distinct-result width at most 256, guaranteed for the documented supplied
-programs, therefore suffices. These are existence arguments, not claims of
-optimal schedules or footprints.
-\end{proof}
+\paragraph{Exact search and the controller.} What propagation cannot rule out,
+a depth-first branch and bound decides, pruning a node when a lower bound on $J$
+is no better than the best known. A controller keeps \V{resident} questions resident and
+gives each a slice of at most \V{sliceMs}\,ms or \V{sliceNodes} nodes in turn. The first question to
+find a strict improvement wins: its answer is validated by the challenge's own
+checker, becomes the new incumbent, and a new epoch begins with a fresh catalogue.
+This is the combinatorial approach to scheduling and allocation of Casta\~neda
+Lozano and colleagues~\cite{castaneda2019}, applied to small neighbourhoods of one
+incumbent rather than to a whole function.
 
-The policies are familiar greedy policies: earliest feasible cycle and lowest
-legal address in a specified order. Their decisions are computed through schema
-queries. No serial or classical schedule supplies the incumbent, and the direct
-production path contains neither a BDD backend nor an external solver.
-Failure during bootstrap emits no partial schedule and invokes no fallback.
+\paragraph{The shared branch state.} In R0 each child node copies its parent's
+domains and recomputes the whole fixed point, although it differs from the parent
+by one decision. C1 keeps at each node an immutable branch state (its domains and
+the facts derived from them) together with a change record of which domains lost
+their extreme values or became single cycles, and each rule re-examines only the
+constraints that the change can reach (Figure~\ref{fig:shared}). This is
+incremental, event-driven propagation, a well-established idea in constraint
+programming~\cite{schulte2008}, and we claim no novelty for it. The contribution
+is narrower: an exact emulation of R0's sweep order, so that C1 emits the same
+certificates in the same order, together with an empirical parity test of that
+property.
 
-\subsection{Joint legality and target queries}
-Select at most four operations. Encode their issue times, produced-value
-addresses and auxiliary engine lanes in contiguous LSB-first fields, ordered
-by operation ID. Other decisions are fixed. Selected times lie within two cycles
-of the incumbent and in $[0,\min(H_0,T)-1]$; selected addresses range over all
-aligned starts ending at or below target memory $M$.
-
-The query intersects domains and targets, data precedence, memory order, engine
-capacity and scratch safety. Two selected or external operations sharing an
-engine require different times or lanes. External lanes are fixed by operation
-ID in each bundle. Since engine capacities are at most two, the pairwise rule
-is equivalent to issue capacity after existentially quantifying selected lanes.
-Lanes are not emitted machine instructions.
-
-For every affected value pair $u,v$, scratch safety requires
-\begin{equation}\label{eq:safety}
- a_u+w_u\leq a_v\ \vee\ a_v+w_v\leq a_u\ \vee\ e_u<b_v\ \vee\ e_v<b_u.
-\end{equation}
-The temporal comparison $e_u<b_v$ expands to $b_u<b_v$ and $t_j<b_v$ for
-\emph{every} consumer $j$ of $u$, including consumers outside the window.
-This exactly implements inclusive lifetimes. Fixed external decisions must
-also satisfy $t_i<T$ and $a_v+w_v\leq M$; a violation makes the bounded query
-infeasible. It does not silently expand the window.
-
-For incumbent $(C,S)$ and $P=CS$, try target pairs
-\begin{equation}
- (C-1,S),\quad (C,S-1),\quad
- \left(C+1,\left\lfloor\frac{P-1}{C+1}\right\rfloor\right),\quad
- \left(C-1,\min\left(256,\left\lfloor\frac{P-1}{C-1}\right\rfloor\right)\right).
-\end{equation}
-Remove undefined, duplicate and out-of-bound pairs, targets below dependency,
-engine or result-width lower bounds, and any pair with $TM\geq P$.
-Window priorities consider latest-issued operations and producers of the
-highest scratch ends, followed by source-order windows of four advancing by
-two, retaining the final shorter window. For a memory-reducing target, the
-scratch window comes first. Windows are deduplicated deterministically.
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[node distance=7mm,
- box/.style={draw=figteal,rounded corners=3pt,fill=pale,align=center,
- text width=43mm,minimum height=13mm,font=\sffamily\small,text=ink},
- arr/.style={-{Stealth},thick,draw=figteal}]
-\node[box] (input) {Static program facts\\dependencies, widths, engines};
-\node[box,right=of input] (boot) {Minimum-index bootstrap\\own validated incumbent};
-\node[box,right=of boot] (target) {Target $TM<CS$\\window and fixed context};
-\node[box,below=of target] (query) {Exact legality $\cap$ target\\bounded schema query};
-\node[box,left=of query] (check) {SAT: decode and validate\\check actual $C,S$};
-\node[box,left=of check] (output) {Emit best validated result\\strict improvements only};
-\draw[arr] (input)--(boot);\draw[arr] (boot)--(target);
-\draw[arr] (target)--(query);\draw[arr] (query)--(check);\draw[arr] (check)--(output);
-\end{tikzpicture}
-\caption{Production flow. UNSAT or UNKNOWN retains the incumbent and continues
-within the remaining budgets. An accepted improvement restarts target selection.
-A validator disagreement is recorded as a release-blocking discrepancy. The
-classical and serial compilers are evaluation controls outside this flow.}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_pipeline.pdf}
+\caption{\textbf{C1 on the worked example.} (A)~One epoch as an operation
+network, annotated with the counts the real modules produce: \V{weCatalogue}
+windows; the product box of the \texttt{k8\_latest} window, $C\leq\V{weCapCcap}$ and
+$S\leq\V{weCapScap}$; propagation that reduces the declared time combinations from
+\V{weCombDeclared} to \V{weCombRoot} with \V{weRootCerts} certificates; and the
+validated improvement. (B)~The catalogue: each row is one question and each
+filled cell an operation it may move. (C)~The incumbent in the $(C,S)$ plane over
+\V{weEpochs} epochs and \V{weNodes} search nodes at fixed work; the first
+improvement lies inside the product box. All counts are checked before
+rendering; they describe one program and are not evidence of average gain.}
+\label{fig:pipeline}
 \end{figure}
 
-\begin{lstlisting}[float=htbp,caption={Abstract optimizer loop; declarations above fix its search policy.}]
-incumbent = independently_construct_and_validate(program)
-while time_and_query_allowance_remain:
-    improvement = false
-    for target, window in deterministic_queries(incumbent):
-        result = build_and_solve(legality AND target, shared_budget)
-        if result is SAT:
-            candidate = decode(result.cube.anchor)
-            independently_validate_and_measure(candidate)
-            record_discrepancy_if_invalid_or_target_breached()
-            if valid AND within_target AND product_strictly_decreases:
-                incumbent = candidate; improvement = true; restart
-        # UNSAT and UNKNOWN preserve incumbent
-    if not improvement: break
-return incumbent
-\end{lstlisting}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_shared_state.pdf}
+\caption{\textbf{One propagation step, and the shared branch state.} (A)~Fixing
+operation~\V{weChildOp} at cycle~\V{weChildVal} in the \texttt{k8\_latest} question: grey cells were
+removed at the root, orange cells are removed in the child and are labelled by the
+certificate that removed them. (B)~The \V{weEdges} precedence constraints; for this child
+R0 re-examines every one (\V{weLooksR} edge looks) while C1 re-examines only the
+orange ones (\V{weLooksC} looks). (C)~Over a depth-first subtree of \V{weSubChildren}
+children built both ways, R0 makes \V{weSubR} edge looks and C1 \V{weSubC}; the
+domains and the \V{weSubCerts} certificates are identical at every child, which the
+generator asserts. The same counts are printed by notebook~04, and the generator
+checks that they agree.}
+\label{fig:shared}
+\end{figure}
 
-Internal validation checks structural machine legality. The evaluation harness
-separately checks final memory for every supplied case of each measured output.
-The optimizer measures actual cycles and footprint against the requested target;
-passing machine validation alone is insufficient. Only strict product decreases
-are accepted. Conditional on exact constraints and the independent checks,
-legality is preserved and accepted objective values decrease. Neither property
-proves global optimality. The test corpus checks the implementation; it is not
-a formal proof of the full Python program or correctness on untested cases.
+\section{A worked example, method by method}\label{sec:worked}
 
-\subsection{Resource contract and implementation refinements}
-The declared total soft allowance is 15 seconds, with at most 10 seconds for
-optimization, 0.1 seconds per joint query and 32 attempted queries. Per-query
-caps are 4,096 cubes per atomic cover, 50,000 visited cubes and 20,000 expression
-records. Construction and search share a meter. One second of internal headroom
-is reserved for final processing; the external isolated-process timeout is
-20 seconds. Cooperative clock checks are not hard real-time guarantees.
+We now run every method on one public program, \texttt{05\_mixed\_broadcast}
+(Figure~\ref{fig:program}). It has \V{weOps} operations: three loads, two
+\texttt{splat}s that copy a scalar into all lanes of a vector, a vector multiply,
+a vector add and a store. Its trade-offs are visible at a glance: the vector load
+is slow, two vectors must be alive at once, and the order in which they are
+created decides how much scratch they need. Every number in this section describes
+this one program and is illustrative; none of it is evidence of an average gain.
 
-The refined v4 implementation reduces repeated invariant checking inside proved
-algebra operations, reuses exact relation covers within one compilation, avoids
-repeated calendar reconstruction, and streamlines query accounting. Public cube
-construction still validates inputs. Reuse is charged according to the declared
-logical accounting; it does not increase the search allowance. Later repairs
-restore clock checks before terminal verdicts and make the evidence checker
-enforce its own frozen protocol. These optimizations target constant costs in
-this implementation, not a different asymptotic problem.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_program.pdf}
+\caption{\textbf{The worked example.} (A)~The dependence network of
+\texttt{05\_mixed\_broadcast}; colour marks the engine and arrow labels the latency
+that must elapse before the consumer may issue. (B)~The machine's issue slots per
+cycle. The generator checks that every arrow's label equals its producer's
+latency.}\label{fig:program}
+\end{figure}
 
-\section{Evaluation design and evidence}
-The primary dataset is the final independent lead run at reviewed revision
-\texttt{1cf98da}, recorded on 20 September 2026. Production code is unchanged
-from the preceding repair. The candidate export has 2,652 lines; its full hash
-and that of frozen v3 are in Appendix~\ref{app:artifact}. Earlier runs are
-retained to describe variability and repairs, not pooled as independent samples.
+Figure~\ref{fig:methods} aligns the five methods' schedules and scratch layouts,
+and Table~\ref{tab:worked} gives their metrics. The serial and starter compilers
+follow a fixed rule and produce the same answer, \V{weSerialC}~cycles and
+\V{weSerialS}~words. The classical compiler follows local priorities: it issues
+the operations with the longest remaining path first and places each value at the
+lowest free address, reaching \V{weClassicalC}~×~\V{weClassicalS}. It never
+revisits a decision, and on this program its greedy choices happen to be good.
 
-The fresh verifier passed 340 direct tests, the unchanged 11 public tests,
-142 isolated programs with 277 cases, and eight CLI checks. The acceptance
-corpus combines eight public programs, 30 historical regression programs, 100 generated inputs
-and four stress inputs. Exact small-domain algebra/constraint tests,
-independence checks and injected harness failures supplement output tests.
-The official serial/classical/direct comparison retains all $8\times3\times3=72$
-measurements and passes its seven release gates. The evidence audit passes 50
-checks covering protocol, membership, hashes, measurement arithmetic and
-verification artifacts.
+The original direct compiler states each choice as an exact query, so every cycle
+and address it emits is a witness of a stated set: the smallest member of a cover.
+Its answer, \V{weDirectphase1C}~×~\V{weDirectphase1S}, is \emph{worse} than the
+classical one on both counts. The smallest-index rule places each vector as soon
+as it can, which keeps two eight-word vectors alive together, and the first
+version's four-operation windows cannot move enough operations at once to undo
+this. This is the program on which the first version lost, and it is why the
+later stages exist.
 
-For timing, five arms are measured: classical, frozen-v3 bootstrap, frozen-v3
-full, candidate bootstrap and candidate full. Each public program has 15
-repetitions, giving 600 rows. A separately frozen set of 100 additional
-generator inputs has three repetitions in each arm, giving 1,500 rows.
-The latter set uses different seeds but shares the development generator;
-it is not an independent sample of real compiler workloads.
+C1 starts from that same first answer and reopens it. Its first epoch, through the
+\texttt{k8\_latest} window that releases all eight operations, keeps every cycle
+and cuts the footprint to \V{weStepAS} words. The second, through the same window,
+saves a cycle. The third, through an ordinary four-operation window that had
+nothing to offer from the first answer, saves one more word, ending at
+\V{weC1C}~×~\V{weC1S} (Figure~\ref{fig:pipeline}C). The large move opened the way
+and a small one finished it. At fixed work R0 walks exactly the same path: the
+search traces and certificate streams of the two compilers have identical hashes
+on this program, as on every tested program. At a wall-clock allowance of \V{bA}\,s
+the difference in speed becomes visible in the output: C1 reaches
+\V{wePubC1Shortcycles}~×~\V{wePubC1Shortscratch} and R0
+\V{wePubR0Shortcycles}~×~\V{wePubR0Shortscratch}. On the larger public program
+\texttt{08\_vector\_reduction}, with \V{weScaleOps} operations, the same search
+lowers $J$ from \V{weScaleFirstJ} to \V{weScaleFinalJ} within \V{weScaleNodes}
+nodes.
 
-Each timed compilation uses a fresh process. Direct arms load only their
-standalone export and pinned machine in an isolated directory. Arm order within
-each program/repetition is seeded and shuffled. There are no warmups, excluded
-outliers or silent retries. The compiler-call interval excludes import and
-the harness's post-call correctness check. Internal validation performed by the
-compiler remains inside its call time. Import time, total subprocess elapsed
-time and process peak resident memory are separate measurements. Process
-launch paths differ between classical and direct arms, so their process totals
-also include different harness overheads.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{we_methods.pdf}
+\caption{\textbf{Five methods, one program.} Top: the schedule as engine ×
+cycle, with the identifiers of the operations issued in each slot. Bottom: the
+scratch layout, each value occupying its words from its write cycle to its last
+read; the dashed line is the footprint $S$. Every layout is produced by running
+the method, validated by the challenge's checker on every test case, and checked
+for capacity and for live overlaps before rendering.}\label{fig:methods}
+\end{figure}
 
-For baseline $B$ and candidate $A$, the primary speedup statistic is
-\begin{equation}\label{eq:timing}
- R=\exp\left[\frac1{8}\sum_{p=1}^{8}
-       \log\frac{\operatorname{median}_r t_{B,p,r}}
-                     {\operatorname{median}_r t_{A,p,r}}\right].
-\end{equation}
-The 95\% percentile intervals use 10,000 paired resamples of repetition
-identifiers with seed 20260920. They condition on the programs and recorded run;
-they quantify neither uncertainty over new programs nor between-run system
-variation. A ratio of pooled medians is a different statistic and is explicitly
-labelled wherever used.
+\begin{table}[htbp]\centering\scriptsize
+\begin{tabularx}{\linewidth}{lrrr>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}X}
+\toprule
+Method & $C$ & $S$ & $J$ & Compile call (frozen evidence) & Mechanism\\\midrule
+\tableinput{generated/tab_worked.tex}
+\bottomrule
+\end{tabularx}
+\caption{The worked example, one program. Compile times are medians from the
+frozen measurement runs, never measured here: serial from the Phase~1
+comparison, classical and original direct from the Phase~1 timing run (full mode),
+C1 from the third-round public stage. They were recorded in different runs of one
+machine and are shown for scale only. The starter compiler was never timed.}
+\label{tab:worked}
+\end{table}
 
-The recorded environment is Python 3.13.7, macOS 26.6.2, arm64, with 28 logical
-CPUs reported. The provenance does not identify the precise CPU model or control
-thermal state. No verification or benchmark process launched by the lead ran
-concurrently with these measurements. This does not imply complete system
-quiescence.
+The contrast is between kinds of reasoning, not between scores on one program.
+The serial and starter compilers apply a fixed rule. The classical compiler
+applies greedy local priorities and cannot undo a commitment. The direct method
+expresses each choice as an exact statement about a set, so any answer can be
+traced to the set it was drawn from. C1 then reopens related groups of decisions,
+confines each question to the only region where a strict improvement can exist,
+deletes impossible options with a local causal reason (``because $v$ reads $u$ with
+lag $\ell$''), searches the rest exactly, and reuses at each node the facts its
+parent derived.
 
-\section{Results}
-\subsection{Output quality and the optimizer ablation}
-The public composite scores are serial 1.000000000, classical 1.901379121,
-and direct 2.008466202. Both direct versions and both direct modes produce the
-same public cycles and scratch metrics. The 5.6321\% composite advantage over
-classical therefore belongs to bootstrap on this suite. It does not measure
-the benefit of joint optimization, nor isolate representation from differing
-greedy heuristics.
+\section{Evaluation design}\label{sec:design}
+
+\paragraph{Populations.} All generated programs come from the same generator in
+five families (scalar, vector, mixed, dependency and aliasing). The final round
+developed and selected its mechanism on development seeds and confirmed it on a
+fresh cohort of \V{tPrograms} programs, \V{tPerFamily} per family, seeds
+\V{tSeedLo}--\V{tSeedHi}, generated only after C1 had been frozen by hash. None of
+the cohort's program, file or compilation-input hashes occurs in any earlier result
+file. Earlier rounds used their own fresh cohorts, which are never pooled.
+
+\paragraph{Endpoints.} Two endpoints were registered before measurement. The cost
+endpoint is the complete compile-call time at fixed work: the search is limited to
+\V{tNodes} nodes on a logical clock that never advances, so both arms perform the
+same search. The quality endpoint is $J$ at a real \V{bB}\,s allowance. Each program
+was compiled \V{tReps} times by each arm in fresh processes. The estimator is the
+equal-family geometric mean of per-program median ratios, with a paired bootstrap
+over programs stratified by family (\V{tResamples} resamples, seed \V{tSeed},
+percentiles \V{tPctLo} and \V{tPctHi}, a Bonferroni split across the two
+endpoints). The gates were an upper bound of at most \V{tGateCost} for cost and at
+most \V{tGateQual} for quality, with exact parity at fixed work.
+
+\paragraph{Correctness.} Every compilation in every stage was validated by the
+challenge's evaluator on every supplied case. Both standalone exports pass a
+corpus of \V{tAccPrograms} programs and \V{tAccCases} cases. All
+\V{tExportRows} command-line runs of the exports were re-validated by the review
+with the challenge's own evaluator.
+
+\paragraph{Review.} Codex, the designated lead reviewer, was unavailable for the
+final round, and the author authorised Claude Code to complete the review. The
+reviewer was therefore also the implementer, and the acceptance of C1 is a
+self-review. It recomputed every endpoint with new standard-library code that
+imports neither the reporter nor the auditor, re-validated the exports, repeated
+the bootstrap under three further seeds (upper cost bounds \V{tAltSeedACostHi},
+\V{tAltSeedBCostHi} and \V{tAltSeedCCostHi}), and probed for order effects, drift,
+timer scope and heterogeneity. It also found two errors in the implementer's own
+handoff, reported in Supplementary Section~\ref{S-sec:errata}. An independent
+re-review would supersede it.
+
+\section{Results}\label{sec:results}
+
+\subsection{The final proposal against its predecessor}
+C1 met both gates with a wide margin (Table~\ref{tab:c1}). At fixed work the two
+compilers made the same decisions: \V{tParityPairs} of \V{tParityPairs} paired runs
+had identical search traces, incumbents, statuses and certificate streams
+(\V{tTraces} distinct traces over \V{tPrograms} programs; a median of
+\V{tCertMedian} certificates per run). Of those pairs, \V{tSubstantive} involve real
+search, because \V{tZeroNode} programs need no search node at all. Parity holds on
+every tested input; it is not a proof for all programs. At that equal work C1's
+complete compile call took \V{tCost} of R0's time, with \V{lvThree}\% interval
+\ci{\V{tCostLo}}{\V{tCostHi}}; at the \V{bB}\,s allowance its $J$ ratio was \V{tQual},
+with interval \ci{\V{tQualLo}}{\V{tQualHi}}.
 
 \begin{table}[htbp]\centering\small
-\begin{tabular}{lrrrrrr}\toprule
-&\multicolumn{2}{c}{Serial}&\multicolumn{2}{c}{Classical}&\multicolumn{2}{c}{Direct, both modes}\\
-Program&$C$&$S$&$C$&$S$&$C$&$S$\\\midrule
-\tableinput{generated/quality_rows.tex}
+\begin{tabular}{lrrl}\toprule
+Endpoint (C1 / R0, \V{tPrograms} fresh programs) & Estimate & \V{lvThree}\% interval & Gate\\\midrule
+Compile call at fixed work (\V{tNodes} nodes) & \V{tCostFour} & \ci{\V{tCostLoFour}}{\V{tCostHiFour}} & $\leq\V{tGateCost}$\\
+$J$ at \V{bB}\,s & \V{tQualFour} & \ci{\V{tQualLoFour}}{\V{tQualHiFour}} & $\leq\V{tGateQual}$\\
+Parity at fixed work & \multicolumn{2}{l}{\V{tParityPairs} / \V{tParityPairs} pairs identical} & exact\\
 \bottomrule\end{tabular}
-\caption{Exact public output metrics from retained measurements. $C$ is emitted
-cycles and $S$ is scratch words. Direct is worse on both components for
-\texttt{mixed\_broadcast}; the aggregate gain is not universal.}\label{tab:quality}
+\caption{The registered endpoints of the final round, with the estimator and
+bootstrap described in Section~\ref{sec:design}. Both are ratios C1/R0; lower is
+better. The independent recomputation reproduced both estimates exactly.}\label{tab:c1}
 \end{table}
 
-\begin{figure}[htbp]\centering
-\includegraphics[width=\linewidth]{output_quality.pdf}
-\caption{Component differences against classical. Coincident markers indicate
-equal metrics. The two axes have different units; neither is compiler runtime.}
-\end{figure}
-
-On the 100 additional programs, score geomeans relative to serial are
-2.370890261 for classical, 2.362098438 for bootstrap and 2.376596963 for full
-direct compilation. Six distinct programs improve through joint optimization;
-18 accepted improvements are recorded across three repetitions, not 18
-independent improved programs. Candidate and frozen direct metrics agree on
-every public and generated timing row. Bootstrap is slightly below classical
-on this generated aggregate, while full is slightly above it. The public ordering
-therefore does not transfer unchanged even to this related generator.
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=\linewidth]{optimizer_ablation.pdf}
-\caption{The six additional programs improved by joint optimization, with
-$(C\times S)$ before and after. The other 94 programs have zero product change.
-Each pair of metrics repeats in all three measurements, for both direct
-versions. This is an optimizer-on/off comparison within the direct compiler.}
-\end{figure}
-
-\subsection{Compilation time and memory}
-In the final reviewed run, full-direct compilation is 2.132005693 times faster
-than frozen v3 by Equation~\ref{eq:timing}, with interval
-[2.126779601, 2.137538179]. Bootstrap is 1.162943978 times faster, with interval
-[1.147124692, 1.168961407]. The full 2.00-times engineering target is met in
-this run; the bootstrap 1.20-times target is missed. These targets were declared
-before measurement and are separate from mandatory correctness gates.
+The descriptive probes support the same reading. Adding the solver-module import
+time gives a cost ratio of \V{tImport}, and whole-process time including
+interpreter start gives \V{tProcess}; the shared base compile and validation lie
+inside both arms and pull the ratio towards one. Splitting pairs by which arm ran
+first gives \V{tOrderR0} (\V{tOrderR0Pairs} pairs, R0 first) and \V{tOrderC1}
+(\V{tOrderC1Pairs} pairs, C1 first), and the ratio shows no trend across time
+quartiles (\V{tDriftA}, \V{tDriftB}, \V{tDriftC}, \V{tDriftD}). Per program the
+ratio ranges from \V{tPPmin} to \V{tPPmax} (median \V{tPPmedian}), and C1 is slower
+on \V{tPPslower} of \V{tPrograms} programs (Figure~\ref{fig:perprog}). The saving
+grows with the size of the search, as a mechanism that reuses parent facts at every
+node predicts: \V{tTerA} on the smallest third of programs by search size,
+\V{tTerB} on the middle third and \V{tTerC} on the largest. In wall-clock mode C1's
+compile call is never longer (geometric ratios \V{tWallTimeA}, \V{tWallTimeB} and
+\V{tWallTimeC} at allowances of \V{bA}, \V{bB} and \V{bC}\,s), so its quality is not bought
+with extra time. At the \V{bB}\,s allowance C1 is better on \V{tWTLBW}, equal on
+\V{tWTLBT} and worse on \V{tWTLBL} of the paired runs; per program, \V{tProgBetter}
+are better, \V{tProgEqual} equal and \V{tProgWorse} worse.
 
 \begin{figure}[htbp]\centering
-\includegraphics[width=\linewidth]{compile_times.pdf}
-\caption{Median compiler-call times from 15 repetitions per public program.
-The logarithmic axis keeps the classical/direct gap visible alongside the v3/v4
-improvements. Bootstrap and full compilation have identical public output
-quality despite their different costs.}\label{fig:times}
+\includegraphics[width=.9\linewidth]{results_per_program.pdf}
+\caption{\textbf{C1/R0 compile-call time at equal work, one point per fresh
+program}, against the number of search nodes, which is identical for both arms.
+The dashed line is the confirmatory estimate. Ratios near one on tiny searches
+reflect fixed costs that both arms share; the saving grows with the search. The
+generator checks the minimum, maximum, median and number of programs above one
+against the independent recomputation.}\label{fig:perprog}
 \end{figure}
 
-Direct compilation remains slower than classical. The geometric means of
-per-program median \emph{candidate/classical} ratios are 2.0696 for bootstrap
-and 657.5045 for full. Alternatively, the \emph{pooled} median call times are
-0.26927 ms classical, 0.54962 ms bootstrap and 155.80323 ms full; dividing these
-pooled medians gives about 2.04 and 578.61. Different aggregation explains the
-different ratios; none supports classical-relative runtime superiority.
+This is an engineering property of one Python implementation, measured on one
+local machine at equal search work. It is not a result about computational
+complexity, not a private-grader result, and not a comparison with the compile
+time of the classical compiler. Memory is a cost: the peak traced allocation of C1
+relative to R0 had a median of \V{tMemMed} and a maximum of \V{tMemMax}, measured
+on \V{tMemPrograms} development programs only; no memory measurement exists for the
+confirmation cohort.
+
+\subsection{Speed changes the path}\label{sec:q1}
+Decision parity holds at equal work. Under a real clock it does not hold program by
+program, and the reason is instructive. The controller gives each resident
+question a slice of \V{sliceMs}\,ms or \V{sliceNodes} nodes, and the first strict improvement ends the
+epoch. C1 expands more nodes per slice, so a different question can be the first
+to improve, and from there the two searches follow different paths. At a \V{bC}\,s
+allowance C1 is worse than R0 on \V{tLossRuns} of the paired runs, spread over
+\V{tLossPrograms} programs; it is deterministic across repetitions on those
+programs, and \V{tLossNoUnknown} of the losses involve no unresolved question on
+either side. On program \V{tQoneSeed} both start from the same first answer,
+\V{weQone980183C}~×~\V{weQone980183S}; R0 ends at
+\V{tSeed980183R0cycles}~×~\V{tSeed980183R0scratch}~$=\V{tSeed980183R0J}$ and C1 at
+\V{tSeed980183C1cycles}~×~\V{tSeed980183C1scratch}~$=\V{tSeed980183C1J}$, in all \V{tReps}
+repetitions (Figure~\ref{fig:q1}). The quality claim is therefore distributional,
+and it is stated as ``decision parity at equal work'', never as a claim that the two compilers
+decide alike under a wall budget, nor that C1 is never worse.
+
+This is not a defect of C1; it is a property of anytime first-improvement local
+search on a rugged landscape. A faster search reaches a different basin, and a
+different basin can be worse. Being faster does not imply being better.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{results_q1.pdf}
+\caption{\textbf{Quality is not monotone in speed.} (A)~Paired runs at three
+wall-clock allowances (\V{tPrograms} fresh programs, \V{tReps} repetitions): C1
+better, equal or worse than R0. (B)~Program \V{tQoneSeed} at \V{bC}\,s: the same first answer,
+and two different local optima that each arm reached in every repetition; dotted
+curves are lines of constant $J$. The generator checks that the generated program
+is byte-identical to the one the frozen rows measured.}\label{fig:q1}
+\end{figure}
+
+\subsection{The whole programme against the benchmarks}
+Table~\ref{tab:public} gives the public score of every method, and
+Table~\ref{tab:perprogram} the per-program metrics of the external benchmarks, our
+first version and C1. The public programs were visible throughout development,
+so these are exact results on eight fixed programs, not estimates for a
+population. On them the programme moved from \V{pOneScore} (first version) to
+\V{tPubSixC1B} (C1 at \V{bB}\,s), against \V{rTwoPubClassical} for the classical
+compiler.
 
 \begin{table}[htbp]\centering\small
-\begin{tabular}{lrrrr}\toprule
-Arm&Call (ms)&Import (ms)&Process (ms)&Peak RSS (MiB)\\\midrule
-\tableinput{generated/resource_rows.tex}
+\begin{tabular}{llll}\toprule
+Method & Role & Allowance & Public score\\\midrule
+\tableinput{generated/tab_public.tex}
 \bottomrule\end{tabular}
-\caption{Pooled medians across public timing rows. Peak RSS is whole-process
-resident memory, including the interpreter and loaded modules; it is not
-the cube representation size and is unrelated to the program's scratch words.
-Each column is separately aggregated, so medians are not additive.}
+\caption{Score (Equation~\ref{eq:score}) on the \V{mPublic} public programs,
+relative to serial; higher is better. Every value was identical in every
+repetition of its run. Scores from different rounds are exact on the same
+programs, so they may be compared, but they are not population estimates; the
+round-two row for \texttt{cap512\_wider} shows why (Section~\ref{sec:negative}).}
+\label{tab:public}
 \end{table}
 
-\subsection{Variation and negative results}
-The worker's last run, using the same production compiler, reported full
-speedup 1.9471 and bootstrap speedup 1.1337. The lead's fresh run crosses the
-full target, but does not erase the earlier miss or establish a reliably
-achieved 2.00-times speedup. Figure~\ref{fig:variation} shows consecutive repaired
-runs. Their within-run intervals are narrow compared with some between-run
-changes. Two classical program medians changed substantially in earlier rounds;
-the cause is not established. We therefore retain per-program values rather
-than diagnosing the difference as hardware noise or attributing it to one edit.
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=\linewidth]{run_variability.pdf}
-\caption{Three retained runs after production repairs. Dashed lines are the
-original engineering targets. Error bars are paired within-run intervals;
-they do not describe variation between runs. Production code is the same in
-these three runs; evidence-checker changes distinguish the repair rounds.}
-\label{fig:variation}
-\end{figure}
-
-The optimizer improves only a minority of generated inputs, adds no public
-quality gain, and has substantial overhead. Bounded windows, target selection,
-representation growth and search all constrain it; the per-query clock is not
-the only limit. Count-limited queries can become faster even with unchanged
-budgets. Prior attempts to infer a universal speedup ceiling from timeout
-fractions are unsupported because queries can encounter different kinds of
-limits after optimization. No measured slowdown here proves that the method
-can never beat a particular classical implementation.
-
-\section{Structural-encoding feasibility}
-\label{sec:structural-feasibility}
-
-The compiler case study above evaluates one production implementation. A
-separate, predeclared campaign asked whether exact structural encodings of
-whole-program schedule/address choices could be sampled and then used in further experiments.
-This feasibility question matters because rank encodings and structural
-representations require a well-defined finite domain of legal completions.
-The campaign's result is inconclusive: its public sampler did not attain the
-specified minimum coverage, so the dependent comparisons were not measured.
-
-\subsection{Sampling design and finite checks}
-The locked domain fixes the issue-time fields by operation ID and then the
-selected scratch-address fields by producer ID, with least-significant-bit-first
-coordinates. Two distinct streams sampled each public program. Raw-bit sampling
-draws uniform fixed-width bit strings and decodes them; strings may be invalid
-or may identify dead ends. Option-path sampling chooses uniformly among the
-available physical choices at each decision, stopping at a dead end. These are
-different distributions, and neither is assumed to be uniform over feasible
-schedules. The domain uses issue cycles from zero through one less than the
-program horizon and all legal physical scratch bases. The incumbent is first in
-the option order when available, followed by remaining choices in ascending
-order. Each stream requested 10,000 attempts per program,
-with a 60-second per-program, per-stream limit and no invisible retries.
-Coverage is the union of distinct completed compilations across both streams;
-the gate requires at least 100 per program. This threshold is a sampling
-criterion, not an estimate of the total feasible set.
-
-Finite fixture checks covered 12 locked programs and all four declared codecs.
-Across those fixtures, 24 small code universes were exhausted and 564
-round-trip checks were performed. These denominators do not imply that every
-codec's complete code universe was exhausted on every fixture. The checks found
-no round-trip failures or finite-domain discrepancies for the tested objects.
-
-\subsection{Public coverage and disposition}
-Table~\ref{tab:phase2-coverage} reports completed draws by stream and the
-distinct union across streams. Stream counts may include repeated compilations;
-the union deduplicates them. These are not case-execution counts.
-All raw-bit streams produced zero completions. The campaign retained 160,000
-attempts in 16 streams, 819 completed draws, and 1,356 case checks; it observed
-zero validator discrepancies. Four programs fell below the 100-completion
-threshold.
-
 \begin{table}[htbp]\centering\small
-\begin{tabularx}{\linewidth}{Xrrrl}\toprule
-Program & \shortstack{Raw-bit\\completions} & \shortstack{Option-path\\completions} & \shortstack{Distinct\\union} & Gate \\\midrule
-\tableinput{generated/phase2_coverage_rows.tex}
-\bottomrule\end{tabularx}
-\caption{Phase 2 P1 public sampling coverage. Each stream made 10,000 attempts
-per program. The union deduplicates compilation identities across streams.}
-\label{tab:phase2-coverage}
-\end{table}
-
-P0 passed its declared provenance, domain and oracle diagnostics. P1 is
-INCONCLUSIVE because four public programs missed the declared coverage minimum.
-P2--P5 are blocked by the gate and remain unmeasured. The evidence checker
-reported zero findings and found the retained artifacts internally consistent,
-while its record says the evidence is incomplete and scientific success was not
-established. Checker consistency is not scientific success, and zero observed
-defects is not a proof of universal correctness.
-This result does not establish that structural encoding is impossible; it
-shows that this fixed sampler did not pass its coverage gate. A changed domain
-or sampling policy requires a separately specified amendment and fresh
-evidence. The present campaign establishes no compression, scaling, discovery,
-or performance benefit.
-
-\section{Relation to prior ideas and complexity}
-\subsection{Boolean covers and integrated compilation}
-A cube is a conjunction of fixed literals; a flat cube cover is a disjunctive
-normal form. Integer anchors change its storage and operations, not its
-mathematical denotation. Bryant's ordered binary decision diagrams share
-subfunctions in a graph and are canonical under a fixed variable order and
-reduction rules~\cite{bryant}. This implementation instead uses direct masks
-and factored AND/OR queries. Neither representation dominates all Boolean
-functions; no BDD performance comparison is reported here.
-
-Combining scheduling and allocation in one constraint model also has precedent.
-Unison formulates integrated register allocation and instruction scheduling by
-constraint programming and evaluates the resulting compiler on real target
-architectures~\cite{unison}. Luminal's fixed scratch machine, restricted
-transformations and four-operation neighborhoods define a much narrower study.
-Neither its scores nor its times are comparable to Unison's published results.
-The present measurements compare only the pinned local implementations.
-
-\subsection{What is used from Shannon, and what is not}
-Equation~\ref{eq:shannon} supplies the mathematical cofactor partition used by
-Boolean splitting. Shannon's switching-circuit work is relevant historical
-context~\cite{shannon49}. This identity does not bound the number of splits
-needed to construct a useful accepting cover.
-
-Two information questions must be distinguished. Shannon's communication
-theory concerns source entropy and reliable communication under a specified
-channel model~\cite{shannon48}. A finite memoryless source has entropy
-$H(X)=-\sum_xp(x)\log_2p(x)$; a discrete memoryless channel has capacity
-$\mathcal C=\max_{p(x)}I(X;Y)$. The Luminal compiler defines no noisy channel,
-code rate or source distribution over its decision assignments. It therefore
-does not implement or approach a measured Shannon communication limit.
-
-Separately, there are $2^{2^n}$ subsets of an $n$-bit universe. A fixed-length
-lossless description capable of distinguishing \emph{all} these subsets needs
-at least $2^n$ bits in the worst case, by counting distinct codewords. For
-variable-length descriptions, fewer than $2^n$ bits cannot describe all subsets
-either, since there are only $2^{2^n}-1$ binary strings shorter than $2^n$.
-This elementary counting argument concerns universal representation capacity,
-not the running time of one compiler on a structured family. Storing large
-families compactly is possible precisely because many families are structured.
-
-\subsection{Wolfram's memory discussion}
-Wolfram discusses exact retrieval by ordered lookup and hashing in his account
-of human thinking, and suggests a possible connection to memory~\cite{wolfram}.
-The useful motivation here is to ask what an indexed representation lets a
-query recover without scanning all represented objects. The mechanism in this
-compiler is exact logical restriction and witness extraction. It is not a model
-of human memory, cellular-automaton hashing or approximate associative recall.
-Ordinary implementation caches and provenance hashes do not establish such a
-connection. The conceptual influence belongs in the research motivation, while
-claims about computational behaviour must follow from the algorithms and data.
-
-\subsection{An explicit representation limit}
-\begin{proposition}[Parity needs an exponential flat cube cover]
-For $n\geq1$, every exact cube-union representation of odd parity requires
-$2^{n-1}$ singleton cubes.
-\end{proposition}
-\begin{proof}
-Any cube with a free coordinate contains two assignments differing only in that
-coordinate. They have opposite parity. Such a cube cannot be a subset of the
-odd-parity set. In an exact union, each cube must be a subset, since a union
-cannot cancel an unwanted member. Every cube is therefore a singleton, and
-there are $2^{n-1}$ odd-parity assignments.
-\end{proof}
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.93\linewidth]{representation_limits.pdf}
-\caption{Analytic representation examples, not compiler scaling measurements.
-An unconstrained family is one cube; an exact flat cover of odd parity needs
-exponentially many. This lower bound is specific to flat cube unions and does
-not prove the same growth for factored expressions or decision diagrams.}
-\end{figure}
-
-A cube with $k$ free coordinates describes $2^k$ indices using two $n$-bit
-masks, apart from metadata. This is a representation saving, not $2^k$ answers
-computed at constant total cost. Expanding those members takes at least their
-output size. For arbitrary $n$, Python integer operations themselves scale
-with the number of machine words; treating an unbounded integer as a constant
-cost object would hide complexity. Lazy factoring can avoid a large flat cover
-on some predicates but does not imply tractable search in general. The parity
-example also shows why the chosen representation must be named in every
-compression claim.
-
-\section{A reproducible starting point for a complexity study}
-The artifact supports a precise next question: for which families of compiler
-constraints do direct schemata reduce total construction and query cost?
-Answering it requires families with controlled growth in operation count,
-dependency width, field width, alias density and vector pressure. Report
-expression size, cover sizes, bit widths, search visits, UNKNOWN rates,
-compile time and process memory separately. Include preprocessing and cache
-construction in the cost model.
-
-Matched-heuristic implementations would isolate representation effects:
-hold operation order, allocation order, windows, targets and budgets fixed,
-and vary only the query backend. Stronger compiler baselines and different
-generators address separate questions of competitiveness and generalization.
-Repeat measurements across fresh runs and machines rather than treating repeated
-timings of eight programs as independent workloads. Adversarial predicates,
-including parity for flat covers, should accompany cases designed to compress.
-
-No such scaling experiment is claimed in this draft. The present evidence
-supports exact structured operations, validated bounded optimization and a
-measured quality/cost tradeoff. It does not establish global optimality,
-polynomial worst-case complexity, universal compression, or a separation of
-complexity classes. The combination of positive and negative results makes the
-compiler useful as an instrument for those more narrowly specified experiments.
-
-\appendix
-\section{Artifact and reproduction}\label{app:artifact}
-The paper directory contains the editable manuscript, figure generator,
-generated PDF/PNG figures, tables and an input hash manifest. All numerical
-figures are derived from retained evidence; the set and parity figures are
-labelled mathematical illustrations. No benchmark was rerun to select a better
-paper result. The primary evidence root, relative to \texttt{luminal-challenge}, is
-\begin{lstlisting}
-results/direct_index_v4_optimization_repair2/lead_review/
-\end{lstlisting}
-The authoritative files are \path{final/runs.json},
-\path{final/provenance.json}, \path{verification/summary.json},
-\path{comparison/runs.json} and \path{measurement_audit.json}.
-The frozen-v3 export and evaluation corpus are under
-\texttt{results/direct\_index\_v4\_optimization/baseline/}.
-The candidate and frozen export SHA256 digests, respectively, are
-\begin{lstlisting}
-d14bf39b450aaa5fe73c41a3236980e219089e527ae43007781d78e0059a5864
-c0574395d339dae3b24e819955795c2a6165953c5966e46062c9bf9b18a50ce2
-\end{lstlisting}
-Figure generation checks current production hashes against retained provenance,
-the candidate export, timing-row membership, component equality between
-versions, and recomputed scores and speedups. The artifact README gives build
-commands and validation results. To repeat the full empirical protocol, use new
-output directories and the commands in the final lead review. Never overwrite
-the historical measurement trees. The standalone compiler needs Python 3.10+
-and the supplied machine module; plotting additionally uses NumPy and
-Matplotlib, and the paper uses a standard pdf\LaTeX{} toolchain.
-
-The separate Phase 2 evidence root is
-\path{results/phase2_structural_encoding/phase2_repair_20260923c/}.
-Its retained acceptance, manifest, gate and hypothesis records, checker output,
-and P0/P1 summaries are the sources for the feasibility section;
-\path{paper/generated/phase2_metrics.json} records their source digests and
-derived denominators. The P1 raw-attempt file is approximately 113 MB and
-remains local. Packaging and a portable storage representation are unresolved,
-so this evidence is not described as portable, published or fully archived.
-The production measurements above remain the accepted 20 September evidence;
-the Phase 2 checks are dated 23 September and are not pooled with them.
-
-\clearpage
-\section{Per-program compiler-call medians}
-\begin{table}[htbp]\centering\small
-\begin{tabular}{lrrrrr}\toprule
-&Classical&v3 boot&v3 full&v4 boot&v4 full\\
-Program&\multicolumn{5}{c}{Milliseconds, median of 15 calls}\\\midrule
-\tableinput{generated/timing_rows.tex}
+\begin{tabular}{lllllrrrr}\toprule
+& \multicolumn{4}{c}{$C\times S$} & \multicolumn{4}{c}{$J$}\\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Program & Serial & Classical & Direct & C1 & Serial & Classical & Direct & C1\\\midrule
+\tableinput{generated/tab_perprogram.tex}
 \bottomrule\end{tabular}
-\caption{Unrounded raw timings are retained in the JSON evidence. These medians
-underlie Equation~\ref{eq:timing} and Figure~\ref{fig:times}.}
+\caption{Per-program metrics on the public programs. Direct is the original
+direct compiler (its bootstrap and full modes give identical public metrics); C1 is
+at the \V{bB}\,s allowance, where R0 gives the same metrics. Bold marks the lowest
+$J$ in each row. Values are constant across all repetitions.}\label{tab:perprogram}
 \end{table}
-\FloatBarrier
 
-\section{Review status and assistance}
-The implementation received local lead acceptance with limitations on
-20 September 2026. That disposition covers the recorded compiler and evidence;
-it is separate from manuscript peer review or a novelty determination.
-The draft was prepared with Codex assistance; Claude Code assisted implementation
-and repair work recorded in the repository. Checks include small-domain oracles,
-independent machine execution, injected failures, source hashes, recomputation
-of recorded measurements and inspection of primary literature. The author
-retains responsibility for reviewing the proofs, claims and interpretation.
+On fresh populations the picture is more nuanced, and every measured pair appears
+in Figure~\ref{fig:forest} and Table~\ref{tab:pairs} with its own comparator. The
+closest measured comparison of our search with the classical compiler is from
+round one: at \V{bB}\,s the A4 search found \V{rOneClRed}\% lower geometric $J$ than
+classical (\V{lvOne}\% interval \V{rOneClLo}\% to \V{rOneClHi}\%) on \V{tPrograms} fresh
+programs, winning on \V{rOneClwins}, tying on \V{rOneClties} and \emph{losing on
+\V{rOneCllosses}}, at \V{rOneClTime} times classical's compile time. In round two
+the depth-first variant that became R0 was descriptively \V{rTwoDfsClRed}\% better
+than classical on another fresh cohort (\V{rTwoDfsClW} wins, \V{rTwoDfsClT} ties,
+\V{rTwoDfsClL} losses, unadjusted). C1 itself was never measured against classical
+on a fresh cohort; we do not chain C1/R0 onto these ratios.
 
-\clearpage
-\begin{thebibliography}{9}
-\raggedright
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{results_forest.pdf}
+\caption{\textbf{Every measured pair, each against its own control.} (A)~Output
+quality as the geometric $J$ ratio of candidate to control; (B)~compile time as the
+geometric ratio of candidate to control. Each row names its round, population and
+interval level. Orange bars are registered gates or targets: C1's gates were met;
+the round-two practical target of \V{rTwoQRoute} was missed (TARGET\_NOT\_REACHED).
+Rows are never combined across rounds.}\label{fig:forest}
+\end{figure}
+
+\begin{table}[htbp]\centering\scriptsize
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{33mm}rr}
+\toprule
+Pair (candidate / control) & Population, allowance, interval & Quality & W / T / L & Time ratio\\\midrule
+C1 / R0 & round 3, \V{tPrograms} fresh, \V{bB}\,s; \V{lvThree}\% & $J$ ratio \V{tQual} \ci{\V{tQualLo}}{\V{tQualHi}} & \V{tWTLBW} / \V{tWTLBT} / \V{tWTLBL} & \V{tCost}$^{a}$\\
+\texttt{cell\_a4cat\_dfs} / heap A4 & round 2, \V{tPrograms} fresh, \V{bB}\,s; \V{lvTwo}\% & $J$ ratio \V{rTwoDfsHJ} \ci{\V{rTwoDfsHLo}}{\V{rTwoDfsHHi}} & \V{rTwoDfsHnW} / \V{rTwoDfsHnT} / \V{rTwoDfsHnL} & \V{rTwoDfsHT}\\
+\texttt{cell\_a4cat\_dfs} / \texttt{cap512\_wider} & round 2, \V{tPrograms} fresh, \V{bB}\,s; \V{lvTwo}\% & $J$ ratio \V{rTwoDfsEJ} \ci{\V{rTwoDfsELo}}{\V{rTwoDfsEHi}} & \V{rTwoDfsEnW} / \V{rTwoDfsEnT} / \V{rTwoDfsEnL} & \V{rTwoDfsET}\\
+repaired A4 / \texttt{cap512\_wider} & round 2, \V{tPrograms} fresh, \V{bB}\,s; \V{lvStd}\% & $J$ ratio \V{rTwoJ}; mean log \V{rTwoLog} \ci{\V{rTwoLo}}{\V{rTwoHi}} & \V{rTwoWTLW} / \V{rTwoWTLT} / \V{rTwoWTLL} & \V{rTwoTime}\\
+A4 / A0 & round 1, \V{tPrograms} fresh, \V{bB}\,s; \V{lvOne}\% & $J$ \V{rOneAzeroRed}\% lower \ci{\V{rOneAzeroLo}}{\V{rOneAzeroHi}}\% & \V{rOneAzerowins} / \V{rOneAzeroties} / \V{rOneAzerolosses} & \V{rOneAzeroTime}\\
+A4 / accepted optimiser & round 1, \V{tPrograms} fresh, \V{bB}\,s; \V{lvOne}\% & $J$ \V{rOneAccRed}\% lower \ci{\V{rOneAccLo}}{\V{rOneAccHi}}\% & \V{rOneAccwins} / \V{rOneAccties} / \V{rOneAcclosses} & \V{rOneAccTimeThree}\\
+A4 / classical & round 1, \V{tPrograms} fresh, \V{bB}\,s; \V{lvOne}\% & $J$ \V{rOneClRed}\% lower \ci{\V{rOneClLo}}{\V{rOneClHi}}\% & \V{rOneClwins} / \V{rOneClties} / \V{rOneCllosses} & \V{rOneClTime}\\
+A0 / accepted optimiser & Phase 2, \V{aZeroAccN} held-out, \V{bB}\,s; \V{lvStd}\% & mean log \V{aZeroAccLog} \ci{\V{aZeroAccLo}}{\V{aZeroAccHi}} & \V{aZeroAccwins} / \V{aZeroAccties} / \V{aZeroAcclosses} & \V{aZeroAccTime}$^{b}$\\
+A0 / classical & Phase 2, \V{aZeroClN} held-out, \V{bB}\,s; \V{lvStd}\% & mean log \V{aZeroClLog} \ci{\V{aZeroClLo}}{\V{aZeroClHi}} & \V{aZeroClwins} / \V{aZeroClties} / \V{aZeroCllosses} & \V{aZeroClTime}\\
+Original direct / classical & Phase 1, \V{pOneExtraN} generated, default & score geomeans \V{pOneExtraFull} vs \V{pOneExtraCl} & \multicolumn{1}{c}{--} & \V{pOneSlowFull}\\
+\bottomrule
+\end{tabularx}
+\caption{Every measured pair. Quality is reported in the statistic its protocol
+registered; ``mean log'' is the mean paired $\log(J_{\text{control}}/J_{\text{candidate}})$,
+positive when the candidate is better. W/T/L counts programs, except for C1/R0,
+where it counts paired runs. Time ratios are geometric means of per-program median
+compile times, candidate over control. $^{a}$At fixed work. $^{b}$A0 stops early, so
+it finishes long before its allowance. No row may be multiplied by another.}
+\label{tab:pairs}
+\end{table}
+
+\subsection{What the gains cost}
+The method is slower to compile than the classical compiler, by a wide margin. In
+round one, A4 took \V{rOneClTime} times classical's compile time (\V{lvOne}\% interval
+\V{rOneClTimeLo} to \V{rOneClTimeHi}) and \V{rOneAzeroTime} times A0's. The first
+version, in its full mode, took \V{pOneSlowFull} times classical's time, and even A0,
+which stops early, took \V{aZeroClTime} times. C1 recovers part of the cost of its
+own search (Table~\ref{tab:c1}), but nothing we measured suggests that it
+approaches classical compile time, and we make no such claim. The quality gains
+are also not uniform: A4 lost to classical on \V{rOneCllosses} of \V{tPrograms}
+fresh programs, the first version was worse than classical on
+\texttt{mixed\_broadcast} (Table~\ref{tab:perprogram}), and on generated programs
+the first version's full mode was only marginally above classical (score geometric
+means \V{pOneExtraFull} against \V{pOneExtraCl}). What the method offers is a
+trade: better output on average, a reason for every deletion, and a search that can
+be reopened, in exchange for compile time.
+
+\section{What did not work}\label{sec:negative}
+
+The negative results are part of the evidence, and each keeps its own comparator.
+\begin{itemize}
+\item \emph{The ladder.} Removing the query cap (A1) gained \V{ladOneQ} in mean log
+$J$ over A0; product domains (A2) and certified propagation (A3) gained nothing in
+quality (\V{ladTwoQ} and \V{ladThreeQ}), although each made compilation cheaper
+(\V{ladTwoT} and \V{ladThreeT} times the previous step). Only the multiscale
+catalogue (A4) moved quality, by \V{ladFourQ}, at \V{ladFourT} times A3's compile
+time (Supplementary Section~\ref{S-sec:ladder}).
+\item \emph{Catalogue, not traversal.} A two-by-two factorial on \V{facPrograms}
+development programs attributed A4's gain to its catalogue ($\V{facCat}$ in log $J$,
+\V{lvStd}\% interval \ci{\V{facCatLo}}{\V{facCatHi}}). The discrepancy-ordered traversal
+of Harvey and Ginsberg~\cite{harvey1995} made no measurable difference
+(\ci{\V{facTravLo}}{\V{facTravHi}}), and neither did the interaction.
+\item \emph{A reversal between the public suite and the population.} On fresh
+programs repaired A4 beat the earlier \texttt{cap512\_wider} optimiser (mean log
+$J$ \V{rTwoLog}, \V{lvStd}\% interval \ci{\V{rTwoLo}}{\V{rTwoHi}}, with \V{rTwoWTLL} programs
+worse), while on the public suite the order reversed, \V{rTwoPubCap} against
+\V{rTwoPubHeap}. Neither result overrides the other; they answer different
+questions.
+\item \emph{A missed target.} The round-two candidate \texttt{cell\_a4cat\_dfs} was
+better than A4 (J ratio \V{rTwoDfsHJ}) but missed both registered routes to a
+``better'' claim (an upper $J$ bound of \V{rTwoQRoute}, or a compile-time upper bound
+of \V{rTwoERoute} at no loss): TARGET\_NOT\_REACHED.
+\item \emph{Two engineering attempts that stopped.} A worklist fixed point saved
+\V{rTwoWorklist}\% of compile time against a gate of \V{rTwoWorklistGate}\%, and a
+filter on the capacity rule was predicted to reach only \V{effPred} of the fixed-work
+time against a gate of \V{tGateCost}: NO\_JUSTIFIED\_OPTIMIZATION.
+\item \emph{The original registration of the shared branch state.} Its cost model
+gave \V{tMReg} and stopped the round; the review found that one term was measured
+over a narrower scope than the work it was meant to subtract. The correction is
+post hoc and is reported as a forecast (\V{tMCons}), not as a measurement.
+\item \emph{Learning.} A depth-three schema tree~\cite{breiman1984}, used in the
+spirit of learned guidance for exact search~\cite{gasse2019}, lost to plain Hamming
+order on all \V{lrnHamNeg} of \V{lrnFixtures} fixtures, and in \V{lrnEcoPrograms}
+real compilations not one query collected the observations the learner needed
+(\V{lrnEcoZero} of \V{lrnEcoPrograms}). Round one's learning hypothesis had failed by
+design: none of its \V{rOneLearnOf} fixtures contained a test solution better than
+the training minimum. The per-query learner is retired for this architecture.
+\item \emph{Structural encoding.} The feasibility campaign behind A0 did not meet
+its coverage gate and was recorded as inconclusive (Supplementary
+Section~\ref{S-sec:feasibility}).
+\end{itemize}
+
+\section{Why a different way of computing}\label{sec:why}
+
+The framing in this section is motivation and interpretation. The evidence is the
+set of measured gains, costs and intervals above, and nothing said here adds to
+it.
+
+\paragraph{A lineage in work in progress.} The index-set method grows out of the
+author's research on algorithmic information dynamics and the programmability of
+integrated systems~\cite{hernandez2019aid,hernandez2021aid}, which in turn builds
+on Zenil and collaborators' algorithmic information calculus and causal
+deconvolution~\cite{zenil2017causality,zenil2019calculus,zenil2019deconvolution}.
+Its broader form, index deconvolution, gives an exact finite representation of what
+a system can do, as sets written in index form, from which behaviour can be
+recovered, queried and explained. That method remains in development, and this
+paper neither describes nor depends on its construction. What the compiler uses is
+the narrower idea that a family of decisions can be stated exactly as a set of
+indices and queried without enumeration. It is a specialisation of these ideas to
+exact finite descriptions, and it is distinct from a computation of Kolmogorov
+complexity itself.
+
+\paragraph{Algorithmic information.} A cube is two integers that stand for a set
+of any size, and a cover is a short exact description of which choices are legal.
+The search asks, in effect, for the shortest exact statement of the region where a
+better answer can lie, which is the program-length view of information of
+Kolmogorov and Chaitin~\cite{kolmogorov1965,chaitin1966,li2019}. We compute no
+Kolmogorov complexity and no estimate of it; the link is conceptual and
+representational, not a measured quantity, and the parity bound of Supplementary
+Section~\ref{S-sec:parity} shows that the representation compresses only what is
+structured. The interest in simple exact rules that yield rich behaviour is
+consonant with Wolfram's Principle of Computational Equivalence~\cite{wolfram2002,
+wolfram2002pce}, which we use as motivation and not as a theorem about compilers.
+
+\paragraph{Causality.} Every deletion of an option carries a certificate that
+states a local reason and can be replayed by anyone holding the program. Reopening
+a window and solving it again is an intervention on the schedule that holds the
+rest fixed, in the sense of the interventional calculus of the cited
+work~\cite{zenil2019calculus}. The result is a compiler whose every decision can be
+audited: why a cycle was not used, which constraint forced a value to move, and
+which question produced an improvement. A trained policy that emits a schedule does
+not, by itself, offer this.
+
+\paragraph{Complexity.} The problem is combinatorial and its landscape is rugged.
+Large neighbourhoods of related decisions succeeded where local moves did not,
+which is the lesson of large neighbourhood search~\cite{shaw1998}, and speed
+changed the trajectory of the search (Section~\ref{sec:q1}), which is a hallmark of
+path dependence in complex search. Both findings are measured; their
+interpretation as features of a rugged landscape is ours.
+
+\section{Limitations}\label{sec:limits}
+
+The final mechanism was developed and selected on development programs, its
+kernel draft preceded its specification, and its cost model was corrected after the
+outcome; only the fresh confirmation is inferential. All measurements come from
+one local machine and one Python implementation, and the speed-up is an
+engineering property of that implementation, not an asymptotic result. The
+public programs were visible throughout development, and there is no
+private-grader result. Memory was measured on development programs only. All
+generated programs come from one generator, so no claim transfers to real
+compiler workloads without further evidence. Parity at equal work is established on
+the tested inputs, not proved. The acceptance of C1 was a self-review. Finally, the
+challenge asks that the exercise and its solution not be shared publicly; this
+manuscript is prepared to publication standard but is kept local, and any release
+requires that restriction to be resolved.
+
+\section{Conclusion}\label{sec:conclusion}
+
+We set out to answer the Luminal challenge and to test whether a different way of
+computing is worth pursuing. The answer to the first is a compiler that is correct
+on every supplied case, that scores \V{tPubSixC1B} on the public programs against
+\V{rTwoPubClassical} for a classical list scheduler, and whose final stage runs the
+same search in \V{tCost} of its predecessor's time at equal work without losing
+quality at a fixed allowance. The answer to the second is more guarded and, we
+think, more interesting. Stating every decision as an exact query over index sets
+gave a compiler that can explain each of its choices, reopen any group of them, and
+prove when a question has no better answer; the gains it earned came from asking
+larger and better-shaped questions, and its costs are real and measured. As
+compilation moves towards accelerators that expose every decision and towards
+search and learning at scale, a representation that is exact, compact and
+auditable is, on this evidence, worth developing further.
+
+\section*{Code, data and assistance}
+All figures and tables are regenerated from frozen evidence by the paper's build;
+the worked example is produced by running the compilers themselves, and every
+number cited is recorded, with its source file and field, in the claim ledger of
+Supplementary Section~\ref{S-sec:ledger}. Claude Code assisted with implementation,
+the final review and the preparation of this manuscript; Codex reviewed the earlier
+rounds. The author is responsible for the claims and their interpretation.
+
+\begin{thebibliography}{99}\raggedright\small
 \bibitem{luminal} Luminal. \emph{Compiler challenge}, pinned source revision
 573b8a85f4bdb8c3d8ba9f180d5f98dac875c902.
 \url{https://github.com/luminal-ai/interview/tree/573b8a85f4bdb8c3d8ba9f180d5f98dac875c902}.
-The retained reference files define the machine used here.
-\bibitem{bryant} R. E. Bryant. Graph-based algorithms for Boolean function
-manipulation. \emph{IEEE Transactions on Computers}, C-35(8):677--691, 1986.
-\href{https://www.cs.cmu.edu/~bryant/pubdir/ieeetc86.pdf}{Author-hosted version}.
-\bibitem{unison} R. Casta\~neda Lozano, M. Carlsson, G. Hjort Blindell and
-C. Schulte. Combinatorial register allocation and instruction scheduling.
-\emph{ACM Transactions on Programming Languages and Systems}, 2019.
-\url{https://arxiv.org/abs/1804.02452}.
-\bibitem{shannon49} C. E. Shannon. The synthesis of two-terminal switching
-circuits. \emph{Bell System Technical Journal}, 28(1):59--98, 1949.
-\href{https://deeplearning.cs.cmu.edu/S22/document/readings/Shannon49.pdf}{Primary paper}.
-\bibitem{shannon48} C. E. Shannon. A mathematical theory of communication.
-\emph{Bell System Technical Journal}, 27:379--423, 623--656, 1948.
-\href{https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf}{Primary paper}.
-\bibitem{wolfram} S. Wolfram. \emph{A New Kind of Science}. Wolfram Media,
-2002. Chapter 10, Human Thinking, p.~622 (retrieval and hashing).
-\url{https://www.wolframscience.com/nks/p622--human-thinking/}.
+\bibitem{hernandez2019aid} A. Hernández-Espinosa, H. Zenil, N. A. Kiani and
+J. Tegnér, \emph{Estimations of Integrated Information Based on Algorithmic
+Complexity and Dynamic Querying}, arXiv:1904.10393 [q-bio.NC] (2019).
+\url{https://arxiv.org/abs/1904.10393}.
+\bibitem{hernandez2021aid} A. Hernández-Espinosa, H. Zenil, N. A. Kiani and
+J. Tegnér, ``Estimations of Integrated Information Based on Algorithmic
+Complexity and Dynamic Querying,'' in \emph{Handbook of Unconventional
+Computing}, Vol. 1: Theory, ed. A. Adamatzky (World Scientific, 2021), Chap. 5,
+pp. 171--220.\ \url{https://doi.org/10.1142/9789811235726_0005}.
+\bibitem{kolmogorov1965} A. N. Kolmogorov, \emph{Three approaches to the
+definition of the concept of quantity of information}, \emph{Problems of
+Information Transmission} 1(1), 3--11 (1965); English reprint,
+\emph{Three Approaches to the Quantitative Definition of Information},
+\emph{International Journal of Computer Mathematics} 2(1--4), 157--168
+(1968).\\ \url{https://doi.org/10.1080/00207166808803030}.
+\bibitem{chaitin1966} G. J. Chaitin, \emph{On the length of programs for
+computing finite binary sequences}, \emph{Journal of the ACM} 13(4),
+547--569 (1966).\\ \url{https://doi.org/10.1145/321356.321363}.
+\bibitem{li2019} M. Li and P. M. B. Vitányi, \emph{An Introduction to
+Kolmogorov Complexity and Its Applications}, 4th ed., Texts in Computer
+Science (Springer, Cham, 2019).\\ \url{https://doi.org/10.1007/978-3-030-11298-1}.
+\bibitem{wolfram2002} S. Wolfram, \emph{A New Kind of Science}, Chap. 12
+(Wolfram Media, Champaign, IL, 2002).\\
+\url{https://www.wolframscience.com/nks/}.
+\bibitem{wolfram2002pce} S. Wolfram, ``Notes for Chapter 12: The Principle
+of Computational Equivalence,'' in \emph{A New Kind of Science Online}
+(2002).\ \url{https://www.wolframscience.com/reference/notes/1128c/}.
+\bibitem{zenil2017causality} H. Zenil, A. Schmidt and J. Tegnér,
+\emph{Causality, Information, and Biological Computation: An Algorithmic
+Software Approach to Life, Disease, and the Immune System}, in \emph{From
+Matter to Life: Information and Causality}, eds. S. I. Walker, P. C. W. Davies
+and G. F. R. Ellis (Cambridge University Press, 2017), pp. 244--280.
+\url{https://doi.org/10.1017/9781316584200.011}.
+\bibitem{zenil2019calculus} H. Zenil, N. A. Kiani, F. Marabita, Y. Deng,
+S. Elias, A. Schmidt, G. Ball and J. Tegnér, \emph{An Algorithmic Information
+Calculus for Causal Discovery and Reprogramming Systems}, \emph{iScience}
+19, 1160--1172 (2019).\\ \url{https://doi.org/10.1016/j.isci.2019.07.043}.
+\bibitem{zenil2019deconvolution} H. Zenil, N. A. Kiani, A. A. Zea and
+J. Tegnér, \emph{Causal deconvolution by algorithmic generative models},
+\emph{Nature Machine Intelligence} 1, 58--66 (2019).
+\url{https://doi.org/10.1038/s42256-018-0005-0}.
+\bibitem{shaw1998} P. Shaw, \emph{Using Constraint Programming and Local Search
+Methods to Solve Vehicle Routing Problems}, in \emph{Principles and Practice of
+Constraint Programming -- CP98}, eds. M. Maher and J.-F. Puget, LNCS 1520
+(Springer, 1998), pp. 417--431. \url{https://doi.org/10.1007/3-540-49481-2_30}.
+\bibitem{harvey1995} W. D. Harvey and M. L. Ginsberg, \emph{Limited Discrepancy
+Search}, in \emph{Proceedings of the 14th International Joint Conference on
+Artificial Intelligence (IJCAI-95)}, Vol. 1, pp. 607--613 (1995).
+\url{https://www.ijcai.org/Proceedings/95-1/Papers/080.pdf}.
+\bibitem{castaneda2019} R. Castañeda Lozano, M. Carlsson, G. Hjort Blindell and
+C. Schulte, \emph{Combinatorial Register Allocation and Instruction Scheduling},
+\emph{ACM Transactions on Programming Languages and Systems} 41(3), Article 17
+(2019). \url{https://doi.org/10.1145/3332373}.
+\bibitem{ohrimenko2009} O. Ohrimenko, P. J. Stuckey and M. Codish,
+\emph{Propagation via lazy clause generation}, \emph{Constraints} 14(3),
+357--391 (2009). \url{https://doi.org/10.1007/s10601-008-9064-x}.
+\bibitem{schulte2008} C. Schulte and P. J. Stuckey, \emph{Efficient Constraint
+Propagation Engines}, \emph{ACM Transactions on Programming Languages and
+Systems} 31(1), Article 2 (2008). \url{https://doi.org/10.1145/1452044.1452046}.
+\bibitem{gasse2019} M. Gasse, D. Chételat, N. Ferroni, L. Charlin and A. Lodi,
+\emph{Exact Combinatorial Optimization with Graph Convolutional Neural Networks},
+in \emph{Advances in Neural Information Processing Systems 32} (NeurIPS 2019).
+\url{https://arxiv.org/abs/1906.01629}.
+\bibitem{breiman1984} L. Breiman, J. H. Friedman, R. A. Olshen and C. J. Stone,
+\emph{Classification and Regression Trees} (Wadsworth, 1984).
+\bibitem{graham1969} R. L. Graham, \emph{Bounds on multiprocessing timing
+anomalies}, \emph{SIAM Journal on Applied Mathematics} 17(2), 416--429 (1969).
+\url{https://doi.org/10.1137/0117039}.
+\bibitem{gibbons1986} P. B. Gibbons and S. S. Muchnick, \emph{Efficient
+instruction scheduling for a pipelined architecture}, in \emph{Proceedings of the
+SIGPLAN '86 Symposium on Compiler Construction}, pp. 11--16 (1986).
+\url{https://doi.org/10.1145/12276.13312}.
+\bibitem{poletto1999} M. Poletto and V. Sarkar, \emph{Linear Scan Register
+Allocation}, \emph{ACM Transactions on Programming Languages and Systems} 21(5),
+895--913 (1999). \url{https://doi.org/10.1145/330249.330250}.
+\bibitem{fisher1983} J. A. Fisher, \emph{Very Long Instruction Word
+Architectures and the ELI-512}, in \emph{Proceedings of the 10th Annual
+International Symposium on Computer Architecture}, pp. 140--150 (1983).
+\url{https://doi.org/10.1145/800046.801649}.
 \end{thebibliography}
 \end{document}

@@ -1,0 +1,1967 @@
+{
+ "program": "05_mixed_broadcast",
+ "program_object_sha256": "e87f907fe55f7ea61f7aa211976de74736d1f1a380be895e42e904ab0444ac50",
+ "engine_limits": {
+  "load": 2,
+  "scalar": 2,
+  "vector": 2,
+  "store": 1,
+  "flow": 1
+ },
+ "operations": [
+  {
+   "id": 0,
+   "op": "vload",
+   "engine": "load",
+   "latency": 4,
+   "reads": [],
+   "writes": "weights0"
+  },
+  {
+   "id": 1,
+   "op": "load",
+   "engine": "load",
+   "latency": 3,
+   "reads": [],
+   "writes": "bias0"
+  },
+  {
+   "id": 2,
+   "op": "load",
+   "engine": "load",
+   "latency": 3,
+   "reads": [],
+   "writes": "gate0"
+  },
+  {
+   "id": 3,
+   "op": "splat",
+   "engine": "vector",
+   "latency": 1,
+   "reads": [
+    "bias0"
+   ],
+   "writes": "vbias"
+  },
+  {
+   "id": 4,
+   "op": "splat",
+   "engine": "vector",
+   "latency": 1,
+   "reads": [
+    "gate0"
+   ],
+   "writes": "vgate"
+  },
+  {
+   "id": 5,
+   "op": "vmul",
+   "engine": "vector",
+   "latency": 3,
+   "reads": [
+    "weights0",
+    "vgate"
+   ],
+   "writes": "scaled"
+  },
+  {
+   "id": 6,
+   "op": "vadd",
+   "engine": "vector",
+   "latency": 1,
+   "reads": [
+    "scaled",
+    "vbias"
+   ],
+   "writes": "result"
+  },
+  {
+   "id": 7,
+   "op": "vstore",
+   "engine": "store",
+   "latency": 1,
+   "reads": [
+    "result"
+   ],
+   "writes": "out"
+  }
+ ],
+ "edges": [
+  [
+   1,
+   3,
+   3
+  ],
+  [
+   2,
+   4,
+   3
+  ],
+  [
+   0,
+   5,
+   4
+  ],
+  [
+   4,
+   5,
+   1
+  ],
+  [
+   3,
+   6,
+   1
+  ],
+  [
+   5,
+   6,
+   3
+  ],
+  [
+   6,
+   7,
+   1
+  ]
+ ],
+ "widths": {
+  "weights0": 8,
+  "bias0": 1,
+  "gate0": 1,
+  "vbias": 8,
+  "vgate": 8,
+  "scaled": 8,
+  "result": 8
+ },
+ "producers": {
+  "weights0": 0,
+  "bias0": 1,
+  "gate0": 2,
+  "vbias": 3,
+  "vgate": 4,
+  "scaled": 5,
+  "result": 6
+ },
+ "methods": {
+  "serial": {
+   "C": 11,
+   "S": 42,
+   "J": 462,
+   "times": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 9,
+    "7": 10
+   },
+   "addresses": {
+    "weights0": 0,
+    "vbias": 8,
+    "vgate": 16,
+    "scaled": 24,
+    "result": 32,
+    "bias0": 40,
+    "gate0": 41
+   },
+   "lifetimes": {
+    "weights0": [
+     4,
+     6
+    ],
+    "bias0": [
+     4,
+     4
+    ],
+    "gate0": [
+     5,
+     5
+    ],
+    "vbias": [
+     5,
+     9
+    ],
+    "vgate": [
+     6,
+     6
+    ],
+    "scaled": [
+     9,
+     9
+    ],
+    "result": [
+     10,
+     10
+    ]
+   }
+  },
+  "starter": {
+   "C": 11,
+   "S": 42,
+   "J": 462,
+   "times": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 9,
+    "7": 10
+   },
+   "addresses": {
+    "weights0": 0,
+    "vbias": 8,
+    "vgate": 16,
+    "scaled": 24,
+    "result": 32,
+    "bias0": 40,
+    "gate0": 41
+   },
+   "lifetimes": {
+    "weights0": [
+     4,
+     6
+    ],
+    "bias0": [
+     4,
+     4
+    ],
+    "gate0": [
+     5,
+     5
+    ],
+    "vbias": [
+     5,
+     9
+    ],
+    "vgate": [
+     6,
+     6
+    ],
+    "scaled": [
+     9,
+     9
+    ],
+    "result": [
+     10,
+     10
+    ]
+   }
+  },
+  "classical": {
+   "C": 9,
+   "S": 17,
+   "J": 153,
+   "times": {
+    "0": 0,
+    "2": 0,
+    "1": 1,
+    "4": 3,
+    "3": 4,
+    "5": 4,
+    "6": 7,
+    "7": 8
+   },
+   "addresses": {
+    "vgate": 0,
+    "weights0": 8,
+    "vbias": 0,
+    "scaled": 8,
+    "result": 0,
+    "bias0": 16,
+    "gate0": 0
+   },
+   "lifetimes": {
+    "weights0": [
+     4,
+     4
+    ],
+    "bias0": [
+     4,
+     4
+    ],
+    "gate0": [
+     3,
+     3
+    ],
+    "vbias": [
+     5,
+     7
+    ],
+    "vgate": [
+     4,
+     4
+    ],
+    "scaled": [
+     7,
+     7
+    ],
+    "result": [
+     8,
+     8
+    ]
+   }
+  },
+  "direct_phase1": {
+   "C": 10,
+   "S": 24,
+   "J": 240,
+   "times": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 8,
+    "7": 9
+   },
+   "addresses": {
+    "weights0": 0,
+    "bias0": 0,
+    "gate0": 16,
+    "vbias": 8,
+    "vgate": 16,
+    "scaled": 0,
+    "result": 0
+   },
+   "lifetimes": {
+    "weights0": [
+     4,
+     5
+    ],
+    "bias0": [
+     3,
+     3
+    ],
+    "gate0": [
+     4,
+     4
+    ],
+    "vbias": [
+     4,
+     8
+    ],
+    "vgate": [
+     5,
+     5
+    ],
+    "scaled": [
+     8,
+     8
+    ],
+    "result": [
+     9,
+     9
+    ]
+   }
+  },
+  "C1": {
+   "C": 9,
+   "S": 16,
+   "J": 144,
+   "times": {
+    "0": 0,
+    "2": 0,
+    "1": 2,
+    "4": 3,
+    "5": 4,
+    "3": 5,
+    "6": 7,
+    "7": 8
+   },
+   "addresses": {
+    "weights0": 0,
+    "bias0": 0,
+    "gate0": 8,
+    "vbias": 8,
+    "vgate": 8,
+    "scaled": 0,
+    "result": 0
+   },
+   "lifetimes": {
+    "weights0": [
+     4,
+     4
+    ],
+    "bias0": [
+     5,
+     5
+    ],
+    "gate0": [
+     3,
+     3
+    ],
+    "vbias": [
+     6,
+     7
+    ],
+    "vgate": [
+     4,
+     4
+    ],
+    "scaled": [
+     7,
+     7
+    ],
+    "result": [
+     8,
+     8
+    ]
+   }
+  }
+ },
+ "first_answer": {
+  "C": 10,
+  "S": 24,
+  "J": 240,
+  "times": {
+   "0": 0,
+   "1": 0,
+   "2": 1,
+   "3": 3,
+   "4": 4,
+   "5": 5,
+   "6": 8,
+   "7": 9
+  },
+  "addresses": {
+   "weights0": 0,
+   "bias0": 0,
+   "gate0": 16,
+   "vbias": 8,
+   "vgate": 16,
+   "scaled": 0,
+   "result": 0
+  },
+  "lifetimes": {
+   "weights0": [
+    4,
+    5
+   ],
+   "bias0": [
+    3,
+    3
+   ],
+   "gate0": [
+    4,
+    4
+   ],
+   "vbias": [
+    4,
+    8
+   ],
+   "vgate": [
+    5,
+    5
+   ],
+   "scaled": [
+    8,
+    8
+   ],
+   "result": [
+    9,
+    9
+   ]
+  }
+ },
+ "first_answer_queries": {
+  "queries": 15,
+  "largest_cover": 4,
+  "intersections": 33
+ },
+ "time_width": 5,
+ "schedule_queries": [
+  {
+   "cubes": [
+    [
+     5,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       5,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    0
+   ],
+   "labels": [
+    "x0..x4:00000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     0,
+     3
+    ],
+    [
+     5,
+     4,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 0,
+     "hi": 4,
+     "cubes": [
+      [
+       5,
+       0,
+       3
+      ],
+      [
+       5,
+       4,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "labels": [
+    "x0..x4:**000",
+    "x0..x4:00100"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     1,
+     6
+    ],
+    [
+     5,
+     2,
+     4
+    ],
+    [
+     5,
+     4,
+     0
+    ]
+   ],
+   "chosen_index": 1,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 0,
+     "hi": 7,
+     "cubes": [
+      [
+       5,
+       0,
+       7
+      ]
+     ]
+    }
+   ],
+   "members": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "labels": [
+    "x0..x4:1**00",
+    "x0..x4:01*00",
+    "x0..x4:00100"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     3,
+     0
+    ],
+    [
+     5,
+     4,
+     3
+    ],
+    [
+     5,
+     8,
+     1
+    ],
+    [
+     5,
+     10,
+     0
+    ]
+   ],
+   "chosen_index": 3,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 3,
+     "hi": 10,
+     "cubes": [
+      [
+       5,
+       3,
+       0
+      ],
+      [
+       5,
+       4,
+       3
+      ],
+      [
+       5,
+       8,
+       1
+      ],
+      [
+       5,
+       10,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "labels": [
+    "x0..x4:11000",
+    "x0..x4:**100",
+    "x0..x4:*0010",
+    "x0..x4:01010"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     4,
+     3
+    ],
+    [
+     5,
+     8,
+     3
+    ]
+   ],
+   "chosen_index": 4,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 4,
+     "hi": 11,
+     "cubes": [
+      [
+       5,
+       4,
+       3
+      ],
+      [
+       5,
+       8,
+       3
+      ]
+     ]
+    }
+   ],
+   "members": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "labels": [
+    "x0..x4:**100",
+    "x0..x4:**010"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     5,
+     0
+    ],
+    [
+     5,
+     6,
+     1
+    ],
+    [
+     5,
+     8,
+     3
+    ],
+    [
+     5,
+     12,
+     0
+    ]
+   ],
+   "chosen_index": 5,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 5,
+     "hi": 12,
+     "cubes": [
+      [
+       5,
+       5,
+       0
+      ],
+      [
+       5,
+       6,
+       1
+      ],
+      [
+       5,
+       8,
+       3
+      ],
+      [
+       5,
+       12,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "labels": [
+    "x0..x4:10100",
+    "x0..x4:*1100",
+    "x0..x4:**010",
+    "x0..x4:00110"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     8,
+     7
+    ]
+   ],
+   "chosen_index": 8,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 8,
+     "hi": 15,
+     "cubes": [
+      [
+       5,
+       8,
+       7
+      ]
+     ]
+    }
+   ],
+   "members": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "labels": [
+    "x0..x4:***10"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     9,
+     0
+    ],
+    [
+     5,
+     10,
+     1
+    ],
+    [
+     5,
+     12,
+     3
+    ],
+    [
+     5,
+     16,
+     0
+    ]
+   ],
+   "chosen_index": 9,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 9,
+     "hi": 16,
+     "cubes": [
+      [
+       5,
+       9,
+       0
+      ],
+      [
+       5,
+       10,
+       1
+      ],
+      [
+       5,
+       12,
+       3
+      ],
+      [
+       5,
+       16,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "labels": [
+    "x0..x4:10010",
+    "x0..x4:*1010",
+    "x0..x4:**110",
+    "x0..x4:00001"
+   ]
+  }
+ ],
+ "address_queries": [
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "weights0",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     8,
+     0
+    ]
+   ],
+   "chosen_index": 8,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 8,
+     "cubes": [
+      [
+       8,
+       0,
+       7
+      ],
+      [
+       8,
+       8,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 7,
+     "cubes": [
+      [
+       8,
+       0,
+       7
+      ]
+     ]
+    }
+   ],
+   "value": "vbias",
+   "decoded": 8,
+   "labels": [
+    "x0..x7:00010000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     16,
+     0
+    ]
+   ],
+   "chosen_index": 16,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 16,
+     "cubes": [
+      [
+       8,
+       0,
+       15
+      ],
+      [
+       8,
+       16,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 7,
+     "cubes": [
+      [
+       8,
+       0,
+       7
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 1,
+     "hi": 15,
+     "cubes": [
+      [
+       8,
+       1,
+       0
+      ],
+      [
+       8,
+       2,
+       1
+      ],
+      [
+       8,
+       4,
+       3
+      ],
+      [
+       8,
+       8,
+       7
+      ]
+     ]
+    }
+   ],
+   "value": "vgate",
+   "decoded": 16,
+   "labels": [
+    "x0..x7:00001000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 8,
+     "cubes": [
+      [
+       8,
+       0,
+       7
+      ],
+      [
+       8,
+       8,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 1,
+     "hi": 8,
+     "cubes": [
+      [
+       8,
+       1,
+       0
+      ],
+      [
+       8,
+       2,
+       1
+      ],
+      [
+       8,
+       4,
+       3
+      ],
+      [
+       8,
+       8,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "scaled",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "result",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "bias0",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     16,
+     0
+    ]
+   ],
+   "chosen_index": 16,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 16,
+     "cubes": [
+      [
+       8,
+       0,
+       15
+      ],
+      [
+       8,
+       16,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 7,
+     "cubes": [
+      [
+       8,
+       0,
+       7
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 8,
+     "hi": 15,
+     "cubes": [
+      [
+       8,
+       8,
+       7
+      ]
+     ]
+    }
+   ],
+   "value": "gate0",
+   "decoded": 16,
+   "labels": [
+    "x0..x7:00001000"
+   ]
+  }
+ ],
+ "address_width": 8,
+ "catalogue": [
+  {
+   "policy": "windows_for",
+   "radius": 2,
+   "window": [
+    0,
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "policy": "k4_latest",
+   "radius": 4,
+   "window": [
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  {
+   "policy": "k8_latest",
+   "radius": 4,
+   "window": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  {
+   "policy": "k16_latest",
+   "radius": 8,
+   "window": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  {
+   "policy": "whole_program",
+   "radius": "full",
+   "window": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  {
+   "policy": "windows_for",
+   "radius": 2,
+   "window": [
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  {
+   "policy": "k4_memory",
+   "radius": 4,
+   "window": [
+    0,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "policy": "windows_for",
+   "radius": 2,
+   "window": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "policy": "k4_contiguous_0",
+   "radius": 4,
+   "window": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "policy": "windows_for",
+   "radius": 2,
+   "window": [
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "policy": "windows_for",
+   "radius": 2,
+   "window": [
+    6,
+    7
+   ]
+  }
+ ],
+ "caps": {
+  "J0": 240,
+  "LC": 9,
+  "LS": 8,
+  "Ccap": 17,
+  "Scap": 26
+ },
+ "horizon": 17,
+ "declared_domains": {
+  "0": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "1": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "2": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "3": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "4": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "5": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "6": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "7": [
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13
+  ]
+ },
+ "root_domains": {
+  "0": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "1": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "2": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "3": [
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "4": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "5": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "6": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "7": [
+   8,
+   9,
+   10,
+   11,
+   12,
+   13
+  ]
+ },
+ "root_certificates": [
+  [
+   "PL",
+   0,
+   5,
+   4,
+   0,
+   [
+    1,
+    2,
+    3
+   ]
+  ],
+  [
+   "PL",
+   1,
+   3,
+   3,
+   0,
+   [
+    0,
+    1,
+    2
+   ]
+  ],
+  [
+   "PL",
+   2,
+   4,
+   3,
+   0,
+   [
+    0,
+    1,
+    2
+   ]
+  ],
+  [
+   "PL",
+   5,
+   6,
+   3,
+   4,
+   [
+    4,
+    5,
+    6
+   ]
+  ],
+  [
+   "PL",
+   6,
+   7,
+   1,
+   7,
+   [
+    5,
+    6,
+    7
+   ]
+  ]
+ ],
+ "combinations_declared": 7873200,
+ "combinations_root": 972000,
+ "child_decision": [
+  0,
+  2
+ ],
+ "child_domains": {
+  "0": [
+   2
+  ],
+  "1": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "2": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "3": [
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "4": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "5": [
+   6,
+   7,
+   8,
+   9
+  ],
+  "6": [
+   9,
+   10,
+   11,
+   12
+  ],
+  "7": [
+   10,
+   11,
+   12,
+   13
+  ]
+ },
+ "child_certificates": [
+  [
+   "PL",
+   0,
+   5,
+   4,
+   2,
+   [
+    4,
+    5
+   ]
+  ],
+  [
+   "PL",
+   5,
+   6,
+   3,
+   6,
+   [
+    7,
+    8
+   ]
+  ],
+  [
+   "PL",
+   6,
+   7,
+   1,
+   9,
+   [
+    8,
+    9
+   ]
+  ]
+ ],
+ "child_edges_looked_C1": [
+  [
+   0,
+   5,
+   4
+  ],
+  [
+   5,
+   6,
+   3
+  ],
+  [
+   6,
+   7,
+   1
+  ]
+ ],
+ "propagator_edges": [
+  [
+   0,
+   5,
+   4
+  ],
+  [
+   1,
+   3,
+   3
+  ],
+  [
+   2,
+   4,
+   3
+  ],
+  [
+   3,
+   6,
+   1
+  ],
+  [
+   4,
+   5,
+   1
+  ],
+  [
+   5,
+   6,
+   3
+  ],
+  [
+   6,
+   7,
+   1
+  ]
+ ],
+ "edges_total": 7,
+ "child_edge_looks": {
+  "R0": 14,
+  "C1": 3
+ },
+ "change_record": [
+  0,
+  5,
+  6,
+  7
+ ],
+ "subtree": [
+  {
+   "limit": 10,
+   "children": 10,
+   "looks_R0": 126,
+   "looks_C1": 20,
+   "certificates": 17
+  },
+  {
+   "limit": 100,
+   "children": 101,
+   "looks_R0": 980,
+   "looks_C1": 158,
+   "certificates": 71
+  },
+  {
+   "limit": 1000,
+   "children": 1000,
+   "looks_R0": 9247,
+   "looks_C1": 1469,
+   "certificates": 555
+  },
+  {
+   "limit": 3000,
+   "children": 3001,
+   "looks_R0": 27874,
+   "looks_C1": 4440,
+   "certificates": 1655
+  }
+ ],
+ "epochs": {
+  "count": 4,
+  "nodes": 5476,
+  "stopped_because": "pass_complete",
+  "steps": [
+   {
+    "epoch": 1,
+    "from": [
+     10,
+     24
+    ],
+    "to": [
+     10,
+     17
+    ],
+    "policy": "k8_latest",
+    "radius": 4,
+    "window": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ]
+   },
+   {
+    "epoch": 2,
+    "from": [
+     10,
+     17
+    ],
+    "to": [
+     9,
+     17
+    ],
+    "policy": "k8_latest",
+    "radius": 4,
+    "window": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ]
+   },
+   {
+    "epoch": 3,
+    "from": [
+     9,
+     17
+    ],
+    "to": [
+     9,
+     16
+    ],
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     1,
+     2,
+     3,
+     4
+    ]
+   }
+  ],
+  "path": [
+   [
+    10,
+    24
+   ],
+   [
+    10,
+    17
+   ],
+   [
+    9,
+    17
+   ],
+   [
+    9,
+    16
+   ]
+  ],
+  "trace_sha256_R0": "9df58498121538a0660a6b342c94a9566a468f5d313c10612f059f45efcd1177",
+  "trace_sha256_C1": "9df58498121538a0660a6b342c94a9566a468f5d313c10612f059f45efcd1177",
+  "certificate_stream_sha256": "c7203e6048aadb5bb9aa3765eacd9c9c016b2355aac3a4ad126e7535ddbb1114"
+ },
+ "scale": {
+  "program": "08_vector_reduction",
+  "operations": 19,
+  "first_CSJ": [
+   12,
+   40,
+   480
+  ],
+  "final_CSJ": [
+   12,
+   32,
+   384
+  ],
+  "nodes": 9999,
+  "epochs": 3
+ },
+ "q1": {
+  "980183": {
+   "first_CSJ": [
+    22,
+    44,
+    968
+   ],
+   "operations": 66
+  },
+  "980026": {
+   "first_CSJ": [
+    23,
+    80,
+    1840
+   ],
+   "operations": 34
+  }
+ },
+ "starter_public": {
+  "programs": {
+   "01_scalar_pipeline": {
+    "serial": [
+     18,
+     15
+    ],
+    "starter": [
+     18,
+     15
+    ],
+    "object_sha256": "d3fabefc9f767380028d2a960ef978517fa8a555d14767786333ae82216071d4"
+   },
+   "02_scalar_dual_chain": {
+    "serial": [
+     12,
+     9
+    ],
+    "starter": [
+     12,
+     9
+    ],
+    "object_sha256": "8e7a15ef445817a6b7b11fc668d2db5a26b04ae322e8b208731922d123fb083a"
+   },
+   "03_vector_axpy": {
+    "serial": [
+     14,
+     73
+    ],
+    "starter": [
+     14,
+     73
+    ],
+    "object_sha256": "3cebcd07e9bed927046f41dfc4d026b6e95b0255930c0424d128e78c8dd411bb"
+   },
+   "04_vector_bitmix": {
+    "serial": [
+     16,
+     89
+    ],
+    "starter": [
+     16,
+     89
+    ],
+    "object_sha256": "d9277262e550d331ff56388be644eb425de5d36b887aa0e3e274e0861585004c"
+   },
+   "05_mixed_broadcast": {
+    "serial": [
+     11,
+     42
+    ],
+    "starter": [
+     11,
+     42
+    ],
+    "object_sha256": "e87f907fe55f7ea61f7aa211976de74736d1f1a380be895e42e904ab0444ac50"
+   },
+   "06_parallel_memory": {
+    "serial": [
+     21,
+     128
+    ],
+    "starter": [
+     21,
+     128
+    ],
+    "object_sha256": "2ee093d159322ce9e22f44bf42f16a76ec1aa27a650b2d8276d165ddc39eff7c"
+   },
+   "07_scalar_selects": {
+    "serial": [
+     20,
+     16
+    ],
+    "starter": [
+     20,
+     16
+    ],
+    "object_sha256": "716e1d948096ace472cacc33941e409918c6bf65dfe7e3069a9a8829faf43026"
+   },
+   "08_vector_reduction": {
+    "serial": [
+     19,
+     137
+    ],
+    "starter": [
+     19,
+     137
+    ],
+    "object_sha256": "1270daa0d62c87ecae8ecab83d30bf6d72ed73abc75da5b20ffb945aff698b75"
+   }
+  },
+  "score": 1.0
+ },
+ "notebook_cross_check": "PASS: edge looks, subtree counts, combination counts and epoch/node counts equal notebook 04 outputs"
+}

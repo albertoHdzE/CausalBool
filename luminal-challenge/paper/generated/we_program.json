@@ -1,0 +1,131 @@
+{
+ "checks": {
+  "edge_lags_equal_producer_latency": true,
+  "operations": 8,
+  "edges": 7
+ },
+ "data": {
+  "operations": [
+   {
+    "id": 0,
+    "op": "vload",
+    "engine": "load",
+    "latency": 4,
+    "reads": [],
+    "writes": "weights0"
+   },
+   {
+    "id": 1,
+    "op": "load",
+    "engine": "load",
+    "latency": 3,
+    "reads": [],
+    "writes": "bias0"
+   },
+   {
+    "id": 2,
+    "op": "load",
+    "engine": "load",
+    "latency": 3,
+    "reads": [],
+    "writes": "gate0"
+   },
+   {
+    "id": 3,
+    "op": "splat",
+    "engine": "vector",
+    "latency": 1,
+    "reads": [
+     "bias0"
+    ],
+    "writes": "vbias"
+   },
+   {
+    "id": 4,
+    "op": "splat",
+    "engine": "vector",
+    "latency": 1,
+    "reads": [
+     "gate0"
+    ],
+    "writes": "vgate"
+   },
+   {
+    "id": 5,
+    "op": "vmul",
+    "engine": "vector",
+    "latency": 3,
+    "reads": [
+     "weights0",
+     "vgate"
+    ],
+    "writes": "scaled"
+   },
+   {
+    "id": 6,
+    "op": "vadd",
+    "engine": "vector",
+    "latency": 1,
+    "reads": [
+     "scaled",
+     "vbias"
+    ],
+    "writes": "result"
+   },
+   {
+    "id": 7,
+    "op": "vstore",
+    "engine": "store",
+    "latency": 1,
+    "reads": [
+     "result"
+    ],
+    "writes": "out"
+   }
+  ],
+  "edges": [
+   [
+    1,
+    3,
+    3
+   ],
+   [
+    2,
+    4,
+    3
+   ],
+   [
+    0,
+    5,
+    4
+   ],
+   [
+    4,
+    5,
+    1
+   ],
+   [
+    3,
+    6,
+    1
+   ],
+   [
+    5,
+    6,
+    3
+   ],
+   [
+    6,
+    7,
+    1
+   ]
+  ],
+  "engine_limits": {
+   "load": 2,
+   "scalar": 2,
+   "vector": 2,
+   "store": 1,
+   "flow": 1
+  }
+ }
+}
