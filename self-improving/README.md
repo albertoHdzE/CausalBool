@@ -130,7 +130,94 @@ names its level.
 
 ---
 
-## 5. Models and compute
+## 5. What counts as a discovery
+
+The direction is compression: a small rule that generates a large behaviour.
+A result counts as a discovery only when it compresses better than every known
+method, and the comparison is made so that a referee can check it.
+
+**The quantity is a two-part length, summed over a hidden corpus.**
+
+    total(P) = |P| + Σ over hidden networks N of |d_P(N)|
+
+- P is the evolved program. It must include the decoder that reproduces a
+  network's full repertoire from its description.
+- d_P(N) is the description P emits for network N.
+
+A lookup table has a short P and enormous descriptions. A pile of memorised
+special cases has a huge P. Only a general law makes the total small, which is
+why the method is charged together with what it describes.
+
+**Shorter can be certified; shortest cannot.** Kolmogorov complexity cannot be
+computed, but an exact program is an upper bound on it. A program that is exact
+and shorter than every known method is therefore a *proof* of a better upper
+bound. It is not a claim of optimality, and it is never written as one.
+
+**Fixed at the Stage D freeze, before any run:**
+- **Exactness.** Exactness is checked by forward reproduction of the full
+  repertoire of every hidden network, by the evaluator, from ground truth (M4).
+  A program that fails on one network has no length.
+- **The encoding.** One reference language subset and one counting rule, for
+  |P| and |d_P(N)| alike. Lengths are algorithmic (program length under the
+  declared encoding), never a Shannon quantity; the owner of description
+  lengths is `GOVERNANCE/DESCRIPTION_LENGTHS.md`.
+- **The baselines, each measured under the same encoding:**
+  - the full truth table;
+  - minimal DNF (Quine–McCluskey);
+  - reduced ordered BDDs, best of a declared set of variable orders;
+  - (L, Ω) from our owner;
+  - the best exact program of the zero-shot probe (§2).
+- **The hidden corpus.** Drawn from the generator with a sealed seed. It
+  includes sizes above those seen during evolution, so a method that only
+  works at the sizes it was selected on cannot win.
+
+**The verdict ladder.**
+
+| Outcome | Status |
+|---|---|
+| Not exact on the hidden corpus | failure |
+| Exact, total above the best baseline | competence, not discovery |
+| Exact, total within the declared tolerance of a known method | rediscovery (M5 or M6, by the audit of §1), subject to the lineage test of §2 |
+| Exact, total strictly below every baseline, on every size bucket and on each of three sealed corpora | **discovery**: a certified new upper bound |
+
+The representation found does not have to be (L, Ω). Any representation that
+wins on this ledger is a discovery, and the numbers decide it, not our
+inspection. The audit of §1 then says what the representation is, which is a
+separate question from whether it wins.
+
+---
+
+## 6. Beyond Stage D: calibration, then deployment
+
+The internal goal is larger than Stage D: a general way of using a language
+model inside an exact loop to make discoveries in our research. Stage D is the
+**calibration step** of that goal. An instrument is trusted on unknown targets
+only after it has recovered a known one, and our own method is the ideal known
+target: exact, completely checkable, and ours. `deconv-lab` applies the same
+rule, calibrating on generators with known ground truth before any claim about
+real data.
+
+**Deployment order.** Once Stage D has a verdict, the same loop, with the same
+ledger of §5, may be pointed at open targets. The order is fixed by how exact
+the evaluator is:
+
+1. **Exact domains first.** These are targets where validity is decidable and
+   the length is a number: other discrete dynamical systems (cellular
+   automata, mixed-gate networks) and, as an engineering target, scratch or
+   memory planning.
+2. **Noisy domains last.** On data such as the pivot clocks of the time-series
+   programme, exactness is unavailable. Compression becomes compression
+   *relative to a null*, which is a statistical claim, not a certified one.
+   Such a result is reported with that weaker status, never as a certified
+   discovery.
+
+**The generality claim.** "A general method" is claimed only after a
+discovery, in the sense of §5, in **at least two exact domains** besides the
+calibration target. One domain is a result; two is the beginning of a method.
+
+---
+
+## 7. Models and compute
 
 - **Models:** local and quantised (MLX, 4-bit), on the M3 Ultra (96 GB).
   Candidate families are small coder models. The family, size, quantisation and
@@ -140,13 +227,13 @@ names its level.
 
 ---
 
-## 6. Folder map
+## 8. Folder map
 
 | File | Role | Status |
 |---|---|---|
 | `PROTOCOL_capability_repertoire.md` | Stage A/B: can the model answer; capability boundary as a Boolean function | draft |
 | `PROTOCOL_stage_C_solution_families.md` | Stage C: plan genotypes, schema-directed mutation, fusion as crossover, basins | draft |
-| Stage D protocol | the rediscovery of §1–§4 | to be written |
+| Stage D protocol | the rediscovery of §1–§5 | to be written |
 | `paper/` | Zenil, Uthamacumaran and Ozelim [1] | reference |
 
 The tickets T1–T3 (listed in the Stage C protocol) are prerequisites for Stage
