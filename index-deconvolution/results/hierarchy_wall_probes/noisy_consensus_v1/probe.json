@@ -1,0 +1,2158 @@
+{
+  "status": "posthoc exploratory probe on previously inspected inputs",
+  "frozen_run": "confirm-v1-r1",
+  "script_sha256": "cd685ccbb8bde20a3ee1b9e330486ce1015dc1a973e3313a06387512d8e790b8",
+  "input_only_proposal": true,
+  "period_grid": "1..256, deterministically enumerated",
+  "local_chunk_length": 1024,
+  "maximum_global_error_fraction": "1/16",
+  "limits": [
+    "F06/F07 transfer only, no new holdout or CI claims",
+    "augmented costs compare frozen incumbent with new proposals; full search not rerun",
+    "proposal time excludes frozen search and does not establish end-to-end resource compliance",
+    "global variant relaxes search patch cap; local variants preserve the per-patch cap",
+    "all archives use unchanged wire format and exact decoding"
+  ],
+  "aggregates": {
+    "F06": {
+      "strings": 16,
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "strings_improved_over_frozen": 2,
+          "strings_better_than_portfolio": 2,
+          "mean_improvement_per_input_bit": 0.023803166487962737,
+          "mean_saving_vs_portfolio_per_input_bit": -0.2852832049982261
+        },
+        "consensus_original_periods_local_patches": {
+          "strings_improved_over_frozen": 8,
+          "strings_better_than_portfolio": 8,
+          "mean_improvement_per_input_bit": 0.10971236831571861,
+          "mean_saving_vs_portfolio_per_input_bit": -0.19937400317047024
+        },
+        "consensus_dense_periods_local_patches": {
+          "strings_improved_over_frozen": 16,
+          "strings_better_than_portfolio": 12,
+          "mean_improvement_per_input_bit": 0.3138385687485259,
+          "mean_saving_vs_portfolio_per_input_bit": 0.004752197262337076
+        },
+        "consensus_dense_periods_global_patch": {
+          "strings_improved_over_frozen": 16,
+          "strings_better_than_portfolio": 16,
+          "mean_improvement_per_input_bit": 0.4630987701360945,
+          "mean_saving_vs_portfolio_per_input_bit": 0.15401239864990568
+        }
+      }
+    },
+    "F07": {
+      "strings": 16,
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "strings_improved_over_frozen": 0,
+          "strings_better_than_portfolio": 0,
+          "mean_improvement_per_input_bit": 0.0,
+          "mean_saving_vs_portfolio_per_input_bit": 0.0
+        },
+        "consensus_original_periods_local_patches": {
+          "strings_improved_over_frozen": 0,
+          "strings_better_than_portfolio": 0,
+          "mean_improvement_per_input_bit": 0.0,
+          "mean_saving_vs_portfolio_per_input_bit": 0.0
+        },
+        "consensus_dense_periods_local_patches": {
+          "strings_improved_over_frozen": 0,
+          "strings_better_than_portfolio": 0,
+          "mean_improvement_per_input_bit": 0.0,
+          "mean_saving_vs_portfolio_per_input_bit": 0.0
+        },
+        "consensus_dense_periods_global_patch": {
+          "strings_improved_over_frozen": 0,
+          "strings_better_than_portfolio": 0,
+          "mean_improvement_per_input_bit": 0.0,
+          "mean_saving_vs_portfolio_per_input_bit": 0.0
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "transfer-F06-16384-2000-base",
+      "family": "F06",
+      "n": 16384,
+      "frozen_full_bits": 15712,
+      "baseline_best_bits": 7760,
+      "input_sha256": "cab7535c71e601b13bc00f90446215001b910612908a74194dbb720ed4e4c316",
+      "proposal_wall_seconds": 0.02062929200110375,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 15712,
+          "archive_sha256": "9d2e140ef8469e2d77d842c134834e7ba33f206bb40bb89c2e8c0ba569930c74",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -7952
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 15712,
+          "archive_sha256": "9d2e140ef8469e2d77d842c134834e7ba33f206bb40bb89c2e8c0ba569930c74",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -7952
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 512,
+          "rules": 81,
+          "depth": 5,
+          "proposal_bits": 7440,
+          "augmented_bits": 7440,
+          "archive_sha256": "8fa4d0a6d2b833c714ceed8d08ffd7344c49e8c355d3aede555e0bc859646c81",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 8272,
+          "saving_over_portfolio_bits": 320
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4440,
+          "augmented_bits": 4440,
+          "archive_sha256": "868af6aa64f6ab96b7a05e228091d327b2b8a0ac4c7a21f0a66140a1eed3029c",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 11272,
+          "saving_over_portfolio_bits": 3320
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-16384-2000-ragged",
+      "family": "F06",
+      "n": 16387,
+      "frozen_full_bits": 15664,
+      "baseline_best_bits": 7760,
+      "input_sha256": "c113f1e80af172a19689a262265859fb07295bc217a09157c8c223d42d8d8010",
+      "proposal_wall_seconds": 0.020435542002815055,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 15664,
+          "archive_sha256": "25559c9aa91800157bf77b989d0662d45e7260d2d060d92a42189b3d8b15f9d6",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -7904
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 15664,
+          "archive_sha256": "25559c9aa91800157bf77b989d0662d45e7260d2d060d92a42189b3d8b15f9d6",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -7904
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 512,
+          "rules": 82,
+          "depth": 5,
+          "proposal_bits": 7472,
+          "augmented_bits": 7472,
+          "archive_sha256": "1005c4774f29d6e37d5925e4cbd421f321e2380fd983612ef68efb678fa8e899",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 8192,
+          "saving_over_portfolio_bits": 288
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4440,
+          "augmented_bits": 4440,
+          "archive_sha256": "375deacafba3be0b2b69874efbe212507cff3cea90451bdd8f25c9a1a09465eb",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 11224,
+          "saving_over_portfolio_bits": 3320
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-16384-2001-base",
+      "family": "F06",
+      "n": 16384,
+      "frozen_full_bits": 9760,
+      "baseline_best_bits": 7184,
+      "input_sha256": "fead16a5a43b35ce23fd04564d159182cd4023dbc941d4d821894dc5649e1a4b",
+      "proposal_wall_seconds": 0.030699209000886185,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 1,
+        "consensus_dense_periods_local_patches": 15,
+        "consensus_dense_periods_global_patch": 15
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 9760,
+          "archive_sha256": "671c062df66dffeac89a69ca18a5d99a60ca0f27276aa1122c3271eb535e74db",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -2576
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 77,
+          "depth": 5,
+          "proposal_bits": 6608,
+          "augmented_bits": 6608,
+          "archive_sha256": "80bec5b1ad3c30d7d5ccee9c4c380e360e049767289328f8f6f7ea81878efa0e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3152,
+          "saving_over_portfolio_bits": 576
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 77,
+          "depth": 5,
+          "proposal_bits": 6608,
+          "augmented_bits": 6608,
+          "archive_sha256": "80bec5b1ad3c30d7d5ccee9c4c380e360e049767289328f8f6f7ea81878efa0e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3152,
+          "saving_over_portfolio_bits": 576
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 17,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4424,
+          "augmented_bits": 4424,
+          "archive_sha256": "9533bf18dac138ae045c9bddef62302d55ea7bdb74d2ce5b63c9857f3789443a",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 5336,
+          "saving_over_portfolio_bits": 2760
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-16384-2001-ragged",
+      "family": "F06",
+      "n": 16387,
+      "frozen_full_bits": 9792,
+      "baseline_best_bits": 7184,
+      "input_sha256": "2b7396ff88446cc553f2220249298a77c33fdf447ccc464da843502e813d463e",
+      "proposal_wall_seconds": 0.03057920900027966,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 1,
+        "consensus_dense_periods_local_patches": 15,
+        "consensus_dense_periods_global_patch": 15
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 9792,
+          "archive_sha256": "c5a468d58f7ba8d7c2d81164228d27f55f0422f66008525a65988fe38708aa78",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -2608
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 78,
+          "depth": 5,
+          "proposal_bits": 6640,
+          "augmented_bits": 6640,
+          "archive_sha256": "bc9b08d8831fa1d0626717b6795015eab3198920b6c109c5214bc4796b9d0836",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3152,
+          "saving_over_portfolio_bits": 544
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 78,
+          "depth": 5,
+          "proposal_bits": 6640,
+          "augmented_bits": 6640,
+          "archive_sha256": "bc9b08d8831fa1d0626717b6795015eab3198920b6c109c5214bc4796b9d0836",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3152,
+          "saving_over_portfolio_bits": 544
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 17,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4424,
+          "augmented_bits": 4424,
+          "archive_sha256": "4cda3b3483f5f3ed94e9e28425756ac28f41e5d3eb9e638fc30bab26b79db833",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 5368,
+          "saving_over_portfolio_bits": 2760
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-16384-2002-base",
+      "family": "F06",
+      "n": 16384,
+      "frozen_full_bits": 16176,
+      "baseline_best_bits": 7760,
+      "input_sha256": "27ab7a671d2027104a1ca7d561007f8e52624bcd12f4c5d2a2942eab186815ba",
+      "proposal_wall_seconds": 0.02037124999696971,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16176,
+          "archive_sha256": "86e1b7e502cc0e1dbd82179256c0be91da2bad7c87e8aa04b2862060d1617f9c",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -8416
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16176,
+          "archive_sha256": "86e1b7e502cc0e1dbd82179256c0be91da2bad7c87e8aa04b2862060d1617f9c",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -8416
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 512,
+          "rules": 81,
+          "depth": 5,
+          "proposal_bits": 7432,
+          "augmented_bits": 7432,
+          "archive_sha256": "49c368b9e99dd0be40d7bb3d2e9976bab62be8813698b043d29d680c2d810af1",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 8744,
+          "saving_over_portfolio_bits": 328
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4416,
+          "augmented_bits": 4416,
+          "archive_sha256": "d53ec83f45af7776212ba5275b25a3481fb68acad69758274346f55bd296acbc",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 11760,
+          "saving_over_portfolio_bits": 3344
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-16384-2002-ragged",
+      "family": "F06",
+      "n": 16387,
+      "frozen_full_bits": 16168,
+      "baseline_best_bits": 7760,
+      "input_sha256": "e33e8773fb4290202dec793dbcec26cdd6f618a408ad7be3e58d33caaf6ef234",
+      "proposal_wall_seconds": 0.02040287500130944,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16168,
+          "archive_sha256": "b5cb6a36a197369770f83be0a8d86b16050ef65d3c24f8e932560f0ecb00af08",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -8408
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16168,
+          "archive_sha256": "b5cb6a36a197369770f83be0a8d86b16050ef65d3c24f8e932560f0ecb00af08",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -8408
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 512,
+          "rules": 82,
+          "depth": 5,
+          "proposal_bits": 7464,
+          "augmented_bits": 7464,
+          "archive_sha256": "8bcc24250923d9ff2c385de130d7e3ecd1b2e9ea282ee9a87f0b9c10f8f7bd75",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 8704,
+          "saving_over_portfolio_bits": 296
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4416,
+          "augmented_bits": 4416,
+          "archive_sha256": "d97fbb97b173304aad55313e8959bd36033ec471929e702036022c049d62aa08",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 11752,
+          "saving_over_portfolio_bits": 3344
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-16384-2003-base",
+      "family": "F06",
+      "n": 16384,
+      "frozen_full_bits": 10008,
+      "baseline_best_bits": 7024,
+      "input_sha256": "9e7604a114a4a08d10d923d3d3ff0bf0a0b13f7d6c1256d1f9c85ea409045775",
+      "proposal_wall_seconds": 0.031366874998639105,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 1,
+        "consensus_dense_periods_local_patches": 15,
+        "consensus_dense_periods_global_patch": 15
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 10008,
+          "archive_sha256": "3580a1dae9f922e51d9f53d4f41ba2dc8e83cf0c8085c644616f4f2fc30712b7",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -2984
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 75,
+          "depth": 5,
+          "proposal_bits": 6552,
+          "augmented_bits": 6552,
+          "archive_sha256": "a904bdd9a05771c3a9da353f238846e18f41866669ad2836209ee4bdce84ac55",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3456,
+          "saving_over_portfolio_bits": 472
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 75,
+          "depth": 5,
+          "proposal_bits": 6552,
+          "augmented_bits": 6552,
+          "archive_sha256": "a904bdd9a05771c3a9da353f238846e18f41866669ad2836209ee4bdce84ac55",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3456,
+          "saving_over_portfolio_bits": 472
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 17,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4432,
+          "augmented_bits": 4432,
+          "archive_sha256": "089caa424bc408f234bd1d42eca304cfbd781d68c04e709f8c47cb28c26ed707",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 5576,
+          "saving_over_portfolio_bits": 2592
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-16384-2003-ragged",
+      "family": "F06",
+      "n": 16387,
+      "frozen_full_bits": 10016,
+      "baseline_best_bits": 7024,
+      "input_sha256": "70efca11c55ba3224237a725040b6fb0d52771e4901580fcf402033d3494756b",
+      "proposal_wall_seconds": 0.03100583400009782,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 1,
+        "consensus_dense_periods_local_patches": 15,
+        "consensus_dense_periods_global_patch": 15
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 10016,
+          "archive_sha256": "e94aa3799f584182f0b51954c1863f46cf1ebb5ecc2041730d0da1549adcbbd9",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -2992
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 76,
+          "depth": 5,
+          "proposal_bits": 6584,
+          "augmented_bits": 6584,
+          "archive_sha256": "2bbda524093af0b2a14195c5ea7f53acbdcfb940903ae02c190f3cfa97130aaa",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3432,
+          "saving_over_portfolio_bits": 440
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 17,
+          "errors": 512,
+          "rules": 76,
+          "depth": 5,
+          "proposal_bits": 6584,
+          "augmented_bits": 6584,
+          "archive_sha256": "2bbda524093af0b2a14195c5ea7f53acbdcfb940903ae02c190f3cfa97130aaa",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 3432,
+          "saving_over_portfolio_bits": 440
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 17,
+          "errors": 512,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 4432,
+          "augmented_bits": 4432,
+          "archive_sha256": "78680b2d30400515a4956013d3b5af3f5db3eca714ca05aeff848cf0d450ac81",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 5584,
+          "saving_over_portfolio_bits": 2592
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2000-base",
+      "family": "F06",
+      "n": 65536,
+      "frozen_full_bits": 50728,
+      "baseline_best_bits": 25936,
+      "input_sha256": "2119eceb8b420a002309712efe37de59d1ac3e2e221da7f05596b511eefad06e",
+      "proposal_wall_seconds": 0.06862441599878366,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 50728,
+          "archive_sha256": "923f5a43adc160199887ff5c6ae0f3dffb061fd3374af4a245fc74a3e6f785c3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24792
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 50728,
+          "archive_sha256": "923f5a43adc160199887ff5c6ae0f3dffb061fd3374af4a245fc74a3e6f785c3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24792
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 317,
+          "depth": 5,
+          "proposal_bits": 30904,
+          "augmented_bits": 30904,
+          "archive_sha256": "d6ab3ad582fd63b38f9a012e0e0a073d7051280765d5044f9007ff30f3345a37",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 19824,
+          "saving_over_portfolio_bits": -4968
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 16992,
+          "augmented_bits": 16992,
+          "archive_sha256": "7880c9a9973818c04374c89d8766c6ef8f7b0ec93baec69a32a78ce437da5403",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 33736,
+          "saving_over_portfolio_bits": 8944
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2000-ragged",
+      "family": "F06",
+      "n": 65539,
+      "frozen_full_bits": 50736,
+      "baseline_best_bits": 25936,
+      "input_sha256": "b06c1271aba7509b1c4d7448e9c158f33d1a868a80ac78bb462d81f112b97ac7",
+      "proposal_wall_seconds": 0.0700449159994605,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 50736,
+          "archive_sha256": "4f4d8117d02d44b7e23645ea177dc00434eea659c2b96ce3c1d60e48dd840e6d",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24800
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 50736,
+          "archive_sha256": "4f4d8117d02d44b7e23645ea177dc00434eea659c2b96ce3c1d60e48dd840e6d",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24800
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 318,
+          "depth": 5,
+          "proposal_bits": 30944,
+          "augmented_bits": 30944,
+          "archive_sha256": "0e353c6920b07e7baced004d83d3189f69a715145d5530bd4a1240c6a2c5756a",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 19792,
+          "saving_over_portfolio_bits": -5008
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 17000,
+          "augmented_bits": 17000,
+          "archive_sha256": "5767d1636fd1d8e1a18b1135a75c49da343ea3f5a91f99eb3c5ef1112be11cb2",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 33736,
+          "saving_over_portfolio_bits": 8936
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2001-base",
+      "family": "F06",
+      "n": 65536,
+      "frozen_full_bits": 32840,
+      "baseline_best_bits": 23248,
+      "input_sha256": "d8cb62aac6c7e777a68dc5f8be6299ad1f96caf4725eae9407ea38371a547527",
+      "proposal_wall_seconds": 0.11856795799758402,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 2,
+        "consensus_original_periods_local_patches": 2,
+        "consensus_dense_periods_local_patches": 19,
+        "consensus_dense_periods_global_patch": 19
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 117,
+          "depth": 5,
+          "proposal_bits": 20352,
+          "augmented_bits": 20352,
+          "archive_sha256": "f359f146f4c3d2f000669a2c76e4716432dea706082775898247cec7c82361c1",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 12488,
+          "saving_over_portfolio_bits": 2896
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 117,
+          "depth": 5,
+          "proposal_bits": 20352,
+          "augmented_bits": 20352,
+          "archive_sha256": "f359f146f4c3d2f000669a2c76e4716432dea706082775898247cec7c82361c1",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 12488,
+          "saving_over_portfolio_bits": 2896
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 117,
+          "depth": 5,
+          "proposal_bits": 20352,
+          "augmented_bits": 20352,
+          "archive_sha256": "f359f146f4c3d2f000669a2c76e4716432dea706082775898247cec7c82361c1",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 12488,
+          "saving_over_portfolio_bits": 2896
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 16888,
+          "augmented_bits": 16888,
+          "archive_sha256": "a168b562c5a170a6d2109d5706300930dd3e7813560a0c201032cedbe3b35068",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 15952,
+          "saving_over_portfolio_bits": 6360
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2001-ragged",
+      "family": "F06",
+      "n": 65539,
+      "frozen_full_bits": 32856,
+      "baseline_best_bits": 23248,
+      "input_sha256": "585f4a79ec7a07b32e6725a183bb842a10395909023676b77dcf8540697fb365",
+      "proposal_wall_seconds": 0.1214084580024064,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 2,
+        "consensus_original_periods_local_patches": 2,
+        "consensus_dense_periods_local_patches": 19,
+        "consensus_dense_periods_global_patch": 19
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 118,
+          "depth": 5,
+          "proposal_bits": 20384,
+          "augmented_bits": 20384,
+          "archive_sha256": "e69a70a6e946335d7975b232ea65f22a4d4de639fb86b6125cfaf3023c499eb3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 12472,
+          "saving_over_portfolio_bits": 2864
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 118,
+          "depth": 5,
+          "proposal_bits": 20384,
+          "augmented_bits": 20384,
+          "archive_sha256": "e69a70a6e946335d7975b232ea65f22a4d4de639fb86b6125cfaf3023c499eb3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 12472,
+          "saving_over_portfolio_bits": 2864
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 118,
+          "depth": 5,
+          "proposal_bits": 20384,
+          "augmented_bits": 20384,
+          "archive_sha256": "e69a70a6e946335d7975b232ea65f22a4d4de639fb86b6125cfaf3023c499eb3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 12472,
+          "saving_over_portfolio_bits": 2864
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 13,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 16888,
+          "augmented_bits": 16888,
+          "archive_sha256": "367eba878f9408a2f9d20adb84e872c4e655b3fe312e42e79ce5d59b7af655fe",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 15968,
+          "saving_over_portfolio_bits": 6360
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2002-base",
+      "family": "F06",
+      "n": 65536,
+      "frozen_full_bits": 50272,
+      "baseline_best_bits": 26192,
+      "input_sha256": "d1a64f8b0ddeeb98761ac35b71901e157a1a2c3ca7d5caaa574e646c9ab3ffa1",
+      "proposal_wall_seconds": 0.06786429099884117,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 50272,
+          "archive_sha256": "9b6a9cad735fe6d9e3b3ddbc113346bfeb3ec1b340e75865eafdab681680b73c",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24080
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 50272,
+          "archive_sha256": "9b6a9cad735fe6d9e3b3ddbc113346bfeb3ec1b340e75865eafdab681680b73c",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24080
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 317,
+          "depth": 5,
+          "proposal_bits": 30848,
+          "augmented_bits": 30848,
+          "archive_sha256": "585dbba045ad7d1486702066500cabe66e6f1c8019754b96ac432e906d263598",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 19424,
+          "saving_over_portfolio_bits": -4656
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 16952,
+          "augmented_bits": 16952,
+          "archive_sha256": "ae80424ee0dc98cc3986d1ebb21f01732895c0c6fe0dc12d19dc689d6f39e0e9",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 33320,
+          "saving_over_portfolio_bits": 9240
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2002-ragged",
+      "family": "F06",
+      "n": 65539,
+      "frozen_full_bits": 50256,
+      "baseline_best_bits": 26192,
+      "input_sha256": "4e1ba447e964d9c00316eed36ef5b88b284eb6d13bd290de5ccdd257c60d9371",
+      "proposal_wall_seconds": 0.0685650830018858,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 4,
+        "consensus_dense_periods_global_patch": 4
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 50256,
+          "archive_sha256": "5627fce502d8d1ed8b1c521238db92398b95ede7e0584c7971d79df9611dece8",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24064
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 50256,
+          "archive_sha256": "5627fce502d8d1ed8b1c521238db92398b95ede7e0584c7971d79df9611dece8",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -24064
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 318,
+          "depth": 5,
+          "proposal_bits": 30888,
+          "augmented_bits": 30888,
+          "archive_sha256": "727979e60666f669644ca2b721f26640f0c06a0fd1258428522e5a79a540d530",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 19368,
+          "saving_over_portfolio_bits": -4696
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 63,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 16960,
+          "augmented_bits": 16960,
+          "archive_sha256": "e910b72b03227697eb4b1045e2be3ef8cef6617310e6d70fcb513f7673de0d6f",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 33296,
+          "saving_over_portfolio_bits": 9232
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2003-base",
+      "family": "F06",
+      "n": 65536,
+      "frozen_full_bits": 41024,
+      "baseline_best_bits": 25072,
+      "input_sha256": "afab34c7d7a42b3f63d2cdd5e890c7c36770cc16b15b770de07ffb37a292ba87",
+      "proposal_wall_seconds": 0.08325912500004051,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 1,
+        "consensus_original_periods_local_patches": 1,
+        "consensus_dense_periods_local_patches": 8,
+        "consensus_dense_periods_global_patch": 8
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": 31,
+          "errors": 4018,
+          "rules": 145,
+          "depth": 5,
+          "proposal_bits": 47600,
+          "augmented_bits": 41024,
+          "archive_sha256": "cdfcd0a90bb2c7ca136e6adb28535144e34f84dcf6c5d418ce7b5dcfddb4bf51",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -15952
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 31,
+          "errors": 2048,
+          "rules": 160,
+          "depth": 5,
+          "proposal_bits": 22304,
+          "augmented_bits": 22304,
+          "archive_sha256": "395f3c26ecba72a42b8e0b2139ae6f5b6d2c0e51ac166c831f405ca064898cfa",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 18720,
+          "saving_over_portfolio_bits": 2768
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 31,
+          "errors": 2048,
+          "rules": 160,
+          "depth": 5,
+          "proposal_bits": 22304,
+          "augmented_bits": 22304,
+          "archive_sha256": "395f3c26ecba72a42b8e0b2139ae6f5b6d2c0e51ac166c831f405ca064898cfa",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 18720,
+          "saving_over_portfolio_bits": 2768
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 31,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 16920,
+          "augmented_bits": 16920,
+          "archive_sha256": "fef793bdfc78749c80fa781f2c81112ffecd727c35847efc399ba06fcdfb0027",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 24104,
+          "saving_over_portfolio_bits": 8152
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F06-65536-2003-ragged",
+      "family": "F06",
+      "n": 65539,
+      "frozen_full_bits": 40944,
+      "baseline_best_bits": 25072,
+      "input_sha256": "2b01e6bdf387ca50aa181700ba69a16f9138025c3c8fcd1a89527dd41e6fc352",
+      "proposal_wall_seconds": 0.08868954200079315,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 1,
+        "consensus_original_periods_local_patches": 1,
+        "consensus_dense_periods_local_patches": 8,
+        "consensus_dense_periods_global_patch": 8
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": 31,
+          "errors": 4018,
+          "rules": 146,
+          "depth": 5,
+          "proposal_bits": 47640,
+          "augmented_bits": 40944,
+          "archive_sha256": "818dc7f4801e4e850b27cb672f4be1d5ee0e69c555190b219995f1c7b41f4ccc",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": -15872
+        },
+        "consensus_original_periods_local_patches": {
+          "period": 31,
+          "errors": 2048,
+          "rules": 161,
+          "depth": 5,
+          "proposal_bits": 22344,
+          "augmented_bits": 22344,
+          "archive_sha256": "4c667fbef1f40eb9f4194fd35d6a96538f701346cb90d74b1e19e9c623a57b5b",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 18600,
+          "saving_over_portfolio_bits": 2728
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": 31,
+          "errors": 2048,
+          "rules": 161,
+          "depth": 5,
+          "proposal_bits": 22344,
+          "augmented_bits": 22344,
+          "archive_sha256": "4c667fbef1f40eb9f4194fd35d6a96538f701346cb90d74b1e19e9c623a57b5b",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 18600,
+          "saving_over_portfolio_bits": 2728
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": 31,
+          "errors": 2048,
+          "rules": 5,
+          "depth": 4,
+          "proposal_bits": 16920,
+          "augmented_bits": 16920,
+          "archive_sha256": "683ed0fa639e09a1ae8f989c2c0ed4b145cd63dec233c553f2625bbd3d341d09",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 24024,
+          "saving_over_portfolio_bits": 8152
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2000-base",
+      "family": "F07",
+      "n": 16384,
+      "frozen_full_bits": 16464,
+      "baseline_best_bits": 16464,
+      "input_sha256": "1cf4e92c5790799efb2f06a0065112bcf3bbc7162d97a032f8d43a9c101529e6",
+      "proposal_wall_seconds": 0.02315837499918416,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "2b136837a500612371dabcfa5441eb9885bf7dab882bd466726292d66f8875fc",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "2b136837a500612371dabcfa5441eb9885bf7dab882bd466726292d66f8875fc",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "2b136837a500612371dabcfa5441eb9885bf7dab882bd466726292d66f8875fc",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "2b136837a500612371dabcfa5441eb9885bf7dab882bd466726292d66f8875fc",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2000-ragged",
+      "family": "F07",
+      "n": 16387,
+      "frozen_full_bits": 16472,
+      "baseline_best_bits": 16472,
+      "input_sha256": "a18fe5004bd4fc71429dbd9e1d41eabd21c9885b0323eac8d043ba1786760b68",
+      "proposal_wall_seconds": 0.02218729200103553,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "7ecfac8bdb9830d376a65b8464f1cc5187be2be33128d587b06f31c82a986451",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "7ecfac8bdb9830d376a65b8464f1cc5187be2be33128d587b06f31c82a986451",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "7ecfac8bdb9830d376a65b8464f1cc5187be2be33128d587b06f31c82a986451",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "7ecfac8bdb9830d376a65b8464f1cc5187be2be33128d587b06f31c82a986451",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2001-base",
+      "family": "F07",
+      "n": 16384,
+      "frozen_full_bits": 16464,
+      "baseline_best_bits": 16464,
+      "input_sha256": "250bfbbeb783fc83c2fb688b2038d9adf25c2c2ea7f66653019bbf6a62285b48",
+      "proposal_wall_seconds": 0.022236624998186016,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "461aacd57f6bd7e89703fea8ecf75ea9bb3e06075edc600f2fcb3f4feed58d8b",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "461aacd57f6bd7e89703fea8ecf75ea9bb3e06075edc600f2fcb3f4feed58d8b",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "461aacd57f6bd7e89703fea8ecf75ea9bb3e06075edc600f2fcb3f4feed58d8b",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "461aacd57f6bd7e89703fea8ecf75ea9bb3e06075edc600f2fcb3f4feed58d8b",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2001-ragged",
+      "family": "F07",
+      "n": 16387,
+      "frozen_full_bits": 16472,
+      "baseline_best_bits": 16472,
+      "input_sha256": "794e9027a47556af51ff13b35c687925a1b235edaef8494ea9e180d865cd5287",
+      "proposal_wall_seconds": 0.022157750001497334,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "9e1d6d4f01c0be0d6e529ffecf17e612fbc59ef82c672e3e46028c597b263e89",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "9e1d6d4f01c0be0d6e529ffecf17e612fbc59ef82c672e3e46028c597b263e89",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "9e1d6d4f01c0be0d6e529ffecf17e612fbc59ef82c672e3e46028c597b263e89",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "9e1d6d4f01c0be0d6e529ffecf17e612fbc59ef82c672e3e46028c597b263e89",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2002-base",
+      "family": "F07",
+      "n": 16384,
+      "frozen_full_bits": 16464,
+      "baseline_best_bits": 16464,
+      "input_sha256": "15037112f6aaf005f0b2924b61e5821d7c81ccd4ac5e21fbf8f214ee7246d565",
+      "proposal_wall_seconds": 0.022256041997025022,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "eb526aeba4a1d06fabb36e71b4fe02ffd438ce0b929e0e9f9c5d39ffeeed1238",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "eb526aeba4a1d06fabb36e71b4fe02ffd438ce0b929e0e9f9c5d39ffeeed1238",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "eb526aeba4a1d06fabb36e71b4fe02ffd438ce0b929e0e9f9c5d39ffeeed1238",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "eb526aeba4a1d06fabb36e71b4fe02ffd438ce0b929e0e9f9c5d39ffeeed1238",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2002-ragged",
+      "family": "F07",
+      "n": 16387,
+      "frozen_full_bits": 16472,
+      "baseline_best_bits": 16472,
+      "input_sha256": "3a650af09b8477c92a8a6816ecef41e9c13dc68464d0a8d2d003726fe41bb84f",
+      "proposal_wall_seconds": 0.022135750001325505,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "3d168216bf1582f80950f5f11a94c74f2dddbcfd55616d8c682c13d72150dbe7",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "3d168216bf1582f80950f5f11a94c74f2dddbcfd55616d8c682c13d72150dbe7",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "3d168216bf1582f80950f5f11a94c74f2dddbcfd55616d8c682c13d72150dbe7",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "3d168216bf1582f80950f5f11a94c74f2dddbcfd55616d8c682c13d72150dbe7",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2003-base",
+      "family": "F07",
+      "n": 16384,
+      "frozen_full_bits": 16464,
+      "baseline_best_bits": 16464,
+      "input_sha256": "ec02819206c74ff68bb953287a62cdd314d9b70985c16d6c400011f04392e8d8",
+      "proposal_wall_seconds": 0.022025792000931688,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "023c54497e55dbc915ebbd6153b536346ca4d71fe885c0db2b2135b7c64e60ac",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "023c54497e55dbc915ebbd6153b536346ca4d71fe885c0db2b2135b7c64e60ac",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "023c54497e55dbc915ebbd6153b536346ca4d71fe885c0db2b2135b7c64e60ac",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16464,
+          "augmented_bits": 16464,
+          "archive_sha256": "023c54497e55dbc915ebbd6153b536346ca4d71fe885c0db2b2135b7c64e60ac",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-16384-2003-ragged",
+      "family": "F07",
+      "n": 16387,
+      "frozen_full_bits": 16472,
+      "baseline_best_bits": 16472,
+      "input_sha256": "2d737fdc2fab38543ce958e7246f3c0baf6e82f36b782845fe77fe3430b0d193",
+      "proposal_wall_seconds": 0.02208924999649753,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "84bd2300aa125629251ad60ebad9414eba83dd03e1101c1d94aeb2bc01bfa354",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "84bd2300aa125629251ad60ebad9414eba83dd03e1101c1d94aeb2bc01bfa354",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "84bd2300aa125629251ad60ebad9414eba83dd03e1101c1d94aeb2bc01bfa354",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 16472,
+          "augmented_bits": 16472,
+          "archive_sha256": "84bd2300aa125629251ad60ebad9414eba83dd03e1101c1d94aeb2bc01bfa354",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2000-base",
+      "family": "F07",
+      "n": 65536,
+      "frozen_full_bits": 65616,
+      "baseline_best_bits": 65616,
+      "input_sha256": "8deb7a8b97000a23e6df0c44fd650a03ffc96b50a7c5c6c2b64803be0a01062e",
+      "proposal_wall_seconds": 0.07863641700168955,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "1334c51c7d0e346f7886ded99998064bf4f6ff33dd4c8d70577f42715889a762",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "1334c51c7d0e346f7886ded99998064bf4f6ff33dd4c8d70577f42715889a762",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "1334c51c7d0e346f7886ded99998064bf4f6ff33dd4c8d70577f42715889a762",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "1334c51c7d0e346f7886ded99998064bf4f6ff33dd4c8d70577f42715889a762",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2000-ragged",
+      "family": "F07",
+      "n": 65539,
+      "frozen_full_bits": 65624,
+      "baseline_best_bits": 65624,
+      "input_sha256": "1255454b767cbd444a348e584300a952c2cc6630dd7edd204e6d2a7eaf8a8961",
+      "proposal_wall_seconds": 0.07653991600091103,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "eb4404a6e990f7f1063d4d969aa21bf8c9f5377127e5b3b92b48f973d178c772",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "eb4404a6e990f7f1063d4d969aa21bf8c9f5377127e5b3b92b48f973d178c772",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "eb4404a6e990f7f1063d4d969aa21bf8c9f5377127e5b3b92b48f973d178c772",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "eb4404a6e990f7f1063d4d969aa21bf8c9f5377127e5b3b92b48f973d178c772",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2001-base",
+      "family": "F07",
+      "n": 65536,
+      "frozen_full_bits": 65616,
+      "baseline_best_bits": 65616,
+      "input_sha256": "8c8653efc37ff253e6b1a16184aec24fa71af5bab2d7ace25115877ceb112136",
+      "proposal_wall_seconds": 0.07688366699949256,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "2b1fd2354c823c984b0a81b20e76c9d4ecca9969fe691590428e618cc00eb8de",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "2b1fd2354c823c984b0a81b20e76c9d4ecca9969fe691590428e618cc00eb8de",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "2b1fd2354c823c984b0a81b20e76c9d4ecca9969fe691590428e618cc00eb8de",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "2b1fd2354c823c984b0a81b20e76c9d4ecca9969fe691590428e618cc00eb8de",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2001-ragged",
+      "family": "F07",
+      "n": 65539,
+      "frozen_full_bits": 65624,
+      "baseline_best_bits": 65624,
+      "input_sha256": "8358ebb0d30076550353fb62dbf5e6bcdd2450360256bdb4e2886377e6d9a055",
+      "proposal_wall_seconds": 0.07737437499963562,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "e6f98ba62901ed000f277ba245dc6152f0fe3f3163f91e0d6105b7aeb2cb0e2e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "e6f98ba62901ed000f277ba245dc6152f0fe3f3163f91e0d6105b7aeb2cb0e2e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "e6f98ba62901ed000f277ba245dc6152f0fe3f3163f91e0d6105b7aeb2cb0e2e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "e6f98ba62901ed000f277ba245dc6152f0fe3f3163f91e0d6105b7aeb2cb0e2e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2002-base",
+      "family": "F07",
+      "n": 65536,
+      "frozen_full_bits": 65616,
+      "baseline_best_bits": 65616,
+      "input_sha256": "c3a08e08ed0709d72b70c91771059d906445a06fdac80ebf77953e5b67cf9ce4",
+      "proposal_wall_seconds": 0.07659829200201784,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "65a486e301c63b1b2124215c1ae4ceec48ffb3d2c26ed4377333e440f6169658",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "65a486e301c63b1b2124215c1ae4ceec48ffb3d2c26ed4377333e440f6169658",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "65a486e301c63b1b2124215c1ae4ceec48ffb3d2c26ed4377333e440f6169658",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "65a486e301c63b1b2124215c1ae4ceec48ffb3d2c26ed4377333e440f6169658",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2002-ragged",
+      "family": "F07",
+      "n": 65539,
+      "frozen_full_bits": 65624,
+      "baseline_best_bits": 65624,
+      "input_sha256": "11fdaea46625ef5b375c0f096d9339e930f3ae329b106dbb4185169dffd2ca83",
+      "proposal_wall_seconds": 0.07759016699856147,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "8807ed663b7748f818aee76660a0c6479f7dbac97d56c122880d7ccd2c5df90e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "8807ed663b7748f818aee76660a0c6479f7dbac97d56c122880d7ccd2c5df90e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "8807ed663b7748f818aee76660a0c6479f7dbac97d56c122880d7ccd2c5df90e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "8807ed663b7748f818aee76660a0c6479f7dbac97d56c122880d7ccd2c5df90e",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2003-base",
+      "family": "F07",
+      "n": 65536,
+      "frozen_full_bits": 65616,
+      "baseline_best_bits": 65616,
+      "input_sha256": "4d7b79692ae78ae76c3b9efd9d6a1d91c4dc819ed049e9933c6e308644d43473",
+      "proposal_wall_seconds": 0.07745708299989928,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "7ee28e5ac4f35d44d58dfbca664feb9f258dc27aae868b316fba0eee71fb27c3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "7ee28e5ac4f35d44d58dfbca664feb9f258dc27aae868b316fba0eee71fb27c3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "7ee28e5ac4f35d44d58dfbca664feb9f258dc27aae868b316fba0eee71fb27c3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65616,
+          "augmented_bits": 65616,
+          "archive_sha256": "7ee28e5ac4f35d44d58dfbca664feb9f258dc27aae868b316fba0eee71fb27c3",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    },
+    {
+      "case_id": "transfer-F07-65536-2003-ragged",
+      "family": "F07",
+      "n": 65539,
+      "frozen_full_bits": 65624,
+      "baseline_best_bits": 65624,
+      "input_sha256": "1f0e3d0a664a605b75270292a861d01031408cc9eb29a4ed31128c45aa6d845e",
+      "proposal_wall_seconds": 0.07705825000084587,
+      "candidate_counts": {
+        "first_block_original_periods_local_patches": 0,
+        "consensus_original_periods_local_patches": 0,
+        "consensus_dense_periods_local_patches": 0,
+        "consensus_dense_periods_global_patch": 0
+      },
+      "variants": {
+        "first_block_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "cd512c00a18ab482245ff9b3f102a27b447d144041bd10c5ad4cf127b0e6dea4",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_original_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "cd512c00a18ab482245ff9b3f102a27b447d144041bd10c5ad4cf127b0e6dea4",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_local_patches": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "cd512c00a18ab482245ff9b3f102a27b447d144041bd10c5ad4cf127b0e6dea4",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        },
+        "consensus_dense_periods_global_patch": {
+          "period": null,
+          "errors": null,
+          "rules": 0,
+          "depth": 0,
+          "proposal_bits": 65624,
+          "augmented_bits": 65624,
+          "archive_sha256": "cd512c00a18ab482245ff9b3f102a27b447d144041bd10c5ad4cf127b0e6dea4",
+          "decode_ok": true,
+          "improvement_over_frozen_bits": 0,
+          "saving_over_portfolio_bits": 0
+        }
+      }
+    }
+  ]
+}

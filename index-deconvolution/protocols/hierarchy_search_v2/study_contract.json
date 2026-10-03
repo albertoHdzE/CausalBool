@@ -1,0 +1,460 @@
+{
+  "schema_version": 1,
+  "study": "search-v2",
+  "algorithm": "HID-search-v2",
+  "wire_format": "ISD1/HID-v1 unchanged",
+  "status": "delegation_ready_implementation_pending",
+  "date": "2026-10-02",
+  "run_id": "search-confirm-v2-r1",
+  "result_root": "index-deconvolution/results/hierarchy_search_v2",
+  "fixture_namespace": "search_v2_fixture",
+  "hid_methods": [
+    "hid_legacy",
+    "hid_first_local",
+    "hid_consensus_local",
+    "hid_dense_local",
+    "hid_global",
+    "hid_full"
+  ],
+  "baseline_methods": [
+    "raw",
+    "rle",
+    "gaps",
+    "period",
+    "bernoulli",
+    "context",
+    "zlib",
+    "lzma",
+    "pair_grammar"
+  ],
+  "derived_methods": [
+    "baseline_best"
+  ],
+  "rows_per_case": 16,
+  "stages": {
+    "hid_legacy": [
+      "L"
+    ],
+    "hid_first_local": [
+      "L",
+      "P"
+    ],
+    "hid_consensus_local": [
+      "L",
+      "P",
+      "C"
+    ],
+    "hid_dense_local": [
+      "L",
+      "P",
+      "C",
+      "D"
+    ],
+    "hid_global": [
+      "L",
+      "P",
+      "C",
+      "D",
+      "G"
+    ],
+    "hid_full": [
+      "L",
+      "P",
+      "C",
+      "D",
+      "G",
+      "B"
+    ]
+  },
+  "resources": {
+    "worker_wall_seconds": 30,
+    "worker_rss_bytes": 1073741824,
+    "max_workers": 2,
+    "development_wall_seconds": 14400,
+    "reserved_wall_seconds": 21600,
+    "diagnostics_verification_wall_seconds": 7200,
+    "total_automated_wall_seconds": 43200,
+    "legacy_work_cap": 120000000
+  },
+  "search": {
+    "legacy_configuration": "unchanged hierarchy.infer.FULL",
+    "period_max": 256,
+    "period_min_copies": 2,
+    "original_period_grid": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      64,
+      128,
+      256
+    ],
+    "consensus_tie_bit": "0",
+    "residual_divisor": 16,
+    "local_block_bits": 1024,
+    "local_patch_max": 64,
+    "global_patch_fixed_count_cap": null,
+    "max_rules": 4096,
+    "max_depth": 64,
+    "first_local_candidate_cap": 35,
+    "consensus_local_candidate_cap": 256,
+    "consensus_global_candidate_cap": 256,
+    "template_candidate_cap_total": 547,
+    "equal_cost_selection": "retain earlier incumbent"
+  },
+  "boundary": {
+    "leaf_policy": "literal or shortest exact period <=256, standalone HID bytes, literal wins ties",
+    "max_segments": 8,
+    "parent_min_bits": 64,
+    "child_min_bits": 1,
+    "coarse_grid_denominator": 32,
+    "coarse_edge_neighbors": true,
+    "max_refinement_levels": 5,
+    "refinement_grid_denominator": 16,
+    "refinement_offset_min": -8,
+    "refinement_offset_max": 8,
+    "root_trial_cap_including_initial": 512,
+    "cached_leaf_cap": 2048,
+    "shortest_period_length_charge_multiplier": 256,
+    "strict_improvement_commit": true,
+    "budget_exhaustion": "offer best valid already serialized full-input trial; stop"
+  },
+  "development": {
+    "source_run": "index-deconvolution/results/hierarchy_v1/confirm-v1-r1",
+    "pilot_cohorts": [
+      {
+        "old_role": "confirmation",
+        "families": [
+          "F01",
+          "F02",
+          "F03",
+          "F04",
+          "F05",
+          "F06",
+          "F07",
+          "F08",
+          "F09",
+          "F10",
+          "F11",
+          "F12"
+        ],
+        "base_lengths": [
+          1024
+        ],
+        "replicates": [
+          1000,
+          1001
+        ]
+      },
+      {
+        "old_role": "transfer",
+        "families": [
+          "F01",
+          "F02",
+          "F03",
+          "F04",
+          "F05",
+          "F06",
+          "F07",
+          "F08",
+          "F09",
+          "F10",
+          "F11",
+          "F12"
+        ],
+        "base_lengths": [
+          65536
+        ],
+        "replicates": [
+          2000,
+          2001
+        ]
+      }
+    ],
+    "pilot_strings": 96,
+    "pilot_rows": 1536,
+    "regression_strings": 1632,
+    "regression_rows": 26112,
+    "performance_tuning_authorized": false,
+    "max_prefreeze_fixture_length": 65539
+  },
+  "paired_offsets": [
+    0,
+    3
+  ],
+  "roles": {
+    "confirmation": {
+      "rng_namespace": "search_v2_confirmation",
+      "families": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09",
+        "F10",
+        "F11",
+        "F12"
+      ],
+      "base_lengths": [
+        256,
+        1024,
+        4096
+      ],
+      "replicates": [
+        3000,
+        3001,
+        3002,
+        3003,
+        3004,
+        3005,
+        3006,
+        3007,
+        3008,
+        3009,
+        3010,
+        3011,
+        3012,
+        3013,
+        3014,
+        3015,
+        3016,
+        3017,
+        3018,
+        3019
+      ],
+      "expected_strings": 1440,
+      "expected_rows": 23040
+    },
+    "transfer": {
+      "rng_namespace": "search_v2_transfer",
+      "families": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09",
+        "F10",
+        "F11",
+        "F12"
+      ],
+      "base_lengths": [
+        16384,
+        65536,
+        131072
+      ],
+      "replicates": [
+        5000,
+        5001,
+        5002,
+        5003
+      ],
+      "expected_strings": 288,
+      "expected_rows": 4608
+    },
+    "stress": {
+      "rng_namespace": "search_v2_stress",
+      "families": [
+        "S01",
+        "S02"
+      ],
+      "base_lengths": [
+        4096,
+        65536
+      ],
+      "replicates": [
+        4000,
+        4001,
+        4002,
+        4003,
+        4004,
+        4005,
+        4006,
+        4007
+      ],
+      "expected_strings": 64,
+      "expected_rows": 1024
+    }
+  },
+  "expected_total_strings": 1792,
+  "expected_total_rows": 28672,
+  "stress_parameters": {
+    "S01": {
+      "periods": [
+        37,
+        43,
+        59,
+        67,
+        97,
+        127,
+        193,
+        251
+      ],
+      "noise_divisor_even_replicate": 64,
+      "noise_divisor_odd_replicate": 16
+    },
+    "S02": {
+      "prefix_periods": [
+        19,
+        23,
+        29,
+        37
+      ],
+      "suffix_word_periods": [
+        41,
+        43,
+        47,
+        53
+      ],
+      "definition": "BENCHMARK.md section 3"
+    }
+  },
+  "analysis": {
+    "primary": {
+      "role": "confirmation",
+      "families": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F12"
+      ],
+      "method": "hid_full",
+      "comparator": "baseline_best",
+      "expected_strings": 840,
+      "expected_units": 420,
+      "expected_cells": 21,
+      "quantity": "(baseline archive bits - method archive bits) / input length",
+      "weighting": "mean within base/ragged unit, then within family-size cell, then equal cell means",
+      "bootstrap_draws": 10000,
+      "bootstrap_seed": 44001,
+      "percentiles": [
+        2.5,
+        97.5
+      ],
+      "quantile_method": "linear",
+      "rng": "numpy.random.default_rng"
+    },
+    "targeted_contrasts": {
+      "role": "confirmation",
+      "bootstrap_draws": 10000,
+      "bootstrap_seed": 44002,
+      "joint_draws_over": "all 21 primary cells, retaining pairs and methods",
+      "percentiles": [
+        0.5,
+        99.5
+      ],
+      "expected_strings_each": 120,
+      "expected_units_each": 60,
+      "expected_cells_each": 3,
+      "comparisons": [
+        {
+          "added": "hid_first_local",
+          "previous": "hid_legacy",
+          "family": "F06"
+        },
+        {
+          "added": "hid_consensus_local",
+          "previous": "hid_first_local",
+          "family": "F06"
+        },
+        {
+          "added": "hid_dense_local",
+          "previous": "hid_consensus_local",
+          "family": "F06"
+        },
+        {
+          "added": "hid_global",
+          "previous": "hid_dense_local",
+          "family": "F06"
+        },
+        {
+          "added": "hid_full",
+          "previous": "hid_global",
+          "family": "F12"
+        }
+      ],
+      "missing_unrelated_cells": "draw frozen replicate indices for all 21 cells regardless of availability; dereference only required complete cells"
+    },
+    "descriptive_optional_intervals": {
+      "draws": 10000,
+      "percentiles": [
+        2.5,
+        97.5
+      ],
+      "all_family_confirmation_seed": 44003,
+      "structured_transfer_seed": 44004,
+      "all_stress_seed": 44005
+    },
+    "independent_point_audit_tolerance": 1e-12
+  },
+  "validator_patch": {
+    "path": "index-deconvolution/results/hierarchy_v1_supervision/confirm-v1-r1/validator_closure/validator_closure.patch",
+    "sha256": "587d7bc0e0b9f598a80be99776655e3cc8d1df355cfa62884e7fbd8ee5809346"
+  },
+  "historical_r1_freeze": "f970efff16a2d08bf1dd22eee1386c164af5ba67b22137fefcf06cd182b27f5c",
+  "unchanged_owners": [
+    "index-deconvolution/hierarchy/infer.py",
+    "index-deconvolution/hierarchy/candidates.py",
+    "index-deconvolution/hierarchy/model.py",
+    "index-deconvolution/hierarchy/wire.py",
+    "index-deconvolution/hierarchy/decode.py",
+    "index-deconvolution/hierarchy/baselines.py",
+    "index-deconvolution/hierarchy/corpus.py",
+    "index-deconvolution/src/deconvolution.py",
+    "index-deconvolution/src/causalbool.py",
+    "src/description_lengths.py"
+  ],
+  "final_handoff": "index-deconvolution/hierarchy/HANDOFF_SEARCH_V2.md",
+  "acceptance_policy": {
+    "positive_primary_required_for_engineering_acceptance": false,
+    "supervisor_review_required": true,
+    "commit_push_publication_authorized": false
+  },
+  "initial_source_state": "index-deconvolution/protocols/hierarchy_search_v2/INITIAL_SOURCE_STATE.json",
+  "historical_owner_exception": {
+    "path": "src/description_lengths.py",
+    "historical_sha256": "052786ca6f2e399cdf19a77743d5f4013f6856abf69a2034c4f944732775524e",
+    "active_sha256": "b6fb6eaf1a81323bc81858cdadf22184315a7364602546275af0edb997018d36",
+    "change": "Only an added bdm_1d_trace function; AST identical after removing that addition",
+    "recovery_source": "/Users/alberto/Documents/projects/CausalBool_validator_closure/baseline/src/description_lengths.py",
+    "policy": "Preserve active file for new study; use verified historical bytes only in old-source snapshot; never override historical freeze validation."
+  }
+}

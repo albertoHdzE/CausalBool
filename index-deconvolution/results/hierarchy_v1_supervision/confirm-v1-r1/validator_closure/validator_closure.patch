@@ -1,0 +1,434 @@
+--- a/index-deconvolution/hierarchy/validation.py
++++ b/index-deconvolution/hierarchy/validation.py
+@@ -329,15 +329,46 @@
+ # ---------------------------------------------------------------------------
+ # The production path shared by ``report`` and ``verify``
+ # ---------------------------------------------------------------------------
++
++def rows_file_problems(records, cid: str, design_case: tuple, methods) -> list[str]:
++    """Structural problems of one ``rows/<case_id>.json``, checked before it is keyed
++    by method: a list of row objects, each with a declared method, no method twice
++    (identical copies included), and every row carrying this case's design metadata.
++    ``design_case`` is (split, family, base_length, replicate, ragged, n_bits)."""
++    if not isinstance(records, list):
++        return [f"is a JSON {type(records).__name__}, not a list of rows"]
++    if not all(isinstance(r, dict) for r in records):
++        return ["holds an entry that is not a row object"]
++    out = []
++    count: dict = defaultdict(int)
++    for r in records:
++        count[r.get("method")] += 1
++    for m, k in count.items():
++        if m not in methods:
++            out.append(f"method {m!r} not in the declared design")
++        if k > 1:
++            out.append(f"method {m!r} appears {k} times")
++    want = dict(zip(ROW_FIELDS + ("n_bits", "case_id"), design_case + (cid,)))
++    for r in records:
++        for k, v in want.items():
++            if r.get(k) != v:
++                out.append(f"{r.get('method')!r} field {k}={r.get(k)!r}, design says {v!r}")
++    return out
+ 
++
+ def validate_run(run_id: str, splits, *, frozen: bool = True, decode: bool = True,
+                  purpose: str | None = None) -> tuple[dict, dict]:
+-    """Validate a stored run against the production design of ``splits``.
++    """Validate a WHOLE stored run against the production design of ``splits``.
++
++    ``splits`` is the run's complete declared split set: every row in cases.jsonl and
++    every rows/ file is validated, and one outside the design (another split, case or
++    method) is engineering invalidity, never filtered out. There is no subset mode.
+ 
+     Returns (validation, context). Freeze/source/protocol problems, a regenerated
+-    corpus that differs from the stored manifest, and rows/ files that disagree with
+-    cases.jsonl are engineering invalidity. ``purpose`` additionally enforces the
+-    frozen environment (``report``); ``verify`` passes None and only reports it.
++    corpus that differs from the stored manifest, and rows/ files that are malformed
++    or disagree with cases.jsonl are engineering invalidity. ``purpose`` additionally
++    enforces the frozen environment (``report``); ``verify`` passes None and only
++    reports it.
+     """
+     import json
+ 
+@@ -346,7 +377,7 @@
+     from .report import load_rows
+     d = B.run_dir(run_id)
+     extra_invalid: list[str] = []
+-    ctx: dict = {"run_dir": str(d), "splits": list(splits)}
++    ctx: dict = {"run_dir": str(d), "splits": list(splits), "scope": "whole_run"}
+     fr, fsha = None, None
+     if frozen:
+         try:
+@@ -369,13 +400,14 @@
+             extra_invalid.append(f"corpus manifest missing for {split}")
+         elif mp.read_text() != text:
+             extra_invalid.append(f"regenerated {split} corpus differs from the stored manifest")
+-    rows = [r for r in load_rows(d) if r.get("split") in splits]
++    rows = load_rows(d)                   # all of them: undeclared rows are invalid
+     design = production_design(splits)
+     config_shas = {m: B.method_config_sha(m) for m in design["methods"]}
+     v = validate_study(rows, design, run_dir=d, run_id=run_id, freeze_sha=fsha,
+                        inputs=inputs, config_shas=config_shas, decode=decode)
+-    # rows/<case_id>.json must agree with the merged cases.jsonl
+-    for cid, *_ in expected_cases(design):
++    # rows/<case_id>.json: well formed on its own, then equal to the merged cases.jsonl
++    declared = {c[0]: c[1:] for c in expected_cases(design)}
++    for cid, design_case in declared.items():
+         p = d / "rows" / f"{cid}.json"
+         merged = v["_index"].get(cid, {})
+         if not p.exists():
+@@ -383,12 +415,20 @@
+                 extra_invalid.append(f"{cid}: rows file missing but cases.jsonl has rows")
+             continue
+         try:
+-            on_disk = {r["method"]: r for r in json.loads(p.read_text())}
+-        except (ValueError, KeyError, TypeError):
++            records = json.loads(p.read_text())
++        except ValueError:
+             extra_invalid.append(f"{cid}: rows file unreadable")
+             continue
+-        if on_disk != merged:
++        bad = rows_file_problems(records, cid, design_case, design["methods"])
++        if bad:
++            extra_invalid += [f"{cid}: rows file {b}" for b in bad]
++            continue
++        if {r["method"]: r for r in records} != merged:
+             extra_invalid.append(f"{cid}: rows file differs from cases.jsonl")
++    if (d / "rows").is_dir():
++        for p in sorted((d / "rows").iterdir()):
++            if p.suffix != ".json" or p.stem not in declared:
++                extra_invalid.append(f"rows/{p.name} is not a declared case of {list(splits)}")
+     if extra_invalid:
+         v["invalid"] = extra_invalid + v["invalid"]
+         v["engineering_valid"] = False
+--- a/index-deconvolution/hierarchy/cli.py
++++ b/index-deconvolution/hierarchy/cli.py
+@@ -234,11 +234,13 @@
+                                       for f, o in diag["objects"].items()}
+         summary["bdm_holm"] = diag["holm"]
+     _report_state(summary, val)
+-    B.atomic_write(d / "summary.json", json.dumps(summary, indent=1, default=float).encode())
+     rows = sorted((r for m in val["_index"].values() for r in m.values()),
+                   key=lambda r: (r["case_id"], r["method"]))
+-    B.atomic_write(d / "ledgers.json", json.dumps(R.representative_ledgers(d, rows), indent=1).encode())
++    ledgers = R.representative_ledgers(d, rows)
+     led = R.claim_ledger(summary, diag, a.run_id)
++    # everything is computed before anything is written: no mix of fresh and stale files
++    B.atomic_write(d / "summary.json", json.dumps(summary, indent=1, default=float).encode())
++    B.atomic_write(d / "ledgers.json", json.dumps(ledgers, indent=1).encode())
+     B.atomic_write(d / "claim_ledger.json", json.dumps(led, indent=1, default=float).encode())
+     code = _exit_code(val)
+     print(json.dumps({"engineering": summary["engineering_status"],
+@@ -262,13 +264,18 @@
+     Shares ``validation.validate_run`` with ``report``; additionally decodes a
+     stratified sample in a separate process, checks the required artefacts and that
+     summary.json and claim_ledger.json are exactly what the rows imply. The current
+-    environment is reported, never enforced, and the freeze is never rewritten."""
++    environment is reported, never enforced, and the freeze is never rewritten.
++
++    Any earlier verification.json is first replaced by a ``not_verified`` record, so
++    a verification that does not finish can never leave an older success behind."""
+     from . import benchmark as B
+     from . import report as R
+     from . import validation as V
+     d = B.run_dir(a.run_id)
+     v = {"run_id": a.run_id, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+          "commands": [], "problems": []}
++    _write_verification(d, dict(v, engineering_status="not_verified", exit_code=None,
++                                note="verification started and has not finished"))
+     splits = _splits(a.run_id)
+     val, ctx = V.validate_run(a.run_id, splits, frozen=True)
+     v["freeze_sha256"] = ctx["freeze_sha256"]
+@@ -285,6 +292,9 @@
+     rows = sorted((r for m in val["_index"].values() for r in m.values()),
+                   key=lambda r: (r["case_id"], r["method"]))
+     v["separate_process_decode"] = _separate_process_sample(d, rows)
++    if v["separate_process_decode"].get("unavailable"):
++        invalid.append("separate-process sample: archives unavailable for "
++                       f"{len(v['separate_process_decode']['unavailable'])} strata")
+     if not v["separate_process_decode"]["all_ok"]:
+         invalid.append("separate-process decoder disagreed on the stratified sample")
+     for name in ("summary.json", "claim_ledger.json", "diagnostics.json", "corpus_manifest.jsonl",
+@@ -335,22 +345,29 @@
+     if v["problems"] and code == EXIT_OK:
+         code = EXIT_INVALID
+     v["exit_code"] = code
+-    out = d / "verification.json"
+-    tmp = out.with_name(".verification.json.tmp")
+-    tmp.write_text(json.dumps(v, indent=1, default=float))
+-    os.replace(tmp, out)
++    _write_verification(d, v)
+     print(json.dumps({k: v[k] for k in ("engineering_status", "completeness",
+                                         "scientific_verdict", "exit_code",
+                                         "archives_decoded_against_regenerated_inputs")}))
+     return code
+ 
+ 
++def _write_verification(d: Path, v: dict) -> None:
++    out = d / "verification.json"
++    tmp = out.with_name(".verification.json.tmp")
++    tmp.write_text(json.dumps(v, indent=1, default=float))
++    os.replace(tmp, out)
++
++
+ def _splits(run_id: str) -> list[str]:
+     return ["development"] if run_id.startswith("dev") else ["confirmation", "transfer"]
+ 
+ 
+ def _separate_process_sample(d: Path, rows) -> dict:
+-    """Decode one archive per (split, family, method) with only decode.py present."""
++    """Decode one archive per (split, family, method) with only decode.py present.
++
++    A sampled archive file that is absent is listed under ``unavailable`` and the
++    sample is not ``all_ok``; it is never replaced by another stratum member."""
+     from . import decode as dmod
+     from .corpus import split_cases
+     want = {}
+@@ -362,24 +379,38 @@
+     for split in {k[0] for k in want}:
+         for c in split_cases(split)[0]:
+             inputs[c.case_id] = c.bits
++    unavailable = []
+     with tempfile.TemporaryDirectory() as tmp:
+         box = Path(tmp)
+         shutil.copy(dmod.__file__, box / "decode.py")
+         names = {}
+         for i, r in enumerate(want.values()):
++            src = d / r["archive_path"]
++            if not src.is_file():
++                unavailable.append(f"{r['case_id']}:{r['method']} archive file missing")
++                continue
+             name = f"s{i:05d}.bin"
+-            shutil.copy(d / r["archive_path"], box / name)
++            shutil.copy(src, box / name)
+             names[name] = r
+         if not names:
+-            return {"sampled": 0, "all_ok": False}
++            return {"sampled": 0, "all_ok": False, "unavailable": unavailable}
+         out = subprocess.run([sys.executable, "-I", "-S", "decode.py"] + sorted(names),
+                              cwd=box, env={"PATH": os.environ.get("PATH", "")},
+                              capture_output=True, text=True)
+         res = json.loads(out.stdout) if out.returncode == 0 else []
+     ok = [x["ok"] and x["bits"] == inputs[names[x["path"]]["case_id"]] for x in res]
+-    return {"sampled": len(names), "decoded": len(res), "all_ok": bool(res) and all(ok)
+-            and len(res) == len(names),
+-            "strata": "one archive per (split, family, method, status), including fallbacks"}
++    sample = {"sampled": len(names), "decoded": len(res), "all_ok": bool(res) and all(ok)
++              and len(res) == len(names) and not unavailable,
++              "strata": "one archive per (split, family, method, status), including fallbacks"}
++    failed = [f"{names[x['path']]['case_id']}:{names[x['path']]['method']} "
++              + (f"{x['error']}: {x['message']}" if not x["ok"]
++                 else "decoded to a different input")
++              for x, good in zip(res, ok) if not good]
++    if failed:
++        sample["failed"] = failed
++    if unavailable:
++        sample["unavailable"] = unavailable
++    return sample
+ 
+ 
+ def _run_checks() -> list[dict]:
+--- a/index-deconvolution/hierarchy/report.py
++++ b/index-deconvolution/hierarchy/report.py
+@@ -503,8 +503,14 @@
+ def representative_ledgers(d: Path, rows) -> list[dict]:
+     """One case per (split, family, base_length): lowest replicate, base length,
+     the HID-full archive and the portfolio's selected archive, with byte ledgers
+-    read from the stored bytes and the decoded expansion cross-checked."""
+-    from .decode import decode_archive
++    read from the stored bytes and the decoded expansion cross-checked.
++
++    A chosen archive that is missing, differs from its row's hash or does not decode
++    is presented as ``unavailable`` with the reason; ``validate_run`` has already
++    made such a run engineering-invalid, so nothing here is evidence of success."""
++    import hashlib
++
++    from .decode import ArchiveError, decode_archive
+     from .ledger import archive_ledger, explain_model
+     pick: dict = {}
+     for r in rows:
+@@ -524,9 +530,20 @@
+             r = pick[key].get(m)
+             if r is None:
+                 continue
+-            data = (d / r["archive_path"]).read_bytes()
++            p = d / r["archive_path"]
++            if not p.is_file():
++                entry[m] = _unavailable(r, "archive file missing")
++                continue
++            data = p.read_bytes()
++            if hashlib.sha256(data).hexdigest() != r["archive_sha256"]:
++                entry[m] = _unavailable(r, "archive hash differs from the row")
++                continue
++            try:
++                decoded = decode_archive(data)
++            except ArchiveError as exc:
++                entry[m] = _unavailable(r, f"archive does not decode: {type(exc).__name__}: {exc}")
++                continue
+             led = archive_ledger(data)
+-            decoded = decode_archive(data)
+             item = {"case_id": r["case_id"], "input_sha256": r["input_sha256"],
+                     "archive_sha256": r["archive_sha256"], "archive_bits": 8 * len(data),
+                     "codec": led["codec"], "bytes_by_owner": led["bytes_by_owner"],
+@@ -543,6 +560,11 @@
+     return out
+ 
+ 
++def _unavailable(r: dict, reason: str) -> dict:
++    return {"case_id": r["case_id"], "archive_path": r["archive_path"],
++            "archive_sha256": r["archive_sha256"], "unavailable": reason}
++
++
+ def _sha(s: str) -> str:
+     import hashlib
+     return hashlib.sha256(s.encode("ascii")).hexdigest()
+--- a/index-deconvolution/hierarchy/tests/test_validation.py
++++ b/index-deconvolution/hierarchy/tests/test_validation.py
+@@ -389,3 +389,146 @@
+     assert v["verification_environment"]["numpy_version"] == "0.0"
+     assert v["summary_recomputed"].startswith("skipped")
+     assert (run / "freeze.json").read_bytes() == freeze                # provenance untouched
++
++
++# ---------------------------------------------------------------------------
++# Validator closure (bitacora 37 §4): R1a missing/malformed archives reach the
++# structured invalid record; R1b rows files are checked before they are keyed;
++# R1c undeclared rows are validated, never filtered out
++# ---------------------------------------------------------------------------
++
++FIRST = "confirmation-F01-64-1000-base"       # first sample stratum and representative ledger
++
++
++def _ledger_item(d, cid, method):
++    for e in json.loads((d / "ledgers.json").read_text()):
++        if e.get(method, {}).get("case_id") == cid:
++            return e[method]
++    raise KeyError(cid)
++
++
++def _assert_nothing_claims_success(d, s, v):
++    assert s["engineering_status"] == "invalid" and s["primary"]["verdict"] == "not_assessed"
++    led = {c["id"]: c for c in json.loads((d / "claim_ledger.json").read_text())}
++    assert led["C1"]["decision"] == "not_assessed" and led["C2"]["status"] == "not_supported"
++    assert v["engineering_status"] == "invalid" and v["exit_code"] == cli.EXIT_INVALID
++
++
++def test_valid_run_presents_every_archive_and_samples_without_gaps(run):
++    rc, s, vc, v = _report_and_verify(run)
++    assert (rc, vc) == (cli.EXIT_OK, cli.EXIT_OK)
++    assert not any("unavailable" in e.get(m, {}) for e in json.loads((run / "ledgers.json").read_text())
++                   for m in ("hid_full", "baseline_best"))
++    sp = v["separate_process_decode"]
++    assert sp["all_ok"] and sp["sampled"] > 0 and "unavailable" not in sp and "failed" not in sp
++
++
++def test_missing_archive_writes_invalid_records_and_replaces_a_stale_success(run):
++    assert cli.main(["verify", "--run-id", RID]) == cli.EXIT_OK
++    stale = json.loads((run / "verification.json").read_text())
++    assert stale["engineering_status"] == "valid"
++    row = next(r for r in _rows(run) if r["case_id"] == FIRST and r["method"] == "hid_full")
++    (run / row["archive_path"]).unlink()
++    val, _ = V.validate_run(RID, ["confirmation", "transfer"])
++    assert not val["engineering_valid"]
++    assert any(f"{FIRST}:hid_full archive file missing" == x for x in val["invalid"])
++    rc, s, vc, v = _report_and_verify(run)
++    assert (rc, vc) == (cli.EXIT_INVALID, cli.EXIT_INVALID)
++    _assert_nothing_claims_success(run, s, v)
++    assert _ledger_item(run, FIRST, "hid_full")["unavailable"] == "archive file missing"
++    assert f"{FIRST}:hid_full archive file missing" in v["invalid_reasons"]
++    sp = v["separate_process_decode"]
++    assert not sp["all_ok"] and f"{FIRST}:hid_full archive file missing" in sp["unavailable"]
++    assert v["started_utc"] >= stale["started_utc"] and v != stale
++
++
++def test_malformed_archive_claimed_by_its_row_is_invalid_everywhere(run):
++    rows = _rows(run)
++    r = next(r for r in rows if r["case_id"] == FIRST and r["method"] == "hid_full")
++    bad = (run / r["archive_path"]).read_bytes()[:-1]          # truncated payload
++    rel, h = _store(run, bad)
++    r.update(archive_path=rel, archive_sha256=h, archive_bits=8 * len(bad))
++    _write(run, rows)
++    rc, s, vc, v = _report_and_verify(run)
++    assert (rc, vc) == (cli.EXIT_INVALID, cli.EXIT_INVALID)
++    _assert_nothing_claims_success(run, s, v)
++    assert f"{FIRST}:hid_full decoder raised ArchiveError" in v["invalid_reasons"]
++    assert _ledger_item(run, FIRST, "hid_full")["unavailable"].startswith(
++        "archive does not decode: ArchiveError")
++    sp = v["separate_process_decode"]
++    assert not sp["all_ok"] and any(x.startswith(f"{FIRST}:hid_full ArchiveError")
++                                    for x in sp["failed"])
++
++
++def test_corrupted_archive_bytes_are_invalid_and_never_presented(run):
++    r = next(r for r in _rows(run) if r["case_id"] == FIRST and r["method"] == "hid_full")
++    (run / r["archive_path"]).write_bytes(b"not an archive")
++    rc, s, vc, v = _report_and_verify(run)
++    assert (rc, vc) == (cli.EXIT_INVALID, cli.EXIT_INVALID)
++    _assert_nothing_claims_success(run, s, v)
++    assert f"{FIRST}:hid_full archive hash differs from the row" in v["invalid_reasons"]
++    assert _ledger_item(run, FIRST, "hid_full")["unavailable"] == \
++        "archive hash differs from the row"
++    assert not v["separate_process_decode"]["all_ok"]
++
++
++def test_programmer_error_in_verify_propagates_and_leaves_no_stale_success(run, monkeypatch):
++    assert cli.main(["verify", "--run-id", RID]) == cli.EXIT_OK
++
++    def boom(*a, **k):
++        raise ZeroDivisionError("planted")
++    monkeypatch.setattr(R, "summarise", boom)
++    with pytest.raises(ZeroDivisionError, match="planted"):
++        cli.main(["verify", "--run-id", RID])
++    v = json.loads((run / "verification.json").read_text())
++    assert v["engineering_status"] == "not_verified" and v["exit_code"] is None
++
++
++@pytest.mark.parametrize("damage,needle", [
++    (lambda rec: rec + [rec[0]], "appears 2 times"),                          # identical
++    (lambda rec: rec + [dict(rec[0], archive_bits=8)], "appears 2 times"),    # conflicting
++    (lambda rec: {"rows": rec}, "not a list of rows"),
++    (lambda rec: rec + ["row"], "not a row object"),
++    (lambda rec: rec + [dict(rec[0], method="hid_mystery")], "not in the declared design"),
++    (lambda rec: [dict(rec[0], replicate=1001)] + rec[1:], "field replicate=1001"),
++])
++def test_malformed_rows_file_is_invalid_before_it_is_keyed(run, damage, needle):
++    p = run / "rows" / f"{FIRST}.json"
++    p.write_text(json.dumps(damage(json.loads(p.read_text()))))
++    val, _ = V.validate_run(RID, ["confirmation", "transfer"])
++    assert not val["engineering_valid"]
++    rc, s, vc, v = _report_and_verify(run)
++    assert (rc, vc) == (cli.EXIT_INVALID, cli.EXIT_INVALID)
++    _assert_nothing_claims_success(run, s, v)
++    assert any(x.startswith(f"{FIRST}: rows file") and needle in x
++               for x in v["invalid_reasons"]), v["invalid_reasons"][:5]
++
++
++def test_undeclared_split_row_is_validated_not_filtered(run):
++    rows = _rows(run)
++    extra = dict(rows[0], split="undeclared", case_id="undeclared-F01-64-1000-base")
++    with (run / "cases.jsonl").open("a") as stream:
++        stream.write(json.dumps(extra) + "\n")
++    val, ctx = V.validate_run(RID, ["confirmation", "transfer"])
++    assert ctx["scope"] == "whole_run"
++    assert not val["engineering_valid"] and val["unknown"] == [
++        f"undeclared-F01-64-1000-base:{rows[0]['method']}"]
++    rc, s, vc, v = _report_and_verify(run)
++    assert (rc, vc) == (cli.EXIT_INVALID, cli.EXIT_INVALID)
++    _assert_nothing_claims_success(run, s, v)
++    assert v["validation"]["unknown"] == val["unknown"]
++
++
++def test_undeclared_rows_file_is_invalid(run):
++    shutil.copy(run / "rows" / f"{FIRST}.json", run / "rows" / "undeclared-F01-64-1000-base.json")
++    rc, s, vc, v = _report_and_verify(run)
++    assert (rc, vc) == (cli.EXIT_INVALID, cli.EXIT_INVALID)
++    assert any("rows/undeclared-F01-64-1000-base.json is not a declared case" in x
++               for x in v["invalid_reasons"])
++
++
++def test_a_split_subset_is_not_a_partial_acceptance(run):
++    val, ctx = V.validate_run(RID, ["confirmation"])
++    transfer = [u for u in val["unknown"] if u.startswith("transfer-")]
++    assert not val["engineering_valid"] and len(transfer) == 2 * len(B.ALL_METHODS)
++    assert sum("is not a declared case of ['confirmation']" in x for x in val["invalid"]) == 2

@@ -1,0 +1,206 @@
+[
+ {
+  "id": "C1",
+  "claim": "HID-v1 (full) yields an average code-length gain over the strong decodable baseline portfolio on the prespecified structured confirmation benchmark",
+  "status": "not_supported",
+  "metric": "equal-family, equal-size mean of (baseline_best_bits - hid_full_bits)/n",
+  "estimate": -0.05791971433165062,
+  "uncertainty": [
+   -0.0824281117272118,
+   -0.032649931244886486
+  ],
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/summary.json#primary",
+   "results/hierarchy_v1/dev-smoke/cases.jsonl (split=confirmation, families F01,F02,F03,F04,F05,F06,F12, methods hid_full, baseline_best)"
+  ],
+  "domain": "families F01-F06, F12; base lengths 256, 1024, 4096 plus ragged +3; replicates 1000-1019; frozen search budget",
+  "caveat": "a code-length comparison under a fixed language and budget; not K, not generator recovery, not prediction"
+ },
+ {
+  "id": "C2",
+  "claim": "Every stored archive decodes exactly to its input with the independent decoder",
+  "status": "supported",
+  "metric": "decode_ok rows / rows with an archive",
+  "estimate": {
+   "decode_ok": 2048,
+   "decode_failed": 0,
+   "with_archive": 2048
+  },
+  "uncertainty": null,
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/verification.json"
+  ],
+  "domain": "all splits run under this run id",
+  "caveat": "engineering claim"
+ },
+ {
+  "id": "C3.1",
+  "claim": "The component removed in hid_fixed8 contributes a code-length advantage to the full search",
+  "status": "inconclusive",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.00078125,
+  "uncertainty": [
+   0.0,
+   0.0015625
+  ],
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/summary.json#ablations.hid_fixed8"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; an ablation can win through search interaction"
+ },
+ {
+  "id": "C3.2",
+  "claim": "The component removed in hid_flat contributes a code-length advantage to the full search",
+  "status": "supported",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.09705583659920092,
+  "uncertainty": [
+   0.0505464142926811,
+   0.1438130928000512
+  ],
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/summary.json#ablations.hid_flat"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; an ablation can win through search interaction"
+ },
+ {
+  "id": "C3.3",
+  "claim": "The component removed in hid_no_arithmetic contributes a code-length advantage to the full search",
+  "status": "supported",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.055834115142362764,
+  "uncertainty": [
+   0.03613136090627562,
+   0.07513649018614021
+  ],
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/summary.json#ablations.hid_no_arithmetic"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; an ablation can win through search interaction"
+ },
+ {
+  "id": "C3.4",
+  "claim": "The component removed in hid_no_schema contributes a code-length advantage to the full search",
+  "status": "supported",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.016523217730941227,
+  "uncertainty": [
+   0.003105994079188065,
+   0.03226971007578207
+  ],
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/summary.json#ablations.hid_no_schema"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; an ablation can win through search interaction"
+ },
+ {
+  "id": "C3.5",
+  "claim": "The component removed in hid_no_transform contributes a code-length advantage to the full search",
+  "status": "inconclusive",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.0,
+  "uncertainty": [
+   0.0,
+   0.0
+  ],
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/summary.json#ablations.hid_no_transform"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; an ablation can win through search interaction"
+ },
+ {
+  "id": "C5",
+  "claim": "HID-v1 shows no advantage over the statistical baselines on IID, biased IID and Markov controls",
+  "status": "supported",
+  "metric": "same endpoint on F07-F09",
+  "estimate": -0.2525221308103033,
+  "uncertainty": [
+   -0.30333653035022695,
+   -0.20281614249347513
+  ],
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/summary.json#controls_aggregate"
+  ],
+  "domain": "confirmation F07-F09",
+  "caveat": "descriptive"
+ },
+ {
+  "id": "C6",
+  "claim": "Aligned/full-coverage BDM, with setting selection calibrated symmetrically on marginal-preserving nulls, separates the structured diagnostic objects from bit shuffles",
+  "status": "supported",
+  "metric": "adaptive p-value (r+1)/(B+1), Holm-adjusted across ten objects",
+  "estimate": {
+   "F01": 0.005,
+   "F02": 0.005,
+   "F04": 0.005,
+   "F05": 0.005,
+   "F06": 0.005,
+   "F07": 0.845,
+   "F08": 0.705,
+   "F09": 0.005
+  },
+  "uncertainty": "Monte Carlo, 199 nulls",
+  "evidence": [
+   "results/hierarchy_v1/dev-smoke/diagnostics.json"
+  ],
+  "domain": "replicate 1000, base length 1024, non-ragged",
+  "caveat": "marginal shuffle null; says nothing beyond bit marginals for F09; BDM is a diagnostic score, never stored bytes"
+ },
+ {
+  "id": "C7",
+  "claim": "HID-v1 computes or estimates Kolmogorov complexity",
+  "status": "out_of_scope",
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C8",
+  "claim": "An inferred description is the unique generating mechanism",
+  "status": "out_of_scope",
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C9",
+  "claim": "Full-string compression establishes prediction of unseen suffixes",
+  "status": "out_of_scope",
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C10",
+  "claim": "The study establishes causal identification or priority of hierarchical grammar coding",
+  "status": "out_of_scope",
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ }
+]

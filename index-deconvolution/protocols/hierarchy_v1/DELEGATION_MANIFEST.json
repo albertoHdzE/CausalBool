@@ -1,0 +1,96 @@
+{
+  "protocol": "HID-v1",
+  "date": "2026-10-01",
+  "status": "delegation_ready_implementation_pending",
+  "entrypoint": "index-deconvolution/PROTOCOL_hierarchical_index_generalization.md",
+  "developer_prompt": "index-deconvolution/KICKOFF_hierarchical_index_generalization.md",
+  "files": [
+    {
+      "path": "index-deconvolution/PROTOCOL_hierarchical_index_generalization.md",
+      "sha256": "6208e6b901b9af92518b7e5f3a02054435ecebd66a829660a8102debf218b425",
+      "bytes": 28505
+    },
+    {
+      "path": "index-deconvolution/KICKOFF_hierarchical_index_generalization.md",
+      "sha256": "a359ee2e19637d1636fc665260299598c90779974045a009de9b06103384088b",
+      "bytes": 4568
+    },
+    {
+      "path": "index-deconvolution/protocols/hierarchy_v1/WIRE_FORMAT.md",
+      "sha256": "030fcbe58f705b26b14101a6a31c1e118a780224286e4cfd278a7a604122d16b",
+      "bytes": 12841
+    },
+    {
+      "path": "index-deconvolution/protocols/hierarchy_v1/BENCHMARK.md",
+      "sha256": "c7a8fbc090b736145927cbd3828f4c33632da1e3b6ee73f06cccc9a8f0be5e8c",
+      "bytes": 17528
+    },
+    {
+      "path": "index-deconvolution/protocols/hierarchy_v1/ACCEPTANCE.md",
+      "sha256": "55a6adec184d28c543619c13d8ffc07b5fb93a8cbbc1122be9ce9718914f6114",
+      "bytes": 11690
+    }
+  ],
+  "static_validation": {
+    "relative_links": "pass",
+    "markdown_fences": "pass",
+    "trailing_whitespace": "none",
+    "golden_fixture_envelopes": "6 passed",
+    "corpus_counts": "pass"
+  },
+  "expected_scored_strings": {
+    "development": 128,
+    "confirmation": 1440,
+    "transfer": 192
+  },
+  "expected_method_rows": {
+    "development": 2048,
+    "confirmation": 23040,
+    "transfer": 3072
+  },
+  "golden_envelope_fixtures": [
+    {
+      "case": "Literal empty",
+      "archive_hex": "49 53 44 31 00 00 00",
+      "bytes": 7,
+      "output_bits": 0,
+      "mode": 0
+    },
+    {
+      "case": "Literal `1`",
+      "archive_hex": "49 53 44 31 00 01 01 80",
+      "bytes": 8,
+      "output_bits": 1,
+      "mode": 0
+    },
+    {
+      "case": "Literal `0110`",
+      "archive_hex": "49 53 44 31 00 04 01 60",
+      "bytes": 8,
+      "output_bits": 4,
+      "mode": 0
+    },
+    {
+      "case": "Bernoulli `0110` (weight 2, rank 2)",
+      "archive_hex": "49 53 44 31 05 04 02 02 02",
+      "bytes": 9,
+      "output_bits": 4,
+      "mode": 5
+    },
+    {
+      "case": "Context `0101` (Q0=`11`, Q1=`0`)",
+      "archive_hex": "49 53 44 31 06 04 04 00 02 02 00",
+      "bytes": 11,
+      "output_bits": 4,
+      "mode": 6
+    },
+    {
+      "case": "HID literal `1`, then repeat 8",
+      "archive_hex": "49 53 44 31 01 08 07 02 00 01 80 02 00 08",
+      "bytes": 14,
+      "output_bits": 8,
+      "mode": 1
+    }
+  ],
+  "note": "Only delegation documents and hand-derived format fixtures were checked. The codec, inference, and benchmark remain for Claude Code to implement and run."
+}

@@ -1,0 +1,142 @@
+{
+ "run_id": "confirm-v1-r1",
+ "started_utc": "2026-10-02T18:19:36Z",
+ "commands": [
+  {
+   "name": "pytest",
+   "command": "-m pytest index-deconvolution/hierarchy/tests tests/analysis/test_description_lengths_values.py -q --tb=short -p no:cacheprovider",
+   "exit_code": 0,
+   "tail": [
+    "........................................................................ [ 90%]",
+    ".............................                                            [100%]",
+    "317 passed in 27.87s"
+   ],
+   "seconds": 28.0,
+   "required": true
+  },
+  {
+   "name": "ruff",
+   "command": "ruff check --output-format=concise index-deconvolution/hierarchy src/description_lengths.py tests/analysis/test_description_lengths_values.py index-deconvolution/notebooks/build_15.py index-deconvolution/notebooks/build_16.py",
+   "exit_code": 0,
+   "tail": [
+    "All checks passed!"
+   ],
+   "seconds": 0.1,
+   "required": true
+  },
+  {
+   "name": "check_core_index",
+   "command": "zsh tools/check_core_index.sh",
+   "exit_code": 0,
+   "tail": [
+    "CORE-INDEX: 71/71 paths named in GOVERNANCE/CORE.md exist"
+   ],
+   "seconds": 0.0,
+   "required": true
+  },
+  {
+   "name": "check_test_manifest",
+   "command": "zsh tools/check_test_manifest.sh",
+   "exit_code": 0,
+   "tail": [
+    "TEST-MANIFEST: rollup agrees \u2014 72 scored / 72 declared Wolfram, SCOPE=all",
+    "TEST-MANIFEST: verdict artefacts consistent \u2014 81 scanned, 0 contradict the rollup",
+    "TEST-MANIFEST: pytest agrees \u2014 28 files collected / 28 declared Python"
+   ],
+   "seconds": 2.8,
+   "required": false
+  },
+  {
+   "name": "check_single_engine",
+   "command": "zsh tools/check_single_engine.sh",
+   "exit_code": 1,
+   "tail": [
+    "  -> expected exactly src/description_lengths.py plus the pinned",
+    "     imp-pathinfo mirror; add a new site to DESCRIPTION_LENGTHS.md first",
+    "SINGLE-ENGINE: a second engine definition site exists \u2014 reconcile or archive it"
+   ],
+   "seconds": 38.7,
+   "required": false
+  },
+  {
+   "name": "notebook 15_shifted_zero_bdm_probe.ipynb",
+   "exit_code": 0,
+   "tail": [
+    "13 code cells, 0 error outputs, 0 unexecuted"
+   ],
+   "required": true
+  },
+  {
+   "name": "notebook 16_hierarchical_index_generalization.ipynb",
+   "exit_code": 0,
+   "tail": [
+    "17 code cells, 0 error outputs, 0 unexecuted"
+   ],
+   "required": true
+  }
+ ],
+ "problems": [],
+ "freeze_sha256": "f970efff16a2d08bf1dd22eee1386c164af5ba67b22137fefcf06cd182b27f5c",
+ "freeze_problems": [],
+ "validation": {
+  "engineering_valid": true,
+  "complete": true,
+  "expected_rows": 26112,
+  "present_rows": 26112,
+  "archives_checked": 26112,
+  "distinct_archives_decoded": 16402,
+  "missing_units": {
+   "confirmation": [],
+   "transfer": []
+  },
+  "missing_methods": {
+   "confirmation": {},
+   "transfer": {}
+  },
+  "duplicates": [],
+  "unknown": [],
+  "censored": []
+ },
+ "archives_decoded_against_regenerated_inputs": 26112,
+ "separate_process_decode": {
+  "sampled": 360,
+  "decoded": 360,
+  "all_ok": true,
+  "strata": "one archive per (split, family, method, status), including fallbacks"
+ },
+ "verification_environment": {
+  "cpu": "Apple M3 Ultra",
+  "cpu_count": 28,
+  "lzma_liblzma": "probe-sha256:0040f94d11d0039505328a90b2ff48968db873e9e7967307631bf40ef5679275",
+  "machine": "arm64",
+  "matplotlib_version": "3.10.8",
+  "numpy_version": "2.4.3",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "pybdm_version": "0.1.0",
+  "pytest_version": "9.1.1",
+  "python": "3.13.12 (main, Mar  7 2026, 16:31:40) [Clang 17.0.0 (clang-1700.6.4.2)]",
+  "python_implementation": "CPython",
+  "ram_bytes": 103079215104,
+  "zlib_runtime_version": "1.2.12",
+  "zlib_version": "1.2.12"
+ },
+ "environment_differences": {},
+ "environment_problems_by_purpose": {
+  "benchmark": [],
+  "diagnostics": [],
+  "report": []
+ },
+ "summary_recomputed": {
+  "stale_keys": [],
+  "agrees": true
+ },
+ "scientific_verdict": "not_supported",
+ "engineering_status": "valid",
+ "completeness": "complete",
+ "invalid_count": 0,
+ "incomplete_count": 0,
+ "invalid_reasons": [],
+ "incomplete_reasons": [],
+ "finished_utc": "2026-10-02T18:22:03Z",
+ "exit_code": 0
+}

@@ -1,0 +1,649 @@
+{
+ "analysis_plan": {
+  "primary_population": {
+   "split": "confirmation",
+   "families": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F12"
+   ]
+  },
+  "per_string": "saving_bits = baseline_best_archive_bits - hid_full_archive_bits; saving_per_input_bit = saving_bits / n_bits",
+  "weighting": "mean of the base/ragged pair within a unit, then mean over units in each (family, base_length) cell, then mean over cells (equal weights)",
+  "primary_bootstrap": {
+   "replicates": 10000,
+   "seed": 33001,
+   "rng": "numpy.random.default_rng",
+   "scheme": "within each cell resample units with replacement, keeping both lengths and all methods together",
+   "interval": "percentile 95%"
+  },
+  "verdict": {
+   "supported": "95% interval entirely above 0, all baseline results available, engineering gates pass",
+   "not_supported": "95% interval entirely below 0",
+   "inconclusive": "interval includes 0, or any baseline result censored"
+  },
+  "hid_deployed_statuses": [
+   "ok",
+   "timeout_raw",
+   "rss_limit_raw"
+  ],
+  "ablations": {
+   "methods": [
+    "hid_no_schema",
+    "hid_no_arithmetic",
+    "hid_no_transform",
+    "hid_flat",
+    "hid_fixed8"
+   ],
+   "per_string": "(ablation_bits - full_bits) / n_bits",
+   "replicates": 10000,
+   "seed": 33002,
+   "interval": "percentile 99% (Bonferroni across five two-sided intervals)",
+   "joint_resampling": true
+  },
+  "descriptive": {
+   "family_cells_seed": 33010,
+   "transfer_seed": 33004,
+   "controls_and_all_families": "same endpoint, descriptive only"
+  }
+ },
+ "status_counts": {
+  "development": {
+   "baseline_best": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "bernoulli": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "context": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "gaps": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "hid_fixed8": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "hid_flat": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "hid_full": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "hid_no_arithmetic": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "hid_no_schema": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "hid_no_transform": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "lzma": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "pair_grammar": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "period": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "raw": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "rle": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   },
+   "zlib": {
+    "expected": 128,
+    "present": 128,
+    "absent": 0,
+    "ok": 128
+   }
+  }
+ },
+ "round_trips": {
+  "decode_ok": 2048,
+  "decode_failed": 0,
+  "with_archive": 2048
+ },
+ "engineering": {
+  "valid": true,
+  "freeze_problems": [],
+  "error_rows": [],
+  "wrong_decodes": []
+ },
+ "primary": {
+  "verdict": "inconclusive",
+  "reason": "no confirmation rows",
+  "units_missing": []
+ },
+ "families_confirmation": [],
+ "transfer": [],
+ "development": [
+  {
+   "family": "F01",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.29143038127413123,
+   "ci95_descriptive": [
+    -0.3458011583011583,
+    -0.2407848696911197
+   ],
+   "mean_saving_bits": -75.0,
+   "median_saving_bits": -80.0,
+   "median_saving_per_input_bit": -0.31069015444015446,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F01",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.09361307205452775,
+   "ci95_descriptive": [
+    -0.09361307205452775,
+    -0.09361307205452775
+   ],
+   "mean_saving_bits": -96.0,
+   "median_saving_bits": -96.0,
+   "median_saving_per_input_bit": -0.09361307205452775,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F02",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.1355875965250965,
+   "ci95_descriptive": [
+    -0.2634531853281853,
+    -0.007722007722007722
+   ],
+   "mean_saving_bits": -35.0,
+   "median_saving_bits": -24.0,
+   "median_saving_per_input_bit": -0.09356901544401544,
+   "strings_hid_better": 0,
+   "strings_tied": 3,
+   "strings_hid_worse": 5
+  },
+  {
+   "family": "F02",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.2515737204844206,
+   "ci95_descriptive": [
+    -0.3968818463972736,
+    -0.13649053675754624
+   ],
+   "mean_saving_bits": -258.0,
+   "median_saving_bits": -208.0,
+   "median_saving_per_input_bit": -0.20253164556962028,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F04",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.17087958494208494,
+   "ci95_descriptive": [
+    -0.24855212355212353,
+    -0.10874155405405406
+   ],
+   "mean_saving_bits": -44.0,
+   "median_saving_bits": -40.0,
+   "median_saving_per_input_bit": -0.15534507722007723,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F04",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.06435898703748782,
+   "ci95_descriptive": [
+    -0.08191143804771178,
+    -0.04290599135832522
+   ],
+   "mean_saving_bits": -66.0,
+   "median_saving_bits": -72.0,
+   "median_saving_per_input_bit": -0.07019839337877312,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F05",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.01898829633204633,
+   "ci95_descriptive": [
+    -0.13172659266409267,
+    0.1091487693050193
+   ],
+   "mean_saving_bits": -5.0,
+   "median_saving_bits": -16.0,
+   "median_saving_per_input_bit": -0.06195704633204633,
+   "strings_hid_better": 3,
+   "strings_tied": 0,
+   "strings_hid_worse": 5
+  },
+  {
+   "family": "F05",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.03507922803067186,
+   "ci95_descriptive": [
+    -0.06822244705452775,
+    -0.0019360090068159688
+   ],
+   "mean_saving_bits": -36.0,
+   "median_saving_bits": -36.0,
+   "median_saving_per_input_bit": -0.035110607351509254,
+   "strings_hid_better": 2,
+   "strings_tied": 1,
+   "strings_hid_worse": 5
+  },
+  {
+   "family": "F06",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": 0.2833916505791506,
+   "ci95_descriptive": [
+    0.263996138996139,
+    0.31059966216216217
+   ],
+   "mean_saving_bits": 73.0,
+   "median_saving_bits": 72.0,
+   "median_saving_per_input_bit": 0.277992277992278,
+   "strings_hid_better": 8,
+   "strings_tied": 0,
+   "strings_hid_worse": 0
+  },
+  {
+   "family": "F06",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": 0.1989220727848101,
+   "ci95_descriptive": [
+    0.17161826010223952,
+    0.2301264301363194
+   ],
+   "mean_saving_bits": 204.0,
+   "median_saving_bits": 200.0,
+   "median_saving_per_input_bit": 0.1950386441090555,
+   "strings_hid_better": 8,
+   "strings_tied": 0,
+   "strings_hid_worse": 0
+  },
+  {
+   "family": "F07",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": 0.0,
+   "ci95_descriptive": [
+    0.0,
+    0.0
+   ],
+   "mean_saving_bits": 0.0,
+   "median_saving_bits": 0.0,
+   "median_saving_per_input_bit": 0.0,
+   "strings_hid_better": 0,
+   "strings_tied": 8,
+   "strings_hid_worse": 0
+  },
+  {
+   "family": "F07",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": 0.0,
+   "ci95_descriptive": [
+    0.0,
+    0.0
+   ],
+   "mean_saving_bits": 0.0,
+   "median_saving_bits": 0.0,
+   "median_saving_per_input_bit": 0.0,
+   "strings_hid_better": 0,
+   "strings_tied": 8,
+   "strings_hid_worse": 0
+  },
+  {
+   "family": "F08",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.4038067084942085,
+   "ci95_descriptive": [
+    -0.45041023166023164,
+    -0.3572031853281853
+   ],
+   "mean_saving_bits": -104.0,
+   "median_saving_bits": -108.0,
+   "median_saving_per_input_bit": -0.41952220077220076,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F08",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.4592877084347614,
+   "ci95_descriptive": [
+    -0.48756808361733206,
+    -0.43003077075219087
+   ],
+   "mean_saving_bits": -471.0,
+   "median_saving_bits": -472.0,
+   "median_saving_per_input_bit": -0.4602528602726388,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F09",
+   "base_length": 256,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.28734314671814676,
+   "ci95_descriptive": [
+    -0.4971042471042471,
+    -0.07758204633204634
+   ],
+   "mean_saving_bits": -74.0,
+   "median_saving_bits": -80.0,
+   "median_saving_per_input_bit": -0.3088803088803089,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  },
+  {
+   "family": "F09",
+   "base_length": 1024,
+   "units_complete": 4,
+   "availability": {
+    "ok": 8
+   },
+   "mean_saving_per_input_bit": -0.36469522121470305,
+   "ci95_descriptive": [
+    -0.5772749056718598,
+    -0.15211553675754624
+   ],
+   "mean_saving_bits": -374.0,
+   "median_saving_bits": -376.0,
+   "median_saving_per_input_bit": -0.3669364654333009,
+   "strings_hid_better": 0,
+   "strings_tied": 0,
+   "strings_hid_worse": 8
+  }
+ ],
+ "resources": {
+  "baseline_best": {
+   "encode_s_median": 0.002723417,
+   "encode_s_max": 0.004307666,
+   "encode_s_total": 0.326029053,
+   "worker_s_total": 50.620832349,
+   "peak_rss_mb_max": 40.3125
+  },
+  "bernoulli": {
+   "encode_s_median": 0.00010541700000000001,
+   "encode_s_max": 0.000275625,
+   "encode_s_total": 0.018066836,
+   "worker_s_total": 5.595806157,
+   "peak_rss_mb_max": 23.859375
+  },
+  "context": {
+   "encode_s_median": 0.0001361875,
+   "encode_s_max": 0.000278375,
+   "encode_s_total": 0.019217332,
+   "worker_s_total": 5.620533164,
+   "peak_rss_mb_max": 23.796875
+  },
+  "gaps": {
+   "encode_s_median": 0.0002636875,
+   "encode_s_max": 0.000368375,
+   "encode_s_total": 0.028274036,
+   "worker_s_total": 5.592704165,
+   "peak_rss_mb_max": 23.828125
+  },
+  "hid_fixed8": {
+   "encode_s_median": 0.093327125,
+   "encode_s_max": 0.497904583,
+   "encode_s_total": 15.053535831,
+   "worker_s_total": 20.768504254,
+   "peak_rss_mb_max": 25.609375
+  },
+  "hid_flat": {
+   "encode_s_median": 0.1443970415,
+   "encode_s_max": 0.4894775,
+   "encode_s_total": 20.245895711,
+   "worker_s_total": 25.81365192,
+   "peak_rss_mb_max": 30.578125
+  },
+  "hid_full": {
+   "encode_s_median": 0.172744791,
+   "encode_s_max": 0.490906875,
+   "encode_s_total": 21.935668212,
+   "worker_s_total": 27.613225548,
+   "peak_rss_mb_max": 30.75
+  },
+  "hid_no_arithmetic": {
+   "encode_s_median": 0.080841417,
+   "encode_s_max": 0.489330375,
+   "encode_s_total": 13.819653036,
+   "worker_s_total": 19.535884416000002,
+   "peak_rss_mb_max": 25.703125
+  },
+  "hid_no_schema": {
+   "encode_s_median": 0.054588625,
+   "encode_s_max": 0.242527709,
+   "encode_s_total": 11.195990998,
+   "worker_s_total": 16.773199997,
+   "peak_rss_mb_max": 30.5
+  },
+  "hid_no_transform": {
+   "encode_s_median": 0.1702372295,
+   "encode_s_max": 0.487197916,
+   "encode_s_total": 21.714824338,
+   "worker_s_total": 27.325225333,
+   "peak_rss_mb_max": 30.84375
+  },
+  "lzma": {
+   "encode_s_median": 0.0008818335,
+   "encode_s_max": 0.003092542,
+   "encode_s_total": 0.130156956,
+   "worker_s_total": 5.715439418,
+   "peak_rss_mb_max": 40.3125
+  },
+  "pair_grammar": {
+   "encode_s_median": 0.0005965835,
+   "encode_s_max": 0.001208292,
+   "encode_s_total": 0.081618698,
+   "worker_s_total": 5.657061454,
+   "peak_rss_mb_max": 23.953125
+  },
+  "period": {
+   "encode_s_median": 6.5875e-05,
+   "encode_s_max": 0.000185083,
+   "encode_s_total": 0.007938624,
+   "worker_s_total": 5.594395211,
+   "peak_rss_mb_max": 23.84375
+  },
+  "raw": {
+   "encode_s_median": 1.95625e-05,
+   "encode_s_max": 6.0084e-05,
+   "encode_s_total": 0.002603542,
+   "worker_s_total": 5.57691754,
+   "peak_rss_mb_max": 23.9375
+  },
+  "rle": {
+   "encode_s_median": 8.61665e-05,
+   "encode_s_max": 0.000265666,
+   "encode_s_total": 0.015453525,
+   "worker_s_total": 5.65246358,
+   "peak_rss_mb_max": 23.796875
+  },
+  "zlib": {
+   "encode_s_median": 4.9354e-05,
+   "encode_s_max": 0.000603458,
+   "encode_s_total": 0.022699504,
+   "worker_s_total": 5.61551166,
+   "peak_rss_mb_max": 23.828125
+  }
+ },
+ "duplicate_inputs": {},
+ "selected_baselines": {
+  "development|F01": {
+   "period": 16
+  },
+  "development|F02": {
+   "period": 8,
+   "zlib": 4,
+   "raw": 3,
+   "bernoulli": 1
+  },
+  "development|F04": {
+   "period": 16
+  },
+  "development|F05": {
+   "period": 6,
+   "zlib": 8,
+   "rle": 2
+  },
+  "development|F06": {
+   "zlib": 16
+  },
+  "development|F07": {
+   "raw": 16
+  },
+  "development|F08": {
+   "bernoulli": 16
+  },
+  "development|F09": {
+   "context": 16
+  }
+ },
+ "hid_stop_reasons": {
+  "development|hid_fixed8": {
+   "converged": 126,
+   "rounds_exhausted": 2
+  },
+  "development|hid_flat": {
+   "converged": 128
+  },
+  "development|hid_full": {
+   "converged": 126,
+   "rounds_exhausted": 2
+  },
+  "development|hid_no_arithmetic": {
+   "rounds_exhausted": 5,
+   "converged": 123
+  },
+  "development|hid_no_schema": {
+   "converged": 126,
+   "rounds_exhausted": 2
+  },
+  "development|hid_no_transform": {
+   "converged": 128
+  }
+ },
+ "status": "development pilot (exploratory, not confirmatory)"
+}

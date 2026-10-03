@@ -1,0 +1,245 @@
+[
+ {
+  "id": "C1",
+  "claim": "HID-search-v2 (hid_full) yields an average code-length saving over the nine-baseline portfolio on fresh instances of the declared structured confirmation population",
+  "status": "inconclusive",
+  "decision": "inconclusive",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean of (bits(baseline_best) - bits(hid_full)) / n, paired units",
+  "estimate": 0.005605234982532739,
+  "uncertainty": [
+   -0.0020814318519917223,
+   0.01304720625259862
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#primary"
+  ],
+  "domain": "confirmation F01-F06, F12; 256, 1024, 4096 bits plus ragged +3; replicates 3000-3019; namespace search_v2_confirmation",
+  "caveat": "new instances of familiar generators, not unfamiliar families; a code length under one fixed language and resource policy; not K, not generator recovery"
+ },
+ {
+  "id": "C2",
+  "claim": "Every stored archive decodes exactly to its input with the independent decoder",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "whole-run engineering validation",
+  "metric": "archives decoded and hash-matched / archives promised",
+  "estimate": {
+   "archives_checked": 28672,
+   "distinct_archives_decoded": 17573,
+   "decode_ok": 28672,
+   "decode_failed": 0,
+   "with_archive": 28672
+  },
+  "uncertainty": null,
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/verification.json"
+  ],
+  "domain": "all roles of this run",
+  "caveat": "engineering claim"
+ },
+ {
+  "id": "C3.1",
+  "claim": "P_vs_L: adding the stage that turns hid_legacy into hid_first_local saves code length on confirmation F06",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean of (bits(hid_legacy) - bits(hid_first_local))/n",
+  "estimate": 0.01425259495456209,
+  "uncertainty": [
+   0.0011714461606489386,
+   0.03442815185804962
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#contrasts.P_vs_L"
+  ],
+  "domain": "confirmation F06, 60 paired units, three size cells",
+  "caveat": "99% Bonferroni interval; cumulative algorithm change including its cost; not additive, not a pure mechanism effect, and no rescue of a failed primary test"
+ },
+ {
+  "id": "C3.2",
+  "claim": "C_vs_P: adding the stage that turns hid_first_local into hid_consensus_local saves code length on confirmation F06",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean of (bits(hid_first_local) - bits(hid_consensus_local))/n",
+  "estimate": 0.12214205654204006,
+  "uncertainty": [
+   0.07057285239481416,
+   0.17494166833718625
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#contrasts.C_vs_P"
+  ],
+  "domain": "confirmation F06, 60 paired units, three size cells",
+  "caveat": "99% Bonferroni interval; cumulative algorithm change including its cost; not additive, not a pure mechanism effect, and no rescue of a failed primary test"
+ },
+ {
+  "id": "C3.3",
+  "claim": "D_vs_C: adding the stage that turns hid_consensus_local into hid_dense_local saves code length on confirmation F06",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean of (bits(hid_consensus_local) - bits(hid_dense_local))/n",
+  "estimate": 0.09959053921404402,
+  "uncertainty": [
+   0.03705879100298928,
+   0.17023339569408483
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#contrasts.D_vs_C"
+  ],
+  "domain": "confirmation F06, 60 paired units, three size cells",
+  "caveat": "99% Bonferroni interval; cumulative algorithm change including its cost; not additive, not a pure mechanism effect, and no rescue of a failed primary test"
+ },
+ {
+  "id": "C3.4",
+  "claim": "G_vs_D: adding the stage that turns hid_dense_local into hid_global saves code length on confirmation F06",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean of (bits(hid_dense_local) - bits(hid_global))/n",
+  "estimate": 0.045633231033071285,
+  "uncertainty": [
+   0.03891882329385152,
+   0.052189814522774804
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#contrasts.G_vs_D"
+  ],
+  "domain": "confirmation F06, 60 paired units, three size cells",
+  "caveat": "99% Bonferroni interval; cumulative algorithm change including its cost; not additive, not a pure mechanism effect, and no rescue of a failed primary test"
+ },
+ {
+  "id": "C3.5",
+  "claim": "B_full_vs_G: adding the stage that turns hid_global into hid_full saves code length on confirmation F12",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean of (bits(hid_global) - bits(hid_full))/n",
+  "estimate": 0.12025781469716568,
+  "uncertainty": [
+   0.1128727700538363,
+   0.12762753354490694
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#contrasts.B_full_vs_G"
+  ],
+  "domain": "confirmation F12, 60 paired units, three size cells",
+  "caveat": "99% Bonferroni interval; cumulative algorithm change including its cost; not additive, not a pure mechanism effect, and no rescue of a failed primary test"
+ },
+ {
+  "id": "C4",
+  "claim": "Descriptive: hid_full versus the portfolio on structured transfer (16,384-131,072 bits)",
+  "status": "descriptive",
+  "decision": null,
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean saving per input bit (and versus hid_legacy)",
+  "estimate": 0.0003706132677265279,
+  "uncertainty": [
+   -0.0034540810186953035,
+   0.004260139039875997
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#structured_transfer"
+  ],
+  "domain": "structured_transfer",
+  "caveat": "descriptive only; no superiority verdict"
+ },
+ {
+  "id": "C5",
+  "claim": "Descriptive: hid_full versus the portfolio on parameter-shift stress S01/S02",
+  "status": "descriptive",
+  "decision": null,
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean saving per input bit (and versus hid_legacy)",
+  "estimate": 0.1740817188056191,
+  "uncertainty": [
+   0.15137527522468608,
+   0.19357527507459218
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#all_stress"
+  ],
+  "domain": "all_stress",
+  "caveat": "descriptive only; no superiority verdict"
+ },
+ {
+  "id": "C6",
+  "claim": "Descriptive: hid_full versus the portfolio on all twelve confirmation families",
+  "status": "descriptive",
+  "decision": null,
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-cell mean saving per input bit (and versus hid_legacy)",
+  "estimate": -0.07295166658828228,
+  "uncertainty": [
+   -0.07923298783869345,
+   -0.06666822984112483
+  ],
+  "evidence": [
+   "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/summary.json#all_family_confirmation"
+  ],
+  "domain": "all_family_confirmation",
+  "caveat": "descriptive only; no superiority verdict"
+ },
+ {
+  "id": "C7",
+  "claim": "HID-search-v2 computes Kolmogorov complexity or a minimum description length over all programs",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchy_search_v2.md section 7"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C8",
+  "claim": "A found description identifies the true generator",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchy_search_v2.md section 7"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C9",
+  "claim": "Fresh instances of familiar generators establish unfamiliar-family generalization",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchy_search_v2.md section 7"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C10",
+  "claim": "Full-string compression establishes prediction of unseen suffixes",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchy_search_v2.md section 7"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ }
+]

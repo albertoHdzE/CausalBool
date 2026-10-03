@@ -15,9 +15,7 @@ and explains every result in plain language. Run them **in order**.
 | 06 | `06_fractal_and_shared_clock` | The clock is a self-similar fractal point process, and largely shared across instruments | 17 |
 | 07 | `07_recursion_and_leg_shape` | The clock of the clock (bursts of bursts) and within-leg sub-diffusion | 18 |
 | 08 | `08_from_structure_to_strategy` | Turning the structure into a **risk** strategy — and the honest ceiling (no return alpha) | 19 |
-| 15 | `15_shifted_zero_bdm_probe` | A zero shifted through 8-bit blocks: BDM sees each block, not the shift; its answer depends on whether the partition matches the hidden period 9. Revised 2026-10-02: names A64/A72/A24, characters versus bits versus archives, full-coverage scans beside the historical drop policy, P1–P3 executed | 32, 33 |
-| 16 | `16_hierarchical_index_generalization` | HID-v1: a decodable hierarchical code, a frozen bounded search, and its benchmark against a strong baseline portfolio on unseen strings (run `confirm-v1`) | 34 |
-| 17 | `17_hierarchy_search_v2` | HID-search-v2: consensus/dense/global templates and bounded boundary search inside the unchanged HID-v1 language; prospective run `search-confirm-v2-r1` read from saved artefacts | 40 |
+| 15 | `15_shifted_zero_bdm_probe` | A zero shifted through 8-bit blocks: BDM sees each block, not the shift; its answer depends on whether the partition matches the hidden period 9 | — |
 
 ## How to run
 

@@ -1,0 +1,140 @@
+{
+ "run_id": "search-confirm-v2-r1",
+ "study": "search-v2",
+ "started_utc": "2026-10-03T03:24:18Z",
+ "commands": [
+  {
+   "name": "pytest",
+   "command": "-m pytest index-deconvolution/hierarchy/tests tests/analysis/test_description_lengths_values.py -q --tb=short -p no:cacheprovider",
+   "exit_code": 0,
+   "tail": [
+    "........................................................................ [ 37%]",
+    "........................................................................ [ 56%]",
+    "........................................................................ [ 74%]",
+    "........................................................................ [ 93%]",
+    ".........................                                                [100%]",
+    "385 passed in 84.11s (0:01:24)"
+   ],
+   "seconds": 84.3,
+   "required": true
+  },
+  {
+   "name": "ruff",
+   "command": "ruff check --output-format=concise index-deconvolution/hierarchy index-deconvolution/notebooks/build_17.py index-deconvolution/experiments/audit_search_v2_primary.py index-deconvolution/experiments/preserve_confirm_v1_r1_sources.py",
+   "exit_code": 0,
+   "tail": [
+    "All checks passed!"
+   ],
+   "seconds": 0.1,
+   "required": true
+  },
+  {
+   "name": "check_core_index",
+   "command": "zsh tools/check_core_index.sh",
+   "exit_code": 0,
+   "tail": [
+    "CORE-INDEX: 71/71 paths named in GOVERNANCE/CORE.md exist"
+   ],
+   "seconds": 0.0,
+   "required": true
+  },
+  {
+   "name": "check_test_manifest",
+   "command": "zsh tools/check_test_manifest.sh",
+   "exit_code": 0,
+   "tail": [
+    "  Quarantine never means passing. Read the reason column: some are RED",
+    "  against real code and are carried as open items in GOVERNANCE/VERIFICATION.md.",
+    "TEST-MANIFEST: runner selection agrees \u2014 72 Wolfram files, 0 Python",
+    "TEST-MANIFEST: rollup agrees \u2014 72 scored / 72 declared Wolfram, SCOPE=all",
+    "TEST-MANIFEST: verdict artefacts consistent \u2014 81 scanned, 0 contradict the rollup",
+    "TEST-MANIFEST: pytest agrees \u2014 28 files collected / 28 declared Python"
+   ],
+   "seconds": 3.1,
+   "required": false
+  },
+  {
+   "name": "check_single_engine",
+   "command": "zsh tools/check_single_engine.sh",
+   "exit_code": 1,
+   "tail": [
+    "  imp-pathinfo-paper/src/imp_pathinfo/causalbool_mirror.py",
+    "  index-deconvolution/protocols/description_lengths.py",
+    "  src/description_lengths.py",
+    "  -> expected exactly src/description_lengths.py plus the pinned",
+    "     imp-pathinfo mirror; add a new site to DESCRIPTION_LENGTHS.md first",
+    "SINGLE-ENGINE: a second engine definition site exists \u2014 reconcile or archive it"
+   ],
+   "seconds": 36.3,
+   "required": false
+  },
+  {
+   "name": "notebook 17",
+   "exit_code": 0,
+   "tail": [
+    "15 code cells, 0 error outputs, 0 unexecuted"
+   ],
+   "required": true
+  }
+ ],
+ "problems": [],
+ "scope": "whole_run",
+ "roles": [
+  "confirmation",
+  "transfer",
+  "stress"
+ ],
+ "freeze_sha256": "0f0a72ef2f9d9faac406b6d18594a45ba9dc71ff1d0331f38c6a3fead68e1d49",
+ "freeze_problems": [],
+ "validation": {
+  "engineering_valid": true,
+  "complete": true,
+  "expected_rows": 28672,
+  "present_rows": 28672,
+  "archives_checked": 28672,
+  "distinct_archives_decoded": 17573,
+  "missing_units": {
+   "confirmation": [],
+   "transfer": [],
+   "stress": []
+  },
+  "missing_methods": {
+   "confirmation": {},
+   "transfer": {},
+   "stress": {}
+  },
+  "duplicates": [],
+  "unknown": [],
+  "censored": []
+ },
+ "search_v2_checks": {
+  "nesting_pairs_checked": 8960,
+  "resource_nesting_break_count": 0
+ },
+ "separate_process_decode": {
+  "sampled": 390,
+  "decoded": 390,
+  "all_ok": true,
+  "strata": "one archive per (split, family, method, status), including fallbacks"
+ },
+ "environment_differences": {},
+ "environment_problems_by_purpose": {
+  "benchmark": [],
+  "diagnostics": [],
+  "report": []
+ },
+ "summary_recomputed": {
+  "stale_keys": [],
+  "agrees": true
+ },
+ "scientific_verdict": "inconclusive",
+ "engineering_status": "valid",
+ "completeness": "complete",
+ "invalid_count": 0,
+ "incomplete_count": 0,
+ "invalid_reasons": [],
+ "incomplete_reasons": [],
+ "exit_code": 0,
+ "finished_utc": "2026-10-03T03:32:38Z",
+ "diagnostics_verification_s_used": 1643.568782375005
+}

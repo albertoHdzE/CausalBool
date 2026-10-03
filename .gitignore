@@ -80,3 +80,12 @@ results/**/Done.txt
 # LARGE_BINARIES forbids regenerable results of that size in history, so they
 # are reached by rerunning the producer, not by clone.
 results/step35_*/
+
+# HID result trees (index-deconvolution/results/hierarchy_*): per-row records, content-
+# addressed archives, merged cases.jsonl and worker temporaries are regenerable from the
+# frozen sources and exceed LARGE_BINARIES limits (cases.jsonl up to 55 MB, ~38k files);
+# summaries, freezes, snapshots, audits, diagnostics and manifests are committed.
+index-deconvolution/results/hierarchy_*/**/rows/
+index-deconvolution/results/hierarchy_*/**/archives/
+index-deconvolution/results/hierarchy_*/**/cases.jsonl
+index-deconvolution/results/hierarchy_*/**/tmp/

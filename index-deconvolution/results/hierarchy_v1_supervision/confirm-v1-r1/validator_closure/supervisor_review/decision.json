@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-02",
+  "decision": "approved",
+  "scope": "Three requested validator fixes and their tests as an unapplied correction artifact; not certification of arbitrary malformed metadata handling.",
+  "patch_sha256": "587d7bc0e0b9f598a80be99776655e3cc8d1df355cfa62884e7fbd8ee5809346",
+  "encoding_run": "confirm-v1-r1",
+  "encoding_freeze_sha256": "f970efff16a2d08bf1dd22eee1386c164af5ba67b22137fefcf06cd182b27f5c",
+  "active_patch_applied": false,
+  "independent_tests": {
+    "passed": 331,
+    "seconds": 30.01,
+    "lint": "pass"
+  },
+  "reviewer_decisions": {
+    "D1": "accepted: absent methods remain incomplete; duplicates/unknown methods invalid",
+    "D2": "accepted: undeclared row artifacts invalidate whole-run validation",
+    "D3": "accepted: write not_verified before starting; propagate unrelated errors"
+  },
+  "full_corpus": {
+    "rows": 26112,
+    "distinct_archives": 16402,
+    "separate_process_sample": 360,
+    "other_invalid": 0,
+    "encoding_provenance_mismatches": 3,
+    "arithmetic_and_ledgers_unchanged": true,
+    "run_directory_unchanged": true
+  },
+  "integration": "Keep current frozen tree unchanged. Approved patch is ready for the next development revision, before that revision is frozen. Do not relabel the old encoding freeze.",
+  "remaining_limitations": [
+    "Malformed JSON and absent row fields may still abort, with verify left not_verified.",
+    "Report files are individually written; computing them first does not make the multi-file write transactional."
+  ],
+  "additional_encoding_benchmark_required_for_this_review": false,
+  "additional_correction_delegation_required_for_this_scope": false
+}

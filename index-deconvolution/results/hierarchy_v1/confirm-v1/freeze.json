@@ -1,0 +1,669 @@
+{
+ "analysis_plan": {
+  "ablations": {
+   "interval": "percentile 99% (Bonferroni across five two-sided intervals)",
+   "joint_resampling": true,
+   "methods": [
+    "hid_no_schema",
+    "hid_no_arithmetic",
+    "hid_no_transform",
+    "hid_flat",
+    "hid_fixed8"
+   ],
+   "per_string": "(ablation_bits - full_bits) / n_bits",
+   "replicates": 10000,
+   "seed": 33002
+  },
+  "descriptive": {
+   "controls_and_all_families": "same endpoint, descriptive only",
+   "family_cells_seed": 33010,
+   "transfer_seed": 33004
+  },
+  "hid_deployed_statuses": [
+   "ok",
+   "timeout_raw",
+   "rss_limit_raw"
+  ],
+  "per_string": "saving_bits = baseline_best_archive_bits - hid_full_archive_bits; saving_per_input_bit = saving_bits / n_bits",
+  "primary_bootstrap": {
+   "interval": "percentile 95%",
+   "replicates": 10000,
+   "rng": "numpy.random.default_rng",
+   "scheme": "within each cell resample units with replacement, keeping both lengths and all methods together",
+   "seed": 33001
+  },
+  "primary_population": {
+   "families": [
+    "F01",
+    "F02",
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F12"
+   ],
+   "split": "confirmation"
+  },
+  "verdict": {
+   "inconclusive": "interval includes 0, or any baseline result censored",
+   "not_supported": "95% interval entirely below 0",
+   "supported": "95% interval entirely above 0, all baseline results available, engineering gates pass"
+  },
+  "weighting": "mean of the base/ragged pair within a unit, then mean over units in each (family, base_length) cell, then mean over cells (equal weights)"
+ },
+ "baseline_parameters": {
+  "bernoulli": {
+   "codec_id": 5,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "bernoulli",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "context": {
+   "codec_id": 6,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "context",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "gaps": {
+   "codec_id": 3,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "gaps",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "lzma": {
+   "codec_id": 8,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "lzma",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "pair_grammar": {
+   "codec_id": 9,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "pair_grammar",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "period": {
+   "codec_id": 4,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "period",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "raw": {
+   "codec_id": 0,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "raw",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "rle": {
+   "codec_id": 2,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "rle",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "zlib": {
+   "codec_id": 7,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "zlib",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  }
+ },
+ "documentation_sha256_informational": {
+  "index-deconvolution/hierarchy/SEARCH_SPEC.md": "724404080301af9a71cd3cbda3b10def223c6c15e2eba6fc764d454ae641f2b2"
+ },
+ "environment": {
+  "cpu": "Apple M3 Ultra",
+  "cpu_count": 28,
+  "lzma_liblzma": "probe-sha256:0040f94d11d0039505328a90b2ff48968db873e9e7967307631bf40ef5679275",
+  "machine": "arm64",
+  "matplotlib_version": "3.10.8",
+  "numpy_version": "2.4.3",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "pybdm_version": "0.1.0",
+  "pytest_version": "9.1.1",
+  "python": "3.13.12 (main, Mar  7 2026, 16:31:40) [Clang 17.0.0 (clang-1700.6.4.2)]",
+  "python_implementation": "CPython",
+  "ram_bytes": 103079215104,
+  "zlib_runtime_version": "1.2.12",
+  "zlib_version": "1.2.12"
+ },
+ "expected_counts": {
+  "confirmation": {
+   "method_rows": 23040,
+   "scored_strings": 1440
+  },
+  "development": {
+   "method_rows": 2048,
+   "scored_strings": 128
+  },
+  "transfer": {
+   "method_rows": 3072,
+   "scored_strings": 192
+  }
+ },
+ "frozen_at_utc": "2026-10-02T15:06:52Z",
+ "generator": {
+  "held_out": [
+   "F03",
+   "F10",
+   "F11",
+   "F12"
+  ],
+  "seed_formula": "sha256('hid-v1|split|family|base_length|replicate|stream')",
+  "splits": {
+   "confirmation": {
+    "base_lengths": [
+     256,
+     1024,
+     4096
+    ],
+    "families": [
+     "F01",
+     "F02",
+     "F03",
+     "F04",
+     "F05",
+     "F06",
+     "F07",
+     "F08",
+     "F09",
+     "F10",
+     "F11",
+     "F12"
+    ],
+    "replicates": [
+     1000,
+     1001,
+     1002,
+     1003,
+     1004,
+     1005,
+     1006,
+     1007,
+     1008,
+     1009,
+     1010,
+     1011,
+     1012,
+     1013,
+     1014,
+     1015,
+     1016,
+     1017,
+     1018,
+     1019
+    ]
+   },
+   "development": {
+    "base_lengths": [
+     256,
+     1024
+    ],
+    "families": [
+     "F01",
+     "F02",
+     "F04",
+     "F05",
+     "F06",
+     "F07",
+     "F08",
+     "F09"
+    ],
+    "replicates": [
+     0,
+     1,
+     2,
+     3
+    ]
+   },
+   "transfer": {
+    "base_lengths": [
+     16384,
+     65536
+    ],
+    "families": [
+     "F01",
+     "F02",
+     "F03",
+     "F04",
+     "F05",
+     "F06",
+     "F07",
+     "F08",
+     "F09",
+     "F10",
+     "F11",
+     "F12"
+    ],
+    "replicates": [
+     2000,
+     2001,
+     2002,
+     2003
+    ]
+   }
+  },
+  "streams": [
+   "structure",
+   "content",
+   "noise"
+  ]
+ },
+ "git_head_note": "dcc1d59e5097b363b64e5ba93f21a57e43b929c8 (inputs are uncommitted; content hashes identify them)",
+ "methods": [
+  "hid_full",
+  "hid_no_schema",
+  "hid_no_arithmetic",
+  "hid_no_transform",
+  "hid_flat",
+  "hid_fixed8",
+  "raw",
+  "rle",
+  "gaps",
+  "period",
+  "bernoulli",
+  "context",
+  "zlib",
+  "lzma",
+  "pair_grammar",
+  "baseline_best"
+ ],
+ "protocol_sha256": {
+  "index-deconvolution/PROTOCOL_hierarchical_index_generalization.md": "6208e6b901b9af92518b7e5f3a02054435ecebd66a829660a8102debf218b425",
+  "index-deconvolution/protocols/hierarchy_v1/ACCEPTANCE.md": "55a6adec184d28c543619c13d8ffc07b5fb93a8cbbc1122be9ce9718914f6114",
+  "index-deconvolution/protocols/hierarchy_v1/BENCHMARK.md": "c7a8fbc090b736145927cbd3828f4c33632da1e3b6ee73f06cccc9a8f0be5e8c",
+  "index-deconvolution/protocols/hierarchy_v1/WIRE_FORMAT.md": "030fcbe58f705b26b14101a6a31c1e118a780224286e4cfd278a7a604122d16b"
+ },
+ "resource_policy": {
+  "max_workers": 2,
+  "rss_limit_bytes": 1073741824,
+  "rss_method": "os.wait4 ru_maxrss of the worker process (bytes on darwin); worker self-terminates with exit 86 when its ru_maxrss exceeds 1 GiB",
+  "total_budget_s": 21600,
+  "wall_limit_s": 30.0,
+  "worker": "python -S -m hierarchy.benchmark --worker METHOD"
+ },
+ "restricted_oracle_config": {
+  "ap_single_runs": 8,
+  "beam_width": 8,
+  "dyadic_min": 32,
+  "enable_ap": false,
+  "enable_grammar": false,
+  "enable_patch": false,
+  "enable_schema": false,
+  "enable_segmentation": false,
+  "enable_transform": false,
+  "fixed8": false,
+  "fixed_widths": [
+   8,
+   16,
+   32,
+   64,
+   128,
+   256
+  ],
+  "flat": false,
+  "grammar_literal_thresholds": [
+   0,
+   16,
+   64
+  ],
+  "max_ap": 256,
+  "max_candidates": 512,
+  "max_depth": 64,
+  "max_phases": 8,
+  "max_relation_candidates": 8,
+  "max_relation_reps": 64,
+  "max_rules": 4096,
+  "max_schema_clauses": 64,
+  "max_sites": 16,
+  "name": "restricted_oracle",
+  "noisy_keep": 3,
+  "patch_divisor": 16,
+  "patch_max": 64,
+  "restricted": true,
+  "restricted_max_nodes": 3,
+  "rewrite_rounds": 4,
+  "schema_max_len": 256,
+  "schema_table_budget": 4096,
+  "sha256": "ed73d7c72884ff725de9fbaddd50fbc1f0501080e21c4c8cc50963fe6e12781b",
+  "site_proposals": 1,
+  "split_min": 64,
+  "work_cap": 120000000
+ },
+ "run_id": "confirm-v1",
+ "search_configs": {
+  "fixed8": {
+   "ap_single_runs": 8,
+   "beam_width": 8,
+   "dyadic_min": 32,
+   "enable_ap": true,
+   "enable_grammar": true,
+   "enable_patch": true,
+   "enable_schema": true,
+   "enable_segmentation": true,
+   "enable_transform": true,
+   "fixed8": true,
+   "fixed_widths": [
+    8,
+    16,
+    32,
+    64,
+    128,
+    256
+   ],
+   "flat": false,
+   "grammar_literal_thresholds": [
+    0,
+    16,
+    64
+   ],
+   "max_ap": 256,
+   "max_candidates": 512,
+   "max_depth": 64,
+   "max_phases": 8,
+   "max_relation_candidates": 8,
+   "max_relation_reps": 64,
+   "max_rules": 4096,
+   "max_schema_clauses": 64,
+   "max_sites": 16,
+   "name": "fixed8",
+   "noisy_keep": 3,
+   "patch_divisor": 16,
+   "patch_max": 64,
+   "restricted": false,
+   "restricted_max_nodes": 3,
+   "rewrite_rounds": 4,
+   "schema_max_len": 256,
+   "schema_table_budget": 4096,
+   "sha256": "d9d3ff0d60b37d9cb5093b60001b17a9f91756c912b1d68dd7ad4d16dc80ab39",
+   "site_proposals": 1,
+   "split_min": 64,
+   "work_cap": 120000000
+  },
+  "flat": {
+   "ap_single_runs": 8,
+   "beam_width": 8,
+   "dyadic_min": 32,
+   "enable_ap": true,
+   "enable_grammar": false,
+   "enable_patch": true,
+   "enable_schema": true,
+   "enable_segmentation": true,
+   "enable_transform": false,
+   "fixed8": false,
+   "fixed_widths": [
+    8,
+    16,
+    32,
+    64,
+    128,
+    256
+   ],
+   "flat": true,
+   "grammar_literal_thresholds": [
+    0,
+    16,
+    64
+   ],
+   "max_ap": 256,
+   "max_candidates": 512,
+   "max_depth": 64,
+   "max_phases": 8,
+   "max_relation_candidates": 8,
+   "max_relation_reps": 64,
+   "max_rules": 4096,
+   "max_schema_clauses": 64,
+   "max_sites": 16,
+   "name": "flat",
+   "noisy_keep": 3,
+   "patch_divisor": 16,
+   "patch_max": 64,
+   "restricted": false,
+   "restricted_max_nodes": 3,
+   "rewrite_rounds": 4,
+   "schema_max_len": 256,
+   "schema_table_budget": 4096,
+   "sha256": "7932d6e1cb786499f9716a0634d72a5091a2d2308485af0e368d1b863e6eb1fa",
+   "site_proposals": 1,
+   "split_min": 64,
+   "work_cap": 120000000
+  },
+  "full": {
+   "ap_single_runs": 8,
+   "beam_width": 8,
+   "dyadic_min": 32,
+   "enable_ap": true,
+   "enable_grammar": true,
+   "enable_patch": true,
+   "enable_schema": true,
+   "enable_segmentation": true,
+   "enable_transform": true,
+   "fixed8": false,
+   "fixed_widths": [
+    8,
+    16,
+    32,
+    64,
+    128,
+    256
+   ],
+   "flat": false,
+   "grammar_literal_thresholds": [
+    0,
+    16,
+    64
+   ],
+   "max_ap": 256,
+   "max_candidates": 512,
+   "max_depth": 64,
+   "max_phases": 8,
+   "max_relation_candidates": 8,
+   "max_relation_reps": 64,
+   "max_rules": 4096,
+   "max_schema_clauses": 64,
+   "max_sites": 16,
+   "name": "full",
+   "noisy_keep": 3,
+   "patch_divisor": 16,
+   "patch_max": 64,
+   "restricted": false,
+   "restricted_max_nodes": 3,
+   "rewrite_rounds": 4,
+   "schema_max_len": 256,
+   "schema_table_budget": 4096,
+   "sha256": "1a8878f7cfe7984b4b82f088935a059d4b71d52b3a8320e5af5718a51b43e806",
+   "site_proposals": 1,
+   "split_min": 64,
+   "work_cap": 120000000
+  },
+  "no_arithmetic": {
+   "ap_single_runs": 8,
+   "beam_width": 8,
+   "dyadic_min": 32,
+   "enable_ap": false,
+   "enable_grammar": true,
+   "enable_patch": true,
+   "enable_schema": true,
+   "enable_segmentation": true,
+   "enable_transform": true,
+   "fixed8": false,
+   "fixed_widths": [
+    8,
+    16,
+    32,
+    64,
+    128,
+    256
+   ],
+   "flat": false,
+   "grammar_literal_thresholds": [
+    0,
+    16,
+    64
+   ],
+   "max_ap": 256,
+   "max_candidates": 512,
+   "max_depth": 64,
+   "max_phases": 8,
+   "max_relation_candidates": 8,
+   "max_relation_reps": 64,
+   "max_rules": 4096,
+   "max_schema_clauses": 64,
+   "max_sites": 16,
+   "name": "no_arithmetic",
+   "noisy_keep": 3,
+   "patch_divisor": 16,
+   "patch_max": 64,
+   "restricted": false,
+   "restricted_max_nodes": 3,
+   "rewrite_rounds": 4,
+   "schema_max_len": 256,
+   "schema_table_budget": 4096,
+   "sha256": "ced367eb8f049a10e36a4747872752e74becfe4185a33d50375472b37c7e3621",
+   "site_proposals": 1,
+   "split_min": 64,
+   "work_cap": 120000000
+  },
+  "no_schema": {
+   "ap_single_runs": 8,
+   "beam_width": 8,
+   "dyadic_min": 32,
+   "enable_ap": true,
+   "enable_grammar": true,
+   "enable_patch": true,
+   "enable_schema": false,
+   "enable_segmentation": true,
+   "enable_transform": true,
+   "fixed8": false,
+   "fixed_widths": [
+    8,
+    16,
+    32,
+    64,
+    128,
+    256
+   ],
+   "flat": false,
+   "grammar_literal_thresholds": [
+    0,
+    16,
+    64
+   ],
+   "max_ap": 256,
+   "max_candidates": 512,
+   "max_depth": 64,
+   "max_phases": 8,
+   "max_relation_candidates": 8,
+   "max_relation_reps": 64,
+   "max_rules": 4096,
+   "max_schema_clauses": 64,
+   "max_sites": 16,
+   "name": "no_schema",
+   "noisy_keep": 3,
+   "patch_divisor": 16,
+   "patch_max": 64,
+   "restricted": false,
+   "restricted_max_nodes": 3,
+   "rewrite_rounds": 4,
+   "schema_max_len": 256,
+   "schema_table_budget": 4096,
+   "sha256": "3e02ed7d7cd915d800610364e5f07e4f544ee2f34293d857848fe7f4f1c9b913",
+   "site_proposals": 1,
+   "split_min": 64,
+   "work_cap": 120000000
+  },
+  "no_transform": {
+   "ap_single_runs": 8,
+   "beam_width": 8,
+   "dyadic_min": 32,
+   "enable_ap": true,
+   "enable_grammar": true,
+   "enable_patch": true,
+   "enable_schema": true,
+   "enable_segmentation": true,
+   "enable_transform": false,
+   "fixed8": false,
+   "fixed_widths": [
+    8,
+    16,
+    32,
+    64,
+    128,
+    256
+   ],
+   "flat": false,
+   "grammar_literal_thresholds": [
+    0,
+    16,
+    64
+   ],
+   "max_ap": 256,
+   "max_candidates": 512,
+   "max_depth": 64,
+   "max_phases": 8,
+   "max_relation_candidates": 8,
+   "max_relation_reps": 64,
+   "max_rules": 4096,
+   "max_schema_clauses": 64,
+   "max_sites": 16,
+   "name": "no_transform",
+   "noisy_keep": 3,
+   "patch_divisor": 16,
+   "patch_max": 64,
+   "restricted": false,
+   "restricted_max_nodes": 3,
+   "rewrite_rounds": 4,
+   "schema_max_len": 256,
+   "schema_table_budget": 4096,
+   "sha256": "16ed4ec2e2203f54d17c3b8e9220622e1ee1fc8e2dc97e1f69f92337e6eefdbc",
+   "site_proposals": 1,
+   "split_min": 64,
+   "work_cap": 120000000
+  }
+ },
+ "source_sha256": {
+  "index-deconvolution/hierarchy/__init__.py": "5bd93ec8b46f80f71de2d4fcb1f00a64f54cd115981865ba1976b3158830b575",
+  "index-deconvolution/hierarchy/baselines.py": "670553e384f19868ad320a86306eb49cc969add9bd50963ca8f24ac43b90af05",
+  "index-deconvolution/hierarchy/benchmark.py": "63f84691630c32b5976ee66fc900381de7eb4fb5aa99eaab1d8972aac9d2213e",
+  "index-deconvolution/hierarchy/candidates.py": "03ec251d359cad2f7093fd3fd64ff70de1de512d7637f14d984cded2a9e00d1b",
+  "index-deconvolution/hierarchy/cli.py": "a4a586233604a66cf0216f3361a725b5995b4c6925c5d7006b60438a1528a1b4",
+  "index-deconvolution/hierarchy/codes.py": "c94de70a9c4cd0b5b156e0524f09d9e1667170392c7ce3e4c30ce2d797f62380",
+  "index-deconvolution/hierarchy/corpus.py": "af0b0cb686e9af9a342c0d5493302f87e8ba7cbc03a0e2654ccfa46a0d531a41",
+  "index-deconvolution/hierarchy/decode.py": "557d7bd49cc8cf0c7ad2632c20bf080d43812dd441cdf43bb8bb89d5143cb3b9",
+  "index-deconvolution/hierarchy/diagnostics.py": "0b7e81614b910e8bc4efada2fa3ecb4814f03598770f6a004c36d15f70c784f5",
+  "index-deconvolution/hierarchy/infer.py": "efde76fe09661d49aff02e718a7093ed917b441455fc3827acd4102392f92a6d",
+  "index-deconvolution/hierarchy/ledger.py": "790f2a624754bddace433c9cf111b682de4b721c8af98785493ce0e365faa9e7",
+  "index-deconvolution/hierarchy/model.py": "87d56d8176fdeda93087303b8ad345f68facb700bba19ae80b48fe8398359b09",
+  "index-deconvolution/hierarchy/report.py": "285e0e3880a624fadbc48687c67040755ec22fa5dc1e4221cb20c4dcf59248cd",
+  "index-deconvolution/hierarchy/wire.py": "ca677fb2637b079f7a0daafde6572ec4926ed4a8cf12ec5cff396ce64baed2ff",
+  "index-deconvolution/src/causalbool.py": "856cd0f29549f49685de43cc8bfe0796f96ca91457d649d97275b74fdafb1100",
+  "index-deconvolution/src/deconvolution.py": "6749376102315a996f0d80977b38f520f7dbce1b30db9635047f30d9158a1177",
+  "src/description_lengths.py": "052786ca6f2e399cdf19a77743d5f4013f6856abf69a2034c4f944732775524e"
+ }
+}

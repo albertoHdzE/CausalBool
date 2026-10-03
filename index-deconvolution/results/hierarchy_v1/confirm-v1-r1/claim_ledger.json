@@ -1,0 +1,256 @@
+[
+ {
+  "id": "C1",
+  "claim": "HID-v1 (full) yields an average code-length gain over the strong decodable baseline portfolio on the prespecified structured confirmation benchmark",
+  "status": "not_supported",
+  "decision": "not_supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-family, equal-size mean of (baseline_best_bits - hid_full_bits)/n",
+  "estimate": -0.044615638178146094,
+  "uncertainty": [
+   -0.053677526971600935,
+   -0.035824263694091044
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#primary",
+   "results/hierarchy_v1/confirm-v1-r1/cases.jsonl (split=confirmation, families F01,F02,F03,F04,F05,F06,F12, methods hid_full, baseline_best)"
+  ],
+  "domain": "families F01-F06, F12; base lengths 256, 1024, 4096 plus ragged +3; replicates 1000-1019; frozen search budget",
+  "caveat": "a code-length comparison of the best archive found under a fixed language and budget; not K, not generator recovery, not prediction"
+ },
+ {
+  "id": "C2",
+  "claim": "Every stored archive decodes exactly to its input with the independent decoder",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "engineering validation of every declared row and archive",
+  "metric": "archives decoded and hash-matched / archives promised by row statuses",
+  "estimate": {
+   "archives_checked": 26112,
+   "distinct_archives_decoded": 16402,
+   "decode_ok": 26112,
+   "decode_failed": 0,
+   "with_archive": 26112
+  },
+  "uncertainty": null,
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/verification.json",
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#validation"
+  ],
+  "domain": "all splits run under this run id",
+  "caveat": "engineering claim"
+ },
+ {
+  "id": "C3.1",
+  "claim": "The component removed in hid_fixed8 contributes a code-length advantage to the full search",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.011524074096212145,
+  "uncertainty": [
+   0.006701291503646186,
+   0.016676866735213534
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#ablations.hid_fixed8"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; describes the configured algorithm under the frozen budget: removing a component also changes what the bounded search reaches, so this is not a language-intrinsic contribution"
+ },
+ {
+  "id": "C3.2",
+  "claim": "The component removed in hid_flat contributes a code-length advantage to the full search",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.2636049256079921,
+  "uncertainty": [
+   0.24348112196965338,
+   0.2825125702693631
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#ablations.hid_flat"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; describes the configured algorithm under the frozen budget: removing a component also changes what the bounded search reaches, so this is not a language-intrinsic contribution"
+ },
+ {
+  "id": "C3.3",
+  "claim": "The component removed in hid_no_arithmetic contributes a code-length advantage to the full search",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.039232501944997084,
+  "uncertainty": [
+   0.03352907733641074,
+   0.04514486998992139
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#ablations.hid_no_arithmetic"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; describes the configured algorithm under the frozen budget: removing a component also changes what the bounded search reaches, so this is not a language-intrinsic contribution"
+ },
+ {
+  "id": "C3.4",
+  "claim": "The component removed in hid_no_schema contributes a code-length advantage to the full search",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.00895682863304977,
+  "uncertainty": [
+   0.005953669009017654,
+   0.012107289840667787
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#ablations.hid_no_schema"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; describes the configured algorithm under the frozen budget: removing a component also changes what the bounded search reaches, so this is not a language-intrinsic contribution"
+ },
+ {
+  "id": "C3.5",
+  "claim": "The component removed in hid_no_transform contributes a code-length advantage to the full search",
+  "status": "supported",
+  "decision": "supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "equal-weight mean of (ablation_bits - full_bits)/n",
+  "estimate": 0.0018777611706115953,
+  "uncertainty": [
+   0.0014804041039420096,
+   0.0022726858644637423
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#ablations.hid_no_transform"
+  ],
+  "domain": "structured confirmation population",
+  "caveat": "99% Bonferroni intervals; describes the configured algorithm under the frozen budget: removing a component also changes what the bounded search reaches, so this is not a language-intrinsic contribution"
+ },
+ {
+  "id": "C4",
+  "claim": "At 16,384 and 65,536 bits HID-v1 (full) has a positive equal-weight mean saving over the nine-code portfolio on the structured families",
+  "status": "not_supported",
+  "decision": "not_supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "primary endpoint arithmetic on the transfer split",
+  "estimate": -0.06279695513458282,
+  "uncertainty": [
+   -0.07689535930680705,
+   -0.04853323201626922
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#transfer_structured_aggregate"
+  ],
+  "domain": "transfer split, families F01-F06, F12, replicates 2000-2003 (four units per cell), seed 33005",
+  "caveat": "descriptive only. The reserved transfer seeds and the held-out families F03, F10, F11, F12 were not used before the freeze, but 65,536-bit development_resource probes (development families and parameter ranges) informed the work-cap choice, so 65,536 bits is not an unseen length"
+ },
+ {
+  "id": "C5",
+  "claim": "On the statistical controls F07-F09 HID-v1 (full) has a positive equal-weight aggregate saving over the nine-code portfolio",
+  "status": "not_supported",
+  "decision": "not_supported",
+  "evidence_gate": "gates passed: valid, complete, uncensored",
+  "metric": "primary endpoint arithmetic, equal weights over F07-F09 cells",
+  "estimate": -0.26335231058832276,
+  "uncertainty": [
+   -0.2810490068288155,
+   -0.2451061714169631
+  ],
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#controls_aggregate",
+   "results/hierarchy_v1/confirm-v1-r1/summary.json#controls_vs_statistical_codes"
+  ],
+  "domain": "confirmation F07-F09, seed 33006",
+  "caveat": "descriptive. An aggregate over three families says nothing about each family; failure to show an advantage is not equivalence. Against the better of the Bernoulli and context codes alone the comparison differs by family (controls_vs_statistical_codes, descriptive), because raw fallback and code overheads enter both sides"
+ },
+ {
+  "id": "C6",
+  "claim": "Aligned/full-coverage BDM, with setting selection calibrated symmetrically on marginal-preserving nulls, separates the structured diagnostic objects from bit shuffles",
+  "status": "inconclusive",
+  "decision": "inconclusive",
+  "evidence_gate": "diagnostics.json written under a validated freeze and environment",
+  "metric": "adaptive p-value (r+1)/(B+1), Holm-adjusted across ten objects",
+  "estimate": {
+   "F01": 0.005,
+   "F02": 0.005,
+   "F03": 0.005,
+   "F04": 0.05,
+   "F05": 0.005,
+   "F06": 0.005,
+   "F12": 0.01,
+   "F07": 0.215,
+   "F08": 0.985,
+   "F09": 0.005
+  },
+  "uncertainty": "Monte Carlo, 199 nulls",
+  "evidence": [
+   "results/hierarchy_v1/confirm-v1-r1/diagnostics.json"
+  ],
+  "domain": "replicate 1000, base length 1024, non-ragged",
+  "caveat": "marginal shuffle null; says nothing beyond bit marginals for F09; BDM is a diagnostic score, never stored bytes"
+ },
+ {
+  "id": "C7",
+  "claim": "HID-v1 computes or estimates Kolmogorov complexity",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C8",
+  "claim": "An inferred description is the unique generating mechanism",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C9",
+  "claim": "Full-string compression establishes prediction of unseen suffixes",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ },
+ {
+  "id": "C10",
+  "claim": "The study establishes causal identification or priority of hierarchical grammar coding",
+  "status": "out_of_scope",
+  "decision": null,
+  "evidence_gate": null,
+  "metric": null,
+  "estimate": null,
+  "uncertainty": null,
+  "evidence": [
+   "PROTOCOL_hierarchical_index_generalization.md section 1"
+  ],
+  "domain": null,
+  "caveat": "not tested by this design"
+ }
+]

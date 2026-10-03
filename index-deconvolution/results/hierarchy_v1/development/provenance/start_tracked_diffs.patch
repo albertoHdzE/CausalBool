@@ -1,0 +1,124 @@
+diff --git a/GOVERNANCE/CORE.md b/GOVERNANCE/CORE.md
+index 54d18b60..4ff48bb5 100644
+--- a/GOVERNANCE/CORE.md
++++ b/GOVERNANCE/CORE.md
+@@ -74,7 +74,7 @@ sharing code.
+ 
+ | concept | owner |
+ |---|---|
+-| all description-length variants A–E, `bdm_2d`, the `pybdm` pin | `src/description_lengths.py` |
++| all description-length variants A–E, `bdm_2d`, `bdm_1d`, `ctm_1d`, the `pybdm` pin | `src/description_lengths.py` |
+ | repository / paper / figures path resolution | `src/causalbool_paths.py` |
+ | index-set deconvolution, `minimal_dnf` (Quine–McCluskey) | `index-deconvolution/src/deconvolution.py` |
+ | **LZ76** complexity (Kaspar & Schuster) | `src/complexity/Trajectory_LZ.py` |
+diff --git a/index-deconvolution/notebooks/README.md b/index-deconvolution/notebooks/README.md
+index a96da836..93a80f0f 100644
+--- a/index-deconvolution/notebooks/README.md
++++ b/index-deconvolution/notebooks/README.md
+@@ -15,6 +15,7 @@ and explains every result in plain language. Run them **in order**.
+ | 06 | `06_fractal_and_shared_clock` | The clock is a self-similar fractal point process, and largely shared across instruments | 17 |
+ | 07 | `07_recursion_and_leg_shape` | The clock of the clock (bursts of bursts) and within-leg sub-diffusion | 18 |
+ | 08 | `08_from_structure_to_strategy` | Turning the structure into a **risk** strategy — and the honest ceiling (no return alpha) | 19 |
++| 15 | `15_shifted_zero_bdm_probe` | A zero shifted through 8-bit blocks: BDM sees each block, not the shift; its answer depends on whether the partition matches the hidden period 9 | — |
+ 
+ ## How to run
+ 
+diff --git a/src/description_lengths.py b/src/description_lengths.py
+index ea90160f..a8a33d28 100644
+--- a/src/description_lengths.py
++++ b/src/description_lengths.py
+@@ -197,3 +197,57 @@ def bdm_2d(array, below_floor: str = "none") -> float | None:
+     if below_floor == "raise" and (a.shape[0] < 4 or a.shape[1] < 4):
+         raise ValueError(f"BDM floor violated: shape {a.shape}")
+     return float(BDM(ndim=2).bdm(a))
++
++
++# --- 1-D CTM / BDM over binary strings ----------------------------------------
++#
++# Added for index-deconvolution notebook 15 (the shifted-zero probe of BDM).
++# Same pin, same rule as bdm_2d: the partition is chosen by the caller, never
++# silently. pybdm's default 1-D partition DROPS any remainder shorter than the
++# block, so a 20-bit string under block 12 is scored on its first 12 bits only.
++# That is refused here unless the caller asks for it.
++
++def _bits(bits):
++    import numpy as np
++    if isinstance(bits, str):
++        bits = [int(c) for c in bits]
++    a = np.asarray(bits, dtype=int)
++    if a.ndim != 1 or a.size == 0 or not set(np.unique(a)) <= {0, 1}:
++        raise ValueError("expected a non-empty 1-D binary string")
++    return a
++
++
++def ctm_1d(bits) -> float:
++    """CTM (bits) of a binary string of length 1..12, looked up in pybdm's
++    CTM-B2-D12 table (Soler-Toscano et al. 2014, D(5) machines)."""
++    _check_pybdm()
++    from pybdm import BDM
++    a = _bits(bits)
++    if a.size > 12:
++        raise ValueError(f"CTM table covers lengths 1..12, got {a.size}")
++    return float(BDM(ndim=1, shape=(a.size,)).bdm(a))
++
++
++def bdm_1d(bits, block: int = 12, shift: int | None = None,
++           remainder: str = "raise") -> float:
++    """pybdm 1-D BDM: sum over DISTINCT blocks of CTM(block) + log2(multiplicity).
++
++    block      block length, 1..12 (the CTM table's range);
++    shift      None -> non-overlapping blocks (pybdm PartitionIgnore);
++               k    -> sliding blocks with step k (pybdm PartitionCorrelated);
++    remainder  "raise" -> refuse a length that the blocks do not tile exactly;
++               "drop"  -> pybdm's own behaviour, trailing bits ignored.
++    """
++    _check_pybdm()
++    from pybdm import BDM
++    from pybdm.partitions import PartitionCorrelated
++    a = _bits(bits)
++    if not 1 <= block <= 12:
++        raise ValueError(f"block must be 1..12, got {block}")
++    step = block if shift is None else shift
++    if remainder == "raise" and (a.size - block) % step != 0:
++        raise ValueError(f"length {a.size} not tiled by block {block} step {step}")
++    if shift is None:
++        return float(BDM(ndim=1, shape=(block,)).bdm(a))
++    return float(BDM(ndim=1, shape=(block,), partition=PartitionCorrelated,
++                     shift=shift).bdm(a))
+diff --git a/tests/analysis/test_description_lengths_values.py b/tests/analysis/test_description_lengths_values.py
+index 12850c1c..641f6e8d 100644
+--- a/tests/analysis/test_description_lengths_values.py
++++ b/tests/analysis/test_description_lengths_values.py
+@@ -350,3 +350,32 @@ def test_variant_c_delegates_to_the_causalnet_measure():
+     and3 = dl.model_dnf_bits([0, 0, 0, 0, 0, 0, 0, 1], 3)
+     # XOR needs four product terms in DNF; AND needs one.
+     assert xor3 > and3
++
++
++# ── bdm_1d / ctm_1d: the 1-D partition is chosen explicitly ─────────────────
++
++def test_ctm_is_invariant_under_reversal_and_complement():
++    # The D(5) machine space is closed under both symmetries, so the table is.
++    s = "10111111"
++    comp = "".join("1" if c == "0" else "0" for c in s)
++    assert dl.ctm_1d(s) == pytest.approx(dl.ctm_1d(s[::-1]))
++    assert dl.ctm_1d(s) == pytest.approx(dl.ctm_1d(comp))
++
++
++def test_aligned_bdm_is_the_sum_of_ctm_plus_log2_multiplicity():
++    # Derived from the BDM definition, not copied from pybdm's output.
++    blocks = ["01111111", "10111111", "01111111"]
++    expected = dl.ctm_1d(blocks[0]) + 1.0 + dl.ctm_1d(blocks[1])
++    assert dl.bdm_1d("".join(blocks), block=8) == pytest.approx(expected)
++
++
++def test_bdm_1d_refuses_a_remainder_unless_asked():
++    with pytest.raises(ValueError, match="tiled"):
++        dl.bdm_1d("1" * 20, block=12)
++    assert dl.bdm_1d("1" * 20, block=12, remainder="drop") == pytest.approx(
++        dl.ctm_1d("1" * 12))
++
++
++def test_ctm_1d_refuses_beyond_the_table():
++    with pytest.raises(ValueError, match="1..12"):
++        dl.ctm_1d("1" * 13)

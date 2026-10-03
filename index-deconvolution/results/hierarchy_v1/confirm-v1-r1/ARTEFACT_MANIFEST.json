@@ -1,0 +1,20 @@
+{
+ "note": "Large-binary policy (GOVERNANCE/LARGE_BINARIES.md): cases.jsonl exceeds 10 MB and is kept out of history by the local .gitignore. It is a deterministic merge of rows/*.json (sorted by case_id, method); archives are content-addressed under archives/ and listed with hashes in archives_manifest.sha256.",
+ "cases.jsonl": {
+  "bytes": 39028198,
+  "sha256": "9d321384dfd5ee02905ca69eb84b28dadb050f3cd1ba27bf98fc2e5fd6d4a6c8",
+  "regenerate_from_rows": "PYTHONPATH=index-deconvolution:src venv/bin/python -c \"from hierarchy.benchmark import _merge_outputs, run_dir; _merge_outputs(run_dir('confirm-v1-r1'))\"",
+  "regenerate_from_scratch": "freeze is fixed; rerun 'benchmark --split confirmation --resume' and '--split transfer --resume' on a fresh copy of freeze.json+freeze.sha256 under a new run id"
+ },
+ "archives": {
+  "files": 16402,
+  "bytes": 15480989,
+  "manifest": "archives_manifest.sha256",
+  "manifest_sha256": "7017bc3690f9ad1fa1231d0bf21126f53b9f7031bd209e339320ed2f9195b410"
+ },
+ "rows": {
+  "files": 1632,
+  "manifest": "rows_manifest.sha256",
+  "manifest_sha256": "a7ab8cbedbfa0cad80e0be69a4494b2a9f583acf76f6266f50d058c4000425ca"
+ }
+}
