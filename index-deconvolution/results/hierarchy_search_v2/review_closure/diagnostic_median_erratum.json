@@ -1,0 +1,494 @@
+{
+ "title": "HID-search-v2 diagnostic median erratum (review R1)",
+ "scope": "DIAGNOSTIC-ONLY. Corrects the descriptive gap_median of the evaluation-only supplied-boundary reference summary (diagnostics.json#supplied_boundary_references.by_cell). Primary estimate, interval, gates, contrasts, descriptive transfer/stress, mean gaps and every row/archive are unaffected. Original diagnostics.json and references.json are not modified. Not a new run, not a replication.",
+ "units": "bits per input bit; gap = (bits(hid_full) - min(bits(reference), bits(raw))) / n; negative means the automatic archive is shorter",
+ "median_definition": "conventional sample median: middle value (odd n), mean of the two middle values (even n); null for an empty cell",
+ "defect": "frozen diagnostics_v2.py line 167 reported g[len(g) // 2] (upper middle order statistic for even n)",
+ "run_id": "search-confirm-v2-r1",
+ "freeze_sha256": "0f0a72ef2f9d9faac406b6d18594a45ba9dc71ff1d0331f38c6a3fead68e1d49",
+ "input_sha256": {
+  "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/diagnostics/boundary_reference/references.json": "937940b6c43730ab0c5853d5f9f190514d58a3666ae1f1526c128dd4c62430a2",
+  "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/diagnostics.json": "79c4ccc7ae93870c57dd82c7824d16cb6a2f0debd49146dc588b88c72e9f035c",
+  "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/cases.jsonl": "b920b3082b65910fb180be92f9268d56cef2226c012cd74387eb46bed01b66fd",
+  "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1/freeze.json": "05f3933126e15dfd556eb58f06dd1b9d663d3d391d8946e261bbea67d881c9fb",
+  "index-deconvolution/results/hierarchy_search_v2/supervision/diagnostic_audit.json": "f5b965e852b845d4f8e037127075216ca3de8ec2ff50537d06c6d9b7e1675321"
+ },
+ "source_identity": {
+  "frozen_diagnostics_v2_sha256": "a73d0650966a5528ed10383e4948cfa16d23a62171f1f4557be6964d0ba7e2c7",
+  "patched_copy": "/private/tmp/hid_review_closure_20261003/CausalBool/index-deconvolution",
+  "imported_modules": {
+   "index-deconvolution/hierarchy/__init__.py": {
+    "sha256": "5bd93ec8b46f80f71de2d4fcb1f00a64f54cd115981865ba1976b3158830b575",
+    "frozen_sha256": "5bd93ec8b46f80f71de2d4fcb1f00a64f54cd115981865ba1976b3158830b575",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/candidates.py": {
+    "sha256": "03ec251d359cad2f7093fd3fd64ff70de1de512d7637f14d984cded2a9e00d1b",
+    "frozen_sha256": "03ec251d359cad2f7093fd3fd64ff70de1de512d7637f14d984cded2a9e00d1b",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/codes.py": {
+    "sha256": "c94de70a9c4cd0b5b156e0524f09d9e1667170392c7ce3e4c30ce2d797f62380",
+    "frozen_sha256": "c94de70a9c4cd0b5b156e0524f09d9e1667170392c7ce3e4c30ce2d797f62380",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/consensus.py": {
+    "sha256": "4b5435f1ca25cd3454372e66c82e42683f112b9e3cc26356dfb645897fc7a5b8",
+    "frozen_sha256": "4b5435f1ca25cd3454372e66c82e42683f112b9e3cc26356dfb645897fc7a5b8",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/corpus.py": {
+    "sha256": "af0b0cb686e9af9a342c0d5493302f87e8ba7cbc03a0e2654ccfa46a0d531a41",
+    "frozen_sha256": "af0b0cb686e9af9a342c0d5493302f87e8ba7cbc03a0e2654ccfa46a0d531a41",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/decode.py": {
+    "sha256": "557d7bd49cc8cf0c7ad2632c20bf080d43812dd441cdf43bb8bb89d5143cb3b9",
+    "frozen_sha256": "557d7bd49cc8cf0c7ad2632c20bf080d43812dd441cdf43bb8bb89d5143cb3b9",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/diagnostics_v2.py": {
+    "sha256": "a89e95852549d9b26cd286fea97ec687f3703e59b0306d4f8383b838080e7545",
+    "frozen_sha256": "a73d0650966a5528ed10383e4948cfa16d23a62171f1f4557be6964d0ba7e2c7",
+    "equals_frozen": false
+   },
+   "index-deconvolution/hierarchy/ledger.py": {
+    "sha256": "590d4e5a340cc031b3b0c309f4220e268de722f302df33fba0bc7e39c61a48b3",
+    "frozen_sha256": "590d4e5a340cc031b3b0c309f4220e268de722f302df33fba0bc7e39c61a48b3",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/model.py": {
+    "sha256": "87d56d8176fdeda93087303b8ad345f68facb700bba19ae80b48fe8398359b09",
+    "frozen_sha256": "87d56d8176fdeda93087303b8ad345f68facb700bba19ae80b48fe8398359b09",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/segmentation.py": {
+    "sha256": "8ce6b6dcb9b2dedf6fa6c270e188885988236ba0fffbfcee42dccab619236970",
+    "frozen_sha256": "8ce6b6dcb9b2dedf6fa6c270e188885988236ba0fffbfcee42dccab619236970",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/study_corpus.py": {
+    "sha256": "d83b13110bbd2a6e68228946e578dcf631983b8d8dec838a117372a97d257152",
+    "frozen_sha256": "d83b13110bbd2a6e68228946e578dcf631983b8d8dec838a117372a97d257152",
+    "equals_frozen": true
+   },
+   "index-deconvolution/hierarchy/wire.py": {
+    "sha256": "ca677fb2637b079f7a0daafde6572ec4926ed4a8cf12ec5cff396ce64baed2ff",
+    "frozen_sha256": "ca677fb2637b079f7a0daafde6572ec4926ed4a8cf12ec5cff396ce64baed2ff",
+    "equals_frozen": true
+   }
+  }
+ },
+ "derivation_script": {
+  "path": "index-deconvolution/results/hierarchy_search_v2/review_closure/scripts/derive_median_erratum.py",
+  "sha256": "903ffa55b697f728d82b3f7a6ce67e0cef192e10c531acc0c0e106e1b6a5f15f"
+ },
+ "record_checks": {
+  "records": 176,
+  "available": 176,
+  "archive_sha_ok": 176,
+  "length_ok": 176,
+  "decodes_to_case_input_sha256": 176,
+  "hid_bits_equal_rows": 176,
+  "raw_bits_equal_rows": 176,
+  "gap_recomputed_exactly": 176
+ },
+ "cells_total": 8,
+ "cells_changed": 5,
+ "cells": {
+  "confirmation|F12|1024": {
+   "n_gaps": 40,
+   "parity": "even",
+   "case_ids": [
+    "confirmation-F12-1024-3000-base",
+    "confirmation-F12-1024-3000-ragged",
+    "confirmation-F12-1024-3001-base",
+    "confirmation-F12-1024-3001-ragged",
+    "confirmation-F12-1024-3002-base",
+    "confirmation-F12-1024-3002-ragged",
+    "confirmation-F12-1024-3003-base",
+    "confirmation-F12-1024-3003-ragged",
+    "confirmation-F12-1024-3004-base",
+    "confirmation-F12-1024-3004-ragged",
+    "confirmation-F12-1024-3005-base",
+    "confirmation-F12-1024-3005-ragged",
+    "confirmation-F12-1024-3006-base",
+    "confirmation-F12-1024-3006-ragged",
+    "confirmation-F12-1024-3007-base",
+    "confirmation-F12-1024-3007-ragged",
+    "confirmation-F12-1024-3008-base",
+    "confirmation-F12-1024-3008-ragged",
+    "confirmation-F12-1024-3009-base",
+    "confirmation-F12-1024-3009-ragged",
+    "confirmation-F12-1024-3010-base",
+    "confirmation-F12-1024-3010-ragged",
+    "confirmation-F12-1024-3011-base",
+    "confirmation-F12-1024-3011-ragged",
+    "confirmation-F12-1024-3012-base",
+    "confirmation-F12-1024-3012-ragged",
+    "confirmation-F12-1024-3013-base",
+    "confirmation-F12-1024-3013-ragged",
+    "confirmation-F12-1024-3014-base",
+    "confirmation-F12-1024-3014-ragged",
+    "confirmation-F12-1024-3015-base",
+    "confirmation-F12-1024-3015-ragged",
+    "confirmation-F12-1024-3016-base",
+    "confirmation-F12-1024-3016-ragged",
+    "confirmation-F12-1024-3017-base",
+    "confirmation-F12-1024-3017-ragged",
+    "confirmation-F12-1024-3018-base",
+    "confirmation-F12-1024-3018-ragged",
+    "confirmation-F12-1024-3019-base",
+    "confirmation-F12-1024-3019-ragged"
+   ],
+   "middle_order_statistics": [
+    -0.062317429406037,
+    -0.062317429406037
+   ],
+   "original_gap_median": -0.062317429406037,
+   "corrected_gap_median": -0.062317429406037,
+   "changed": false,
+   "difference_corrected_minus_original": 0.0,
+   "median_sign_original_corrected": [
+    -1,
+    -1
+   ],
+   "unchanged_quantities": {
+    "strings": 40,
+    "available": 40,
+    "gap_mean": -0.07295901290165531,
+    "automatic_shorter_than_reference": 40,
+    "automatic_longer_than_reference": 0,
+    "ties": 0
+   },
+   "in_supervisor_audit": false
+  },
+  "confirmation|F12|256": {
+   "n_gaps": 40,
+   "parity": "even",
+   "case_ids": [
+    "confirmation-F12-256-3000-base",
+    "confirmation-F12-256-3000-ragged",
+    "confirmation-F12-256-3001-base",
+    "confirmation-F12-256-3001-ragged",
+    "confirmation-F12-256-3002-base",
+    "confirmation-F12-256-3002-ragged",
+    "confirmation-F12-256-3003-base",
+    "confirmation-F12-256-3003-ragged",
+    "confirmation-F12-256-3004-base",
+    "confirmation-F12-256-3004-ragged",
+    "confirmation-F12-256-3005-base",
+    "confirmation-F12-256-3005-ragged",
+    "confirmation-F12-256-3006-base",
+    "confirmation-F12-256-3006-ragged",
+    "confirmation-F12-256-3007-base",
+    "confirmation-F12-256-3007-ragged",
+    "confirmation-F12-256-3008-base",
+    "confirmation-F12-256-3008-ragged",
+    "confirmation-F12-256-3009-base",
+    "confirmation-F12-256-3009-ragged",
+    "confirmation-F12-256-3010-base",
+    "confirmation-F12-256-3010-ragged",
+    "confirmation-F12-256-3011-base",
+    "confirmation-F12-256-3011-ragged",
+    "confirmation-F12-256-3012-base",
+    "confirmation-F12-256-3012-ragged",
+    "confirmation-F12-256-3013-base",
+    "confirmation-F12-256-3013-ragged",
+    "confirmation-F12-256-3014-base",
+    "confirmation-F12-256-3014-ragged",
+    "confirmation-F12-256-3015-base",
+    "confirmation-F12-256-3015-ragged",
+    "confirmation-F12-256-3016-base",
+    "confirmation-F12-256-3016-ragged",
+    "confirmation-F12-256-3017-base",
+    "confirmation-F12-256-3017-ragged",
+    "confirmation-F12-256-3018-base",
+    "confirmation-F12-256-3018-ragged",
+    "confirmation-F12-256-3019-base",
+    "confirmation-F12-256-3019-ragged"
+   ],
+   "middle_order_statistics": [
+    0.0,
+    0.0
+   ],
+   "original_gap_median": 0.0,
+   "corrected_gap_median": 0.0,
+   "changed": false,
+   "difference_corrected_minus_original": 0.0,
+   "median_sign_original_corrected": [
+    0,
+    0
+   ],
+   "unchanged_quantities": {
+    "strings": 40,
+    "available": 40,
+    "gap_mean": 0.0,
+    "automatic_shorter_than_reference": 0,
+    "automatic_longer_than_reference": 0,
+    "ties": 40
+   },
+   "in_supervisor_audit": false
+  },
+  "confirmation|F12|4096": {
+   "n_gaps": 40,
+   "parity": "even",
+   "case_ids": [
+    "confirmation-F12-4096-3000-base",
+    "confirmation-F12-4096-3000-ragged",
+    "confirmation-F12-4096-3001-base",
+    "confirmation-F12-4096-3001-ragged",
+    "confirmation-F12-4096-3002-base",
+    "confirmation-F12-4096-3002-ragged",
+    "confirmation-F12-4096-3003-base",
+    "confirmation-F12-4096-3003-ragged",
+    "confirmation-F12-4096-3004-base",
+    "confirmation-F12-4096-3004-ragged",
+    "confirmation-F12-4096-3005-base",
+    "confirmation-F12-4096-3005-ragged",
+    "confirmation-F12-4096-3006-base",
+    "confirmation-F12-4096-3006-ragged",
+    "confirmation-F12-4096-3007-base",
+    "confirmation-F12-4096-3007-ragged",
+    "confirmation-F12-4096-3008-base",
+    "confirmation-F12-4096-3008-ragged",
+    "confirmation-F12-4096-3009-base",
+    "confirmation-F12-4096-3009-ragged",
+    "confirmation-F12-4096-3010-base",
+    "confirmation-F12-4096-3010-ragged",
+    "confirmation-F12-4096-3011-base",
+    "confirmation-F12-4096-3011-ragged",
+    "confirmation-F12-4096-3012-base",
+    "confirmation-F12-4096-3012-ragged",
+    "confirmation-F12-4096-3013-base",
+    "confirmation-F12-4096-3013-ragged",
+    "confirmation-F12-4096-3014-base",
+    "confirmation-F12-4096-3014-ragged",
+    "confirmation-F12-4096-3015-base",
+    "confirmation-F12-4096-3015-ragged",
+    "confirmation-F12-4096-3016-base",
+    "confirmation-F12-4096-3016-ragged",
+    "confirmation-F12-4096-3017-base",
+    "confirmation-F12-4096-3017-ragged",
+    "confirmation-F12-4096-3018-base",
+    "confirmation-F12-4096-3018-ragged",
+    "confirmation-F12-4096-3019-base",
+    "confirmation-F12-4096-3019-ragged"
+   ],
+   "middle_order_statistics": [
+    0.076171875,
+    0.076171875
+   ],
+   "original_gap_median": 0.076171875,
+   "corrected_gap_median": 0.076171875,
+   "changed": false,
+   "difference_corrected_minus_original": 0.0,
+   "median_sign_original_corrected": [
+    1,
+    1
+   ],
+   "unchanged_quantities": {
+    "strings": 40,
+    "available": 40,
+    "gap_mean": 0.10502920157736644,
+    "automatic_shorter_than_reference": 0,
+    "automatic_longer_than_reference": 40,
+    "ties": 0
+   },
+   "in_supervisor_audit": false
+  },
+  "stress|S02|4096": {
+   "n_gaps": 16,
+   "parity": "even",
+   "case_ids": [
+    "stress-S02-4096-4000-base",
+    "stress-S02-4096-4000-ragged",
+    "stress-S02-4096-4001-base",
+    "stress-S02-4096-4001-ragged",
+    "stress-S02-4096-4002-base",
+    "stress-S02-4096-4002-ragged",
+    "stress-S02-4096-4003-base",
+    "stress-S02-4096-4003-ragged",
+    "stress-S02-4096-4004-base",
+    "stress-S02-4096-4004-ragged",
+    "stress-S02-4096-4005-base",
+    "stress-S02-4096-4005-ragged",
+    "stress-S02-4096-4006-base",
+    "stress-S02-4096-4006-ragged",
+    "stress-S02-4096-4007-base",
+    "stress-S02-4096-4007-ragged"
+   ],
+   "middle_order_statistics": [
+    -0.023420346425957552,
+    -0.021484375
+   ],
+   "original_gap_median": -0.021484375,
+   "corrected_gap_median": -0.022452360712978778,
+   "changed": true,
+   "difference_corrected_minus_original": -0.0009679857129787778,
+   "median_sign_original_corrected": [
+    -1,
+    -1
+   ],
+   "unchanged_quantities": {
+    "strings": 16,
+    "available": 16,
+    "gap_mean": 0.008664937332276164,
+    "automatic_shorter_than_reference": 12,
+    "automatic_longer_than_reference": 4,
+    "ties": 0
+   },
+   "in_supervisor_audit": true
+  },
+  "stress|S02|65536": {
+   "n_gaps": 16,
+   "parity": "even",
+   "case_ids": [
+    "stress-S02-65536-4000-base",
+    "stress-S02-65536-4000-ragged",
+    "stress-S02-65536-4001-base",
+    "stress-S02-65536-4001-ragged",
+    "stress-S02-65536-4002-base",
+    "stress-S02-65536-4002-ragged",
+    "stress-S02-65536-4003-base",
+    "stress-S02-65536-4003-ragged",
+    "stress-S02-65536-4004-base",
+    "stress-S02-65536-4004-ragged",
+    "stress-S02-65536-4005-base",
+    "stress-S02-65536-4005-ragged",
+    "stress-S02-65536-4006-base",
+    "stress-S02-65536-4006-ragged",
+    "stress-S02-65536-4007-base",
+    "stress-S02-65536-4007-ragged"
+   ],
+   "middle_order_statistics": [
+    0.00048825889928134393,
+    0.008422466012603182
+   ],
+   "original_gap_median": 0.008422466012603182,
+   "corrected_gap_median": 0.004455362455942263,
+   "changed": true,
+   "difference_corrected_minus_original": -0.003967103556660919,
+   "median_sign_original_corrected": [
+    1,
+    1
+   ],
+   "unchanged_quantities": {
+    "strings": 16,
+    "available": 16,
+    "gap_mean": 0.029448726364599286,
+    "automatic_shorter_than_reference": 7,
+    "automatic_longer_than_reference": 9,
+    "ties": 0
+   },
+   "in_supervisor_audit": true
+  },
+  "transfer|F12|131072": {
+   "n_gaps": 8,
+   "parity": "even",
+   "case_ids": [
+    "transfer-F12-131072-5000-base",
+    "transfer-F12-131072-5000-ragged",
+    "transfer-F12-131072-5001-base",
+    "transfer-F12-131072-5001-ragged",
+    "transfer-F12-131072-5002-base",
+    "transfer-F12-131072-5002-ragged",
+    "transfer-F12-131072-5003-base",
+    "transfer-F12-131072-5003-ragged"
+   ],
+   "middle_order_statistics": [
+    0.08343505859375,
+    0.0834941827198169
+   ],
+   "original_gap_median": 0.0834941827198169,
+   "corrected_gap_median": 0.08346462065678345,
+   "changed": true,
+   "difference_corrected_minus_original": -2.9562063033450325e-05,
+   "median_sign_original_corrected": [
+    1,
+    1
+   ],
+   "unchanged_quantities": {
+    "strings": 8,
+    "available": 8,
+    "gap_mean": 0.08341121437120774,
+    "automatic_shorter_than_reference": 0,
+    "automatic_longer_than_reference": 8,
+    "ties": 0
+   },
+   "in_supervisor_audit": true
+  },
+  "transfer|F12|16384": {
+   "n_gaps": 8,
+   "parity": "even",
+   "case_ids": [
+    "transfer-F12-16384-5000-base",
+    "transfer-F12-16384-5000-ragged",
+    "transfer-F12-16384-5001-base",
+    "transfer-F12-16384-5001-ragged",
+    "transfer-F12-16384-5002-base",
+    "transfer-F12-16384-5002-ragged",
+    "transfer-F12-16384-5003-base",
+    "transfer-F12-16384-5003-ragged"
+   ],
+   "middle_order_statistics": [
+    0.11669921875,
+    0.1196070055531824
+   ],
+   "original_gap_median": 0.1196070055531824,
+   "corrected_gap_median": 0.1181531121515912,
+   "changed": true,
+   "difference_corrected_minus_original": -0.0014538934015912025,
+   "median_sign_original_corrected": [
+    1,
+    1
+   ],
+   "unchanged_quantities": {
+    "strings": 8,
+    "available": 8,
+    "gap_mean": 0.1346904437814178,
+    "automatic_shorter_than_reference": 0,
+    "automatic_longer_than_reference": 8,
+    "ties": 0
+   },
+   "in_supervisor_audit": true
+  },
+  "transfer|F12|65536": {
+   "n_gaps": 8,
+   "parity": "even",
+   "case_ids": [
+    "transfer-F12-65536-5000-base",
+    "transfer-F12-65536-5000-ragged",
+    "transfer-F12-65536-5001-base",
+    "transfer-F12-65536-5001-ragged",
+    "transfer-F12-65536-5002-base",
+    "transfer-F12-65536-5002-ragged",
+    "transfer-F12-65536-5003-base",
+    "transfer-F12-65536-5003-ragged"
+   ],
+   "middle_order_statistics": [
+    0.09032789636704863,
+    0.09033203125
+   ],
+   "original_gap_median": 0.09033203125,
+   "corrected_gap_median": 0.09032996380852432,
+   "changed": true,
+   "difference_corrected_minus_original": -2.067441475683829e-06,
+   "median_sign_original_corrected": [
+    1,
+    1
+   ],
+   "unchanged_quantities": {
+    "strings": 8,
+    "available": 8,
+    "gap_mean": 0.08944496940901839,
+    "automatic_shorter_than_reference": 0,
+    "automatic_longer_than_reference": 8,
+    "ties": 0
+   },
+   "in_supervisor_audit": true
+  }
+ },
+ "problems": [],
+ "all_checks_pass": true
+}

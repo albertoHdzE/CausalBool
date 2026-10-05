@@ -77,3 +77,41 @@ def parse_bnet(path: str) -> tuple[Network, list[str]]:
             params[k] = {"table": table}
 
     return Network(n=n, C=C, gates=gates, params=params), names
+
+
+def network_to_bnet(net: Network, names: list[str]) -> str:
+    """Write ``net`` as ``.bnet`` text, the inverse of :func:`parse_bnet`.
+
+    Each node's function is tabulated over its connected inputs and written as
+    the compact DNF of :func:`deconvolution.minimal_dnf`, so any gate the
+    forward method accepts (named families and LUT alike) is expressible.  The
+    header ``targets, factors`` makes the file readable by BoolNet's
+    ``loadNetwork`` as well as by PyBoolNet.  Constants are written ``0``/``1``.
+    """
+    from causalbool import truth_table
+    from deconvolution import minimal_dnf
+
+    lines = ["targets, factors"]
+    for k in range(net.n):
+        ic = net.connected_inputs(k)
+        g = net.gates[k]
+        if g in ("TRUE", "FALSE"):
+            reduced = [1 if g == "TRUE" else 0]
+        elif g == "LUT":
+            reduced = list(net.params[k]["table"])
+        else:
+            reduced = truth_table(g, len(ic), net.params[k])
+        if not any(reduced):
+            expr = "0"
+        elif all(reduced):
+            expr = "1"
+        else:
+            terms = []
+            for clause in minimal_dnf(reduced):
+                lits = ([names[ic[j]] for j in clause["activators"]]
+                        + ["!" + names[ic[j]] for j in clause["inhibitors"]])
+                terms.append(" & ".join(lits))
+            expr = " | ".join(f"({t})" if len(terms) > 1 and "&" in t else t
+                              for t in terms)
+        lines.append(f"{names[k]}, {expr}")
+    return "\n".join(lines) + "\n"

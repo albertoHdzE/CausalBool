@@ -1,0 +1,553 @@
+--- a/index-deconvolution/results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/REPORT.md
++++ b/index-deconvolution/results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/corrected/REPORT.md
+@@ -1,4 +1,12 @@
+-# search-diagnosis-v1-r1 — report
++# search-diagnosis-v1-r1 — report (corrected, reporting revision `report-r2`)
++
++> **Corrected copy.** Computations: attempt `a1`, unchanged. The original
++> `search-diagnosis-v1-r1/REPORT.md` is kept unchanged as a historical artifact. This
++> copy answers Codex review R1–R3. Every number is unchanged from a1 and is read from
++> `report-r2/outputs/`, regenerated from a1's saved records by the repaired reporting
++> pipeline (0 numeric differences: `report-r2/outputs/comparison_with_a1.json`). Artifact
++> names below refer to the a1 run directory unless prefixed `report-r2/`; `analysis/*`
++> and `DECISION.json` have byte-for-byte equal numbers in `report-r2/outputs/`.
+ 
+ Date: 2026-10-03. Developer/executor: Claude Code. Supervisor: Codex.
+ Evidence role: **`posthoc_diagnostic`** on the accepted run `search-confirm-v2-r1`
+@@ -48,8 +56,9 @@
+ * **zlib, boundary families** (F12 at 4,096 and every transfer size; S02 at 65,536):
+   the selected stage is `B` in confirmation F12 and mostly in S02; D2/D3 measure these.
+ * **bernoulli / context / lzma / zlib on F08–F11**: the largest per-bit losses in the
+-  run (for example confirmation F08: −0.45 bits per input bit). **No diagnostic in
+-  this phase addresses them**; they remain unexplained here.
++  run (for example confirmation F08: −0.45 bits per input bit). **No diagnostic in this
++  phase targeted these losses.** F11 (with F06 and F07) was sampled only as a D2 control
++  at 4,096 and 65,536 bits; F08–F10 appear only in D1; none was a D3 or D4 target.
+ 
+ The bucket map makes the period-cell loss concrete. In confirmation F01 at 256 bits the
+ portfolio spends envelope 0.2486 + `other_payload` 0.1429 bits per input bit, while the
+@@ -93,9 +102,10 @@
+ | transfer F12 131072 | 4/4 | 0 | 0 | 7 no_strict + 1 root_trial_cap | 8 no_strict |
+ 
+ Control cells (F01, F06, F07, F11 at 4,096 and 65,536; 16 units): opportunity 0 and
+-B8 = B0 everywhere. **Reading:** the frozen caps are not the boundary stage's binding
+-limitation on these populations. B stops because no single split it proposes improves
+-the archive, not because it runs out of work.
++B8 = B0 everywhere. **Reading:** on these populations the specific B0→B8 increase changed
++one output, and every B8 run stopped by `no_strict_improvement` rather than at a cap. That
++is a result about this cap increase; it does not exclude resource limitations under other
++searches or other budgets.
+ 
+ ## 3. D3 — the supplied-cut subset space (truth-assisted, 176 targets)
+ 
+@@ -133,13 +143,17 @@
+   notebook 18 §4) the strict path stops at 31,120 bits; the next eligible edge adds the
+   one-bit-adjacent supplied cut at +8 bits, after which the edges are strict down to
+   22,480 bits, below both H (27,896) and P (23,272).
+-* The strict-improvement rule is not the main obstacle in this space: among the 87
+-  strings with a supplied partition shorter than H, the cheapest strictly reachable
+-  subset is already shorter than H in 68.
++* Among the 87 strings with a supplied partition shorter than H, the cheapest strictly
++  reachable subset is already shorter than H in 68. Strict reachability along some
++  supplied-cut path does not show that B's automatic greedy path could reach that state.
+ * Descriptive, post-hoc: of the 252 supplied cuts in those 68 best strictly reachable
+-  subsets, 129 have a B0 cut within 8 bits and 123 do not
+-  (`descriptive_B0_cut_location`). B places roughly half of the useful boundaries
+-  approximately and never proposes the rest.
++  subsets, 129 lie within 8 bits of a cut of the archive B0 **returned** and 123 do not
++  (`report-r2/outputs/flags.json` → `descriptive_returned_B0_cut_proximity`; a1 name
++  `descriptive_B0_cut_location`). The statistic reads the returned archive's cut tuple
++  (`jobs/D2/*B0.json` → `info.cuts`), not the cuts B proposed or evaluated: a supplied
++  position may have been proposed and rejected on an earlier partition. It measures
++  proximity to returned cuts, not proposal coverage, and cannot rank proposal location,
++  accepted path, refinement and leaf construction as causes.
+ 
+ This space is exact only over at most five supplied cuts and B's shortest-period leaf
+ heuristic. It is not an optimal segmentation, not a bound over HID descriptions, and not
+@@ -173,10 +187,14 @@
+ 
+ **Loss decomposition where the translated method won the portfolio** (`flags.json` →
+ `d4_loss_decomposition_where_portfolio_winner_was_translated`): 386 strings; HID
+-loses on 367; on **282** of them H = T exactly — the automatic search reached a
+-description of exactly the translated length, so its whole loss to that baseline equals
+-T − C; on 85, H < T (HID found something shorter than the translation but still longer
+-than the baseline).
++loses on 367; on **282** of them H = T in **length** — the saved full archive has exactly
++the translated length, so its loss to that baseline equals T − C arithmetically; on 85,
++H < T (HID found something shorter than the translation but still longer than the
++baseline). Equal length is not an equal proposal: of the 282, **261** are byte-identical
++to the translation and **21** differ in bytes (`report-r2/outputs/key_numbers.json` →
++`d4_hid_loses_H_eq_T_identical_bytes`, `…_different_bytes`; list in the supervisor's
++`audit.json`). Neither case shows that no search change in the frozen language could do
++better: D4 prices the translated proposal only.
+ 
+ | cell | winner period / pair | HID loses | H = T | H < T | mean (T−C)/n period | mean (T−C)/n pair |
+ |---|--:|--:|--:|--:|--:|--:|
+@@ -221,20 +239,21 @@
+ | `missed_baseline_structure_observed` | false | 0 | — | 1,152 admissible records |
+ | `proposal_representation_penalty_observed` | true | 1,152 records (proposal-specific) | period median 96 bits, pair median 472 bits | 1,152 admissible records |
+ 
+-Recommendation (`DECISION.md`): **BOTH_SEPARATELY**.
++Recommendation (corrected `DECISION.md`): **BOTH_SEPARATELY**, exploratory.
+ 
+ ## 6. What was learned and what was not
+ 
+-Learned, within these populations: the frozen boundary caps almost never bind; the
+-supplied-cut space in the unchanged leaf language contains partitions shorter than both
+-the full archive and the portfolio in every losing boundary-family string, and most of
+-the best ones are strictly reachable from the empty partition, so B's limitation lies
+-in the cut positions it proposes far more than in its strict-improvement rule; on
+-period/grammar cells the automatic search usually reaches exactly the translated
+-length, so the loss there equals the HID cost of the same proposal.
+-
+-Not learned: why B stops where it does (imprecise cuts, unproposed cuts, or the
+-shortest-period leaf heuristic); whether a shorter HID description of the period
+-strings exists; the cause of the 85 losses with H < T; anything about F06–F11 losses
+-(F08, F09 and F11 carry the largest per-bit losses and no diagnostic here touches them);
+-and anything about unfamiliar families or new draws.
++Learned, within these populations: the B0→B8 cap increase changed one output of 176
++targets; the supplied-cut space in the unchanged leaf language contains partitions
++shorter than both the full archive and the portfolio in every losing boundary-family
++string, and in most strings the best such partition is strictly reachable from the empty
++partition over supplied cuts; on period/grammar cells the saved full archive usually has
++exactly the translated length (mostly, not always, the same bytes), so the loss there
++equals that translation's measured penalty.
++
++Not learned: why B stops where it does (imprecise cuts, unproposed cuts, rejected
++proposals, the accepted path, or the shortest-period leaf heuristic) — returned cuts
++cannot separate these; whether a shorter HID description of the period strings exists;
++the cause of the 85 losses with H < T; the cause of the F06–F11 losses (F08, F09 and F11
++carry the largest per-bit losses; F06, F07, F11 appear only as D2 controls, F08–F10 only
++in D1); and anything about unfamiliar families or new draws.
+--- a/index-deconvolution/results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/DECISION.md
++++ b/index-deconvolution/results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/corrected/DECISION.md
+@@ -1,20 +1,32 @@
+-# search-diagnosis-v1-r1 — decision memo
++# search-diagnosis-v1-r1 — decision memo (corrected, reporting revision `report-r2`)
+ 
+-Recommendation: **`BOTH_SEPARATELY`** — two separate, independently reviewed
+-continuations: a boundary-search change for the boundary families and a representation
+-change for the period-type families. Never one combined source version.
++> **Corrected copy.** Computations: attempt `a1`, unchanged. This memo replaces the
++> interpretation in the original `search-diagnosis-v1-r1/DECISION.md`, which is kept
++> unchanged as a historical artifact. Corrections answer Codex review R1–R3
++> (`supervision/search-diagnosis-v1-r1/REVIEW.md`); every number is read from
++> `report-r2/outputs/` (`DECISION.json`, `flags.json`, `key_numbers.json`). The
++> numerical comparison with a1's outputs is `report-r2/outputs/comparison_with_a1.json`.
++
++Recommendation: **`BOTH_SEPARATELY`**, as an exploratory recommendation — two
++separately reviewed continuations: a boundary-search change for the boundary families and
++a representation change for the period-type families. It is not a proved decomposition of
++the loss and not a reason to exclude future same-language search improvements on the
++period-type families.
+ 
+ This is a post-hoc recommendation on already inspected data. It is not a superiority
+ claim, not a confirmation and does not by itself authorize an algorithm. Machine record:
+-`DECISION.json` (gates, rule, flags, basis lines generated from `analysis/flags.json`).
++`report-r2/outputs/DECISION.json` (gates, rule, flags, basis lines generated from
++`report-r2/outputs/flags.json`).
+ 
+ ## Evidence gates
+ 
+ All 416 + 176 + 576 jobs completed `ok`; B0 reproduced the saved stage-B telemetry in
+ 208/208 strings with 0 deterministic mismatches; 176/176 supplied references reproduced;
+ 0 of 1,152 H − C identity failures; D1 found 0 problems across 1,792 cases and 28,672 rows
+-and reproduced the accepted primary estimate exactly. Neither `INVALID` nor
+-`INCOMPLETE` applies.
++and reproduced the accepted primary estimate exactly. Every intended record is available,
++so neither `INVALID` nor `INCOMPLETE` applies. (The a1 reporting code could not have
++produced either state on unavailable records — it raised `KeyError`; `report-r2` applies
++the gates before any success-only quantity.)
+ 
+ ## Rule
+ 
+@@ -22,68 +34,87 @@
+ search signal requires that, in the boundary-family strings where the full arm loses to
+ the portfolio, a same-language supplied-cut partition beat the saved full archive in a
+ majority while B8 changed only a small minority. A representation signal requires that,
+-among D4 strings where the translated method won the portfolio and HID loses, H = T in a
+-majority. Both in disjoint family groups gives `BOTH_SEPARATELY`.
++among D4 strings where the translated method won the portfolio and HID loses, H = T **in
++length** in a majority. Both in disjoint family groups gives `BOTH_SEPARATELY`.
+ 
+ ## Why, cell by cell
+ 
+ **Search (F12 at ≥ 4,096 bits, S02 at 65,536).** The losing strings are concentrated
+ here: confirmation F12 4,096 (40 of 40 strings), transfer F12 at all three sizes (8 of 8
+-each) and S02 (2 of 16 at 4,096, 6 of 16 at 65,536). Budget is not the limitation: B8
+-changed one of 176 targets (40 bits) and none of 32 controls; every B8 job ended by
+-`no_strict_improvement`. Yet in all 72 losing strings a supplied-cut partition in the
++each) and S02 (2 of 16 at 4,096, 6 of 16 at 65,536). The specific B0→B8 cap increase
++changed the output of one of 176 targets (40 bits) and none of 32 controls; every B8 job
++ended by `no_strict_improvement`. This concerns that one increase on these strings; it
++does not exclude resource limits under other searches. In all 72 losing strings a supplied-cut partition in the
+ unchanged leaf language beats both the saved full archive and the portfolio, and the
+ cheapest strictly reachable partition beats the portfolio in 32 of 40 confirmation F12
+ 4,096 strings, 6, 2 and 4 of 8 at transfer 16,384, 65,536 and 131,072, and 14 and 16 of
+ 16 in the S02 cells (§3 of `REPORT.md`). Restricted path barriers exist in 22 strings,
+ all positive-cost steps, concentrated at transfer F12 65,536 (6 of 8) and 131,072 (4 of
+-8). Of the useful supplied cuts, about half (129 of 252) have a B0 cut within 8 bits and
+-the rest have none. The dominant obstacle in this restricted space is which cut
+-positions B proposes; the strict-improvement rule is secondary, and caps are
+-negligible.
++8). Descriptively, of the 252 supplied cuts in the 68 cheapest strictly reachable
++subsets that beat H, 129 lie within 8 bits of a cut in the archive B0 **returned** and 123
++do not. Returned cuts are not the cuts B proposed or evaluated: a cut could have been
++proposed and rejected on an earlier partition. These data therefore do not rank cut
++proposal, the accepted path, refinement and leaf construction as causes, and strict
++reachability along some supplied-cut path does not show that B's automatic greedy path
++could reach that state.
+ 
+ **Representation (F01, F02, F03, F05).** Of 386 strings whose portfolio winner was the
+-translated period or pair-grammar archive, HID loses on 367, and on 282 of those the
+-saved full archive has exactly the translated length (H = T). There, no search change
+-inside the frozen language can recover the loss to that baseline: the search already
+-reaches the proposal and pays its HID cost. No translation was shorter than H (0/1,152),
+-so D4 found no missed baseline structure. The penalty is structural: an exact repeat
+-costs 40–48 bits more than the period codec, a ragged repeat 96–352, and each pair rule
+-pays an extra opcode and arity field; its per-bit size shrinks with n, which is why it
+-weighs most in the 256- and 1,024-bit cells that the accepted primary estimate weights
+-equally.
++translated period or pair-grammar archive, HID loses on 367. On 282 of those the saved
++full archive has the same **length** as the translation (H = T); on 261 the bytes are
++identical and on 21 they differ (for example `confirmation-F01-1024-3003-ragged`,
++period), so equal length is not the same proposal. Wherever H = T, H − C = T − C exactly:
++the loss to that baseline equals this translation's measured penalty. That arithmetic
++does not show that no search change inside the frozen language could recover the loss —
++D4 prices only the translated proposal (protocol §§7–8), and even byte identity would not
++prove optimality over all HID descriptions. No translation was shorter than H (0/1,152),
++so D4 found no missed baseline structure. The measured, proposal-specific penalties: the
++46 exact-repeat period translations cost 40–48 bits more than the period codec, the 350
++repeat-plus-ragged-tail translations 96–352, and each pair rule pays an extra opcode and
++arity field; the per-bit size shrinks with n, which is why it weighs most in the 256- and
++1,024-bit cells that the accepted primary estimate weights equally.
+ 
+ **Why not one scope.** The two mechanisms live in disjoint family groups (boundary
+ families versus period-type families) and touch different owners
+ (`hierarchy/segmentation.py` versus `hierarchy/model.py`/`wire.py`/`decode.py`).
+-Choosing one would leave the other group's losses unexplained, and combining them in
+-one source version would make neither effect attributable.
++Choosing one would leave the other group's losses unaddressed. Separate contrasts are a
++design preference for clean attribution; a combined version with controlled ablations
++could also identify the two effects.
+ 
+-**Priority, offered for the supervisor's choice.** The search continuation is the only
+-one of the two where the measured space shows the sign of the loss can reverse (supplied
+-partitions shorter than the portfolio). The representation continuation can only reduce
+-the deficit: the exact-repeat floor of 40–48 bits above the period codec remains under
+-any HID-v1-style DAG. I would run the search study first.
++**Priority, offered for the supervisor's choice.** The search continuation is the one
++where a measured (truth-assisted) space contains descriptions shorter than the portfolio:
++supplied-cut partitions in the unchanged leaf language. For the representation side D4
++measured no translation shorter than its baseline, but that is a property of these
++translations, not a floor: whether some other HID description of those strings is
++shorter was not measured. I would run the search study first; this is a preference, not
++an inference from a bound.
+ 
+ ## What would falsify the proposed explanations
+ 
+-* Search: an input-only change that makes B propose cuts near the useful supplied
+-  positions (measured by the same within-8-bits location statistic on development
+-  strings) does not shorten the full archive in the F12 4,096 cell, or shortens it only
+-  where the new cuts coincide with no supplied position. Then the cause is the leaf
+-  heuristic or the language, not cut proposal.
+-* Representation: a change that removes the tail literal and the CONCAT from ragged
+-  periodic translations does not reduce H by the bytes predicted from the saved ledgers
+-  in the H = T strings (an exact, deterministic prediction), or reduces it while the
+-  primary-cell deficits stay unchanged in sign and size.
++* Search: an input-only change to cut proposal, whose proposed and evaluated cuts are
++  logged directly (not inferred from returned cuts), that does not shorten the full
++  archive in the F12 4,096 cell would count against the proposal hypothesis. It would not
++  by itself place the cause in the leaf heuristic or the language: the accepted path,
++  refinement, leaf construction and their interactions remain candidates.
++* Representation: for a fully specified rewrite of the saved translations, the cost T′ of
++  each rewritten proposal is exactly computable in advance (graph sharing and pruning,
++  rule IDs, variable-length fields and the new wire envelope included); a measured T′
++  that differs from it is a defect in the rewrite or its accounting. The full method's H′
++  is not exactly predictable from H = T — the incumbent, proposals or search path can
++  differ — so a disagreement in H′ is not automatically a codec defect. The explanation
++  would be weakened if, on the period-type cells, the full method's measured reductions
++  stayed far below the T − T′ reductions of the same strings' proposals.
+ 
+ ## What remains unidentified
+ 
+ Why B stops (imprecise accepted cuts, unproposed cuts, or the shortest-period leaf
+-heuristic) is not separated by these data. The 85 losses with H < T are not decomposed.
+-F06–F11 are outside D2–D4, and F08, F09 and F11 carry the largest per-bit losses in the
+-whole run. A missing improvement here is not a language-impossibility statement; D3 is
+-truth-assisted and restricted to at most five supplied cuts; D4 is proposal-specific.
++heuristic) is not separated by these data; returned cuts cannot separate them. The 85
++losses with H < T are not decomposed. F06, F07 and F11 were sampled only as D2 controls
++(at 4,096 and 65,536 bits); none was a D3 or D4 target, and F08–F10 appear only in D1.
++F08, F09 and F11 carry the largest per-bit losses in the whole run, and no diagnostic here
++targeted those losses. A missing improvement here is not a language-impossibility
++statement; D3 is truth-assisted and restricted to at most five supplied cuts; D4 is
++proposal-specific.
+ 
+-A concrete draft for each continuation is in `NEXT_PROTOCOL_DRAFT.md`; no seeds were
+-generated and no source version was implemented.
++A concrete draft for each continuation is in `NEXT_PROTOCOL_DRAFT.md` (corrected copy
++beside this file); neither is approved for implementation. No seeds were generated and
++no source version was implemented.
+--- a/index-deconvolution/results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/NEXT_PROTOCOL_DRAFT.md
++++ b/index-deconvolution/results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/corrected/NEXT_PROTOCOL_DRAFT.md
+@@ -1,10 +1,17 @@
+-# Next-protocol drafts after search-diagnosis-v1 (for supervisor review)
++# Next-protocol drafts after search-diagnosis-v1 (for supervisor review; corrected, `report-r2`)
++
++> **Corrected copy** answering Codex review R1–R2. The original
++> `search-diagnosis-v1-r1/NEXT_PROTOCOL_DRAFT.md` is kept unchanged as a historical
++> artifact. Neither draft is approved for implementation or confirmation; each needs
++> its own reviewed protocol.
+ 
+ Status: **draft only.** No seed has been generated, no reserved namespace touched, no
+-source version implemented. The recommendation is `BOTH_SEPARATELY`; the two drafts
+-below are independent studies, each with exactly one change, its own freeze and its own
+-review. They must not share a source version. Suggested order: Draft A first (see
+-`DECISION.md`, "Priority").
++source version implemented. The (exploratory) recommendation is `BOTH_SEPARATELY`; the
++two drafts below are independent studies, each with exactly one change, its own freeze
++and its own review. Keeping them in separate source versions is a design preference for
++clean contrasts, not a claim that a combined version could not be attributed (controlled
++ablations can identify effects). Suggested order: Draft A first (corrected `DECISION.md`,
++"Priority").
+ 
+ Common to both drafts:
+ 
+@@ -38,20 +45,33 @@
+ tie-breaking, stopping, and the **B0 caps** (512 roots, 2,048 leaves, 256·n). Cap hits are
+ reported, not tuned.
+ 
+-**Why this change.** D2: caps are not binding (B8 changed 1/176 targets). D3: in all 72
+-losing boundary-family strings a supplied partition is shorter than H and P, the best
+-strictly reachable one beats H in 68/176 strings, and about half of its useful cuts (123
+-of 252) have no B0 cut within 8 bits. The change targets cut *proposal*, the obstacle
+-the diagnosis points to, without touching the language or budgets.
++**Why this change (a hypothesis to investigate, not an identified cause).** D2: the
++B0→B8 cap increase changed 1 of 176 target outputs. D3: in all 72 losing boundary-family
++strings a supplied partition is shorter than H and P, and the best strictly reachable
++supplied-cut subset beats H in 68 of 176 strings. Of the 252 supplied cuts in those 68
++subsets, 123 have no cut of B0's **returned** archive within 8 bits. That is proximity to
++returned cuts: it cannot show which cuts B proposed, so it does not establish that cut
++proposal is the obstacle rather than the accepted path, refinement or leaf construction.
++The change tests one candidate — wider refinement of proposals — without touching the
++language or budgets.
+ 
+ **Arms.** `hid_full` (frozen HID-search-v2 bytes, rerun) versus `hid_full_A` (identical
+ except the change); the nine-codec portfolio unchanged.
+ 
+ **Development (inspected strings only).** On the 176 D3 targets, pre-register before
+-running: (i) the fraction of supplied cuts with a B cut within 8 bits; (ii) the share of
+-strings where `hid_full_A` is shorter, and longer, than `hid_full` (a different B path
+-can end longer, since only the stages before B are shared). Stop the line (no
+-confirmation) if (i) does not rise above the B0 value 129/252.
++running: (i) proposal coverage measured **directly** — the fraction of supplied cuts within
++8 bits of at least one cut that B *proposed* (and, separately, *evaluated*) in any round,
++read from an explicit per-round proposal log that the future protocol must specify and
++that `search-diagnosis-v1` did not record (no new telemetry jobs were run for this
++closure); (ii) the share of strings where `hid_full_A` is shorter, and longer, than
++`hid_full` (a different B path can end longer, since only the stages before B are
++shared). Proximity to returned cuts (B0: 129 of 252) may be reported only as a
++descriptive secondary quantity; it is not the gate. The stop rule on (i) needs its
++baseline from the same proposal log run on the frozen B, not the returned-cut value.
++
++**Not yet executable.** Before this draft becomes a protocol it needs a finite total
++compute budget for the refinement of k trials per round, and fully specified scheduling
++and tie rules for selecting and refining the k trials.
+ 
+ **Target population (confirmation).** New reserved namespace
+ `search_v3a_confirmation`: F12 at 4,096 bits, 20 new replicates × {base, ragged}; F12
+@@ -82,19 +102,27 @@
+ golden archives are hand-derived. Nothing else changes: no search change, no new
+ proposal, no change to the portfolio.
+ 
+-**Prediction before implementation.** From the saved D4 ledgers, compute exactly, per
+-record, the bytes TILE would remove (the CONCAT rule and the tail LITERAL rule, minus the
+-TILE length field) and therefore the predicted T′ for every ragged-period translation and
+-the predicted change in H for the 282 H = T strings. This is arithmetic on saved bytes,
+-not an experiment, and fixes the expected effect before any encoding. The exact-repeat
+-floor (T − C = 40–48 bits) is unaffected, so sign reversals against the period codec are
+-**not** expected; the target is the size of the deficit.
++**Prediction before implementation (per proposal only).** For each saved ragged-period
++translation, write down the fully specified rewritten proposal (TILE replacing REPEAT +
++tail LITERAL + CONCAT) and compute its exact cost T′ under the new wire version, with full
++serialization accounting: graph sharing and pruning, rule IDs, variable-length fields and
++the new wire envelope. That is arithmetic on saved bytes and fixes, per proposal, the
++expected T′ before any encoding. It does **not** give an exact prediction of the full
++method's H′ from H = T: with TILE available the incumbent, the proposals or the search
++path can differ, and the 282 equal-length strings include 21 whose saved archive is not
++the translated proposal. The full method's H′ is measured, not predicted. The measured
++exact-repeat translations (T − C = 40–48 bits) do not use the tail construction and are
++unchanged by TILE; that is a statement about those translations, not a floor for every
++HID description. Sign reversals against the period codec are therefore not predicted;
++whether they occur is an empirical question for the study.
+ 
+ **Arms.** `hid_full` (frozen) versus `hid_full_B` (TILE available to every stage that
+ builds periodic nodes); portfolio unchanged.
+ 
+-**Development (inspected strings only).** Verify the predicted byte changes exactly on the
+-D4 population; any disagreement is a defect to fix before the freeze.
++**Development (inspected strings only).** Verify every pre-computed per-proposal T′
++exactly on the D4 population; a disagreement there is a defect in the rewrite or its
++accounting, to fix before the freeze. Report the full method's measured H′ beside it; a
++difference between H′ and T′ is not by itself a codec defect.
+ 
+ **Target population (confirmation).** New reserved namespace `search_v3b_confirmation`:
+ F01, F02, F03, F05 at 256, 1,024 and 4,096 bits, 20 replicates × {base, ragged}; controls
+@@ -103,7 +131,7 @@
+ **Decision rule.** Primary contrast (bits(`hid_full`) − bits(`hid_full_B`)) / n over the
+ twelve target cells, 99% percentile interval, declared seed; supported if lower bound > 0.
+ Secondary, descriptive: the contrast against the portfolio by cell, and agreement of the
+-measured with the predicted byte change.
++measured with the pre-computed per-proposal T′.
+ 
+ **What it would not show.** That HID can beat a specialised period codec on purely
+ periodic strings, or anything about F06–F11.
+@@ -112,6 +140,7 @@
+ 
+ ## Not proposed
+ 
+-No change is proposed for F06–F11, which this diagnosis did not examine and which carry
+-the largest per-bit losses (F08, F09, F11). A diagnostic of those cells would precede any
+-algorithm there.
++No change is proposed for F06–F11, which carry the largest per-bit losses (F08, F09,
++F11). This diagnosis did not target their losses: F06, F07 and F11 were sampled only as
++D2 controls (4,096 and 65,536 bits), none was a D3 or D4 target, and F08–F10 appear only
++in D1. A diagnostic of those cells would precede any algorithm there.
+--- a/index-deconvolution/results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/HANDOFF.md
++++ b/index-deconvolution/results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/corrected/HANDOFF_a1.md
+@@ -1,4 +1,10 @@
+-# search-diagnosis-v1-r1 — handoff for Codex review
++# search-diagnosis-v1-r1 — handoff for Codex review (corrected copy, `report-r2`)
++
++> **Corrected copy.** The original `search-diagnosis-v1-r1/HANDOFF.md` is kept unchanged as
++> a historical artifact. Only the interpretive statements answering Codex review R1–R2
++> and the scope statement are corrected here; operational content (identity, resources,
++> tests, commands) is the a1 record as delivered. The closure of the review is
++> `review_closure/search-diagnosis-v1-r1/HANDOFF.md`.
+ 
+ Date: 2026-10-03. Executor: Claude Code. Git HEAD `53c41d8f3b97106fd176f24d575e0934848dddd6`
+ (branch `main`), dirty tree with unrelated pre-existing edits preserved.
+@@ -22,14 +28,16 @@
+   | `missed_baseline_structure_observed` | false | 0/576 period, 0/576 pair-grammar translations shorter than H |
+   | `proposal_representation_penalty_observed` | true | 576/576 and 576/576 translations longer than their own baseline; T − C median 96 bits (period), 472 bits (pair grammar) |
+ 
+-* **Recommendation:** `BOTH_SEPARATELY` (`DECISION.md`, `DECISION.json`), with **no
+-  superiority claim**. Boundary families: in all 72 strings where the full arm loses to
+-  the portfolio, a supplied-cut partition in the unchanged leaf language is shorter than
+-  both; caps are not the limitation; the strict rule is secondary. Period-type families:
+-  of 367 losses to a translated winner, 282 have H = T exactly, so the loss equals the HID
+-  cost of the same proposal. Two separate single-change drafts are in
+-  `NEXT_PROTOCOL_DRAFT.md` (search first, suggested); no seeds generated, no source
+-  version implemented.
++* **Recommendation:** `BOTH_SEPARATELY`, exploratory (corrected `DECISION.md`,
++  `report-r2/outputs/DECISION.json`), with **no superiority claim**. Boundary families: in
++  all 72 strings where the full arm loses to the portfolio, a supplied-cut partition in
++  the unchanged leaf language is shorter than both; the B0→B8 cap increase changed one
++  target output; these data do not rank proposal, accepted path, refinement and leaf
++  construction as causes. Period-type families: of 367 losses to a translated winner, 282
++  have H = T in length (261 byte-identical, 21 different bytes), so there H − C = T − C,
++  the translation's measured penalty; this is not an optimality or impossibility result.
++  Two separate single-change drafts are in the corrected `NEXT_PROTOCOL_DRAFT.md`; neither
++  is approved; no seeds generated, no source version implemented.
+ 
+ ## 2. Implementation identity
+ 
+@@ -152,15 +160,16 @@
+ 
+ ## 9. What was learned and what was not
+ 
+-Learned (post hoc, these populations): the frozen boundary caps almost never bind; the
+-supplied-cut space contains same-language partitions shorter than the full archive and
+-the portfolio in every losing boundary-family string, mostly strictly reachable, so the
+-boundary stage's weakness is the cut positions it proposes; in period-type cells the
+-search usually reaches exactly the translated proposal and loses by its HID cost, which
+-is structural and shrinks per bit with n. Not learned: why B stops; whether shorter HID
+-descriptions of the period strings exist; the 85 losses with H < T; anything about
+-F06–F11 (where the largest per-bit losses are); anything about new draws or unfamiliar
+-families.
++Learned (post hoc, these populations): the B0→B8 cap increase changed one target output;
++the supplied-cut space contains same-language partitions shorter than the full archive
++and the portfolio in every losing boundary-family string, mostly strictly reachable over
++supplied cuts; in period-type cells the saved full archive usually has exactly the
++translated length (mostly the same bytes, 21 exceptions among the losses), so the loss
++equals that translation's measured penalty, whose per-bit size shrinks with n. Not
++learned: why B stops (returned cuts cannot separate proposal from rejection, path,
++refinement or leaves); whether shorter HID descriptions of the period strings exist; the
++85 losses with H < T; the cause of the F06–F11 losses (where the largest per-bit losses
++are); anything about new draws or unfamiliar families.
+ 
+ ## 10. Deviations and items needing review
+ 
+@@ -193,6 +202,8 @@
+ * **D8 Bucket mapping.** `field_buckets` files the period codec's first-period bits under
+   `other_payload`, so bucket-level T − C differences move bits between
+   `literal_payload_bits` and `other_payload`; totals are exact.
+-* **D9 F06–F11** are outside D2–D4 by design; the memo says so rather than extrapolating.
++* **D9 F06–F11 scope (corrected).** F06, F07 and F11 were sampled as D2 controls at
++  4,096 and 65,536 bits; none was a D3 or D4 target; F08–F10 appear only in D1. No
++  diagnostic targeted their losses.
+ 
+ **Ready for Codex review; not yet accepted.**
+--- a/index-deconvolution/bitacora/42_hierarchy_search_diagnosis.md
++++ b/index-deconvolution/results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/corrected/bitacora_42_hierarchy_search_diagnosis.md
+@@ -1,7 +1,12 @@
+-# Where HID-search-v2 loses: search reach versus representation cost
++# Where HID-search-v2 loses: search reach versus representation cost (corrected, `report-r2`)
+ 
+-Date: 2026-10-03. Executor: Claude Code. Supervisor: Codex. Status: **ready for Codex
+-review; not yet accepted.** Evidence role: post-hoc diagnostic on already inspected data.
++> Corrected copy for review; the bitacora entry `bitacora/42_hierarchy_search_diagnosis.md`
++> is unchanged. Corrections answer Codex review R1–R2 (closure
++> `results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/`).
++
++Date: 2026-10-03. Executor: Claude Code. Supervisor: Codex. Status: **changes requested
++by Codex; correction closure ready for Codex review, not yet accepted.** Evidence role:
++post-hoc diagnostic on already inspected data.
+ 
+ The accepted HID-search-v2 study (bitacora 41) was inconclusive against the nine-codec
+ portfolio. This phase asked which concrete limitation deserves the next algorithm
+@@ -9,22 +14,26 @@
+ 
+ The saved-result map (D1) re-read all 1,792 cases and reproduced the accepted primary
+ estimate exactly. Giving the boundary stage eight times its caps (D2) changed its output
+-on one of 176 target strings and none of 32 controls; the frozen stage itself replayed
+-bit for bit. Pricing every subset of the generator's supplied cuts (D3, truth-assisted)
+-showed that, in all 72 boundary-family strings where the full method loses, the unchanged
+-leaf language holds a partition shorter than both the full archive and the portfolio;
+-mostly the obstacle is which cuts B proposes, with 22 strings showing a positive-cost
+-barrier on the strict path. Rewriting the saved period and pair-grammar archives in HID
+-(D4) found no translation shorter than the full archive, and every translation longer
+-than its baseline; in 282 of the 367 losses to those codecs the full archive already has
+-exactly the translated length, so the loss is the HID cost of the same proposal.
++on one of 176 target strings and none of 32 controls — a result about that one cap
++increase; the frozen stage itself replayed bit for bit. Pricing every subset of the
++generator's supplied cuts (D3, truth-assisted) showed that, in all 72 boundary-family
++strings where the full method loses, the unchanged leaf language holds a partition
++shorter than both the full archive and the portfolio, with 22 strings showing a
++positive-cost barrier on the strict path. Which mechanism stops B is not identified:
++proximity of supplied cuts to the cuts of B's returned archive says nothing about the
++cuts it proposed. Rewriting the saved period and pair-grammar archives in HID (D4) found
++no translation shorter than the full archive, and every translation longer than its
++baseline; in 282 of the 367 losses to those codecs the full archive has exactly the
++translated length (261 with identical bytes, 21 without), so there the loss equals that
++translation's measured penalty — not a proof that no better HID description exists.
+ 
+-Recommendation: `BOTH_SEPARATELY` — a boundary-proposal change for F12/S02 and a
+-representation change for the period-type families, as separate studies. F06–F11, where
+-the largest per-bit losses sit, were not examined.
++Recommendation, exploratory: `BOTH_SEPARATELY` — a boundary-search change for F12/S02 and
++a representation change for the period-type families, as separate studies. The losses of
++F06–F11, the largest per bit, were not targeted: F06, F07 and F11 appear only as D2
++controls, F08–F10 only in D1.
+ 
+-Details: [report](../results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/REPORT.md),
+-[decision](../results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/DECISION.md),
+-[drafts](../results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/NEXT_PROTOCOL_DRAFT.md),
+-[handoff](../results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/HANDOFF.md),
+-notebook `18_hierarchy_search_diagnosis`. Nothing was committed, pushed or published.
++Details (corrected copies): [report](REPORT.md), [decision](DECISION.md),
++[drafts](NEXT_PROTOCOL_DRAFT.md), [closure handoff](../HANDOFF.md), notebook
++`18_hierarchy_search_diagnosis.report-r2.executed.ipynb`. Historical originals:
++`results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/`, notebook
++`notebooks/18_hierarchy_search_diagnosis.ipynb`. Nothing was committed, pushed or published.

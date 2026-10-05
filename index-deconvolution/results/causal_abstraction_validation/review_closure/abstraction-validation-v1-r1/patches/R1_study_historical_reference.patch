@@ -1,0 +1,73 @@
+--- a/index-deconvolution/results/causal_abstraction_validation/abstraction-validation-v1-r1/study.py
++++ b/index-deconvolution/results/causal_abstraction_validation/abstraction-validation-v1-r1/study.py
+@@ -342,15 +342,26 @@
+ 
+ def evaluate_classes(cls: list[list[int]], maps: dict, present: set, sizes: dict, N: int) -> dict:
+     """Coarse-hypothesis outcome. ``maps``: q -> induced map or None (record present);
+-    ``present``: q indices with a record. Representative = first member; never substituted."""
++    ``present``: q indices with a record. Representative = first member; never substituted.
++
++    Record availability (does a record exist?) and member existence (does its own
++    induced map exist?) are tracked independently of comparison evaluability.  A
++    known structural failure outranks missing evidence; missing evidence, including
++    an absent singleton representative, never yields COARSE-NO-HOLDOUT or COARSE-HOLDS.
++    ``availability`` units: ``missing_records`` = distinct q indices with no record;
++    ``missing_comparisons`` = representative-member comparisons not made for want of a
++    record (equal to ``counts["MISSING"]``; a singleton contributes none).
++    """
+     rows = []
+     intended = inspected = evaluable = macro_mis = micro_mis = 0
+     counts = {"DISAGREE": 0, "REP-NOEXIST": 0, "MEMBER-NOEXIST": 0, "MISSING": 0}
++    missing_records = set()
+     for members in cls:
+         rep = members[0]
+         intended += (len(members) - 1) * N
+         if rep not in present:
+             rep_state = "MISSING"
++            missing_records.add(rep)
+         elif maps[rep] is None:
+             rep_state = "REP-NOEXIST"
+             counts["REP-NOEXIST"] += 1
+@@ -359,10 +370,21 @@
+         out = []
+         for m in members[1:]:
+             own = None if m not in present else (PASS if maps[m] is not None else FAIL)
+-            if rep_state == "MISSING" or m not in present:
++            if m not in present:
++                missing_records.add(m)
+                 res = {"q": m, "outcome": "MISSING", "own_e3": own, "reason": "record absent",
+                        "macro_disagreements": None, "micro_mismatches": None, "witness_macro": None}
+                 counts["MISSING"] += 1
++            elif rep_state == "MISSING":
++                if maps[m] is None:
++                    res = {"q": m, "outcome": "MEMBER-NOEXIST", "own_e3": own,
++                           "reason": "member has no induced map; representative record absent",
++                           "macro_disagreements": None, "micro_mismatches": None, "witness_macro": None}
++                    counts["MEMBER-NOEXIST"] += 1
++                else:
++                    res = {"q": m, "outcome": "MISSING", "own_e3": own, "reason": "representative record absent",
++                           "macro_disagreements": None, "micro_mismatches": None, "witness_macro": None}
++                counts["MISSING"] += 1
+             else:
+                 inspected += N
+                 if rep_state == "REP-NOEXIST":
+@@ -384,7 +406,7 @@
+         label = "COARSE-DISAGREE"
+     elif counts["REP-NOEXIST"] or counts["MEMBER-NOEXIST"]:
+         label = "COARSE-STRUCT-FAIL"
+-    elif counts["MISSING"]:
++    elif counts["MISSING"] or missing_records:
+         label = "COARSE-INCOMPLETE"
+     elif all(len(m) == 1 for m in cls):
+         label = "COARSE-NO-HOLDOUT"
+@@ -392,7 +414,9 @@
+         label = "COARSE-HOLDS"
+     return {"label": label, "classes": rows, "n_classes": len(cls), "counts": counts,
+             "pairs_intended": intended, "pairs_inspected": inspected, "pairs_evaluable": evaluable,
+-            "macro_state_disagreements": macro_mis, "micro_state_pair_mismatches": micro_mis}
++            "macro_state_disagreements": macro_mis, "micro_state_pair_mismatches": micro_mis,
++            "availability": {"missing_records": len(missing_records),
++                             "missing_comparisons": counts["MISSING"]}}
+ 
+ 
+ # --------------------------------------------------------------------------- one D row

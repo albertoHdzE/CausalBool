@@ -1,0 +1,17 @@
+Transcribed from the single executions of this closure (each run once; not rerun to capture a log).
+
+00:01:35Z  scripts/run_tests.py r3 -q --tb=short
+  51 passed in 8.79s            (44 existing + 7 new regression tests)
+
+00:02:12Z  scripts/run_tests.py r2+r3tests -q --tb=line
+  7 failed, 44 passed in 8.32s  (report-r2 source + report-r3 test file, temporary copy)
+  FAILED test_d4_complete_counts_jobs_once_and_conversions_per_method
+  FAILED test_d4_missing_job_is_one_job_and_two_conversions
+  FAILED test_d4_invalid_job_counted_once_in_its_denominator
+  FAILED test_selected_b_bytes_pass_on_retained_records          (KeyError: new gate field)
+  FAILED test_false_selected_b_byte_comparison_is_invalid
+  FAILED test_false_byte_comparison_plus_missing_evidence_is_invalid  ('INCOMPLETE' == 'INVALID')
+  FAILED test_absent_byte_comparison_is_not_a_failure             (KeyError: new gate field)
+
+00:02:33Z  ruff check --output-format=concise report-r3 scripts      All checks passed!
+00:02:55Z  ruff check --output-format=concise scripts (after make_patches.py)  All checks passed!

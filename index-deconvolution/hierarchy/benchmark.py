@@ -118,8 +118,8 @@ def method_config(method: str, study=None) -> dict:
             return {"kind": "hid", "search_config": cfg.__dict__ | {}}
     else:
         spec = study.method(method)
-        if spec.kind == "hid_v2":
-            return {"kind": "hid_v2", "search_config": spec.config.as_dict()}
+        if spec.kind in ("hid_v2", "hid_v3a"):
+            return {"kind": spec.kind, "search_config": spec.config.as_dict()}
         if spec.kind == "portfolio":
             return {"kind": "portfolio", "constituents": list(study.baselines)}
     return {"kind": "baseline", "method": method,
@@ -132,7 +132,7 @@ def method_config_sha(method: str, study=None) -> str:
     if _is_legacy(study):
         if method.startswith("hid_"):
             return ABLATIONS[method[4:]].sha256()
-    elif study.method(method).kind == "hid_v2":
+    elif study.method(method).kind in ("hid_v2", "hid_v3a"):
         return study.method(method).config.sha256()
     if method == "baseline_best":
         return sha256_bytes(canonical([method_config(m) for m in BASELINE_METHODS]))
@@ -332,9 +332,15 @@ def worker_main(method: str, out_path: str, registry: str = "hid-v1",
         from .study import method_registry
         spec = next(m for m in method_registry(registry) if m.name == method)
         kind = spec.kind
-    if kind == "hid_v2":
-        from .search_v2 import infer_v2
-        res = infer_v2(bits, spec.config)
+    if kind in ("hid_v2", "hid_v3a"):
+        if kind == "hid_v3a":                      # every v3a HID job writes its B trace
+            from .search_v3a import infer_v3a
+            res, side = infer_v3a(bits, spec.config, trace=True)
+            atomic_write(Path(trace_sidecar_path(out_path)),
+                         json.dumps(side, sort_keys=True).encode())
+        else:
+            from .search_v2 import infer_v2
+            res = infer_v2(bits, spec.config)
         archive = res.archive
         tele = res.telemetry
         info = {"mode": "literal" if archive[4] == C.CODEC_LITERAL else "hid",
@@ -368,6 +374,34 @@ def worker_main(method: str, out_path: str, registry: str = "hid-v1",
 # ---------------------------------------------------------------------------
 # Parent: case execution
 # ---------------------------------------------------------------------------
+
+def trace_sidecar_path(out_path) -> str:
+    """Where a tracing worker writes its stage-B trace, next to its archive output."""
+    return f"{out_path}.trace.json"
+
+
+def _store_trace(job, row: dict, d: Path) -> None:
+    """Move a HID worker's trace sidecar into ``traces/`` and link it from the row.
+
+    ``complete``: an ``ok`` row with its sidecar; ``unavailable_watchdog``: the worker
+    was killed (no trace is fabricated); ``missing``: an ``ok`` row without a sidecar,
+    which validation treats as an engineering failure."""
+    side = Path(trace_sidecar_path(job.tmp))
+    row["trace_path"] = row["trace_sha256"] = None
+    if side.exists() and row["status"] == "ok":
+        data = side.read_bytes()
+        rel = f"traces/{job.case.case_id}.{job.method}.json"
+        atomic_write(d / rel, data)
+        row["trace_path"], row["trace_sha256"] = rel, sha256_bytes(data)
+        row["trace_status"] = "complete"
+    elif row["status"] in ("timeout_raw", "rss_limit_raw"):
+        row["trace_status"] = "unavailable_watchdog"
+    else:
+        row["trace_status"] = "missing" if row["status"] == "ok" else f"unavailable_{row['status']}"
+    try:
+        side.unlink()
+    except FileNotFoundError:
+        pass
 
 def store_archive(d: Path, archive: bytes) -> tuple[str, str]:
     h = sha256_bytes(archive)
@@ -527,6 +561,8 @@ def _job_row(job: _Job, run_id: str, fsha: str, raw_bits: int, study=None,
         row["archive_path"], row["archive_sha256"] = rel, h
         row["archive_bits"] = 8 * len(archive)
         row["selected_codec_id"] = archive[4]
+    if hid and not _is_legacy(study) and study.trace_sidecars:
+        _store_trace(job, row, d)
     for p in (job.tmp, job.err):
         try:
             p.unlink()
@@ -652,7 +688,8 @@ def run_cases(cases, d: Path, run_id: str, fsha: str, resume: bool, log,
             if case_rows_path(d, c).exists() and not resume:
                 raise RuntimeError(f"rows exist for {c.case_id}; use --resume")
             pending_cases.append(c)
-    queue = [(c, m) for c in pending_cases for m in encode_methods]
+    queue = [(c, m) for c in pending_cases
+             for m in (encode_methods if legacy else study.job_methods(c))]
     per_case: dict[str, dict] = {c.case_id: {} for c in pending_cases}
     arcs: dict[str, dict] = {c.case_id: {} for c in pending_cases}
     by_id = {c.case_id: c for c in pending_cases}
@@ -680,8 +717,11 @@ def run_cases(cases, d: Path, run_id: str, fsha: str, resume: bool, log,
                 if len(per_case[cid]) == len(encode_methods):
                     case = by_id[cid]
                     rows = per_case.pop(cid)
-                    rows["baseline_best"] = portfolio_row(case, rows, arcs.pop(cid), run_id,
-                                                          fsha, raw_bits, study)
+                    if "baseline_best" in all_methods:
+                        rows["baseline_best"] = portfolio_row(case, rows, arcs.pop(cid), run_id,
+                                                              fsha, raw_bits, study)
+                    else:
+                        arcs.pop(cid)
                     out = [rows[m] for m in all_methods]
                     atomic_write(case_rows_path(d, case),
                                  json.dumps(out, sort_keys=True).encode())

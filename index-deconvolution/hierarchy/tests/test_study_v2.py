@@ -479,3 +479,72 @@ def test_end_to_end_artifacts_and_corruption(run):
     p.write_bytes(p.read_bytes()[:-1] + bytes([p.read_bytes()[-1] ^ 1]))
     rc, vc, s, v = _rv(st, d)
     assert vc == cli.EXIT_INVALID and s["primary"]["verdict"] == "not_assessed"
+
+
+# ---------------------------------------------------------------------------
+# 11. Diagnostic summaries: supplied-boundary gap medians (review R1)
+# ---------------------------------------------------------------------------
+
+from hierarchy import diagnostics_v2 as D  # noqa: E402
+
+
+def _ref(role, fam, n, gap=None, available=True):
+    it = {"role": role, "family": fam, "base_length": n, "available": available}
+    if gap is not None:
+        it["gap_hid_full_per_input_bit"] = gap
+    return it
+
+
+def _middle_mean(gaps):
+    s = sorted(gaps)
+    return (s[len(s) // 2 - 1] + s[len(s) // 2]) / 2 if len(s) % 2 == 0 else s[len(s) // 2]
+
+
+def test_boundary_gap_median_averages_the_two_middle_values_of_an_even_cell():
+    gaps = [0.3, -0.1, -0.4, 0.2]                     # sorted: -0.4, -0.1, 0.2, 0.3
+    agg = D.boundary_gap_summary([_ref("stress", "S02", 64, g) for g in gaps])
+    c = agg["stress|S02|64"]
+    assert c["gap_median"] == pytest.approx(0.05, abs=1e-15)
+    assert c["gap_median"] != pytest.approx(0.2)      # the upper middle the old owner reported
+    assert c["gap_mean"] == pytest.approx(0.0, abs=1e-15)
+    assert (c["strings"], c["available"]) == (4, 4)
+    assert (c["automatic_shorter_than_reference"], c["automatic_longer_than_reference"],
+            c["ties"]) == (2, 2, 0)
+
+
+def test_boundary_gap_median_of_an_odd_cell_is_the_middle_value_and_cells_stay_separate():
+    items = [_ref("transfer", "F12", 16, g) for g in (0.25, -0.5, 0.0)] + \
+            [_ref("transfer", "F12", 32, g) for g in (-0.3, -0.1)]
+    agg = D.boundary_gap_summary(items)
+    assert agg["transfer|F12|16"]["gap_median"] == 0.0
+    assert agg["transfer|F12|16"]["ties"] == 1
+    assert agg["transfer|F12|32"]["gap_median"] == pytest.approx(-0.2, abs=1e-15)
+    assert agg["transfer|F12|32"]["automatic_shorter_than_reference"] == 2
+
+
+def test_boundary_gap_summary_counts_unavailable_strings_and_leaves_empty_cells_unset():
+    items = [_ref("confirmation", "F12", 8, available=False),
+             _ref("confirmation", "F12", 8),                  # available, hid_full row absent
+             _ref("confirmation", "F12", 16, available=False)]
+    agg = D.boundary_gap_summary(items)
+    assert (agg["confirmation|F12|8"]["strings"], agg["confirmation|F12|8"]["available"]) == (2, 1)
+    for k in agg:
+        assert agg[k]["gap_median"] is None and agg[k]["gap_mean"] is None
+
+
+def test_fixture_diagnostics_by_cell_is_the_owner_summary_of_its_saved_references(run):
+    # Wiring check through the production CLI. On this fixture the two middle gaps of
+    # every cell coincide, so the defect itself is detected by the unit tests above.
+    st, d = run
+    sb = json.loads((d / "diagnostics.json").read_text())["supplied_boundary_references"]
+    items = json.loads((d / sb["items_path"]).read_text())
+    assert sb["by_cell"] == D.boundary_gap_summary(items)
+    checked = 0
+    for k, c in sb["by_cell"].items():
+        gaps = [it["gap_hid_full_per_input_bit"] for it in items
+                if f"{it['role']}|{it['family']}|{it['base_length']}" == k
+                and "gap_hid_full_per_input_bit" in it]
+        assert gaps, k
+        assert c["gap_median"] == pytest.approx(_middle_mean(gaps), abs=1e-15)
+        checked += 1
+    assert checked == len(sb["by_cell"]) > 0

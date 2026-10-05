@@ -1356,16 +1356,21 @@ def show_domain_filtering(
     A row is ``(label, declared, kept, reasons)``: ``reasons`` maps a removed
     value to the short rule tag that removed it, read from the propagator's own
     certificates. Nothing here decides what is removed.
+
+    A row may carry a fifth element, the value the method finally chose from
+    what was kept (a query's minimum member); it is drawn in the chosen colour.
     """
 
-    width = max(len(declared) for _, declared, _, _ in rows)
+    width = max(len(row[1]) for row in rows)
     fig, ax = plt.subplots(figsize=(0.55 * width + 3.4, 0.62 * len(rows) + 1.3))
-    for row, (label, declared, kept, reasons) in enumerate(rows):
+    for row, (label, declared, kept, reasons, *rest) in enumerate(rows):
+        chosen = rest[0] if rest else None
         y = len(rows) - 1 - row
         ax.text(-0.3, y + 0.4, label, ha="right", va="center", fontsize=9)
         for column, value in enumerate(declared):
             alive = value in kept
-            ax.add_patch(Rectangle((column, y), 0.9, 0.8, facecolor=FILL if alive else EXCLUDED,
+            face = (CHOSEN if value == chosen else FILL) if alive else EXCLUDED
+            ax.add_patch(Rectangle((column, y), 0.9, 0.8, facecolor=face,
                                    edgecolor=EDGE, linewidth=0.7))
             ax.text(column + 0.45, y + 0.5, str(value), ha="center", va="center", fontsize=8)
             if not alive and value in reasons:

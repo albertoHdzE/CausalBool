@@ -1,0 +1,112 @@
+"""Tests of the induced-map (abstraction) API owned by deconvolution.py, and the
+single-owner guard for the fibre condition (abstraction-validation-v1-r1)."""
+from __future__ import annotations
+
+import os
+import re
+import sys
+
+import pytest
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SRC = os.path.join(os.path.dirname(HERE), "src")
+sys.path.insert(0, SRC)
+
+from deconvolution import (  # noqa: E402
+    canonical_partition, commutation_failures, compare_induced, fibre_sizes, induced_map,
+)
+
+PKG = os.path.dirname(HERE)
+OWNER = os.path.join(SRC, "deconvolution.py")
+# Declared validation exception: the named run-local independent audit oracle.
+ALLOWED = {os.path.join(PKG, "results", "causal_abstraction_validation", "abstraction-validation-v1-r1",
+                        "audit_oracle.py")}
+SCAN = [SRC, os.path.join(PKG, "hierarchy"), os.path.join(PKG, "results", "causal_abstraction_validation")]
+PATTERNS = [re.compile(r"^\s*def\s+(induced_map|compare_induced|commutation_failures|canonical_partition)\b", re.M),
+            re.compile(r"dict\(zip\(alpha,\s*image\)\)")]
+
+
+def fibre_definitions(roots) -> list[str]:
+    """Python files outside the owner and the allowlist that define the checker API
+    or contain its body fragment. A textual guard: it does not prove semantic uniqueness."""
+    hits = []
+    for root in roots:
+        for d, dirs, files in os.walk(root):
+            dirs[:] = [x for x in dirs if x != "__pycache__"]
+            for f in files:
+                p = os.path.join(d, f)
+                if not f.endswith(".py") or p == OWNER or p in ALLOWED:
+                    continue
+                text = open(p, encoding="utf-8", errors="replace").read()
+                if any(pat.search(text) for pat in PATTERNS):
+                    hits.append(p)
+    return hits
+
+
+def test_canonical_partition_first_appearance():
+    assert canonical_partition([(1, 0), (0, 0), (1, 0), 7]) == [0, 1, 0, 2]
+
+
+def test_induced_map_exists_and_values():
+    G, w = induced_map([0, 0, 1, 1], [1, 1, 0, 0])
+    assert w is None and G == {0: 1, 1: 0}
+
+
+def test_induced_map_lexicographic_witness():
+    # fibre 0 = {0, 2, 3}: images 5, 5, 6 -> smallest pair (0, 3); fibre 1 = {1, 4} mixed too
+    G, w = induced_map([0, 1, 0, 0, 1], [5, 1, 5, 6, 2])
+    assert G is None and w == (0, 3)
+    # least violating pair starts at fibre minimum 1 when fibre of 0 is consistent
+    G, w = induced_map([0, 1, 0, 1, 1], [5, 1, 5, 1, 2])
+    assert w == (1, 4)
+
+
+def test_induced_map_refuses_empty_or_ragged():
+    with pytest.raises(ValueError):
+        induced_map([], [])
+    with pytest.raises(ValueError):
+        induced_map([0, 1], [0])
+
+
+def test_compare_induced_units_and_witness():
+    alpha = [0, 0, 0, 1, 2, 2]
+    sizes = fibre_sizes(alpha)
+    r = compare_induced({0: 0, 1: 1, 2: 2}, {0: 1, 1: 1, 2: 0}, sizes)
+    assert r["outcome"] == "DISAGREE" and r["macro_disagreements"] == 2
+    assert r["micro_mismatches"] == 3 + 2 and r["witness_macro"] == 0
+    assert compare_induced({0: 0}, {0: 0}, {0: 4})["outcome"] == "AGREE"
+
+
+def test_compare_induced_not_evaluable_has_no_counts():
+    r = compare_induced(None, {0: 0}, {0: 1})
+    assert r["outcome"] == "NOT-EVALUABLE" and r["reason"] == "representative has no induced map"
+    assert r["macro_disagreements"] is None and r["micro_mismatches"] is None
+
+
+def test_commutation_failures():
+    assert commutation_failures([0, 1, 2], [1, 2, 0], lambda y: (y + 1) % 3) == []
+    assert commutation_failures([0, 1, 2], [1, 2, 2], lambda y: (y + 1) % 3) == [2]
+    assert commutation_failures([0, 1, 1, 2], [0, 1, 0, 2], lambda y: y) == [2]
+
+
+@pytest.mark.parametrize("alpha,image", [([], []), ([0, 1], [0]), ([0], [0, 1])],
+                         ids=["empty", "image_short", "alpha_short"])
+def test_commutation_failures_rejects_incomplete_domain(alpha, image):
+    with pytest.raises(ValueError):
+        commutation_failures(alpha, image, lambda y: y)
+
+
+def test_single_owner_guard_clean():
+    scanned = sum(1 for r in SCAN if os.path.isdir(r))
+    print(f"guard scanned roots: {scanned}")
+    assert scanned >= 2
+    assert fibre_definitions(SCAN) == []
+
+
+def test_single_owner_guard_rejects_planted_copy(tmp_path):
+    planted = tmp_path / "second_checker.py"
+    planted.write_text("def induced_map(alpha, image):\n    return dict(zip(alpha, image))\n")
+    assert fibre_definitions([str(tmp_path)]) == [str(planted)]
+    fragment = tmp_path / "inline.py"
+    fragment.write_text("m = dict(zip(alpha, image))\n")
+    assert str(fragment) in fibre_definitions([str(tmp_path)])

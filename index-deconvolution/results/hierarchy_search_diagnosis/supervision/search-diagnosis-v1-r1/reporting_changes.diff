@@ -1,0 +1,208 @@
+--- launch/analysis.py
++++ review/analysis.py
+@@ -409,3 +409,124 @@
+             "penalty_cases": sum(1 for c in ids if sub[c].get("T_minus_C", 0) > 0),
+             "admissible": sum(1 for c in ids if "T" in sub[c])}
+     return res
++
++
++# ---------------------------------------------------------------------------
++# Evidence flags and decision quantities
++# ---------------------------------------------------------------------------
++
++def _quantiles(xs) -> dict | None:
++    xs = sorted(xs)
++    if not xs:
++        return None
++    k = len(xs)
++    med = xs[k // 2] if k % 2 else (xs[k // 2 - 1] + xs[k // 2]) / 2
++    return {"n": k, "min": xs[0], "median": med, "max": xs[-1]}
++
++
++def decision_quantities(d1: dict, d2: dict, s2: dict, d3: dict, d4: dict, s4: dict,
++                        res: dict, targets, controls, ids4, near_bits: int = 8) -> dict:
++    cell = lambda c: K.parse_case_id(c)["cell"]                     # noqa: E731
++    P = {c: d1[c]["bits"]["baseline_best"] for c in d1}
++    # D2
++    wit = [{"case_id": c, "H": d2[c]["H"], "B0": d2[c]["B0_bits"], "B8": d2[c]["B8_bits"],
++            "n": d2[c]["n"], "portfolio": P[c], "B0_stop": d2[c]["B0_stop"],
++            "B8_stop": d2[c]["B8_stop"]} for c in s2["targets"]["witnesses"]]
++    b0cap = sorted(c for c in targets + controls if d2[c].get("B0_cap_hit"))
++    flags = {"budget_opportunity_observed": {
++        "value": bool(wit), "witnesses": wit,
++        "denominator": {"target_strings": len(targets), "completed_B8_targets":
++                        sum(1 for c in targets if "B8_bits" in d2[c])},
++        "prevalence_by_cell": s2["targets"]["B8_shorter_than_H"],
++        "control_behaviour": {"B8_shorter_than_H": s2["controls"]["B8_shorter_than_H"],
++                              "B8_differs_from_B0": sum(1 for c in controls
++                                                        if d2[c]["B8_bits"] != d2[c]["B0_bits"])},
++        "B0_cap_hit_strings": b0cap,
++        "effect_equal_cell_mean_opportunity_per_input_bit":
++            s2["targets"]["equal_cell_mean_opportunity"],
++        "resources": res["D2"]}}
++    # D3
++    by: dict[str, Counter] = defaultdict(Counter)
++    kinds = Counter()
++    gaps = defaultdict(list)
++    located = Counter()
++    for c, r in d3.items():
++        k = by[cell(c)]
++        al, el, st = (r["cheapest_all"]["bits"], r["cheapest_eligible"]["bits"],
++                      r["cheapest_strict"]["bits"])
++        k["strings"] += 1
++        k["reference_reproduced"] += r["reference_reproduced"]
++        k["restricted_path_barrier"] += r["restricted_path_barrier"]
++        k["eligibility_obstruction"] += r["eligibility_obstruction"]
++        k["cheapest_all_lt_H"] += al < r["H"]
++        k["cheapest_strict_lt_H"] += st < r["H"]
++        k["cheapest_all_lt_portfolio"] += al < P[c]
++        k["cheapest_strict_lt_portfolio"] += st < P[c]
++        k["H_gt_portfolio"] += r["H"] > P[c]
++        k["H_gt_portfolio_and_cheapest_all_lt_H"] += r["H"] > P[c] and al < r["H"]
++        k["cheapest_strict_lt_B0"] += st < r["B0"]
++        if r["restricted_path_barrier"]:
++            kinds[r["barrier"]["kind"]] += 1
++        gaps[cell(c)].append((r["H"] - al) / r["n"])
++        if st < r["H"]:
++            b0cuts = json.loads(record_path(K.RUN_DIR, "D2", c, "B0").read_text())["info"]["cuts"]
++            for s in r["cheapest_strict"]["subset"]:
++                near = any(abs(s - x) <= near_bits for x in b0cuts)
++                located["supplied_cut_with_B0_cut_within_%d_bits" % near_bits] += near
++                located["supplied_cut_without"] += not near
++    flags["restricted_path_barrier_observed"] = {
++        "value": sum(v["restricted_path_barrier"] for v in by.values()) > 0,
++        "space": "D3 supplied-cut subsets only (truth-assisted, B0 leaf heuristic)",
++        "barrier_kinds": dict(kinds),
++        "eligibility_obstructions": sum(v["eligibility_obstruction"] for v in by.values()),
++        "by_cell": {k: dict(v) for k, v in sorted(by.items())},
++        "effect_H_minus_cheapest_all_per_input_bit_by_cell":
++            {k: _quantiles(v) for k, v in sorted(gaps.items())},
++        "descriptive_B0_cut_location": dict(located),
++        "denominator": {"strings": len(d3), "subsets": sum(r["subsets"] for r in d3.values())},
++        "resources": res["D3"]}
++    # D4
++    loss: dict[str, Counter] = defaultdict(Counter)
++    pen_loss = defaultdict(list)
++    absolute = {"period": [], "pair_grammar": []}
++    for r in d4.values():
++        if "T" in r:
++            absolute[r["method"]].append(r["T_minus_C"])
++        if r["method"] != r["portfolio_method"]:
++            continue
++        k = loss[cell(r["case_id"])]
++        k[f"portfolio_winner_{r['method']}"] += 1
++        if r["H"] > r["portfolio"]:
++            k["hid_loses"] += 1
++            k["hid_loses_and_H_eq_T"] += r["H"] == r["T"]
++            k["hid_loses_and_H_lt_T"] += r["H"] < r["T"]
++            pen_loss[cell(r["case_id"])].append(r["T_minus_C"] / r["n"])
++    missed = {m: s4[m]["missed_witnesses"] for m in s4}
++    flags["missed_baseline_structure_observed"] = {
++        "value": any(missed.values()), "witnesses": missed,
++        "denominator": {"conversion_records": len(d4),
++                        "admissible": {m: s4[m]["admissible"] for m in s4}},
++        "prevalence_by_cell": {m: s4[m]["T_shorter_than_H"] for m in s4},
++        "effect_H_minus_T_per_input_bit_by_cell": {m: {k: v["mean"] for k, v in
++                                                       s4[m]["H_minus_T"].items()} for m in s4},
++        "resources": res["D4"]}
++    flags["proposal_representation_penalty_observed"] = {
++        "value": any(s4[m]["penalty_cases"] for m in s4),
++        "qualification": "proposal-specific: the cost of THIS translation of THIS saved "
++                         "proposal under the stated factory/pruning rules",
++        "penalty_records": {m: s4[m]["penalty_cases"] for m in s4},
++        "denominator": {"conversion_records": len(d4),
++                        "admissible": {m: s4[m]["admissible"] for m in s4}},
++        "prevalence_by_cell": {m: s4[m]["T_longer_than_C"] for m in s4},
++        "effect_T_minus_C_per_input_bit_by_cell": {m: {k: v["mean"] for k, v in
++                                                       s4[m]["T_minus_C"].items()} for m in s4},
++        "absolute_T_minus_C_bits": {m: _quantiles(v) for m, v in absolute.items()},
++        "identity_failures": {m: s4[m]["identity_failures"] for m in s4},
++        "resources": res["D4"]}
++    flags["d4_loss_decomposition_where_portfolio_winner_was_translated"] = {
++        "by_cell": {k: dict(v) for k, v in sorted(loss.items())},
++        "T_minus_C_per_input_bit_among_losses": {k: _quantiles(v)
++                                                 for k, v in sorted(pen_loss.items())},
++        "reading": "H == T: the automatic search reached a description of exactly the "
++                   "translated length, so the whole loss to that baseline equals T - C"}
++    return flags
+--- launch/cli.py
++++ review/cli.py
+@@ -104,11 +104,31 @@
+     return 0
+ 
+ 
+-def _identity() -> dict:
++REPORTING_ADAPTERS = ("analysis.py", "cli.py", "report.py")      # read saved records; never run a job
++
++
++def _identity(scope: str = "full") -> dict:
++    """``full``: everything recorded must match (job launch, D1). ``execution``: every
++    owner, packet, config, design and job-executing adapter must match; a changed
++    reporting adapter is allowed and recorded in identity/reporting_revisions.json."""
+     rec = json.loads((K.RUN_DIR / "identity" / "identity.json").read_text())
+     core, _ = _identity_core()
+-    if K.canonical_sha(core) != rec["identity_sha256"]:
++    if K.canonical_sha(core) == rec["identity_sha256"]:
++        return rec
++    rep = {k for k in core["adapters"] if k.rsplit("/", 1)[-1] in REPORTING_ADAPTERS}
++    strip = lambda d: {k: v for k, v in d.items() if k not in ("adapters",)}  # noqa: E731
++    same_exec = (strip(core) == {k: rec[k] for k in strip(core)} and
++                 {k: v for k, v in core["adapters"].items() if k not in rep} ==
++                 {k: v for k, v in rec["adapters"].items() if k not in rep})
++    if scope != "execution" or not same_exec:
+         raise SystemExit("sources/config/design differ from the recorded identity; refusing")
++    K.write_json(K.RUN_DIR / "identity" / "reporting_revisions.json", {
++        "recorded_identity_sha256": rec["identity_sha256"],
++        "reason": "reporting-only adapters changed after the jobs ran (no job re-executed); "
++                  "the launched bytes are in identity/executable_closure.tar",
++        "changed": {k: {"at_launch": rec["adapters"].get(k), "now": core["adapters"][k]}
++                    for k in sorted(rep) if rec["adapters"].get(k) != core["adapters"][k]},
++        "checked_utc": K.utc()})
+     return rec
+ 
+ 
+@@ -164,7 +184,7 @@
+ 
+ 
+ def cmd_analyse(a) -> int:
+-    _identity()
++    _identity("execution")
+     out = K.RUN_DIR / "analysis"
+     d2ids = K.section_ids("D2")
+     ids2 = sorted(d2ids["targets"] + d2ids["controls"])
+@@ -182,9 +202,21 @@
+     K.write_json(out / "d3_rows.json", d3)
+     K.write_json(out / "d4_rows.json", d4)
+     K.write_json(out / "d4_summary.json", s4)
+-    K.write_json(out / "resources.json", {"D2": A.resource_summary(rec2),
+-                                          "D3": A.resource_summary(rec3),
+-                                          "D4": A.resource_summary(rec4)})
++    res = {"D2": A.resource_summary(rec2), "D3": A.resource_summary(rec3),
++           "D4": A.resource_summary(rec4)}
++    K.write_json(out / "resources.json", res)
++    d1 = json.loads((K.RUN_DIR / "d1" / "d1_cases.json").read_text())
++    flags = A.decision_quantities(d1, d2, s2, d3, d4, s4, res, d2ids["targets"],
++                                  d2ids["controls"], ids4)
++    K.write_json(out / "flags.json", flags)
++    print({k: v["value"] for k, v in flags.items() if "value" in v})
++    from .report import decision
++    dec, numbers = decision(flags, json.loads((K.RUN_DIR / "d1" / "d1_tables.json").read_text()),
++                            s2, s4, res, len(json.loads(
++                                (K.RUN_DIR / "d1" / "d1_checks.json").read_text())["problems"]))
++    K.write_json(K.RUN_DIR / "DECISION.json", dec)
++    K.write_json(out / "key_numbers.json", numbers)
++    print("recommendation:", dec["recommendation"])
+     print(json.dumps({"D2": A.resource_summary(rec2)["status"],
+                       "D3": A.resource_summary(rec3)["status"],
+                       "D4": A.resource_summary(rec4)["status"]}))
+@@ -197,6 +229,10 @@
+     (K.RUN_DIR / "preservation" / "git_status_after.txt").write_text(status)
+     K.write_json(K.RUN_DIR / "preservation" / "preservation_after.json", after)
+     cmp = K.compare_preservation(before, after)
++    allowed = {"files:index-deconvolution/notebooks/README.md"}   # the one appended entry (protocol §2)
++    cmp["allowed_changed"] = sorted(d for d in cmp["differences"] if d in allowed)
++    cmp["unexpected_differences"] = sorted(d for d in cmp["differences"] if d not in allowed)
++    cmp["unchanged"] = not cmp["unexpected_differences"]
+     K.write_json(K.RUN_DIR / "preservation" / "preservation_comparison.json", cmp)
+     print(json.dumps(cmp))
+     return 0 if cmp["unchanged"] else 1

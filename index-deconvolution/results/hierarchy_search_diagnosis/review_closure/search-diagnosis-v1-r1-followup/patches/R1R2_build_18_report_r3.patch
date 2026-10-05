@@ -1,0 +1,163 @@
+--- a/index-deconvolution/notebooks/build_18.py
++++ b/index-deconvolution/notebooks/build_18.py
+@@ -5,6 +5,12 @@
+ results/hierarchy_search_diagnosis/search-diagnosis-v1-r1 (plus the accepted
+ search-confirm-v2-r1 run it diagnoses). Runs from the repository root or the notebook
+ directory.
++
++Reporting revision report-r3 (closure of Codex reviews R1-R3 and R3a-R3b): the computations are the
++retained attempt a1; rows, flags, key numbers and the decision record are read from the
++report-r3 outputs (results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1-followup/
++report-r3/outputs), regenerated from a1's saved records. Output path: $NB18_OUT, default
++next to this builder.
+ 
+ Artifact-only. The notebook READS saved records, archives and tables; it imports only
+ ``hierarchy.decode``/``ledger``/``codes``/``model`` to re-check archive bytes. It runs no
+@@ -13,9 +19,14 @@
+ POST-HOC diagnostics on already inspected data.
+ """
+ import os
+-from _nblib import md, code, write_notebook, BOOTSTRAP
++import sys
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
++_d = HERE
++while not os.path.isfile(os.path.join(_d, "PROTOCOL_order_discovery.md")):
++    _d = os.path.dirname(_d)
++sys.path.insert(0, os.path.join(_d, "notebooks"))               # the shared _nblib owner
++from _nblib import BOOTSTRAP, code, md, write_notebook  # noqa: E402
+ 
+ SETUP = r'''
+ from pathlib import Path
+@@ -37,14 +48,15 @@
+ 
+ RUN = ID_ROOT / "results" / "hierarchy_search_diagnosis" / "search-diagnosis-v1-r1"
+ BASE = ID_ROOT / "results" / "hierarchy_search_v2" / "search-confirm-v2-r1"
+-def load(rel):
+-    return json.loads((RUN / rel).read_text())
+-identity = load("identity/identity.json")
++REV = ID_ROOT / "results" / "hierarchy_search_diagnosis" / "review_closure" / "search-diagnosis-v1-r1-followup" / "report-r3"
++def load(rel, root=RUN):
++    return json.loads((root / rel).read_text())
++identity, revid = load("identity/identity.json"), load("identity.json", REV)
+ d1t, d1c, d1k = load("d1/d1_tables.json"), load("d1/d1_cases.json"), load("d1/d1_checks.json")
+-d2, s2 = load("analysis/d2_rows.json"), load("analysis/d2_summary.json")
+-d3, d4, s4 = load("analysis/d3_rows.json"), load("analysis/d4_rows.json"), load("analysis/d4_summary.json")
+-flags, res = load("analysis/flags.json"), load("analysis/resources.json")
+-decision = load("DECISION.json")
++d2, s2 = load("outputs/d2_rows.json", REV), load("outputs/d2_summary.json", REV)
++d3, d4, s4 = load("outputs/d3_rows.json", REV), load("outputs/d4_rows.json", REV), load("outputs/d4_summary.json", REV)
++flags, res = load("outputs/flags.json", REV), load("outputs/resources.json", REV)
++decision, kn = load("outputs/DECISION.json", REV), load("outputs/key_numbers.json", REV)
+ inputs = {r["case_id"]: r for r in map(json.loads, (RUN / "identity/input_manifest.jsonl").read_text().splitlines())}
+ def sha(b):
+     return hashlib.sha256(b).hexdigest()
+@@ -59,6 +71,8 @@
+ print("run:", identity["run_id"], "| evidence role:", identity["evidence_role"])
+ print("identity:", identity["identity_sha256"][:16], "| baseline freeze:", identity["baseline_freeze_sha256"][:16])
+ print("membership:", identity["membership"])
++print("reporting revision:", revid["reporting_revision"], "| identity:", revid["identity_sha256"][:16],
++      "| computations:", revid["compute_attempt"], revid["compute_identity_sha256"][:16])
+ '''.strip()
+ 
+ cells = [
+@@ -79,6 +93,13 @@
+ Everything here is **post-hoc** on already inspected data. No result below is a new
+ confirmation, a superiority claim or a causal identification. Every number is printed
+ by a cell from a saved artifact.
++
++**Corrected reporting revision `report-r3`.** The computations are the retained attempt
++`a1`; the tables, flags and decision are regenerated from its saved records by a repaired
++reporting pipeline (Codex review R1–R3). Two readings of the first version are withdrawn:
++equal length $H=T$ is not the same proposal, and the distance of supplied cuts to the cuts
++of B's *returned* archive is not a measure of which cuts B proposes. The first version of
++this notebook is kept unchanged as a historical artifact.
+ """),
+ code(BOOTSTRAP),
+ code(SETUP),
+@@ -140,11 +161,12 @@
+         print(f"   {m:<14}", v)
+ """),
+ md(r"""
+-## 3. D2 — more boundary budget barely matters
++## 3. D2 — the B0→B8 cap increase changed one output
+ 
+ B0 is the frozen boundary stage; B8 has eight times the root-trial, leaf-cache and
+ leaf-length caps and nothing else changed. B0 must reproduce the saved B telemetry
+-exactly before B8 means anything.
++exactly before B8 means anything. The result concerns this one cap increase on these
++strings; it does not exclude resource limits under other searches.
+ """),
+ code(r"""
+ for g in ("targets", "controls"):
+@@ -154,7 +176,8 @@
+ f = flags["budget_opportunity_observed"]
+ print("B0 cap-hit strings:", f["B0_cap_hit_strings"])
+ print("witness detail:", f["witnesses"])
+-print("controls where B8 differs from B0:", f["control_behaviour"]["B8_differs_from_B0"])
++print("controls where B8 differs from B0:", f["control_behaviour"]["B8_differs_from_B0"],
++      "of", f["control_behaviour"]["comparable_controls"], "comparable controls")
+ """),
+ code(r"""
+ x = np.array([d2[c]["B0_bits"] / d2[c]["n"] for c in d2]); y = np.array([d2[c]["B8_bits"] / d2[c]["n"] for c in d2])
+@@ -212,8 +235,11 @@
+ print(f"{'cell':<24}" + "".join(f"{k[:22]:>24}" for k in keys))
+ for c, v in fb["by_cell"].items():
+     print(f"{c:<24}" + "".join(f"{v.get(k, 0):>24}" for k in keys))
+-print("descriptive: supplied cuts in the best strict subset with / without a B0 cut within 8 bits:",
+-      fb["descriptive_B0_cut_location"])
++prox = fb["descriptive_returned_B0_cut_proximity"]
++print("descriptive, post hoc -- proximity to the cuts of B0's RETURNED archive (not proposal coverage):")
++print("   strings:", prox["strings"], "| supplied cuts with a returned B0 cut within 8 bits:",
++      prox["supplied_cut_with_returned_B0_cut_within_8_bits"], "| without:",
++      prox["supplied_cut_without_returned_B0_cut_within_8_bits"])
+ """),
+ md(r"""
+ ## 5. D4 — writing the saved baseline proposals in HID
+@@ -222,6 +248,8 @@
+ factory and serializer, and decoded. With $H$ the saved full-HID bits, $T$ the
+ translation and $C$ the saved baseline, $H-C=(H-T)+(T-C)$ holds exactly. $H>T$ would be a
+ same-language description the search missed; $T>C$ is this proposal's cost in HID.
++$H=T$ compares **lengths**: there $H-C=T-C$ exactly, but the saved full archive need not
++be the translated proposal, so byte identity is counted separately.
+ """),
+ code(r"""
+ _n = 0
+@@ -255,6 +283,9 @@
+     tot.update(v)
+ print("strings where the translated method won the portfolio:", tot["portfolio_winner_period"] + tot["portfolio_winner_pair_grammar"],
+       "| HID loses:", tot["hid_loses"], "| of which H == T:", tot["hid_loses_and_H_eq_T"], "| H < T:", tot["hid_loses_and_H_lt_T"])
++print("equal length H == T:", tot["hid_loses_and_H_eq_T"], "| byte-identical:", tot["hid_loses_and_H_eq_T_identical_bytes"],
++      "| same length, different bytes:", tot["hid_loses_and_H_eq_T_different_bytes"],
++      "| translation unavailable:", tot["hid_loses_translation_unavailable"])
+ """),
+ md(r"""
+ ## 6. Flags and recommendation
+@@ -267,6 +298,8 @@
+     if "value" in v:
+         print(f"{k:<45} {v['value']}")
+ print()
++print("evidence: complete", decision["complete"], "| valid", decision["valid"],
++      "| unavailable", decision["gates"]["unavailable"])
+ print("recommendation:", decision["recommendation"])
+ for line in decision["basis"]:
+     print(" -", line)
+@@ -282,9 +315,15 @@
+   meets the same barrier.
+ * **D4 is proposal-specific.** $T-C$ is the cost of this translation of this saved
+   archive. It does not show that no better HID description exists, and $H-T$, $T-C$ are
+-  not a causal decomposition of the accepted primary estimate.
+-* **D2 is boundary-only.** B8 is a probe of caps, not a deployable full-wrapper encoder.
++  not a causal decomposition of the accepted primary estimate. $H=T$ is equality of
++  length, not of proposal, and gives no exact prediction of the full method's $H$ under a
++  changed representation: the incumbent, proposals or search path can differ.
++* **Returned cuts are not proposed cuts.** The proximity count in §4 reads the cut tuple
++  of the archive B0 returned. A cut may have been proposed and rejected; the statistic
++  cannot rank proposal location, accepted path, refinement and leaf construction as causes.
++* **D2 is boundary-only.** B8 is a probe of one cap increase, not a deployable
++  full-wrapper encoder, and not a universal exclusion of resource limits.
+ """),
+ ]
+ 
+-write_notebook(cells, os.path.join(HERE, "18_hierarchy_search_diagnosis.ipynb"))
++write_notebook(cells, os.environ.get("NB18_OUT", os.path.join(HERE, "18_hierarchy_search_diagnosis.ipynb")))

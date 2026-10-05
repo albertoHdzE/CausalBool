@@ -1,0 +1,3180 @@
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/benchmark.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/benchmark.py
+--- index-deconvolution/hierarchy/benchmark.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/benchmark.py	2026-10-04 07:16:52
+@@ -118,8 +118,8 @@
+             return {"kind": "hid", "search_config": cfg.__dict__ | {}}
+     else:
+         spec = study.method(method)
+-        if spec.kind == "hid_v2":
+-            return {"kind": "hid_v2", "search_config": spec.config.as_dict()}
++        if spec.kind in ("hid_v2", "hid_v3a"):
++            return {"kind": spec.kind, "search_config": spec.config.as_dict()}
+         if spec.kind == "portfolio":
+             return {"kind": "portfolio", "constituents": list(study.baselines)}
+     return {"kind": "baseline", "method": method,
+@@ -132,7 +132,7 @@
+     if _is_legacy(study):
+         if method.startswith("hid_"):
+             return ABLATIONS[method[4:]].sha256()
+-    elif study.method(method).kind == "hid_v2":
++    elif study.method(method).kind in ("hid_v2", "hid_v3a"):
+         return study.method(method).config.sha256()
+     if method == "baseline_best":
+         return sha256_bytes(canonical([method_config(m) for m in BASELINE_METHODS]))
+@@ -332,9 +332,15 @@
+         from .study import method_registry
+         spec = next(m for m in method_registry(registry) if m.name == method)
+         kind = spec.kind
+-    if kind == "hid_v2":
+-        from .search_v2 import infer_v2
+-        res = infer_v2(bits, spec.config)
++    if kind in ("hid_v2", "hid_v3a"):
++        if kind == "hid_v3a":                      # every v3a HID job writes its B trace
++            from .search_v3a import infer_v3a
++            res, side = infer_v3a(bits, spec.config, trace=True)
++            atomic_write(Path(trace_sidecar_path(out_path)),
++                         json.dumps(side, sort_keys=True).encode())
++        else:
++            from .search_v2 import infer_v2
++            res = infer_v2(bits, spec.config)
+         archive = res.archive
+         tele = res.telemetry
+         info = {"mode": "literal" if archive[4] == C.CODEC_LITERAL else "hid",
+@@ -369,6 +375,34 @@
+ # Parent: case execution
+ # ---------------------------------------------------------------------------
+ 
++def trace_sidecar_path(out_path) -> str:
++    """Where a tracing worker writes its stage-B trace, next to its archive output."""
++    return f"{out_path}.trace.json"
++
++
++def _store_trace(job, row: dict, d: Path) -> None:
++    """Move a HID worker's trace sidecar into ``traces/`` and link it from the row.
++
++    ``complete``: an ``ok`` row with its sidecar; ``unavailable_watchdog``: the worker
++    was killed (no trace is fabricated); ``missing``: an ``ok`` row without a sidecar,
++    which validation treats as an engineering failure."""
++    side = Path(trace_sidecar_path(job.tmp))
++    row["trace_path"] = row["trace_sha256"] = None
++    if side.exists() and row["status"] == "ok":
++        data = side.read_bytes()
++        rel = f"traces/{job.case.case_id}.{job.method}.json"
++        atomic_write(d / rel, data)
++        row["trace_path"], row["trace_sha256"] = rel, sha256_bytes(data)
++        row["trace_status"] = "complete"
++    elif row["status"] in ("timeout_raw", "rss_limit_raw"):
++        row["trace_status"] = "unavailable_watchdog"
++    else:
++        row["trace_status"] = "missing" if row["status"] == "ok" else f"unavailable_{row['status']}"
++    try:
++        side.unlink()
++    except FileNotFoundError:
++        pass
++
+ def store_archive(d: Path, archive: bytes) -> tuple[str, str]:
+     h = sha256_bytes(archive)
+     rel = f"archives/{h[:2]}/{h}.isd"
+@@ -527,6 +561,8 @@
+         row["archive_path"], row["archive_sha256"] = rel, h
+         row["archive_bits"] = 8 * len(archive)
+         row["selected_codec_id"] = archive[4]
++    if hid and not _is_legacy(study) and study.trace_sidecars:
++        _store_trace(job, row, d)
+     for p in (job.tmp, job.err):
+         try:
+             p.unlink()
+@@ -652,7 +688,8 @@
+             if case_rows_path(d, c).exists() and not resume:
+                 raise RuntimeError(f"rows exist for {c.case_id}; use --resume")
+             pending_cases.append(c)
+-    queue = [(c, m) for c in pending_cases for m in encode_methods]
++    queue = [(c, m) for c in pending_cases
++             for m in (encode_methods if legacy else study.job_methods(c))]
+     per_case: dict[str, dict] = {c.case_id: {} for c in pending_cases}
+     arcs: dict[str, dict] = {c.case_id: {} for c in pending_cases}
+     by_id = {c.case_id: c for c in pending_cases}
+@@ -680,8 +717,11 @@
+                 if len(per_case[cid]) == len(encode_methods):
+                     case = by_id[cid]
+                     rows = per_case.pop(cid)
+-                    rows["baseline_best"] = portfolio_row(case, rows, arcs.pop(cid), run_id,
+-                                                          fsha, raw_bits, study)
++                    if "baseline_best" in all_methods:
++                        rows["baseline_best"] = portfolio_row(case, rows, arcs.pop(cid), run_id,
++                                                              fsha, raw_bits, study)
++                    else:
++                        arcs.pop(cid)
+                     out = [rows[m] for m in all_methods]
+                     atomic_write(case_rows_path(d, case),
+                                  json.dumps(out, sort_keys=True).encode())
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/diagnostics_v2.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/diagnostics_v2.py
+--- index-deconvolution/hierarchy/diagnostics_v2.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/diagnostics_v2.py	2026-10-04 07:12:18
+@@ -18,6 +18,7 @@
+ 
+ import hashlib
+ import json
++import statistics
+ import time
+ from collections import defaultdict
+ from pathlib import Path
+@@ -95,6 +96,33 @@
+             for k, v in sorted(out.items())}
+ 
+ 
++def boundary_gap_summary(items) -> dict:
++    """Per role|family|base_length cell: counts and signed ``hid_full`` gap summaries.
++
++    ``gap_median`` is the conventional sample median (``statistics.median``): the middle
++    value for an odd count and the mean of the two middle values for an even count;
++    ``None`` for a cell without gaps. Units are bits per input bit.
++    """
++    summary = defaultdict(lambda: {"strings": 0, "available": 0, "gaps": []})
++    for it in items:
++        k = f"{it['role']}|{it['family']}|{it['base_length']}"
++        summary[k]["strings"] += 1
++        if it.get("available"):
++            summary[k]["available"] += 1
++            if "gap_hid_full_per_input_bit" in it:
++                summary[k]["gaps"].append(it["gap_hid_full_per_input_bit"])
++    agg = {}
++    for k, v in sorted(summary.items()):
++        g = sorted(v["gaps"])
++        agg[k] = {"strings": v["strings"], "available": v["available"],
++                  "gap_mean": sum(g) / len(g) if g else None,
++                  "gap_median": statistics.median(g) if g else None,
++                  "automatic_shorter_than_reference": sum(1 for x in g if x < 0),
++                  "automatic_longer_than_reference": sum(1 for x in g if x > 0),
++                  "ties": sum(1 for x in g if x == 0)}
++    return agg
++
++
+ def boundary_references(study, run_id: str, d: Path, index: dict, roles) -> dict:
+     out_dir = d / "diagnostics" / "boundary_reference"
+     items = []
+@@ -151,23 +179,7 @@
+             if full is None:
+                 item["note"] = "hid_full row absent"
+             items.append(item)
+-    summary = defaultdict(lambda: {"strings": 0, "available": 0, "gaps": []})
+-    for it in items:
+-        k = f"{it['role']}|{it['family']}|{it['base_length']}"
+-        summary[k]["strings"] += 1
+-        if it.get("available"):
+-            summary[k]["available"] += 1
+-            if "gap_hid_full_per_input_bit" in it:
+-                summary[k]["gaps"].append(it["gap_hid_full_per_input_bit"])
+-    agg = {}
+-    for k, v in sorted(summary.items()):
+-        g = sorted(v["gaps"])
+-        agg[k] = {"strings": v["strings"], "available": v["available"],
+-                  "gap_mean": sum(g) / len(g) if g else None,
+-                  "gap_median": g[len(g) // 2] if g else None,
+-                  "automatic_shorter_than_reference": sum(1 for x in g if x < 0),
+-                  "automatic_longer_than_reference": sum(1 for x in g if x > 0),
+-                  "ties": sum(1 for x in g if x == 0)}
++    agg = boundary_gap_summary(items)
+     (out_dir).mkdir(parents=True, exist_ok=True)
+     (out_dir / "references.json").write_text(json.dumps(items, indent=1) + "\n")
+     return {"label": "EVALUATION-ONLY supplied-boundary feasible references; truth used only "
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/freeze_v2.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/freeze_v2.py
+--- index-deconvolution/hierarchy/freeze_v2.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/freeze_v2.py	2026-10-04 07:23:48
+@@ -48,7 +48,48 @@
+                        "index-deconvolution/experiments/audit_search_v2_primary.py")
+ RESERVED_MARKERS = ("search_v2_confirmation", "search_v2_transfer", "search_v2_stress")
+ 
++V3A_PACKET = "index-deconvolution/protocols/hierarchy_search_v3a/"
++# Per-study freeze profile, selected by explicit study name (never by a name prefix):
++# protocol files, extra executable closure outside the package, informational globs,
++# reserved namespaces and the analysis plan's owner.
++PROFILES = {
++    "search-v2": {"protocol": PROTOCOL_FILES, "extra_closure": (),
++                  "informational": INFORMATIONAL_GLOBS, "reserved": RESERVED_MARKERS,
++                  "analysis_plan": ("report_v2", "ANALYSIS_PLAN_V2")},
++    "search-v3a": {
++        "protocol": ("index-deconvolution/PROTOCOL_hierarchy_search_v3a.md",
++                     "index-deconvolution/KICKOFF_hierarchy_search_v3a.md",
++                     *(V3A_PACKET + f for f in ("SEARCH.md", "BENCHMARK.md", "ACCEPTANCE.md",
++                                                "DESIGN_REVIEW.md", "contract.json",
++                                                "intended_cases.json", "DELEGATION_MANIFEST.json",
++                                                "INITIAL_SOURCE_STATE.json",
++                                                "INTEGRATION_CHECK.json", "PACKET_CHECKS.json",
++                                                "check_packet.py")),
++                     "index-deconvolution/protocols/hierarchy_v1/WIRE_FORMAT.md",
++                     "index-deconvolution/protocols/hierarchy_search_v2/SEARCH.md",
++                     "index-deconvolution/protocols/hierarchy_search_v2/BENCHMARK.md"),
++        "extra_closure": ("index-deconvolution/experiments/search_v3a/__init__.py",
++                          "index-deconvolution/experiments/search_v3a/audit.py",
++                          "index-deconvolution/experiments/search_v3a/development.py",
++                          "index-deconvolution/experiments/search_v3a/ledger.py",
++                          "index-deconvolution/experiments/search_v3a/preserve.py",
++                          "index-deconvolution/experiments/search_v3a/prospective.py",
++                          "index-deconvolution/experiments/search_diagnosis/__init__.py",
++                          "index-deconvolution/experiments/search_diagnosis/common.py"),
++        "informational": ("index-deconvolution/hierarchy/tests/*.py",
++                          "index-deconvolution/hierarchy/*.md"),
++        "reserved": ("search_v3a_confirmation", "search_v3a_transfer", "search_v3a_stress",
++                     "search_v3a_controls"),
++        "analysis_plan": ("report_v3a", "ANALYSIS_PLAN_V3A")},
++}
+ 
++
++def profile(study) -> dict:
++    """The freeze profile of the study's method registry (fixture studies included)."""
++    from .study import V3A_REGISTRIES
++    return PROFILES["search-v3a" if study.registry in V3A_REGISTRIES else "search-v2"]
++
++
+ def sha_file(p: Path) -> str:
+     return hashlib.sha256(p.read_bytes()).hexdigest()
+ 
+@@ -57,10 +98,11 @@
+     return json.dumps(obj, sort_keys=True, separators=(",", ":"), default=str).encode()
+ 
+ 
+-def closure_files() -> list[str]:
++def closure_files(study=None) -> list[str]:
+     pkg = sorted(p.relative_to(REPO).as_posix()
+                  for p in (ID_ROOT / "hierarchy").glob("*.py"))
+-    return pkg + list(SHARED_OWNERS)
++    extra = list(profile(study)["extra_closure"]) if study is not None else []
++    return pkg + list(SHARED_OWNERS) + extra
+ 
+ 
+ PROBE = r"""
+@@ -84,14 +126,14 @@
+ """
+ 
+ 
+-def import_probe() -> dict:
++def import_probe(study=None) -> dict:
+     env = dict(os.environ, PYTHONPATH=f"{ID_ROOT}{os.pathsep}{REPO / 'src'}")
+     out = subprocess.run([sys.executable, "-c", PROBE, str(REPO)], cwd=REPO, env=env,
+                          capture_output=True, text=True, check=True)
+     allfiles = json.loads(out.stdout)
+     third = [f for f in allfiles if f.startswith("venv/")]
+     loaded = [f for f in allfiles if not f.startswith("venv/")]
+-    closure = set(closure_files())
++    closure = set(closure_files(study))
+     return {"loaded_repository_files": loaded,
+             "third_party_files_loaded": len(third),
+             "third_party_identity": "venv packages; versions recorded under environment",
+@@ -99,9 +141,9 @@
+             "closure_not_loaded": sorted(closure - set(loaded))}
+ 
+ 
+-def informational_files() -> list[str]:
++def informational_files(study=None) -> list[str]:
+     out = set()
+-    for g in INFORMATIONAL_GLOBS:
++    for g in (profile(study)["informational"] if study is not None else INFORMATIONAL_GLOBS):
+         out.update(p.relative_to(REPO).as_posix() for p in REPO.glob(g))
+     return sorted(out)
+ 
+@@ -116,12 +158,12 @@
+                          or p.parent.name in ("rows", "logs", "archives"))
+             if p.is_file() and generated and p.suffix in (".json", ".jsonl", ".log"):
+                 text = p.read_text(errors="replace")
+-                if any(m in text for m in RESERVED_MARKERS):
++                if any(m in text for m in profile(study)["reserved"]):
+                     hits.append(str(p))
+     present = [n for n in ("rows", "cases.jsonl", "corpus_manifest.jsonl")
+                if (run_dir / n).exists()]
+     return {"files_mentioning_reserved_namespaces": hits, "run_artifacts_present": present,
+-            "reserved_namespaces": list(RESERVED_MARKERS),
++            "reserved_namespaces": list(profile(study)["reserved"]),
+             "clean": not hits and not present,
+             "scope": "every generated-data artefact (corpus manifests, cases.jsonl, rows, "
+                      "logs) under the study result root; documentation that names the "
+@@ -153,7 +195,7 @@
+ 
+ def dev_fingerprint(study) -> str:
+     """Identity of the current code/configuration for unfrozen development rows."""
+-    blob = {"sources": {p: sha_file(REPO / p) for p in closure_files()},
++    blob = {"sources": {p: sha_file(REPO / p) for p in closure_files(study)},
+             "methods": {m: v["sha256"] for m, v in method_configs(study).items()}}
+     return "dev:" + hashlib.sha256(canonical(blob)).hexdigest()
+ 
+@@ -161,14 +203,17 @@
+ def build(study, run_id: str, prefreeze_dir: Path | None) -> tuple[dict, bytes, str]:
+     from . import benchmark as B
+     from . import corpus, study_corpus
+-    from .report_v2 import ANALYSIS_PLAN_V2
++    import importlib
++    prof = profile(study)
++    plan = getattr(importlib.import_module(f".{prof['analysis_plan'][0]}", __package__),
++                   prof["analysis_plan"][1])
+     run_dir = study.run_dir(run_id)
+-    probe = import_probe()
++    probe = import_probe(study)
+     if probe["outside_closure"]:
+         raise RuntimeError(f"import probe loaded files outside the closure: {probe['outside_closure']}")
+-    src = {p: sha_file(REPO / p) for p in closure_files()}
+-    proto = {p: sha_file(REPO / p) for p in PROTOCOL_FILES}
+-    info = {p: sha_file(REPO / p) for p in informational_files()}
++    src = {p: sha_file(REPO / p) for p in closure_files(study)}
++    proto = {p: sha_file(REPO / p) for p in prof["protocol"]}
++    info = {p: sha_file(REPO / p) for p in informational_files(study)}
+     prefreeze = {}
+     if prefreeze_dir is not None and prefreeze_dir.exists():
+         for p in sorted(prefreeze_dir.rglob("*")):
+@@ -195,7 +240,7 @@
+                                       "{replicate}|{stream}')",
+                       "corpus_sha256": sha_file(Path(corpus.__file__)),
+                       "study_corpus_sha256": sha_file(Path(study_corpus.__file__))},
+-        "analysis_plan": ANALYSIS_PLAN_V2,
++        "analysis_plan": plan,
+         "resource_policy": dict(study.resources.as_dict(),
+                                 rss_method=B.RSS_METHOD,
+                                 worker="python -S -m hierarchy.benchmark --worker METHOD OUT "
+@@ -259,7 +304,7 @@
+                 problems.append(f"{label} missing since freeze: {p}")
+             elif sha_file(path) != h:
+                 problems.append(f"{label} changed since freeze: {p}")
+-    extra = sorted(set(closure_files()) - set(fr.get("source_sha256", {})))
++    extra = sorted(set(closure_files(study)) - set(fr.get("source_sha256", {})))
+     for p in extra:
+         problems.append(f"source added to the closure since freeze: {p}")
+     now = method_configs(study)
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/report_v3a.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/report_v3a.py
+--- index-deconvolution/hierarchy/report_v3a.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/report_v3a.py	2026-10-04 07:26:40
+@@ -0,0 +1,517 @@
++"""HID-search-v3a analysis from saved rows, archives and trace sidecars (BENCHMARK.md 4-5).
++
++A study-specific adapter over the shared report owner: ``report.design_units``,
++``report.unit_value``, ``report.weighted_mean``, ``report.stratified_bootstrap`` (with
++its ``cell_index_draws``), ``report.percentile_interval`` and ``report.verdict`` are
++``report``'s; nothing here re-implements them. No inference runs here.
++
++Primary: s(x) = (bits(hid_full) - bits(hid_refine4)) / n on the six target cells
++(role, family, base_length), mean of base/ragged per unit, of the 20 units per cell,
++then of the six cells equally; 10,000 draws, seed 55001, two-sided 99% percentile.
++Decision: INVALID, then INCOMPLETE (any declared job absent or not_run), then
++SUPPORTED (lower > 0), HARMFUL (upper < 0), INCONCLUSIVE otherwise.
++
++Trace checks recompute the stage-B charges, cache hits, outcomes and summary of every
++sidecar from its own events and compare them with the row's telemetry.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++from collections import defaultdict
++from pathlib import Path
++
++import numpy as np
++
++from . import report as R
++from . import validation as V
++from .validation import HID_DEPLOYED
++
++PRIMARY_ROLES = ("boundary", "boundary_large", "boundary_stress")
++CONTROL_ROLE = "controls"
++HID = ("hid_full", "hid_refine4")
++REPS, SEED, LEVEL = 10000, 55001, 0.99
++TOLERANCE_BITS = 8
++OUTCOMES = ("new_admissible", "new_graph_rejection", "cached_admissible",
++            "cached_graph_rejection", "cap_blocked")
++CHARGES = ("root_trials", "leaf_cache", "leaf_length_charge")
++VERDICT_LABEL = {"supported": "SUPPORTED", "not_supported": "HARMFUL",
++                 "inconclusive": "INCONCLUSIVE"}
++
++ANALYSIS_PLAN_V3A = {
++    "primary": {"roles": list(PRIMARY_ROLES), "cells": "(role, family, base_length), six",
++                "per_string": "(bits(hid_full) - bits(hid_refine4)) / actual_n_bits",
++                "positive_means": "k = 4 saves bits",
++                "weighting": ["base_ragged_pair_mean", "within_cell_unit_mean",
++                              "equal_six_cell_mean"],
++                "bootstrap": {"owner": "hierarchy.report.stratified_bootstrap", "draws": REPS,
++                              "seed": SEED, "rng": "numpy.random.default_rng",
++                              "cell_order": "lexicographic (role, family, base_length)",
++                              "unit_order": "replicate ascending",
++                              "interval": "two-sided 99% percentile, numpy linear quantiles"},
++                "hid_fallback": "validated raw archive cost with explicit timeout_raw/rss_limit_raw",
++                "decision_precedence": ["INVALID", "INCOMPLETE", "SUPPORTED if lower > 0",
++                                        "HARMFUL if upper < 0", "INCONCLUSIVE otherwise"]},
++    "descriptive_only": ["six cell means and signed counts", "archive-size distributions",
++                         "k=4 and k=1 versus portfolio where all nine constituents exist",
++                         "control outcomes", "status, stage, work, wall, RSS",
++                         "proposed/evaluated/returned trace counts"],
++    "other_intervals": False,
++    "hid_deployed_statuses": list(HID_DEPLOYED),
++}
++
++
++# ---------------------------------------------------------------------------
++# Trace sidecars
++# ---------------------------------------------------------------------------
++
++def load_trace(d: Path, row: dict | None) -> tuple[dict | None, str]:
++    if row is None:
++        return None, "row_absent"
++    st = row.get("trace_status")
++    if st != "complete":
++        return None, st or "missing"
++    p = d / row["trace_path"]
++    if not p.is_file():
++        return None, "file_missing"
++    data = p.read_bytes()
++    if hashlib.sha256(data).hexdigest() != row.get("trace_sha256"):
++        return None, "hash_mismatch"
++    return json.loads(data), "complete"
++
++
++def trace_problems(side: dict, row: dict) -> list[str]:
++    """Every sidecar quantity recomputed from its events, against the row telemetry."""
++    out = []
++    if side.get("config_sha256") != row.get("config_sha256"):
++        out.append("config hash differs from the row")
++    if row.get("status") == "ok" and side.get("archive_sha256") != row.get("archive_sha256"):
++        out.append("selected archive differs from the row")
++    tele = (row.get("search_counters") or {}).get("stages", {}).get("B")
++    inv = side.get("boundary_invocations") or []
++    if tele is None or len(inv) != 1:
++        return out + [f"expected one B invocation, got {len(inv)} (telemetry B: {tele is not None})"]
++    t = inv[0]
++    ev, c = t["events"], tele["counts"]
++    if t.get("event_count") != len(ev) or len(ev) > t.get("max_events", 0):
++        out.append("event count inconsistent or above the bound")
++    if [e.get("position") for e in ev] != list(range(len(ev))):
++        out.append("event positions are not the call order 0..n-1")
++    if any(e.get("outcome") not in OUTCOMES for e in ev):
++        out.append("unknown outcome")
++    new = sum(e["outcome"].startswith("new_") for e in ev)
++    cap = [i for i, e in enumerate(ev) if e["outcome"] == "cap_blocked"]
++    done = [e for e in ev if e["outcome"] != "cap_blocked"]
++    if new != c["root_trials"]:
++        out.append(f"new evaluations {new} != root_trials {c['root_trials']}")
++    if sum(e["outcome"] == "new_graph_rejection" for e in ev) != c["graph_rejections"]:
++        out.append("new graph rejections differ from the counter")
++    for ph, key in (("coarse", "coarse_trials"), ("refine", "refine_trials")):
++        if sum(e["phase"] == ph for e in done) != c[key]:
++            out.append(f"{ph} completed requests differ from {key}")
++    if sum(e["phase"] == "initial" for e in ev) != 1 or ev[0]["phase"] != "initial":
++        out.append("the first event is not the single initial request")
++    if bool(cap) != bool(tele.get("cap_hit")) or (cap and cap != [len(ev) - 1]):
++        out.append("cap-blocked events do not match the cap exit")
++    for a, b in zip(ev, ev[1:]):
++        if a["post"] != b["pre"]:
++            out.append(f"charges change between events {a['position']} and {b['position']}")
++            break
++    for e in ev:
++        if e["cache_hit"] and e["outcome"] != "cap_blocked" and e["pre"] != e["post"]:
++            out.append(f"cached event {e['position']} changed a charge")
++            break
++        if e["cache_hit"] != e["outcome"].startswith("cached_") and e["outcome"] != "cap_blocked":
++            out.append(f"event {e['position']} outcome disagrees with cache_hit")
++            break
++    if ev and ev[-1]["post"] != {k: c[k] for k in CHARGES}:
++        out.append("final charges differ from the counters")
++    rounds = max((e["round"] for e in ev), default=0)
++    if rounds != c["rounds"]:
++        out.append(f"last event round {rounds} != rounds {c['rounds']}")
++    s = t["summary"]
++    kinds = [m["kind"] for m in s]
++    if not s or kinds[-1] != "final" or (tele.get("archive_bits") is not None and kinds[0] != "initial"):
++        out.append("summary is not initial ... final")
++    elif sum(k == "commit" for k in kinds) != c["commits"]:
++        out.append("summary commits differ from the counter")
++    else:
++        fin = s[-1]
++        if fin["cuts"] != tele["cuts"] or (fin["archive_bytes"] is not None
++                                           and 8 * fin["archive_bytes"] != tele["archive_bits"]):
++            out.append("final summary differs from the B output")
++    return out
++
++
++def _covered(supplied, cuts, tol: int) -> int:
++    return sum(1 for s in supplied if any(abs(s - c) <= tol for c in cuts))
++
++
++def trace_summary(d: Path, row: dict | None, supplied=None, tol: int = TOLERANCE_BITS) -> dict:
++    """Counts of one HID row's trace; supplied-cut coverage only when ``supplied`` is
++    given (development only: never on prospective data)."""
++    side, st = load_trace(d, row)
++    out = {"status": st}
++    if side is None:
++        return out
++    out["problems"] = trace_problems(side, row)
++    inv = side["boundary_invocations"][0]
++    ev = inv["events"]
++    proposed = sorted({e["cut"] for e in ev if "cut" in e})
++    evaluated = sorted({e["cut"] for e in ev if "cut" in e and e["outcome"] != "cap_blocked"})
++    fin = inv["summary"][-1]
++    returned = list(fin["cuts"])
++    out.update({"events": len(ev), "proposed_cuts": len(proposed),
++                "evaluated_cuts": len(evaluated),
++                "new_serialized_admissible": sum(e["outcome"] == "new_admissible" for e in ev),
++                "graph_rejections": sum(e["outcome"].endswith("graph_rejection") for e in ev),
++                "cached_requests": sum(e["outcome"].startswith("cached_") for e in ev),
++                "cap_blocked": sum(e["outcome"] == "cap_blocked" for e in ev),
++                "stop_reason": fin.get("stop_reason"), "final_source": fin.get("source"),
++                "commits": sum(m["kind"] == "commit" for m in inv["summary"]),
++                "returned_cuts": returned})
++    if supplied is not None:
++        sup = sorted(set(supplied))
++        cov = {}
++        for kind, cuts in (("proposed", proposed), ("evaluated", evaluated),
++                           ("returned", returned)):
++            cov[kind] = ({"numerator": _covered(sup, cuts, tol), "denominator": len(sup)}
++                         if sup else {"numerator": None, "denominator": 0,
++                                      "note": "no supplied cuts: unavailable"})
++        out["supplied_coverage"] = cov
++    return out
++
++
++def trace_checks(index: dict, run_dir: Path, hid_methods) -> dict:
++    """Validation hook: every ``ok`` HID row has a complete, consistent trace."""
++    invalid, counts = [], defaultdict(int)
++    for cid, have in sorted(index.items()):
++        for m in hid_methods:
++            r = have.get(m)
++            if r is None or r.get("status") in (None, "not_run", "error"):
++                continue
++            side, st = load_trace(run_dir, r)
++            counts[st] += 1
++            if r["status"] == "ok":
++                if side is None:
++                    invalid.append(f"{cid}:{m} trace {st} on an ok HID row")
++                    continue
++                invalid += [f"{cid}:{m} trace: {p}" for p in trace_problems(side, r)]
++            elif st != "unavailable_watchdog":
++                invalid.append(f"{cid}:{m} {r['status']} row has trace status {st}")
++    return {"invalid": invalid, "trace_status_counts": dict(counts)}
++
++
++# ---------------------------------------------------------------------------
++# Per-string quantities and the primary contrast
++# ---------------------------------------------------------------------------
++
++def _deployed(r) -> bool:
++    return r is not None and r.get("status") in HID_DEPLOYED and r.get("archive_bits") is not None
++
++
++def saving(methods: dict) -> float | None:
++    a, b = methods.get("hid_full"), methods.get("hid_refine4")
++    if not _deployed(a) or not _deployed(b):
++        return None
++    return (a["archive_bits"] - b["archive_bits"]) / a["n_bits"]
++
++
++def vs_portfolio(method: str):
++    def fn(methods: dict):
++        a, p = methods.get(method), methods.get("baseline_best")
++        if not _deployed(a) or p is None or p.get("status") != "ok":
++            return None
++        return (p["archive_bits"] - a["archive_bits"]) / a["n_bits"]
++    return fn
++
++
++def role_cells(index, design, roles, fn) -> tuple[dict, list, int]:
++    """({(role, family, base_length): array(units x 1)}, unavailable units, required)."""
++    cells, unavailable, required = defaultdict(list), [], 0
++    for role in roles:
++        if role not in design["splits"]:
++            continue
++        spec = design["splits"][role]
++        for (fam, bl), label, pair in R.design_units(index, design, role, spec["families"]):
++            required += 1
++            v = R.unit_value(pair, fn)
++            if v is None:
++                unavailable.append(label)
++            else:
++                cells[(role, fam, bl)].append([v])
++    return ({k: np.asarray(v, dtype=float) for k, v in sorted(cells.items())},
++            unavailable, required)
++
++
++def decision(validation: dict, design: dict) -> dict:
++    index = validation["_index"]
++    cells, unavailable, required = role_cells(index, design, PRIMARY_ROLES, saving)
++    out = {"required_units": required, "available_units": required - len(unavailable),
++           "engineering_valid": bool(validation["engineering_valid"]),
++           "complete": bool(validation["complete"]),
++           "cells": {"|".join(map(str, k)): {"units": int(m.shape[0]),
++                                            "mean": float(m[:, 0].mean())}
++                     for k, m in cells.items()}}
++    if not out["engineering_valid"]:
++        out.update(verdict="INVALID", reason="engineering invalidity; no inferential verdict")
++    elif not out["complete"] or unavailable or len(cells) != 6 or \
++            any(m.shape[0] != 20 for m in cells.values()):
++        out.update(verdict="INCOMPLETE", reason="declared jobs absent/not_run or HID units "
++                   "unavailable; no primary interval",
++                   unavailable_units=unavailable[:200])
++        if cells:
++            out["partial_diagnostic"] = {"label": "PARTIAL: available units only; not the "
++                                                  "prespecified endpoint",
++                                         "equal_cell_mean": float(R.weighted_mean(cells)[0])}
++    else:
++        point = float(R.weighted_mean(cells)[0])
++        draws = R.stratified_bootstrap(cells, REPS, SEED)
++        ci = R.percentile_interval(draws[:, 0], LEVEL)
++        gate = {"engineering_valid": True, "complete": True, "censored_count": 0}
++        out.update(estimate_bits_per_input_bit=point, ci99=list(ci),
++                   verdict=VERDICT_LABEL[R.verdict(ci, gate)],
++                   bootstrap={"draws": REPS, "seed": SEED, "level": LEVEL,
++                              "cell_order": ["|".join(map(str, k)) for k in sorted(cells)],
++                              "draw_mean": float(draws[:, 0].mean()),
++                              "draw_sd": float(draws[:, 0].std())})
++    return out
++
++
++# ---------------------------------------------------------------------------
++# Descriptive tables
++# ---------------------------------------------------------------------------
++
++def _sign(v: float) -> str:
++    return "better" if v > 0 else ("worse" if v < 0 else "tie")
++
++
++def per_string(index, design, roles) -> list[dict]:
++    out = []
++    for role in roles:
++        for cid, sp, fam, bl, rep, rg, n in V.expected_cases(design, role):
++            have = index.get(cid, {})
++            a, b, p = have.get("hid_full"), have.get("hid_refine4"), have.get("baseline_best")
++            s = saving(have)
++            out.append({"case_id": cid, "role": sp, "family": fam, "base_length": bl,
++                        "replicate": rep, "ragged": rg, "n_bits": n,
++                        "hid_full_status": a and a["status"], "hid_refine4_status": b and b["status"],
++                        "hid_full_bits": a and a["archive_bits"],
++                        "hid_refine4_bits": b and b["archive_bits"],
++                        "baseline_best_status": p and p["status"],
++                        "baseline_best_bits": p and p["archive_bits"],
++                        "baseline_best_method": p and p.get("selected_method"),
++                        "hid_full_stage": a and a.get("best_source"),
++                        "hid_refine4_stage": b and b.get("best_source"),
++                        "saving_per_input_bit": s,
++                        "sign": None if s is None else _sign(s)})
++    return out
++
++
++def per_unit(strings) -> list[dict]:
++    units = defaultdict(dict)
++    for s in strings:
++        units[(s["role"], s["family"], s["base_length"], s["replicate"])][s["ragged"]] = s
++    out = []
++    for (role, fam, bl, rep), pair in sorted(units.items()):
++        vals = [pair[r]["saving_per_input_bit"] for r in (False, True) if r in pair]
++        ok = len(vals) == 2 and all(v is not None for v in vals)
++        out.append({"role": role, "family": fam, "base_length": bl, "replicate": rep,
++                    "unit_saving": (vals[0] + vals[1]) / 2 if ok else None})
++    return out
++
++
++def per_cell(strings, units) -> list[dict]:
++    cells = defaultdict(lambda: {"strings": [], "units": []})
++    for s in strings:
++        cells[(s["role"], s["family"], s["base_length"])]["strings"].append(s)
++    for u in units:
++        cells[(u["role"], u["family"], u["base_length"])]["units"].append(u)
++    out = []
++    for k, v in sorted(cells.items()):
++        us = [u["unit_saving"] for u in v["units"] if u["unit_saving"] is not None]
++        ss = [s for s in v["strings"] if s["saving_per_input_bit"] is not None]
++        dist = {}
++        for m in ("hid_full_bits", "hid_refine4_bits", "baseline_best_bits"):
++            xs = [s[m] for s in v["strings"] if s[m] is not None]
++            dist[m] = ({"min": min(xs), "median": float(np.median(xs)), "max": max(xs),
++                        "n": len(xs)} if xs else None)
++        out.append({"cell": "|".join(map(str, k)), "units": len(v["units"]),
++                    "available_units": len(us), "mean_unit_saving": float(np.mean(us)) if us else None,
++                    "strings_better": sum(s["sign"] == "better" for s in ss),
++                    "strings_tie": sum(s["sign"] == "tie" for s in ss),
++                    "strings_worse": sum(s["sign"] == "worse" for s in ss),
++                    "units_better": sum(x > 0 for x in us), "units_tie": sum(x == 0 for x in us),
++                    "units_worse": sum(x < 0 for x in us), "archive_bits": dist})
++    return out
++
++
++def versus_portfolio(index, design) -> dict:
++    out = {}
++    for m in HID:
++        cells, unavailable, required = role_cells(index, design, PRIMARY_ROLES, vs_portfolio(m))
++        out[m] = {"equal_cell_mean": float(R.weighted_mean(cells)[0])
++                  if cells and not unavailable else None,
++                  "available_units": required - len(unavailable), "required_units": required,
++                  "note": "descriptive; reported only when all nine constituents are available "
++                          "for every primary unit"}
++    return out
++
++
++def resources(rows) -> dict:
++    out = defaultdict(lambda: {"jobs": 0, "statuses": defaultdict(int), "worker_wall_s": 0.0,
++                               "max_worker_wall_s": 0.0, "max_peak_rss_bytes": 0})
++    for r in rows:
++        if r["method"] == "baseline_best":
++            continue
++        o = out[r["method"]]
++        o["jobs"] += 1
++        o["statuses"][r["status"]] += 1
++        w = (r.get("worker_wall_ns") or 0) / 1e9
++        o["worker_wall_s"] += w
++        o["max_worker_wall_s"] = max(o["max_worker_wall_s"], w)
++        o["max_peak_rss_bytes"] = max(o["max_peak_rss_bytes"], r.get("peak_rss_bytes") or 0)
++    return {m: dict(v, statuses=dict(v["statuses"]),
++                    label="instrumented measurement (trace observer enabled for HID arms)")
++            for m, v in sorted(out.items())}
++
++
++def hid_telemetry(rows) -> dict:
++    out = {}
++    for m in HID:
++        stops, stages, caps = defaultdict(int), defaultdict(int), defaultdict(int)
++        for r in rows:
++            if r["method"] != m or r["status"] != "ok":
++                continue
++            stages[r.get("best_source")] += 1
++            b = (r.get("search_counters") or {}).get("stages", {}).get("B", {})
++            stops[b.get("stop_reason")] += 1
++            if b.get("cap_hit"):
++                caps[b.get("stop_reason")] += 1
++        out[m] = {"selected_stage": dict(stages), "B_stop_reason": dict(stops),
++                  "B_cap_exits": dict(caps)}
++    return out
++
++
++def trace_table(index, design, run_dir: Path, roles) -> dict:
++    agg = {}
++    for m in HID:
++        acc = defaultdict(list)
++        status = defaultdict(int)
++        for role in roles:
++            for cid, *_ in V.expected_cases(design, role):
++                t = trace_summary(run_dir, index.get(cid, {}).get(m))
++                status[t["status"]] += 1
++                if t["status"] == "complete":
++                    for k in ("events", "proposed_cuts", "evaluated_cuts",
++                              "new_serialized_admissible", "graph_rejections",
++                              "cached_requests", "cap_blocked", "commits"):
++                        acc[k].append(t[k])
++                    acc["returned_cuts"].append(len(t["returned_cuts"]))
++        agg[m] = {"trace_status": dict(status),
++                  **{k: {"total": int(sum(v)), "mean": float(np.mean(v)), "max": int(max(v))}
++                     for k, v in acc.items() if v}}
++    return agg
++
++
++def summarise(validation: dict, design: dict, run_dir: Path) -> dict:
++    index = validation["_index"]
++    rows = sorted((r for m in index.values() for r in m.values()),
++                  key=lambda r: (r["case_id"], r["method"]))
++    pub = V.public(validation)
++    strings = per_string(index, design, PRIMARY_ROLES + (CONTROL_ROLE,))
++    units = per_unit(strings)
++    cells = per_cell(strings, units)
++    s = {"analysis_plan": ANALYSIS_PLAN_V3A,
++         "validation": {k: pub[k] for k in ("engineering_valid", "complete", "expected_rows",
++                                            "present_rows", "archives_checked",
++                                            "distinct_archives_decoded")}
++         | {k: pub[k][:200] for k in ("invalid", "incomplete", "censored", "duplicates",
++                                       "unknown")}
++         | {"trace_checks": validation.get("trace_checks", {}).get("trace_status_counts")},
++         "primary": decision(validation, design),
++         "cells": cells,
++         "controls": [c for c in cells if c["cell"].startswith(CONTROL_ROLE + "|")],
++         "changed_controls": [x for x in strings if x["role"] == CONTROL_ROLE
++                              and x["sign"] not in ("tie", None)],
++         "versus_portfolio": versus_portfolio(index, design),
++         "hid_telemetry": hid_telemetry(rows),
++         "resources": resources(rows),
++         "status_counts": pub["status_counts"],
++         "trace": trace_table(index, design, run_dir, PRIMARY_ROLES + (CONTROL_ROLE,)),
++         "round_trips": {"decode_ok": sum(1 for r in rows if r["decode_ok"] is True),
++                         "decode_failed": sum(1 for r in rows if r["decode_ok"] is False),
++                         "with_archive": sum(1 for r in rows if r["archive_path"])}}
++    s["censored_baselines"] = len(pub["censored"])
++    s["portfolio_conclusion_blocked_by_censoring"] = bool(pub["censored"])
++    return s, strings, units
++
++
++# ---------------------------------------------------------------------------
++# Development (inspected inputs; descriptive only)
++# ---------------------------------------------------------------------------
++
++def development_summary(records) -> dict:
++    """Paired full-versus-refine4 counts and supplied-cut coverage, pair then cell."""
++    out = {"label": "development on inspected retained inputs; descriptive; no efficacy gate"}
++    for grp, pick in (("targets", True), ("controls", False)):
++        rs = [r for r in records if r["target"] is pick]
++        by_cell = defaultdict(lambda: defaultdict(list))
++        signs = defaultdict(int)
++        for r in rs:
++            if r["full_bits"] is None or r["refine4_bits"] is None:
++                signs["unavailable"] += 1
++                continue
++            v = (r["full_bits"] - r["refine4_bits"]) / r["n_bits"]
++            signs[_sign(v)] += 1
++            by_cell[r["cell"]][r["unit"]].append(v)
++        cellm = {c: float(np.mean([np.mean(v) for v in u.values()])) for c, u in sorted(by_cell.items())}
++        cell_signs = defaultdict(lambda: defaultdict(int))
++        for r in rs:
++            if r["full_bits"] is not None and r["refine4_bits"] is not None:
++                cell_signs[r["cell"]][_sign(r["full_bits"] - r["refine4_bits"])] += 1
++        g = {"strings": len(rs), "string_signs": dict(signs),
++             "cell_mean_saving": cellm,
++             "cell_string_signs": {c: dict(v) for c, v in sorted(cell_signs.items())},
++             "equal_cell_mean_saving": float(np.mean(list(cellm.values()))) if cellm else None}
++        for arm in ("full", "refine4"):
++            ts = [r[f"{arm}_trace"] for r in rs]
++            g[f"{arm}_trace_status"] = dict(_count(t["status"] for t in ts))
++            ok = [t for t in ts if t["status"] == "complete"]
++            g[f"{arm}_new_serialized_admissible_mean"] = (
++                float(np.mean([t["new_serialized_admissible"] for t in ok])) if ok else None)
++            g[f"{arm}_cap_stops"] = dict(_count(t["stop_reason"] for t in ok if t["cap_blocked"]))
++            g[f"{arm}_stop_reasons"] = dict(_count(t["stop_reason"] for t in ok))
++            if pick:
++                g[f"{arm}_coverage"] = _coverage(rs, f"{arm}_trace")
++        out[grp] = g
++    return out
++
++
++def _count(it) -> dict:
++    c = defaultdict(int)
++    for x in it:
++        c[x] += 1
++    return c
++
++
++def _coverage(rs, key) -> dict:
++    out = {}
++    for kind in ("proposed", "evaluated", "returned"):
++        num = den = 0
++        cell = defaultdict(lambda: defaultdict(list))
++        unavailable = 0
++        for r in rs:
++            cov = (r[key].get("supplied_coverage") or {}).get(kind)
++            if not cov or not cov["denominator"]:
++                unavailable += 1
++                continue
++            num += cov["numerator"]
++            den += cov["denominator"]
++            cell[r["cell"]][r["unit"]].append(cov["numerator"] / cov["denominator"])
++        cm = [np.mean([np.mean(v) for v in u.values()]) for u in cell.values()]
++        out[kind] = {"pooled_numerator": num, "pooled_denominator": den,
++                     "pooled_proportion": num / den if den else None,
++                     "pair_then_cell_mean_proportion": float(np.mean(cm)) if cm else None,
++                     "strings_unavailable": unavailable}
++    return out
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/search_v2.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/search_v2.py
+--- index-deconvolution/hierarchy/search_v2.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/search_v2.py	2026-10-04 07:15:18
+@@ -31,7 +31,7 @@
+ from .decode import decode_archive
+ from .infer import FULL, infer
+ from .model import NodeFactory, check_bits, count_reachable, to_model
+-from .segmentation import BoundaryConfig, BoundarySearch, DecodeMismatch
++from .segmentation import K1, BoundaryConfig, BoundaryPolicy, BoundarySearch, DecodeMismatch
+ from .wire import encode_literal, serialize_model
+ 
+ STAGE_ORDER = ("L", "P", "C", "D", "G", "B")
+@@ -174,9 +174,19 @@
+ 
+ def infer_v2(bits: str, config: SearchV2Config) -> V2Result:
+     """Best complete archive found by the arm ``config`` (literal fallback included)."""
++    return run_arm(bits, config)
++
++
++def run_arm(bits: str, config: SearchV2Config, policy: BoundaryPolicy = K1, observer=None,
++            identity: tuple[str, str] | None = None) -> V2Result:
++    """The one orchestrator of L, P, C, D, G, B. ``policy`` selects the boundary
++    refinement seed count (K1: search-v2), ``observer`` an optional stage-B trace, and
++    ``identity`` the (name, config sha256) of a wrapping study configuration; the
++    defaults are exactly ``infer_v2``."""
+     check_bits(bits)
+-    if not isinstance(config, SearchV2Config):
+-        raise TypeError("config must be a SearchV2Config")
++    if not isinstance(config, SearchV2Config) or not isinstance(policy, BoundaryPolicy):
++        raise TypeError("config must be a SearchV2Config and policy a BoundaryPolicy")
++    name, sha = identity or (config.name, config.sha256())
+     raw = encode_literal(bits)
+     inc = _Incumbent(raw)
+     n = len(bits)
+@@ -185,8 +195,7 @@
+     t_all = time.perf_counter()
+     if n == 0:
+         tele["stop"] = "empty_input"
+-        return V2Result(raw, "raw", 8 * len(raw), 8 * len(raw), tele, (), config.name,
+-                        config.sha256())
++        return V2Result(raw, "raw", 8 * len(raw), 8 * len(raw), tele, (), name, sha)
+     tpl = _Templates(bits, config)
+     for stage in config.stages:
+         t0 = time.perf_counter()
+@@ -200,7 +209,7 @@
+                   "rule_count": res.rule_count, "dag_depth": res.dag_depth,
+                   "best_source": res.best_source, "strict_improvements": int(improved)}
+         elif stage == "B":
+-            srch = BoundarySearch(bits, config.boundary)
++            srch = BoundarySearch(bits, config.boundary, policy, observer)
+             st = {"strict_improvements": 0}
+ 
+             def offer(arc, st=st):
+@@ -244,4 +253,4 @@
+     tele["selected_detail"] = inc.detail
+     tele["total_wall_s"] = time.perf_counter() - t_all
+     return V2Result(inc.archive, inc.stage, 8 * len(inc.archive), 8 * len(raw), tele,
+-                    tuple(inc.trace), config.name, config.sha256())
++                    tuple(inc.trace), name, sha)
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/search_v3a.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/search_v3a.py
+--- index-deconvolution/hierarchy/search_v3a.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/search_v3a.py	2026-10-04 07:15:33
+@@ -0,0 +1,69 @@
++"""HID-search-v3a policy/config adapter (protocols/hierarchy_search_v3a/SEARCH.md).
++
++Two full-method arms over the one orchestrator ``search_v2.run_arm``:
++
++  hid_full     the accepted search-v2 arm, unchanged object and configuration hash
++               (boundary refinement seed count k = 1);
++  hid_refine4  the same stages, caps and grammar with k = 4 ranked coarse seeds,
++               level-major then seed-rank-major (``segmentation.BoundaryPolicy``).
++
++``SearchV3aConfig`` binds the k = 4 policy, the schedule and the trace schema into
++its own hash; ``hid_full`` keeps the search-v2 serialization (no default-valued key
++is added). ``infer_v3a`` receives the bit string and a frozen configuration only and
++optionally returns the direct stage-B trace; the observer never influences the search.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++from dataclasses import dataclass, field
++
++from .search_v2 import ARMS, STAGE_ORDER, SearchV2Config, V2Result, run_arm
++from .segmentation import K1, TRACE_MAX_EVENTS, TRACE_SCHEMA, BoundaryPolicy, TraceObserver
++
++
++@dataclass(frozen=True)
++class SearchV3aConfig:
++    """A search-v2 full arm plus an explicit boundary policy and trace schema."""
++
++    base: SearchV2Config
++    policy: BoundaryPolicy = field(default_factory=BoundaryPolicy)
++    trace_schema: str = TRACE_SCHEMA
++    trace_max_events: int = TRACE_MAX_EVENTS
++
++    @property
++    def name(self) -> str:
++        return self.base.name
++
++    def as_dict(self) -> dict:
++        return {"base": self.base.as_dict(), "boundary_policy": self.policy.as_dict(),
++                "trace_schema": self.trace_schema, "trace_max_events": self.trace_max_events}
++
++    def sha256(self) -> str:
++        return hashlib.sha256(json.dumps(self.as_dict(), sort_keys=True).encode()).hexdigest()
++
++
++REFINE4 = SearchV3aConfig(SearchV2Config("hid_refine4", STAGE_ORDER),
++                          BoundaryPolicy(refinement_seed_count=4))
++ARMS_V3A = {"hid_full": ARMS["hid_full"], "hid_refine4": REFINE4}
++
++
++def infer_v3a(bits: str, config, trace: bool = False) -> tuple[V2Result, dict | None]:
++    """(result, trace sidecar or None) for a search-v2 arm (k = 1) or a v3a arm."""
++    if isinstance(config, SearchV3aConfig):
++        base, policy, identity = config.base, config.policy, (config.name, config.sha256())
++        max_events = config.trace_max_events
++    elif isinstance(config, SearchV2Config):
++        base, policy, identity, max_events = config, K1, None, TRACE_MAX_EVENTS
++    else:
++        raise TypeError("config must be a SearchV2Config or a SearchV3aConfig")
++    obs = TraceObserver(max_events) if trace else None
++    res = run_arm(bits, base, policy, obs, identity)
++    if obs is None:
++        return res, None
++    side = {"config_name": res.config_name, "config_sha256": res.config_sha256,
++            "refinement_seed_count": policy.refinement_seed_count,
++            "boundary_invocations": [obs.as_dict()] if "B" in base.stages else [],
++            "selected_stage": res.selected_stage, "archive_bits": res.archive_bits,
++            "archive_sha256": hashlib.sha256(res.archive).hexdigest()}
++    return res, side
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/segmentation.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/segmentation.py
+--- index-deconvolution/hierarchy/segmentation.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/segmentation.py	2026-10-04 07:14:54
+@@ -26,9 +26,20 @@
+ trial before its serialization. Leaf standalone serializations are counted
+ separately. Every full-input trial is checked against the rule/depth limits and
+ decoded by the independent decoder; a disagreement is fatal.
++
++HID-search-v3a (protocols/hierarchy_search_v3a/SEARCH.md) adds an explicit
++``BoundaryPolicy`` to the same search: ``refinement_seed_count`` k refines the k best
++coarse trials with distinct resulting partitions, level-major then seed-rank-major,
++each with its own local pool (its parent's coarse trials plus its own refinements);
++caches and charges are shared, the global winner is chosen over every trial, and the
++commit stays strict. k = 1 is the search-v2 behaviour byte for byte (same telemetry,
++same ``BoundaryConfig`` serialization). An optional ``TraceObserver`` records one event
++per trial request in call order; it only appends, adds no charged operation and is
++never read by the search.
+ """
+ from __future__ import annotations
+ 
++import hashlib
+ import math
+ from dataclasses import asdict, dataclass
+ 
+@@ -59,6 +70,56 @@
+         return asdict(self)
+ 
+ 
++@dataclass(frozen=True)
++class BoundaryPolicy:
++    """How many ranked coarse trials are refined per round (SEARCH.md section 3)."""
++
++    refinement_seed_count: int = 1
++    schedule: str = "level_major_then_fixed_coarse_seed_rank"
++    seed_selection: str = "distinct_resulting_partitions_ranked_by_length_parent_start_cut_bytes"
++    seed_pool: str = "all_coarse_trials_of_seed_parent_plus_own_refinement_trials"
++
++    def __post_init__(self):
++        if self.refinement_seed_count < 1:
++            raise ValueError("refinement_seed_count must be >= 1")
++
++    def as_dict(self) -> dict:
++        return asdict(self)
++
++
++K1 = BoundaryPolicy()
++TRACE_SCHEMA = "hid-boundary-trace-v1"
++TRACE_MAX_EVENTS = 8192
++_CHARGES = ("root_trials", "leaf_cache", "leaf_length_charge")
++
++
++class TraceOverflow(RuntimeError):
++    """More trial events than the defensive bound: a trace failure, never truncation."""
++
++
++class TraceObserver:
++    """Direct observational trace of one boundary-search invocation (append only)."""
++
++    def __init__(self, max_events: int = TRACE_MAX_EVENTS) -> None:
++        self.max_events = max_events
++        self.events: list[dict] = []
++        self.summary: list[dict] = []
++
++    def event(self, ev: dict) -> None:
++        if len(self.events) >= self.max_events:
++            raise TraceOverflow(f"more than {self.max_events} boundary trial events")
++        ev["position"] = len(self.events)
++        self.events.append(ev)
++
++    def mark(self, item: dict) -> None:
++        self.summary.append(item)
++
++    def as_dict(self) -> dict:
++        return {"schema": TRACE_SCHEMA, "max_events": self.max_events,
++                "event_count": len(self.events), "events": self.events,
++                "summary": self.summary}
++
++
+ class DecodeMismatch(RuntimeError):
+     """A full-input candidate decodes to a different string: fatal, never a fallback."""
+ 
+@@ -69,8 +130,10 @@
+ 
+ 
+ class BoundarySearch:
+-    def __init__(self, x: str, cfg: BoundaryConfig = BoundaryConfig()) -> None:
++    def __init__(self, x: str, cfg: BoundaryConfig = BoundaryConfig(),
++                 policy: BoundaryPolicy = K1, observer: TraceObserver | None = None) -> None:
+         self.x, self.n, self.cfg = x, len(x), cfg
++        self.policy, self.observer = policy, observer
+         self.f = NodeFactory()
+         self.leaves: dict[tuple[int, int], tuple] = {}
+         self.parts: dict[tuple[int, ...], bytes | None] = {}
+@@ -149,16 +212,49 @@
+         cand = {a + 1, b - 1} | {a + (j * (b - a)) // k for j in range(1, k)}
+         return sorted(c for c in cand if a < c < b)
+ 
++    def _charges(self) -> dict:
++        return {k: self.counts[k] for k in _CHARGES}
++
++    def _request(self, cuts: tuple[int, ...], info: dict) -> bytes | None:
++        """``evaluate`` with one observational trace event (when an observer is set)."""
++        obs = self.observer
++        if obs is None:
++            return self.evaluate(cuts)
++        ev = dict(info, partition=list(cuts), pre=self._charges(), cache_hit=cuts in self.parts)
++        try:
++            arc = self.evaluate(cuts)
++        except _Cap as cap:
++            ev.update(post=self._charges(), outcome="cap_blocked", cap=cap.reason)
++            obs.event(ev)
++            raise
++        if arc is None:
++            ev["outcome"] = "cached_graph_rejection" if ev["cache_hit"] else "new_graph_rejection"
++        else:
++            ev["outcome"] = "cached_admissible" if ev["cache_hit"] else "new_admissible"
++            ev["archive_bytes"] = len(arc)
++            ev["archive_sha256"] = hashlib.sha256(arc).hexdigest()
++        ev["post"] = self._charges()
++        obs.event(ev)
++        return arc
++
++    def _mark(self, kind: str, cuts, archive: bytes | None, **extra) -> None:
++        if self.observer is not None:
++            self.observer.mark(dict(extra, kind=kind, cuts=list(cuts),
++                                    archive_bytes=None if archive is None else len(archive),
++                                    archive_sha256=None if archive is None
++                                    else hashlib.sha256(archive).hexdigest()))
++
+     def run(self, offer=None) -> dict:
+         """Run B; ``offer(archive)`` is called on every commit and on the final output."""
+-        cfg = self.cfg
++        cfg, k = self.cfg, self.policy.refinement_seed_count
+         cuts: tuple[int, ...] = ()
+         stop, unresolved = None, None
+         current = None
+         try:
+-            current = self.evaluate(cuts)
++            current = self._request(cuts, {"round": 0, "phase": "initial"})
+             if current is None:
+                 raise RuntimeError("the initial single-leaf partition violates graph limits")
++            self._mark("initial", cuts, current)
+             while True:
+                 if len(cuts) + 1 >= cfg.max_segments:
+                     stop = "max_segments"
+@@ -175,15 +271,22 @@
+                 trials: list[tuple] = []      # (len, parent start, cut, bytes, new cuts)
+                 per_parent: dict[int, list[tuple]] = {}
+ 
+-                def trial(a, b, c, stage):
++                def trial(a, b, c, stage, seed=None):
+                     new = tuple(sorted(cuts + (c,)))
+-                    arc = self.evaluate(new)
++                    info = {"round": rnd["round"], "phase": stage, "current": list(cuts),
++                            "parent": [a, b], "cut": c}
++                    if seed is not None:
++                        info.update(seed_rank=seed["rank"], level=seed["levels"] + 1)
++                    arc = self._request(new, info)
+                     self.counts[f"{stage}_trials"] += 1
+                     if arc is None:
+                         return
+                     t = (len(arc), a, c, arc, new)
+                     trials.append(t)
+-                    per_parent.setdefault(a, []).append(t)
++                    if seed is None:
++                        per_parent.setdefault(a, []).append(t)
++                    else:
++                        seed["pool"].append(t)
+ 
+                 unresolved = {"round": rnd["round"], "phase": "coarse"}
+                 for a, b in parents:
+@@ -193,31 +296,67 @@
+                     stop = "no_admissible_trial"
+                     unresolved = None
+                     break
+-                best = min(trials, key=lambda t: t[:4])
+-                a, c = best[1], best[2]
+-                b = next(bb for aa, bb in parents if aa == a)
+-                rnd.update(coarse_parent=[a, b], coarse_cut=c, coarse_bytes=best[0])
+-                L = b - a
+-                r = math.ceil(L / cfg.coarse_grid_denominator)
+-                lo, hi = max(a + 1, c - r), min(b - 1, c + r)
+-                levels, step = 0, None
+-                unresolved = {"round": rnd["round"], "phase": "refinement", "parent": [a, b],
+-                              "bracket": [lo, hi], "cut": c, "levels_done": 0}
++                seeds, taken = [], set()
++                for t in sorted(trials, key=lambda t: t[:4]):
++                    if len(seeds) == k:
++                        break
++                    if t[4] in taken:
++                        continue
++                    taken.add(t[4])
++                    a, c = t[1], t[2]
++                    b = next(bb for aa, bb in parents if aa == a)
++                    r = math.ceil((b - a) / cfg.coarse_grid_denominator)
++                    lo, hi = max(a + 1, c - r), min(b - 1, c + r)
++                    state = {"round": rnd["round"], "phase": "refinement", "parent": [a, b],
++                             "bracket": [lo, hi], "cut": c, "levels_done": 0}
++                    if k > 1:
++                        state["seed_rank"] = len(seeds)
++                    seeds.append({"rank": len(seeds), "a": a, "b": b, "c": c, "lo": lo,
++                                  "hi": hi, "levels": 0, "step": None, "active": True,
++                                  "coarse_cut": c, "coarse_bytes": t[0],
++                                  "pool": list(per_parent[a]), "unresolved": state})
++                top = seeds[0]
++                rnd.update(coarse_parent=[top["a"], top["b"]], coarse_cut=top["c"],
++                           coarse_bytes=top["coarse_bytes"])
+                 for _ in range(cfg.max_refinement_levels):
+-                    step = max(1, math.ceil((hi - lo) / cfg.refinement_grid_denominator))
+-                    pos = {lo, hi, c} | {c + j * step for j in range(-cfg.refinement_offset,
+-                                                                     cfg.refinement_offset + 1)}
+-                    for q in sorted(p for p in pos if lo <= p <= hi):
+-                        trial(a, b, q, "refine")
+-                    pb = min(per_parent[a], key=lambda t: (t[0], t[2], t[3]))
+-                    c = pb[2]
+-                    levels += 1
+-                    unresolved.update(bracket=[lo, hi], cut=c, levels_done=levels, step=step)
+-                    if step == 1:
++                    for sd in seeds:
++                        if not sd["active"]:
++                            continue
++                        a, b, c, lo, hi = sd["a"], sd["b"], sd["c"], sd["lo"], sd["hi"]
++                        unresolved = sd["unresolved"]
++                        if k > 1:
++                            unresolved.update(current_level=sd["levels"] + 1,
++                                              current_bracket=[lo, hi])
++                        step = max(1, math.ceil((hi - lo) / cfg.refinement_grid_denominator))
++                        pos = {lo, hi, c} | {c + j * step for j in range(-cfg.refinement_offset,
++                                                                         cfg.refinement_offset + 1)}
++                        for q in sorted(p for p in pos if lo <= p <= hi):
++                            trial(a, b, q, "refine", sd)
++                        pb = min(sd["pool"], key=lambda t: (t[0], t[2], t[3]))
++                        sd["c"] = c = pb[2]
++                        sd["levels"] += 1
++                        sd["step"] = step
++                        unresolved.update(bracket=[lo, hi], cut=c, levels_done=sd["levels"],
++                                          step=step)
++                        if step == 1:
++                            sd["active"] = False
++                            continue
++                        sd["lo"], sd["hi"] = max(a + 1, c - step), min(b - 1, c + step)
++                    if not any(sd["active"] for sd in seeds):
+                         break
+-                    lo, hi = max(a + 1, c - step), min(b - 1, c + step)
+-                rnd.update(refined_cut=c, last_bracket=[lo, hi], last_step=step,
+-                           levels=levels, resolved_to_one_bit=step == 1)
++                rnd.update(refined_cut=top["c"], last_bracket=[top["lo"], top["hi"]],
++                           last_step=top["step"], levels=top["levels"],
++                           resolved_to_one_bit=top["step"] == 1)
++                if k > 1:
++                    rnd["seeds"] = [{"rank": sd["rank"], "parent": [sd["a"], sd["b"]],
++                                     "coarse_cut": sd["coarse_cut"],
++                                     "coarse_bytes": sd["coarse_bytes"], "refined_cut": sd["c"],
++                                     "last_bracket": [sd["lo"], sd["hi"]],
++                                     "last_step": sd["step"], "levels": sd["levels"],
++                                     "resolved_to_one_bit": sd["step"] == 1,
++                                     "local_best_bytes": min(t[0] for t in sd["pool"])}
++                                    for sd in seeds]
++                    rnd["seed_count"] = len(seeds)
+                 unresolved = None
+                 win = min(trials, key=lambda t: t[:4])
+                 rnd.update(best_parent_start=win[1], best_cut=win[2], best_bytes=win[0],
+@@ -226,6 +365,7 @@
+                     cuts, current = win[4], win[3]
+                     self.counts["commits"] += 1
+                     rnd["committed"] = True
++                    self._mark("commit", cuts, current, round=rnd["round"])
+                     if offer is not None:
+                         offer(current)
+                 else:
+@@ -235,9 +375,13 @@
+         except _Cap as cap:
+             stop = cap.reason
+         output, output_cuts = current, cuts
++        source = "current"
+         if stop and stop.endswith("_cap") and self.best_seen is not None and \
+                 (current is None or self.best_seen[0] < len(current)):
+             output, output_cuts = self.best_seen[2], self.best_seen[3]
++            source = "best_seen"
++        self._mark("final", output_cuts, output, stop_reason=stop, source=source,
++                   unresolved=unresolved if stop and stop.endswith("_cap") else None)
+         if output is not None and offer is not None:
+             offer(output)
+         return {"archive": output, "cuts": list(output_cuts), "committed_cuts": list(cuts),
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/study.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/study.py
+--- index-deconvolution/hierarchy/study.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/study.py	2026-10-04 07:21:30
+@@ -10,6 +10,10 @@
+ its roles are read from ``corpus.SPLITS`` and its methods from ``infer.ABLATIONS``.
+ ``SEARCH_V2`` (``search-v2``) is HID-search-v2 (PROTOCOL_hierarchy_search_v2.md):
+ six cumulative HID arms, the same nine baselines and the derived portfolio row.
++``SEARCH_V3A`` (``search-v3a``) is HID-search-v3a (PROTOCOL_hierarchy_search_v3a.md):
++``hid_full`` (k = 1) and ``hid_refine4`` (k = 4), the nine baselines and the portfolio,
++with a direct stage-B trace sidecar per HID row and a replicate-parity HID job order.
++Its two development studies run one arm each on retained search-v2 inputs.
+ """
+ from __future__ import annotations
+ 
+@@ -18,6 +22,11 @@
+ 
+ from .baselines import BASELINE_METHODS
+ 
++HID_KINDS = ("hid_v1", "hid_v2", "hid_v3a")
++V3A_REGISTRIES = {"search-v3a": ("hid_full", "hid_refine4"),
++                  "search-v3a-dev-control": ("hid_full",),
++                  "search-v3a-dev-treatment": ("hid_refine4",)}
++
+ PKG = Path(__file__).resolve().parent
+ ID_ROOT = PKG.parent
+ REPO = ID_ROOT.parent
+@@ -26,12 +35,12 @@
+ @dataclass(frozen=True)
+ class MethodSpec:
+     name: str
+-    kind: str                    # "hid_v1" | "hid_v2" | "baseline" | "portfolio"
++    kind: str                    # "hid_v1" | "hid_v2" | "hid_v3a" | "baseline" | "portfolio"
+     config: object = None
+ 
+     @property
+     def is_hid(self) -> bool:
+-        return self.kind in ("hid_v1", "hid_v2")
++        return self.kind in HID_KINDS
+ 
+ 
+ @dataclass(frozen=True)
+@@ -77,6 +86,10 @@
+     if name == "search-v2":
+         from .search_v2 import ARMS
+         return tuple(MethodSpec(k, "hid_v2", v) for k, v in ARMS.items()) + _baseline_specs()
++    if name in V3A_REGISTRIES:
++        from .search_v3a import ARMS_V3A
++        hid = tuple(MethodSpec(m, "hid_v3a", ARMS_V3A[m]) for m in V3A_REGISTRIES[name])
++        return hid + (_baseline_specs() if name == "search-v3a" else ())
+     raise KeyError(f"unknown method registry {name!r}")
+ 
+ 
+@@ -111,6 +124,7 @@
+     default_roles: tuple = ()
+     resources: ResourcePolicy = field(default_factory=ResourcePolicy)
+     fixture: bool = False
++    trace_sidecars: bool = False                 # HID workers write a stage-B trace sidecar
+ 
+     # -- methods ---------------------------------------------------------------
+ 
+@@ -131,6 +145,10 @@
+     def encode_methods(self) -> tuple[str, ...]:
+         return tuple(m.name for m in self.methods() if m.kind != "portfolio")
+ 
++    def job_methods(self, case) -> tuple[str, ...]:
++        """Dispatch order of one case's encoder jobs (default: registry order)."""
++        return self.encode_methods
++
+     @property
+     def hid_methods(self) -> tuple[str, ...]:
+         return tuple(m.name for m in self.methods() if m.is_hid)
+@@ -243,9 +261,76 @@
+                                            ("diagnostics_verification", 2 * 3600.0)),
+                              total_budget_s=12 * 3600.0))
+ 
+-_STUDIES: dict[str, StudySpec] = {LEGACY.name: LEGACY, SEARCH_V2.name: SEARCH_V2}
+ 
++class V3aStudy(StudySpec):
++    """HID-search-v3a: HID control then treatment for even replicates, treatment then
++    control for odd replicates, then the baselines in owner order (BENCHMARK.md 3)."""
+ 
++    def job_methods(self, case) -> tuple[str, ...]:
++        hid = self.hid_methods if case.replicate % 2 == 0 else tuple(reversed(self.hid_methods))
++        return hid + self.baselines
++
++    def role_cases(self, role: str, run_dir: Path | None = None):
++        """Reserved roles are generated only for a run whose freeze VALIDATES now
++        (hashes, closure, configs, design, snapshot), not merely one that exists."""
++        spec = self.role(role)
++        if spec.reserved and spec.source == "generate":
++            from . import freeze_v2
++            from .study_corpus import ReservedAccessError
++            if run_dir is None or not (run_dir / "freeze.json").is_file():
++                raise ReservedAccessError(f"role {role} is reserved; no freeze in {run_dir}")
++            if run_dir.resolve() != self.run_dir(run_dir.name).resolve():
++                raise ReservedAccessError(f"{run_dir} is not a run directory of {self.name}")
++            _, _, problems = freeze_v2.load_and_validate(self, run_dir.name)
++            if problems:
++                raise ReservedAccessError("freeze does not validate; reserved generation "
++                                          "refused: " + "; ".join(problems[:5]))
++        return super().role_cases(role, run_dir)
++
++
++V3A_ALLOWANCES = (("development", 14400.0), ("prospective", 10800.0),
++                  ("report_verification", 3600.0))
++V3A_RESOURCES = ResourcePolicy(allowances_s=V3A_ALLOWANCES, total_budget_s=28800.0)
++V2_RUN = "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1"
++
++SEARCH_V3A_ROLES = (
++    RoleSpec("boundary", ("F12",), (4096,), tuple(range(6000, 6020)), "prospective_target",
++             rng_namespace="search_v3a_confirmation", reserved=True),
++    RoleSpec("boundary_large", ("F12",), (16384, 65536, 131072), tuple(range(7000, 7020)),
++             "prospective_target", rng_namespace="search_v3a_transfer", reserved=True),
++    RoleSpec("boundary_stress", ("S02",), (4096, 65536), tuple(range(8000, 8020)),
++             "prospective_target", rng_namespace="search_v3a_stress", reserved=True),
++    RoleSpec("controls", ("F01", "F06", "F07", "F11"), (4096,), (9000, 9001),
++             "prospective_control", rng_namespace="search_v3a_controls", reserved=True),
++)
++SEARCH_V3A = V3aStudy(
++    name="search-v3a", result_root=ID_ROOT / "results" / "hierarchy_search_v3a",
++    registry="search-v3a", roles=SEARCH_V3A_ROLES,
++    default_roles=("boundary", "boundary_large", "boundary_stress", "controls"),
++    resources=V3A_RESOURCES, trace_sidecars=True)
++
++# Development: retained search-v2 confirmation inputs, one arm per study. Inputs are
++# decoded from the retained raw archives by the development adapter (the v2 manifest
++# schema differs from the HID-v1 one ``study_corpus.retained_cases`` reads).
++_V3A_DEV_ROLES = tuple(
++    RoleSpec(r, fams, bls, reps, "development", source="retained", retained_run=V2_RUN,
++             retained_split=r)
++    for r, fams, bls, reps in (("confirmation", ALL12, (256, 1024, 4096), tuple(range(3000, 3020))),
++                               ("transfer", ALL12, (16384, 65536, 131072), tuple(range(5000, 5004))),
++                               ("stress", ("S01", "S02"), (4096, 65536), tuple(range(4000, 4008)))))
++SEARCH_V3A_DEV_CONTROL = StudySpec(
++    name="search-v3a-dev-control", result_root=SEARCH_V3A.result_root,
++    registry="search-v3a-dev-control", roles=_V3A_DEV_ROLES, resources=V3A_RESOURCES,
++    trace_sidecars=True)
++SEARCH_V3A_DEV_TREATMENT = StudySpec(
++    name="search-v3a-dev-treatment", result_root=SEARCH_V3A.result_root,
++    registry="search-v3a-dev-treatment", roles=_V3A_DEV_ROLES, resources=V3A_RESOURCES,
++    trace_sidecars=True)
++
++_STUDIES: dict[str, StudySpec] = {s.name: s for s in (
++    LEGACY, SEARCH_V2, SEARCH_V3A, SEARCH_V3A_DEV_CONTROL, SEARCH_V3A_DEV_TREATMENT)}
++
++
+ def get_study(name: str) -> StudySpec:
+     try:
+         return _STUDIES[name]
+@@ -255,9 +340,11 @@
+ 
+ def register_fixture_study(spec: StudySpec) -> None:
+     """Explicit registration of a fixture study (tests only; never a production name)."""
+-    if not spec.fixture or spec.name in (LEGACY.name, SEARCH_V2.name):
++    if not spec.fixture or spec.name in (LEGACY.name, SEARCH_V2.name, SEARCH_V3A.name,
++                                         SEARCH_V3A_DEV_CONTROL.name, SEARCH_V3A_DEV_TREATMENT.name):
+         raise ValueError("only fixture studies with new names may be registered")
+     for r in spec.roles:
+-        if r.source == "generate" and r.rng_namespace != "search_v2_fixture":
+-            raise ValueError("fixture studies may generate only the search_v2_fixture namespace")
++        if r.source == "generate" and r.rng_namespace not in ("search_v2_fixture",
++                                                               "search_v3a_fixture"):
++            raise ValueError("fixture studies may generate only a fixture namespace")
+     _STUDIES[spec.name] = spec
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/tests/test_search_v3a.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/tests/test_search_v3a.py
+--- index-deconvolution/hierarchy/tests/test_search_v3a.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/tests/test_search_v3a.py	2026-10-04 07:26:48
+@@ -0,0 +1,547 @@
++"""HID-search-v3a: multi-seed boundary schedule, observer trace, runner, gates, primary
++arithmetic (protocols/hierarchy_search_v3a/ACCEPTANCE.md section 1).
++
++Schedule fixtures use ``Priced``: the real ``BoundarySearch.run`` over a hand-written
++price table (the archive of a partition is its cut list padded to the table's length),
++so every ranking, pool and commit is computable by hand. Cap fixtures use the real
++leaf builder and serializer. Watchdog fixtures use deliberately tiny limits on the
++real ``_Job`` worker and are labelled as such. Only the ``search_v3a_fixture``
++namespace is generated.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import math
++import shutil
++
++import numpy as np
++import pytest
++
++from hierarchy import benchmark as B
++from hierarchy import freeze_v2
++from hierarchy import report as R
++from hierarchy import report_v3a as R3
++from hierarchy import segmentation as SG
++from hierarchy import study as S
++from hierarchy import study_corpus as SC
++from hierarchy import validation as V
++from hierarchy.search_v2 import ARMS, infer_v2
++from hierarchy.search_v3a import ARMS_V3A, REFINE4, infer_v3a
++from hierarchy.segmentation import (BoundaryConfig, BoundaryPolicy, BoundarySearch,
++                                    TraceObserver, _Cap)
++
++NS = "search_v3a_fixture"
++
++
++# ---------------------------------------------------------------------------
++# Hand-priced search
++# ---------------------------------------------------------------------------
++
++class Priced(BoundarySearch):
++    """Real ``run``/``_request``; ``evaluate`` prices a partition from ``table``
++    (missing -> ``default``; ``None`` -> graph rejection). Root-trial cap and cache
++    semantics are the owner's; leaves are not used."""
++
++    def __init__(self, n, table, k=1, default=1000, observer=None, **cfg):
++        super().__init__("0" * n, BoundaryConfig(**cfg), BoundaryPolicy(k), observer)
++        self.table, self.default, self.calls = table, default, []
++
++    def evaluate(self, cuts):
++        if cuts in self.parts:
++            return self.parts[cuts]
++        if self.counts["root_trials"] + 1 > self.cfg.root_trial_cap:
++            raise _Cap("root_trial_cap")
++        self.counts["root_trials"] += 1
++        self.calls.append(cuts)
++        price = self.table.get(cuts, self.default)
++        if price is None:
++            self.counts["graph_rejections"] += 1
++            self.parts[cuts] = None
++            return None
++        enc = b"".join(c.to_bytes(4, "big") for c in cuts)
++        arc = enc + b"\0" * (price - len(enc))
++        self.parts[cuts] = arc
++        self.seq += 1
++        if self.best_seen is None or len(arc) < self.best_seen[0]:
++            self.best_seen = (len(arc), self.seq, arc, cuts)
++        return arc
++
++
++def coarse(a, b):
++    return sorted(c for c in {a + 1, b - 1} | {a + (j * (b - a)) // 32 for j in range(1, 32)}
++                  if a < c < b)
++
++
++def ref_positions(c, lo, hi, step):
++    return sorted(p for p in {lo, hi, c} | {c + j * step for j in range(-8, 9)} if lo <= p <= hi)
++
++
++def test_coarse_rank_dedup_and_fewer_than_four_seeds():
++    # n=64: one parent; coarse cuts 1,2,...,63 (33 distinct incl. ends). Two prices tie.
++    t = {(32,): 200, (2,): 200, (40,): 210}
++    s = Priced(64, t, k=4, max_segments=2)
++    out = s.run()
++    seeds = s.rounds[0]["seeds"]
++    # ties ranked by (length, parent start, cut): cut 2 before cut 32
++    assert [sd["coarse_cut"] for sd in seeds[:3]] == [2, 32, 40]
++    assert len(seeds) == 4 and seeds[3]["coarse_bytes"] == 1000
++    assert out["stop_reason"] == "max_segments" and out["cuts"] == [2]
++    # fewer than four admissible: everything else is a graph rejection
++    rej = {(c,): None for c in coarse(0, 64)}
++    rej.update({(10,): 300, (20,): 310})
++    s2 = Priced(64, rej, k=4, max_segments=2)
++    s2.run()
++    assert [sd["coarse_cut"] for sd in s2.rounds[0]["seeds"]] == [10, 20]
++    # zero admissible: the old outcome
++    s3 = Priced(64, {(c,): None for c in coarse(0, 64)}, k=4)
++    assert s3.run()["stop_reason"] == "no_admissible_trial"
++
++
++def test_same_parent_seeds_independent_pools_and_level_major_order():
++    n = 1024
++    t = {(320,): 500, (640,): 510, (352,): 520, (608,): 530}
++    t.update({(332,): 480, (652,): 470})          # on the level-1 grids of seeds 0 and 1
++    obs = TraceObserver()
++    s = Priced(n, t, k=4, observer=obs, max_segments=2)
++    out = s.run()
++    seeds = s.rounds[0]["seeds"]
++    assert [sd["coarse_cut"] for sd in seeds] == [320, 640, 352, 608]
++    assert all(sd["parent"] == [0, 1024] for sd in seeds)      # same parent, no diversity rule
++    ref = [e for e in obs.events if e["phase"] == "refine"]
++    # level-major then seed-rank-major: every level-1 request precedes every level-2 one,
++    # and within a level the seeds appear in rank order, each completing its level
++    lv = [(e["level"], e["seed_rank"]) for e in ref]
++    assert lv == sorted(lv)
++    # level 1 of seed 0 is exactly the hand-computed grid
++    r = math.ceil(1024 / 32)
++    lo, hi = 320 - r, 320 + r
++    step = math.ceil((hi - lo) / 16)
++    got = [e["cut"] for e in ref if e["level"] == 1 and e["seed_rank"] == 0]
++    assert got == ref_positions(320, lo, hi, step)
++    # pools are local: seed 0 centres on 330 (its own refinement), not on 650
++    assert seeds[0]["refined_cut"] == 332 and seeds[1]["refined_cut"] == 652
++    # seed 2 (352) evaluates 332 as a cache hit and keeps it; 652 is not in its pool
++    assert seeds[2]["refined_cut"] == 332
++    # global winner over every trial, strict commit
++    assert out["cuts"] == [652] and s.rounds[0]["best_bytes"] == 470
++
++
++def test_converging_seeds_are_not_merged_and_step_one_terminates():
++    n = 1024
++    t = {(320,): 500, (352,): 505, (336,): 400}    # both seeds converge on 336
++    s = Priced(n, t, k=2, max_segments=2)
++    s.run()
++    sd = s.rounds[0]["seeds"]
++    assert sd[0]["refined_cut"] == sd[1]["refined_cut"] == 336
++    assert len(sd) == 2 and all(x["resolved_to_one_bit"] for x in sd)
++    assert all(x["last_step"] == 1 and x["levels"] <= 5 for x in sd)
++
++
++def test_boundary_clamping_and_five_level_limit():
++    n = 64                                          # parent length 64: r = 2, tiny brackets
++    t = {(1,): 100}
++    s = Priced(n, t, k=1, max_segments=2)
++    s.run()
++    rnd = s.rounds[0]
++    assert rnd["coarse_cut"] == 1 and rnd["last_bracket"][0] >= 1
++    assert rnd["levels"] <= 5
++    # five-level limit: max_refinement_levels counts
++    s2 = Priced(4096, {(1024,): 100}, k=4, max_segments=2, max_refinement_levels=2)
++    s2.run()
++    assert all(x["levels"] <= 2 for x in s2.rounds[0]["seeds"])
++
++
++def test_strict_commit_rejection_and_k4_can_finish_worse():
++    n = 1024
++    # round 1: k=1 refines only 320 (coarse best 900); k=4 also refines 640 and finds 656
++    # (not a coarse cut); round 2 from {320} reaches 518 (= 320 + 22*9, a coarse cut of
++    # [320, 1024)) but from {656} only 679 (= 656 + floor(2*368/32))
++    t = {(320,): 900, (640,): 950, (656,): 850, (320, 518): 500, (656, 679): 840}
++    k1 = Priced(n, t, k=1, max_segments=3).run()
++    k4 = Priced(n, t, k=4, max_segments=3).run()
++    assert k1["cuts"] == [320, 518] and k1["archive_bits"] == 8 * 500
++    assert k4["committed_cuts"] == [656, 679] and k4["archive_bits"] == 8 * 840
++    assert k4["archive_bits"] > k1["archive_bits"]          # wider refinement finished worse
++    # strict commit: an equal-length best is not committed
++    eq = Priced(n, {(): 1000}, k=4, default=1000)
++    out = eq.run()
++    assert out["stop_reason"] == "no_strict_improvement" and out["cuts"] == []
++
++
++def test_cap_during_coarse_and_mid_seed_refinement_best_seen_and_unresolved():
++    n = 1024
++    t = {(160,): 700, (96,): 700, (320,): 600}
++    # coarse cap: initial + 9 coarse trials -> the 10th request is blocked
++    obs = TraceObserver()
++    s = Priced(n, t, k=4, observer=obs, root_trial_cap=10)
++    out = s.run()
++    assert out["stop_reason"] == "root_trial_cap"
++    assert out["unresolved_refinement"] == {"round": 1, "phase": "coarse"}
++    # best seen among the 9 coarse cuts 1,32,...,256: 96 and 160 tie at 700 -> earliest (96)
++    assert out["cuts"] == [96] and out["archive_bits"] == 8 * 700
++    assert obs.events[-1]["outcome"] == "cap_blocked" and obs.events[-1]["cut"] == 288
++    # mid-seed cap: allow all 33 coarse + a few refinements of seed 0
++    obs2 = TraceObserver()
++    s2 = Priced(n, t, k=4, observer=obs2, root_trial_cap=1 + 33 + 5)
++    out2 = s2.run()
++    u = out2["unresolved_refinement"]
++    assert out2["stop_reason"] == "root_trial_cap"
++    assert u["round"] == 1 and u["phase"] == "refinement" and u["seed_rank"] == 0
++    assert u["current_level"] == 1 and u["levels_done"] == 0 and u["parent"] == [0, 1024]
++    assert out2["cuts"] == [320]
++    assert obs2.events[-1]["outcome"] == "cap_blocked"
++
++
++@pytest.mark.parametrize("cap", [dict(cached_leaf_cap=6), dict(length_charge_multiplier=2),
++                                 dict(root_trial_cap=40)])
++def test_real_leaf_caps_best_seen_matches_trace(cap):
++    from hierarchy.study_corpus import generate_unit
++    x, _ = generate_unit(NS, "F12", 1024, 0)
++    obs = TraceObserver()
++    out = BoundarySearch(x, BoundaryConfig(**cap), BoundaryPolicy(4), obs).run()
++    assert out["cap_hit"] and out["stop_reason"].endswith("_cap")
++    new = [e for e in obs.events if e["outcome"] == "new_admissible"]
++    best = min(new, key=lambda e: (e["archive_bytes"], e["position"]))   # earliest of a tie
++    marks = [m for m in obs.summary if m["kind"] in ("initial", "commit")]
++    cur = marks[-1]
++    if best["archive_bytes"] < cur["archive_bytes"]:
++        want = (best["archive_bytes"], best["partition"])
++    else:
++        want = (cur["archive_bytes"], cur["cuts"])
++    assert (out["archive_bits"], out["cuts"]) == (8 * want[0], want[1])
++    assert obs.events[-1]["outcome"] == "cap_blocked"
++    if out["unresolved_refinement"]["phase"] == "refinement":
++        assert {"seed_rank", "current_level", "current_bracket"} <= set(out["unresolved_refinement"])
++    for a, b in zip(obs.events, obs.events[1:]):
++        assert a["post"] == b["pre"]
++
++
++def test_observer_on_off_identical_and_trace_matches_execution():
++    from hierarchy.study_corpus import generate_unit
++    x, _ = generate_unit(NS, "S02", 4096, 1)
++    for k in (1, 4):
++        a = BoundarySearch(x, BoundaryConfig(), BoundaryPolicy(k)).run()
++        obs = TraceObserver()
++        b = BoundarySearch(x, BoundaryConfig(), BoundaryPolicy(k), obs).run()
++        assert a == b
++        ev = obs.events
++        assert sum(e["outcome"].startswith("new_") for e in ev) == b["counts"]["root_trials"]
++        done = [e for e in ev if e["outcome"] != "cap_blocked"]
++        assert sum(e["phase"] == "coarse" for e in done) == b["counts"]["coarse_trials"]
++        assert sum(e["phase"] == "refine" for e in done) == b["counts"]["refine_trials"]
++        assert len(ev) - len(done) == int(b["cap_hit"])
++        assert not any(k_ in e for e in ev for k_ in ("family", "case_id", "replicate", "seed"))
++
++
++def test_v3a_trace_sidecar_passes_trace_checks_and_k1_equals_infer_v2():
++    from hierarchy.study_corpus import generate_unit
++    x, _ = generate_unit(NS, "F12", 4096, 2)
++    r1, side1 = infer_v3a(x, ARMS_V3A["hid_full"], trace=True)
++    r0 = infer_v2(x, ARMS["hid_full"])
++    assert r1.archive == r0.archive and r1.config_sha256 == r0.config_sha256
++    r4, side4 = infer_v3a(x, REFINE4, trace=True)
++    for res, side in ((r1, side1), (r4, side4)):
++        row = {"config_sha256": res.config_sha256, "status": "ok",
++               "archive_sha256": hashlib.sha256(res.archive).hexdigest(),
++               "search_counters": res.telemetry}
++        assert R3.trace_problems(side, row) == []
++    assert side4["refinement_seed_count"] == 4 and r4.config_sha256 == REFINE4.sha256()
++
++
++def test_hid_full_config_hash_is_the_frozen_search_v2_hash():
++    from pathlib import Path
++    fr = json.loads((Path(B.ID_ROOT) / "results/hierarchy_search_v2/search-confirm-v2-r1/"
++                     "freeze.json").read_text())["method_configs"]["hid_full"]
++    assert ARMS_V3A["hid_full"] is ARMS["hid_full"]
++    assert ARMS["hid_full"].sha256() == fr["sha256"]
++    assert ARMS["hid_full"].as_dict() == fr["config"]["search_config"]
++    assert "refinement_seed_count" not in json.dumps(ARMS["hid_full"].as_dict())
++    assert REFINE4.sha256() != ARMS["hid_full"].sha256()
++    assert REFINE4.as_dict()["boundary_policy"]["refinement_seed_count"] == 4
++
++
++def test_decode_disagreement_is_fatal(monkeypatch):
++    from hierarchy.study_corpus import generate_unit
++    x, _ = generate_unit(NS, "F12", 256, 3)
++    monkeypatch.setattr(SG, "decode_archive", lambda a: "0")
++    with pytest.raises(SG.DecodeMismatch):
++        BoundarySearch(x, BoundaryConfig(), BoundaryPolicy(4)).run()
++
++
++def test_trace_overflow_is_a_failure_not_truncation():
++    from hierarchy.study_corpus import generate_unit
++    x, _ = generate_unit(NS, "F12", 1024, 4)
++    with pytest.raises(SG.TraceOverflow):
++        BoundarySearch(x, BoundaryConfig(), BoundaryPolicy(4), TraceObserver(max_events=5)).run()
++
++
++# ---------------------------------------------------------------------------
++# Primary arithmetic on tiny analytical designs
++# ---------------------------------------------------------------------------
++
++def _design(units=20):
++    roles = {"boundary": ("F12", (4096,)), "boundary_large": ("F12", (16384, 65536, 131072)),
++             "boundary_stress": ("S02", (4096, 65536))}
++    splits = {r: {"families": (f,), "base_lengths": bl, "replicates": tuple(range(units))}
++              for r, (f, bl) in roles.items()}
++    return V.make_design(splits, ("hid_full", "hid_refine4"), (),
++                         kinds={"hid_full": "hid_v3a", "hid_refine4": "hid_v3a"})
++
++
++def _index(design, fn):
++    """fn(role, base_length, replicate, ragged) -> (full_bits, refine4_bits) or None."""
++    idx = {}
++    for cid, sp, fam, bl, rep, rg, n in V.expected_cases(design):
++        got = fn(sp, bl, rep, rg)
++        if got is None:
++            continue
++        a, b = got
++        idx[cid] = {m: {"status": "ok", "archive_bits": v, "n_bits": n}
++                    for m, v in (("hid_full", a), ("hid_refine4", b))}
++    return idx
++
++
++def _val(idx, valid=True, complete=True):
++    return {"_index": idx, "engineering_valid": valid, "complete": complete}
++
++
++def test_six_cell_equal_weighting_ragged_n_and_fixed_bootstrap():
++    d = _design()
++    cell_val = {("boundary", 4096): 1, ("boundary_large", 16384): 2,
++                ("boundary_large", 65536): 3, ("boundary_large", 131072): 4,
++                ("boundary_stress", 4096): 5, ("boundary_stress", 65536): 6}
++
++    def fn(sp, bl, rep, rg):
++        n = bl + 3 if rg else bl
++        return 10 * n, 10 * n - cell_val[(sp, bl)] * n * (1 + rep % 2)   # saving = v(1+rep%2)
++    out = R3.decision(_val(_index(d, fn)), d)
++    want = np.mean([v * 1.5 for v in cell_val.values()])                # equal cells, not strings
++    assert out["estimate_bits_per_input_bit"] == pytest.approx(want, abs=1e-12)
++    assert out["verdict"] == "SUPPORTED"
++    # the bootstrap is the owner's, in lexicographic cell order, seed 55001
++    cells = {k: np.asarray([[cell_val[(k[0], k[2])] * (1 + r % 2)] for r in range(20)], float)
++             for k in sorted((r, "F12" if r != "boundary_stress" else "S02", b)
++                             for r, b in cell_val)}
++    draws = R.stratified_bootstrap(cells, 10000, 55001)
++    lo, hi = np.quantile(draws[:, 0], 0.005), np.quantile(draws[:, 0], 0.995)
++    assert out["ci99"] == [pytest.approx(lo, abs=0), pytest.approx(hi, abs=0)]
++    assert out["bootstrap"]["cell_order"] == ["boundary|F12|4096", "boundary_large|F12|16384",
++                                              "boundary_large|F12|65536",
++                                              "boundary_large|F12|131072",
++                                              "boundary_stress|S02|4096",
++                                              "boundary_stress|S02|65536"]
++    assert R3.decision(_val(_index(d, fn)), d) == out                   # fixed RNG and order
++
++
++def test_actual_n_for_ragged_strings():
++    d = _design()
++
++    def fn(sp, bl, rep, rg):
++        return (bl + 3 if rg else bl) * 2, (bl + 3 if rg else bl) * 2 - 3   # 3 bits saved
++    out = R3.decision(_val(_index(d, fn)), d)
++    want = np.mean([np.mean([3 / bl, 3 / (bl + 3)]) for bl in
++                    (4096, 16384, 65536, 131072, 4096, 65536)])
++    assert out["estimate_bits_per_input_bit"] == pytest.approx(want, rel=1e-12)
++
++
++@pytest.mark.parametrize("delta,verdict", [(5, "SUPPORTED"), (-5, "HARMFUL"), (0, "INCONCLUSIVE")])
++def test_verdict_branches(delta, verdict):
++    d = _design()
++    out = R3.decision(_val(_index(d, lambda sp, bl, rep, rg: (1000, 1000 - delta))), d)
++    assert out["verdict"] == verdict
++    if delta == 0:
++        assert out["ci99"] == [0.0, 0.0]                              # equality at zero
++
++
++def test_mixed_signs_inconclusive_and_precedence_invalid_then_incomplete():
++    d = _design()
++    out = R3.decision(_val(_index(d, lambda sp, bl, rep, rg: (1000, 1000 + (5 if rep % 2 else -5)))), d)
++    assert out["verdict"] == "INCONCLUSIVE"
++    missing = _index(d, lambda sp, bl, rep, rg: None if (rep == 3 and rg) else (1000, 990))
++    inc = R3.decision(_val(missing, complete=False), d)
++    assert inc["verdict"] == "INCOMPLETE" and "ci99" not in inc
++    assert inc["available_units"] == 120 - 6                           # missing is never zero
++    assert R3.decision(_val(missing, valid=False, complete=False), d)["verdict"] == "INVALID"
++
++
++def test_raw_fallback_is_a_valid_cost_but_errors_are_not():
++    d = _design()
++    idx = _index(d, lambda sp, bl, rep, rg: (1000, 990))
++    first = next(iter(idx))
++    idx[first]["hid_refine4"]["status"] = "timeout_raw"
++    assert R3.decision(_val(idx), d)["verdict"] == "SUPPORTED"
++    idx[first]["hid_refine4"]["status"] = "error"
++    assert R3.decision(_val(idx), d)["verdict"] == "INCOMPLETE"
++
++
++# ---------------------------------------------------------------------------
++# Registry, job order, reserved access
++# ---------------------------------------------------------------------------
++
++def test_registry_kinds_order_and_job_parity():
++    st = S.get_study("search-v3a")
++    assert st.all_methods == ("hid_full", "hid_refine4", "raw", "rle", "gaps", "period",
++                              "bernoulli", "context", "zlib", "lzma", "pair_grammar",
++                              "baseline_best")
++    assert st.kinds()["hid_full"] == "hid_v3a" and st.method("hid_full").is_hid
++    case = lambda rep: type("C", (), {"replicate": rep})()           # noqa: E731
++    assert st.job_methods(case(6000))[:2] == ("hid_full", "hid_refine4")
++    assert st.job_methods(case(7001))[:2] == ("hid_refine4", "hid_full")
++    assert st.job_methods(case(6001))[2:] == st.baselines
++    assert B.method_config_sha("hid_full", st) == ARMS["hid_full"].sha256()
++    d = freeze_v2.design(st, "search-confirm-v3a-r1")
++    assert d["expected_total_strings"] == 256 and d["expected_total_rows"] == 3072
++
++
++def test_reserved_generation_requires_a_validated_freeze(tmp_path):
++    st = S.get_study("search-v3a")
++    with pytest.raises(SC.ReservedAccessError):
++        st.role_cases("boundary", st.run_dir("search-confirm-v3a-r1"))     # no freeze yet
++    fake = tmp_path / "search-confirm-v3a-r1"
++    fake.mkdir()
++    (fake / "freeze.json").write_text(json.dumps({"study": "search-v3a", "design": {
++        "roles": {"boundary": {}}}}))
++    with pytest.raises(SC.ReservedAccessError):
++        st.role_cases("boundary", fake)                    # an existing file is not enough
++
++
++# ---------------------------------------------------------------------------
++# Real watchdog and the record-to-report pipeline (tiny fixture study)
++# ---------------------------------------------------------------------------
++
++FX_POLICY = S.ResourcePolicy(allowances_s=S.V3A_ALLOWANCES, total_budget_s=28800.0)
++
++
++def fx_study(name, root, resources=FX_POLICY, reps=(0,)):
++    roles = (S.RoleSpec("boundary", ("F12",), (256,), reps, "fixture", rng_namespace=NS,
++                        reserved=True),)
++    spec = S.V3aStudy(name=name, result_root=root, registry="search-v3a", roles=roles,
++                      default_roles=("boundary",), resources=resources, fixture=True,
++                      trace_sidecars=True)
++    S.register_fixture_study(spec)
++    return spec
++
++
++def _run(st, rid="fx-v3a"):
++    freeze_v2.write(st, rid, None)
++    d = st.run_dir(rid)
++    fr, fsha, problems = B.load_and_validate_freeze(rid, "benchmark", st)
++    assert not problems
++    cases, manifest = st.role_cases("boundary", d)
++    B.atomic_write(d / "corpus_manifest.boundary.jsonl",
++                   ("\n".join(json.dumps(m, sort_keys=True) for m in manifest) + "\n").encode())
++    B.run_cases(cases, d, rid, fsha, False, lambda m: None, None, study=st)
++    B._merge_outputs(d, st, rid)
++    return d, cases, fsha
++
++
++@pytest.fixture(scope="module")
++def fx_built(tmp_path_factory):
++    root = tmp_path_factory.mktemp("v3afx") / "results"
++    st = fx_study("fx-v3a-built", root)
++    d, cases, fsha = _run(st)
++    return root
++
++
++@pytest.fixture
++def fx(fx_built, tmp_path):
++    shutil.copytree(fx_built, tmp_path / "results")
++    st = fx_study("fx-v3a-built", tmp_path / "results")
++    return st, st.run_dir("fx-v3a")
++
++
++def _validate(st):
++    val, ctx = V.validate_run("fx-v3a", ["boundary"], frozen=True, study=st)
++    return val, ctx
++
++
++def test_fixture_pipeline_valid_with_traces(fx):
++    st, d = fx
++    val, ctx = _validate(st)
++    assert val["engineering_valid"] and val["complete"], val["invalid"][:5]
++    assert val["trace_checks"]["trace_status_counts"] == {"complete": 4}
++    rows = [json.loads(x) for x in (d / "cases.jsonl").read_text().splitlines()]
++    assert {r["trace_status"] for r in rows if r["method"].startswith("hid")} == {"complete"}
++    assert all("trace_status" not in r for r in rows if not r["method"].startswith("hid"))
++    s, strings, units = R3.summarise(val, ctx["design"], d)
++    assert s["primary"]["verdict"] == "INCOMPLETE"       # a 1-cell fixture is not the design
++
++
++def test_fixture_corruption_and_missing_rows_invalid_precedes_incomplete(fx):
++    st, d = fx
++    rows = [json.loads(x) for x in (d / "cases.jsonl").read_text().splitlines()]
++    hid = next(r for r in rows if r["method"] == "hid_refine4")
++    t = d / hid["trace_path"]
++    t.write_bytes(t.read_bytes().replace(b'"cache_hit": false', b'"cache_hit": true ', 1))
++    val, ctx = _validate(st)
++    assert not val["engineering_valid"]
++    assert any("trace hash_mismatch" in x for x in val["invalid"])
++    (d / "rows" / f"{rows[0]['case_id']}.json").unlink()
++    val, ctx = _validate(st)
++    assert R3.decision(val, ctx["design"])["verdict"] == "INVALID"
++
++
++def test_fixture_missing_and_duplicate_rows(fx):
++    st, d = fx
++    lines = (d / "cases.jsonl").read_text().splitlines()
++    rows = [json.loads(x) for x in lines]
++    cid = rows[0]["case_id"]
++    keep = [x for x, r in zip(lines, rows) if r["case_id"] != cid]
++    (d / "cases.jsonl").write_text("\n".join(keep) + "\n")
++    (d / "rows" / f"{cid}.json").unlink()
++    val, ctx = _validate(st)
++    assert val["engineering_valid"] and not val["complete"]
++    assert R3.decision(val, ctx["design"])["verdict"] == "INCOMPLETE"
++    (d / "cases.jsonl").write_text("\n".join(keep + keep[:1]) + "\n")
++    val, _ = _validate(st)
++    assert not val["engineering_valid"] and val["duplicates"]
++
++
++def test_fixture_resume_changed_identity_fails(fx):
++    st, d = fx
++    p = next((d / "rows").iterdir())
++    rows = json.loads(p.read_text())
++    rows[0]["freeze_sha256"] = "0" * 64
++    p.write_text(json.dumps(rows))
++    cases, _ = st.role_cases("boundary", d)
++    fr, fsha, _ = B.load_and_validate_freeze("fx-v3a", "benchmark", st)
++    with pytest.raises(RuntimeError, match="different freeze"):
++        B.run_cases(cases, d, "fx-v3a", fsha, True, lambda m: None, None, study=st)
++
++
++def test_fixture_source_change_invalidates_freeze(fx, monkeypatch):
++    st, d = fx
++    real = freeze_v2.sha_file
++    target = str(B.ID_ROOT / "hierarchy" / "segmentation.py")
++    monkeypatch.setattr(freeze_v2, "sha_file", lambda p: "0" * 64 if str(p) == target else real(p))
++    _, _, problems = freeze_v2.load_and_validate(st, "fx-v3a")
++    assert any("segmentation.py" in p for p in problems)
++    with pytest.raises(SC.ReservedAccessError):
++        st.role_cases("boundary", d)
++
++
++@pytest.mark.parametrize("limits,hid_status,base_status", [
++    (dict(wall_limit_s=0.01), "timeout_raw", "censored_timeout"),
++    (dict(rss_limit_bytes=1 << 20), "rss_limit_raw", "censored_rss_limit")])
++def test_real_watchdog_tiny_limits_fallback_and_censoring(tmp_path, limits, hid_status, base_status):
++    """DELIBERATELY TINY FIXTURE LIMITS (0.01 s wall / 1 MiB RSS): every worker breaches."""
++    import dataclasses
++    pol = dataclasses.replace(FX_POLICY, **limits)
++    st = fx_study(f"fx-v3a-tiny-{hid_status}", tmp_path / "results", resources=pol)
++    d, cases, fsha = _run(st)
++    val, ctx = V.validate_run("fx-v3a", ["boundary"], frozen=True, study=st)
++    rows = [json.loads(x) for x in (d / "cases.jsonl").read_text().splitlines()]
++    by = {}
++    for r in rows:
++        by.setdefault(r["method"], set()).add(r["status"])
++    assert by["hid_full"] == by["hid_refine4"] == {hid_status}
++    assert by["raw"] == {base_status}
++    assert {r["trace_status"] for r in rows if r["method"].startswith("hid")} == \
++        {"unavailable_watchdog"}
++    assert val["trace_checks"]["trace_status_counts"] == {"unavailable_watchdog": 4}
++    assert len(val["censored"]) == 2 * 9
++    # owner semantics: a portfolio with NO available constituent is an error row, which
++    # validation reports; it is never replaced by raw
++    assert by["baseline_best"] == {"error"}
++    assert val["invalid"] and all("baseline_best error row" in x for x in val["invalid"])
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/tests/test_study_v2.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/tests/test_study_v2.py
+--- index-deconvolution/hierarchy/tests/test_study_v2.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/tests/test_study_v2.py	2026-10-04 07:12:18
+@@ -479,3 +479,72 @@
+     p.write_bytes(p.read_bytes()[:-1] + bytes([p.read_bytes()[-1] ^ 1]))
+     rc, vc, s, v = _rv(st, d)
+     assert vc == cli.EXIT_INVALID and s["primary"]["verdict"] == "not_assessed"
++
++
++# ---------------------------------------------------------------------------
++# 11. Diagnostic summaries: supplied-boundary gap medians (review R1)
++# ---------------------------------------------------------------------------
++
++from hierarchy import diagnostics_v2 as D  # noqa: E402
++
++
++def _ref(role, fam, n, gap=None, available=True):
++    it = {"role": role, "family": fam, "base_length": n, "available": available}
++    if gap is not None:
++        it["gap_hid_full_per_input_bit"] = gap
++    return it
++
++
++def _middle_mean(gaps):
++    s = sorted(gaps)
++    return (s[len(s) // 2 - 1] + s[len(s) // 2]) / 2 if len(s) % 2 == 0 else s[len(s) // 2]
++
++
++def test_boundary_gap_median_averages_the_two_middle_values_of_an_even_cell():
++    gaps = [0.3, -0.1, -0.4, 0.2]                     # sorted: -0.4, -0.1, 0.2, 0.3
++    agg = D.boundary_gap_summary([_ref("stress", "S02", 64, g) for g in gaps])
++    c = agg["stress|S02|64"]
++    assert c["gap_median"] == pytest.approx(0.05, abs=1e-15)
++    assert c["gap_median"] != pytest.approx(0.2)      # the upper middle the old owner reported
++    assert c["gap_mean"] == pytest.approx(0.0, abs=1e-15)
++    assert (c["strings"], c["available"]) == (4, 4)
++    assert (c["automatic_shorter_than_reference"], c["automatic_longer_than_reference"],
++            c["ties"]) == (2, 2, 0)
++
++
++def test_boundary_gap_median_of_an_odd_cell_is_the_middle_value_and_cells_stay_separate():
++    items = [_ref("transfer", "F12", 16, g) for g in (0.25, -0.5, 0.0)] + \
++            [_ref("transfer", "F12", 32, g) for g in (-0.3, -0.1)]
++    agg = D.boundary_gap_summary(items)
++    assert agg["transfer|F12|16"]["gap_median"] == 0.0
++    assert agg["transfer|F12|16"]["ties"] == 1
++    assert agg["transfer|F12|32"]["gap_median"] == pytest.approx(-0.2, abs=1e-15)
++    assert agg["transfer|F12|32"]["automatic_shorter_than_reference"] == 2
++
++
++def test_boundary_gap_summary_counts_unavailable_strings_and_leaves_empty_cells_unset():
++    items = [_ref("confirmation", "F12", 8, available=False),
++             _ref("confirmation", "F12", 8),                  # available, hid_full row absent
++             _ref("confirmation", "F12", 16, available=False)]
++    agg = D.boundary_gap_summary(items)
++    assert (agg["confirmation|F12|8"]["strings"], agg["confirmation|F12|8"]["available"]) == (2, 1)
++    for k in agg:
++        assert agg[k]["gap_median"] is None and agg[k]["gap_mean"] is None
++
++
++def test_fixture_diagnostics_by_cell_is_the_owner_summary_of_its_saved_references(run):
++    # Wiring check through the production CLI. On this fixture the two middle gaps of
++    # every cell coincide, so the defect itself is detected by the unit tests above.
++    st, d = run
++    sb = json.loads((d / "diagnostics.json").read_text())["supplied_boundary_references"]
++    items = json.loads((d / sb["items_path"]).read_text())
++    assert sb["by_cell"] == D.boundary_gap_summary(items)
++    checked = 0
++    for k, c in sb["by_cell"].items():
++        gaps = [it["gap_hid_full_per_input_bit"] for it in items
++                if f"{it['role']}|{it['family']}|{it['base_length']}" == k
++                and "gap_hid_full_per_input_bit" in it]
++        assert gaps, k
++        assert c["gap_median"] == pytest.approx(_middle_mean(gaps), abs=1e-15)
++        checked += 1
++    assert checked == len(sb["by_cell"]) > 0
+diff --color -ruN --exclude=__pycache__ index-deconvolution/hierarchy/validation.py /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/validation.py
+--- index-deconvolution/hierarchy/validation.py	1969-12-31 18:00:00
++++ /Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/validation.py	2026-10-04 07:20:49
+@@ -38,7 +38,7 @@
+     kinds = (design or {}).get("kinds")
+     if kinds:
+         k = kinds[method]
+-        return "hid" if k in ("hid_v1", "hid_v2") else k
++        return "hid" if k in ("hid_v1", "hid_v2", "hid_v3a") else k
+     if method == "baseline_best":
+         return "portfolio"
+     return "hid" if method.startswith("hid_") else "baseline"
+@@ -455,6 +455,10 @@
+     if not legacy and study.registry == "search-v2":
+         v["search_v2_checks"] = search_v2_checks(v["_index"], design)
+         extra_invalid += v["search_v2_checks"]["invalid"]
++    if not legacy and study.trace_sidecars:
++        from .report_v3a import trace_checks
++        v["trace_checks"] = trace_checks(v["_index"], d, study.hid_methods)
++        extra_invalid += v["trace_checks"]["invalid"]
+     if extra_invalid:
+         v["invalid"] = extra_invalid + v["invalid"]
+         v["engineering_valid"] = False
+--- /dev/null	2026-10-04 08:35:57
++++ index-deconvolution/experiments/search_v3a/__init__.py	2026-10-04 07:11:15
+@@ -0,0 +1,5 @@
++"""HID-search-v3a orchestration and audit adapters (PROTOCOL_hierarchy_search_v3a.md).
++
++Thin adapters only: preservation records, development comparison, read-only audit.
++The search, runner, validator, freeze and bootstrap owners live in ``hierarchy``.
++"""
+--- /dev/null	2026-10-04 08:35:57
++++ index-deconvolution/experiments/search_v3a/audit.py	2026-10-04 07:23:03
+@@ -0,0 +1,161 @@
++"""Independent read-only arithmetic audit of search-confirm-v3a-r1 (BENCHMARK.md 5).
++
++    PYTHONPATH=experiments:.:../src ../venv/bin/python -B -m search_v3a.audit
++
++Reads archive bytes and row files only (no saved aggregate is an input): recomputes
++every promised archive's hash and length, decodes it with the independent decoder to
++the input whose hash the corpus manifest records, checks HID raw-fallback validity,
++rebuilds the nine-way portfolio and its tie order and status, and recomputes the
++per-string savings, the six cell means and the equal-cell point estimate with plain
++Python. The bootstrap draws are inspected (count, cell order, shapes) through the
++owner's ``cell_index_draws`` and the percentile interval is recomputed from those
++indices. No encoding. Writes ``arithmetic_audit.json`` only.
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++from collections import defaultdict
++from pathlib import Path
++
++import numpy as np
++
++from hierarchy import codes as C
++from hierarchy.decode import decode_archive
++
++ID_ROOT = Path(__file__).resolve().parents[2]
++RUN = ID_ROOT / "results" / "hierarchy_search_v3a" / "search-confirm-v3a-r1"
++PACKET = ID_ROOT / "protocols" / "hierarchy_search_v3a"
++BASELINES = ("raw", "rle", "gaps", "period", "bernoulli", "context", "zlib", "lzma",
++             "pair_grammar")
++HID = ("hid_full", "hid_refine4")
++PRIMARY = ("boundary", "boundary_large", "boundary_stress")
++
++
++def sha(b: bytes) -> str:
++    return hashlib.sha256(b).hexdigest()
++
++
++def manifest_hashes() -> dict:
++    out = {}
++    for p in sorted(RUN.glob("corpus_manifest.*.jsonl")):
++        for line in p.read_text().splitlines():
++            if line.strip():
++                m = json.loads(line)
++                base_id, rag_id = m["case_ids"]
++                out[base_id], out[rag_id] = m["base_sha256"], m["full_sha256"]
++    return out
++
++
++def main() -> int:
++    cases = json.loads((PACKET / "intended_cases.json").read_text())["cases"]
++    want = manifest_hashes()
++    problems, checked, decoded = [], 0, {}
++    status = defaultdict(lambda: defaultdict(int))
++    per_string = {}
++    for c in cases:
++        cid = c["case_id"]
++        p = RUN / "rows" / f"{cid}.json"
++        if not p.exists():
++            problems.append(f"{cid}: rows file missing")
++            continue
++        rows = {}
++        for r in json.loads(p.read_text()):
++            if r["method"] in rows:
++                problems.append(f"{cid}:{r['method']} duplicate")
++            rows[r["method"]] = r
++        arcs = {}
++        for m in HID + BASELINES:
++            r = rows.get(m)
++            if r is None:
++                problems.append(f"{cid}:{m} absent")
++                continue
++            status[m][r["status"]] += 1
++            if not r.get("archive_path"):
++                if r["status"] not in ("not_run", "error"):
++                    problems.append(f"{cid}:{m} status {r['status']} without archive")
++                continue
++            data = (RUN / r["archive_path"]).read_bytes()
++            checked += 1
++            if sha(data) != r["archive_sha256"] or 8 * len(data) != r["archive_bits"]:
++                problems.append(f"{cid}:{m} archive hash/length differs from the row")
++            h = sha(data)
++            if h not in decoded:
++                s = decode_archive(data)
++                decoded[h] = (len(s), sha(s.encode("ascii")))
++            if decoded[h] != (c["n_bits"], want.get(cid)):
++                problems.append(f"{cid}:{m} archive does not decode to the manifest input")
++            if r["status"] in ("timeout_raw", "rss_limit_raw") and data[4] != C.CODEC_LITERAL:
++                problems.append(f"{cid}:{m} raw fallback is not a literal archive")
++            if r["status"] in ("ok", "timeout_raw", "rss_limit_raw") or m in BASELINES:
++                arcs[m] = (r["status"], data)
++        pb = rows.get("baseline_best")
++        avail = {m: d for m, (st, d) in arcs.items() if m in BASELINES and st == "ok"}
++        all_ok = len(avail) == len(BASELINES)
++        if pb is None:
++            problems.append(f"{cid}: portfolio row absent")
++        elif avail:
++            best = min(avail, key=lambda m: (len(avail[m]), avail[m][4], avail[m]))
++            if pb["selected_method"] != best or pb["archive_bits"] != 8 * len(avail[best]):
++                problems.append(f"{cid}: portfolio selection differs from the recomputed minimum")
++            if (pb["status"] == "ok") != all_ok:
++                problems.append(f"{cid}: portfolio status {pb['status']} with all_ok={all_ok}")
++        a, b = arcs.get("hid_full"), arcs.get("hid_refine4")
++        per_string[cid] = (None if a is None or b is None
++                           else (8 * len(a[1]) - 8 * len(b[1])) / c["n_bits"])
++    # plain-Python primary arithmetic
++    units = defaultdict(dict)
++    for c in cases:
++        if c["role"] in PRIMARY:
++            units[(c["role"], c["family"], c["base_length"])].setdefault(c["replicate"], []).append(
++                per_string.get(c["case_id"]))
++    cell_means, cell_units = {}, {}
++    complete = True
++    for k in sorted(units):
++        vals = []
++        for rep in sorted(units[k]):
++            pair = units[k][rep]
++            if len(pair) != 2 or any(v is None for v in pair):
++                complete = False
++                continue
++            vals.append((pair[0] + pair[1]) / 2)
++        cell_units[k] = vals
++        cell_means["|".join(map(str, k))] = sum(vals) / len(vals) if vals else None
++    out = {"archives_checked": checked, "distinct_archives_decoded": len(decoded),
++           "strings": len(cases), "status_counts": {m: dict(v) for m, v in status.items()},
++           "problems": problems[:500], "problem_count": len(problems),
++           "cell_means": cell_means, "complete_primary_units": complete
++           and all(len(v) == 20 for v in cell_units.values()) and len(cell_units) == 6}
++    if out["complete_primary_units"]:
++        point = sum(cell_means.values()) / 6
++        draws_idx = __import__("hierarchy.report", fromlist=["x"]).cell_index_draws(
++            {k: 20 for k in cell_units}, 10000, 55001)
++        order = list(draws_idx)
++        acc = np.zeros(10000)
++        for k in order:
++            acc += np.asarray(cell_units[k])[draws_idx[k]].mean(axis=1)
++        acc /= 6
++        lo, hi = float(np.quantile(acc, 0.005)), float(np.quantile(acc, 0.995))
++        out["point_estimate"] = point
++        out["bootstrap_inspection"] = {"cell_order": ["|".join(map(str, k)) for k in order],
++                                       "shapes": [list(draws_idx[k].shape) for k in order],
++                                       "ci99_recomputed": [lo, hi]}
++        dec = json.loads((RUN / "DECISION.json").read_text())
++        out["decision_point_equal"] = dec.get("estimate_bits_per_input_bit") is not None and \
++            abs(dec["estimate_bits_per_input_bit"] - point) < 1e-12
++        out["decision_ci_equal"] = dec.get("ci99") is not None and \
++            max(abs(dec["ci99"][0] - lo), abs(dec["ci99"][1] - hi)) < 1e-12
++        summ = json.loads((RUN / "summary.json").read_text())
++        out["cell_means_equal"] = all(abs(summ["primary"]["cells"][k]["mean"] - v) < 1e-12
++                                      for k, v in cell_means.items())
++    out["pass"] = not problems and (not out["complete_primary_units"] or (
++        out["decision_point_equal"] and out["decision_ci_equal"] and out["cell_means_equal"]))
++    (RUN / "arithmetic_audit.json").write_text(json.dumps(out, indent=1, sort_keys=True) + "\n")
++    print(json.dumps({k: out.get(k) for k in ("pass", "archives_checked", "problem_count",
++                                              "point_estimate", "decision_point_equal",
++                                              "decision_ci_equal", "cell_means_equal")}))
++    return 0 if out["pass"] else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- /dev/null	2026-10-04 08:35:57
++++ index-deconvolution/experiments/search_v3a/development.py	2026-10-04 07:18:33
+@@ -0,0 +1,200 @@
++"""HID-search-v3a fixed development on retained inputs (BENCHMARK.md section 1).
++
++    PYTHONPATH=experiments:.:../src ../venv/bin/python -B -m search_v3a.development \
++        run control|treatment RUN_ID [--resume]   |   compare CONTROL_RUN TREATMENT_RUN
++
++``run`` executes the production runner (``hierarchy.benchmark.run_cases``, real
++watchdog, ``python -S`` workers, trace sidecars) for one development study:
++  control    hid_full (k = 1) on all 1,792 strings of search-confirm-v2-r1;
++  treatment  hid_refine4 (k = 4) on the 208 fixed D2 strings (176 targets, 32 controls).
++Inputs come only from decoding each retained raw archive (``search_diagnosis.common.
++load_case``, hash-checked). ``compare`` writes the compatibility gate, the treatment
++record check and the descriptive development comparison. No efficacy gate, no tuning.
++"""
++from __future__ import annotations
++
++import json
++import sys
++import time
++from collections import defaultdict
++from pathlib import Path
++
++from hierarchy import benchmark as B
++from hierarchy import freeze_v2
++from hierarchy import report_v3a as R3
++from hierarchy.cli_v2 import DETERMINISTIC, _strip_timing
++from hierarchy.corpus import Case
++from hierarchy.study import get_study
++from search_diagnosis.common import load_case, parse_case_id, saved_rows
++
++from . import ledger
++
++ID_ROOT = Path(__file__).resolve().parents[2]
++PACKET = ID_ROOT / "protocols" / "hierarchy_search_v3a"
++V2_RUN = ID_ROOT / "results" / "hierarchy_search_v2" / "search-confirm-v2-r1"
++REFERENCES = V2_RUN / "diagnostics" / "boundary_reference" / "references.json"
++STUDIES = {"control": "search-v3a-dev-control", "treatment": "search-v3a-dev-treatment"}
++OUT = ID_ROOT / "results" / "hierarchy_search_v3a" / "development"
++
++
++def contract() -> dict:
++    return json.loads((PACKET / "contract.json").read_text())
++
++
++def case_ids(kind: str) -> list[str]:
++    dev = contract()["development"]
++    if kind == "control":
++        return list(dev["control_case_ids"])
++    return list(dev["target_case_ids"]) + list(dev["control_case_ids_for_paired_comparison"])
++
++
++def load_cases(ids) -> list[Case]:
++    out = []
++    for cid in ids:
++        p = parse_case_id(cid)
++        c = load_case(cid)
++        out.append(Case(cid, p["role"], p["family"], p["base_length"], p["replicate"],
++                        p["ragged"], c.bits))
++    return out
++
++
++def run(kind: str, run_id: str, resume: bool) -> int:
++    study = get_study(STUDIES[kind])
++    d = study.run_dir(run_id)
++    d.mkdir(parents=True, exist_ok=True)
++    fp = freeze_v2.dev_fingerprint(study)
++    cases = load_cases(case_ids(kind))
++    man = "\n".join(json.dumps({"case_id": c.case_id, "input_sha256": c.input_sha256,
++                                "n_bits": len(c.bits), "source_run": str(V2_RUN.relative_to(ID_ROOT)),
++                                "source": "retained raw archive, decoded and hash-checked"},
++                               sort_keys=True) for c in cases) + "\n"
++    mp = d / "inputs_manifest.jsonl"
++    if mp.exists() and mp.read_text() != man:
++        raise SystemExit("retained inputs differ from the stored manifest")
++    B.atomic_write(mp, man.encode())
++    budget = ledger.SpanBudget("development", f"dev:{kind}:{run_id}")
++    t0 = time.time()
++    with open(d / "attempts.jsonl", "a") as fh:
++        fh.write(json.dumps({"event": "start", "run_id": run_id, "kind": kind, "fingerprint": fp,
++                             "resume": resume, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                             "cases": len(cases)}) + "\n")
++    stats = B.run_cases(cases, d, run_id, fp, resume, lambda m: None, budget, study=study)
++    with open(d / "attempts.jsonl", "a") as fh:
++        fh.write(json.dumps({"event": "end", "run_id": run_id, "stats": stats,
++                             "wall_s": time.time() - t0}) + "\n")
++    print(json.dumps({"run_id": run_id, "stats": stats, "wall_s": round(time.time() - t0),
++                      "development_used_s": round(budget.elapsed())}))
++    return 0
++
++
++def _rows(study, run_id: str, ids) -> dict:
++    d = study.run_dir(run_id)
++    out = {}
++    for cid in ids:
++        p = d / "rows" / f"{cid}.json"
++        out[cid] = {r["method"]: r for r in json.loads(p.read_text())} if p.exists() else {}
++    return out
++
++
++def compatibility(control_run: str) -> dict:
++    """All 1,792 hid_full rows against the accepted search-v2 rows, field by field."""
++    study = get_study(STUDIES["control"])
++    d = study.run_dir(control_run)
++    ids = case_ids("control")
++    rows = _rows(study, control_run, ids)
++    fields = DETERMINISTIC + ("config_sha256", "input_sha256", "n_bits")
++    diffs, statuses, archives_ok = [], defaultdict(int), 0
++    from hierarchy.search_v2 import ARMS
++    for cid in ids:
++        new = rows[cid].get("hid_full")
++        old = saved_rows(cid)["hid_full"]
++        if new is None:
++            diffs.append({"case_id": cid, "field": "row_missing"})
++            statuses["absent"] += 1
++            continue
++        statuses[new["status"]] += 1
++        for k in fields:
++            if new.get(k) != old.get(k):
++                diffs.append({"case_id": cid, "field": k})
++        if _strip_timing(new.get("search_counters")) != _strip_timing(old.get("search_counters")):
++            diffs.append({"case_id": cid, "field": "search_counters (timing removed)"})
++        if new.get("archive_path"):
++            data = (d / new["archive_path"]).read_bytes()
++            old_data = (V2_RUN / old["archive_path"]).read_bytes()
++            if data == old_data and B.sha256_bytes(data) == new["archive_sha256"]:
++                archives_ok += 1
++            else:
++                diffs.append({"case_id": cid, "field": "archive_bytes"})
++    cfg = ARMS["hid_full"]
++    old_cfg = json.loads((V2_RUN / "freeze.json").read_text())["method_configs"]["hid_full"]
++    out = {"population": len(ids), "statuses": dict(statuses),
++           "archives_byte_identical": archives_ok, "differences": diffs[:500],
++           "difference_count": len(diffs),
++           "fields_compared": list(fields) + ["search_counters (timing removed)", "archive_bytes"],
++           "config_sha256_now": cfg.sha256(), "config_sha256_frozen_v2": old_cfg["sha256"],
++           "config_dict_equal": cfg.as_dict() == old_cfg["config"]["search_config"],
++           "excluded": "recorded timings (keys ending wall_s, encode/worker wall, RSS) and the new "
++                       "separate trace fields"}
++    out["pass"] = (out["archives_byte_identical"] == len(ids) == 1792 and not diffs
++                   and statuses.get("ok") == len(ids) and out["config_dict_equal"]
++                   and out["config_sha256_now"] == out["config_sha256_frozen_v2"])
++    return out
++
++
++def compare(control_run: str, treatment_run: str) -> int:
++    OUT.mkdir(parents=True, exist_ok=True)
++    comp = compatibility(control_run)
++    B.atomic_write(OUT / "compatibility.json", json.dumps(comp, indent=1).encode())
++    cst, tst = get_study(STUDIES["control"]), get_study(STUDIES["treatment"])
++    ids = case_ids("treatment")
++    targets = set(contract()["development"]["target_case_ids"])
++    crow, trow = _rows(cst, control_run, ids), _rows(tst, treatment_run, ids)
++    cdir, tdir = cst.run_dir(control_run), tst.run_dir(treatment_run)
++    refs = {it["case_id"]: it for it in json.loads(REFERENCES.read_text())}
++    records = []
++    for cid in ids:
++        p = parse_case_id(cid)
++        a, b = crow[cid].get("hid_full"), trow[cid].get("hid_refine4")
++        rec = {"case_id": cid, "cell": p["cell"], "unit": p["unit"], "target": cid in targets,
++               "n_bits": (a or b or {}).get("n_bits"),
++               "full_status": a and a["status"], "refine4_status": b and b["status"],
++               "full_bits": a and a["archive_bits"], "refine4_bits": b and b["archive_bits"]}
++        for name, row, dd in (("full", a, cdir), ("refine4", b, tdir)):
++            rec[f"{name}_trace"] = R3.trace_summary(dd, row, refs.get(cid, {}).get("cuts"),
++                                                    contract()["trace"]["supplied_cut_tolerance_bits"])
++        records.append(rec)
++    treat_ok = sum(1 for r in records if r["refine4_status"] in ("ok", "timeout_raw", "rss_limit_raw"))
++    trace_ok = sum(1 for r in records if r["target"] and r["refine4_trace"]["status"] == "complete"
++                   and r["full_trace"]["status"] == "complete")
++    desc = R3.development_summary(records)
++    gate = {"compatibility_pass": comp["pass"],
++            "treatment_terminal_records": treat_ok, "treatment_population": len(ids),
++            "treatment_errors": [r["case_id"] for r in records
++                                 if r["refine4_status"] not in ("ok", "timeout_raw", "rss_limit_raw")],
++            "paired_target_traces_complete": trace_ok, "paired_target_strings": len(targets),
++            "trace_check_failures": [r["case_id"] for r in records
++                                     for k in ("full_trace", "refine4_trace")
++                                     if r[k].get("problems")]}
++    gate["pass"] = (comp["pass"] and treat_ok == len(ids) == 208 and not gate["treatment_errors"]
++                    and trace_ok == len(targets) == 176 and not gate["trace_check_failures"])
++    B.atomic_write(OUT / "development_records.json", json.dumps(records, indent=1).encode())
++    B.atomic_write(OUT / "development_summary.json", json.dumps(desc, indent=1).encode())
++    B.atomic_write(OUT / "engineering_gate.json", json.dumps(gate, indent=1).encode())
++    print(json.dumps({"engineering_gate": gate["pass"], "compatibility": comp["pass"],
++                      "archives_identical": comp["archives_byte_identical"],
++                      "differences": comp["difference_count"],
++                      "treatment_terminal": treat_ok, "traces_complete": trace_ok}))
++    return 0 if gate["pass"] else 1
++
++
++def main(argv=None) -> int:
++    argv = sys.argv[1:] if argv is None else argv
++    if argv[0] == "run":
++        return run(argv[1], argv[2], "--resume" in argv)
++    if argv[0] == "compare":
++        return compare(argv[1], argv[2])
++    raise SystemExit(__doc__)
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- /dev/null	2026-10-04 08:35:57
++++ index-deconvolution/experiments/search_v3a/ledger.py	2026-10-04 07:17:30
+@@ -0,0 +1,113 @@
++"""Controller wall-span ledger for HID-search-v3a (PROTOCOL section 4).
++
++One durable event stream, ``<run>/ledger/resource_events.jsonl``: ``start`` and ``stop``
++events per category (development, prospective, report_verification) and ``checkpoint``
++events from runners. A category's charge is the sum of its closed spans plus, while a
++span is open, the time to now. Spans never overlap across categories (``start`` refuses
++while another category is open). Worker CPU/wall is reported separately from the rows.
++
++    PYTHONPATH=experiments:.:../src ../venv/bin/python -B -m search_v3a.ledger \
++        start|stop CATEGORY NOTE   |   status
++"""
++from __future__ import annotations
++
++import json
++import os
++import sys
++import time
++from pathlib import Path
++
++ID_ROOT = Path(__file__).resolve().parents[2]
++RUN_DIR = ID_ROOT / "results" / "hierarchy_search_v3a" / "search-confirm-v3a-r1"
++LEDGER = RUN_DIR / "ledger" / "resource_events.jsonl"
++CAPS = {"development": 14400.0, "prospective": 10800.0, "report_verification": 3600.0}
++TOTAL = 28800.0
++REPORT_RESERVE = 600.0
++
++
++def events(path: Path = LEDGER) -> list[dict]:
++    if not path.exists():
++        return []
++    return [json.loads(x) for x in path.read_text().splitlines() if x.strip()]
++
++
++def _append(ev: dict, path: Path = LEDGER) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    ev = dict(ev, utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
++    with open(path, "a") as fh:
++        fh.write(json.dumps(ev, sort_keys=True) + "\n")
++        fh.flush()
++        os.fsync(fh.fileno())
++
++
++def state(path: Path = LEDGER, now: float | None = None) -> dict:
++    now = time.time() if now is None else now
++    used = {c: 0.0 for c in CAPS}
++    open_cat, open_t = None, None
++    for e in events(path):
++        if e["event"] == "start":
++            if open_cat is not None:
++                raise RuntimeError(f"ledger: {e['category']} started while {open_cat} open")
++            open_cat, open_t = e["category"], e["t"]
++        elif e["event"] == "stop":
++            if e["category"] != open_cat:
++                raise RuntimeError(f"ledger: stop {e['category']} without an open span")
++            used[open_cat] += e["t"] - open_t
++            open_cat, open_t = None, None
++    if open_cat is not None:
++        used[open_cat] += now - open_t
++    return {"used_s": used, "open": open_cat, "caps_s": CAPS,
++            "remaining_s": {c: CAPS[c] - used[c] for c in CAPS},
++            "total_used_s": sum(used.values()), "total_cap_s": TOTAL}
++
++
++def start(category: str, note: str, path: Path = LEDGER) -> None:
++    if category not in CAPS:
++        raise ValueError(category)
++    st = state(path)
++    if st["open"] is not None:
++        raise RuntimeError(f"category {st['open']} is still open")
++    _append({"event": "start", "category": category, "t": time.time(), "note": note}, path)
++
++
++def stop(category: str, note: str, path: Path = LEDGER) -> None:
++    if state(path)["open"] != category:
++        raise RuntimeError(f"{category} is not open")
++    _append({"event": "stop", "category": category, "t": time.time(), "note": note}, path)
++
++
++class SpanBudget:
++    """The budget interface ``hierarchy.benchmark.run_cases`` reads (``expired``,
++    ``save``, ``elapsed``), over the open span of one category. ``margin_s`` keeps time
++    to terminate and record running workers before the cap: no job starts inside it."""
++
++    def __init__(self, category: str, job: str, margin_s: float = 90.0,
++                 path: Path = LEDGER) -> None:
++        if state(path)["open"] != category:
++            raise RuntimeError(f"open a {category} span before running its jobs")
++        self.category, self.job, self.margin, self.path = category, job, margin_s, path
++        self.total = CAPS[category]
++
++    def elapsed(self) -> float:
++        return state(self.path)["used_s"][self.category]
++
++    def expired(self) -> bool:
++        return self.elapsed() > self.total - self.margin
++
++    def save(self) -> None:
++        _append({"event": "checkpoint", "category": self.category, "t": time.time(),
++                 "job": self.job}, self.path)
++
++
++def main(argv=None) -> int:
++    argv = sys.argv[1:] if argv is None else argv
++    if argv[0] == "start":
++        start(argv[1], " ".join(argv[2:]))
++    elif argv[0] == "stop":
++        stop(argv[1], " ".join(argv[2:]))
++    print(json.dumps(state(), indent=1))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- /dev/null	2026-10-04 08:35:57
++++ index-deconvolution/experiments/search_v3a/notebook20.py	2026-10-04 07:59:11
+@@ -0,0 +1,106 @@
++"""Execute notebook 20 under the reviewed artifact-only guard and save its checks.
++
++    (from index-deconvolution/) ../venv/bin/python -B experiments/search_v3a/notebook20.py [TAG]
++
++Reuses ``run``/``texts``/``sha_file`` from the reviewed harness
++results/hierarchy_search_v2/review_closure/scripts/execute_notebook_artifact_only.py
++(import gate: only hierarchy.{decode,ledger,codes,model}; no src imports; no writes
++below results/; no subprocess), as the report-r3 driver of notebook 18 does. Executes
++from the notebook directory and from the repository root, keeps BOTH executed
++notebooks, compares the two after coalescing adjacent same-name stream messages, and
++checks that saved values are displayed. Writes the deliverable notebook (the
++notebook-directory execution) and records under the run's ``notebook/`` directory.
++A presentation adapter written after the freeze; it reads saved artifacts only.
++"""
++import importlib.util
++import json
++import sys
++import tempfile
++from pathlib import Path
++
++import nbformat
++
++sys.dont_write_bytecode = True
++ID = Path(__file__).resolve().parents[2]
++REPO = ID.parent
++HARNESS = ID / "results/hierarchy_search_v2/review_closure/scripts/execute_notebook_artifact_only.py"
++spec = importlib.util.spec_from_file_location("reviewed_notebook_guard", HARNESS)
++guard = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(guard)
++
++NB = ID / "notebooks" / "20_hierarchy_search_v3a.ipynb"
++BUILDER = ID / "notebooks" / "build_20.py"
++RUN = ID / "results/hierarchy_search_v3a/search-confirm-v3a-r1"
++ALLOWED = {"hierarchy", "hierarchy.decode", "hierarchy.ledger", "hierarchy.codes", "hierarchy.model"}
++
++
++def coalesced(cell) -> list:
++    out = []
++    for o in cell.get("outputs", []):
++        if o["output_type"] == "stream" and out and out[-1][0] == "stream" and out[-1][1] == o["name"]:
++            out[-1] = ("stream", o["name"], out[-1][2] + o["text"])
++        elif o["output_type"] == "stream":
++            out.append(("stream", o["name"], o["text"]))
++        else:
++            out.append((o["output_type"], json.dumps({k: v for k, v in o.items() if k != "execution_count"},
++                                                     sort_keys=True)))
++    return out
++
++
++def main() -> int:
++    tag = sys.argv[1] if len(sys.argv) > 1 else "run1"
++    tmp = Path(tempfile.mkdtemp(prefix="nb20_guard_"))
++    results, src = ID / "results", ID / "src"
++    unexecuted_sha = guard.sha_file(NB)
++    nb_a, rec_a = guard.run(NB, NB.parent, "notebook_dir", tmp, results, src)
++    nb_b, rec_b = guard.run(NB, REPO, "repository_root", tmp, results, src)
++    ca = [c for c in nb_a.cells if c.cell_type == "code"]
++    cb = [c for c in nb_b.cells if c.cell_type == "code"]
++    diffs = [i for i, (x, y) in enumerate(zip(ca, cb)) if coalesced(x) != coalesced(y)]
++    alltext = "\n".join(t for c in ca for t in guard.texts(c))
++    dec = json.loads((RUN / "DECISION.json").read_text())
++    freeze = (RUN / "freeze.sha256").read_text().strip()
++    shown = {"freeze": freeze[:16] in alltext,
++             "verdict": f"verdict: {dec['verdict']}" in alltext,
++             "estimate": str(dec["estimate_bits_per_input_bit"]) in alltext,
++             "interval": str(dec["ci99"]) in alltext}
++    forbidden = [t for t in ("infer_v2", "infer_v3a", "hierarchy.search", "hierarchy.segmentation",
++                             "BoundarySearch", "study_corpus", "hierarchy.corpus", "hierarchy.benchmark",
++                             "import random", "subprocess", "hierarchy.wire", "search_v3a.")
++                 if any(t in c.source for c in ca)]
++    checks = {
++        "both_executions_exit_0": rec_a["exit_status"] == 0 and rec_b["exit_status"] == 0,
++        "zero_error_outputs": rec_a["error_outputs"] == 0 and rec_b["error_outputs"] == 0,
++        "zero_unexecuted": rec_a["unexecuted"] == 0 and rec_b["unexecuted"] == 0,
++        "guard_active_and_no_refusals": all(r["guard_log_present"] and not r["guard"]["refused"]
++                                            for r in (rec_a, rec_b)),
++        "only_allowlisted_hierarchy_modules": all(
++            set(r["guard"]["allowed_hierarchy_imports"]) <= ALLOWED for r in (rec_a, rec_b)),
++        "no_inference_generation_or_job_tokens_in_code": not forbidden,
++        "cwd_outputs_identical_after_bootstrap_banner": len(ca) == len(cb) and not [i for i in diffs if i != 0],
++        "saved_values_displayed": all(shown.values()),
++    }
++    ver = RUN / "notebook"
++    ver.mkdir(parents=True, exist_ok=True)
++    nbformat.write(nb_a, ver / f"{tag}.notebook_dir.ipynb")
++    nbformat.write(nb_b, ver / f"{tag}.repository_root.ipynb")
++    report = {"harness": {"path": str(HARNESS.relative_to(REPO)), "sha256": guard.sha_file(HARNESS)},
++              "driver_sha256": guard.sha_file(Path(__file__)), "builder_sha256": guard.sha_file(BUILDER),
++              "unexecuted_notebook_sha256": unexecuted_sha, "freeze_sha256": freeze,
++              "executions": {"notebook_dir": rec_a, "repository_root": rec_b},
++              "cwd_text_output_differences": diffs,
++              "cwd_difference_detail": {i: {"notebook_dir": guard.texts(ca[i]),
++                                            "repository_root": guard.texts(cb[i])} for i in diffs},
++              "forbidden_tokens_in_code": forbidden, "displayed_value_checks": shown,
++              "checks": checks, "all_checks_pass": all(checks.values())}
++    (ver / f"{tag}.checks.json").write_text(json.dumps(report, indent=1) + "\n")
++    if report["all_checks_pass"]:
++        nbformat.write(nb_a, NB)            # deliverable: the notebook-directory execution
++    print(json.dumps({"checks": checks, "diffs": diffs,
++                      "elapsed_s": [rec_a["elapsed_s"], rec_b["elapsed_s"]],
++                      "exception": [rec_a["exception"], rec_b["exception"]]}, indent=1))
++    return 0 if report["all_checks_pass"] else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+--- /dev/null	2026-10-04 08:35:57
++++ index-deconvolution/experiments/search_v3a/preserve.py	2026-10-04 07:12:11
+@@ -0,0 +1,138 @@
++"""Preservation records for HID-search-v3a: git status, file hashes, protected trees,
++and an executable snapshot of the hierarchy package plus shared owners.
++
++    (from index-deconvolution/) PYTHONPATH=experiments:.:../src ../venv/bin/python -B \
++        -m search_v3a.preserve \
++        {initial|final|integration} OUT_DIR
++
++The tree aggregate is the format of ``experiments/preserve_confirm_v1_r1_sources.tree_hash``
++(sorted relative path, NUL, file sha256, newline) with bytecode excluded, as recorded in
++``protocols/hierarchy_search_v3a/INITIAL_SOURCE_STATE.json``.
++"""
++from __future__ import annotations
++
++import hashlib
++import io
++import json
++import subprocess
++import sys
++import tarfile
++import time
++from pathlib import Path
++
++ID_ROOT = Path(__file__).resolve().parents[2]
++REPO = ID_ROOT.parent
++PACKET = ID_ROOT / "protocols" / "hierarchy_search_v3a"
++SNAPSHOT_GLOBS = ("index-deconvolution/hierarchy/**/*.py", "index-deconvolution/hierarchy/*.md",
++                  "index-deconvolution/experiments/search_diagnosis/**/*.py",
++                  "index-deconvolution/src/deconvolution.py", "index-deconvolution/src/causalbool.py",
++                  "src/description_lengths.py")
++
++
++def sha(data: bytes) -> str:
++    return hashlib.sha256(data).hexdigest()
++
++
++def _bytecode(p: Path) -> bool:
++    return "__pycache__" in p.parts or p.suffix in (".pyc", ".pyo")
++
++
++def tree_hash(root: Path) -> dict:
++    files = sorted(p for p in root.rglob("*") if (p.is_file() or p.is_symlink()) and not _bytecode(p))
++    h = hashlib.sha256()
++    total = 0
++    for p in files:
++        data = p.read_bytes()
++        h.update(p.relative_to(root).as_posix().encode() + b"\0" + sha(data).encode() + b"\n")
++        total += len(data)
++    return {"files": len(files), "bytes": total, "aggregate_sha256": h.hexdigest(),
++            "bytecode_excluded": True}
++
++
++def snapshot_members() -> list[str]:
++    out = set()
++    for g in SNAPSHOT_GLOBS:
++        out.update(p.relative_to(REPO).as_posix() for p in REPO.glob(g)
++                   if p.is_file() and not _bytecode(p))
++    return sorted(out)
++
++
++def snapshot_tar(members) -> bytes:
++    buf = io.BytesIO()
++    with tarfile.open(fileobj=buf, mode="w", format=tarfile.USTAR_FORMAT) as tar:
++        for m in members:
++            data = (REPO / m).read_bytes()
++            ti = tarfile.TarInfo(m)
++            ti.size, ti.mtime, ti.mode, ti.uid, ti.gid = len(data), 0, 0o644, 0, 0
++            tar.addfile(ti, io.BytesIO(data))
++    return buf.getvalue()
++
++
++def record(kind: str) -> dict:
++    init = json.loads((PACKET / "INITIAL_SOURCE_STATE.json").read_text())
++    git = lambda *a: subprocess.run(["git", *a], cwd=REPO, capture_output=True, text=True).stdout  # noqa: E731
++    status = git("status", "--porcelain=v1", "--untracked-files=all", "--", "index-deconvolution")
++    files = {}
++    for group in ("source_hashes", "protected_file_hashes"):
++        cur = {}
++        for p, h in init[group].items():
++            q = REPO / p
++            cur[p] = {"initial": h, "current": sha(q.read_bytes()) if q.is_file() else None}
++            cur[p]["equal"] = cur[p]["initial"] == cur[p]["current"]
++        files[group] = cur
++    trees = {}
++    for p, v in init["protected_trees"].items():
++        now = tree_hash(REPO / p)
++        trees[p] = {"initial": v, "current": now,
++                    "equal": now["aggregate_sha256"] == v["aggregate_sha256"]
++                    and now["files"] == v["files"]}
++    return {"kind": kind, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++            "git_head": git("rev-parse", "HEAD").strip(),
++            "git_status_index_deconvolution": status.splitlines(),
++            "files": files, "trees": trees,
++            "summary": {g: {"equal": sum(v["equal"] for v in d.values()), "total": len(d),
++                            "differ": sorted(k for k, v in d.items() if not v["equal"])}
++                        for g, d in files.items()}
++            | {"trees": {k: v["equal"] for k, v in trees.items()}}}
++
++
++def integration_equalities() -> dict:
++    """The ten report-r3 source/notebook equalities, read from the integration owner's
++    own EQUAL table (loaded without running its writer)."""
++    import importlib.util
++    path = ID_ROOT / ("results/hierarchy_search_diagnosis/integration/search-diagnosis-v1-r1/"
++                      "integration_check.py")
++    spec = importlib.util.spec_from_file_location("_integration_check_v3a", path)
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    eq = {str(a.relative_to(REPO)): {"accepted": str(b.relative_to(REPO)),
++                                     "equal": a.read_bytes() == b.read_bytes()}
++          for a, b in mod.EQUAL.items()}
++    return {"equalities": eq, "denominator": len(eq),
++            "passed": sum(v["equal"] for v in eq.values()),
++            "all_equal": len(eq) == 10 and all(v["equal"] for v in eq.values())}
++
++
++def main(argv=None) -> int:
++    argv = sys.argv[1:] if argv is None else argv
++    kind, out = argv[0], Path(argv[1])
++    out.mkdir(parents=True, exist_ok=True)
++    if kind == "integration":
++        rec = integration_equalities()
++        (out / "integration_equalities.json").write_text(json.dumps(rec, indent=1) + "\n")
++        print(json.dumps({k: rec[k] for k in ("denominator", "passed", "all_equal")}))
++        return 0 if rec["all_equal"] else 1
++    rec = record(kind)
++    if kind == "initial":
++        members = snapshot_members()
++        tar = snapshot_tar(members)
++        (out / "preedit_executable_snapshot.tar").write_bytes(tar)
++        rec["snapshot"] = {"path": "preedit_executable_snapshot.tar", "sha256": sha(tar),
++                           "members": {m: sha((REPO / m).read_bytes()) for m in members}}
++    (out / f"{kind}_preservation.json").write_text(json.dumps(rec, indent=1, sort_keys=True) + "\n")
++    print(json.dumps(rec["summary"], indent=1))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- /dev/null	2026-10-04 08:35:57
++++ index-deconvolution/experiments/search_v3a/prospective.py	2026-10-04 07:56:11
+@@ -0,0 +1,345 @@
++"""HID-search-v3a commands (run from ``index-deconvolution/``)::
++
++  P="PYTHONPATH=experiments:.:../src ../venv/bin/python -B -m search_v3a.prospective"
++  $P preflight            packet re-check, integration equalities, exposure inventory
++  $P freeze               freeze_v2.write for search-v3a:search-confirm-v3a-r1
++  $P run [--resume]       generate the 256 reserved strings (validated freeze only) and
++                          execute the fixed 2,816-job queue (+256 portfolio rows)
++  $P report               validation, primary decision, descriptive tables, REPORT.md
++  $P verify               read-only re-validation, recomputed summary, decoder sample
++
++Development lives in ``search_v3a.development``; the arithmetic audit in
++``search_v3a.audit``; the controller span ledger in ``search_v3a.ledger``.
++Exit codes: 0 complete and valid (any verdict), 2 invalid, 3 incomplete.
++"""
++from __future__ import annotations
++
++import csv
++import io
++import json
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++from hierarchy import benchmark as B
++from hierarchy import freeze_v2
++from hierarchy import report_v3a as R3
++from hierarchy import validation as V
++from hierarchy.study import get_study
++
++from . import ledger
++
++ID_ROOT = Path(__file__).resolve().parents[2]
++REPO = ID_ROOT.parent
++PACKET = ID_ROOT / "protocols" / "hierarchy_search_v3a"
++RUN_ID = "search-confirm-v3a-r1"
++STUDY = "search-v3a"
++EXIT_OK, EXIT_INVALID, EXIT_INCOMPLETE = 0, 2, 3
++MARKERS = ("search_v3a_confirmation", "search_v3a_transfer", "search_v3a_stress",
++           "search_v3a_controls")
++KEY_PATTERNS = ("boundary-F12-4096-60", "boundary_large-F12-", "boundary_stress-S02-",
++                "controls-F0", "controls-F1", "|F12|4096|60", "|F12|16384|70", "|F12|65536|70",
++                "|F12|131072|70", "|S02|4096|80", "|S02|65536|80")
++
++
++def _study():
++    return get_study(STUDY)
++
++
++def _write_json(path: Path, obj) -> None:
++    B.atomic_write(path, (json.dumps(obj, indent=1, sort_keys=True, default=float) + "\n").encode())
++
++
++# ---------------------------------------------------------------------------
++# preflight
++# ---------------------------------------------------------------------------
++
++def exposure_inventory() -> dict:
++    """Every local file naming a reserved namespace or a reserved case/unit key."""
++    pats = list(MARKERS) + list(KEY_PATTERNS)
++    roots = [ID_ROOT]
++    cmd = ["grep", "-rIlF", "--exclude-dir=__pycache__", "--exclude-dir=.git",
++           "--exclude-dir=venv", *sum((["-e", p] for p in pats), [])] + [str(r) for r in roots]
++    out = subprocess.run(cmd, capture_output=True, text=True)
++    files = sorted(Path(f).relative_to(REPO).as_posix() for f in out.stdout.split())
++    allowed_prefix = ("index-deconvolution/protocols/hierarchy_search_v3a/",
++                      "index-deconvolution/PROTOCOL_hierarchy_search_v3a.md",
++                      "index-deconvolution/KICKOFF_hierarchy_search_v3a.md",
++                      "index-deconvolution/hierarchy/", "index-deconvolution/experiments/search_v3a/",
++                      "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/ledger/",
++                      "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/")
++    drafts = ("NEXT_PROTOCOL_DRAFT.md",
++              # prose diff of that draft (review closure of search-diagnosis-v1)
++              "search-diagnosis-v1-r1/patches/R1R2_prose_corrections.informational.diff")
++    classified = []
++    for f in files:
++        if f.startswith(allowed_prefix):
++            kind = "protocol_or_source_mention"
++        elif f.endswith(drafts):
++            kind = "protocol_draft_mention"
++        else:
++            kind = "REVIEW"
++        classified.append({"path": f, "class": kind})
++    review = [c for c in classified if c["class"] == "REVIEW"]
++    generated = [c for c in review if any(s in c["path"] for s in
++                                          ("/rows/", "cases.jsonl", "corpus_manifest", "/archives/",
++                                           "/traces/", "/logs/"))]
++    return {"patterns": pats, "searched": [str(r.relative_to(REPO)) for r in roots],
++            "grep_exit": out.returncode, "files": classified, "needs_review": review,
++            "generated_artifacts_mentioning": generated,
++            "exposed": bool(generated),
++            "definition": "mentions in protocol drafts/sources are not exposure; generated rows, "
++                          "manifests, archives, traces or logs naming a reserved namespace or key "
++                          "would be"}
++
++
++def cmd_preflight(a) -> int:
++    out = ID_ROOT / "results/hierarchy_search_v3a" / RUN_ID / "prefreeze"
++    out.mkdir(parents=True, exist_ok=True)
++    pk = subprocess.run([sys.executable, "-B", str(PACKET / "check_packet.py")], cwd=REPO,
++                        capture_output=True, text=True)
++    pkr = json.loads(pk.stdout)
++    from . import preserve
++    integ = preserve.integration_equalities()
++    exp = exposure_inventory()
++    exp_freeze = freeze_v2.exposure_check(_study(), _study().run_dir(RUN_ID))
++    res = {"packet_check": pkr, "packet_check_exit": pk.returncode,
++           "packet_expected_post_edit_failures": sorted(k for k, v in pkr["checks"].items() if not v),
++           "integration": {k: integ[k] for k in ("denominator", "passed", "all_equal")},
++           "exposure_inventory": exp, "freeze_exposure_check": exp_freeze}
++    allowed = {"source_hashes_unchanged", "new_run_not_started", "notebook20_unoccupied"}
++    # Protected files that changed: only the BDM workstream's notebook 19 pair may differ,
++    # and only as a disclosed concurrent change by another workstream (never reverted).
++    init = json.loads((PACKET / "INITIAL_SOURCE_STATE.json").read_text())
++    changed = sorted(k for k, v in init["protected_file_hashes"].items()
++                     if not (REPO / k).is_file() or B.sha256_file(REPO / k) != v)
++    external = {"index-deconvolution/notebooks/build_19.py",
++                "index-deconvolution/notebooks/19_bdm_and_index_complexity.ipynb"}
++    res["protected_changed"] = changed
++    res["protected_changed_external_disclosed"] = {
++        k: {"mtime_local": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime((REPO / k).stat().st_mtime)),
++            "owner": "BDM workstream (notebook 19 allocation, INITIAL_SOURCE_STATE note)",
++            "attribution": "not written by this phase; not reverted; outside the study closure"}
++        for k in changed if k in external}
++    if changed and set(changed) <= external:
++        allowed.add("protected_file_hashes_unchanged")
++    res["packet_unexpected_failures"] = sorted(set(res["packet_expected_post_edit_failures"]) - allowed)
++    res["pass"] = (not res["packet_unexpected_failures"] and integ["all_equal"]
++                   and not exp["exposed"] and exp_freeze["clean"])
++    _write_json(out / "preflight.json", res)
++    _write_json(out / "exposure_inventory.json", exp)
++    print(json.dumps({"pass": res["pass"], "packet_post_edit_failures":
++                      res["packet_expected_post_edit_failures"],
++                      "integration": res["integration"], "review_files": len(exp["needs_review"]),
++                      "exposed": exp["exposed"]}))
++    return 0 if res["pass"] else 1
++
++
++# ---------------------------------------------------------------------------
++# freeze and run
++# ---------------------------------------------------------------------------
++
++def cmd_freeze(a) -> int:
++    study = _study()
++    pre = study.run_dir(RUN_ID) / "prefreeze"
++    fr = freeze_v2.write(study, RUN_ID, pre)
++    print(f"froze {study.name}:{RUN_ID}: sha256 {freeze_v2.freeze_sha(fr)}")
++    return 0
++
++
++def intended_cases() -> list[dict]:
++    return json.loads((PACKET / "intended_cases.json").read_text())["cases"]
++
++
++def cmd_run(a) -> int:
++    study = _study()
++    d = study.run_dir(RUN_ID)
++    fr, fsha, problems = B.load_and_validate_freeze(RUN_ID, "benchmark", study)
++    if problems:
++        raise SystemExit("freeze validation failed: " + "; ".join(problems))
++    budget = ledger.SpanBudget("prospective", f"run:{RUN_ID}")
++    if budget.expired():
++        raise SystemExit("prospective allowance exhausted; the run is preserved as is")
++    all_cases = []
++    for role in study.run_roles(RUN_ID):
++        cases, manifest = study.role_cases(role, d)
++        mp = d / f"corpus_manifest.{role}.jsonl"
++        text = "\n".join(json.dumps(m, sort_keys=True) for m in manifest) + "\n"
++        if mp.exists() and mp.read_text() != text:
++            raise SystemExit(f"regenerated {role} corpus differs from the stored manifest")
++        B.atomic_write(mp, text.encode())
++        all_cases += cases
++    want = [(c["case_id"], c["n_bits"]) for c in intended_cases()]
++    have = [(c.case_id, len(c.bits)) for c in all_cases]
++    if want != have:
++        raise SystemExit("generated cases differ from intended_cases.json (membership/order)")
++    dup = {}
++    for c in all_cases:
++        dup.setdefault(c.input_sha256, []).append(c.case_id)
++    jobs = [{"case_id": c.case_id, "method": m} for c in all_cases for m in study.job_methods(c)]
++    _write_json(d / "intended_jobs.json", {"jobs": jobs, "encoder_jobs": len(jobs),
++                                           "derived_portfolio_rows": len(all_cases),
++                                           "total_rows": len(jobs) + len(all_cases)})
++    _write_json(d / "input_checks.json", {
++        "strings": len(all_cases), "hash_duplicates": {h: v for h, v in dup.items() if len(v) > 1},
++        "membership_and_order_equal_intended": True,
++        "note": "duplicates are reported, never resampled"})
++    with open(d / "attempts.jsonl", "a") as fh:
++        fh.write(json.dumps({"event": "start", "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                             "resume": a.resume, "freeze_sha256": fsha}) + "\n")
++    (d / "logs").mkdir(parents=True, exist_ok=True)
++    logf = open(d / "logs" / "benchmark.log", "a")
++
++    def log(m):
++        logf.write(f"{time.strftime('%Y-%m-%dT%H:%M:%S')} {m}\n")
++        logf.flush()
++    t0 = time.time()
++    stats = B.run_cases(all_cases, d, RUN_ID, fsha, a.resume, log, budget, study=study)
++    logf.close()
++    B._merge_outputs(d, study, RUN_ID)
++    with open(d / "attempts.jsonl", "a") as fh:
++        fh.write(json.dumps({"event": "end", "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
++                             "stats": stats, "wall_s": time.time() - t0}) + "\n")
++    print(json.dumps(dict(stats, wall_s=round(time.time() - t0),
++                          prospective_used_s=round(budget.elapsed()))))
++    return 0
++
++
++# ---------------------------------------------------------------------------
++# report and verify
++# ---------------------------------------------------------------------------
++
++def _validate(purpose):
++    study = _study()
++    return V.validate_run(RUN_ID, study.run_roles(RUN_ID), frozen=True, study=study,
++                          purpose=purpose)
++
++
++def _csv(rows: list[dict]) -> bytes:
++    if not rows:
++        return b""
++    buf = io.StringIO()
++    w = csv.DictWriter(buf, fieldnames=list(rows[0]))
++    w.writeheader()
++    w.writerows(rows)
++    return buf.getvalue().encode()
++
++
++def build(val, ctx) -> tuple[dict, list, list]:
++    d = _study().run_dir(RUN_ID)
++    summary, strings, units = R3.summarise(val, ctx["design"], d)
++    summary["freeze_sha256"] = ctx["freeze_sha256"]
++    summary["freeze_problems"] = ctx.get("freeze_problems", [])
++    return summary, strings, units
++
++
++def decision_record(summary: dict) -> dict:
++    p = summary["primary"]
++    return {"study": STUDY, "run_id": RUN_ID, "freeze_sha256": summary["freeze_sha256"],
++            "verdict": p["verdict"], "estimate_bits_per_input_bit": p.get("estimate_bits_per_input_bit"),
++            "ci99": p.get("ci99"), "bootstrap": p.get("bootstrap"),
++            "required_units": p["required_units"], "available_units": p["available_units"],
++            "cells": p["cells"], "engineering_valid": p["engineering_valid"],
++            "complete": p["complete"], "reason": p.get("reason"),
++            "censored_baselines": summary["censored_baselines"],
++            "portfolio_conclusion_blocked_by_censoring":
++                summary["portfolio_conclusion_blocked_by_censoring"],
++            "scope": "k=4 versus k=1 full HID on the fixed mixture of six declared cells; not "
++                     "superiority over the portfolio, not all families, not causal identification",
++            "status": "ready for Codex review; not yet accepted"}
++
++
++def cmd_report(a) -> int:
++    d = _study().run_dir(RUN_ID)
++    fr = json.loads((d / "freeze.json").read_text())
++    env = B.check_environment(fr.get("environment", {}), "report")
++    if env:
++        raise SystemExit("report refused, environment differs from the freeze: " + "; ".join(env))
++    val, ctx = _validate("report")
++    summary, strings, units = build(val, ctx)
++    _write_json(d / "summary.json", summary)
++    _write_json(d / "DECISION.json", decision_record(summary))
++    B.atomic_write(d / "tables" / "per_string.csv", _csv(strings))
++    B.atomic_write(d / "tables" / "per_unit.csv", _csv(units))
++    B.atomic_write(d / "tables" / "per_cell.json",
++                   (json.dumps(summary["cells"], indent=1) + "\n").encode())
++    code = EXIT_INVALID if not val["engineering_valid"] else (
++        EXIT_INCOMPLETE if not val["complete"] else EXIT_OK)
++    print(json.dumps({"verdict": summary["primary"]["verdict"],
++                      "estimate": summary["primary"].get("estimate_bits_per_input_bit"),
++                      "ci99": summary["primary"].get("ci99"),
++                      "engineering_valid": val["engineering_valid"], "complete": val["complete"],
++                      "exit_code": code}))
++    return code
++
++
++def cmd_verify(a) -> int:
++    from hierarchy.cli import _separate_process_sample
++    study = _study()
++    d = study.run_dir(RUN_ID)
++    v = {"run_id": RUN_ID, "study": STUDY, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
++    _write_json(d / "verification.json", dict(v, status="not_verified",
++                                              note="verification started and has not finished"))
++    val, ctx = _validate(None)
++    invalid, incomplete = list(val["invalid"]), list(val["incomplete"])
++    pub = V.public(val)
++    v["validation"] = {k: pub[k] for k in ("engineering_valid", "complete", "expected_rows",
++                                           "present_rows", "archives_checked",
++                                           "distinct_archives_decoded", "missing_units",
++                                           "missing_methods", "duplicates", "unknown")}
++    v["validation"]["censored"] = pub["censored"][:200]
++    v["trace_checks"] = val.get("trace_checks", {}).get("trace_status_counts")
++    v["freeze_sha256"], v["freeze_problems"] = ctx["freeze_sha256"], ctx.get("freeze_problems", [])
++    rows = sorted((r for m in val["_index"].values() for r in m.values()),
++                  key=lambda r: (r["case_id"], r["method"]))
++    inputs = {}
++    for role in study.run_roles(RUN_ID):
++        inputs.update({c.case_id: c.bits for c in study.role_cases(role, d)[0]})
++    v["separate_process_decode"] = _separate_process_sample(d, rows, inputs)
++    if not v["separate_process_decode"].get("all_ok"):
++        invalid.append("separate-process decoder sample failed or unavailable")
++    for name in ("summary.json", "DECISION.json", "cases.jsonl", "corpus_manifest.jsonl",
++                 "freeze.json", "source_snapshot.tar", "intended_jobs.json"):
++        if not (d / name).exists():
++            invalid.append(f"required artefact missing: {name}")
++    fr = ctx.get("freeze") or {}
++    v["environment_differences"] = {k: c for k, c in B.environment_comparison(
++        fr.get("environment", {})).items() if not c["equal"]} if fr else {}
++    saved = json.loads((d / "summary.json").read_text()) if (d / "summary.json").exists() else None
++    if saved is not None:
++        fresh, _, _ = build(val, ctx)
++        fresh = json.loads(json.dumps(fresh, default=float))
++        stale = sorted(k for k in set(fresh) | set(saved) if fresh.get(k) != saved.get(k))
++        v["summary_recomputed"] = {"stale_keys": stale, "agrees": not stale}
++        if stale:
++            invalid.append(f"summary.json disagrees with the rows: {stale}")
++        dec = json.loads((d / "DECISION.json").read_text()) if (d / "DECISION.json").exists() else None
++        if dec != json.loads(json.dumps(decision_record(fresh), default=float)):
++            invalid.append("DECISION.json disagrees with the recomputed decision")
++    v["engineering_status"] = "invalid" if invalid else "valid"
++    v["completeness"] = "incomplete" if incomplete else "complete"
++    v["invalid_count"], v["incomplete_count"] = len(invalid), len(incomplete)
++    v["invalid_reasons"], v["incomplete_reasons"] = invalid[:200], incomplete[:200]
++    v["scientific_verdict"] = (saved or {}).get("primary", {}).get("verdict")
++    code = EXIT_INVALID if invalid else (EXIT_INCOMPLETE if incomplete else EXIT_OK)
++    v["exit_code"] = code
++    v["finished_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
++    _write_json(d / "verification.json", v)
++    print(json.dumps({k: v[k] for k in ("engineering_status", "completeness",
++                                        "scientific_verdict", "exit_code")}))
++    return code
++
++
++def main(argv=None) -> int:
++    import argparse
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("command", choices=("preflight", "freeze", "run", "report", "verify"))
++    ap.add_argument("--resume", action="store_true")
++    a = ap.parse_args(argv)
++    return {"preflight": cmd_preflight, "freeze": cmd_freeze, "run": cmd_run,
++            "report": cmd_report, "verify": cmd_verify}[a.command](a)
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

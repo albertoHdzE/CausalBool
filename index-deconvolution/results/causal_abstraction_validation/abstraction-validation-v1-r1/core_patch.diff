@@ -1,0 +1,77 @@
+702a703,778
+> 
+> 
+> # ---------------------------------------------------------------------------
+> # Induced macro maps (abstraction checker)
+> #
+> # Owner of the fibre condition for exact abstractions, accepted in
+> # results/causal_abstraction_design/supervision/abstraction-design-v1-r1-closure
+> # (OWNERSHIP_TICKET).  Inputs are integer sequences over the micro states
+> # x = 0 .. 2**n - 1: ``alpha[x]`` is the macro code of x and ``image[x]`` the
+> # macro code of the successor of x under some micro map (F**tau or an
+> # intervened F_q).  No study semantics (intervention groupings, labels) live
+> # here.  The run-local audit oracle of abstraction-validation-v1-r1 is a
+> # declared validation exception, not a second production implementation.
+> # ---------------------------------------------------------------------------
+> 
+> def canonical_partition(codes) -> list[int]:
+>     """Relabel macro codes by first appearance, visiting micro states ascending."""
+>     seen: dict = {}
+>     return [seen.setdefault(c, len(seen)) for c in codes]
+> 
+> 
+> def fibre_sizes(alpha) -> dict:
+>     """Number of micro states in each fibre (macro code -> count)."""
+>     sizes: dict = {}
+>     for a in alpha:
+>         sizes[a] = sizes.get(a, 0) + 1
+>     return sizes
+> 
+> 
+> def induced_map(alpha, image) -> tuple[dict | None, tuple[int, int] | None]:
+>     """Induced macro map G with G(alpha[x]) = image[x] for every x, if one exists.
+> 
+>     The fibre condition: alpha[x] == alpha[x'] implies image[x] == image[x'].
+>     Every micro state is visited (no early exit).  Returns ``(G, None)`` when the
+>     condition holds, else ``(None, (x, x'))`` with the lexicographically smallest
+>     violating micro-state pair, x < x'.
+>     """
+>     if len(alpha) != len(image) or not alpha:
+>         raise ValueError("alpha and image must be non-empty and of equal length")
+>     last = dict(zip(alpha, image))
+>     if all(last[a] == b for a, b in zip(alpha, image)):
+>         return last, None
+>     first: dict = {}
+>     mixed = set()
+>     for a, b in zip(alpha, image):
+>         if first.setdefault(a, b) != b:
+>             mixed.add(a)
+>     x = next(x for x, a in enumerate(alpha) if a in mixed)
+>     x2 = next(y for y in range(x + 1, len(alpha))
+>               if alpha[y] == alpha[x] and image[y] != image[x])
+>     return None, (x, x2)
+> 
+> 
+> def compare_induced(rep: dict | None, member: dict | None, sizes: dict) -> dict:
+>     """Compare two induced maps on the same macro states.
+> 
+>     ``macro_disagreements`` counts macro states where the maps differ;
+>     ``micro_mismatches`` weights each by its fibre size (micro states).  The
+>     witness is the smallest disagreeing macro code.  If either map does not
+>     exist the comparison is NOT-EVALUABLE and both counts are None.
+>     """
+>     if rep is None or member is None:
+>         reason = "representative has no induced map" if rep is None else "member has no induced map"
+>         return {"outcome": "NOT-EVALUABLE", "reason": reason,
+>                 "macro_disagreements": None, "micro_mismatches": None, "witness_macro": None}
+>     if set(rep) != set(member):
+>         raise ValueError("induced maps are defined on different macro states")
+>     bad = sorted(y for y in rep if rep[y] != member[y])
+>     return {"outcome": "DISAGREE" if bad else "AGREE", "reason": None,
+>             "macro_disagreements": len(bad), "micro_mismatches": sum(sizes[y] for y in bad),
+>             "witness_macro": bad[0] if bad else None}
+> 
+> 
+> def commutation_failures(alpha, image, macro_map) -> list[int]:
+>     """Micro states x where a supplied macro map fails: macro_map[alpha[x]] != image[x]."""
+>     return [x for x, (a, b) in enumerate(zip(alpha, image)) if macro_map(a) != b]

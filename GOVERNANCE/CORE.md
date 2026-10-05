@@ -74,9 +74,14 @@ sharing code.
 
 | concept | owner |
 |---|---|
-| all description-length variants A–E, `bdm_2d`, the `pybdm` pin | `src/description_lengths.py` |
+| all description-length variants A–E, `bdm_2d`, `bdm_1d`, `ctm_1d`, the `pybdm` pin | `src/description_lengths.py` |
 | repository / paper / figures path resolution | `src/causalbool_paths.py` |
 | index-set deconvolution, `minimal_dnf` (Quine–McCluskey) | `index-deconvolution/src/deconvolution.py` |
+| HID-v1 archive format: canonical serialization, LEB128/packing/rank fields, field ledgers | `index-deconvolution/hierarchy/wire.py` (rule types `index-deconvolution/hierarchy/model.py`, constants `index-deconvolution/hierarchy/codes.py`) |
+| HID-v1 archive decoding (all ten codecs) | `index-deconvolution/hierarchy/decode.py` — standard library only, deliberately independent of `wire.py` |
+| HID-v1 bounded search, proposal generators, baseline codecs | `index-deconvolution/hierarchy/infer.py`, `index-deconvolution/hierarchy/candidates.py`, `index-deconvolution/hierarchy/baselines.py` (the W7 pair grammar lives once, in `candidates.py`) |
+| HID-v1 study validation: declared design, row/archive/portfolio checks, completeness and censoring (the one gate `report` and `verify` share) | `index-deconvolution/hierarchy/validation.py` (endpoint arithmetic and claim gates stay in `index-deconvolution/hierarchy/report.py`; the supervisor's `index-deconvolution/experiments/review_hierarchy_confirm_v1.py` is a deliberately independent audit, not an owner) |
+| **archive bits** — the measured length of a transmitted byte archive (`encoded_bit_length`, exactly 8 × bytes) | `src/description_lengths.py`; a distinct quantity, **not** a variant A–E, see `DESCRIPTION_LENGTHS.md` §1c |
 | **LZ76** complexity (Kaspar & Schuster) | `src/complexity/Trajectory_LZ.py` |
 | **LZ78** phrase-dictionary size | `src/complexity/Scaling_LZ_Tools.py` (`compute_lz78_dictionary_size`) |
 
@@ -95,6 +100,8 @@ sharing code.
 | `imp-causalNet-paper/src/imp_causalnet_paper/causalbool_mirror.py` | declared canonical for **variant A**; the root module now delegates to it | proven equal on 300 random adjacency matrices |
 | `workspaces/claude-nature/paper/code/` path helpers | frozen Level 8 reproducibility artefact, at a different directory depth | not edited; excluded by the guard with this reason inline |
 | `index-deconvolution/level*/` helpers | each level is a **dated experiment record**; collapsing rewrites history | left as-is, recorded in `DUPLICATION.md` |
+| `index-deconvolution/hierarchy/decode.py` vs `index-deconvolution/hierarchy/wire.py` + `index-deconvolution/hierarchy/model.py` | HID-v1 (2026-10-02). The decoder re-implements field parsing, rank/unrank and graph evaluation **on purpose**: a serializer and decoder that share code can omit the same information and still agree. It imports nothing from the package | `index-deconvolution/hierarchy/tests/test_wire_decode.py` (golden bytes, three-evaluator agreement on 300 random compositions, separate-process decoding with only `decode.py` present, constants cross-check) |
+| `index-deconvolution/hierarchy/tests/interp.py`, `index-deconvolution/hierarchy/tests/oracle.py`, `index-deconvolution/hierarchy/ledger.py` | a slow semantic interpreter, the tiny oracle's own writer, and a reporting-side field parser are independent derivations of the same format | each is asserted against the production serializer/decoder in the package tests |
 | `index-deconvolution/crosscheck/` vs `index-deconvolution/experiments/DemoLibrary.wl` | the cross-check must be **independent** of what it checks — that independence is what makes 135/135 mean anything | deliberate; exempt in the guard |
 | `imp-prices/vendor` | two-copies rule, pinned byte-identical to `index-deconvolution/src/` | `imp-prices/tests/test_vendor_parity.py`, an md5 gate in CI that **loudly skips** rather than passing if the canonical is absent |
 | `src/external/ccapi` | vendored third party | dependency boundary, never modified |

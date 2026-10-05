@@ -1,0 +1,180 @@
+{
+  "verdict": "NARROW",
+  "h1": {
+    "per_network": [
+      {
+        "id": "synthetic/n050_s0",
+        "n": 50,
+        "Q_LB": 23,
+        "best_m": 42,
+        "within_2xQ_LB": true
+      },
+      {
+        "id": "synthetic/n050_s1",
+        "n": 50,
+        "Q_LB": 23,
+        "best_m": 103,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n050_s2",
+        "n": 50,
+        "Q_LB": 23,
+        "best_m": 53,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n050_s3",
+        "n": 50,
+        "Q_LB": 23,
+        "best_m": 75,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n050_s4",
+        "n": 50,
+        "Q_LB": 23,
+        "best_m": 49,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n100_s0",
+        "n": 100,
+        "Q_LB": 26,
+        "best_m": 71,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n100_s1",
+        "n": 100,
+        "Q_LB": 26,
+        "best_m": 72,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n100_s2",
+        "n": 100,
+        "Q_LB": 26,
+        "best_m": 80,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n100_s3",
+        "n": 100,
+        "Q_LB": 26,
+        "best_m": 63,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n100_s4",
+        "n": 100,
+        "Q_LB": 26,
+        "best_m": 81,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n200_s0",
+        "n": 200,
+        "Q_LB": 29,
+        "best_m": 80,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n200_s1",
+        "n": 200,
+        "Q_LB": 29,
+        "best_m": 112,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n200_s2",
+        "n": 200,
+        "Q_LB": 29,
+        "best_m": 69,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n200_s3",
+        "n": 200,
+        "Q_LB": 29,
+        "best_m": 66,
+        "within_2xQ_LB": false
+      },
+      {
+        "id": "synthetic/n200_s4",
+        "n": 200,
+        "Q_LB": 29,
+        "best_m": 72,
+        "within_2xQ_LB": false
+      }
+    ],
+    "within_2xQ_LB": "1/15",
+    "no_headroom": false,
+    "gate": "H1 shows no S2 headroom iff the best competitor needs <= 2 x Q_LB at every n >= 50"
+  },
+  "h1_no_headroom": false,
+  "classes": {
+    "S3a one-step": [
+      true,
+      [
+        "bdd"
+      ],
+      15
+    ],
+    "S3b fixed": [
+      true,
+      [
+        "pyboolnet",
+        "boolnet"
+      ],
+      5
+    ],
+    "S3b attr": [
+      false,
+      [],
+      5
+    ],
+    "S3b reach": [
+      true,
+      [
+        "z3_bmc"
+      ],
+      10
+    ]
+  },
+  "h2_no_headroom": false,
+  "headroom": [
+    "S2",
+    "S3b attr"
+  ],
+  "our_arm": {
+    "S2": "none exists",
+    "S3a one-step": "index-based (exact_query_representation)",
+    "S3b fixed": "none exists",
+    "S3b attr": "exhaustive (num_attractors)",
+    "S3b reach": "none exists"
+  },
+  "s3a": {
+    "solved_by": [
+      "bdd"
+    ],
+    "questions_at_200": 15,
+    "lead": {
+      "T1_single": {
+        "ours_faster_than_cudd": 5,
+        "ours_smaller_than_cudd": 5,
+        "of": 5
+      },
+      "T2_small": {
+        "ours_faster_than_cudd": 4,
+        "ours_smaller_than_cudd": 3,
+        "of": 5
+      },
+      "T3_medium": {
+        "ours_faster_than_cudd": 0,
+        "ours_smaller_than_cudd": 0,
+        "of": 5
+      }
+    }
+  }
+}

@@ -10,6 +10,10 @@ never a name prefix.
 its roles are read from ``corpus.SPLITS`` and its methods from ``infer.ABLATIONS``.
 ``SEARCH_V2`` (``search-v2``) is HID-search-v2 (PROTOCOL_hierarchy_search_v2.md):
 six cumulative HID arms, the same nine baselines and the derived portfolio row.
+``SEARCH_V3A`` (``search-v3a``) is HID-search-v3a (PROTOCOL_hierarchy_search_v3a.md):
+``hid_full`` (k = 1) and ``hid_refine4`` (k = 4), the nine baselines and the portfolio,
+with a direct stage-B trace sidecar per HID row and a replicate-parity HID job order.
+Its two development studies run one arm each on retained search-v2 inputs.
 """
 from __future__ import annotations
 
@@ -17,6 +21,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .baselines import BASELINE_METHODS
+
+HID_KINDS = ("hid_v1", "hid_v2", "hid_v3a")
+V3A_REGISTRIES = {"search-v3a": ("hid_full", "hid_refine4"),
+                  "search-v3a-dev-control": ("hid_full",),
+                  "search-v3a-dev-treatment": ("hid_refine4",)}
 
 PKG = Path(__file__).resolve().parent
 ID_ROOT = PKG.parent
@@ -26,12 +35,12 @@ REPO = ID_ROOT.parent
 @dataclass(frozen=True)
 class MethodSpec:
     name: str
-    kind: str                    # "hid_v1" | "hid_v2" | "baseline" | "portfolio"
+    kind: str                    # "hid_v1" | "hid_v2" | "hid_v3a" | "baseline" | "portfolio"
     config: object = None
 
     @property
     def is_hid(self) -> bool:
-        return self.kind in ("hid_v1", "hid_v2")
+        return self.kind in HID_KINDS
 
 
 @dataclass(frozen=True)
@@ -77,6 +86,10 @@ def method_registry(name: str) -> tuple[MethodSpec, ...]:
     if name == "search-v2":
         from .search_v2 import ARMS
         return tuple(MethodSpec(k, "hid_v2", v) for k, v in ARMS.items()) + _baseline_specs()
+    if name in V3A_REGISTRIES:
+        from .search_v3a import ARMS_V3A
+        hid = tuple(MethodSpec(m, "hid_v3a", ARMS_V3A[m]) for m in V3A_REGISTRIES[name])
+        return hid + (_baseline_specs() if name == "search-v3a" else ())
     raise KeyError(f"unknown method registry {name!r}")
 
 
@@ -111,6 +124,7 @@ class StudySpec:
     default_roles: tuple = ()
     resources: ResourcePolicy = field(default_factory=ResourcePolicy)
     fixture: bool = False
+    trace_sidecars: bool = False                 # HID workers write a stage-B trace sidecar
 
     # -- methods ---------------------------------------------------------------
 
@@ -130,6 +144,10 @@ class StudySpec:
     @property
     def encode_methods(self) -> tuple[str, ...]:
         return tuple(m.name for m in self.methods() if m.kind != "portfolio")
+
+    def job_methods(self, case) -> tuple[str, ...]:
+        """Dispatch order of one case's encoder jobs (default: registry order)."""
+        return self.encode_methods
 
     @property
     def hid_methods(self) -> tuple[str, ...]:
@@ -243,7 +261,74 @@ SEARCH_V2 = StudySpec(
                                            ("diagnostics_verification", 2 * 3600.0)),
                              total_budget_s=12 * 3600.0))
 
-_STUDIES: dict[str, StudySpec] = {LEGACY.name: LEGACY, SEARCH_V2.name: SEARCH_V2}
+
+class V3aStudy(StudySpec):
+    """HID-search-v3a: HID control then treatment for even replicates, treatment then
+    control for odd replicates, then the baselines in owner order (BENCHMARK.md 3)."""
+
+    def job_methods(self, case) -> tuple[str, ...]:
+        hid = self.hid_methods if case.replicate % 2 == 0 else tuple(reversed(self.hid_methods))
+        return hid + self.baselines
+
+    def role_cases(self, role: str, run_dir: Path | None = None):
+        """Reserved roles are generated only for a run whose freeze VALIDATES now
+        (hashes, closure, configs, design, snapshot), not merely one that exists."""
+        spec = self.role(role)
+        if spec.reserved and spec.source == "generate":
+            from . import freeze_v2
+            from .study_corpus import ReservedAccessError
+            if run_dir is None or not (run_dir / "freeze.json").is_file():
+                raise ReservedAccessError(f"role {role} is reserved; no freeze in {run_dir}")
+            if run_dir.resolve() != self.run_dir(run_dir.name).resolve():
+                raise ReservedAccessError(f"{run_dir} is not a run directory of {self.name}")
+            _, _, problems = freeze_v2.load_and_validate(self, run_dir.name)
+            if problems:
+                raise ReservedAccessError("freeze does not validate; reserved generation "
+                                          "refused: " + "; ".join(problems[:5]))
+        return super().role_cases(role, run_dir)
+
+
+V3A_ALLOWANCES = (("development", 14400.0), ("prospective", 10800.0),
+                  ("report_verification", 3600.0))
+V3A_RESOURCES = ResourcePolicy(allowances_s=V3A_ALLOWANCES, total_budget_s=28800.0)
+V2_RUN = "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1"
+
+SEARCH_V3A_ROLES = (
+    RoleSpec("boundary", ("F12",), (4096,), tuple(range(6000, 6020)), "prospective_target",
+             rng_namespace="search_v3a_confirmation", reserved=True),
+    RoleSpec("boundary_large", ("F12",), (16384, 65536, 131072), tuple(range(7000, 7020)),
+             "prospective_target", rng_namespace="search_v3a_transfer", reserved=True),
+    RoleSpec("boundary_stress", ("S02",), (4096, 65536), tuple(range(8000, 8020)),
+             "prospective_target", rng_namespace="search_v3a_stress", reserved=True),
+    RoleSpec("controls", ("F01", "F06", "F07", "F11"), (4096,), (9000, 9001),
+             "prospective_control", rng_namespace="search_v3a_controls", reserved=True),
+)
+SEARCH_V3A = V3aStudy(
+    name="search-v3a", result_root=ID_ROOT / "results" / "hierarchy_search_v3a",
+    registry="search-v3a", roles=SEARCH_V3A_ROLES,
+    default_roles=("boundary", "boundary_large", "boundary_stress", "controls"),
+    resources=V3A_RESOURCES, trace_sidecars=True)
+
+# Development: retained search-v2 confirmation inputs, one arm per study. Inputs are
+# decoded from the retained raw archives by the development adapter (the v2 manifest
+# schema differs from the HID-v1 one ``study_corpus.retained_cases`` reads).
+_V3A_DEV_ROLES = tuple(
+    RoleSpec(r, fams, bls, reps, "development", source="retained", retained_run=V2_RUN,
+             retained_split=r)
+    for r, fams, bls, reps in (("confirmation", ALL12, (256, 1024, 4096), tuple(range(3000, 3020))),
+                               ("transfer", ALL12, (16384, 65536, 131072), tuple(range(5000, 5004))),
+                               ("stress", ("S01", "S02"), (4096, 65536), tuple(range(4000, 4008)))))
+SEARCH_V3A_DEV_CONTROL = StudySpec(
+    name="search-v3a-dev-control", result_root=SEARCH_V3A.result_root,
+    registry="search-v3a-dev-control", roles=_V3A_DEV_ROLES, resources=V3A_RESOURCES,
+    trace_sidecars=True)
+SEARCH_V3A_DEV_TREATMENT = StudySpec(
+    name="search-v3a-dev-treatment", result_root=SEARCH_V3A.result_root,
+    registry="search-v3a-dev-treatment", roles=_V3A_DEV_ROLES, resources=V3A_RESOURCES,
+    trace_sidecars=True)
+
+_STUDIES: dict[str, StudySpec] = {s.name: s for s in (
+    LEGACY, SEARCH_V2, SEARCH_V3A, SEARCH_V3A_DEV_CONTROL, SEARCH_V3A_DEV_TREATMENT)}
 
 
 def get_study(name: str) -> StudySpec:
@@ -255,9 +340,11 @@ def get_study(name: str) -> StudySpec:
 
 def register_fixture_study(spec: StudySpec) -> None:
     """Explicit registration of a fixture study (tests only; never a production name)."""
-    if not spec.fixture or spec.name in (LEGACY.name, SEARCH_V2.name):
+    if not spec.fixture or spec.name in (LEGACY.name, SEARCH_V2.name, SEARCH_V3A.name,
+                                         SEARCH_V3A_DEV_CONTROL.name, SEARCH_V3A_DEV_TREATMENT.name):
         raise ValueError("only fixture studies with new names may be registered")
     for r in spec.roles:
-        if r.source == "generate" and r.rng_namespace != "search_v2_fixture":
-            raise ValueError("fixture studies may generate only the search_v2_fixture namespace")
+        if r.source == "generate" and r.rng_namespace not in ("search_v2_fixture",
+                                                               "search_v3a_fixture"):
+            raise ValueError("fixture studies may generate only a fixture namespace")
     _STUDIES[spec.name] = spec

@@ -9,7 +9,7 @@
 \definecolor{figteal}{HTML}{007F86}
 \definecolor{light}{HTML}{F2F5F7}
 \usepackage[colorlinks=true,linkcolor=figteal,citecolor=figteal,urlcolor=figteal]{hyperref}
-\hypersetup{pdftitle={Reopen and resolve: an answer to the Luminal compiler challenge},pdfauthor={Alberto Hern\'andez-Espinosa}}
+\hypersetup{pdftitle={Causality and symbolic computation: from Boolean networks to a compiler},pdfauthor={Alberto Hern\'andez-Espinosa}}
 \captionsetup{font=small,labelfont=bf}
 \setlength{\parskip}{3pt}
 \setlength{\emergencystretch}{3em}
@@ -17,14 +17,14 @@
 \makeatletter
 \newcommand{\tableinput}[1]{\@@input #1 }
 \makeatother
-\input{generated/values.tex}
+\input{generated/values.tex} 
 \newcommand{\ci}[2]{[#1,\,#2]}
 \newcommand{\keybox}[1]{\par\smallskip\noindent\colorbox{light}{\parbox{\dimexpr\linewidth-2\fboxsep}{\small #1}}\par\smallskip}
 
-\title{Reopen and resolve\\[4pt]
-\large An answer to the Luminal compiler challenge:\\ exact, explainable search over scheduling and memory decisions}
+\title{An Application of Causality and symbolic computation\\[4pt]
+\large from Boolean networks to a compiler}
 \author{Alberto Hern\'andez-Espinosa}
-\date{Technical report, September 2026}
+\date{September 2026}
 
 \begin{document}
 \maketitle
@@ -98,14 +98,44 @@ interesting, and it is where a greedy compiler leaves the most on the table.
 
 \section{Three compilers, three ideas}\label{sec:three}
 
+\paragraph{A program small enough to watch.} To show how a compiler actually
+decides, we follow one public program of the challenge, \texttt{02\_scalar\_dual\_chain},
+through every compiler in this section and the next. It has \V{exOps} operations and
+\V{exValues} values, all scalars:
+\begin{center}\small
+\begin{tabular}{@{}r@{\quad}l@{\qquad}l@{}}
+\tableinput{generated/tab_example_program.tex}
+\end{tabular}
+\end{center}
+The line number is the operation's identifier, the one used by every figure below.
+Two chains share one value. Nothing in the program says in which order the four
+loads must happen, how the chains should interleave, or which word each value
+should occupy; those are exactly the decisions being scored.
+
+Every compiler below is shown in the same picture (Figure~\ref{fig:traces}), which
+replays the compiled program on the machine one cycle at a time. Each column is a
+cycle. The top strip names the operations issued in that cycle: that is the
+\emph{schedule}. Below it there is one row per scratch word, and a cell holds the
+number stored in that word at the end of the cycle: that is the \emph{allocation}
+at work. A green cell marks a value landing in its word, which happens a latency
+after the operation that produced it was issued. The bottom rows are the buffers,
+the only memory the grader reads; the answer appears there when the stores
+execute. \textbf{The number of columns is} $C$, the \textbf{number of scratch rows is} $S$. Every
+picture was produced by running the compiler and replaying its output, and each
+replay is checked against the challenge's own simulator before it is drawn. 
+
 \paragraph{The baseline: serial.} The challenge supplies a serial compiler that
 issues one operation per bundle and gives every value a fresh address. It is always
-correct, never good, and it defines a score of one. On the public programs the
-supplied starter compiler produces exactly the same schedules and footprints.
+correct, never good, and it defines a score of one. On the public programs (programs
+provided as part of the challenge to test development) the
+supplied starter compiler produces exactly the same schedules and footprints. In
+Figure~\ref{fig:traces}A every column holds at most one operation, and every value
+keeps its own word to the end, long after its last reader has finished with it:
+$C=\V{exSerC}$, $S=\V{exSerS}$, $J=\V{exSerJ}$.
 
-\paragraph{The classical benchmark.} Our classical compiler is what an experienced
-compiler engineer would write first, and what the challenge's own hints point
-towards. It schedules with a \emph{critical-path list scheduler}~\cite{graham1969,gibbons1986}:
+\paragraph{The classical benchmark.} Our classical compiler is a version based on 
+optimization techniques found in literature. It schedules with a \emph{critical-path 
+list scheduler}~\cite{graham1969,gibbons1986}:
 at each cycle it issues the ready operations that head the longest remaining chain
 of latencies, filling every free slot. It then computes each value's live interval
 and places values by \emph{aligned first fit}~\cite{poletto1999}: each value takes
@@ -114,6 +144,46 @@ eight. It tries three fixed orders of the values and keeps the best. This compil
 is fast, simple and strong; it scores \V{rTwoPubClassical}. Its limitation is
 structural: it decides once, in order, and never revisits a decision. It also
 optimises time first and memory second, even though the score weighs them equally.
+
+Figure~\ref{fig:queue} shows its decisions on the example. At cycle 0 all four loads
+are ready and all four have the same priority, \V{exClPrio}, the latency of the
+longest chain from each load to the end of the program. The tie is broken by
+fan-out: \texttt{a0} and \texttt{c0} each feed two operations, their product and
+\texttt{cross}, so they take the two load slots, and \texttt{b0} and \texttt{d0} wait
+for cycle 1. The rule is reasonable locally, and its consequences are visible in
+Figure~\ref{fig:traces}B. Neither multiply can start until \texttt{b0} and
+\texttt{d0} land at cycle 4, so the two chains advance in lockstep and finish
+together; their two stores then compete for the single store slot, and one of them
+waits, at cycles \V{exClStoreA} and \V{exClStoreB}. Memory pays as well: at cycle
+\V{exClPeakCycle} all four inputs and \texttt{cross} are alive at once, so no
+allocation can use fewer than five words, and first fit uses exactly five. The
+result is $C=\V{exClC}$, $S=\V{exClS}$, $J=\V{exClJ}$. The allocation is optimal for
+the schedule it was given; what costs a cycle and two words is the schedule itself,
+chosen by a rule that never sees memory.
+
+\begin{figure}[htbp]\centering
+\textbf{A}\quad serial\par
+\includegraphics[width=1\linewidth]{ex_trace_serial.pdf}\par\medskip
+\textbf{B}\quad classical\par
+\includegraphics[width=1\linewidth]{ex_trace_classical.pdf}
+\caption{\textbf{How a compiler's output runs, cycle by cycle}, on
+\texttt{02\_scalar\_dual\_chain}. Columns are cycles. The top strip is the schedule
+(operations issued); the middle band is the allocation (one row per scratch word,
+with the value it holds); the bottom band is main memory. Green: a value landing
+in its word, or a store reaching memory. (A)~Serial, $\V{exSerC}\times\V{exSerS}$.
+(B)~Classical, $\V{exClC}\times\V{exClS}$: the loads are issued in two pairs, the
+four inputs and \texttt{cross} are all alive at cycle \V{exClPeakCycle}, and the last
+store waits a cycle for the store slot.}\label{fig:traces}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=1\linewidth]{ex_classical_queue.pdf}
+\caption{\textbf{The classical list scheduler, decision by decision.} Each row is one
+cycle's ready queue, sorted by priority (the longest latency chain to the end, then
+fan-out). Green cards take a slot; red cards find their engine full and wait for
+the next cycle. The tie among the four loads at cycle 0 is broken in favour of the
+two loads that feed two operations each.}\label{fig:queue}
+\end{figure}
 
 \paragraph{Our proposal: reopen and resolve.} The compiler we propose starts from
 a different question. Instead of asking ``what is the best next step?'', it asks
@@ -138,18 +208,197 @@ One ingredient makes this practical: the set of legal choices for a group of
 decisions is kept as an exact and compact description, which can be asked
 questions such as ``what is the smallest legal cycle?'' or ``is any assignment
 with $J$ below the current value legal?'' without listing its members one by one.
-How that description is built is not needed to follow this report; what matters is
-that every answer is exact and every rejected option has a stated cause.
+Section~\ref{sec:steps} shows how that description is written, how a question is
+asked of it, and how each answer becomes a decision. On the example it reaches
+$C=\V{exOursC}$, $S=\V{exOursS}$, $J=\V{exOursJ}$, against \V{exClJ} for classical
+and \V{exSerJ} for serial, and it proves that nothing better exists.
 
 \section{Our approach, step by step}\label{sec:steps}
 
-\paragraph{Step 1: a correct first answer.} Operations are taken in order. For each,
-the compiler describes the cycles it could use, from the moment its inputs are
-ready up to a safe horizon, removes the cycles in which its engine is already full,
-and takes the earliest survivor. Addresses are chosen the same way: the aligned
-addresses minus those held by values whose lifetimes overlap, and the lowest
-survivor. Each choice is the answer to an exact question about a set, so it is legal
-by construction. This first answer is decent but never revisits anything.
+We follow \texttt{02\_scalar\_dual\_chain}, one of the public provided programs,
+ and follow it through every step. The compiler works
+by a single loop: it \emph{writes a question} about a set of options, \emph{obtains
+the answer} exactly, and \emph{turns the answer into a decision}. Step~1 asks one
+question per decision; Steps~2 to~5 ask questions about groups of decisions.
+
+\paragraph{Step 1: a correct first answer, one question per decision.} Operations
+are taken in program order, and for each the compiler asks: \emph{which cycles may
+this operation use, given everything decided so far?} The answer is a set of cycle
+numbers, and the way the set is written is what makes the question cheap.
+
+Our compiler obeys exactly the same rules as the classical one, precedence and
+engine slots; what differs is where the rules are applied. The classical compiler
+applies them cycle by cycle: at each cycle it inspects every waiting operation,
+checks whether its inputs have landed and a slot is free, ranks the ready ones and
+issues them. Ours applies them once, when it writes the question. Before asking
+about an operation it computes the earliest cycle at which its inputs have landed
+(for operation 4, \texttt{left\_product}, that is cycle 3: its inputs \texttt{a0} and
+\texttt{b0} are loaded at cycle 0 with latency 3), and this becomes the lower end
+of the window. Cycles whose engine is already full are then removed. The set that
+remains contains legal cycles only, so its smallest member is both legal and as
+early as possible. Step~1 still decides one operation at a time and never revisits
+an answer; each answer becomes a constraint on the questions that follow. Treating
+decisions jointly is the work of Steps~2 to~5.
+
+\emph{The binary format} has three ingredients, shown on the example in
+Table~\ref{tab:codes} and Figure~\ref{fig:cube}.
+
+\smallskip\noindent\textit{(a) Cycle numbers as bits, and the horizon.} Every cycle
+number is written in binary. How many bits are needed depends on the latest cycle a
+schedule could ever require. Issuing each operation only after the previous one has
+completely finished is always legal, so no schedule needs more cycles than the sum
+of all latencies. For the example, that sum is the sum of the all latencies for the all
+operations, $\V{exLatSum}=\V{exHorizon}$, which here we call the
+\emph{horizon}: no operation ever needs a cycle beyond \V{exHorizonLast}. Five bits
+name the 32 cycles 0 to \V{exCodeMax}, so \V{exTimeBits} bits suffice. The same
+reasoning closes each operation's own window: it ends at the sum of the latencies of
+the operations before it, which is why the four loads have windows ending at 0, 3,
+\V{exQhi} and \V{exWinD} (Table~\ref{tab:step1}). We write the bits lowest first, as
+the implementation does: the first character is $x_0$, of weight 1, and the last is
+$x_4$, of weight 16. Cycle \V{exQhi} is therefore \texttt{01100} ($2+4$) .
+
+\smallskip\noindent\textit{(b) Cubes.} A \emph{cube} is a bit pattern in which some
+positions are fixed, to 0 or 1, and the others, marked \texttt{*}, are free. It
+stands for every number obtained by filling the free positions in all possible
+ways, so a pattern with $k$ free positions contains exactly $2^k$ numbers. The name
+comes from Boolean algebra and logic minimisation: the $2^5$ five-bit strings are
+the corners of a five-dimensional cube, a pattern with no free position is one
+corner, and a pattern with $k$ free positions is a $k$-dimensional face of it, a
+sub-cube. Thus \texttt{00000} is the single cycle 0, and \texttt{**000} is a square
+face holding cycles 0, 1, 2 and 3. The implementation stores a cube as two integers,
+an \emph{anchor} (the values of the fixed bits) and a \emph{mask} of the free
+positions (Figure~\ref{fig:cube}). Setting every free bit to 0 gives the anchor, so
+\emph{the smallest member of a cube is its anchor}, read without listing anything.
+
+\smallskip\noindent\textit{(c) Covers.} A single cube can only describe an aligned
+block whose size is a power of two, such as $\{0, 1, 2, 3\}$ or $\{4, 5\}$. An arbitrary
+range of cycles is therefore written as a union of disjoint cubes, a \emph{cover}.
+The \V{exQlen} cycles from 0 to \V{exQhi} are
+$\{0, 1, 2, 3\}\cup\{4, 5\}\cup\{\V{exQhi}\}$, that is \texttt{**000}, \texttt{*0100} and
+\texttt{01100}, in the same way that $\V{exQlen}=4+2+1$. The number of cubes grows
+with the number of bits, not with the length of the range: any range of $n$-bit
+numbers needs at most about $2n$ cubes, and no question of the example needs more
+than \V{exMaxCover}. Removing cycles and intersecting ranges are operations between
+cubes, and the smallest member of a cover is its smallest anchor.
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{rccl}\toprule
+Cycle & Bits $x_0x_1x_2x_3x_4$ & Cube in the window & Cube after the removal\\\midrule
+\tableinput{generated/tab_example_codes.tex}
+\bottomrule\end{tabular}
+\caption{\textbf{The notation on one question} (operation 2, \texttt{load c0}). Each
+cycle of the window is written with its own five binary digits, lowest first. The
+window is a cover of three cubes. Removing the full cycle 0 splits the first cube
+into the odd cycles, \texttt{1*000}, and the one even cycle left, \texttt{01000}; the
+other two cubes are untouched. Generated from the run.}\label{tab:codes}
+\end{table}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=1\linewidth]{ex_cube_anatomy.pdf}
+\caption{\textbf{Anatomy of one cube}, \texttt{1*000}, from the example. Top: each
+position $x_i$ has weight $2^i$; the anchor bits give the fixed part and the mask
+marks the free position. Bottom: every member is the anchor plus a choice of free
+weights, here $1+0$ and $1+2$, the cycles 1 and 3. The smallest member is the
+anchor.}\label{fig:cube}
+\end{figure}
+
+\emph{One question, answered.} Take operation 2, the load of \texttt{c0}
+(Table~\ref{tab:codes} and Figure~\ref{fig:query}). A load reads no earlier value, so
+its window starts at cycle 0 and ends at \V{exQhi}: the three cubes
+\texttt{\V{exQbA}}, \texttt{\V{exQbB}} and \texttt{\V{exQbC}}. Cycle 0 already holds
+two loads, operations 0 and 1, and the load engine has two slots, so cycle 0 must go.
+Removing it is a set difference, not a bit flip: \texttt{\V{exQbA}} minus
+\texttt{00000} leaves \texttt{\V{exQaA}}, the odd cycles 1 and 3, and
+\texttt{\V{exQaB}}, the cycle 2. The bits are the digits of the cycle numbers, not
+one flag per cycle; the leading 1 of \texttt{\V{exQaA}} says ``odd'', not ``used''.
+Nor is a cycle removed merely because something issues in it. It is removed only for
+operations on the same engine, and only once that engine's slots are all taken:
+cycle 1, holding one load, still accepts a second (operation 3 goes there), and a
+scalar operation could still use cycle 0. The anchors of the surviving cubes are
+\V{exQanchors}, so the answer is cycle 1, and the decision follows at once:
+operation 2 issues at cycle 1. Every member of the surviving cover is legal, so the
+decision is legal by construction, and the lost cycle has a stated cause.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.5\linewidth]{ex_query_before.pdf}\hfill
+\includegraphics[width=.5\linewidth]{ex_query_after.pdf}
+\caption{\textbf{One scheduling question, in the binary format.} Operation 2
+(\texttt{load c0}). Left: the window of cycles it may use, written as three cubes
+(bits lowest first; each bar spans the cycles its cube contains). Right: the full
+cycle 0 (red) removed; the cover now has four cubes and its smallest member, cycle 1
+(green), is the decision.}\label{fig:query}
+\end{figure}
+
+The same question is asked for every operation (Table~\ref{tab:step1}, top, and
+Figure~\ref{fig:step1}, top). Operations that read earlier values cannot use any
+cycle before their inputs land; those cycles lie outside the window. The loads of
+\texttt{a0} and \texttt{b0} take cycle 0, those of \texttt{c0} and \texttt{d0} take
+cycle 1, and every other operation issues in the first cycle at which its inputs have
+landed and its engine has a free slot.
+
+Addresses are chosen by the same loop, on \V{exAddrBits} bits (the 256 words of the
+scratchpad): \emph{which words may this value occupy?} The window is written as
+cubes, the words held by values whose lifetimes overlap this one are subtracted,
+and the lowest survivor is the decision (Table~\ref{tab:step1}, bottom, and
+Figure~\ref{fig:step1}, bottom). For instance \texttt{d0} lives only in cycle 4; at
+that moment \texttt{a0} holds word 0 and \texttt{c0} holds word 1, so both are
+removed and \texttt{d0} takes word \V{exAchosen}. Values whose lifetimes have ended
+leave their words free, which is how \texttt{left\_product} reuses word 0 once
+\texttt{a0} has been read for the last time. In all, \V{exQueries} questions build
+the whole first answer.
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{rlllcc}\toprule
+Op & Opcode & Window & Surviving cover (bits lowest first) & Removed & Cycle\\\midrule
+\tableinput{generated/tab_example_times.tex}
+\bottomrule\end{tabular}\par\medskip
+\begin{tabular}{lllll}\toprule
+Value & Lifetime & Window & Words held by an overlapping value & Word\\\midrule
+\tableinput{generated/tab_example_addresses.tex}
+\bottomrule\end{tabular}
+\caption{\textbf{Step 1 on the example: every question and its answer.} Top: one
+scheduling question per operation. The window starts where the operation's inputs
+have landed; ``removed'' lists the cycles whose engine was already full; the answer
+is the smallest member of the surviving cover. Bottom: one allocation question per
+value. A value's lifetime runs from the cycle its result lands to the cycle of its
+last reader; words held by values alive at the same time are removed, and the answer
+is the lowest word left. Generated from the run.}\label{tab:step1}
+\end{table}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.8\linewidth]{ex_step1_times.pdf}\par\medskip
+\includegraphics[width=.45\linewidth]{ex_step1_addresses.pdf}
+\caption{\textbf{Step 1 as pictures.} Top: for each operation, every cycle from 0
+to the end of its query window. Red cells are unavailable: \emph{wait} marks cycles
+before its inputs land, which lie outside the window, and \emph{full} marks cycles
+removed from the window because the engine's slots are taken; blue cells survived; green is the smallest
+survivor, the decision. Bottom: the same for scratch words, one row per value with
+its lifetime; a red word carries the name of the live value that holds
+it.}\label{fig:step1}
+\end{figure}
+
+\emph{The result, and what it means.} Figure~\ref{fig:ours} replays the first
+answer. It runs in $C=\V{exOursC}$ cycles with $S=\V{exOursS}$ words, $J=\V{exOursJ}$,
+against $\V{exClC}\times\V{exClS}=\V{exClJ}$ for classical. Because the loads were
+taken in pairs by chain, the left chain starts one cycle before the right one: the
+two chains are staggered rather than in lockstep, their stores fall at cycles
+\V{exOursStoreA} and \V{exOursStoreB} and never compete for the store slot, and at
+no cycle are more than three values alive. Reading the middle band of
+Figure~\ref{fig:ours} row by row shows the allocation at work: word 0 holds
+\texttt{a0}, then \texttt{left\_product}, then \texttt{right\_product}, then
+\texttt{right}, each arriving only after the previous tenant's last read. We should
+be candid about why Step~1 does so well here: it takes operations in program order
+and the earliest cycle for each, and on this program that order happens to be a good
+one. It is not always so; on the program of Section~\ref{sec:worked}, Step~1 alone
+is worse than classical. That is why the compiler does not stop here.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=1\linewidth]{ex_trace_ours.pdf}
+\caption{\textbf{Our compiler's output on the example}, in the same picture as
+Figure~\ref{fig:traces}: $\V{exOursC}\times\V{exOursS}$. The chains are staggered by
+one cycle, the stores never collide, and three words are reused by all
+\V{exValues} values.}\label{fig:ours}
+\end{figure}
 
 \paragraph{Step 2: find the decisions that cause the cost.} The compiler builds a
 \emph{catalogue} of groups of related operations, called windows, each allowed to
@@ -159,7 +408,10 @@ operations, which determine $C$; the $k$ operations around the memory peak, whic
 determine $S$; contiguous blocks; small groups of four; and the whole program when
 it is small. This is large neighbourhood search~\cite{shaw1998}: move several
 related decisions together, because useful improvements rarely come one decision
-at a time.
+at a time. Each window becomes one question: \emph{if only these decisions may
+change, is there any legal answer with a smaller $J$?} On the example the catalogue
+holds \V{exCatalogue} such questions (Figure~\ref{fig:reopen}, left), from windows of
+a single operation up to the whole program.
 
 \paragraph{Step 3: say exactly what ``better'' must look like.} With the rest of
 the program fixed, a window's answer cannot use fewer than $L_C$ cycles or fewer
@@ -175,6 +427,16 @@ improvement and is answered without searching. This is how the objective of
 Equation~\eqref{eq:j} enters the search directly: the compiler never asks for
 fewer cycles or fewer words in isolation, only for a smaller product.
 
+On the example $J_0=\V{exOursJ}$. For the \V{exBoxPolicy} window the fixed part of the
+program already forces $L_C=\V{exBoxLC}$ and $L_S=\V{exBoxLS}$, so the box is
+$C\le\V{exBoxCcap}$ and $S\le\V{exBoxScap}$; both bounds lie below their minimums,
+the box is empty, and the question is answered by arithmetic alone. \V{exBoxClosed}
+of the \V{exCatalogue} questions end this way. For the whole-program window the
+minimums are $L_C=\V{exWholeLC}$ and $L_S=\V{exWholeLS}$, and the box is $C\le
+\V{exWholeCcap}$ (the horizon) and $S\le\V{exWholeScap}$: any improvement must use at
+most \V{exWholeScap} words and fit under the curve $C\times S=\V{exOursJ}$
+(Figure~\ref{fig:reopen}, right).
+
 \paragraph{Step 4: delete impossible options, each with a reason.} Before
 searching, the compiler removes choices that cannot be part of any legal answer.
 If $v$ reads the result of $u$ and $u$ has latency $\ell$, then $v$ cannot issue
@@ -184,7 +446,10 @@ removed from every other operation on that engine. Every removal records a short
 \emph{certificate} that anyone holding the program can check in one line, in the
 spirit of explained propagation in constraint solvers~\cite{ohrimenko2009}. These
 are the causes in the causal reading: not only ``this option is gone'', but ``this
-option is gone because $v$ reads $u$ with latency $\ell$''.
+option is gone because $v$ reads $u$ with latency $\ell$''. On the example,
+\V{exRootClosed} further questions are closed here, before a single search node:
+at the root, propagation together with the lower bound on $J$ already rules out
+every combination inside the box, which proves the window holds no improvement.
 
 \paragraph{Step 5: search exactly, keep the first validated improvement, repeat.}
 What remains is searched exactly, depth first, abandoning any branch whose best
@@ -196,6 +461,47 @@ the new current answer, and a new round starts from it. The submitted compiler s
 after \V{bB}\,s or when a whole round finds nothing. This is the combinatorial view of
 scheduling and allocation of Casta\~neda Lozano and colleagues~\cite{castaneda2019},
 applied to small, well-chosen neighbourhoods rather than to the whole program at once.
+
+On the example only \V{exSearched} questions survive to the search: the window of
+the 16 latest operations and the whole-program window, which on a program of
+\V{exOps} operations release the same operations with different radii. Both are searched to the end, in \V{exNodes} nodes in total
+(\V{exWholeNodes} for the whole-program window), and neither contains a strict
+improvement. The round finishes having found nothing, so the compiler stops after
+\V{exEpochs} round, long before its budget, and returns the first answer unchanged,
+together with \V{exCerts} certificates that justify every option it discarded. This
+agrees with an independent check that shares nothing with the search: enumerating
+all \V{exOptSchedules} legal schedules of at most \V{exOptCmax} cycles (the only
+ones that could reach $J\le\V{exOptJm}$, because every two-operand operation needs
+two words at once, so $S\ge2$) finds none below \V{exOursJ}. On this program our
+answer is optimal, and the classical one is \V{exRatioCl} times the optimum.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=1\linewidth]{ex_catalogue.pdf}\hfill
+\includegraphics[width=.6\linewidth]{ex_plane.pdf}
+\caption{\textbf{Reopen and resolve on the example.} Left: the \V{exCatalogue}
+questions of the round, one row per window; a filled cell is an operation that
+question may move, and the label gives its verdict (box empty, closed at the root
+by propagation, or searched to the end). Right: the $(C,S)$ plane. Grey dots are
+all points with $C\times S\le\V{exOptJm}$, that is every strict improvement; the curve
+is $C\times S=\V{exOursJ}$; the dashed box is the whole-program question's region. The
+search proves that no legal compilation lies in it.}\label{fig:reopen}
+\end{figure}
+
+\paragraph{Why this came out better.} The example isolates the three differences.
+First, the classical scheduler decides by a local, time-only rule: the tie among the
+loads was broken by fan-out, and that one choice put both chains in lockstep, which
+cost a cycle at the store slot and two words at the memory peak. Steps~2 to~5 judge
+every question by $J$ itself, so a schedule that saves memory is never discarded for
+failing to save time. Second, each of our decisions is the exact answer to a
+question about a set of legal options, written compactly as cubes, so no legal option
+inside a question is overlooked and nothing illegal is ever produced; every removal
+has a stated cause.
+Third, our compiler knows when to stop looking: here, a single round of \V{exNodes}
+nodes proves that no window, including the whole program, can do better, which is a
+guarantee the classical compiler cannot give. On this program Step~1 already found
+the optimum and Steps~2 to~5 certified it; on the program of
+Section~\ref{sec:worked} it is Steps~2 to~5 that turn a first answer worse than
+classical into one that beats it.
 
 \paragraph{An engineering refinement.} A search node differs from its parent by a
 single decision, yet a naive implementation re-checks every constraint at every

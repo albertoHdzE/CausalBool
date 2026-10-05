@@ -1,0 +1,5 @@
+# Terminology note — causal state grouping
+
+New prose in this closure says **causal state grouping**: a map that places micro states into classes able to carry a well-defined reduced dynamics under the declared interventions. "Causal" means compatibility with the declared intervention model only; it asserts no causal identification from observational data, no shorter archive and no discovered grammar. **State compaction** means reducing the number of distinguishable states. It is not a bit saving. **Multilevel state grouping** means composing grouping maps.
+
+The historical names stay as they are: the directories `causal_abstraction_design/` and `causal_abstraction_validation/`, the run `abstraction-validation-v1-r1`, `tests/test_abstraction.py`, and the APIs `induced_map`, `compare_induced`, `commutation_failures` and `evaluate_classes`. Where an older document or a literature source says "abstraction", read it as "causal state grouping". Exact quotations keep their original wording. Nothing was renamed.

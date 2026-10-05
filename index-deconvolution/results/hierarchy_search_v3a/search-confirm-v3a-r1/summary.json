@@ -1,0 +1,997 @@
+{
+ "analysis_plan": {
+  "descriptive_only": [
+   "six cell means and signed counts",
+   "archive-size distributions",
+   "k=4 and k=1 versus portfolio where all nine constituents exist",
+   "control outcomes",
+   "status, stage, work, wall, RSS",
+   "proposed/evaluated/returned trace counts"
+  ],
+  "hid_deployed_statuses": [
+   "ok",
+   "timeout_raw",
+   "rss_limit_raw"
+  ],
+  "other_intervals": false,
+  "primary": {
+   "bootstrap": {
+    "cell_order": "lexicographic (role, family, base_length)",
+    "draws": 10000,
+    "interval": "two-sided 99% percentile, numpy linear quantiles",
+    "owner": "hierarchy.report.stratified_bootstrap",
+    "rng": "numpy.random.default_rng",
+    "seed": 55001,
+    "unit_order": "replicate ascending"
+   },
+   "cells": "(role, family, base_length), six",
+   "decision_precedence": [
+    "INVALID",
+    "INCOMPLETE",
+    "SUPPORTED if lower > 0",
+    "HARMFUL if upper < 0",
+    "INCONCLUSIVE otherwise"
+   ],
+   "hid_fallback": "validated raw archive cost with explicit timeout_raw/rss_limit_raw",
+   "per_string": "(bits(hid_full) - bits(hid_refine4)) / actual_n_bits",
+   "positive_means": "k = 4 saves bits",
+   "roles": [
+    "boundary",
+    "boundary_large",
+    "boundary_stress"
+   ],
+   "weighting": [
+    "base_ragged_pair_mean",
+    "within_cell_unit_mean",
+    "equal_six_cell_mean"
+   ]
+  }
+ },
+ "cells": [
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 2216,
+     "median": 2188.0,
+     "min": 2168,
+     "n": 40
+    },
+    "hid_full_bits": {
+     "max": 2752,
+     "median": 2360.0,
+     "min": 2296,
+     "n": 40
+    },
+    "hid_refine4_bits": {
+     "max": 2752,
+     "median": 2384.0,
+     "min": 2328,
+     "n": 40
+    }
+   },
+   "available_units": 20,
+   "cell": "boundary|F12|4096",
+   "mean_unit_saving": -0.013471845267138327,
+   "strings_better": 0,
+   "strings_tie": 14,
+   "strings_worse": 26,
+   "units": 20,
+   "units_better": 0,
+   "units_tie": 0,
+   "units_worse": 20
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 6568,
+     "median": 6544.0,
+     "min": 6512,
+     "n": 40
+    },
+    "hid_full_bits": {
+     "max": 8944,
+     "median": 8104.0,
+     "min": 8056,
+     "n": 40
+    },
+    "hid_refine4_bits": {
+     "max": 8968,
+     "median": 8888.0,
+     "min": 8416,
+     "n": 40
+    }
+   },
+   "available_units": 20,
+   "cell": "boundary_large|F12|16384",
+   "mean_unit_saving": -0.02968636473938946,
+   "strings_better": 0,
+   "strings_tie": 15,
+   "strings_worse": 25,
+   "units": 20,
+   "units_better": 0,
+   "units_tie": 0,
+   "units_worse": 20
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 23328,
+     "median": 23280.0,
+     "min": 23256,
+     "n": 40
+    },
+    "hid_full_bits": {
+     "max": 28848,
+     "median": 28728.0,
+     "min": 28064,
+     "n": 40
+    },
+    "hid_refine4_bits": {
+     "max": 28848,
+     "median": 28728.0,
+     "min": 28064,
+     "n": 40
+    }
+   },
+   "available_units": 20,
+   "cell": "boundary_large|F12|65536",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 40,
+   "strings_worse": 0,
+   "units": 20,
+   "units_better": 0,
+   "units_tie": 20,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 45424,
+     "median": 45368.0,
+     "min": 45312,
+     "n": 40
+    },
+    "hid_full_bits": {
+     "max": 55368,
+     "median": 55328.0,
+     "min": 55232,
+     "n": 40
+    },
+    "hid_refine4_bits": {
+     "max": 55368,
+     "median": 55328.0,
+     "min": 55232,
+     "n": 40
+    }
+   },
+   "available_units": 20,
+   "cell": "boundary_large|F12|131072",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 40,
+   "strings_worse": 0,
+   "units": 20,
+   "units_better": 0,
+   "units_tie": 20,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 4040,
+     "median": 3484.0,
+     "min": 2992,
+     "n": 40
+    },
+    "hid_full_bits": {
+     "max": 3560,
+     "median": 3056.0,
+     "min": 2088,
+     "n": 40
+    },
+    "hid_refine4_bits": {
+     "max": 3560,
+     "median": 3016.0,
+     "min": 2088,
+     "n": 40
+    }
+   },
+   "available_units": 20,
+   "cell": "boundary_stress|S02|4096",
+   "mean_unit_saving": 0.006880584441327153,
+   "strings_better": 18,
+   "strings_tie": 17,
+   "strings_worse": 5,
+   "units": 20,
+   "units_better": 12,
+   "units_tie": 5,
+   "units_worse": 3
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 44056,
+     "median": 35228.0,
+     "min": 27024,
+     "n": 40
+    },
+    "hid_full_bits": {
+     "max": 48328,
+     "median": 36944.0,
+     "min": 28256,
+     "n": 40
+    },
+    "hid_refine4_bits": {
+     "max": 48328,
+     "median": 36968.0,
+     "min": 28256,
+     "n": 40
+    }
+   },
+   "available_units": 20,
+   "cell": "boundary_stress|S02|65536",
+   "mean_unit_saving": -0.001696734737692562,
+   "strings_better": 0,
+   "strings_tie": 25,
+   "strings_worse": 15,
+   "units": 20,
+   "units_better": 0,
+   "units_tie": 10,
+   "units_worse": 10
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 104,
+     "median": 96.0,
+     "min": 88,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 208,
+     "median": 200.0,
+     "min": 192,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 208,
+     "median": 200.0,
+     "min": 192,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F01|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 2952,
+     "median": 2696.0,
+     "min": 2464,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 1320,
+     "median": 1288.0,
+     "min": 1256,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 1320,
+     "median": 1288.0,
+     "min": 1256,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F06|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F07|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 4104,
+     "median": 4092.0,
+     "min": 4088,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F11|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  }
+ ],
+ "censored_baselines": 0,
+ "changed_controls": [],
+ "controls": [
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 104,
+     "median": 96.0,
+     "min": 88,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 208,
+     "median": 200.0,
+     "min": 192,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 208,
+     "median": 200.0,
+     "min": 192,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F01|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 2952,
+     "median": 2696.0,
+     "min": 2464,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 1320,
+     "median": 1288.0,
+     "min": 1256,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 1320,
+     "median": 1288.0,
+     "min": 1256,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F06|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F07|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  },
+  {
+   "archive_bits": {
+    "baseline_best_bits": {
+     "max": 4104,
+     "median": 4092.0,
+     "min": 4088,
+     "n": 4
+    },
+    "hid_full_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    },
+    "hid_refine4_bits": {
+     "max": 4176,
+     "median": 4172.0,
+     "min": 4168,
+     "n": 4
+    }
+   },
+   "available_units": 2,
+   "cell": "controls|F11|4096",
+   "mean_unit_saving": 0.0,
+   "strings_better": 0,
+   "strings_tie": 4,
+   "strings_worse": 0,
+   "units": 2,
+   "units_better": 0,
+   "units_tie": 2,
+   "units_worse": 0
+  }
+ ],
+ "freeze_problems": [],
+ "freeze_sha256": "05dd799d154e5e53a36bac7dca49f0438ca27b58b2df94c045eeca2fa6dd69e5",
+ "hid_telemetry": {
+  "hid_full": {
+   "B_cap_exits": {
+    "root_trial_cap": 8
+   },
+   "B_stop_reason": {
+    "no_strict_improvement": 248,
+    "root_trial_cap": 8
+   },
+   "selected_stage": {
+    "B": 133,
+    "G": 4,
+    "L": 111,
+    "raw": 8
+   }
+  },
+  "hid_refine4": {
+   "B_cap_exits": {
+    "leaf_length_charge_cap": 219,
+    "root_trial_cap": 1
+   },
+   "B_stop_reason": {
+    "leaf_length_charge_cap": 219,
+    "no_strict_improvement": 36,
+    "root_trial_cap": 1
+   },
+   "selected_stage": {
+    "B": 108,
+    "G": 4,
+    "L": 136,
+    "raw": 8
+   }
+  }
+ },
+ "portfolio_conclusion_blocked_by_censoring": false,
+ "primary": {
+  "available_units": 120,
+  "bootstrap": {
+   "cell_order": [
+    "boundary|F12|4096",
+    "boundary_large|F12|16384",
+    "boundary_large|F12|65536",
+    "boundary_large|F12|131072",
+    "boundary_stress|S02|4096",
+    "boundary_stress|S02|65536"
+   ],
+   "draw_mean": -0.006318868369808352,
+   "draw_sd": 0.0007996718432606152,
+   "draws": 10000,
+   "level": 0.99,
+   "seed": 55001
+  },
+  "cells": {
+   "boundary_large|F12|131072": {
+    "mean": 0.0,
+    "units": 20
+   },
+   "boundary_large|F12|16384": {
+    "mean": -0.02968636473938946,
+    "units": 20
+   },
+   "boundary_large|F12|65536": {
+    "mean": 0.0,
+    "units": 20
+   },
+   "boundary_stress|S02|4096": {
+    "mean": 0.006880584441327153,
+    "units": 20
+   },
+   "boundary_stress|S02|65536": {
+    "mean": -0.001696734737692562,
+    "units": 20
+   },
+   "boundary|F12|4096": {
+    "mean": -0.013471845267138327,
+    "units": 20
+   }
+  },
+  "ci99": [
+   -0.00833260223670385,
+   -0.004177554260442437
+  ],
+  "complete": true,
+  "engineering_valid": true,
+  "estimate_bits_per_input_bit": -0.0063290600504822,
+  "required_units": 120,
+  "verdict": "HARMFUL"
+ },
+ "resources": {
+  "bernoulli": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 27213824,
+   "max_worker_wall_s": 2.587583584,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 147.87085809000004
+  },
+  "context": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 27033600,
+   "max_worker_wall_s": 1.139339334,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 76.09865970900002
+  },
+  "gaps": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 30949376,
+   "max_worker_wall_s": 0.104135209,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 16.170349746
+  },
+  "hid_full": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 300974080,
+   "max_worker_wall_s": 10.868822625,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 1249.9234560010004
+  },
+  "hid_refine4": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 300236800,
+   "max_worker_wall_s": 11.201980875,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 1287.9130678819997
+  },
+  "lzma": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 42958848,
+   "max_worker_wall_s": 0.085053125,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 13.223040497000007
+  },
+  "pair_grammar": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 65667072,
+   "max_worker_wall_s": 0.187340709,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 24.081618254000006
+  },
+  "period": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 28033024,
+   "max_worker_wall_s": 0.081987833,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 13.599062753000007
+  },
+  "raw": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 25444352,
+   "max_worker_wall_s": 0.071659667,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 13.545372001000006
+  },
+  "rle": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 37224448,
+   "max_worker_wall_s": 0.083341042,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 14.811365994000004
+  },
+  "zlib": {
+   "jobs": 256,
+   "label": "instrumented measurement (trace observer enabled for HID arms)",
+   "max_peak_rss_bytes": 25772032,
+   "max_worker_wall_s": 2.0356145,
+   "statuses": {
+    "ok": 256
+   },
+   "worker_wall_s": 124.618290404
+  }
+ },
+ "round_trips": {
+  "decode_failed": 0,
+  "decode_ok": 3072,
+  "with_archive": 3072
+ },
+ "status_counts": {
+  "boundary": {
+   "baseline_best": {
+    "ok": 40
+   },
+   "bernoulli": {
+    "ok": 40
+   },
+   "context": {
+    "ok": 40
+   },
+   "gaps": {
+    "ok": 40
+   },
+   "hid_full": {
+    "ok": 40
+   },
+   "hid_refine4": {
+    "ok": 40
+   },
+   "lzma": {
+    "ok": 40
+   },
+   "pair_grammar": {
+    "ok": 40
+   },
+   "period": {
+    "ok": 40
+   },
+   "raw": {
+    "ok": 40
+   },
+   "rle": {
+    "ok": 40
+   },
+   "zlib": {
+    "ok": 40
+   }
+  },
+  "boundary_large": {
+   "baseline_best": {
+    "ok": 120
+   },
+   "bernoulli": {
+    "ok": 120
+   },
+   "context": {
+    "ok": 120
+   },
+   "gaps": {
+    "ok": 120
+   },
+   "hid_full": {
+    "ok": 120
+   },
+   "hid_refine4": {
+    "ok": 120
+   },
+   "lzma": {
+    "ok": 120
+   },
+   "pair_grammar": {
+    "ok": 120
+   },
+   "period": {
+    "ok": 120
+   },
+   "raw": {
+    "ok": 120
+   },
+   "rle": {
+    "ok": 120
+   },
+   "zlib": {
+    "ok": 120
+   }
+  },
+  "boundary_stress": {
+   "baseline_best": {
+    "ok": 80
+   },
+   "bernoulli": {
+    "ok": 80
+   },
+   "context": {
+    "ok": 80
+   },
+   "gaps": {
+    "ok": 80
+   },
+   "hid_full": {
+    "ok": 80
+   },
+   "hid_refine4": {
+    "ok": 80
+   },
+   "lzma": {
+    "ok": 80
+   },
+   "pair_grammar": {
+    "ok": 80
+   },
+   "period": {
+    "ok": 80
+   },
+   "raw": {
+    "ok": 80
+   },
+   "rle": {
+    "ok": 80
+   },
+   "zlib": {
+    "ok": 80
+   }
+  },
+  "controls": {
+   "baseline_best": {
+    "ok": 16
+   },
+   "bernoulli": {
+    "ok": 16
+   },
+   "context": {
+    "ok": 16
+   },
+   "gaps": {
+    "ok": 16
+   },
+   "hid_full": {
+    "ok": 16
+   },
+   "hid_refine4": {
+    "ok": 16
+   },
+   "lzma": {
+    "ok": 16
+   },
+   "pair_grammar": {
+    "ok": 16
+   },
+   "period": {
+    "ok": 16
+   },
+   "raw": {
+    "ok": 16
+   },
+   "rle": {
+    "ok": 16
+   },
+   "zlib": {
+    "ok": 16
+   }
+  }
+ },
+ "trace": {
+  "hid_full": {
+   "cached_requests": {
+    "max": 43,
+    "mean": 28.796875,
+    "total": 7372
+   },
+   "cap_blocked": {
+    "max": 1,
+    "mean": 0.03125,
+    "total": 8
+   },
+   "commits": {
+    "max": 4,
+    "mean": 2.25,
+    "total": 576
+   },
+   "evaluated_cuts": {
+    "max": 400,
+    "mean": 283.05078125,
+    "total": 72461
+   },
+   "events": {
+    "max": 554,
+    "mean": 383.48046875,
+    "total": 98171
+   },
+   "graph_rejections": {
+    "max": 0,
+    "mean": 0.0,
+    "total": 0
+   },
+   "new_serialized_admissible": {
+    "max": 512,
+    "mean": 354.65234375,
+    "total": 90791
+   },
+   "proposed_cuts": {
+    "max": 401,
+    "mean": 283.0703125,
+    "total": 72466
+   },
+   "returned_cuts": {
+    "max": 5,
+    "mean": 2.25390625,
+    "total": 577
+   },
+   "trace_status": {
+    "complete": 256
+   }
+  },
+  "hid_refine4": {
+   "cached_requests": {
+    "max": 295,
+    "mean": 111.83984375,
+    "total": 28631
+   },
+   "cap_blocked": {
+    "max": 1,
+    "mean": 0.859375,
+    "total": 220
+   },
+   "commits": {
+    "max": 3,
+    "mean": 1.26171875,
+    "total": 323
+   },
+   "evaluated_cuts": {
+    "max": 399,
+    "mean": 292.421875,
+    "total": 74860
+   },
+   "events": {
+    "max": 721,
+    "mean": 431.9921875,
+    "total": 110590
+   },
+   "graph_rejections": {
+    "max": 0,
+    "mean": 0.0,
+    "total": 0
+   },
+   "new_serialized_admissible": {
+    "max": 512,
+    "mean": 319.29296875,
+    "total": 81739
+   },
+   "proposed_cuts": {
+    "max": 400,
+    "mean": 293.2734375,
+    "total": 75078
+   },
+   "returned_cuts": {
+    "max": 3,
+    "mean": 1.99609375,
+    "total": 511
+   },
+   "trace_status": {
+    "complete": 256
+   }
+  }
+ },
+ "validation": {
+  "archives_checked": 3072,
+  "censored": [],
+  "complete": true,
+  "distinct_archives_decoded": 2653,
+  "duplicates": [],
+  "engineering_valid": true,
+  "expected_rows": 3072,
+  "incomplete": [],
+  "invalid": [],
+  "present_rows": 3072,
+  "trace_checks": {
+   "complete": 512
+  },
+  "unknown": []
+ },
+ "versus_portfolio": {
+  "hid_full": {
+   "available_units": 120,
+   "equal_cell_mean": -0.03977557690580706,
+   "note": "descriptive; reported only when all nine constituents are available for every primary unit",
+   "required_units": 120
+  },
+  "hid_refine4": {
+   "available_units": 120,
+   "equal_cell_mean": -0.04610463695628927,
+   "note": "descriptive; reported only when all nine constituents are available for every primary unit",
+   "required_units": 120
+  }
+ }
+}

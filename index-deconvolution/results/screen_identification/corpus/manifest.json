@@ -1,0 +1,3091 @@
+{
+  "protocol": "index-deconvolution/PROTOCOL_screen_identification.md (frozen at dcc1d59e)",
+  "script": "index-deconvolution/experiments/screen_s0_corpus.py",
+  "created_unix": 1790698780,
+  "tool_versions": {
+    "python": "3.13.12",
+    "dd": "0.6.0",
+    "z3-solver": "5.1.0.0",
+    "pyboolnet": "3.0.16",
+    "clingo": "5.8.2",
+    "BoolNet": "2.1.9",
+    "R": "R version 4.6.1 (2026-06-24)",
+    "gringo": "gringo version 5.8.2",
+    "clasp": "clasp version 3.4.1"
+  },
+  "synthetic": {
+    "sizes": [
+      10,
+      15,
+      20,
+      30,
+      50,
+      100,
+      200
+    ],
+    "seeds_per_n": 5,
+    "seed_rule": "seed = 1000*n + s, s = 0..4",
+    "max_arity": 3,
+    "gate_pool": "core",
+    "count": 35,
+    "all_tools_load": 35
+  },
+  "bio": {
+    "files_scanned": 236,
+    "converted": 50,
+    "load_in_every_tool": 50,
+    "selected": 20,
+    "selection_rule": "sorted by (n, id); if more than 20, indices round(i*(L-1)/19)"
+  },
+  "load_check": "forward map of each tool == causalbool.step on 64 pinned random states (seed '20260929:<id>'); ours: parse_bnet(bnet) == network by canonical diagram identity over all 2^n states",
+  "entries": [
+    {
+      "id": "synthetic/n010_s0",
+      "kind": "synthetic",
+      "n": 10,
+      "seed": 10000,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n010_s0.json",
+      "bnet": "synthetic/n010_s0.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "MAJORITY",
+        "NOT",
+        "OR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "d40123a886160f36afaebb8e43b10ea99e9bab059e75aba152f542c04406b008",
+      "bnet_sha256": "9962c5a864f9065577d024c9c291b273046dfdb21f74067243e507ff65661c1c"
+    },
+    {
+      "id": "synthetic/n010_s1",
+      "kind": "synthetic",
+      "n": 10,
+      "seed": 10001,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n010_s1.json",
+      "bnet": "synthetic/n010_s1.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "MAJORITY",
+        "NAND",
+        "NOR",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "eef5ecdc7e67e40029a7ff6738d714a386bcc2b04e6471b120172507c8b2243d",
+      "bnet_sha256": "771398ce2d51d72023d5e22709211ac08a1dea64d35c33ff15a7425b14306476"
+    },
+    {
+      "id": "synthetic/n010_s2",
+      "kind": "synthetic",
+      "n": 10,
+      "seed": 10002,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n010_s2.json",
+      "bnet": "synthetic/n010_s2.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "MAJORITY",
+        "NIMPLIES",
+        "NOR",
+        "OR",
+        "XNOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "2f6e61b52a010767265a55af2b4d410e8eca8d9bd985a6131ed536995eda9e48",
+      "bnet_sha256": "04d1c33996751deca03ca1871876fd28982e898f15387bcffd18c141790005e8"
+    },
+    {
+      "id": "synthetic/n010_s3",
+      "kind": "synthetic",
+      "n": 10,
+      "seed": 10003,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n010_s3.json",
+      "bnet": "synthetic/n010_s3.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "IMPLIES",
+        "KOFN",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "03e7564ff97809303c1bc89fe1e0faa16b4e4af90c4c8836052b51a4c0bb3ec6",
+      "bnet_sha256": "c993ca311602151d7db3b29b218bbd9bc582ed02c129c84b7da859f1bb681088"
+    },
+    {
+      "id": "synthetic/n010_s4",
+      "kind": "synthetic",
+      "n": 10,
+      "seed": 10004,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n010_s4.json",
+      "bnet": "synthetic/n010_s4.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "IMPLIES",
+        "MAJORITY",
+        "NAND",
+        "NOR",
+        "NOT",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "2a54d0e6f619e50d9cef984aa81d85add19b7b8a4d7d935cfbdca870d1f35998",
+      "bnet_sha256": "b62b44012480479f5339dfe1a1534f335f9995b812a468f6ff9897774c2064ac"
+    },
+    {
+      "id": "synthetic/n015_s0",
+      "kind": "synthetic",
+      "n": 15,
+      "seed": 15000,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n015_s0.json",
+      "bnet": "synthetic/n015_s0.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NOR",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "ace09a92236e3b8ab359a537cd8ca82970ae07a99bde6f4d2233e530115f5c3d",
+      "bnet_sha256": "1cf567f84abcc1dae6e3488720c2ca07c61490b5064c3975c4ecc89ae9d40dd4"
+    },
+    {
+      "id": "synthetic/n015_s1",
+      "kind": "synthetic",
+      "n": 15,
+      "seed": 15001,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n015_s1.json",
+      "bnet": "synthetic/n015_s1.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "8b59136cb2d569fb3224d7f4a1b225b586065aef453e59a2711f9db53ad128e1",
+      "bnet_sha256": "892ce6f0317b726bcae0b130500bd46dcf4414f452e70c3a8d73bfdf29ef885e"
+    },
+    {
+      "id": "synthetic/n015_s2",
+      "kind": "synthetic",
+      "n": 15,
+      "seed": 15002,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n015_s2.json",
+      "bnet": "synthetic/n015_s2.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NOR",
+        "NOT",
+        "XNOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "a8980a2d24c960ff5d57820bd3f8cb716beaf6637ecea6a6ce7754b13db6018a",
+      "bnet_sha256": "3446dea03c9f0204686b05f6891743afb9285f9950963157a487333a6657c44c"
+    },
+    {
+      "id": "synthetic/n015_s3",
+      "kind": "synthetic",
+      "n": 15,
+      "seed": 15003,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n015_s3.json",
+      "bnet": "synthetic/n015_s3.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "f767ea3d8be4e06c6e8300e731bbe08cc5c80bde8f2c34e5adac5cfee498b2fc",
+      "bnet_sha256": "4714b474633002bf456f55b8603b6a6b2a6185f46e6ef02ada3181dff1d11d14"
+    },
+    {
+      "id": "synthetic/n015_s4",
+      "kind": "synthetic",
+      "n": 15,
+      "seed": 15004,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n015_s4.json",
+      "bnet": "synthetic/n015_s4.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "OR",
+        "XNOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "ab25fa615eead04351b3d66d0f86968efa7db251a7b651914957fe5625ccac17",
+      "bnet_sha256": "e1417f7940227b9cf45bee6949a5d1fa5775c804de8877bb008e7aa267571283"
+    },
+    {
+      "id": "synthetic/n020_s0",
+      "kind": "synthetic",
+      "n": 20,
+      "seed": 20000,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n020_s0.json",
+      "bnet": "synthetic/n020_s0.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "00dc5e35ab4cc2ca7b180fca5898d6de08ff0cb2fcea0e53f004e42dc29c4d28",
+      "bnet_sha256": "d354f382c5e36528de1d9d2f1822f58a4c01cd46adbdd98d64663010f5114c15"
+    },
+    {
+      "id": "synthetic/n020_s1",
+      "kind": "synthetic",
+      "n": 20,
+      "seed": 20001,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n020_s1.json",
+      "bnet": "synthetic/n020_s1.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "a27ac6afe33fad95321dd7b99228e8aea10fa01c5a15ff38d0f391d53086cd64",
+      "bnet_sha256": "d11aa0b0f249a09af4dbf644d72483df62561c6cf5c71c4672b2cc85b4738b56"
+    },
+    {
+      "id": "synthetic/n020_s2",
+      "kind": "synthetic",
+      "n": 20,
+      "seed": 20002,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n020_s2.json",
+      "bnet": "synthetic/n020_s2.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "7e2422310a946f4c290f22b2f09adc32960720575afc656ea66170736d9ab9ae",
+      "bnet_sha256": "7ba0d3adc24e34d2332712b225f400bbbdb4e61cc1b80b690bf76e23b894865b"
+    },
+    {
+      "id": "synthetic/n020_s3",
+      "kind": "synthetic",
+      "n": 20,
+      "seed": 20003,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n020_s3.json",
+      "bnet": "synthetic/n020_s3.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "af4a5167ed3b19c9add0b08d654caf54e0409d5427e5e0cbd027f3556227b0fe",
+      "bnet_sha256": "e6dadb245778916f6460005001ec6a49fda97fa7ade61be1a2edaed247a4284f"
+    },
+    {
+      "id": "synthetic/n020_s4",
+      "kind": "synthetic",
+      "n": 20,
+      "seed": 20004,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n020_s4.json",
+      "bnet": "synthetic/n020_s4.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "IMPLIES",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "8c22898f1ed67e8362b45d896639e15c80627891f5cfdf099eb4d7de4d173503",
+      "bnet_sha256": "51e6e555ae34ee39a4b68641bb540c9610f43be533f60f99b153d49420d01e93"
+    },
+    {
+      "id": "synthetic/n030_s0",
+      "kind": "synthetic",
+      "n": 30,
+      "seed": 30000,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n030_s0.json",
+      "bnet": "synthetic/n030_s0.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "28eb207a5514cb9bd1c2fc010033216f2c34e370ff30c1a427dcd86e166b60b1",
+      "bnet_sha256": "455cd066e86c6fe3301d2a367dbbf5c86b288bb1b873a7940b699380387042a6"
+    },
+    {
+      "id": "synthetic/n030_s1",
+      "kind": "synthetic",
+      "n": 30,
+      "seed": 30001,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n030_s1.json",
+      "bnet": "synthetic/n030_s1.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "f02423e50aaa5df6cc444dfb8b1b4d037f413f1523e47baae0b9082f96063fd8",
+      "bnet_sha256": "f118b13fb68aa74fb29238af48704e6e1859d93616f20b0bc6b7e437ba3a1230"
+    },
+    {
+      "id": "synthetic/n030_s2",
+      "kind": "synthetic",
+      "n": 30,
+      "seed": 30002,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n030_s2.json",
+      "bnet": "synthetic/n030_s2.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "aa9367b7a07e5c4e96953cc1383d5e0a0cdfc1d3f0972ac6999c095b7ccedd50",
+      "bnet_sha256": "a23116b592a86216c0dd817e79881c116b3ccd7bf1ea85ab5b832963e9d8a8b8"
+    },
+    {
+      "id": "synthetic/n030_s3",
+      "kind": "synthetic",
+      "n": 30,
+      "seed": 30003,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n030_s3.json",
+      "bnet": "synthetic/n030_s3.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "a49ecf2c88eb39c10b17d5ef18594b6ad9dd1e22412519cfa5004e9e60dedb68",
+      "bnet_sha256": "ad689ec1db0f302bed3f1564f0c311866a6c7acafd1c07549f608e03e6985726"
+    },
+    {
+      "id": "synthetic/n030_s4",
+      "kind": "synthetic",
+      "n": 30,
+      "seed": 30004,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n030_s4.json",
+      "bnet": "synthetic/n030_s4.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "81d565b6276ed1f8647c2c1c6c257c0c2e887587367b864fb53e61f4e56fd6ee",
+      "bnet_sha256": "1d849aa6209a4cf746909ae6c438a35df2fa9b510336fc142f270aa4fffbeeca"
+    },
+    {
+      "id": "synthetic/n050_s0",
+      "kind": "synthetic",
+      "n": 50,
+      "seed": 50000,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n050_s0.json",
+      "bnet": "synthetic/n050_s0.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "1be9aa1dd01b13e693b3482d7aa6bd7beb2a21f19694d62fab5af3f4e68b241d",
+      "bnet_sha256": "17595020b827f15577b345574082bd47c524603e4889d0d6facb5a5c17fd1039"
+    },
+    {
+      "id": "synthetic/n050_s1",
+      "kind": "synthetic",
+      "n": 50,
+      "seed": 50001,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n050_s1.json",
+      "bnet": "synthetic/n050_s1.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "54d0833af49f654b3ff3acb9bf91f8dd60059e50f846ef37af69e4e7677d2852",
+      "bnet_sha256": "28ae30ef8cce6c7997db7abd4563a85c89e5aba79b8aad79108e658ae41d35c5"
+    },
+    {
+      "id": "synthetic/n050_s2",
+      "kind": "synthetic",
+      "n": 50,
+      "seed": 50002,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n050_s2.json",
+      "bnet": "synthetic/n050_s2.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "3f257322ac0e5ffd4d11a63b16d3bd1ddd73b832a336ad0e05ce4ef7810ab096",
+      "bnet_sha256": "7b6e857eed2f843fd8f71a6265fcf9c039aeb17ad1a8dc4daa8ae614cf8da4ab"
+    },
+    {
+      "id": "synthetic/n050_s3",
+      "kind": "synthetic",
+      "n": 50,
+      "seed": 50003,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n050_s3.json",
+      "bnet": "synthetic/n050_s3.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "d32b6f8e29cce5b13a9a8bfabf6ce64cf6386ec151c1bd10bc2ca862a8285218",
+      "bnet_sha256": "7f76c18d155e5dd570aa627bee6157e02d8bd564b144a552f018a98749c59a28"
+    },
+    {
+      "id": "synthetic/n050_s4",
+      "kind": "synthetic",
+      "n": 50,
+      "seed": 50004,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n050_s4.json",
+      "bnet": "synthetic/n050_s4.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "18704605630cd974fbff2aa8c61f7e765bacefea4dba8944426867c20dfc02ea",
+      "bnet_sha256": "cf419f1fd571e7615a9ff7230b084c68ef12fc3e372da314e8c86cb079445a76"
+    },
+    {
+      "id": "synthetic/n100_s0",
+      "kind": "synthetic",
+      "n": 100,
+      "seed": 100000,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n100_s0.json",
+      "bnet": "synthetic/n100_s0.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "2782527f13bb5a20530edbffd086e1966e2c392ca70efd29a302baaa2404f7a1",
+      "bnet_sha256": "0bbc261de978bcff6aed2cb7b9a22976eb75e928d1456fd692dcae54784dae46"
+    },
+    {
+      "id": "synthetic/n100_s1",
+      "kind": "synthetic",
+      "n": 100,
+      "seed": 100001,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n100_s1.json",
+      "bnet": "synthetic/n100_s1.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "4c4fc265352c37fb35a4df74dbce76c9696a8c7221d93ae4eceb6bc0a70d2f06",
+      "bnet_sha256": "4b7da67a0afb8d3f70f04128efdd66507d342a9873bf231150daa72b507e8460"
+    },
+    {
+      "id": "synthetic/n100_s2",
+      "kind": "synthetic",
+      "n": 100,
+      "seed": 100002,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n100_s2.json",
+      "bnet": "synthetic/n100_s2.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "e95f5077a2376804164c1f0464e3e0dcd321cda5e93695ea2f6e6864dc6027e3",
+      "bnet_sha256": "6e2adc78494cbcaa0b7d7eca1cbf04debe192bcbd1b8facd71b070f3b1d1d7c9"
+    },
+    {
+      "id": "synthetic/n100_s3",
+      "kind": "synthetic",
+      "n": 100,
+      "seed": 100003,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n100_s3.json",
+      "bnet": "synthetic/n100_s3.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "cb73011c695cc5090d6688238389f3d3161027adf072404bbc67b6f623ae5a83",
+      "bnet_sha256": "25039af93303bd7e4269971f5f8b60822e3361e1017c1e60aecf73ba1938b7e6"
+    },
+    {
+      "id": "synthetic/n100_s4",
+      "kind": "synthetic",
+      "n": 100,
+      "seed": 100004,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n100_s4.json",
+      "bnet": "synthetic/n100_s4.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "0eaa5e9e43287689aa08118b1975980e4ce08ef1aca6eb2894cbeed185bb767d",
+      "bnet_sha256": "0a9ffb3b297e0cd24d682f9ec37a7aae1420060f5f5c7fbfabb016015ae67463"
+    },
+    {
+      "id": "synthetic/n200_s0",
+      "kind": "synthetic",
+      "n": 200,
+      "seed": 200000,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n200_s0.json",
+      "bnet": "synthetic/n200_s0.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "c95052002a6ab85cc0602a62aa5dd9c55ed8667d31ff164b02107aa80d213a7f",
+      "bnet_sha256": "89541383051a3b90dd15eaf3faa14972e529ce8c6181a262139ec268f2e535bb"
+    },
+    {
+      "id": "synthetic/n200_s1",
+      "kind": "synthetic",
+      "n": 200,
+      "seed": 200001,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n200_s1.json",
+      "bnet": "synthetic/n200_s1.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "69ee7d5be22d6c36a84ebb386c6687fcc2425d5059208f4f986b9b65273d12a9",
+      "bnet_sha256": "146d08493255abd73049a1a3a12fa4b53d3d5f705919e03160f02cae7d0453eb"
+    },
+    {
+      "id": "synthetic/n200_s2",
+      "kind": "synthetic",
+      "n": 200,
+      "seed": 200002,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n200_s2.json",
+      "bnet": "synthetic/n200_s2.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "ac973a49ee79c2118792e87ca93676939e5a657fa23f5e638fccce8ad3e6d9ef",
+      "bnet_sha256": "5a3ae7605dc23c00366e034acadfba7749284dca14d0f3f8ae74f2c51460c854"
+    },
+    {
+      "id": "synthetic/n200_s3",
+      "kind": "synthetic",
+      "n": 200,
+      "seed": 200003,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n200_s3.json",
+      "bnet": "synthetic/n200_s3.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "f48e8fdacf32908e523dfe69a339a1ff4544fe4b2d02cafdafd260665f7e1568",
+      "bnet_sha256": "90c6cd5ca8e3cc8b26b888f6cf5a63667a6daac2af04cd77ed87058bcf71cdca"
+    },
+    {
+      "id": "synthetic/n200_s4",
+      "kind": "synthetic",
+      "n": 200,
+      "seed": 200004,
+      "generator": "random_network(n, seed, max_arity=3, gate_pool='core')",
+      "network_json": "synthetic/n200_s4.json",
+      "bnet": "synthetic/n200_s4.bnet",
+      "max_indegree": 3,
+      "gates": [
+        "AND",
+        "IMPLIES",
+        "KOFN",
+        "MAJORITY",
+        "NAND",
+        "NIMPLIES",
+        "NOR",
+        "NOT",
+        "OR",
+        "XNOR",
+        "XOR"
+      ],
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "0ecc61fc3aced7fc3d01c9df20c1f20061d46a33fc237d6ec37c6b522efaa388",
+      "bnet_sha256": "449cf955bfd39f9432deb53790635af629db1b5ede35703d306b4efcec298d9c"
+    },
+    {
+      "id": "bio/lambda_phage",
+      "kind": "bio",
+      "n": 4,
+      "source_file": "data/bio/processed/lambda_phage.json",
+      "source_sha256": "8ab4846d65db31e13f6fbee0d3ea82e42d455280e1d5c949f0aa19c213d87f04",
+      "source": "CellCollective/Literature",
+      "node_names": [
+        "CI",
+        "Cro",
+        "CII",
+        "N"
+      ],
+      "network_json": "bio/lambda_phage.json",
+      "bnet": "bio/lambda_phage.bnet",
+      "syntax": "functional",
+      "nodes_without_rule": [],
+      "max_indegree": 2,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "3541c94295afc6d72e81ae53c7b75182bcdde2e2ccb83aabdee20bb9a7a85c9e",
+      "bnet_sha256": "573d8931aa41825e002aaca32069007abefcb939d72cc75e48303c65d1e6fe30"
+    },
+    {
+      "id": "bio/ginsim_2012-zebrafish-mir9-neurogenesis_zebra_miR9_22jul2011",
+      "kind": "bio",
+      "n": 6,
+      "source_file": "data/bio/processed/ginsim_2012-zebrafish-mir9-neurogenesis_zebra_miR9_22jul2011.json",
+      "source_sha256": "84a2d03d2344b2721e951af188bfc0106f545116704cba0e95643164854ce198",
+      "source": "published",
+      "node_names": [
+        "miR9",
+        "Her6",
+        "Zic5",
+        "HuC",
+        "P",
+        "N"
+      ],
+      "network_json": "bio/ginsim_2012-zebrafish-mir9-neurogenesis_zebra_miR9_22jul2011.json",
+      "bnet": "bio/ginsim_2012-zebrafish-mir9-neurogenesis_zebra_miR9_22jul2011.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [],
+      "max_indegree": 2,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "14a05d27d27458295ee7cfebf71df1624eef2f82a8394f85a8daa141d4b5c491",
+      "bnet_sha256": "43619b416eefc3ba8b2bdf74ada59b1d708f6e02cc85f5e6ed1baabee36dcae4"
+    },
+    {
+      "id": "bio/lac_operon",
+      "kind": "bio",
+      "n": 7,
+      "source_file": "data/bio/processed/lac_operon.json",
+      "source_sha256": "a86f85f31d91ed011ea93fa39df16f51837a0575e4cef3d1fc1e7cae2636015a",
+      "source": "RegulonDB/Literature",
+      "node_names": [
+        "lacI",
+        "lacZ",
+        "lacY",
+        "lacA",
+        "CRP",
+        "glucose",
+        "lactose"
+      ],
+      "network_json": "bio/lac_operon.json",
+      "bnet": "bio/lac_operon.bnet",
+      "syntax": "functional",
+      "nodes_without_rule": [
+        "glucose",
+        "lactose"
+      ],
+      "max_indegree": 2,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "2e3130b65667dcdb55849e8318e78c6790954025cb096bcbee54cf9f5d9f3ce4",
+      "bnet_sha256": "391cebc566ac3cb9454037c491412cc5c9f9c90d3f19cd14f530644048e4dd30"
+    },
+    {
+      "id": "bio/MODEL1504170000",
+      "kind": "bio",
+      "n": 9,
+      "source_file": "data/bio/processed/MODEL1504170000.json",
+      "source_sha256": "16df39dc6934cc1536e5ac4b67bb28b07340c9fa83649817fa85127862531b66",
+      "source": "BioModels",
+      "node_names": [
+        "SCR",
+        "PLT",
+        "ARF",
+        "AUXIAA",
+        "AUXIN",
+        "SHR",
+        "JKD",
+        "MGP",
+        "WOX5"
+      ],
+      "network_json": "bio/MODEL1504170000.json",
+      "bnet": "bio/MODEL1504170000.bnet",
+      "syntax": "functional",
+      "nodes_without_rule": [],
+      "max_indegree": 5,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "879438b2c3f25931665888742f50ef8eb2ac52e045f576f2e8d09ef4ddcb0cc3",
+      "bnet_sha256": "aaaee26766d224e5eb9b5984245f6c366261abfd996b13f1ffa5814b9dec4dcf"
+    },
+    {
+      "id": "bio/biomodels_MODEL1712240003",
+      "kind": "bio",
+      "n": 9,
+      "source_file": "data/bio/processed/biomodels_MODEL1712240003.json",
+      "source_sha256": "dfd931f6129f5d5e5da23c695faf99a73ef5c70970f379a098b2ba7d9628fe54",
+      "source": "BioModels",
+      "node_names": [
+        "MAPK1_3",
+        "PDGFRB",
+        "PDGFB",
+        "glyoxal",
+        "PARP1",
+        "LEP",
+        "methylglyoxal",
+        "oxLDL",
+        "IL1B_secretion"
+      ],
+      "network_json": "bio/biomodels_MODEL1712240003.json",
+      "bnet": "bio/biomodels_MODEL1712240003.bnet",
+      "syntax": "functional",
+      "nodes_without_rule": [],
+      "max_indegree": 8,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "03c6f2ce36391b2f884ce148e25a156c342d029b8383fb94ff31b1d1bc90c0a9",
+      "bnet_sha256": "d57b670b17e7e06a4e62530433e5bf05bc5b44ad5375e741b6397b912c58503d"
+    },
+    {
+      "id": "bio/MODEL1504170002",
+      "kind": "bio",
+      "n": 10,
+      "source_file": "data/bio/processed/MODEL1504170002.json",
+      "source_sha256": "21d753e5da086de61ad614dd247d96c93534e95a1e2608e87053f31303918ba0",
+      "source": "BioModels",
+      "node_names": [
+        "SCR",
+        "PLT",
+        "ARF",
+        "AUXIAA",
+        "AUXIN",
+        "SHR",
+        "JKD",
+        "MGP",
+        "WOX5",
+        "CLEX"
+      ],
+      "network_json": "bio/MODEL1504170002.json",
+      "bnet": "bio/MODEL1504170002.bnet",
+      "syntax": "functional",
+      "nodes_without_rule": [],
+      "max_indegree": 4,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "01e172177618abd71141233a5b135c94e5bcab336f65536b536df799598a8a41",
+      "bnet_sha256": "ec271332706f74633e44bc6a4d5e08c1d513d65297c944b9eec43626d65d9749"
+    },
+    {
+      "id": "bio/egfr_signaling",
+      "kind": "bio",
+      "n": 10,
+      "source_file": "data/bio/processed/egfr_signaling.json",
+      "source_sha256": "86150359027169081153bcaa7d176bef1166a4516cf92dfac6c6d04b774172e5",
+      "source": "Literature",
+      "node_names": [
+        "EGF",
+        "EGFR",
+        "GRB2",
+        "SOS",
+        "Ras",
+        "Raf",
+        "MEK",
+        "ERK",
+        "PI3K",
+        "AKT"
+      ],
+      "network_json": "bio/egfr_signaling.json",
+      "bnet": "bio/egfr_signaling.bnet",
+      "syntax": "functional",
+      "nodes_without_rule": [],
+      "max_indegree": 2,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "90218d45f14dad2b4aded596a6ee6ebb49c8e24ad07f80282191d94dd747bddb",
+      "bnet_sha256": "37fe76a12cc66e87b839541431ee0a2615115004d8af1fbe0e0244013baf1f04"
+    },
+    {
+      "id": "bio/ginsim_2013-drosophila-toll_Toll_Pathway_12Jun2013",
+      "kind": "bio",
+      "n": 11,
+      "source_file": "data/bio/processed/ginsim_2013-drosophila-toll_Toll_Pathway_12Jun2013.json",
+      "source_sha256": "1102e0544aea788273c6155c7f884ca8349a561342d6f482f2995847f9c823fa",
+      "source": "published",
+      "node_names": [
+        "Pelle",
+        "Cactus",
+        "Nec",
+        "Dorsal",
+        "Slmb",
+        "Spz",
+        "MyD88",
+        "Targets",
+        "Tube",
+        "Toll",
+        "Dif"
+      ],
+      "network_json": "bio/ginsim_2013-drosophila-toll_Toll_Pathway_12Jun2013.json",
+      "bnet": "bio/ginsim_2013-drosophila-toll_Toll_Pathway_12Jun2013.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "Nec",
+        "Slmb"
+      ],
+      "max_indegree": 2,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "7ebc151cef0acd2c26c52866f84e22d96796c02de73a49429049eac19c8ee192",
+      "bnet_sha256": "9e4cadeaa97c59b732a712fe3641be6a3f250873c5eb00813e2ce4d63337d972"
+    },
+    {
+      "id": "bio/ginsim_2016-mammal-cell-cycle_Traynard_Boolean_MamCC_Apr2016",
+      "kind": "bio",
+      "n": 13,
+      "source_file": "data/bio/processed/ginsim_2016-mammal-cell-cycle_Traynard_Boolean_MamCC_Apr2016.json",
+      "source_sha256": "772f0305dd1724c0a60d5fe55eb2ee54822843d3e35531bbe7551eab1d32ecdb",
+      "source": "published",
+      "node_names": [
+        "CycD",
+        "Rb2",
+        "E2F",
+        "CycE",
+        "CycA",
+        "CycB",
+        "p27_1",
+        "Cdc20",
+        "Cdh1",
+        "UbcH10",
+        "Skp2",
+        "Rb1",
+        "p27_2"
+      ],
+      "network_json": "bio/ginsim_2016-mammal-cell-cycle_Traynard_Boolean_MamCC_Apr2016.json",
+      "bnet": "bio/ginsim_2016-mammal-cell-cycle_Traynard_Boolean_MamCC_Apr2016.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "CycD"
+      ],
+      "max_indegree": 7,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "6899c3895604f9e4a06686b78bb9bd0d4b46732ed5779c52a3ac7e97bd20105e",
+      "bnet_sha256": "78130a5ec0c5e02813c55c3cb2cda855f56bfebcc7ac620c1eb8552cdc3f92f9"
+    },
+    {
+      "id": "bio/ginsim_2011-drosophila-cell-cycle_drosophilaCellCycleVariants",
+      "kind": "bio",
+      "n": 14,
+      "source_file": "data/bio/processed/ginsim_2011-drosophila-cell-cycle_drosophilaCellCycleVariants.json",
+      "source_sha256": "46c379659d8bb9f055f5aaa3d49a4aa7c0a01dc88af367bd77433494f0de6a0b",
+      "source": "published",
+      "node_names": [
+        "CycD",
+        "Rb",
+        "Rux",
+        "Wee1",
+        "Fzy",
+        "CycA",
+        "CycE",
+        "E2F",
+        "Fzr",
+        "Dap",
+        "Notch",
+        "Stg",
+        "CycB",
+        "Ago"
+      ],
+      "network_json": "bio/ginsim_2011-drosophila-cell-cycle_drosophilaCellCycleVariants.json",
+      "bnet": "bio/ginsim_2011-drosophila-cell-cycle_drosophilaCellCycleVariants.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "CycD",
+        "Fzy",
+        "Notch",
+        "Ago"
+      ],
+      "max_indegree": 5,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "daed61fe64acd8fe72ea4eac81d61b18eee77d63105bff2f470834e332460f20",
+      "bnet_sha256": "65f505e37397fb3cfc7bae4963ac7aaec7241005e8ac0d8c755b3b4b43ff27d5"
+    },
+    {
+      "id": "bio/ginsim_2009-budding-yeast-cell-cycle_buddingYeastIrons2009",
+      "kind": "bio",
+      "n": 18,
+      "source_file": "data/bio/processed/ginsim_2009-budding-yeast-cell-cycle_buddingYeastIrons2009.json",
+      "source_sha256": "1b7d8552be75ba2b6cca9f5c54c09644028254542c1ed3e79aba11e832d359aa",
+      "source": "published",
+      "node_names": [
+        "Clb5",
+        "S",
+        "CKI",
+        "Cln3",
+        "FEAR",
+        "CD",
+        "B",
+        "Clb2",
+        "SFF",
+        "Swi5",
+        "MEN",
+        "Yhp1",
+        "SMBF",
+        "Cdc14",
+        "M",
+        "Cdh1",
+        "Cln2",
+        "Cdc20"
+      ],
+      "network_json": "bio/ginsim_2009-budding-yeast-cell-cycle_buddingYeastIrons2009.json",
+      "bnet": "bio/ginsim_2009-budding-yeast-cell-cycle_buddingYeastIrons2009.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [],
+      "max_indegree": 4,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "da4ab10b4ffa86dfde6d533ff30c69f040da884416fa806be23c6fdff2e58408",
+      "bnet_sha256": "ed5dd1b75e4e4016198480ab1d78476e3ee471da3d27928e7f9d6c9c93aa3801"
+    },
+    {
+      "id": "bio/MODEL1606020000",
+      "kind": "bio",
+      "n": 19,
+      "source_file": "data/bio/processed/MODEL1606020000.json",
+      "source_sha256": "723758a06c92f1261e0e773ecda1fe44f104e8089c32e9689e13aaca2f3bc9d3",
+      "source": "BioModels",
+      "node_names": [
+        "TBET",
+        "IFNG",
+        "GATA3",
+        "IL2",
+        "IL4",
+        "RORGT",
+        "IL21",
+        "FOXP3",
+        "TGFB",
+        "IL10",
+        "IL12e",
+        "IFNGe",
+        "IL2e",
+        "IL4e",
+        "IL21e",
+        "TGFBe",
+        "IL10e",
+        "IL27e",
+        "INSULIN"
+      ],
+      "network_json": "bio/MODEL1606020000.json",
+      "bnet": "bio/MODEL1606020000.bnet",
+      "syntax": "functional",
+      "nodes_without_rule": [],
+      "max_indegree": 8,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "2b5126b4e86a1038d9386211280b74ed5f54f1953503d51a29d238503431bd3e",
+      "bnet_sha256": "68ff628b2843d6aecc6927a6d0e119d14b7a2f864e71c0cae4bf5a71a6af85c1"
+    },
+    {
+      "id": "bio/ginsim_2013-drosophila-hh_Hh__Pathway_11Jun2013",
+      "kind": "bio",
+      "n": 24,
+      "source_file": "data/bio/processed/ginsim_2013-drosophila-hh_Hh__Pathway_11Jun2013.json",
+      "source_sha256": "d3ad4e9b7b68f0b83a88564a512257b881d5d56910be7fabaeda98d764ad73c2",
+      "source": "published",
+      "node_names": [
+        "SuFu",
+        "Targets",
+        "Sgg",
+        "Smo",
+        "Hh",
+        "Shf",
+        "Dsp",
+        "Ci_rep",
+        "Ttv",
+        "Slmb",
+        "CK1a",
+        "Boi",
+        "Lipophorin",
+        "Pka",
+        "Tow",
+        "Dlp",
+        "Ci_act",
+        "Cos",
+        "Rasp",
+        "iHog",
+        "Gprk2",
+        "Ptc",
+        "Dally",
+        "Fu"
+      ],
+      "network_json": "bio/ginsim_2013-drosophila-hh_Hh__Pathway_11Jun2013.json",
+      "bnet": "bio/ginsim_2013-drosophila-hh_Hh__Pathway_11Jun2013.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "Sgg",
+        "Shf",
+        "Dsp",
+        "Ttv",
+        "Slmb",
+        "CK1a",
+        "Boi",
+        "Lipophorin",
+        "Pka",
+        "Tow",
+        "Rasp",
+        "iHog",
+        "Gprk2"
+      ],
+      "max_indegree": 8,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "9cb7c74e6fc906d823d0a7a38e29f43b83b2ac1b3d35f94d4b7f4ef596cb2f2e",
+      "bnet_sha256": "d78070ae6c2df64fb126a1adb0ebc36eb87cff7d4d6d2ef78045567578abc523"
+    },
+    {
+      "id": "bio/ginsim_2016-mammal-hspc-msc-communication_GINsim_HSPC_MSC",
+      "kind": "bio",
+      "n": 26,
+      "source_file": "data/bio/processed/ginsim_2016-mammal-hspc-msc-communication_GINsim_HSPC_MSC.json",
+      "source_sha256": "d9103c0c06b75d3b889fd0342fc797c8c7eacd34c925032e1ab93e2090cb4a5b",
+      "source": "published",
+      "node_names": [
+        "Bcatenin_H",
+        "CXCR4_H",
+        "CXCR7_H",
+        "ERK_H",
+        "FoxO3a_H",
+        "Gfi1_H",
+        "GSK3B_H",
+        "NfkB_H",
+        "PI3KAkt_H",
+        "ROS_H",
+        "TLRs_H",
+        "VLA4_H",
+        "Cx43_M",
+        "Bcatenin_M",
+        "CXCL12_M",
+        "ERK_M",
+        "FoxO3a_M",
+        "GSK3B_M",
+        "NfkB_M",
+        "ROS_M",
+        "PI3KAkt_M",
+        "TLRs_M",
+        "VCAM1_M",
+        "lTLR",
+        "IL1",
+        "GCSF"
+      ],
+      "network_json": "bio/ginsim_2016-mammal-hspc-msc-communication_GINsim_HSPC_MSC.json",
+      "bnet": "bio/ginsim_2016-mammal-hspc-msc-communication_GINsim_HSPC_MSC.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "Cx43_M",
+        "lTLR"
+      ],
+      "max_indegree": 9,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "d6631a030eb6a3f04926389f84ce0b5faa50963813ecf0774a3488f5a73f2ed0",
+      "bnet_sha256": "015e424f479c1e0d4b2e6c4c6ce2af32432c5c6920aa079571ae66254adee82f"
+    },
+    {
+      "id": "bio/ginsim_2010-mammal-cell-fate_Calzone__Cell_Fate",
+      "kind": "bio",
+      "n": 28,
+      "source_file": "data/bio/processed/ginsim_2010-mammal-cell-fate_Calzone__Cell_Fate.json",
+      "source_sha256": "5833f25d2c1968dcb798fb620a74c8c75cfe6c371fefbc9cdc229648df0dd679",
+      "source": "published",
+      "node_names": [
+        "FASL",
+        "TNF",
+        "TNFR",
+        "DISC_TNF",
+        "DISC_FAS",
+        "FADD",
+        "RIP1",
+        "RIP1ub",
+        "RIP1K",
+        "IKK",
+        "NFkB",
+        "CASP8",
+        "BAX",
+        "BCL2",
+        "ROS",
+        "ATP",
+        "MPT",
+        "MOMP",
+        "SMAC",
+        "cIAP",
+        "Cyt_c",
+        "XIAP",
+        "apoptosome",
+        "CASP3",
+        "cFLIP",
+        "NonACD",
+        "Apoptosis",
+        "Survival"
+      ],
+      "network_json": "bio/ginsim_2010-mammal-cell-fate_Calzone__Cell_Fate.json",
+      "bnet": "bio/ginsim_2010-mammal-cell-fate_Calzone__Cell_Fate.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "FASL",
+        "TNF",
+        "FADD"
+      ],
+      "max_indegree": 4,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "deefa0baca88cbf68dce936cfd606c70fb184f9451fbe4125e9070b3c24f304a",
+      "bnet_sha256": "8a5204ccd3b6ce0386837b85977992be37b5991b56286cf3561798d0be885d26"
+    },
+    {
+      "id": "bio/ginsim_2010-mammal-cell-fate_CellFate_multiscale",
+      "kind": "bio",
+      "n": 33,
+      "source_file": "data/bio/processed/ginsim_2010-mammal-cell-fate_CellFate_multiscale.json",
+      "source_sha256": "f341f518ccbde0612fb9c7c1464d043242c817ca82d47349d6cb284a4146efa1",
+      "source": "published",
+      "node_names": [
+        "FASL",
+        "TNF",
+        "TNFR",
+        "DISC_TNF",
+        "DISC_FAS",
+        "FADD",
+        "RIP1",
+        "RIP1ub",
+        "RIP1K",
+        "IKK",
+        "NFKB1",
+        "CASP8",
+        "BAX",
+        "BCL2",
+        "ROS",
+        "ATP",
+        "MPT",
+        "MOMP",
+        "SMAC",
+        "cIAP",
+        "Cyt_c",
+        "XIAP",
+        "apoptosome",
+        "CASP3",
+        "cFLIP",
+        "mROS",
+        "mcIAP",
+        "mXIAP",
+        "NonACD",
+        "Apoptosis",
+        "Survival",
+        "DIVISION",
+        "DEATH"
+      ],
+      "network_json": "bio/ginsim_2010-mammal-cell-fate_CellFate_multiscale.json",
+      "bnet": "bio/ginsim_2010-mammal-cell-fate_CellFate_multiscale.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "FASL",
+        "FADD"
+      ],
+      "max_indegree": 4,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "4bd83ab55b5066915639a11ccadd1d385400148ab67e8bb29d06188424c97ec1",
+      "bnet_sha256": "5bd755fa776fea5c4b3ce72fb7c8673c22f05957da585934a542f787a00de8a5"
+    },
+    {
+      "id": "bio/ginsim_2018-mammal-tcr-tlr5_RodriguezJorge_TLR5_Signalling_BooleanModel_17Jul2018",
+      "kind": "bio",
+      "n": 42,
+      "source_file": "data/bio/processed/ginsim_2018-mammal-tcr-tlr5_RodriguezJorge_TLR5_Signalling_BooleanModel_17Jul2018.json",
+      "source_sha256": "0a7242eabc0348076367543df8b40fd0102c8b900e5c0e753bf30aa1eb74bd30",
+      "source": "published",
+      "node_names": [
+        "TLR5",
+        "MyD88",
+        "TICAM1",
+        "PIK3AP1",
+        "IRAK4",
+        "IRAK1",
+        "PI3K",
+        "TRAF6",
+        "PDPK1",
+        "Akt",
+        "TAK1",
+        "TAB",
+        "TAK1c",
+        "SCFbTrCP",
+        "IKBKB",
+        "NFKBIA",
+        "MAP2K2",
+        "MAP2K3",
+        "MAP2K7",
+        "MAP3K8",
+        "NFKB1",
+        "RPS6KA2",
+        "MKNK1",
+        "GSK3b",
+        "RPS6KA5",
+        "JNK",
+        "P38a",
+        "ERK",
+        "MAPKAPK2",
+        "JUN",
+        "FOS",
+        "NFkB",
+        "AP1",
+        "CREB1",
+        "DUSP",
+        "TNFAIP3",
+        "ZFP36",
+        "PICytokines",
+        "Survival",
+        "AICytokines",
+        "PIK3R1",
+        "IKBKG"
+      ],
+      "network_json": "bio/ginsim_2018-mammal-tcr-tlr5_RodriguezJorge_TLR5_Signalling_BooleanModel_17Jul2018.json",
+      "bnet": "bio/ginsim_2018-mammal-tcr-tlr5_RodriguezJorge_TLR5_Signalling_BooleanModel_17Jul2018.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "TLR5",
+        "SCFbTrCP"
+      ],
+      "max_indegree": 3,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "90e120b79c713f5defe9ef74e40c7a9f60d04e3a108ef259a7bbeaccf5cc4350",
+      "bnet_sha256": "76df0e726210b4f2380c23b4e318cd7273e8fc598374d9f6037830703ae09843"
+    },
+    {
+      "id": "bio/ginsim_2008-mammal-survival-tlgl-leukemia_T_LGL",
+      "kind": "bio",
+      "n": 60,
+      "source_file": "data/bio/processed/ginsim_2008-mammal-survival-tlgl-leukemia_T_LGL.json",
+      "source_sha256": "20451e9eed2f866599aa5d22aba93cc8290e08524634ec6e5a0521fc131ababf",
+      "source": "published",
+      "node_names": [
+        "Cyt_sign",
+        "GAP",
+        "RANTES",
+        "CTLA4",
+        "MCL1",
+        "PLCG1",
+        "P2",
+        "Stimuli",
+        "Caspase",
+        "IL2RAT",
+        "TPL2",
+        "FasT",
+        "Stimuli2",
+        "Tbet",
+        "IFNg",
+        "sFas",
+        "MEK",
+        "IL2RA",
+        "Proliferation",
+        "CD45",
+        "FasL",
+        "FYN",
+        "Ceramide",
+        "GPCR",
+        "IAP",
+        "FLIP",
+        "IL2RBT",
+        "TNF",
+        "IL2RB",
+        "SOCS",
+        "Apoptosis",
+        "CREB",
+        "SMAD",
+        "GRB2",
+        "Fas",
+        "STAT3",
+        "ERK",
+        "JAK",
+        "IL2",
+        "BclxL",
+        "RAS",
+        "P27",
+        "LCK",
+        "A20",
+        "ZAP70",
+        "BID",
+        "NFkB",
+        "TRADD",
+        "GZMB",
+        "PDGFR",
+        "PDGF",
+        "SPHK1",
+        "IFNgT",
+        "IL15",
+        "PI3K",
+        "DISC",
+        "TCR",
+        "TAX",
+        "NFAT",
+        "S1P"
+      ],
+      "network_json": "bio/ginsim_2008-mammal-survival-tlgl-leukemia_T_LGL.json",
+      "bnet": "bio/ginsim_2008-mammal-survival-tlgl-leukemia_T_LGL.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "Cyt_sign",
+        "Stimuli",
+        "Stimuli2",
+        "CD45",
+        "PDGF",
+        "IL15",
+        "TAX"
+      ],
+      "max_indegree": 7,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "ff73c1e6dfead8b44f319d3e21b0021c98f83f4470211309c8db04647385196d",
+      "bnet_sha256": "7c6f2bc54d98b14288bd8b247b1fa6cf51c25f29ef36094788c41c2529de0af0"
+    },
+    {
+      "id": "bio/ginsim_2015-mammal-cell-fate-gastric-cancer_Flobak_FullModel_S2_Dataset",
+      "kind": "bio",
+      "n": 77,
+      "source_file": "data/bio/processed/ginsim_2015-mammal-cell-fate-gastric-cancer_Flobak_FullModel_S2_Dataset.json",
+      "source_sha256": "fcf554722de50a0078add17a1f23df4629a9bdbf8482eb8d9a8ffccf4a75f765",
+      "source": "published",
+      "node_names": [
+        "RTPK",
+        "SHC1",
+        "GRB2",
+        "SOS",
+        "Ras",
+        "Raf",
+        "MEK",
+        "ERK",
+        "DUSP6",
+        "TAK1",
+        "MKK3",
+        "ASK1",
+        "TAB",
+        "p38alpha",
+        "DUSP1",
+        "MKK4",
+        "MKK7",
+        "MEKK4",
+        "MLK3",
+        "Rac",
+        "JNK",
+        "GRAP2",
+        "SHP2",
+        "GAB",
+        "IKKB",
+        "IKKA",
+        "AKT",
+        "IRS1",
+        "Caspase8",
+        "PTENgene",
+        "Caspase9",
+        "FOXO",
+        "TSC",
+        "pras40",
+        "BCL2",
+        "p53",
+        "Rheb",
+        "mTORC1",
+        "PTEN",
+        "BAD",
+        "mTORC2",
+        "MDM2gene",
+        "S6K",
+        "MDM2",
+        "CytochromeC",
+        "BAX",
+        "NFkB",
+        "MAP3K8",
+        "PI3K",
+        "PDK1",
+        "LRP",
+        "ITCH",
+        "DKK1",
+        "Fz",
+        "Antisurvival",
+        "Axin",
+        "GSK3",
+        "RTPKgene",
+        "RSK",
+        "MSK",
+        "CFLAR",
+        "CK1",
+        "Dvl",
+        "SFRP1",
+        "SFRP1gene",
+        "Caspase37",
+        "betacatenin",
+        "betaTrCP",
+        "MMP",
+        "Egr1",
+        "LEF",
+        "Prosurvival",
+        "cMYC",
+        "TCF",
+        "NLK",
+        "DKK1gene",
+        "CCND1"
+      ],
+      "network_json": "bio/ginsim_2015-mammal-cell-fate-gastric-cancer_Flobak_FullModel_S2_Dataset.json",
+      "bnet": "bio/ginsim_2015-mammal-cell-fate-gastric-cancer_Flobak_FullModel_S2_Dataset.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [],
+      "max_indegree": 7,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "adbee95d586aceeaabcc36b92c33d06992259382fdcec034cb7dddd3ffb0728e",
+      "bnet_sha256": "f2f91a934c289babce9ee7a6a0c5097bb7151b3a249ac2521a317e535f94944a"
+    },
+    {
+      "id": "bio/ginsim_2019-mammal-cell-cycle-control_CellCycleControl_Sizek_PCB_2019",
+      "kind": "bio",
+      "n": 87,
+      "source_file": "data/bio/processed/ginsim_2019-mammal-cell-cycle-control_CellCycleControl_Sizek_PCB_2019.json",
+      "source_sha256": "8bbd4f133ba75f6d708184b47832d542dbcd31351b1bd740c422a22cd014dc8c",
+      "source": "published",
+      "node_names": [
+        "GF",
+        "RTK",
+        "Grb2",
+        "Ras",
+        "RAF",
+        "mTORC2",
+        "PI3K",
+        "PIP3",
+        "PDK1",
+        "AKT_B",
+        "p110_H",
+        "PI3K_H",
+        "AKT_H",
+        "FoxO3",
+        "PLCgamma",
+        "NeddL4",
+        "FoxO1",
+        "p21_mRNA",
+        "TSC2",
+        "PRAS40",
+        "Rheb",
+        "mTORC1",
+        "S6K",
+        "eIF4E",
+        "GSK3",
+        "p21",
+        "pRB",
+        "p27Kip1",
+        "Myc",
+        "CyclinD1",
+        "E2F1",
+        "CyclinE",
+        "ORC",
+        "Cdc6",
+        "Cdt1",
+        "Pre_RC",
+        "geminin",
+        "CyclinA_mRNA",
+        "Emi1",
+        "FoxM1",
+        "Cdc25A",
+        "CyclinA",
+        "Wee1",
+        "UbcH10",
+        "CyclinB",
+        "Cdc25B",
+        "Plk1",
+        "Cdc25C",
+        "Cdk1",
+        "pAPC",
+        "Cdc20",
+        "Cdh1",
+        "Replication",
+        "f4N_DNA",
+        "U_Kinetochores",
+        "Mad2",
+        "A_Kinetochores",
+        "Plk1_H",
+        "Ect2",
+        "Casp8",
+        "Casp2",
+        "MCL_1",
+        "BCLXL",
+        "BCL2",
+        "BAD",
+        "BIK",
+        "BIM",
+        "BID",
+        "BAK",
+        "BAX",
+        "Cyto_C",
+        "SMAC",
+        "IAPs",
+        "Casp9",
+        "Casp3",
+        "CAD",
+        "ATR",
+        "CHK1",
+        "Ca2",
+        "DAG",
+        "DR4_5",
+        "ERK",
+        "GF_High",
+        "IP3",
+        "MEK",
+        "SOS",
+        "Trail"
+      ],
+      "network_json": "bio/ginsim_2019-mammal-cell-cycle-control_CellCycleControl_Sizek_PCB_2019.json",
+      "bnet": "bio/ginsim_2019-mammal-cell-cycle-control_CellCycleControl_Sizek_PCB_2019.bnet",
+      "syntax": "infix",
+      "nodes_without_rule": [
+        "DR4_5",
+        "GF_High",
+        "Trail"
+      ],
+      "max_indegree": 10,
+      "checks": {
+        "ours_parse_bnet_identity": true,
+        "pyboolnet": true,
+        "dd": true,
+        "z3": true,
+        "boolnet": true
+      },
+      "network_sha256": "8f91984cd56ca8db16e68ef2b1a2ac6b23564ac247290d67f7341f5871263231",
+      "bnet_sha256": "2e430a8d0c2936ee14192912ee7a04ebda80c2d68bf31ae4d2931bc2310e42f6"
+    }
+  ],
+  "rejected": [
+    {
+      "file": "MODEL1305240000.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for erk: GEQ(mek, theta_t18_mek)"
+    },
+    {
+      "file": "MODEL1407230001.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Ca: OR(AND(NOT(Bile), EQ(Ca, 2), NOT(CaSteadyState)), AND(Bile, "
+    },
+    {
+      "file": "MODEL1411240000.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for erk: GEQ(mek, theta_t10_mek)"
+    },
+    {
+      "file": "MODEL1506260000.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for map3k1: OR(GEQ(rac, theta_t40_rac), GEQ(sitpec, theta_t40_sitpec), G"
+    },
+    {
+      "file": "MODEL1506260002.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for DIG2_S225: OR(LT(FUS3_T180, theta_t5_FUS3_T180), LT(FUS3_S177_T180_Y182"
+    },
+    {
+      "file": "MODEL1607310000.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Bin: GEQ(Bap, 2)"
+    },
+    {
+      "file": "MODEL1610060001.json",
+      "stage": "convert",
+      "reason": "ValueError: in-degree 13 > 12"
+    },
+    {
+      "file": "MODEL1611230001.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for E2F: OR(AND(LEQ(Rb, 1), NOT(CycA), NOT(CycB)), AND(LEQ(Rb, 1), NO"
+    },
+    {
+      "file": "biomodels_MODEL1610240000.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Mac1_gene: EQ(Spi1, 2)"
+    },
+    {
+      "file": "biomodels_MODEL1712240002.json",
+      "stage": "convert",
+      "reason": "ValueError: in-degree 13 > 12"
+    },
+    {
+      "file": "biomodels_MODEL2002170001.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CEBPb: OR(AND(NOT(CEBPb), CEBPa, EQ(Pu1, 2)), AND(CEBPb, EQ(Pu1, 2)"
+    },
+    {
+      "file": "biomodels_MODEL2002190001.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Alk4_5_7: OR(AND(Nodal_In, NOT(Lefty_In), NOT(Panda), Univin), AND(EQ("
+    },
+    {
+      "file": "biomodels_MODEL2004040001.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for EGFR: OR(AND(NOT(EGF), NOT(ITG_AB), NOT(RPTP), TGFBR), AND(NOT(EGF"
+    },
+    {
+      "file": "biomodels_MODEL2101150001.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for IL6_Aut: EQ(PI3K, 2)"
+    },
+    {
+      "file": "cc_sbml_fibroblasts.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "cc_sbml_lac_operon.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "gate_histogram.json",
+      "stage": "convert",
+      "reason": "ValueError: not a network file"
+    },
+    {
+      "file": "ginsim_2003-drosophila-pair-rule_pairRule.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2006-drosophila-DV-boundary_ap-1_else-0_wt.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2006-drosophila-DV-boundary_dv_boundary_wing_disk_model.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2006-mammal-cell-cycle_boolean_cell_cycle.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2006-mammal-tcell-activation_TCRsig40.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2006-mammal-th-differentiation_Th_17.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2008-drosophila-AP-boundary_ap_boundary.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2008-drosophila-segment-polarity_SP_1cell.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2008-drosophila-segment-polarity_SP_6cells.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2008-fission-yeast-cell-cycle_fissionYeastDavidich2008.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2008-fission-yeast-cell-cycle_fissionYeastDavidich2008Modified.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Cdc25: (Cdc2_Cdc13:1 & !PP) | Cdc2_Cdc13:2"
+    },
+    {
+      "file": "ginsim_2009-budding-yeast-core-cell-cycle_core_engine_budding_yeast_CC.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['Bub2-Bfa1']"
+    },
+    {
+      "file": "ginsim_2009-budding-yeast-full-cell-cycle_coupled_budding_yeast_CC.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['Bub2-Bfa1']"
+    },
+    {
+      "file": "ginsim_2009-budding-yeast-mitosis-exit_exit.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['Bub2-Bfa1']"
+    },
+    {
+      "file": "ginsim_2009-budding-yeast-morphogenetic-checkpoint_MCP_budding_yeast_CC.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Clb2: (MASS:1 & Swe1 & !Mih1:2) | (MASS & Swe1:2 & !Mih1)"
+    },
+    {
+      "file": "ginsim_2009-human-erbb-g1s-transition_ErbB2_model.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2010-mammal-th-differentiation_Th_differentiation_full_annotated_model.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for IL4RA: !STAT5:2"
+    },
+    {
+      "file": "ginsim_2010-mammal-th-differentiation_Th_differentiation_reduced_model.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2013-drosophila-JAK-STAT_JakStat__Pathway_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Socs36E: Stat92E:2"
+    },
+    {
+      "file": "ginsim_2013-drosophila-dpp_Dpp__Pathway_11Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Dad: MadMed:2 & !Brk"
+    },
+    {
+      "file": "ginsim_2013-drosophila-egf_EGF__Pathway_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Sos: Drk:1 & !Drk:2"
+    },
+    {
+      "file": "ginsim_2013-drosophila-notch_Notch__Pathway_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Twi: Da & Emc & E_Spl:1 & !E_Spl:2"
+    },
+    {
+      "file": "ginsim_2013-drosophila-spz_Spz__Processing_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['PGRP-SA', 'PGRP-SD']"
+    },
+    {
+      "file": "ginsim_2013-mammal-mapk_MAPK_red1_19062013.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2013-mammal-mapk_MAPK_red2_19062013.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2013-mammal-mapk_MAPK_red3_19062013.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2014-drosophila-eggshell-patterning_mechanistic_cellular.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for dpERK: Grk:2 & ((S:2 & A & !X) | (!S:2 & !X))"
+    },
+    {
+      "file": "ginsim_2014-drosophila-eggshell-patterning_phenomenological_cellular.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2014-mammal-mast-cell-activation_Mast_cell_activation_Annotated_19oct2014.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['AP-1', 'C-Jun', 'c-Fos']"
+    },
+    {
+      "file": "ginsim_2014-mammal-senescence_Senescence_Onset_G1-S.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for p38MAPK: (ATM:1 | ATR:1 | ATR:2) & !ATM:2"
+    },
+    {
+      "file": "ginsim_2015-mammal-bladder-tumorigenesis.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Apoptosis: AND(LEQ(E2F1, 1), TP53)"
+    },
+    {
+      "file": "ginsim_2015-mammal-bladder-tumorigenesis_Bladder_Model.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Apoptosis: !E2F1:2 & TP53"
+    },
+    {
+      "file": "ginsim_2015-stem-cells-myelofibrosis_HSC_MSC_MK.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for TGFb_MK: PI3KAkt_MK:2 & TLRs4_MK"
+    },
+    {
+      "file": "ginsim_2016-drosophila-mesoderm-specification_DrosoMesoLogModel.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Bap: (Bin:1 | (Mad & Med)) & Tin & !Slp & !(Bin:1 & Mad & Med & T"
+    },
+    {
+      "file": "ginsim_2016-mammal-cell-cycle.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for E2F: OR(AND(LEQ(Rb, 1), NOT(CycA), NOT(CycB)), AND(LEQ(Rb, 1), NO"
+    },
+    {
+      "file": "ginsim_2016-mammal-cell-cycle_Traynard_MultiLevel_MamCC_Apr2016.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for E2F: (!CycA | (p27:1 & !Skp2) | p27:2) & !Rb & !(Cdc20 & CycB)"
+    },
+    {
+      "file": "ginsim_2016-mammal-geroconversion_ModelT2DM.json",
+      "stage": "dedup",
+      "reason": "identical network to MODEL1611180000.json"
+    },
+    {
+      "file": "ginsim_2016-mammal-sex-determination_primary_sex_determination_1.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Sry: Y & Wt1 & AS & Sf1 & !Sox9:2 & Gata4"
+    },
+    {
+      "file": "ginsim_2016-mammal-sex-determination_primary_sex_determination_2.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['b-cat_p', 'b-cat_c']"
+    },
+    {
+      "file": "ginsim_2017-bacterium-asymetric-division_g2b.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['ClpXP-RcdA']"
+    },
+    {
+      "file": "ginsim_2017-mammal-lymphoid-myeloid-transdifferentiation_Collombet_model_Bcell_Macrophages_PNAS_170215.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Mac1_gene: Spi1:2"
+    },
+    {
+      "file": "ginsim_2018-bird-sex-determination.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for SOX9: OR(AND(LEQ(DMRT1, 1), SOX9, NOT(FOXL2), NOT(B_CATENIN)), AND"
+    },
+    {
+      "file": "ginsim_2018-bird-sex-determination_full_network.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2018-bird-sex-determination_reduced_network.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for SOX9: (SOX9 | DMRT1:2) & !FOXL2"
+    },
+    {
+      "file": "ginsim_2019-mammal-cell-cycle-control.json",
+      "stage": "dedup",
+      "reason": "identical network to biomodels_MODEL2006170002.json"
+    },
+    {
+      "file": "ginsim_2019-mammal-neonatal-tcell-metabolism_TCR-REDOX-METABOLISM_2019-07-26_reduced.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_2019-mammal-tcell-specification.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CEBPb: OR(AND(NOT(CEBPb), CEBPa, EQ(Pu1, 2)), AND(CEBPb, EQ(Pu1, 2)"
+    },
+    {
+      "file": "ginsim_2019-mammal-tcell-specification_Cacace_TdevModel_SBML_2nov2019.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CEBPb: OR(AND(NOT(CEBPb), CEBPa, EQ(Pu1, 2)), AND(CEBPb, EQ(Pu1, 2)"
+    },
+    {
+      "file": "ginsim_2019-mammal-tcell-specification_Cacace_Tdev_2nov2019.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for CEBPb: Pu1:2 & (CEBPa | CEBPb)"
+    },
+    {
+      "file": "ginsim_2020-mammal-Th-il17-differential-expression_ThIL17diff_29nov2020.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for PIP3: ((PI3K:1 & !PTEN) | PI3K:2) & PIP2"
+    },
+    {
+      "file": "ginsim_2020-mammal-emt-microenvironment_Selvaggio_etal_2019.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for EGFR: (EGF | (FAK_SRC:2 & ITG_AB) | TGFBR) & !RPTP"
+    },
+    {
+      "file": "ginsim_2020-seaurchin-dv-axis.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Alk4_5_7: OR(AND(Nodal_In, NOT(Lefty_In), NOT(Panda), Univin), AND(EQ("
+    },
+    {
+      "file": "ginsim_2020-seaurchin-dv-axis_Flochlay_SeaUrchin_DV_model.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Alk4_5_7: OR(AND(Nodal_In, NOT(Lefty_In), NOT(Panda), Univin), AND(EQ("
+    },
+    {
+      "file": "ginsim_2020-seaurchin-dv-axis_SeaUrchin_model_ginsim.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Alk4_5_7: (Nodal_In:1 & !Lefty_In & Univin & !Panda) | (Nodal_In:2 & U"
+    },
+    {
+      "file": "ginsim_2021-mammal-braf-treatment_BRAF_Model.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for ERK: MEK:1 & !MEK:2"
+    },
+    {
+      "file": "ginsim_2021-mammal-monocytes-dendritic-cells_Karen_MoDC_27Jan2021.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for MAFB: (CEBPb | IRF8) & !AhR & !PU1:2"
+    },
+    {
+      "file": "ginsim_2024-mammal-promyelocytic-leukaemia.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CDKN1A: OR(AND(NOT(RA), NOT(RARA), NOT(PML_RARA), NOT(PLZF_RARA), NO"
+    },
+    {
+      "file": "ginsim_default_2018_zanudo_proliferation.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2020-mammal-oncogenic-signaling_2018_zanudo_proliferation.json"
+    },
+    {
+      "file": "ginsim_default_BRAF_Model.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for ERK: MEK:1 & !MEK:2"
+    },
+    {
+      "file": "ginsim_default_Bladder_Model.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Apoptosis: !E2F1:2 & TP53"
+    },
+    {
+      "file": "ginsim_default_Cacace_TdevModel_SBML_2nov2019.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CEBPb: OR(AND(NOT(CEBPb), CEBPa, EQ(Pu1, 2)), AND(CEBPb, EQ(Pu1, 2)"
+    },
+    {
+      "file": "ginsim_default_Cacace_Tdev_2nov2019.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for CEBPb: Pu1:2 & (CEBPa | CEBPb)"
+    },
+    {
+      "file": "ginsim_default_Calzone__Cell_Fate.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2010-mammal-cell-fate_Calzone__Cell_Fate.json"
+    },
+    {
+      "file": "ginsim_default_CellCycleControl_Sizek_PCB_2019.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2019-mammal-cell-cycle-control_CellCycleControl_Sizek_PCB_2019.json"
+    },
+    {
+      "file": "ginsim_default_CellFate_multiscale.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2010-mammal-cell-fate_CellFate_multiscale.json"
+    },
+    {
+      "file": "ginsim_default_Collombet_model_Bcell_Macrophages_PNAS_170215.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Mac1_gene: Spi1:2"
+    },
+    {
+      "file": "ginsim_default_Dpp__Pathway_11Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Dad: MadMed:2 & !Brk"
+    },
+    {
+      "file": "ginsim_default_DrosoMesoLogModel.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Bap: (Bin:1 | (Mad & Med)) & Tin & !Slp & !(Bin:1 & Mad & Med & T"
+    },
+    {
+      "file": "ginsim_default_EGF__Pathway_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Sos: Drk:1 & !Drk:2"
+    },
+    {
+      "file": "ginsim_default_ErbB2_model.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_FGF_Pathway_12Jun2013.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2013-drosophila-FGF_FGF_Pathway_12Jun2013.json"
+    },
+    {
+      "file": "ginsim_default_Flobak_FullModel_S2_Dataset.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2015-mammal-cell-fate-gastric-cancer_Flobak_FullModel_S2_Dataset.json"
+    },
+    {
+      "file": "ginsim_default_Flobak_ReducedModel_S3_Dataset.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2015-mammal-cell-fate-gastric-cancer_Flobak_ReducedModel_S3_Dataset.json"
+    },
+    {
+      "file": "ginsim_default_Flochlay_SeaUrchin_DV_model.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Alk4_5_7: OR(AND(Nodal_In, NOT(Lefty_In), NOT(Panda), Univin), AND(EQ("
+    },
+    {
+      "file": "ginsim_default_GINsim_HSPC_MSC.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2016-mammal-hspc-msc-communication_GINsim_HSPC_MSC.json"
+    },
+    {
+      "file": "ginsim_default_Gupta_FEBSLetter_2020_Supplementary_File_S1.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2020-G1S-checkpoint-ATM-p21-miRs_Gupta_FEBSLetter_2020_Supplementary_File_S1.json"
+    },
+    {
+      "file": "ginsim_default_HSC_MSC_MK.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for TGFb_MK: PI3KAkt_MK:2 & TLRs4_MK"
+    },
+    {
+      "file": "ginsim_default_Hh__Pathway_11Jun2013.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2013-drosophila-hh_Hh__Pathway_11Jun2013.json"
+    },
+    {
+      "file": "ginsim_default_ImmuneCheckpointInhibitors.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2020-mammal-immune-checkpoints_ImmuneCheckpointInhibitors.json"
+    },
+    {
+      "file": "ginsim_default_JakStat__Pathway_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Socs36E: Stat92E:2"
+    },
+    {
+      "file": "ginsim_default_Karen_MoDC_27Jan2021.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for MAFB: (CEBPb | IRF8) & !AhR & !PU1:2"
+    },
+    {
+      "file": "ginsim_default_MAPK_large_19june2013.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2013-mammal-mapk_MAPK_large_19june2013.json"
+    },
+    {
+      "file": "ginsim_default_MAPK_red1_19062013.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_MAPK_red2_19062013.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_MAPK_red3_19062013.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_MCP_budding_yeast_CC.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Clb2: (MASS:1 & Swe1 & !Mih1:2) | (MASS & Swe1:2 & !Mih1)"
+    },
+    {
+      "file": "ginsim_default_Mast_cell_activation_Annotated_19oct2014.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['AP-1', 'C-Jun', 'c-Fos']"
+    },
+    {
+      "file": "ginsim_default_ModelT2DM.json",
+      "stage": "dedup",
+      "reason": "identical network to MODEL1611180000.json"
+    },
+    {
+      "file": "ginsim_default_Notch__Pathway_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Twi: Da & Emc & E_Spl:1 & !E_Spl:2"
+    },
+    {
+      "file": "ginsim_default_RodriguezJorge_TLR5_Signalling_BooleanModel_17Jul2018.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2018-mammal-tcr-tlr5_RodriguezJorge_TLR5_Signalling_BooleanModel_17Jul2018.json"
+    },
+    {
+      "file": "ginsim_default_SP_1cell.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_SP_6cells.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_SanchezVillanueva_RA_APL_model_19Nov2024.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2024-mammal-promyelocytic-leukaemia_SanchezVillanueva_RA_APL_model_19Nov2024.json"
+    },
+    {
+      "file": "ginsim_default_SeaUrchin_model_ginsim.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Alk4_5_7: (Nodal_In:1 & !Lefty_In & Univin & !Panda) | (Nodal_In:2 & U"
+    },
+    {
+      "file": "ginsim_default_Selvaggio_etal_2019.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for EGFR: (EGF | (FAK_SRC:2 & ITG_AB) | TGFBR) & !RPTP"
+    },
+    {
+      "file": "ginsim_default_Senescence_Onset_G1-S.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for p38MAPK: (ATM:1 | ATR:1 | ATR:2) & !ATM:2"
+    },
+    {
+      "file": "ginsim_default_Spz__Processing_12Jun2013.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['PGRP-SA', 'PGRP-SD']"
+    },
+    {
+      "file": "ginsim_default_SuppMat_Model_Master_Model.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2015-mammal-tumor-invasion-migration_SuppMat_Model_Master_Model.json"
+    },
+    {
+      "file": "ginsim_default_SuppMat_Model_ModNet.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2015-mammal-tumor-invasion-migration_SuppMat_Model_ModNet.json"
+    },
+    {
+      "file": "ginsim_default_TCR-REDOX-METABOLISM_2019-07-26_reduced.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_TCRsig40.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_T_LGL.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2008-mammal-survival-tlgl-leukemia_T_LGL.json"
+    },
+    {
+      "file": "ginsim_default_ThIL17diff_29nov2020.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for PIP3: ((PI3K:1 & !PTEN) | PI3K:2) & PIP2"
+    },
+    {
+      "file": "ginsim_default_Th_17.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_Th_differentiation_full_annotated_model.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for IL4RA: !STAT5:2"
+    },
+    {
+      "file": "ginsim_default_Th_differentiation_reduced_model.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_Toll_Pathway_12Jun2013.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2013-drosophila-toll_Toll_Pathway_12Jun2013.json"
+    },
+    {
+      "file": "ginsim_default_Traynard_Boolean_MamCC_Apr2016.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2016-mammal-cell-cycle_Traynard_Boolean_MamCC_Apr2016.json"
+    },
+    {
+      "file": "ginsim_default_Traynard_MultiLevel_MamCC_Apr2016.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for E2F: (!CycA | (p27:1 & !Skp2) | p27:2) & !Rb & !(Cdc20 & CycB)"
+    },
+    {
+      "file": "ginsim_default_VEGF_Pathway_12Jun2013.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2013-drosophila-vegf_VEGF_Pathway_12Jun2013.json"
+    },
+    {
+      "file": "ginsim_default_Wg_Pathway_11Jun2013.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2013-drosophila-wg_Wg_Pathway_11Jun2013.json"
+    },
+    {
+      "file": "ginsim_default_ap-1_else-0_wt.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_ap_boundary.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_boolean_cell_cycle.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_buddingYeastIrons2009.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2009-budding-yeast-cell-cycle_buddingYeastIrons2009.json"
+    },
+    {
+      "file": "ginsim_default_buddingYeastOrlando2008.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2008-budding-yeast-cell-cycle_buddingYeastOrlando2008.json"
+    },
+    {
+      "file": "ginsim_default_core_engine_budding_yeast_CC.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['Bub2-Bfa1']"
+    },
+    {
+      "file": "ginsim_default_coupled_budding_yeast_CC.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['Bub2-Bfa1']"
+    },
+    {
+      "file": "ginsim_default_drosophilaCellCycleVariants.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2011-drosophila-cell-cycle_drosophilaCellCycleVariants.json"
+    },
+    {
+      "file": "ginsim_default_dv_boundary_wing_disk_model.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_exit.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['Bub2-Bfa1']"
+    },
+    {
+      "file": "ginsim_default_fissionYeastDavidich2008.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_fissionYeastDavidich2008Modified.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Cdc25: (Cdc2_Cdc13:1 & !PP) | Cdc2_Cdc13:2"
+    },
+    {
+      "file": "ginsim_default_full_network.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_g2a.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2017-bacterium-asymetric-division_g2a.json"
+    },
+    {
+      "file": "ginsim_default_g2b.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['ClpXP-RcdA']"
+    },
+    {
+      "file": "ginsim_default_mechanistic_cellular.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for dpERK: Grk:2 & ((S:2 & A & !X) | (!S:2 & !X))"
+    },
+    {
+      "file": "ginsim_default_pairRule.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_phenomenological_cellular.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "ginsim_default_primary_sex_determination_1.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for Sry: Y & Wt1 & AS & Sf1 & !Sox9:2 & Gata4"
+    },
+    {
+      "file": "ginsim_default_primary_sex_determination_2.json",
+      "stage": "convert",
+      "reason": "ValueError: node names not identifiers: ['b-cat_p', 'b-cat_c']"
+    },
+    {
+      "file": "ginsim_default_reduced_network.json",
+      "stage": "convert",
+      "reason": "ValueError: multivalued level in rule for SOX9: (SOX9 | DMRT1:2) & !FOXL2"
+    },
+    {
+      "file": "ginsim_default_zebra_miR9_22jul2011.json",
+      "stage": "dedup",
+      "reason": "identical network to ginsim_2012-zebrafish-mir9-neurogenesis_zebra_miR9_22jul2011.json"
+    },
+    {
+      "file": "ginsim_files_Bladder_Model.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Apoptosis: AND(LEQ(E2F1, 1), TP53)"
+    },
+    {
+      "file": "ginsim_files_Cacace_TdevModel_SBML_2nov2019.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CEBPb: OR(AND(NOT(CEBPb), CEBPa, EQ(Pu1, 2)), AND(CEBPb, EQ(Pu1, 2)"
+    },
+    {
+      "file": "ginsim_files_CellCycleControl_Sizek_PCB_2019.json",
+      "stage": "dedup",
+      "reason": "identical network to biomodels_MODEL2006170002.json"
+    },
+    {
+      "file": "ginsim_files_Flochlay_SeaUrchin_DV_model.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for Alk4_5_7: OR(AND(Nodal_In, NOT(Lefty_In), NOT(Panda), Univin), AND(EQ("
+    },
+    {
+      "file": "ginsim_files_SanchezVillanueva_RA_APL_model_19Nov2024.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CDKN1A: OR(AND(NOT(RA), NOT(RARA), NOT(PML_RARA), NOT(PLZF_RARA), NO"
+    },
+    {
+      "file": "ginsim_files_Traynard_MultiLevel_MamCC_Apr2016.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for E2F: OR(AND(LEQ(Rb, 1), NOT(CycA), NOT(CycB)), AND(LEQ(Rb, 1), NO"
+    },
+    {
+      "file": "ginsim_files_full_network.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for SOX9: OR(AND(LEQ(DMRT1, 1), SOX9, NOT(FOXL2), NOT(B_CATENIN)), AND"
+    },
+    {
+      "file": "ginsim_files_reduced_network.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for SOX9: OR(AND(LEQ(DMRT1, 1), SOX9, NOT(FOXL2)), AND(EQ(DMRT1, 2), N"
+    },
+    {
+      "file": "model_id.json",
+      "stage": "convert",
+      "reason": "ValueError: non-Boolean rule for CEBPb: OR(AND(NOT(CEBPb), CEBPa, EQ(Pu1, 2)), AND(CEBPb, EQ(Pu1, 2)"
+    },
+    {
+      "file": "pyboolnet_arellano_rootstem.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_attractordetection_iterativecompleteness.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_calzone_cellfate.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_dahlhaus_neuroplastoma.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_davidich_yeast.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_dinwoodie_life.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_dinwoodie_stomatal.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_faure_cellcycle.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_fileexchange_operatorbinding.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_grieco_mapk.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_interactiongraphs_topology.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_irma.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_irons_yeast.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_klamt_tcr.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_krumsiek_myeloid.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_n12c5.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_n5s3.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_n6s1c2.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_n7s3.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_remy_tumorigenesis.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_saadatpour_guardcell.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_selvaggio_emt.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_tournier_apoptosis.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_xiao_wnt5a.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_zhang_tlgl.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "pyboolnet_zhang_tlgl_v2.json",
+      "stage": "convert",
+      "reason": "ValueError: no Boolean logic in file"
+    },
+    {
+      "file": "truth_tables.json",
+      "stage": "convert",
+      "reason": "ValueError: not a network file"
+    }
+  ],
+  "elapsed_s": 201.3
+}

@@ -1,0 +1,122 @@
+{
+  "schema": "causal-target-witnesses-v1",
+  "version": 1,
+  "run_id": "causal-target-spec-v1-r1",
+  "declared_before_checking": true,
+  "conventions": {
+    "state_string": "bits written x1 x2 (x3), x1 first; '01' means x1=0, x2=1",
+    "maps": "complete hand-written tables state -> successor state; at most 3 bits, at most 8 states per map",
+    "random_examples": false,
+    "note": "Expectations below are hand-derived. The checker compares against them; it does not generate fixtures."
+  },
+  "witnesses": [
+    {
+      "id": "W1",
+      "question": "Passive ambiguity: identity vs coordinate swap; one off-diagonal query distinguishes.",
+      "maps": {
+        "identity": {"00": "00", "01": "01", "10": "10", "11": "11"},
+        "swap":     {"00": "00", "01": "10", "10": "01", "11": "11"}
+      },
+      "observation": {"regime": "passive_labelled_trajectory", "initial_state": "00", "steps": 4},
+      "expected": {
+        "observed_trajectory_identity": ["00", "00", "00", "00", "00"],
+        "observed_trajectory_swap": ["00", "00", "00", "00", "00"],
+        "maps_agree_on_all_observed_transitions": true,
+        "maps_distinct": true,
+        "passive_verdict_within_declared_pair": "AMBIGUOUS",
+        "distinguishing_single_queries": ["01", "10"],
+        "non_distinguishing_single_queries": ["00", "11"],
+        "chosen_query": "01",
+        "chosen_query_answers": {"identity": "01", "swap": "10"},
+        "consistent_count_all_2bit_maps": 64,
+        "consistent_count_class_at_most_one_essential_input_per_node": 9
+      },
+      "hand_reasoning": "Both maps fix 00, so every transition the all-zero trajectory shows is 00->00 and both are consistent. They differ exactly on 01 and 10 and agree on the diagonal 00, 11. One chosen query at 01 returns 01 (identity) or 10 (swap). Among all 2-bit maps only the row 00 is constrained: 4^3 = 64 remain consistent. In the class where each node depends on at most one input, a node function with f(00)=0 is one of {0, x1, x2}: 3 x 3 = 9 networks remain."
+    },
+    {
+      "id": "W2",
+      "question": "Same full function, different syntax and redundant declared input; functional support is the identifiable target.",
+      "implementations": {
+        "A": {"syntax": "y = AND(x1, x2)", "declared_inputs": ["x1", "x2"]},
+        "B": {"syntax": "y = OR(AND(x1, x2), AND(x1, x2, x3))", "declared_inputs": ["x1", "x2", "x3"]}
+      },
+      "tables": {
+        "A": {"000": 0, "001": 0, "010": 0, "011": 0, "100": 0, "101": 0, "110": 1, "111": 1},
+        "B": {"000": 0, "001": 0, "010": 0, "011": 0, "100": 0, "101": 0, "110": 1, "111": 1}
+      },
+      "expected": {
+        "tables_equal": true,
+        "essential_inputs_A": ["x1", "x2"],
+        "essential_inputs_B": ["x1", "x2"],
+        "declared_inputs_differ": true,
+        "redundant_declared_inputs_B": ["x3"],
+        "recovered_minimal_support": ["x1", "x2"],
+        "recovered_reduced_table_over_x1x2": {"00": 0, "01": 0, "10": 0, "11": 1},
+        "syntax_identifiable_from_table": false,
+        "declared_connectivity_identifiable_from_table": false
+      },
+      "counting_attachment": {
+        "scope": "Arithmetic only, for the audit of PROTOCOL_screen_identification section 3. Functions of n=2 inputs.",
+        "expected": {
+          "functions_by_exact_essential_count_n2": {"0": 2, "1": 4, "2": 10},
+          "distinct_functions_at_most_one_essential_n2": 6,
+          "padded_exact_k1_count_C(2,1)*2^(2^1)": 8,
+          "padded_sum_j_le_1_C(2,j)*2^(2^j)": 10,
+          "network_class_n2_k1_size": 36,
+          "query_outcomes_per_state_query_n2": 4,
+          "adaptive_lower_bound_queries_n2_k1": 3,
+          "nonadaptive_query_set_identifies_class": ["00", "01", "10"],
+          "any_two_queries_identify_class": false,
+          "functions_by_exact_essential_count_n3": {"0": 2, "1": 6, "2": 30, "3": 218},
+          "exact_essential_count_single_k": {"E0": 2, "E1": 2, "E2": 10, "E3": 218},
+          "screen_formula_values_n_ge_50_k3": {"50": 23, "100": 26, "200": 29},
+          "distinct_class_bound_values_n_ge_50_k3": {"50": 23, "100": 26, "200": 29}
+        }
+      },
+      "hand_reasoning": "Absorption: (x1 AND x2) OR (x1 AND x2 AND x3) = x1 AND x2, so both tables are 1 exactly at 110 and 111. Flipping x3 never changes the value, so x3 is not essential; flipping x1 at 110 or x2 at 110 does. The table therefore determines the function and its essential set {x1,x2}, but cannot say whether x3 was declared or which formula was written. Counting on two inputs: constants (2), x1, NOT x1, x2, NOT x2 (4 with exactly one), and the remaining 16-6 = 10 with both essential. With at most one essential input there are 6 distinct functions, but C(2,1)*2^2 = 8 padded pairs because each constant is listed under both supports. A 2-node network in this class is one of 6^2 = 36; each state query returns one of 4 successors, so Q >= ceil(log4 36) = 3. The queries 00, 01, 10 separate all six node functions (patterns 000,111,001,110,010,101 with order (00,01,10)), so 3 is achieved; two queries give at most 4 patterns per node for 6 functions, so 2 never suffice. E3 = 256 - 3*E2 - 3*E1 - E0 = 256-30-6-2 = 218. For n>=50, k=3, the screen value ceil(log2 C(n,3) + 8) and the distinct-function value ceil(log2 sum_j C(n,j) E_j) are both computed by hand to the same integer: n=50: C=19600, log2(19600*256)=22.26 -> 23, distinct 2+100+12250+4246400=4258752 -> log2 22.02 -> 23; n=100: 41395200 -> 25.30 -> 26, distinct 35300302 -> 25.07 -> 26; n=200: C=1313400, *256=336230400 -> 28.33 -> 29, distinct 2+400+199000+286321200=286520602 -> 28.09 -> 29."
+    },
+    {
+      "id": "W3",
+      "question": "Projection alpha=x1: identity commutes, XOR-coupled first-coordinate update fails.",
+      "alpha": {"name": "x1", "table": {"00": "0", "01": "0", "10": "1", "11": "1"}},
+      "maps": {
+        "identity": {"00": "00", "01": "01", "10": "10", "11": "11"},
+        "xor_first": {"00": "00", "01": "11", "10": "10", "11": "01"}
+      },
+      "control_bijective_codec": {
+        "name": "relabel (x1,x2)->(x2,x1) as a 2-bit macro alphabet",
+        "table": {"00": "00", "01": "10", "10": "01", "11": "11"},
+        "purpose": "an invertible dictionary admits a macro map for every micro map; it is a change of name, not a coarse-graining"
+      },
+      "expected": {
+        "identity_macro_map_exists": true,
+        "identity_macro_map": {"0": "0", "1": "1"},
+        "xor_first_macro_map_exists": false,
+        "xor_first_witness_pair": ["00", "01"],
+        "xor_first_witness_next_alpha": {"00": "0", "01": "1"},
+        "alpha_is_lossy": true,
+        "codec_macro_map_exists_identity": true,
+        "codec_macro_map_exists_xor_first": true
+      },
+      "hand_reasoning": "alpha groups {00,01} -> 0 and {10,11} -> 1. Identity sends each group into itself, so Fbar = identity on {0,1}. xor_first sends 00 -> 00 (alpha 0) and 01 -> 11 (alpha 1): two microstates with alpha 0 have successors with different alpha, so no function of alpha alone gives the next alpha. A bijective relabelling has singleton fibres, so the fibre condition holds for every map; that is why a reversible codec is not evidence of a macro-level regularity."
+    },
+    {
+      "id": "W4",
+      "question": "Identity dynamics with XOR alpha: autonomous consistency holds; setting x1=0 before update cannot be represented from alpha alone.",
+      "alpha": {"name": "x1 XOR x2", "table": {"00": "0", "01": "1", "10": "1", "11": "0"}},
+      "map": {"identity": {"00": "00", "01": "01", "10": "10", "11": "11"}},
+      "intervention": {"name": "set x1:=0 before the step, then apply F once", "semantics": "state reset before update (do on the initial state); F is unchanged",
+                       "F_q": {"00": "00", "01": "01", "10": "00", "11": "01"}},
+      "expected": {
+        "autonomous_macro_map_exists": true,
+        "autonomous_macro_map": {"0": "0", "1": "1"},
+        "intervened_macro_map_exists": false,
+        "intervened_witness_pair": ["00", "11"],
+        "intervened_witness_next_alpha": {"00": "0", "11": "1"},
+        "macro_operations_checked": 4,
+        "macro_operations_representing_intervention": 0
+      },
+      "hand_reasoning": "alpha(F(x)) = alpha(x), so autonomous dynamics commute with Fbar = identity. Under x1:=0 then identity, the successor is (0,x2) with alpha = x2. The states 00 and 11 share alpha 0 but give x2 = 0 and x2 = 1. A macro operation g:{0,1}->{0,1} would need g(0)=0 and g(0)=1 at once, so none of the four maps on {0,1} represents it. Autonomous consistency does not imply intervention consistency."
+    }
+  ]
+}

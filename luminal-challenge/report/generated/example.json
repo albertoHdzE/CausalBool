@@ -1,0 +1,1819 @@
+{
+ "program": "02_scalar_dual_chain",
+ "program_object_sha256": "8e7a15ef445817a6b7b11fc668d2db5a26b04ae322e8b208731922d123fb083a",
+ "operations": [
+  {
+   "id": 0,
+   "op": "load",
+   "engine": "load",
+   "latency": 3,
+   "reads": [],
+   "writes": "a0"
+  },
+  {
+   "id": 1,
+   "op": "load",
+   "engine": "load",
+   "latency": 3,
+   "reads": [],
+   "writes": "b0"
+  },
+  {
+   "id": 2,
+   "op": "load",
+   "engine": "load",
+   "latency": 3,
+   "reads": [],
+   "writes": "c0"
+  },
+  {
+   "id": 3,
+   "op": "load",
+   "engine": "load",
+   "latency": 3,
+   "reads": [],
+   "writes": "d0"
+  },
+  {
+   "id": 4,
+   "op": "mul",
+   "engine": "scalar",
+   "latency": 2,
+   "reads": [
+    "a0",
+    "b0"
+   ],
+   "writes": "left_product"
+  },
+  {
+   "id": 5,
+   "op": "mul",
+   "engine": "scalar",
+   "latency": 2,
+   "reads": [
+    "c0",
+    "d0"
+   ],
+   "writes": "right_product"
+  },
+  {
+   "id": 6,
+   "op": "add",
+   "engine": "scalar",
+   "latency": 1,
+   "reads": [
+    "a0",
+    "c0"
+   ],
+   "writes": "cross"
+  },
+  {
+   "id": 7,
+   "op": "add",
+   "engine": "scalar",
+   "latency": 1,
+   "reads": [
+    "left_product",
+    "cross"
+   ],
+   "writes": "left"
+  },
+  {
+   "id": 8,
+   "op": "xor",
+   "engine": "scalar",
+   "latency": 1,
+   "reads": [
+    "right_product",
+    "cross"
+   ],
+   "writes": "right"
+  },
+  {
+   "id": 9,
+   "op": "store",
+   "engine": "store",
+   "latency": 1,
+   "reads": [
+    "left"
+   ],
+   "writes": "out"
+  },
+  {
+   "id": 10,
+   "op": "store",
+   "engine": "store",
+   "latency": 1,
+   "reads": [
+    "right"
+   ],
+   "writes": "out"
+  }
+ ],
+ "horizon": 21,
+ "time_width": 5,
+ "address_width": 8,
+ "methods": {
+  "serial": {
+   "C": 12,
+   "S": 9,
+   "J": 108,
+   "times": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11
+   },
+   "addresses": {
+    "a0": 0,
+    "b0": 1,
+    "c0": 2,
+    "d0": 3,
+    "left_product": 4,
+    "right_product": 5,
+    "cross": 6,
+    "left": 7,
+    "right": 8
+   },
+   "lifetimes": {
+    "a0": [
+     3,
+     7
+    ],
+    "b0": [
+     4,
+     4
+    ],
+    "c0": [
+     5,
+     7
+    ],
+    "d0": [
+     6,
+     6
+    ],
+    "left_product": [
+     6,
+     8
+    ],
+    "right_product": [
+     8,
+     9
+    ],
+    "cross": [
+     8,
+     9
+    ],
+    "left": [
+     9,
+     10
+    ],
+    "right": [
+     10,
+     11
+    ]
+   }
+  },
+  "classical": {
+   "C": 9,
+   "S": 5,
+   "J": 45,
+   "times": {
+    "0": 0,
+    "2": 0,
+    "1": 1,
+    "3": 1,
+    "6": 3,
+    "4": 4,
+    "5": 4,
+    "7": 6,
+    "8": 6,
+    "9": 7,
+    "10": 8
+   },
+   "addresses": {
+    "cross": 0,
+    "a0": 1,
+    "c0": 2,
+    "b0": 3,
+    "d0": 4,
+    "left_product": 1,
+    "right_product": 2,
+    "left": 0,
+    "right": 1
+   },
+   "lifetimes": {
+    "a0": [
+     3,
+     4
+    ],
+    "b0": [
+     4,
+     4
+    ],
+    "c0": [
+     3,
+     4
+    ],
+    "d0": [
+     4,
+     4
+    ],
+    "left_product": [
+     6,
+     6
+    ],
+    "right_product": [
+     6,
+     6
+    ],
+    "cross": [
+     4,
+     6
+    ],
+    "left": [
+     7,
+     7
+    ],
+    "right": [
+     7,
+     8
+    ]
+   }
+  },
+  "first": {
+   "C": 8,
+   "S": 3,
+   "J": 24,
+   "times": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 1,
+    "4": 3,
+    "5": 4,
+    "6": 4,
+    "7": 5,
+    "8": 6,
+    "9": 6,
+    "10": 7
+   },
+   "addresses": {
+    "a0": 0,
+    "b0": 1,
+    "c0": 1,
+    "d0": 2,
+    "left_product": 0,
+    "right_product": 0,
+    "cross": 1,
+    "left": 2,
+    "right": 0
+   },
+   "lifetimes": {
+    "a0": [
+     3,
+     4
+    ],
+    "b0": [
+     3,
+     3
+    ],
+    "c0": [
+     4,
+     4
+    ],
+    "d0": [
+     4,
+     4
+    ],
+    "left_product": [
+     5,
+     5
+    ],
+    "right_product": [
+     6,
+     6
+    ],
+    "cross": [
+     5,
+     6
+    ],
+    "left": [
+     6,
+     6
+    ],
+    "right": [
+     7,
+     7
+    ]
+   }
+  },
+  "C1": {
+   "C": 8,
+   "S": 3,
+   "J": 24,
+   "times": {
+    "0": 0,
+    "1": 0,
+    "2": 1,
+    "3": 1,
+    "4": 3,
+    "5": 4,
+    "6": 4,
+    "7": 5,
+    "8": 6,
+    "9": 6,
+    "10": 7
+   },
+   "addresses": {
+    "a0": 0,
+    "b0": 1,
+    "c0": 1,
+    "d0": 2,
+    "left_product": 0,
+    "right_product": 0,
+    "cross": 1,
+    "left": 2,
+    "right": 0
+   },
+   "lifetimes": {
+    "a0": [
+     3,
+     4
+    ],
+    "b0": [
+     3,
+     3
+    ],
+    "c0": [
+     4,
+     4
+    ],
+    "d0": [
+     4,
+     4
+    ],
+    "left_product": [
+     5,
+     5
+    ],
+    "right_product": [
+     6,
+     6
+    ],
+    "cross": [
+     5,
+     6
+    ],
+    "left": [
+     6,
+     6
+    ],
+    "right": [
+     7,
+     7
+    ]
+   }
+  }
+ },
+ "schedule_queries": [
+  {
+   "cubes": [
+    [
+     5,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       5,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    0
+   ],
+   "labels": [
+    "x0..x4:00000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     0,
+     3
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 0,
+     "hi": 3,
+     "cubes": [
+      [
+       5,
+       0,
+       3
+      ]
+     ]
+    }
+   ],
+   "members": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "labels": [
+    "x0..x4:**000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     1,
+     2
+    ],
+    [
+     5,
+     2,
+     0
+    ],
+    [
+     5,
+     4,
+     1
+    ],
+    [
+     5,
+     6,
+     0
+    ]
+   ],
+   "chosen_index": 1,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 0,
+     "hi": 6,
+     "cubes": [
+      [
+       5,
+       0,
+       3
+      ],
+      [
+       5,
+       4,
+       1
+      ],
+      [
+       5,
+       6,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "labels": [
+    "x0..x4:1*000",
+    "x0..x4:01000",
+    "x0..x4:*0100",
+    "x0..x4:01100"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     1,
+     6
+    ],
+    [
+     5,
+     2,
+     4
+    ],
+    [
+     5,
+     4,
+     0
+    ],
+    [
+     5,
+     8,
+     1
+    ]
+   ],
+   "chosen_index": 1,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 0,
+     "hi": 9,
+     "cubes": [
+      [
+       5,
+       0,
+       7
+      ],
+      [
+       5,
+       8,
+       1
+      ]
+     ]
+    }
+   ],
+   "members": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "labels": [
+    "x0..x4:1**00",
+    "x0..x4:01*00",
+    "x0..x4:00100",
+    "x0..x4:*0010"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     3,
+     0
+    ],
+    [
+     5,
+     4,
+     3
+    ],
+    [
+     5,
+     8,
+     3
+    ],
+    [
+     5,
+     12,
+     0
+    ]
+   ],
+   "chosen_index": 3,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 3,
+     "hi": 12,
+     "cubes": [
+      [
+       5,
+       3,
+       0
+      ],
+      [
+       5,
+       4,
+       3
+      ],
+      [
+       5,
+       8,
+       3
+      ],
+      [
+       5,
+       12,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "labels": [
+    "x0..x4:11000",
+    "x0..x4:**100",
+    "x0..x4:**010",
+    "x0..x4:00110"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     4,
+     3
+    ],
+    [
+     5,
+     8,
+     3
+    ],
+    [
+     5,
+     12,
+     1
+    ],
+    [
+     5,
+     14,
+     0
+    ]
+   ],
+   "chosen_index": 4,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 4,
+     "hi": 14,
+     "cubes": [
+      [
+       5,
+       4,
+       3
+      ],
+      [
+       5,
+       8,
+       3
+      ],
+      [
+       5,
+       12,
+       1
+      ],
+      [
+       5,
+       14,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "labels": [
+    "x0..x4:**100",
+    "x0..x4:**010",
+    "x0..x4:*0110",
+    "x0..x4:01110"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     4,
+     3
+    ],
+    [
+     5,
+     8,
+     7
+    ],
+    [
+     5,
+     16,
+     0
+    ]
+   ],
+   "chosen_index": 4,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 4,
+     "hi": 16,
+     "cubes": [
+      [
+       5,
+       4,
+       3
+      ],
+      [
+       5,
+       8,
+       7
+      ],
+      [
+       5,
+       16,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "labels": [
+    "x0..x4:**100",
+    "x0..x4:***10",
+    "x0..x4:00001"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     5,
+     0
+    ],
+    [
+     5,
+     6,
+     1
+    ],
+    [
+     5,
+     8,
+     7
+    ],
+    [
+     5,
+     16,
+     1
+    ]
+   ],
+   "chosen_index": 5,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 5,
+     "hi": 17,
+     "cubes": [
+      [
+       5,
+       5,
+       0
+      ],
+      [
+       5,
+       6,
+       1
+      ],
+      [
+       5,
+       8,
+       7
+      ],
+      [
+       5,
+       16,
+       1
+      ]
+     ]
+    }
+   ],
+   "members": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   "labels": [
+    "x0..x4:10100",
+    "x0..x4:*1100",
+    "x0..x4:***10",
+    "x0..x4:*0001"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     6,
+     1
+    ],
+    [
+     5,
+     8,
+     7
+    ],
+    [
+     5,
+     16,
+     1
+    ],
+    [
+     5,
+     18,
+     0
+    ]
+   ],
+   "chosen_index": 6,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 6,
+     "hi": 18,
+     "cubes": [
+      [
+       5,
+       6,
+       1
+      ],
+      [
+       5,
+       8,
+       7
+      ],
+      [
+       5,
+       16,
+       1
+      ],
+      [
+       5,
+       18,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+   ],
+   "labels": [
+    "x0..x4:*1100",
+    "x0..x4:***10",
+    "x0..x4:*0001",
+    "x0..x4:01001"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     6,
+     1
+    ],
+    [
+     5,
+     8,
+     7
+    ],
+    [
+     5,
+     16,
+     3
+    ]
+   ],
+   "chosen_index": 6,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 6,
+     "hi": 19,
+     "cubes": [
+      [
+       5,
+       6,
+       1
+      ],
+      [
+       5,
+       8,
+       7
+      ],
+      [
+       5,
+       16,
+       3
+      ]
+     ]
+    }
+   ],
+   "members": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "labels": [
+    "x0..x4:*1100",
+    "x0..x4:***10",
+    "x0..x4:**001"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     5,
+     7,
+     0
+    ],
+    [
+     5,
+     8,
+     7
+    ],
+    [
+     5,
+     16,
+     3
+    ],
+    [
+     5,
+     20,
+     0
+    ]
+   ],
+   "chosen_index": 7,
+   "intervals": [
+    {
+     "field": "t",
+     "lo": 7,
+     "hi": 20,
+     "cubes": [
+      [
+       5,
+       7,
+       0
+      ],
+      [
+       5,
+       8,
+       7
+      ],
+      [
+       5,
+       16,
+       3
+      ],
+      [
+       5,
+       20,
+       0
+      ]
+     ]
+    }
+   ],
+   "members": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "labels": [
+    "x0..x4:11100",
+    "x0..x4:***10",
+    "x0..x4:**001",
+    "x0..x4:00101"
+   ]
+  }
+ ],
+ "address_queries": [
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "a0",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     1,
+     0
+    ]
+   ],
+   "chosen_index": 1,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 1,
+     "cubes": [
+      [
+       8,
+       0,
+       1
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "b0",
+   "decoded": 1,
+   "labels": [
+    "x0..x7:10000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     1,
+     0
+    ]
+   ],
+   "chosen_index": 1,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 1,
+     "cubes": [
+      [
+       8,
+       0,
+       1
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "c0",
+   "decoded": 1,
+   "labels": [
+    "x0..x7:10000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     2,
+     0
+    ]
+   ],
+   "chosen_index": 2,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 2,
+     "cubes": [
+      [
+       8,
+       0,
+       1
+      ],
+      [
+       8,
+       2,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 1,
+     "hi": 1,
+     "cubes": [
+      [
+       8,
+       1,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "d0",
+   "decoded": 2,
+   "labels": [
+    "x0..x7:01000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "left_product",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     1,
+     0
+    ]
+   ],
+   "chosen_index": 1,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 1,
+     "cubes": [
+      [
+       8,
+       0,
+       1
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "cross",
+   "decoded": 1,
+   "labels": [
+    "x0..x7:10000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 1,
+     "cubes": [
+      [
+       8,
+       0,
+       1
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 1,
+     "hi": 1,
+     "cubes": [
+      [
+       8,
+       1,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "right_product",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     2,
+     0
+    ]
+   ],
+   "chosen_index": 2,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 2,
+     "cubes": [
+      [
+       8,
+       0,
+       1
+      ],
+      [
+       8,
+       2,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 1,
+     "hi": 1,
+     "cubes": [
+      [
+       8,
+       1,
+       0
+      ]
+     ]
+    },
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "left",
+   "decoded": 2,
+   "labels": [
+    "x0..x7:01000000"
+   ]
+  },
+  {
+   "cubes": [
+    [
+     8,
+     0,
+     0
+    ]
+   ],
+   "chosen_index": 0,
+   "intervals": [
+    {
+     "field": "a",
+     "lo": 0,
+     "hi": 0,
+     "cubes": [
+      [
+       8,
+       0,
+       0
+      ]
+     ]
+    }
+   ],
+   "value": "right",
+   "decoded": 0,
+   "labels": [
+    "x0..x7:00000000"
+   ]
+  }
+ ],
+ "reopen": {
+  "epochs": 1,
+  "nodes": 366,
+  "stopped_because": "pass_complete",
+  "statuses": {
+   "NO_STRICT_IMPROVEMENT": 7,
+   "UNSAT": 10
+  },
+  "improvements": [],
+  "certificates": 15137,
+  "questions": [
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     1,
+     2,
+     3,
+     7
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     8,
+     2,
+     11,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k4_latest",
+    "radius": 4,
+    "window": [
+     7,
+     8,
+     9,
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     7,
+     3,
+     7,
+     3
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k8_latest",
+    "radius": 4,
+    "window": [
+     2,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     7,
+     3,
+     7,
+     3
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k16_latest",
+    "radius": 8,
+    "window": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "the declared domain holds no strict improvement",
+    "caps": [
+     7,
+     1,
+     21,
+     3
+    ],
+    "nodes": 180
+   },
+   {
+    "policy": "whole_program",
+    "radius": "full",
+    "window": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "the declared domain holds no strict improvement",
+    "caps": [
+     7,
+     1,
+     21,
+     3
+    ],
+    "nodes": 186
+   },
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     7,
+     8,
+     9,
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     7,
+     3,
+     7,
+     3
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k4_memory",
+    "radius": 4,
+    "window": [
+     0,
+     2,
+     3,
+     4
+    ],
+    "status": "NO_STRICT_IMPROVEMENT",
+    "reason": "caps (7, 2) fall below lower bounds (8, 3)",
+    "caps": [
+     8,
+     3,
+     7,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k8_memory",
+    "radius": 4,
+    "window": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     8,
+     1,
+     21,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "status": "NO_STRICT_IMPROVEMENT",
+    "reason": "caps (7, 2) fall below lower bounds (8, 3)",
+    "caps": [
+     8,
+     3,
+     7,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k4_contiguous_0",
+    "radius": 4,
+    "window": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "status": "NO_STRICT_IMPROVEMENT",
+    "reason": "caps (7, 2) fall below lower bounds (8, 3)",
+    "caps": [
+     8,
+     3,
+     7,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     2,
+     3,
+     4,
+     5
+    ],
+    "status": "NO_STRICT_IMPROVEMENT",
+    "reason": "caps (7, 2) fall below lower bounds (8, 3)",
+    "caps": [
+     8,
+     3,
+     7,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k4_contiguous_4",
+    "radius": 4,
+    "window": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "status": "NO_STRICT_IMPROVEMENT",
+    "reason": "caps (7, 2) fall below lower bounds (8, 3)",
+    "caps": [
+     8,
+     3,
+     7,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "k8_contiguous_8",
+    "radius": 4,
+    "window": [
+     8,
+     9,
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     7,
+     3,
+     7,
+     3
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     4,
+     5,
+     6,
+     7
+    ],
+    "status": "NO_STRICT_IMPROVEMENT",
+    "reason": "caps (7, 2) fall below lower bounds (8, 3)",
+    "caps": [
+     8,
+     3,
+     7,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     6,
+     7,
+     8,
+     9
+    ],
+    "status": "NO_STRICT_IMPROVEMENT",
+    "reason": "caps (7, 2) fall below lower bounds (8, 3)",
+    "caps": [
+     8,
+     3,
+     7,
+     2
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     8,
+     9,
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     7,
+     3,
+     7,
+     3
+    ],
+    "nodes": 0
+   },
+   {
+    "policy": "windows_for",
+    "radius": 2,
+    "window": [
+     10
+    ],
+    "status": "UNSAT",
+    "reason": "unsat_root",
+    "caps": [
+     7,
+     3,
+     7,
+     3
+    ],
+    "nodes": 0
+   }
+  ]
+ },
+ "optimum": {
+  "J0": 24,
+  "J": 24,
+  "C": 8,
+  "S": 3,
+  "c_max": 11,
+  "schedules": 24142,
+  "schedules_below_J0": 0,
+  "times": {
+   "0": 0,
+   "1": 0,
+   "2": 1,
+   "3": 1,
+   "4": 3,
+   "5": 4,
+   "6": 4,
+   "7": 5,
+   "8": 6,
+   "9": 6,
+   "10": 7
+  }
+ }
+}

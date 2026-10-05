@@ -1,0 +1,25 @@
+# Identification screen (PROTOCOL_screen_identification.md) -- competitor tools.
+#
+# Installed into the repository venv on 2026-09-29.  These are the competitors'
+# own software; nothing of ours depends on them.
+#
+# dd must be built from source WITH the CUDD backend (dd.cudd); the wheel on
+# PyPI is pure Python (dd.autoref) only:
+#   venv/bin/python -m pip install "cython==3.1.8"
+#   DD_FETCH=1 DD_CUDD=1 venv/bin/python -m pip install --no-cache-dir \
+#       --no-binary dd --no-build-isolation dd==0.6.0
+dd==0.6.0
+cython==3.1.8
+z3-solver==5.1.0.0
+clingo==5.8.2
+pyboolnet @ git+https://github.com/hklarner/pyboolnet@3394310d07e3e25810a828d8da4f6d7241115113
+
+# Non-Python, recorded here because the results depend on them:
+#   R 4.6.1 (/usr/local/bin/R) with BoolNet 2.1.9 from CRAN, installed into
+#     ~/Library/R/arm64/4.6/library.
+#   PyBoolNet 3.0.16 bundles an x86_64 gringo 4.4 that links against the
+#     removed macOS Python 2.7 framework and cannot run.  Its settings.cfg
+#     (pyboolnet/binaries/settings.cfg) was pointed at Homebrew clingo 5.8.2
+#     (`brew install clingo`): gringo 5.8.2, clasp 3.4.1.  The bundled NuSMV-a
+#     (x86_64) runs under Rosetta.  Original settings kept in
+#     results/screen_identification/logs/pyboolnet_settings.orig.cfg.

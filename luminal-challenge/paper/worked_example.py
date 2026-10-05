@@ -148,6 +148,43 @@ def _notebook_outputs():
     return '\n'.join(text)
 
 
+def decode_first_answer_queries(log, facts, times0, addresses0):
+    """Turn the recorded ``min_member`` calls of the first answer into readable queries.
+
+    One query per operation (its issue cycle), then one or more per value (its
+    address). Every decoded answer is asserted equal to the first answer's own
+    decision before anything is returned.
+    """
+    queries = []
+    for cover, answer, intervals in log:
+        queries.append({'cubes': cover, 'chosen_index': answer, 'intervals': intervals})
+    assert len(queries) >= facts.count
+    schedule_queries = queries[:facts.count]
+    field_t = si.Field('t', 0, dc.time_width(facts.horizon))
+    for op_id, q in enumerate(schedule_queries):
+        assert field_t.decode(q['chosen_index']) == times0[op_id]
+        members = sorted({m for n, a, f in q['cubes'] for m in si.Cube(n, a, f).members()})
+        assert min(members) == q['chosen_index']
+        q['members'] = members
+        q['labels'] = [si.Cube(n, a, f).label() for n, a, f in q['cubes']]
+    field_a = si.Field('a', 0, dc.ADDRESS_WIDTH)
+    address_queries = queries[facts.count:]
+    for q in address_queries:
+        names = [e['value'] for e in q['intervals'] if 'value' in e]
+        q['intervals'] = [e for e in q['intervals'] if 'value' not in e]
+        if names:
+            q['value'] = names[0]
+        q['decoded'] = field_a.decode(q['chosen_index']) if q['chosen_index'] is not None else None
+        q['labels'] = [si.Cube(n, a, f).label() for n, a, f in q['cubes']]
+    current = None
+    for q in address_queries:
+        current = q.get('value', current)
+        q['value'] = current
+        assert q['decoded'] == addresses0[current], (current, q['decoded'])
+    assert [q['value'] for q in address_queries] and set(q['value'] for q in address_queries) == set(addresses0)
+    return schedule_queries, address_queries
+
+
 def _layout(program, facts, compilation):
     times = se.issue_cycles_of(program, compilation['bundles'])
     addresses = dict(compilation['scratch'])
@@ -210,39 +247,9 @@ def compute():
             if r['program_sha256'] == out['program_object_sha256'] and r['mode_key'] == 'wall:0.1'}
     assert mine == {('R0', methods['C1']['C'], methods['C1']['S']), ('C1', methods['C1']['C'], methods['C1']['S'])}, mine
 
-    # Index queries of the first answer: one per operation, then one or more per value.
-    queries = []
-    for cover, answer, intervals in log:
-        queries.append({'cubes': cover, 'chosen_index': answer, 'intervals': intervals})
-    assert len(queries) >= facts.count
-    schedule_queries = queries[:facts.count]
-    width = dc.time_width(facts.horizon)
-    field_t = si.Field('t', 0, width)
-    for op_id, q in enumerate(schedule_queries):
-        assert field_t.decode(q['chosen_index']) == times0[op_id]
-        members = sorted({m for n, a, f in q['cubes'] for m in si.Cube(n, a, f).members()})
-        assert min(members) == q['chosen_index']
-        q['members'] = members
-        q['labels'] = [si.Cube(n, a, f).label() for n, a, f in q['cubes']]
-    out['time_width'] = width
+    schedule_queries, address_queries = decode_first_answer_queries(log, facts, times0, addresses0)
+    out['time_width'] = dc.time_width(facts.horizon)
     out['schedule_queries'] = schedule_queries
-    field_a = si.Field('a', 0, dc.ADDRESS_WIDTH)
-    address_queries = queries[facts.count:]
-    order_seen = []
-    for q in address_queries:
-        names = [e['value'] for e in q['intervals'] if 'value' in e]
-        q['intervals'] = [e for e in q['intervals'] if 'value' not in e]
-        if names:
-            q['value'] = names[0]
-        q['decoded'] = field_a.decode(q['chosen_index']) if q['chosen_index'] is not None else None
-        q['labels'] = [si.Cube(n, a, f).label() for n, a, f in q['cubes']]
-        order_seen.append(q['decoded'])
-    current = None
-    for q in address_queries:
-        current = q.get('value', current)
-        q['value'] = current
-        assert q['decoded'] == addresses0[current], (current, q['decoded'])
-    assert [q['value'] for q in address_queries] and set(q['value'] for q in address_queries) == set(addresses0)
     out['address_queries'] = address_queries
     out['address_width'] = dc.ADDRESS_WIDTH
 
@@ -410,6 +417,92 @@ def compute():
     assert f"{rec_r0['epochs']} epochs, {rec_r0['aggregate']['nodes']:,} nodes" in text
     out['notebook_cross_check'] = 'PASS: edge looks, subtree counts, combination counts and epoch/node counts equal notebook 04 outputs'
     return out
+
+
+EXAMPLE = '02_scalar_dual_chain'   # the running example of notebook 00, section 2
+
+
+def scalar_optimum(program, facts, J0):
+    """Whether any legal schedule has J below ``J0``, by enumeration.
+
+    Independent of the search: it walks every issue-cycle assignment that meets
+    the dependence lags and the engine slots, and scores each by C times its
+    peak number of simultaneously live values. For a program of scalars only,
+    that peak is the optimal footprint of the schedule (an interval graph is
+    coloured with as many words as its largest clique). Completeness: any
+    program with a two-operand operation has S >= 2, so J < J0 needs
+    C <= (J0 - 1) // 2, and no schedule of that length is skipped.
+    """
+    assert all(w == 1 for w in facts.width.values()), 'scalar programs only'
+    assert any(len(op.get('args') or []) >= 2 for op in program['operations'])
+    c_max = (J0 - 1) // 2
+    best = {'J': J0, 'times': None, 'schedules': 0, 'below': 0}
+    times, used = {}, collections.Counter()
+
+    def walk(op):
+        if op == facts.count:
+            C = max(times.values()) + 1
+            life = dc.lifetimes(facts, times)
+            S = max(sum(a <= c <= b for a, b in life.values()) for c in range(C + 1))
+            best['schedules'] += 1
+            best['below'] += C * S < J0
+            if C * S < best['J'] or (C * S == best['J'] and best['times'] is None):
+                best.update(J=C * S, C=C, S=S, times=dict(times))
+            return
+        lo = max([times[u] + lag for u, lag in facts.predecessors[op].items()] + [0])
+        engine = facts.engine[op]
+        for c in range(lo, c_max):
+            if used[engine, c] < machine.ENGINE_LIMITS[engine]:
+                times[op] = c
+                used[engine, c] += 1
+                walk(op + 1)
+                used[engine, c] -= 1
+                del times[op]
+
+    walk(0)
+    return {'J0': J0, 'J': best['J'], 'C': best.get('C'), 'S': best.get('S'), 'c_max': c_max,
+            'schedules': best['schedules'], 'schedules_below_J0': best['below'], 'times': best['times']}
+
+
+def explain_program(stem=EXAMPLE):
+    """Every compiler of the report on one small program, decision by decision.
+
+    Returns the compilations themselves (for cycle-by-cycle replay) and a
+    JSON-able account: layouts, the classical ready queues are left to the
+    caller's replay, the first answer's index queries, the reopen round's
+    questions with their caps and verdicts, and an exhaustive optimum.
+    """
+    program = machine.load_program(ROOT / f'.reference/programs/{stem}.json')
+    facts = dc.derive(program)
+    out = {'program': stem, 'program_object_sha256': object_sha256(program),
+           'operations': [{'id': op['id'], 'op': op['op'], 'engine': facts.engine[op['id']],
+                           'latency': facts.latency[op['id']], 'reads': list(op.get('args') or []),
+                           'writes': op.get('dest') or op.get('buffer')} for op in program['operations']],
+           'horizon': facts.horizon, 'time_width': dc.time_width(facts.horizon),
+           'address_width': dc.ADDRESS_WIDTH}
+    compilations = {'serial': machine.serial_compile(program),
+                    'classical': common.classical_compile(program)}
+    log = []
+    with recorded_queries(log):
+        _, first, _, times0, addresses0 = first_answer(program)
+    assert first == dcomp.compile_with_report(program, dcomp.DEFAULT_LIMITS, optimise=False)[0]
+    compilations['first'] = first
+    t, a, rec = fixed_work(c1, program, facts, times0, addresses0)
+    compilations['C1'] = dc.compilation(facts, t, a)
+    out['methods'] = {k: _layout(program, facts, v) for k, v in compilations.items()}
+    out['schedule_queries'], out['address_queries'] = decode_first_answer_queries(
+        log, facts, times0, addresses0)
+    out['reopen'] = {
+        'epochs': rec['epochs'], 'nodes': rec['aggregate']['nodes'],
+        'stopped_because': rec['stopped_because'], 'statuses': dict(rec['statuses']),
+        'improvements': [[list(s['from_CS']), list(s['to_CS']), s['policy']] for s in rec['improvements']],
+        'certificates': rec['propagation']['certificate_stream_length'],
+        'questions': [{'policy': q['policy'], 'radius': q['radius'], 'window': list(q['window']),
+                       'status': q['status'], 'reason': q.get('reason'), 'caps': list(q['caps'] or []),
+                       'nodes': q['nodes']} for q in rec['queries']]}
+    assert len(out['reopen']['questions']) == sum(rec['statuses'].values())
+    out['optimum'] = scalar_optimum(program, facts, out['methods']['C1']['J'])
+    return out, compilations
 
 
 if __name__ == '__main__':

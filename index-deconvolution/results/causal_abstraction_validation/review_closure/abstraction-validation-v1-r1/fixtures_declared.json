@@ -1,0 +1,23 @@
+{
+  "declared_before_first_execution": true,
+  "N": 4,
+  "sizes": {"0": 1, "1": 1},
+  "map_ok": {"0": 0, "1": 1},
+  "R1": {
+    "F1_missing_singleton": {"classes": [[0]], "present": [], "maps": {}, "expect_label": "COARSE-INCOMPLETE", "expect_missing_records": 1, "expect_missing_comparisons": 0},
+    "F2_missing_rep_failed_member": {"classes": [[0, 1]], "present": [1], "maps": {"1": null}, "expect_label": "COARSE-STRUCT-FAIL", "expect_member_outcome": "MEMBER-NOEXIST", "expect_missing_records": 1, "expect_missing_comparisons": 1},
+    "F3_missing_rep_passing_member": {"classes": [[0, 1]], "present": [1], "maps": {"1": "map_ok"}, "expect_label": "COARSE-INCOMPLETE", "expect_member_outcome": "MISSING", "expect_own_e3": "PASS", "expect_missing_comparisons": 1},
+    "F4_rep_nomap_member_missing": {"classes": [[0, 1]], "present": [0], "maps": {"0": null}, "expect_label": "COARSE-STRUCT-FAIL", "expect_member_outcome": "MISSING"},
+    "F5_rep_nomap_member_failed": {"classes": [[0, 1]], "present": [0, 1], "maps": {"0": null, "1": null}, "expect_label": "COARSE-STRUCT-FAIL", "expect_member_outcome": "NOT-EVALUABLE", "expect_own_e3": "FAIL"},
+    "F6_disagree_plus_missing": {"classes": [[0, 1], [2, 3]], "present": [0, 1], "maps": {"0": "map_ok", "1": {"0": 1, "1": 1}}, "expect_label": "COARSE-DISAGREE", "expect_missing_records": 2, "expect_missing_comparisons": 1},
+    "F7_struct_fail_plus_missing_singleton": {"classes": [[0, 1], [2]], "present": [0, 1], "maps": {"0": null, "1": "map_ok"}, "expect_label": "COARSE-STRUCT-FAIL", "expect_missing_records": 1}
+  },
+  "R2": {
+    "empty": {"alpha": [], "image": [], "expect": "ValueError"},
+    "image_short": {"alpha": [0, 1], "image": [0], "expect": "ValueError"},
+    "alpha_short": {"alpha": [0], "image": [0, 1], "expect": "ValueError"},
+    "valid_no_fail": {"alpha": [0, 1, 2], "image": [1, 2, 0], "macro": "(y+1)%3", "expect": []},
+    "valid_fail_idx": {"alpha": [0, 1, 1, 2], "image": [0, 1, 0, 2], "macro": "identity", "expect": [2]}
+  },
+  "preservation_comparison": "old vs repaired evaluate_classes on every complete coarse hypothesis reconstructed from the frozen run's code paths in copies; fields of the old output must be equal"
+}

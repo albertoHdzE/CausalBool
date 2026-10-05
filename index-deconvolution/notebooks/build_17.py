@@ -3,13 +3,22 @@ HID-v1 language, and its prospective benchmark.
 
 Regenerates notebooks/17_hierarchy_search_v2.ipynb. Standard library to build;
 executing needs the CausalBool kernel and the stored runs under
-results/hierarchy_search_v2/ (search-confirm-v2-r1 and the development regression).
+results/ (search-confirm-v2-r1, its review_closure erratum, and the HID-v1 confirm-v1-r1
+summary). It may be executed from the repository root or the notebook directory.
 
-Presentation only. The notebook READS saved artefacts (freeze, rows, archives, summary,
-claim ledger, diagnostics, arithmetic audit, execution ledger). It runs the encoder only
-on tiny hand-made inputs to show the stages; it never reruns benchmark inference and
-never generates reserved strings. Prose carries no measured number: every number is
-printed by a cell. Notebook 16 and its historical conclusion are untouched.
+Presentation only. The notebook READS saved artefacts (freeze, rows, archives, telemetry,
+summary, claim ledger, diagnostics, the R1 diagnostic median erratum, arithmetic audit,
+verification). It imports no encoder, search or corpus module: it never runs inference
+and never generates strings, reserved or otherwise. The stage example is one retained
+case, named by its case ID, decoded and parsed with the existing owners. Prose carries
+no measured number: every number is printed by a cell. Notebook 16 and its historical
+conclusion are untouched.
+
+Presentation revision (review R1/R2, 2026-10-03): the earlier revision ran ``infer_v2``
+on a constructed period-63 input and printed the frozen, upper-middle diagnostic
+medians. This revision replaces that example with saved archives and displays the
+corrected medians from ``review_closure/diagnostic_median_erratum.json``. The scientific
+freeze and every saved scientific result are unchanged.
 """
 import os
 from _nblib import md, code, write_notebook, BOOTSTRAP
@@ -17,23 +26,31 @@ from _nblib import md, code, write_notebook, BOOTSTRAP
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 SETUP = r'''
+from pathlib import Path
+# Explicit artefact root, whether executed from the repository root or the notebook directory.
+_cands = [Path.cwd(), Path.cwd() / "index-deconvolution", Path(ROOT)]
+ID_ROOT = next(p.resolve() for p in _cands
+               if (p / "PROTOCOL_order_discovery.md").is_file()
+               and (p / "results" / "hierarchy_search_v2" / "search-confirm-v2-r1").is_dir())
+ROOT = str(ID_ROOT)
 for _p in (os.path.join(os.path.dirname(ROOT), "src"), ROOT):
     while _p in sys.path:
         sys.path.remove(_p)
     sys.path.insert(0, _p)
 sys.modules.pop("hierarchy", None)          # a sibling repo ships a module "hierarchy"
-import json, collections
-from pathlib import Path
+import json, collections, hashlib
 import numpy as np
 import matplotlib.pyplot as plt
-from hierarchy.decode import decode_archive
+from hierarchy.decode import decode_archive                 # saved archives only
 from hierarchy.ledger import archive_ledger, field_buckets, BUCKETS
-from hierarchy.search_v2 import ARMS, infer_v2
 
-BASE = Path(ROOT) / "results" / "hierarchy_search_v2"
+BASE = ID_ROOT / "results" / "hierarchy_search_v2"
 RUN = BASE / "search-confirm-v2-r1"
-REG = BASE / "development" / "dev-search-v2-regression"
-OLD = Path(ROOT) / "results" / "hierarchy_v1" / "confirm-v1-r1"
+OLD = ID_ROOT / "results" / "hierarchy_v1" / "confirm-v1-r1"
+ERRATUM = BASE / "review_closure" / "diagnostic_median_erratum.json"
+for _a in (RUN / "freeze.json", RUN / "cases.jsonl", RUN / "diagnostics.json", OLD / "summary.json", ERRATUM):
+    assert _a.is_file(), f"missing saved artefact: {_a}"
+print("artefact root:", BASE)
 freeze = json.loads((RUN / "freeze.json").read_text())
 summary = json.loads((RUN / "summary.json").read_text())
 claims = json.loads((RUN / "claim_ledger.json").read_text())
@@ -44,7 +61,13 @@ rows = [json.loads(x) for x in (RUN / "cases.jsonl").read_text().splitlines() if
 by_case = collections.defaultdict(dict)
 for r in rows:
     by_case[r["case_id"]][r["method"]] = r
-ARM_ORDER = list(ARMS)
+# The six cumulative arms, ordered by the stages each one's saved telemetry declares.
+_stages = {}
+for r in rows:
+    if r["method_kind"] == "hid_v2" and r.get("search_counters"):
+        _stages.setdefault(r["method"], tuple(r["search_counters"]["stages_included"]))
+ARM_ORDER = sorted(_stages, key=lambda m: len(_stages[m]))
+assert [len(_stages[m]) for m in ARM_ORDER] == [1, 2, 3, 4, 5, 6]
 print("run:", freeze["run_id"], "| study:", freeze["study"], "| frozen", freeze["frozen_at_utc"])
 print("rows:", len(rows), "| cases:", len(by_case),
       "| engineering:", summary["engineering_status"], "| complete:", summary["study_complete"])
@@ -96,34 +119,56 @@ print("design:", {r: v for r, v in freeze["design"]["expected"].items()},
       "| total rows", freeze["design"]["expected_total_rows"])
 """),
 md(r"""
-## 3. The six cumulative arms, on a tiny hand-made input
+## 3. The six cumulative arms, on one retained case
 
 Stages: **L** legacy search; **P** first-block template, old period grid, 1,024-bit local
 patches; **C** consensus template (per-phase majority) on the same grid; **D** the other
 periods up to 256; **G** one global correction list; **B** bounded input-only boundary
 search. Each arm keeps the smallest complete archive; ties keep the earlier one.
-Below, a period-63 word with noise (63 is not on the old grid) — built here, so its
-truth is known to us and never passed to the encoder.
+
+The example is an **illustration, not an endpoint**. It is one confirmation case named
+by its ID — the base string of the first declared replicate of F06 (the noisy-period
+family on which the P, C, D and G contrasts are read) at the middle size — and was not
+chosen by comparing outcomes. Nothing is encoded here: each arm's saved archive is
+hash- and length-checked against its row, decoded with the independent decoder and
+compared with the case's recorded input hash; stages come from the saved telemetry.
 """),
 code(r"""
-import random
-rng = random.Random(63)
-word = "".join(rng.choice("01") for _ in range(63))
-n = 4096
-clean = (word * (n // 63 + 1))[:n]
-flips = sorted(rng.sample(range(n), n // 32))
-x = "".join(("1" if c == "0" else "0") if i in set(flips) else c for i, c in enumerate(clean))
-print(f"input: n = {n} bits, period 63 word with {len(flips)} flipped positions")
+CASE_ID = "confirmation-F06-1024-3000-base"          # explicit retained case; illustration only
+case = by_case[CASE_ID]
+
+def saved_archive(row):
+    data = (RUN / row["archive_path"]).read_bytes()
+    assert hashlib.sha256(data).hexdigest() == row["archive_sha256"] and 8 * len(data) == row["archive_bits"]
+    return data
+
+any_row = case[ARM_ORDER[0]]
+print(f"case {CASE_ID}: family {any_row['family']}, n = {any_row['n_bits']} bits, "
+      f"input sha256 {any_row['input_sha256'][:16]}...")
+print("portfolio (baseline_best):", case["baseline_best"]["archive_bits"], "bits via",
+      case["baseline_best"]["selected_method"], "| raw envelope:", case["raw"]["archive_bits"], "bits")
 for name in ARM_ORDER:
-    r = infer_v2(x, ARMS[name])
-    assert decode_archive(r.archive) == x
-    print(f"{name:<20} {r.archive_bits:>6} bits  selected stage {r.selected_stage:<4}"
-          f" detail {r.telemetry.get('selected_detail')}")
+    row = case[name]
+    bits = decode_archive(saved_archive(row))
+    assert hashlib.sha256(bits.encode()).hexdigest() == row["input_sha256"] and len(bits) == row["n_bits"]
+    t = row["search_counters"]
+    print(f"{name:<20} {row['archive_bits']:>6} bits  stages {''.join(t['stages_included']):<6} "
+          f"selected {t['selected_stage']:<2} detail {t.get('selected_detail')}  decodes exactly: True")
 """),
 code(r"""
-r = infer_v2(x, ARMS["hid_global"])
-led = archive_ledger(r.archive)
-print("exact cost buckets (bits):", field_buckets(r.archive))
+t = case["hid_full"]["search_counters"]
+print("hid_full stage by stage (saved telemetry): best candidate bits -> incumbent after the stage")
+for s in t["stages_included"]:
+    st = t["stages"][s]
+    best = st.get("best_candidate_bits", st.get("archive_bits"))
+    work = (f"periods attempted {st['periods_attempted']}" if "periods_attempted" in st else
+            f"root trials {st['counts']['root_trials']}, stop {st['stop_reason']}" if s == "B" else
+            f"unique archives serialized {st['serialized_unique']}, stop {st['stop_reason']}")
+    print(f"  {s}: best {best}  incumbent {st['incumbent_bits_after']} ({st['incumbent_stage_after']})  "
+          f"{work}  strict improvements {st['strict_improvements']}")
+data = saved_archive(case["hid_global"])
+led = archive_ledger(data)
+print("hid_global exact cost buckets (bits):", field_buckets(data), "| total", 8 * len(data))
 for i, rule in enumerate(led["model"].rules):
     print(i, type(rule).__name__, {k: (v if not isinstance(v, (tuple, str)) or len(v) < 12 else f"<{len(v)} items>")
                                    for k, v in rule.__dict__.items()})
@@ -231,22 +276,49 @@ md(r"""
 
 For F12 and S02 strings the generator's construction cuts, mapped through its edits,
 are used — after automatic encoding — to build one feasible partition with the same
-leaf builder. Gap = (bits(hid_full) − min(reference, raw))/n; negative means the
-automatic archive is shorter. This is not an oracle optimum and not a bound on search
-error; it is never an incumbent.
+leaf builder. Gap = (bits(hid_full) − min(reference, raw))/n, in bits per input bit;
+negative means the automatic archive is shorter. This is not an oracle optimum and not
+a bound on search error; it is never an incumbent.
+
+**Erratum R1 (diagnostic only).** The frozen diagnostics reported the upper middle
+observation as the median of an even-sized cell. The medians below are the conventional
+sample medians from the identified erratum, derived from the saved reference records;
+the stored value is shown beside each corrected one. Means, counts and signs are
+unchanged, and no primary, contrast or descriptive result depends on these medians.
 """),
 code(r"""
 sb = diag["supplied_boundary_references"]
+err = json.loads(ERRATUM.read_text())
+assert err["run_id"] == freeze["run_id"] and err["all_checks_pass"]
+assert err["freeze_sha256"] == (RUN / "freeze.sha256").read_text().split()[0]
+for rel, h in err["input_sha256"].items():               # the erratum describes these exact bytes
+    p = ID_ROOT.parent / rel
+    assert hashlib.sha256(p.read_bytes()).hexdigest() == h, rel
 print(sb["label"])
 print("strings", sb["strings"], "| references available", sb["available"])
+print("erratum:", ERRATUM.name, "| cells", err["cells_total"], "| medians corrected", err["cells_changed"])
 for k, v in sb["by_cell"].items():
-    print(f"{k:<28} gap mean {v['gap_mean']}  median {v['gap_median']}  "
+    e = err["cells"][k]
+    assert all(v[f] == e["unchanged_quantities"][f] for f in e["unchanged_quantities"])
+    assert e["original_gap_median"] == v["gap_median"]
+    tag = f"CORRECTED (stored {v['gap_median']})" if e["changed"] else "unchanged"
+    print(f"{k:<22} n {e['n_gaps']:>2}  gap mean {v['gap_mean']}  median {e['corrected_gap_median']}  [{tag}]  "
           f"auto shorter {v['automatic_shorter_than_reference']}  longer {v['automatic_longer_than_reference']}  ties {v['ties']}")
 """),
 md(r"""
 ## 11. Verification and claim ledger
+
+The record shown is the run directory's current `verification.json`; the cell states
+whether it is byte-identical to the supervisor's retained `verify --full` record. Its
+"notebook 17" line describes the notebook revision that existed when that verification
+ran, not this presentation revision, whose execution checks are kept with the review
+closure.
 """),
 code(r"""
+_vf = BASE / "supervision" / "verification_full.json"
+print("verification.json identical to supervision/verification_full.json:",
+      _vf.is_file() and _vf.read_bytes() == (RUN / "verification.json").read_bytes(),
+      "| finished", verification.get("finished_utc"))
 print("verification:", {k: verification.get(k) for k in ("engineering_status", "completeness", "exit_code")})
 for c_ in verification.get("commands", []):
     print(f"  {c_['name']:<22} exit {c_['exit_code']}  {c_['tail'][-1] if c_['tail'] else ''}")

@@ -1,0 +1,84 @@
+{
+  "access_regimes": [
+    "unlabelled_string",
+    "passive_labelled_trajectory",
+    "complete_labelled_transition_table",
+    "chosen_state_successor_queries"
+  ],
+  "benchmark_jobs": 0,
+  "budget": {
+    "executor_cap_s": 3000,
+    "stop_optional_s": 2700,
+    "supervisor_reserve_s": 600,
+    "total_s": 3600
+  },
+  "conditional_deliverable": "DRAFT_EXECUTION_PROTOCOL.md only when the decision selects one draft",
+  "decisions": [
+    "DRAFT_QUERY_RECOVERY",
+    "DRAFT_ABSTRACTION_VALIDATION",
+    "NO_JUSTIFIED_IMPLEMENTATION"
+  ],
+  "declare_before_checking": true,
+  "deliverables": [
+    "EXISTING_EVIDENCE.md",
+    "TARGET_CONTRACT.md",
+    "target_contract.json",
+    "IDENTIFIABILITY.md",
+    "witnesses.json",
+    "check_witnesses.py",
+    "witness_results.json",
+    "ABSTRACTION_CONTRACT.md",
+    "EVALUATION_SPEC.md",
+    "DECISION.md",
+    "evidence_manifest.json",
+    "preservation_before.json",
+    "preservation_after.json",
+    "attempts.jsonl",
+    "time_ledger.jsonl",
+    "HANDOFF.md"
+  ],
+  "draft_execution_authorized": false,
+  "encoder_jobs": 0,
+  "max_drafts": 1,
+  "not_authorized": [
+    "source_package",
+    "encoder",
+    "learner",
+    "generator",
+    "benchmark",
+    "corpus_sweep",
+    "notebook_execution",
+    "dependency_installation",
+    "historical_edit",
+    "commit",
+    "push",
+    "publication",
+    "recurring_task",
+    "draft_execution"
+  ],
+  "output": "index-deconvolution/results/causal_target_v1/causal-target-spec-v1-r1",
+  "phase": "specification_and_identifiability",
+  "random_examples": false,
+  "run_id": "causal-target-spec-v1-r1",
+  "schema": "causal-target-spec-v1",
+  "witness_max_bits": 3,
+  "witness_max_states_per_map": 8,
+  "witnesses": [
+    {
+      "id": "W1",
+      "question": "Passive ambiguity: identity vs coordinate swap; one off-diagonal query distinguishes."
+    },
+    {
+      "id": "W2",
+      "question": "Same full function, different syntax and redundant declared input; functional support is the identifiable target."
+    },
+    {
+      "id": "W3",
+      "question": "Projection alpha=x1: identity commutes, XOR-coupled first-coordinate update fails."
+    },
+    {
+      "id": "W4",
+      "question": "Identity dynamics with XOR alpha: autonomous consistency holds; setting x1=0 before update cannot be represented from alpha alone."
+    }
+  ]
+}

@@ -81,6 +81,35 @@ class CANodeReconstruction:
         }
 
 
+def heterogeneous_eca_network(rules: list[int]) -> Network:
+    """A ring of ``len(rules)`` cells in which cell ``i`` applies ECA rule ``rules[i]``
+    to its own (left, centre, right) neighbourhood, as a runnable :class:`Network`.
+
+    Added for protocol bdm_anatomy_v1 (H7: two rules side by side). Each cell's
+    gate is a LUT over its ascending support, the convention :func:`_key` reads, so
+    the wrap-around cells 0 and w-1 are tabulated correctly. With one rule
+    repeated this reproduces :func:`evolve_eca` exactly (pinned in the owner test).
+    """
+    w = len(rules)
+    if w < 3:
+        raise ValueError(f"need at least 3 cells, got {w}")
+    C = [[0] * w for _ in range(w)]
+    params: list[dict] = []
+    for i, rule in enumerate(rules):
+        if not 0 <= rule <= 255:
+            raise ValueError(f"rule must be 0..255, got {rule}")
+        support = _window(i, 1, w)
+        role = {(i - 1) % w: 4, i: 2, (i + 1) % w: 1}   # weight of l, c, r in the rule index
+        table = []
+        for y in range(8):
+            idx = sum(role[c] for j, c in enumerate(support) if (y >> j) & 1)
+            table.append((rule >> idx) & 1)
+        for c in support:
+            C[i][c] = 1
+        params.append({"table": table})
+    return Network(n=w, C=C, gates=["LUT"] * w, params=params)
+
+
 def _window(i: int, r: int, w: int) -> list[int]:
     """Ascending absolute cell indices within radius r of cell i (periodic)."""
     return sorted({(i + d) % w for d in range(-r, r + 1)})

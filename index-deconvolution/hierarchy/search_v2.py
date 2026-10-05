@@ -31,7 +31,7 @@ from .consensus import (Residual, consensus_word, dense_grid, first_block_word,
 from .decode import decode_archive
 from .infer import FULL, infer
 from .model import NodeFactory, check_bits, count_reachable, to_model
-from .segmentation import BoundaryConfig, BoundarySearch, DecodeMismatch
+from .segmentation import K1, BoundaryConfig, BoundaryPolicy, BoundarySearch, DecodeMismatch
 from .wire import encode_literal, serialize_model
 
 STAGE_ORDER = ("L", "P", "C", "D", "G", "B")
@@ -174,9 +174,19 @@ class _Templates:
 
 def infer_v2(bits: str, config: SearchV2Config) -> V2Result:
     """Best complete archive found by the arm ``config`` (literal fallback included)."""
+    return run_arm(bits, config)
+
+
+def run_arm(bits: str, config: SearchV2Config, policy: BoundaryPolicy = K1, observer=None,
+            identity: tuple[str, str] | None = None) -> V2Result:
+    """The one orchestrator of L, P, C, D, G, B. ``policy`` selects the boundary
+    refinement seed count (K1: search-v2), ``observer`` an optional stage-B trace, and
+    ``identity`` the (name, config sha256) of a wrapping study configuration; the
+    defaults are exactly ``infer_v2``."""
     check_bits(bits)
-    if not isinstance(config, SearchV2Config):
-        raise TypeError("config must be a SearchV2Config")
+    if not isinstance(config, SearchV2Config) or not isinstance(policy, BoundaryPolicy):
+        raise TypeError("config must be a SearchV2Config and policy a BoundaryPolicy")
+    name, sha = identity or (config.name, config.sha256())
     raw = encode_literal(bits)
     inc = _Incumbent(raw)
     n = len(bits)
@@ -185,8 +195,7 @@ def infer_v2(bits: str, config: SearchV2Config) -> V2Result:
     t_all = time.perf_counter()
     if n == 0:
         tele["stop"] = "empty_input"
-        return V2Result(raw, "raw", 8 * len(raw), 8 * len(raw), tele, (), config.name,
-                        config.sha256())
+        return V2Result(raw, "raw", 8 * len(raw), 8 * len(raw), tele, (), name, sha)
     tpl = _Templates(bits, config)
     for stage in config.stages:
         t0 = time.perf_counter()
@@ -200,7 +209,7 @@ def infer_v2(bits: str, config: SearchV2Config) -> V2Result:
                   "rule_count": res.rule_count, "dag_depth": res.dag_depth,
                   "best_source": res.best_source, "strict_improvements": int(improved)}
         elif stage == "B":
-            srch = BoundarySearch(bits, config.boundary)
+            srch = BoundarySearch(bits, config.boundary, policy, observer)
             st = {"strict_improvements": 0}
 
             def offer(arc, st=st):
@@ -244,4 +253,4 @@ def infer_v2(bits: str, config: SearchV2Config) -> V2Result:
     tele["selected_detail"] = inc.detail
     tele["total_wall_s"] = time.perf_counter() - t_all
     return V2Result(inc.archive, inc.stage, 8 * len(inc.archive), 8 * len(raw), tele,
-                    tuple(inc.trace), config.name, config.sha256())
+                    tuple(inc.trace), name, sha)

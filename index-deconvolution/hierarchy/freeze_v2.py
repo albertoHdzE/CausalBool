@@ -48,6 +48,47 @@ INFORMATIONAL_GLOBS = ("index-deconvolution/hierarchy/tests/*.py",
                        "index-deconvolution/experiments/audit_search_v2_primary.py")
 RESERVED_MARKERS = ("search_v2_confirmation", "search_v2_transfer", "search_v2_stress")
 
+V3A_PACKET = "index-deconvolution/protocols/hierarchy_search_v3a/"
+# Per-study freeze profile, selected by explicit study name (never by a name prefix):
+# protocol files, extra executable closure outside the package, informational globs,
+# reserved namespaces and the analysis plan's owner.
+PROFILES = {
+    "search-v2": {"protocol": PROTOCOL_FILES, "extra_closure": (),
+                  "informational": INFORMATIONAL_GLOBS, "reserved": RESERVED_MARKERS,
+                  "analysis_plan": ("report_v2", "ANALYSIS_PLAN_V2")},
+    "search-v3a": {
+        "protocol": ("index-deconvolution/PROTOCOL_hierarchy_search_v3a.md",
+                     "index-deconvolution/KICKOFF_hierarchy_search_v3a.md",
+                     *(V3A_PACKET + f for f in ("SEARCH.md", "BENCHMARK.md", "ACCEPTANCE.md",
+                                                "DESIGN_REVIEW.md", "contract.json",
+                                                "intended_cases.json", "DELEGATION_MANIFEST.json",
+                                                "INITIAL_SOURCE_STATE.json",
+                                                "INTEGRATION_CHECK.json", "PACKET_CHECKS.json",
+                                                "check_packet.py")),
+                     "index-deconvolution/protocols/hierarchy_v1/WIRE_FORMAT.md",
+                     "index-deconvolution/protocols/hierarchy_search_v2/SEARCH.md",
+                     "index-deconvolution/protocols/hierarchy_search_v2/BENCHMARK.md"),
+        "extra_closure": ("index-deconvolution/experiments/search_v3a/__init__.py",
+                          "index-deconvolution/experiments/search_v3a/audit.py",
+                          "index-deconvolution/experiments/search_v3a/development.py",
+                          "index-deconvolution/experiments/search_v3a/ledger.py",
+                          "index-deconvolution/experiments/search_v3a/preserve.py",
+                          "index-deconvolution/experiments/search_v3a/prospective.py",
+                          "index-deconvolution/experiments/search_diagnosis/__init__.py",
+                          "index-deconvolution/experiments/search_diagnosis/common.py"),
+        "informational": ("index-deconvolution/hierarchy/tests/*.py",
+                          "index-deconvolution/hierarchy/*.md"),
+        "reserved": ("search_v3a_confirmation", "search_v3a_transfer", "search_v3a_stress",
+                     "search_v3a_controls"),
+        "analysis_plan": ("report_v3a", "ANALYSIS_PLAN_V3A")},
+}
+
+
+def profile(study) -> dict:
+    """The freeze profile of the study's method registry (fixture studies included)."""
+    from .study import V3A_REGISTRIES
+    return PROFILES["search-v3a" if study.registry in V3A_REGISTRIES else "search-v2"]
+
 
 def sha_file(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
@@ -57,10 +98,11 @@ def canonical(obj) -> bytes:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), default=str).encode()
 
 
-def closure_files() -> list[str]:
+def closure_files(study=None) -> list[str]:
     pkg = sorted(p.relative_to(REPO).as_posix()
                  for p in (ID_ROOT / "hierarchy").glob("*.py"))
-    return pkg + list(SHARED_OWNERS)
+    extra = list(profile(study)["extra_closure"]) if study is not None else []
+    return pkg + list(SHARED_OWNERS) + extra
 
 
 PROBE = r"""
@@ -84,14 +126,14 @@ print(json.dumps(sorted(files)))
 """
 
 
-def import_probe() -> dict:
+def import_probe(study=None) -> dict:
     env = dict(os.environ, PYTHONPATH=f"{ID_ROOT}{os.pathsep}{REPO / 'src'}")
     out = subprocess.run([sys.executable, "-c", PROBE, str(REPO)], cwd=REPO, env=env,
                          capture_output=True, text=True, check=True)
     allfiles = json.loads(out.stdout)
     third = [f for f in allfiles if f.startswith("venv/")]
     loaded = [f for f in allfiles if not f.startswith("venv/")]
-    closure = set(closure_files())
+    closure = set(closure_files(study))
     return {"loaded_repository_files": loaded,
             "third_party_files_loaded": len(third),
             "third_party_identity": "venv packages; versions recorded under environment",
@@ -99,9 +141,9 @@ def import_probe() -> dict:
             "closure_not_loaded": sorted(closure - set(loaded))}
 
 
-def informational_files() -> list[str]:
+def informational_files(study=None) -> list[str]:
     out = set()
-    for g in INFORMATIONAL_GLOBS:
+    for g in (profile(study)["informational"] if study is not None else INFORMATIONAL_GLOBS):
         out.update(p.relative_to(REPO).as_posix() for p in REPO.glob(g))
     return sorted(out)
 
@@ -116,12 +158,12 @@ def exposure_check(study, run_dir: Path) -> dict:
                          or p.parent.name in ("rows", "logs", "archives"))
             if p.is_file() and generated and p.suffix in (".json", ".jsonl", ".log"):
                 text = p.read_text(errors="replace")
-                if any(m in text for m in RESERVED_MARKERS):
+                if any(m in text for m in profile(study)["reserved"]):
                     hits.append(str(p))
     present = [n for n in ("rows", "cases.jsonl", "corpus_manifest.jsonl")
                if (run_dir / n).exists()]
     return {"files_mentioning_reserved_namespaces": hits, "run_artifacts_present": present,
-            "reserved_namespaces": list(RESERVED_MARKERS),
+            "reserved_namespaces": list(profile(study)["reserved"]),
             "clean": not hits and not present,
             "scope": "every generated-data artefact (corpus manifests, cases.jsonl, rows, "
                      "logs) under the study result root; documentation that names the "
@@ -153,7 +195,7 @@ def design(study, run_id: str) -> dict:
 
 def dev_fingerprint(study) -> str:
     """Identity of the current code/configuration for unfrozen development rows."""
-    blob = {"sources": {p: sha_file(REPO / p) for p in closure_files()},
+    blob = {"sources": {p: sha_file(REPO / p) for p in closure_files(study)},
             "methods": {m: v["sha256"] for m, v in method_configs(study).items()}}
     return "dev:" + hashlib.sha256(canonical(blob)).hexdigest()
 
@@ -161,14 +203,17 @@ def dev_fingerprint(study) -> str:
 def build(study, run_id: str, prefreeze_dir: Path | None) -> tuple[dict, bytes, str]:
     from . import benchmark as B
     from . import corpus, study_corpus
-    from .report_v2 import ANALYSIS_PLAN_V2
+    import importlib
+    prof = profile(study)
+    plan = getattr(importlib.import_module(f".{prof['analysis_plan'][0]}", __package__),
+                   prof["analysis_plan"][1])
     run_dir = study.run_dir(run_id)
-    probe = import_probe()
+    probe = import_probe(study)
     if probe["outside_closure"]:
         raise RuntimeError(f"import probe loaded files outside the closure: {probe['outside_closure']}")
-    src = {p: sha_file(REPO / p) for p in closure_files()}
-    proto = {p: sha_file(REPO / p) for p in PROTOCOL_FILES}
-    info = {p: sha_file(REPO / p) for p in informational_files()}
+    src = {p: sha_file(REPO / p) for p in closure_files(study)}
+    proto = {p: sha_file(REPO / p) for p in prof["protocol"]}
+    info = {p: sha_file(REPO / p) for p in informational_files(study)}
     prefreeze = {}
     if prefreeze_dir is not None and prefreeze_dir.exists():
         for p in sorted(prefreeze_dir.rglob("*")):
@@ -195,7 +240,7 @@ def build(study, run_id: str, prefreeze_dir: Path | None) -> tuple[dict, bytes, 
                                       "{replicate}|{stream}')",
                       "corpus_sha256": sha_file(Path(corpus.__file__)),
                       "study_corpus_sha256": sha_file(Path(study_corpus.__file__))},
-        "analysis_plan": ANALYSIS_PLAN_V2,
+        "analysis_plan": plan,
         "resource_policy": dict(study.resources.as_dict(),
                                 rss_method=B.RSS_METHOD,
                                 worker="python -S -m hierarchy.benchmark --worker METHOD OUT "
@@ -259,7 +304,7 @@ def load_and_validate(study, run_id: str, purpose: str | None = None
                 problems.append(f"{label} missing since freeze: {p}")
             elif sha_file(path) != h:
                 problems.append(f"{label} changed since freeze: {p}")
-    extra = sorted(set(closure_files()) - set(fr.get("source_sha256", {})))
+    extra = sorted(set(closure_files(study)) - set(fr.get("source_sha256", {})))
     for p in extra:
         problems.append(f"source added to the closure since freeze: {p}")
     now = method_configs(study)

@@ -1,0 +1,148 @@
+diff --git a/index-deconvolution/hierarchy/diagnostics_v2.py b/index-deconvolution/hierarchy/diagnostics_v2.py
+index e923516..6622f53 100644
+--- a/index-deconvolution/hierarchy/diagnostics_v2.py
++++ b/index-deconvolution/hierarchy/diagnostics_v2.py
+@@ -18,6 +18,7 @@ from __future__ import annotations
+ 
+ import hashlib
+ import json
++import statistics
+ import time
+ from collections import defaultdict
+ from pathlib import Path
+@@ -95,6 +96,33 @@ def stage_yield(rows) -> dict:
+             for k, v in sorted(out.items())}
+ 
+ 
++def boundary_gap_summary(items) -> dict:
++    """Per role|family|base_length cell: counts and signed ``hid_full`` gap summaries.
++
++    ``gap_median`` is the conventional sample median (``statistics.median``): the middle
++    value for an odd count and the mean of the two middle values for an even count;
++    ``None`` for a cell without gaps. Units are bits per input bit.
++    """
++    summary = defaultdict(lambda: {"strings": 0, "available": 0, "gaps": []})
++    for it in items:
++        k = f"{it['role']}|{it['family']}|{it['base_length']}"
++        summary[k]["strings"] += 1
++        if it.get("available"):
++            summary[k]["available"] += 1
++            if "gap_hid_full_per_input_bit" in it:
++                summary[k]["gaps"].append(it["gap_hid_full_per_input_bit"])
++    agg = {}
++    for k, v in sorted(summary.items()):
++        g = sorted(v["gaps"])
++        agg[k] = {"strings": v["strings"], "available": v["available"],
++                  "gap_mean": sum(g) / len(g) if g else None,
++                  "gap_median": statistics.median(g) if g else None,
++                  "automatic_shorter_than_reference": sum(1 for x in g if x < 0),
++                  "automatic_longer_than_reference": sum(1 for x in g if x > 0),
++                  "ties": sum(1 for x in g if x == 0)}
++    return agg
++
++
+ def boundary_references(study, run_id: str, d: Path, index: dict, roles) -> dict:
+     out_dir = d / "diagnostics" / "boundary_reference"
+     items = []
+@@ -151,23 +179,7 @@ def boundary_references(study, run_id: str, d: Path, index: dict, roles) -> dict
+             if full is None:
+                 item["note"] = "hid_full row absent"
+             items.append(item)
+-    summary = defaultdict(lambda: {"strings": 0, "available": 0, "gaps": []})
+-    for it in items:
+-        k = f"{it['role']}|{it['family']}|{it['base_length']}"
+-        summary[k]["strings"] += 1
+-        if it.get("available"):
+-            summary[k]["available"] += 1
+-            if "gap_hid_full_per_input_bit" in it:
+-                summary[k]["gaps"].append(it["gap_hid_full_per_input_bit"])
+-    agg = {}
+-    for k, v in sorted(summary.items()):
+-        g = sorted(v["gaps"])
+-        agg[k] = {"strings": v["strings"], "available": v["available"],
+-                  "gap_mean": sum(g) / len(g) if g else None,
+-                  "gap_median": g[len(g) // 2] if g else None,
+-                  "automatic_shorter_than_reference": sum(1 for x in g if x < 0),
+-                  "automatic_longer_than_reference": sum(1 for x in g if x > 0),
+-                  "ties": sum(1 for x in g if x == 0)}
++    agg = boundary_gap_summary(items)
+     (out_dir).mkdir(parents=True, exist_ok=True)
+     (out_dir / "references.json").write_text(json.dumps(items, indent=1) + "\n")
+     return {"label": "EVALUATION-ONLY supplied-boundary feasible references; truth used only "
+diff --git a/index-deconvolution/hierarchy/tests/test_study_v2.py b/index-deconvolution/hierarchy/tests/test_study_v2.py
+index 3739717..f6a5ca0 100644
+--- a/index-deconvolution/hierarchy/tests/test_study_v2.py
++++ b/index-deconvolution/hierarchy/tests/test_study_v2.py
+@@ -479,3 +479,72 @@ def test_end_to_end_artifacts_and_corruption(run):
+     p.write_bytes(p.read_bytes()[:-1] + bytes([p.read_bytes()[-1] ^ 1]))
+     rc, vc, s, v = _rv(st, d)
+     assert vc == cli.EXIT_INVALID and s["primary"]["verdict"] == "not_assessed"
++
++
++# ---------------------------------------------------------------------------
++# 11. Diagnostic summaries: supplied-boundary gap medians (review R1)
++# ---------------------------------------------------------------------------
++
++from hierarchy import diagnostics_v2 as D  # noqa: E402
++
++
++def _ref(role, fam, n, gap=None, available=True):
++    it = {"role": role, "family": fam, "base_length": n, "available": available}
++    if gap is not None:
++        it["gap_hid_full_per_input_bit"] = gap
++    return it
++
++
++def _middle_mean(gaps):
++    s = sorted(gaps)
++    return (s[len(s) // 2 - 1] + s[len(s) // 2]) / 2 if len(s) % 2 == 0 else s[len(s) // 2]
++
++
++def test_boundary_gap_median_averages_the_two_middle_values_of_an_even_cell():
++    gaps = [0.3, -0.1, -0.4, 0.2]                     # sorted: -0.4, -0.1, 0.2, 0.3
++    agg = D.boundary_gap_summary([_ref("stress", "S02", 64, g) for g in gaps])
++    c = agg["stress|S02|64"]
++    assert c["gap_median"] == pytest.approx(0.05, abs=1e-15)
++    assert c["gap_median"] != pytest.approx(0.2)      # the upper middle the old owner reported
++    assert c["gap_mean"] == pytest.approx(0.0, abs=1e-15)
++    assert (c["strings"], c["available"]) == (4, 4)
++    assert (c["automatic_shorter_than_reference"], c["automatic_longer_than_reference"],
++            c["ties"]) == (2, 2, 0)
++
++
++def test_boundary_gap_median_of_an_odd_cell_is_the_middle_value_and_cells_stay_separate():
++    items = [_ref("transfer", "F12", 16, g) for g in (0.25, -0.5, 0.0)] + \
++            [_ref("transfer", "F12", 32, g) for g in (-0.3, -0.1)]
++    agg = D.boundary_gap_summary(items)
++    assert agg["transfer|F12|16"]["gap_median"] == 0.0
++    assert agg["transfer|F12|16"]["ties"] == 1
++    assert agg["transfer|F12|32"]["gap_median"] == pytest.approx(-0.2, abs=1e-15)
++    assert agg["transfer|F12|32"]["automatic_shorter_than_reference"] == 2
++
++
++def test_boundary_gap_summary_counts_unavailable_strings_and_leaves_empty_cells_unset():
++    items = [_ref("confirmation", "F12", 8, available=False),
++             _ref("confirmation", "F12", 8),                  # available, hid_full row absent
++             _ref("confirmation", "F12", 16, available=False)]
++    agg = D.boundary_gap_summary(items)
++    assert (agg["confirmation|F12|8"]["strings"], agg["confirmation|F12|8"]["available"]) == (2, 1)
++    for k in agg:
++        assert agg[k]["gap_median"] is None and agg[k]["gap_mean"] is None
++
++
++def test_fixture_diagnostics_by_cell_is_the_owner_summary_of_its_saved_references(run):
++    # Wiring check through the production CLI. On this fixture the two middle gaps of
++    # every cell coincide, so the defect itself is detected by the unit tests above.
++    st, d = run
++    sb = json.loads((d / "diagnostics.json").read_text())["supplied_boundary_references"]
++    items = json.loads((d / sb["items_path"]).read_text())
++    assert sb["by_cell"] == D.boundary_gap_summary(items)
++    checked = 0
++    for k, c in sb["by_cell"].items():
++        gaps = [it["gap_hid_full_per_input_bit"] for it in items
++                if f"{it['role']}|{it['family']}|{it['base_length']}" == k
++                and "gap_hid_full_per_input_bit" in it]
++        assert gaps, k
++        assert c["gap_median"] == pytest.approx(_middle_mean(gaps), abs=1e-15)
++        checked += 1
++    assert checked == len(sb["by_cell"]) > 0

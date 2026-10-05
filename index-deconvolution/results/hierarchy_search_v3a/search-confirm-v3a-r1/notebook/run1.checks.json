@@ -1,0 +1,68 @@
+{
+ "harness": {
+  "path": "index-deconvolution/results/hierarchy_search_v2/review_closure/scripts/execute_notebook_artifact_only.py",
+  "sha256": "5cc14ef9005dd062e608b9ed95fcc585434c04796510ec0dabcdffb7b34d279e"
+ },
+ "driver_sha256": "65ad3c9b70f59e558ba3b02f51ebe21104689f2f07b69892b931ec1f70a4cfde",
+ "builder_sha256": "1aac6149a7099f8f2f078a0645f2df98252ab15c50a8042644aebca649e53250",
+ "unexecuted_notebook_sha256": "fea887e46dff2e7e06685ba19a910f2f66844b9085d8b9af2946549d84cddd11",
+ "freeze_sha256": "05dd799d154e5e53a36bac7dca49f0438ca27b58b2df94c045eeca2fa6dd69e5",
+ "executions": {
+  "notebook_dir": {
+   "cwd": "/Users/alberto/Documents/projects/CausalBool/index-deconvolution/notebooks",
+   "exit_status": 1,
+   "exception": "CellExecutionError: An error occurred while executing the following cell:\n------------------\nfor m, v in summary[\"hid_telemetry\"].items():\n    print(m, \"| selected stage:\", v[\"selected_stage\"], \"| B stop:\", v[\"B_stop_reason\"], \"| B cap exits:\", v[\"B_cap_exits\"])\nfor m, v in summary[\"resources\"].items():\n    print(f'{m:13s} jobs {v[\"jobs\"]:>4}  statuses {v[\"statuses\"]}  max wall {v[\"max_worker_wall_s\"]:.2f} s  '\n          f'max RSS {v[\"max_peak_rss_bytes\"] / 2**20:.0f} MiB')\nfor m, v in summary[\"trace\"].items():\n    print(m, {k: (x[\"total\"] if isinstance(x, dict) else x) for k, x in v.items()})\nprint(\"censored baseline rows:\", summary[\"censored_baselines\"],\n      \"| portfolio conclusion blocked by censoring:\", summary[\"portfolio_conclusion_blocked_by_censoring\"])\nprint(\"versus portfolio (descriptive):\", {m: v[\"equal_cell_mean\"] for m, v in summary[\"versus_portfolio\"].items()})\nprint(\"control cells:\", [(c[\"cell\"], c[\"strings_better\"], c[\"strings_tie\"], c[\"strings_worse\"]) for c in summary[\"controls\"]])\n------------------\n\n----- stdout -----\nhid_full | selected stage: {'B': 133, 'G': 4, 'L': 111, 'raw': 8} | B stop: {'no_strict_improvement': 248, 'root_trial_cap': 8} | B cap exits: {'root_trial_cap': 8}\nhid_refine4 | selected stage: {'B': 108, 'G': 4, 'L': 136, 'raw': 8} | B stop: {'leaf_length_charge_cap': 219, 'no_strict_improvement': 36, 'root_trial_cap': 1} | B cap exits: {'leaf_length_charge_cap': 219, 'root_trial_cap': 1}\nbernoulli     jobs  256  statuses {'ok': 256}  max wall 2.59 s  max RSS 26 MiB\ncontext       jobs  256  statuses {'ok': 256}  max wall 1.14 s  max RSS 26 MiB\ngaps          jobs  256  statuses {'ok': 256}  max wall 0.10 s  max RSS 30 MiB\nhid_full      jobs  256  statuses {'ok': 256}  max wall 10.87 s  max RSS 287 MiB\nhid_refine4   jobs  256  statuses {'ok': 256}  max wall 11.20 s  max RSS 286 MiB\nlzma          jobs  256  statuses {'ok': 256}  max wall 0.09 s  max RSS 41 MiB\npair_grammar  jobs  256  statuses {'ok': 256}  max wall 0.19 s  max RSS 63 MiB\nperiod        ",
+   "elapsed_s": 1.54,
+   "code_cells": 7,
+   "error_outputs": 1,
+   "unexecuted": 0,
+   "guard_log_present": true,
+   "guard": {
+    "allowed_hierarchy_imports": [
+     "hierarchy",
+     "hierarchy.decode"
+    ],
+    "refused": [],
+    "hierarchy_origin": "/Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/__init__.py"
+   }
+  },
+  "repository_root": {
+   "cwd": "/Users/alberto/Documents/projects/CausalBool",
+   "exit_status": 1,
+   "exception": "CellExecutionError: An error occurred while executing the following cell:\n------------------\nfor m, v in summary[\"hid_telemetry\"].items():\n    print(m, \"| selected stage:\", v[\"selected_stage\"], \"| B stop:\", v[\"B_stop_reason\"], \"| B cap exits:\", v[\"B_cap_exits\"])\nfor m, v in summary[\"resources\"].items():\n    print(f'{m:13s} jobs {v[\"jobs\"]:>4}  statuses {v[\"statuses\"]}  max wall {v[\"max_worker_wall_s\"]:.2f} s  '\n          f'max RSS {v[\"max_peak_rss_bytes\"] / 2**20:.0f} MiB')\nfor m, v in summary[\"trace\"].items():\n    print(m, {k: (x[\"total\"] if isinstance(x, dict) else x) for k, x in v.items()})\nprint(\"censored baseline rows:\", summary[\"censored_baselines\"],\n      \"| portfolio conclusion blocked by censoring:\", summary[\"portfolio_conclusion_blocked_by_censoring\"])\nprint(\"versus portfolio (descriptive):\", {m: v[\"equal_cell_mean\"] for m, v in summary[\"versus_portfolio\"].items()})\nprint(\"control cells:\", [(c[\"cell\"], c[\"strings_better\"], c[\"strings_tie\"], c[\"strings_worse\"]) for c in summary[\"controls\"]])\n------------------\n\n----- stdout -----\nhid_full\n----- stdout -----\n | selected stage: {'B': 133, 'G': 4, 'L': 111, 'raw': 8} | B stop: {'no_strict_improvement': 248, 'root_trial_cap': 8} | B cap exits: {'root_trial_cap': 8}\nhid_refine4 | selected stage: {'B': 108, 'G': 4, 'L': 136, 'raw': 8} | B stop: {'leaf_length_charge_cap': 219, 'no_strict_improvement': 36, 'root_trial_cap': 1} | B cap exits: {'leaf_length_charge_cap': 219, 'root_trial_cap': 1}\nbernoulli     jobs  256  statuses {'ok': 256}  max wall 2.59 s  max RSS 26 MiB\ncontext       jobs  256  statuses {'ok': 256}  max wall 1.14 s  max RSS 26 MiB\ngaps          jobs  256  statuses {'ok': 256}  max wall 0.10 s  max RSS 30 MiB\nhid_full      jobs  256  statuses {'ok': 256}  max wall 10.87 s  max RSS 287 MiB\nhid_refine4   jobs  256  statuses {'ok': 256}  max wall 11.20 s  max RSS 286 MiB\nlzma          jobs  256  statuses {'ok': 256}  max wall 0.09 s  max RSS 41 MiB\npair_grammar  jobs  256  statuses {'ok': 256}  max wall 0.19 s  max RSS 6",
+   "elapsed_s": 1.116,
+   "code_cells": 7,
+   "error_outputs": 1,
+   "unexecuted": 0,
+   "guard_log_present": true,
+   "guard": {
+    "allowed_hierarchy_imports": [
+     "hierarchy",
+     "hierarchy.decode"
+    ],
+    "refused": [],
+    "hierarchy_origin": "/Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/__init__.py"
+   }
+  }
+ },
+ "cwd_text_output_differences": [],
+ "cwd_difference_detail": {},
+ "forbidden_tokens_in_code": [],
+ "displayed_value_checks": {
+  "freeze": true,
+  "verdict": true,
+  "estimate": true,
+  "interval": true
+ },
+ "checks": {
+  "both_executions_exit_0": false,
+  "zero_error_outputs": false,
+  "zero_unexecuted": true,
+  "guard_active_and_no_refusals": true,
+  "only_allowlisted_hierarchy_modules": true,
+  "no_inference_generation_or_job_tokens_in_code": true,
+  "cwd_outputs_identical_after_bootstrap_banner": true,
+  "saved_values_displayed": true
+ },
+ "all_checks_pass": false
+}

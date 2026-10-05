@@ -1,0 +1,187 @@
+{
+ "exposure_inventory": {
+  "definition": "mentions in protocol drafts/sources are not exposure; generated rows, manifests, archives, traces or logs naming a reserved namespace or key would be",
+  "exposed": false,
+  "files": [
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/experiments/search_v3a/prospective.py"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/hierarchy/freeze_v2.py"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/hierarchy/study.py"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/protocols/hierarchy_search_v3a/BENCHMARK.md"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/protocols/hierarchy_search_v3a/INITIAL_SOURCE_STATE.json"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/protocols/hierarchy_search_v3a/contract.json"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/protocols/hierarchy_search_v3a/intended_cases.json"
+   },
+   {
+    "class": "protocol_draft_mention",
+    "path": "index-deconvolution/results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/corrected/NEXT_PROTOCOL_DRAFT.md"
+   },
+   {
+    "class": "protocol_draft_mention",
+    "path": "index-deconvolution/results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1/patches/R1R2_prose_corrections.informational.diff"
+   },
+   {
+    "class": "protocol_draft_mention",
+    "path": "index-deconvolution/results/hierarchy_search_diagnosis/search-diagnosis-v1-r1/NEXT_PROTOCOL_DRAFT.md"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/exposure_inventory.json"
+   },
+   {
+    "class": "protocol_or_source_mention",
+    "path": "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/preflight.json"
+   }
+  ],
+  "generated_artifacts_mentioning": [],
+  "grep_exit": 0,
+  "needs_review": [],
+  "patterns": [
+   "search_v3a_confirmation",
+   "search_v3a_transfer",
+   "search_v3a_stress",
+   "search_v3a_controls",
+   "boundary-F12-4096-60",
+   "boundary_large-F12-",
+   "boundary_stress-S02-",
+   "controls-F0",
+   "controls-F1",
+   "|F12|4096|60",
+   "|F12|16384|70",
+   "|F12|65536|70",
+   "|F12|131072|70",
+   "|S02|4096|80",
+   "|S02|65536|80"
+  ],
+  "searched": [
+   "index-deconvolution"
+  ]
+ },
+ "freeze_exposure_check": {
+  "clean": true,
+  "files_mentioning_reserved_namespaces": [],
+  "reserved_namespaces": [
+   "search_v3a_confirmation",
+   "search_v3a_transfer",
+   "search_v3a_stress",
+   "search_v3a_controls"
+  ],
+  "run_artifacts_present": [],
+  "scope": "every generated-data artefact (corpus manifests, cases.jsonl, rows, logs) under the study result root; documentation that names the namespaces is not exposure"
+ },
+ "integration": {
+  "all_equal": true,
+  "denominator": 10,
+  "passed": 10
+ },
+ "packet_check": {
+  "all_pass": false,
+  "checks": {
+   "baseline_order_matches_owner": true,
+   "boundary_defaults_match_owner": true,
+   "case_ids_unique": true,
+   "control_8_pairs_16_strings": true,
+   "delegation_hashes": true,
+   "development_counts": true,
+   "development_groups_disjoint": true,
+   "eight_hour_partition": true,
+   "encoded_and_derived_counts": true,
+   "median_patch_hash": true,
+   "new_run_not_started": false,
+   "no_efficacy_selection": true,
+   "notebook20_unoccupied": false,
+   "paired_lengths": true,
+   "primary_120_pairs_240_strings": true,
+   "prospective_ids_distinct": true,
+   "protected_file_hashes_unchanged": false,
+   "report_reserve": true,
+   "single_fixed_bootstrap": true,
+   "six_cells_twenty_units_each": true,
+   "source_hashes_unchanged": false,
+   "trace_bound": true
+  },
+  "primary_cells": [
+   {
+    "base_length": 4096,
+    "family": "F12",
+    "role": "boundary",
+    "units": 20
+   },
+   {
+    "base_length": 16384,
+    "family": "F12",
+    "role": "boundary_large",
+    "units": 20
+   },
+   {
+    "base_length": 65536,
+    "family": "F12",
+    "role": "boundary_large",
+    "units": 20
+   },
+   {
+    "base_length": 131072,
+    "family": "F12",
+    "role": "boundary_large",
+    "units": 20
+   },
+   {
+    "base_length": 4096,
+    "family": "S02",
+    "role": "boundary_stress",
+    "units": 20
+   },
+   {
+    "base_length": 65536,
+    "family": "S02",
+    "role": "boundary_stress",
+    "units": 20
+   }
+  ],
+  "scope": "static pre-edit checks; no generated data or algorithm execution"
+ },
+ "packet_check_exit": 1,
+ "packet_expected_post_edit_failures": [
+  "new_run_not_started",
+  "notebook20_unoccupied",
+  "protected_file_hashes_unchanged",
+  "source_hashes_unchanged"
+ ],
+ "packet_unexpected_failures": [],
+ "pass": true,
+ "protected_changed": [
+  "index-deconvolution/notebooks/19_bdm_and_index_complexity.ipynb",
+  "index-deconvolution/notebooks/build_19.py"
+ ],
+ "protected_changed_external_disclosed": {
+  "index-deconvolution/notebooks/19_bdm_and_index_complexity.ipynb": {
+   "attribution": "not written by this phase; not reverted; outside the study closure",
+   "mtime_local": "2026-10-04 07:22:33",
+   "owner": "BDM workstream (notebook 19 allocation, INITIAL_SOURCE_STATE note)"
+  },
+  "index-deconvolution/notebooks/build_19.py": {
+   "attribution": "not written by this phase; not reverted; outside the study closure",
+   "mtime_local": "2026-10-04 07:22:06",
+   "owner": "BDM workstream (notebook 19 allocation, INITIAL_SOURCE_STATE note)"
+  }
+ }
+}

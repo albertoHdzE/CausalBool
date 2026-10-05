@@ -1,0 +1,133 @@
+{
+ "schema": "causal-target-contract-v1",
+ "run_id": "causal-target-spec-v1-r1",
+ "status": "specification; not authorised for execution",
+ "access_regimes": {
+  "unlabelled_string": {
+   "supplied": [
+    "finite bit string"
+   ],
+   "absent": [
+    "coordinates",
+    "time axis",
+    "interventions",
+    "generating class"
+   ],
+   "default_output": "structural hypotheses with description length",
+   "identification_claim": false
+  },
+  "passive_labelled_trajectory": {
+   "supplied": [
+    "labelled states",
+    "transition boundaries"
+   ],
+   "assumptions_to_treat_as_one_map": [
+    "stationary F",
+    "noiseless",
+    "full observation",
+    "synchronous",
+    "aligned boundaries",
+    "no exogenous input"
+   ],
+   "default_output": "version space within declared class; AMBIGUOUS unless singleton",
+   "refutation": "a repeated state with two successors"
+  },
+  "complete_labelled_transition_table": {
+   "supplied": [
+    "F(x) for all 2^n x"
+   ],
+   "identifiable": [
+    "F",
+    "essential sets S_i",
+    "canonical-name equivalence class"
+   ],
+   "not_identifiable": [
+    "syntax",
+    "redundant declared edges",
+    "hidden variables",
+    "physical mechanism"
+   ]
+  },
+  "chosen_state_successor_queries": {
+   "query": "external reset of the whole state to x, apply unchanged F once, return all n bits",
+   "admissible_states": "all 2^n",
+   "cost_per_query": 1,
+   "excluded": [
+    "equivalence queries",
+    "counterexamples",
+    "model code access",
+    "mechanism replacement",
+    "clamp"
+   ],
+   "evidence_type": "simulator oracle, not passive real-world evidence"
+  }
+ },
+ "intervention_semantics": {
+  "reset_then_step": "F_q(x)=F(r_q(x))",
+  "mechanism_replacement": "f_i := c at every update (reprogramming.knockout)",
+  "clamp": "reset plus mechanism replacement"
+ },
+ "primary_future_target": {
+  "id": "T*",
+  "statement": "exact functional recovery of F in C(n,k) under chosen state-successor queries",
+  "n_range": [
+   10,
+   16
+  ],
+  "k_max": 3,
+  "degree": "at most k essential variables",
+  "function_family": "all Boolean functions on the support",
+  "self_loops": true,
+  "constants": true,
+  "deterministic": true,
+  "full_observation": true,
+  "labels_known": true,
+  "excluded": [
+   "noise",
+   "hidden state",
+   "exogenous inputs",
+   "asynchronous update",
+   "time variation"
+  ],
+  "identifiability_scope": "relative to C(n,k); class membership not certifiable with <2^n queries when n>2k",
+  "go_decision": false
+ },
+ "recovered_object": {
+  "per_node_outcomes": [
+   "IDENTIFIED",
+   "AMBIGUOUS",
+   "ABSTAIN",
+   "INVALID"
+  ],
+  "identified_payload": [
+   "S_i",
+   "reduced table on S_i"
+  ],
+  "equivalence": "functional equality on all 2^n states; no node relabelling",
+  "canonical_name": "representation choice, never reported as original gate",
+  "network_identified_iff": "all nodes IDENTIFIED"
+ },
+ "endpoints": [
+  "observed_agreement",
+  "heldout_predictive_accuracy",
+  "exact_functional_equivalence",
+  "interventional_equivalence"
+ ],
+ "endpoint_implications": {
+  "exact_functional_equivalence=>interventional_equivalence": "true for reset_then_step and mechanism_replacement (deterministic, full state)",
+  "observed_agreement=>exact": false,
+  "predictive=>exact": false
+ },
+ "mdl_role": "selection only; identification requires a singleton consistent set",
+ "never_evidence_of_causation": [
+  "compression",
+  "forecast accuracy",
+  "canonical gate naming"
+ ],
+ "witness_support": {
+  "W1": "observed agreement does not identify",
+  "W2": "syntax and declared edges not identifiable from R3",
+  "W3": "autonomous macro map can fail",
+  "W4": "autonomous consistency does not give intervention consistency"
+ }
+}

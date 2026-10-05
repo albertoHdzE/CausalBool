@@ -18,6 +18,8 @@ and explains every result in plain language. Run them **in order**.
 | 15 | `15_shifted_zero_bdm_probe` | A zero shifted through 8-bit blocks: BDM sees each block, not the shift; its answer depends on whether the partition matches the hidden period 9. Revised 2026-10-02: names A64/A72/A24, characters versus bits versus archives, full-coverage scans beside the historical drop policy, P1–P3 executed | 32, 33 |
 | 16 | `16_hierarchical_index_generalization` | HID-v1: a decodable hierarchical code, a frozen bounded search, and its benchmark against a strong baseline portfolio on unseen strings (run `confirm-v1`) | 34 |
 | 17 | `17_hierarchy_search_v2` | HID-search-v2: consensus/dense/global templates and bounded boundary search inside the unchanged HID-v1 language; prospective run `search-confirm-v2-r1` read from saved artefacts | 40 |
+| 18 | `18_hierarchy_search_diagnosis` | search-diagnosis-v1 (post-hoc, artifact-only): where the full HID search loses — saved cost map, 8x boundary caps, the supplied-cut subset lattice and HID translations of the saved period/pair-grammar archives (run `search-diagnosis-v1-r1`) | 42 |
+| 19 | `19_bdm_and_index_complexity` | Protocol bdm_anatomy_v1 (frozen, 2 amendments, run `a3`): BDM is dictionary + counts with no arrangement; not a code length, neither an upper nor a lower bound on K; perturbation signs depend on the grid on complex rules; simpler methods emulate BDM only where it is saturated; our certified ECA code and HID-v1 against BDM; two-rule boundaries | 43, 44 |
 
 ## How to run
 
@@ -50,3 +52,24 @@ python build_05.py
 
 Nothing else is required to *build* the notebooks (only the standard library);
 *executing* them needs the CausalBool kernel.
+
+## Current revision of notebook 18
+
+Notebook 18 now shows reporting revision **report-r3**, accepted by Codex on 2026-10-04.
+It is the retained executed copy of
+`results/hierarchy_search_diagnosis/review_closure/search-diagnosis-v1-r1-followup/corrected/18_hierarchy_search_diagnosis.report-r3.executed.ipynb`,
+and `build_18.py` reads `review_closure/search-diagnosis-v1-r1-followup/report-r3/outputs`.
+The computations remain attempt a1 (`518ebc13…`); report-r3 (`7b1590bb…`) supersedes
+report-r2 for reporting only. The acceptance record is
+`results/hierarchy_search_diagnosis/supervision/search-diagnosis-v1-r1/closure_acceptance/ACCEPTANCE.md`,
+and the integration record is `results/hierarchy_search_diagnosis/integration/search-diagnosis-v1-r1/`.
+
+## Notebook 20 (HID-search-v3a)
+
+`20_hierarchy_search_v3a.ipynb` (builder `build_20.py`) presents run
+`results/hierarchy_search_v3a/search-confirm-v3a-r1`: four refinement seeds (k = 4)
+against the accepted one-seed method (k = 1). It is artifact-only and was executed under
+the reviewed guard from both the notebook directory and the repository root
+(`results/hierarchy_search_v3a/search-confirm-v3a-r1/notebook/run2.checks.json`; run1
+failed on a builder formatting bug and is retained). Status: ready for Codex review, not
+yet accepted. Notebook 19 belongs to the BDM workstream.

@@ -1,0 +1,19 @@
+--- a/index-deconvolution/tests/test_abstraction.py
++++ b/index-deconvolution/tests/test_abstraction.py
+@@ -86,8 +86,16 @@
+ def test_commutation_failures():
+     assert commutation_failures([0, 1, 2], [1, 2, 0], lambda y: (y + 1) % 3) == []
+     assert commutation_failures([0, 1, 2], [1, 2, 2], lambda y: (y + 1) % 3) == [2]
++    assert commutation_failures([0, 1, 1, 2], [0, 1, 0, 2], lambda y: y) == [2]
+ 
+ 
++@pytest.mark.parametrize("alpha,image", [([], []), ([0, 1], [0]), ([0], [0, 1])],
++                         ids=["empty", "image_short", "alpha_short"])
++def test_commutation_failures_rejects_incomplete_domain(alpha, image):
++    with pytest.raises(ValueError):
++        commutation_failures(alpha, image, lambda y: y)
++
++
+ def test_single_owner_guard_clean():
+     scanned = sum(1 for r in SCAN if os.path.isdir(r))
+     print(f"guard scanned roots: {scanned}")

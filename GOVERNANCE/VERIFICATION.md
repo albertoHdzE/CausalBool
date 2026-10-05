@@ -67,7 +67,7 @@ repository is absent. That is correct refusal, and it is what CI sees.
 | `index-deconvolution` | **146** tests | CI asserts the count |
 | Replication packages | **29 / 97 / 47 / 42** | CI matrix, each count asserted |
 | Wolfram files that parse | **156 / 156** | `check_wolfram_syntax.wl` |
-| Test files classified | **121 / 121** — 85 Wolfram + 36 Python (100 test, 15 producer, 6 quarantine) | `check_test_manifest.sh` |
+| Test files classified | **122 / 122** — 85 Wolfram + 37 Python (101 test, 15 producer, 6 quarantine) | `check_test_manifest.sh` |
 | Owners named in `CORE.md` that exist | **57 / 57** | `check_core_index.sh` |
 | Manuscript numbers unchanged | **138** entries identical | `snapshot_paper_numbers.py` |
 | Lint, enforced rules | **clean** | `ruff check` |

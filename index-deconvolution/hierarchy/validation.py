@@ -38,7 +38,7 @@ def method_kind(method: str, design: dict | None = None) -> str:
     kinds = (design or {}).get("kinds")
     if kinds:
         k = kinds[method]
-        return "hid" if k in ("hid_v1", "hid_v2") else k
+        return "hid" if k in ("hid_v1", "hid_v2", "hid_v3a") else k
     if method == "baseline_best":
         return "portfolio"
     return "hid" if method.startswith("hid_") else "baseline"
@@ -455,6 +455,10 @@ def validate_run(run_id: str, splits, *, frozen: bool = True, decode: bool = Tru
     if not legacy and study.registry == "search-v2":
         v["search_v2_checks"] = search_v2_checks(v["_index"], design)
         extra_invalid += v["search_v2_checks"]["invalid"]
+    if not legacy and study.trace_sidecars:
+        from .report_v3a import trace_checks
+        v["trace_checks"] = trace_checks(v["_index"], d, study.hid_methods)
+        extra_invalid += v["trace_checks"]["invalid"]
     if extra_invalid:
         v["invalid"] = extra_invalid + v["invalid"]
         v["engineering_valid"] = False

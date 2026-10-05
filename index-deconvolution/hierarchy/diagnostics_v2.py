@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import statistics
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -95,6 +96,33 @@ def stage_yield(rows) -> dict:
             for k, v in sorted(out.items())}
 
 
+def boundary_gap_summary(items) -> dict:
+    """Per role|family|base_length cell: counts and signed ``hid_full`` gap summaries.
+
+    ``gap_median`` is the conventional sample median (``statistics.median``): the middle
+    value for an odd count and the mean of the two middle values for an even count;
+    ``None`` for a cell without gaps. Units are bits per input bit.
+    """
+    summary = defaultdict(lambda: {"strings": 0, "available": 0, "gaps": []})
+    for it in items:
+        k = f"{it['role']}|{it['family']}|{it['base_length']}"
+        summary[k]["strings"] += 1
+        if it.get("available"):
+            summary[k]["available"] += 1
+            if "gap_hid_full_per_input_bit" in it:
+                summary[k]["gaps"].append(it["gap_hid_full_per_input_bit"])
+    agg = {}
+    for k, v in sorted(summary.items()):
+        g = sorted(v["gaps"])
+        agg[k] = {"strings": v["strings"], "available": v["available"],
+                  "gap_mean": sum(g) / len(g) if g else None,
+                  "gap_median": statistics.median(g) if g else None,
+                  "automatic_shorter_than_reference": sum(1 for x in g if x < 0),
+                  "automatic_longer_than_reference": sum(1 for x in g if x > 0),
+                  "ties": sum(1 for x in g if x == 0)}
+    return agg
+
+
 def boundary_references(study, run_id: str, d: Path, index: dict, roles) -> dict:
     out_dir = d / "diagnostics" / "boundary_reference"
     items = []
@@ -151,23 +179,7 @@ def boundary_references(study, run_id: str, d: Path, index: dict, roles) -> dict
             if full is None:
                 item["note"] = "hid_full row absent"
             items.append(item)
-    summary = defaultdict(lambda: {"strings": 0, "available": 0, "gaps": []})
-    for it in items:
-        k = f"{it['role']}|{it['family']}|{it['base_length']}"
-        summary[k]["strings"] += 1
-        if it.get("available"):
-            summary[k]["available"] += 1
-            if "gap_hid_full_per_input_bit" in it:
-                summary[k]["gaps"].append(it["gap_hid_full_per_input_bit"])
-    agg = {}
-    for k, v in sorted(summary.items()):
-        g = sorted(v["gaps"])
-        agg[k] = {"strings": v["strings"], "available": v["available"],
-                  "gap_mean": sum(g) / len(g) if g else None,
-                  "gap_median": g[len(g) // 2] if g else None,
-                  "automatic_shorter_than_reference": sum(1 for x in g if x < 0),
-                  "automatic_longer_than_reference": sum(1 for x in g if x > 0),
-                  "ties": sum(1 for x in g if x == 0)}
+    agg = boundary_gap_summary(items)
     (out_dir).mkdir(parents=True, exist_ok=True)
     (out_dir / "references.json").write_text(json.dumps(items, indent=1) + "\n")
     return {"label": "EVALUATION-ONLY supplied-boundary feasible references; truth used only "

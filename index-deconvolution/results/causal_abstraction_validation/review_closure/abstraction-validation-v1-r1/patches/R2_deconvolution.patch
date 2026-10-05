@@ -1,0 +1,15 @@
+--- a/index-deconvolution/src/deconvolution.py
++++ b/index-deconvolution/src/deconvolution.py
+@@ -774,5 +774,11 @@
+ 
+ 
+ def commutation_failures(alpha, image, macro_map) -> list[int]:
+-    """Micro states x where a supplied macro map fails: macro_map[alpha[x]] != image[x]."""
++    """Micro states x where a supplied macro map fails: macro_map[alpha[x]] != image[x].
++
++    Like ``induced_map``, the supplied domain must be complete: ``alpha`` and
++    ``image`` non-empty and of equal length, else ValueError before any evaluation.
++    """
++    if len(alpha) != len(image) or not alpha:
++        raise ValueError("alpha and image must be non-empty and of equal length")
+     return [x for x, (a, b) in enumerate(zip(alpha, image)) if macro_map(a) != b]

@@ -97,6 +97,13 @@ def two_part_code(rule: int, initial_row, steps: int) -> float:
 
     The seed is costed with BDM itself, so the comparison against BDM is not rigged:
     the only part measured by our own calculus is the mechanism.
+
+    Erratum (2026-10-04, bdm_anatomy_v1): because ``bdm_1d(seed)`` is an estimate and
+    not a code length, this quantity is NOT a certificate, and the "certified upper
+    bound" wording of RESEARCH_NOTES.md Thread 1 does not hold for it. The certified
+    code (literal seed, decodable, round-trip tested) is
+    ``src/description_lengths.certified_eca_code``; this function is kept unchanged
+    because published replication numbers depend on it.
     """
     seed = np.asarray(initial_row, dtype=int)
     return eca_model_cost(rule).bits + bdm_1d(seed) + math.log2(max(steps, 1))

@@ -1,0 +1,26 @@
+{
+  "cwd": "/Users/alberto/Documents/projects/CausalBool",
+  "exit_status": 1,
+  "exception": "CellExecutionError: An error occurred while executing the following cell:\n------------------\nfor _p in (os.path.join(os.path.dirname(ROOT), \"src\"), ROOT):\n    while _p in sys.path:\n        sys.path.remove(_p)\n    sys.path.insert(0, _p)\nsys.modules.pop(\"hierarchy\", None)          # a sibling repo ships a module \"hierarchy\"\nimport json, collections\nfrom pathlib import Path\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom hierarchy.decode import decode_archive\nfrom hierarchy.ledger import archive_ledger, field_buckets, BUCKETS\nfrom hierarchy.search_v2 import ARMS, infer_v2\n\nBASE = Path(ROOT) / \"results\" / \"hierarchy_search_v2\"\nRUN = BASE / \"search-confirm-v2-r1\"\nREG = BASE / \"development\" / \"dev-search-v2-regression\"\nOLD = Path(ROOT) / \"results\" / \"hierarchy_v1\" / \"confirm-v1-r1\"\nfreeze = json.loads((RUN / \"freeze.json\").read_text())\nsummary = json.loads((RUN / \"summary.json\").read_text())\nclaims = json.loads((RUN / \"claim_ledger.json\").read_text())\ndiag = json.loads((RUN / \"diagnostics.json\").read_text())\naudit = json.loads((RUN / \"arithmetic_audit.json\").read_text())\nverification = json.loads((RUN / \"verification.json\").read_text())\nrows = [json.loads(x) for x in (RUN / \"cases.jsonl\").read_text().splitlines() if x.strip()]\nby_case = collections.defaultdict(dict)\nfor r in rows:\n    by_case[r[\"case_id\"]][r[\"method\"]] = r\nARM_ORDER = list(ARMS)\nprint(\"run:\", freeze[\"run_id\"], \"| study:\", freeze[\"study\"], \"| frozen\", freeze[\"frozen_at_utc\"])\nprint(\"rows:\", len(rows), \"| cases:\", len(by_case),\n      \"| engineering:\", summary[\"engineering_status\"], \"| complete:\", summary[\"study_complete\"])\n------------------\n\n\n\u001b[31m---------------------------------------------------------------------------\u001b[39m\n\u001b[31mImportError\u001b[39m                               Traceback (most recent call last)\n\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[2]\u001b[39m\u001b[32m, line 12\u001b[39m\n\u001b[32m      8\u001b[39m \u001b[38;5;28;01mimport\u001b[39;00m numpy \u001b[38;5;28;01mas\u001b[39;00m np\n\u001b[32m      9\u001b[39m \u001b[38;5;28;01mimport\u001b[39;00m matplotlib.pyplot \u001b[38;5;",
+  "elapsed_s": 1.064,
+  "code_cells": 15,
+  "error_outputs": 1,
+  "unexecuted": 0,
+  "guard_log_present": true,
+  "guard": {
+    "allowed_hierarchy_imports": [
+      "hierarchy",
+      "hierarchy.decode",
+      "hierarchy.ledger",
+      "hierarchy.codes",
+      "hierarchy.model"
+    ],
+    "refused": [
+      {
+        "kind": "import",
+        "name": "hierarchy.search_v2"
+      }
+    ],
+    "hierarchy_origin": "/Users/alberto/Documents/projects/CausalBool/index-deconvolution/hierarchy/__init__.py"
+  }
+}

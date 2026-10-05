@@ -1,0 +1,832 @@
+{
+ "analysis_plan": {
+  "descriptive_only": [
+   "six cell means and signed counts",
+   "archive-size distributions",
+   "k=4 and k=1 versus portfolio where all nine constituents exist",
+   "control outcomes",
+   "status, stage, work, wall, RSS",
+   "proposed/evaluated/returned trace counts"
+  ],
+  "hid_deployed_statuses": [
+   "ok",
+   "timeout_raw",
+   "rss_limit_raw"
+  ],
+  "other_intervals": false,
+  "primary": {
+   "bootstrap": {
+    "cell_order": "lexicographic (role, family, base_length)",
+    "draws": 10000,
+    "interval": "two-sided 99% percentile, numpy linear quantiles",
+    "owner": "hierarchy.report.stratified_bootstrap",
+    "rng": "numpy.random.default_rng",
+    "seed": 55001,
+    "unit_order": "replicate ascending"
+   },
+   "cells": "(role, family, base_length), six",
+   "decision_precedence": [
+    "INVALID",
+    "INCOMPLETE",
+    "SUPPORTED if lower > 0",
+    "HARMFUL if upper < 0",
+    "INCONCLUSIVE otherwise"
+   ],
+   "hid_fallback": "validated raw archive cost with explicit timeout_raw/rss_limit_raw",
+   "per_string": "(bits(hid_full) - bits(hid_refine4)) / actual_n_bits",
+   "positive_means": "k = 4 saves bits",
+   "roles": [
+    "boundary",
+    "boundary_large",
+    "boundary_stress"
+   ],
+   "weighting": [
+    "base_ragged_pair_mean",
+    "within_cell_unit_mean",
+    "equal_six_cell_mean"
+   ]
+  }
+ },
+ "baseline_parameters": {
+  "bernoulli": {
+   "codec_id": 5,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "bernoulli",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "context": {
+   "codec_id": 6,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "context",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "gaps": {
+   "codec_id": 3,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "gaps",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "lzma": {
+   "codec_id": 8,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "lzma",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "pair_grammar": {
+   "codec_id": 9,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "pair_grammar",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "period": {
+   "codec_id": 4,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "period",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "raw": {
+   "codec_id": 0,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "raw",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "rle": {
+   "codec_id": 2,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "rle",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  },
+  "zlib": {
+   "codec_id": 7,
+   "kind": "baseline",
+   "lzma_check": "CHECK_CRC64",
+   "lzma_preset": 6,
+   "method": "zlib",
+   "pair_max_rules": 4096,
+   "zlib_level": 9
+  }
+ },
+ "design": {
+  "case_design": "frozen Cartesian product role x family x base_length x replicate x {base, ragged}; never inferred from rows",
+  "expected": {
+   "boundary": {
+    "rows": 480,
+    "strings": 40,
+    "units": 20
+   },
+   "boundary_large": {
+    "rows": 1440,
+    "strings": 120,
+    "units": 60
+   },
+   "boundary_stress": {
+    "rows": 960,
+    "strings": 80,
+    "units": 40
+   },
+   "controls": {
+    "rows": 192,
+    "strings": 16,
+    "units": 8
+   }
+  },
+  "expected_total_rows": 3072,
+  "expected_total_strings": 256,
+  "methods": [
+   "hid_full",
+   "hid_refine4",
+   "raw",
+   "rle",
+   "gaps",
+   "period",
+   "bernoulli",
+   "context",
+   "zlib",
+   "lzma",
+   "pair_grammar",
+   "baseline_best"
+  ],
+  "paired_offsets": [
+   0,
+   3
+  ],
+  "roles": {
+   "boundary": {
+    "base_lengths": [
+     4096
+    ],
+    "case_prefix": "boundary",
+    "evidence_role": "prospective_target",
+    "families": [
+     "F12"
+    ],
+    "replicates": [
+     6000,
+     6001,
+     6002,
+     6003,
+     6004,
+     6005,
+     6006,
+     6007,
+     6008,
+     6009,
+     6010,
+     6011,
+     6012,
+     6013,
+     6014,
+     6015,
+     6016,
+     6017,
+     6018,
+     6019
+    ],
+    "reserved": true,
+    "retained_run": null,
+    "retained_split": null,
+    "rng_namespace": "search_v3a_confirmation",
+    "source": "generate"
+   },
+   "boundary_large": {
+    "base_lengths": [
+     16384,
+     65536,
+     131072
+    ],
+    "case_prefix": "boundary_large",
+    "evidence_role": "prospective_target",
+    "families": [
+     "F12"
+    ],
+    "replicates": [
+     7000,
+     7001,
+     7002,
+     7003,
+     7004,
+     7005,
+     7006,
+     7007,
+     7008,
+     7009,
+     7010,
+     7011,
+     7012,
+     7013,
+     7014,
+     7015,
+     7016,
+     7017,
+     7018,
+     7019
+    ],
+    "reserved": true,
+    "retained_run": null,
+    "retained_split": null,
+    "rng_namespace": "search_v3a_transfer",
+    "source": "generate"
+   },
+   "boundary_stress": {
+    "base_lengths": [
+     4096,
+     65536
+    ],
+    "case_prefix": "boundary_stress",
+    "evidence_role": "prospective_target",
+    "families": [
+     "S02"
+    ],
+    "replicates": [
+     8000,
+     8001,
+     8002,
+     8003,
+     8004,
+     8005,
+     8006,
+     8007,
+     8008,
+     8009,
+     8010,
+     8011,
+     8012,
+     8013,
+     8014,
+     8015,
+     8016,
+     8017,
+     8018,
+     8019
+    ],
+    "reserved": true,
+    "retained_run": null,
+    "retained_split": null,
+    "rng_namespace": "search_v3a_stress",
+    "source": "generate"
+   },
+   "controls": {
+    "base_lengths": [
+     4096
+    ],
+    "case_prefix": "controls",
+    "evidence_role": "prospective_control",
+    "families": [
+     "F01",
+     "F06",
+     "F07",
+     "F11"
+    ],
+    "replicates": [
+     9000,
+     9001
+    ],
+    "reserved": true,
+    "retained_run": null,
+    "retained_split": null,
+    "rng_namespace": "search_v3a_controls",
+    "source": "generate"
+   }
+  },
+  "rows_per_case": 12
+ },
+ "environment": {
+  "cpu": "Apple M3 Ultra",
+  "cpu_count": 28,
+  "lzma_liblzma": "probe-sha256:0040f94d11d0039505328a90b2ff48968db873e9e7967307631bf40ef5679275",
+  "machine": "arm64",
+  "matplotlib_version": "3.10.8",
+  "numpy_version": "2.4.3",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "pybdm_version": "0.1.0",
+  "pytest_version": "9.1.1",
+  "python": "3.13.12 (main, Mar  7 2026, 16:31:40) [Clang 17.0.0 (clang-1700.6.4.2)]",
+  "python_implementation": "CPython",
+  "ram_bytes": 103079215104,
+  "zlib_runtime_version": "1.2.12",
+  "zlib_version": "1.2.12"
+ },
+ "exposure_check": {
+  "clean": true,
+  "files_mentioning_reserved_namespaces": [],
+  "reserved_namespaces": [
+   "search_v3a_confirmation",
+   "search_v3a_transfer",
+   "search_v3a_stress",
+   "search_v3a_controls"
+  ],
+  "run_artifacts_present": [],
+  "scope": "every generated-data artefact (corpus manifests, cases.jsonl, rows, logs) under the study result root; documentation that names the namespaces is not exposure"
+ },
+ "frozen_at_utc": "2026-10-04T13:57:31Z",
+ "generator": {
+  "F01_F12": "corpus.generate_unit(rng_namespace, family, base_length, replicate), unchanged",
+  "corpus_sha256": "af0b0cb686e9af9a342c0d5493302f87e8ba7cbc03a0e2654ccfa46a0d531a41",
+  "seed_formula": "sha256('hid-v1|{namespace}|{family}|{base_length}|{replicate}|{stream}')",
+  "stress": "study_corpus.s01/s02 (BENCHMARK.md section 3)",
+  "study_corpus_sha256": "d83b13110bbd2a6e68228946e578dcf631983b8d8dec838a117372a97d257152"
+ },
+ "git_head_note": "53c41d8f3b97106fd176f24d575e0934848dddd6 (sources are uncommitted; content hashes identify them)",
+ "import_probe": {
+  "closure_not_loaded": [
+   "index-deconvolution/experiments/search_diagnosis/__init__.py",
+   "index-deconvolution/experiments/search_diagnosis/common.py",
+   "index-deconvolution/experiments/search_v3a/__init__.py",
+   "index-deconvolution/experiments/search_v3a/audit.py",
+   "index-deconvolution/experiments/search_v3a/development.py",
+   "index-deconvolution/experiments/search_v3a/ledger.py",
+   "index-deconvolution/experiments/search_v3a/preserve.py",
+   "index-deconvolution/experiments/search_v3a/prospective.py",
+   "src/description_lengths.py"
+  ],
+  "loaded_repository_files": [
+   "index-deconvolution/hierarchy/__init__.py",
+   "index-deconvolution/hierarchy/baselines.py",
+   "index-deconvolution/hierarchy/benchmark.py",
+   "index-deconvolution/hierarchy/candidates.py",
+   "index-deconvolution/hierarchy/cli.py",
+   "index-deconvolution/hierarchy/cli_v2.py",
+   "index-deconvolution/hierarchy/codes.py",
+   "index-deconvolution/hierarchy/consensus.py",
+   "index-deconvolution/hierarchy/corpus.py",
+   "index-deconvolution/hierarchy/decode.py",
+   "index-deconvolution/hierarchy/diagnostics.py",
+   "index-deconvolution/hierarchy/diagnostics_v2.py",
+   "index-deconvolution/hierarchy/freeze_v2.py",
+   "index-deconvolution/hierarchy/infer.py",
+   "index-deconvolution/hierarchy/ledger.py",
+   "index-deconvolution/hierarchy/model.py",
+   "index-deconvolution/hierarchy/present.py",
+   "index-deconvolution/hierarchy/report.py",
+   "index-deconvolution/hierarchy/report_v2.py",
+   "index-deconvolution/hierarchy/report_v3a.py",
+   "index-deconvolution/hierarchy/search_v2.py",
+   "index-deconvolution/hierarchy/search_v3a.py",
+   "index-deconvolution/hierarchy/segmentation.py",
+   "index-deconvolution/hierarchy/study.py",
+   "index-deconvolution/hierarchy/study_corpus.py",
+   "index-deconvolution/hierarchy/validation.py",
+   "index-deconvolution/hierarchy/wire.py",
+   "index-deconvolution/src/causalbool.py",
+   "index-deconvolution/src/deconvolution.py"
+  ],
+  "outside_closure": [],
+  "third_party_files_loaded": 85,
+  "third_party_identity": "venv packages; versions recorded under environment"
+ },
+ "informational_sha256": {
+  "index-deconvolution/hierarchy/HANDOFF.md": "f79b64d692ce6ccbf9cb148d90e05bc9594f8313c20b4d472ca40a329fd0f064",
+  "index-deconvolution/hierarchy/HANDOFF_CORRECTIONS.md": "74a8b1d24bd75851b41bf4b628793e3dd9013f8360d6e332ad2d2709aea49e10",
+  "index-deconvolution/hierarchy/HANDOFF_SEARCH_V2.md": "13020e21800ea7a308a69ef1c32e4f116b4fcb4e42a4ca43580135873cea9929",
+  "index-deconvolution/hierarchy/HANDOFF_confirm-v1_original.md": "144956d27bc9a54d0731727ed241a8064ef0900ee60e60cdaf1c8abf8083baf0",
+  "index-deconvolution/hierarchy/README.md": "f5656d72867bf55bb82f181f9b5754dc94bc7c923ac3a2221dd3a64c66c52314",
+  "index-deconvolution/hierarchy/SEARCH_SPEC.md": "8e5ae6e806a1b0ac4ba2ef37348f456b91a722eb5d0e762bb16c3e5b87a99e16",
+  "index-deconvolution/hierarchy/TESTS.md": "7b90f7c79545c0a1fbb5168832fa5b41e1bdaeb0d45f18eb22b490f85c65ac0b",
+  "index-deconvolution/hierarchy/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "index-deconvolution/hierarchy/tests/conftest.py": "020a419662dab018372252ce924ad999f998e2c01d8b196ba2a80c6242168a81",
+  "index-deconvolution/hierarchy/tests/interp.py": "eba6abed34a503c1c6eab753d47c9970c2845b11c2f064de7476841af4779e0d",
+  "index-deconvolution/hierarchy/tests/oracle.py": "07e272a52293f93da29a65b166100481304876f2782975849f169550c573102d",
+  "index-deconvolution/hierarchy/tests/test_baselines.py": "44f58e97cf27bbef0f64830f6d12836f79cb4c1b7c6b744961e93795c5552036",
+  "index-deconvolution/hierarchy/tests/test_benchmark.py": "12602142a8ee0c8165c909423c5bd810cee24a3e58f5788dde6957fb7f4a0542",
+  "index-deconvolution/hierarchy/tests/test_corpus.py": "06b64b279c0e8e3adcd7dd653676091311153965e8f620e0261b72c49a1d5d98",
+  "index-deconvolution/hierarchy/tests/test_ledger.py": "b12daa52f9d0d0bafd0985c5d3954562d9625d8d02fae4c4eacb563c713f67a5",
+  "index-deconvolution/hierarchy/tests/test_oracle.py": "d2ab5eb9a9e0a55ba5010e4f28f5837bf9175c2be50051eb583265a89bf1f2b8",
+  "index-deconvolution/hierarchy/tests/test_report.py": "939346bca67e430a56f6c04836618c8101462f3e7b171557a39d165a35cc8cd6",
+  "index-deconvolution/hierarchy/tests/test_search.py": "3d77feb88d5a40fa6266c0fbae973531883d33f9f11f86b48bbeaa25f7d553e3",
+  "index-deconvolution/hierarchy/tests/test_search_v2.py": "7d797043a3ae673cafd196817a9fdf2850e373e09c742051def152c48aba8f68",
+  "index-deconvolution/hierarchy/tests/test_search_v3a.py": "58efd90cb49dbad4b5550910990c94709c4d9a9e5e1efd9471d7a1fbd519bfd6",
+  "index-deconvolution/hierarchy/tests/test_study_v2.py": "61c9edf48fac432008aa25b928ab4934b6a81e50f8ebc621533f6db8f8eed34a",
+  "index-deconvolution/hierarchy/tests/test_validation.py": "6d52edea34a43d5bbe3b3cb28819e0395a41d94f55de8ec24fe5a77e5d2c05f7",
+  "index-deconvolution/hierarchy/tests/test_wire_decode.py": "9121e24036998cedaf0c38e27c5e2fe21c2ce89c5bc683958d8fa222579095b7"
+ },
+ "method_configs": {
+  "baseline_best": {
+   "config": {
+    "constituents": [
+     "raw",
+     "rle",
+     "gaps",
+     "period",
+     "bernoulli",
+     "context",
+     "zlib",
+     "lzma",
+     "pair_grammar"
+    ],
+    "kind": "portfolio"
+   },
+   "kind": "portfolio",
+   "sha256": "693172243bdbfcef9366fde3764241b76a6cea8a6ed7703d86da89e7c314792d"
+  },
+  "bernoulli": {
+   "config": {
+    "codec_id": 5,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "bernoulli",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "22f7fe639972516e0d988718b603d5f7c570bfe4661ccccb4a7a9120b1e93d82"
+  },
+  "context": {
+   "config": {
+    "codec_id": 6,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "context",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "fca25c77467b3950403496f40b85c5f74b1a0901e5fa68fc53fd12323c427e66"
+  },
+  "gaps": {
+   "config": {
+    "codec_id": 3,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "gaps",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "33ec5269bf68f707c84e336e7fb410fc8cf0f532107b2a02098288dc1dbaa471"
+  },
+  "hid_full": {
+   "config": {
+    "kind": "hid_v3a",
+    "search_config": {
+     "boundary": {
+      "cached_leaf_cap": 2048,
+      "child_min_bits": 1,
+      "coarse_grid_denominator": 32,
+      "leaf_period_max": 256,
+      "length_charge_multiplier": 256,
+      "max_depth": 64,
+      "max_refinement_levels": 5,
+      "max_rules": 4096,
+      "max_segments": 8,
+      "parent_min_bits": 64,
+      "refinement_grid_denominator": 16,
+      "refinement_offset": 8,
+      "root_trial_cap": 512
+     },
+     "consensus_global_candidate_cap": 256,
+     "consensus_local_candidate_cap": 256,
+     "consensus_tie_bit": "0",
+     "first_local_candidate_cap": 35,
+     "legacy_config_sha256": "1a8878f7cfe7984b4b82f088935a059d4b71d52b3a8320e5af5718a51b43e806",
+     "local_block_bits": 1024,
+     "local_patch_max": 64,
+     "max_depth": 64,
+     "max_rules": 4096,
+     "name": "hid_full",
+     "original_grid": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      64,
+      128,
+      256
+     ],
+     "period_max": 256,
+     "residual_divisor": 16,
+     "stages": [
+      "L",
+      "P",
+      "C",
+      "D",
+      "G",
+      "B"
+     ]
+    }
+   },
+   "kind": "hid_v3a",
+   "sha256": "8a829b12a93a18eafa5d78d0c4478f98cd3a9b6945a5e67aa65e1faec3128159"
+  },
+  "hid_refine4": {
+   "config": {
+    "kind": "hid_v3a",
+    "search_config": {
+     "base": {
+      "boundary": {
+       "cached_leaf_cap": 2048,
+       "child_min_bits": 1,
+       "coarse_grid_denominator": 32,
+       "leaf_period_max": 256,
+       "length_charge_multiplier": 256,
+       "max_depth": 64,
+       "max_refinement_levels": 5,
+       "max_rules": 4096,
+       "max_segments": 8,
+       "parent_min_bits": 64,
+       "refinement_grid_denominator": 16,
+       "refinement_offset": 8,
+       "root_trial_cap": 512
+      },
+      "consensus_global_candidate_cap": 256,
+      "consensus_local_candidate_cap": 256,
+      "consensus_tie_bit": "0",
+      "first_local_candidate_cap": 35,
+      "legacy_config_sha256": "1a8878f7cfe7984b4b82f088935a059d4b71d52b3a8320e5af5718a51b43e806",
+      "local_block_bits": 1024,
+      "local_patch_max": 64,
+      "max_depth": 64,
+      "max_rules": 4096,
+      "name": "hid_refine4",
+      "original_grid": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14,
+       15,
+       16,
+       17,
+       18,
+       19,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29,
+       30,
+       31,
+       32,
+       64,
+       128,
+       256
+      ],
+      "period_max": 256,
+      "residual_divisor": 16,
+      "stages": [
+       "L",
+       "P",
+       "C",
+       "D",
+       "G",
+       "B"
+      ]
+     },
+     "boundary_policy": {
+      "refinement_seed_count": 4,
+      "schedule": "level_major_then_fixed_coarse_seed_rank",
+      "seed_pool": "all_coarse_trials_of_seed_parent_plus_own_refinement_trials",
+      "seed_selection": "distinct_resulting_partitions_ranked_by_length_parent_start_cut_bytes"
+     },
+     "trace_max_events": 8192,
+     "trace_schema": "hid-boundary-trace-v1"
+    }
+   },
+   "kind": "hid_v3a",
+   "sha256": "177ac1f83e30287299656f948529d2e04d57a58c3beee0d056bc112e60f63709"
+  },
+  "lzma": {
+   "config": {
+    "codec_id": 8,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "lzma",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "0a9d178b659cd50ba430676c9fc7baaac0f6dd8cd7a4be5deecc24c6021e2525"
+  },
+  "pair_grammar": {
+   "config": {
+    "codec_id": 9,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "pair_grammar",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "ed5841e350cd27c3107230cefec49528201070c827e6ea038dcb50f1d2abeb86"
+  },
+  "period": {
+   "config": {
+    "codec_id": 4,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "period",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "b0278badd3cfd09c422acc28122edc17591c35dc86768ed5c31944490250fcea"
+  },
+  "raw": {
+   "config": {
+    "codec_id": 0,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "raw",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "5f9595127611050c132cedad83a6e4da2a9a084f56f77ae8479cbc32905035bd"
+  },
+  "rle": {
+   "config": {
+    "codec_id": 2,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "rle",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "e584c716990263b30a12cfcb72147f90ae228d2b212884e4ada31bddb580d859"
+  },
+  "zlib": {
+   "config": {
+    "codec_id": 7,
+    "kind": "baseline",
+    "lzma_check": "CHECK_CRC64",
+    "lzma_preset": 6,
+    "method": "zlib",
+    "pair_max_rules": 4096,
+    "zlib_level": 9
+   },
+   "kind": "baseline",
+   "sha256": "f5d3ef292483386c5d301a614cb31630d60295bc1e786af6952abe6cca912baf"
+  }
+ },
+ "prefreeze_evidence_sha256": {
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/compatibility.json": "5c2e88f0633aaaebf1de06cb60f95fab11c11d5aea915f855f97405441282cd2",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/dev_fingerprint_link.json": "55423ef16d1e1707c82ce3b178d6db584054a85e9d06fd9c52756adc80b40b8d",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/development_summary.json": "502c32301ad9aa918eaf07542ddc331a749f53cbeeedd9bc85051fb16d67af44",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/engineering_gate.json": "44d1e6c72c54b2f01b2294137640fbb1484754c68cb379c0d0e5bcee50adb925",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/environment.json": "96a55d1a1a741104b8d5a7636089f76dd6c5cab0d4833cb5b4d1431823a91549",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/exposure_inventory.json": "23c06f32560aad31d97b1dfb78df3bed90b9cb96278cb98956515ee2b6678f68",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/guard_check_core_index.log": "06c15b65dc5f82c7c559c15960bf27380a438c4d4fed5f3e3e4faff6abe99084",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/guard_check_single_engine.log": "3d41af6c3cc881c3510e0df512c32c1f20e9e8a053f6befed08d07a7c3f2dbea",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/guard_check_test_manifest.log": "08fa092f47e225c023445469b3dd05d79afe351509c4c20cdfbfaa807279de36",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/integration_equalities.json": "8b40895365a2faffbc3437c0d1a05da4ce1b9ab01de39673254cdd85940fe2c5",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/median_patch_apply.log": "a61225c9990308f6eb1bd8f7ecabb9a32c5443af77de8890e53c0a0d0307b937",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/median_patch_tests.log": "40b69a9661183c9df5a2a305090ea9fd9d063dc01c6a2c184f78a4f828eeaeea",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/preedit_packet_check.json": "5421c69c7e7a0f3d5ebcc31b7ab4b2852a98f96dd5b51840e370e27405f863d9",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/preflight.json": "40d47fb58fe54aabacdb27dbbf45607c0b4395e3ba1b3f6652a567da96ed349c",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/pytest_description_lengths.log": "4613de98d848683d9cf85e681ee85d261e9d19d90f5a2ea50580982b01567420",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/pytest_full_prefreeze_a1.log": "b34dc602e25453b169824d984347ba57e2bbd244d5051e634047b7bd6d2a2ab8",
+  "index-deconvolution/results/hierarchy_search_v3a/search-confirm-v3a-r1/prefreeze/ruff_prefreeze.log": "3aab40c93f605b78e9513cfc46902407d9a0a1e73fc1c00e9558790b0225b845"
+ },
+ "protocol_sha256": {
+  "index-deconvolution/KICKOFF_hierarchy_search_v3a.md": "55c35df4a0f6ab80038d064ee969044cffd50eea1fc52c0fa8f6e84aa7a3ba5f",
+  "index-deconvolution/PROTOCOL_hierarchy_search_v3a.md": "ad2cc61e84070db9f84df8a55c8f862568eef7b54beca890388b1c6a6d05aff7",
+  "index-deconvolution/protocols/hierarchy_search_v2/BENCHMARK.md": "87c46eb07f8042588ff845227e59230ce888936867391e0384bc9a6bc4af0f93",
+  "index-deconvolution/protocols/hierarchy_search_v2/SEARCH.md": "910372c4ab010df035b0c5c4e75c7ea963a7e1a17ec3d0d55ac4d1aaf0bcc504",
+  "index-deconvolution/protocols/hierarchy_search_v3a/ACCEPTANCE.md": "ce182ca47586e3451d27ed53ffd98dcbf350f483f576363c82685f739c3ba65e",
+  "index-deconvolution/protocols/hierarchy_search_v3a/BENCHMARK.md": "85475548d66b59dac5c25acb615f4d34b93688543b8b79053eaa811ffb8d0de6",
+  "index-deconvolution/protocols/hierarchy_search_v3a/DELEGATION_MANIFEST.json": "50e1a80261e22b8d4dead64f1881837d615d281a6eb6d089a17bcc4e510ef53f",
+  "index-deconvolution/protocols/hierarchy_search_v3a/DESIGN_REVIEW.md": "56b933350cc5f14be8dcb6b28b59fc324406b0a89d7a93fe50e39aa4b20696a5",
+  "index-deconvolution/protocols/hierarchy_search_v3a/INITIAL_SOURCE_STATE.json": "59a8f4155c626c45c3916d332e0c001e3a28cca6c780911dd2bc2e53384e7f57",
+  "index-deconvolution/protocols/hierarchy_search_v3a/INTEGRATION_CHECK.json": "e865e174375a921e12686816ac3a3cc04a6d55251aad8ce66e6b79ed80721e62",
+  "index-deconvolution/protocols/hierarchy_search_v3a/PACKET_CHECKS.json": "30d1a59e26ed50d31574e4336a095e4f8cf29d1489eeb2d6424705317faf6044",
+  "index-deconvolution/protocols/hierarchy_search_v3a/SEARCH.md": "03ae66141f686b96064579919268f1cbeca547998ae1c5891da2486ea8075c0d",
+  "index-deconvolution/protocols/hierarchy_search_v3a/check_packet.py": "60ec9a56dcfeb44bdda3de02b3a2246392bf8130e24cd5f7e0f4525c28e8323f",
+  "index-deconvolution/protocols/hierarchy_search_v3a/contract.json": "b708198f66070e1ee39b9220373a7becea1ac6d30e5404dce13bc921565b0933",
+  "index-deconvolution/protocols/hierarchy_search_v3a/intended_cases.json": "54096e06829335a0d429be95cfc44c4d1427e35bb807990aa030fd953cd01914",
+  "index-deconvolution/protocols/hierarchy_v1/WIRE_FORMAT.md": "030fcbe58f705b26b14101a6a31c1e118a780224286e4cfd278a7a604122d16b"
+ },
+ "resource_policy": {
+  "allowances_s": {
+   "development": 14400.0,
+   "prospective": 10800.0,
+   "report_verification": 3600.0
+  },
+  "max_workers": 2,
+  "rss_limit_bytes": 1073741824,
+  "rss_method": "os.wait4 ru_maxrss of the worker process (bytes on darwin); worker self-terminates with exit 86 when its ru_maxrss exceeds 1 GiB",
+  "total_budget_s": 28800.0,
+  "wall_limit_s": 30.0,
+  "worker": "python -S -m hierarchy.benchmark --worker METHOD OUT search-v3a RSS_LIMIT"
+ },
+ "run_id": "search-confirm-v3a-r1",
+ "snapshot": {
+  "members": 94,
+  "path": "source_snapshot.tar",
+  "sha256": "4b6f91d1bab11ab96ae2b0faa771004802c94c51c3692377ac48dcf41e703837"
+ },
+ "source_sha256": {
+  "index-deconvolution/experiments/search_diagnosis/__init__.py": "08b1243c1ccc057ff7dd1b523dbd8dfb03f55e13cccd354d8e1458589cde7b0b",
+  "index-deconvolution/experiments/search_diagnosis/common.py": "c0356e6f04b0dfc5f67bff4c99b0ce9ac6894741bce89806dec199cb2429271a",
+  "index-deconvolution/experiments/search_v3a/__init__.py": "5073c786d81b6c034d02ff10e94e46d21846dbbeee0210438abdc1f18cf73d99",
+  "index-deconvolution/experiments/search_v3a/audit.py": "ef63a572ed67a4e8163e623ae2600fed14c56b541bbcefc55ac99cbcfde92171",
+  "index-deconvolution/experiments/search_v3a/development.py": "87c9e523d30c7ac03e106cee99147345f5a4546f635d39ab6596699b22ae1de7",
+  "index-deconvolution/experiments/search_v3a/ledger.py": "377c79091849424e7874987618e43aa4e3b8643e4d9153d472631f63bc925163",
+  "index-deconvolution/experiments/search_v3a/preserve.py": "303951a48c67b72c5cb39df97480041395c47abb95f13f299111c59fda14c0c5",
+  "index-deconvolution/experiments/search_v3a/prospective.py": "dece6c23d3d4c3cb146a89d432c96677252585cd6dda0e9b225ceebd7b4e8b02",
+  "index-deconvolution/hierarchy/__init__.py": "5bd93ec8b46f80f71de2d4fcb1f00a64f54cd115981865ba1976b3158830b575",
+  "index-deconvolution/hierarchy/baselines.py": "670553e384f19868ad320a86306eb49cc969add9bd50963ca8f24ac43b90af05",
+  "index-deconvolution/hierarchy/benchmark.py": "7c530d46e0d3ab4ece8e2fad24dac721e857dfde45f02e4627945902b3260c0d",
+  "index-deconvolution/hierarchy/candidates.py": "03ec251d359cad2f7093fd3fd64ff70de1de512d7637f14d984cded2a9e00d1b",
+  "index-deconvolution/hierarchy/cli.py": "fd922f768451b2bf031c431a4f4e450a1717e42b38f9b78dd040a779af4cc7b4",
+  "index-deconvolution/hierarchy/cli_v2.py": "643e4b2090719ed170dc48b91bf23e6d926d1dd762407d0f8372c2b4bb524316",
+  "index-deconvolution/hierarchy/codes.py": "c94de70a9c4cd0b5b156e0524f09d9e1667170392c7ce3e4c30ce2d797f62380",
+  "index-deconvolution/hierarchy/consensus.py": "4b5435f1ca25cd3454372e66c82e42683f112b9e3cc26356dfb645897fc7a5b8",
+  "index-deconvolution/hierarchy/corpus.py": "af0b0cb686e9af9a342c0d5493302f87e8ba7cbc03a0e2654ccfa46a0d531a41",
+  "index-deconvolution/hierarchy/decode.py": "557d7bd49cc8cf0c7ad2632c20bf080d43812dd441cdf43bb8bb89d5143cb3b9",
+  "index-deconvolution/hierarchy/diagnostics.py": "0b7e81614b910e8bc4efada2fa3ecb4814f03598770f6a004c36d15f70c784f5",
+  "index-deconvolution/hierarchy/diagnostics_v2.py": "a89e95852549d9b26cd286fea97ec687f3703e59b0306d4f8383b838080e7545",
+  "index-deconvolution/hierarchy/freeze_v2.py": "2c7262357433755a71cd0874acf6e94ed177a41a24b8264c31b8c045bbb6ae8e",
+  "index-deconvolution/hierarchy/infer.py": "d65d5533f98003abecce6cf65474227468b9fc6f5cfd1726edcffca155bcbfdf",
+  "index-deconvolution/hierarchy/ledger.py": "590d4e5a340cc031b3b0c309f4220e268de722f302df33fba0bc7e39c61a48b3",
+  "index-deconvolution/hierarchy/model.py": "87d56d8176fdeda93087303b8ad345f68facb700bba19ae80b48fe8398359b09",
+  "index-deconvolution/hierarchy/present.py": "dd1e856fbfca09bab6cbb859c4cfa2316b82265ee74c4cdd3cbf4c159aa47769",
+  "index-deconvolution/hierarchy/report.py": "9e376add32320257d719a5f000ccd230597cf5b8abb685f29dda82d8696b5e95",
+  "index-deconvolution/hierarchy/report_v2.py": "4599c6caf0fa9879215714d4cd1186296cc5bb6447e09f50ad112dfdf0347bc8",
+  "index-deconvolution/hierarchy/report_v3a.py": "dfcd8da532005b2ec573d9b1f4a435daa89d677d967589447924e265c25a4dee",
+  "index-deconvolution/hierarchy/search_v2.py": "ec7928a31a3cd3cbf582581786bb3e294eec01e2df7a9e13dd8a3bdcaf344475",
+  "index-deconvolution/hierarchy/search_v3a.py": "fcb7fd2aab17402e5fa0929c4620f16a2351b80c3f1b8a3730354e383643ce0d",
+  "index-deconvolution/hierarchy/segmentation.py": "d771dd767a89096ccc9af3590188d2dc652386c3ba0531ef44978f9fb5181521",
+  "index-deconvolution/hierarchy/study.py": "4975d75eddc61a407dc837f64310b5ca148b1ab47ee56029f4343776052384ee",
+  "index-deconvolution/hierarchy/study_corpus.py": "d83b13110bbd2a6e68228946e578dcf631983b8d8dec838a117372a97d257152",
+  "index-deconvolution/hierarchy/validation.py": "253f067305a0b3a02881507944fa2a78b0eff78c6534fe4349756315347c09c4",
+  "index-deconvolution/hierarchy/wire.py": "ca677fb2637b079f7a0daafde6572ec4926ed4a8cf12ec5cff396ce64baed2ff",
+  "index-deconvolution/src/causalbool.py": "856cd0f29549f49685de43cc8bfe0796f96ca91457d649d97275b74fdafb1100",
+  "index-deconvolution/src/deconvolution.py": "6749376102315a996f0d80977b38f520f7dbce1b30db9635047f30d9158a1177",
+  "src/description_lengths.py": "9edabfa43576b7a1b9ededfdb850e2fa327917c9faf6fa296f3efc4d9020da4e"
+ },
+ "study": "search-v3a"
+}

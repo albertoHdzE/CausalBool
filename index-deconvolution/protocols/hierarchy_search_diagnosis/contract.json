@@ -1,0 +1,254 @@
+{
+  "phase_id": "search-diagnosis-v1",
+  "run_id": "search-diagnosis-v1-r1",
+  "status": "authorized_diagnostic_phase_not_executed",
+  "evidence_role": "posthoc_diagnostic",
+  "baseline_run": "index-deconvolution/results/hierarchy_search_v2/search-confirm-v2-r1",
+  "baseline_scientific_freeze_sha256": "0f0a72ef2f9d9faac406b6d18594a45ba9dc71ff1d0331f38c6a3fead68e1d49",
+  "result_root": "index-deconvolution/results/hierarchy_search_diagnosis",
+  "source_policy": "diagnostic adapters only; active hierarchy package unchanged; R1 patch remains unapplied",
+  "D1": {
+    "cases": 1792,
+    "rows": 28672,
+    "input": "all retained scientific cases"
+  },
+  "D2": {
+    "targets": [
+      {
+        "role": "confirmation",
+        "families": [
+          "F12"
+        ],
+        "base_lengths": [
+          256,
+          1024,
+          4096
+        ],
+        "replicates": [
+          3000,
+          3001,
+          3002,
+          3003,
+          3004,
+          3005,
+          3006,
+          3007,
+          3008,
+          3009,
+          3010,
+          3011,
+          3012,
+          3013,
+          3014,
+          3015,
+          3016,
+          3017,
+          3018,
+          3019
+        ]
+      },
+      {
+        "role": "transfer",
+        "families": [
+          "F12"
+        ],
+        "base_lengths": [
+          16384,
+          65536,
+          131072
+        ],
+        "replicates": [
+          5000,
+          5001,
+          5002,
+          5003
+        ]
+      },
+      {
+        "role": "stress",
+        "families": [
+          "S02"
+        ],
+        "base_lengths": [
+          4096,
+          65536
+        ],
+        "replicates": [
+          4000,
+          4001,
+          4002,
+          4003,
+          4004,
+          4005,
+          4006,
+          4007
+        ]
+      }
+    ],
+    "controls": [
+      {
+        "role": "confirmation",
+        "families": [
+          "F01",
+          "F06",
+          "F07",
+          "F11"
+        ],
+        "base_lengths": [
+          4096
+        ],
+        "replicates": [
+          3000,
+          3001
+        ]
+      },
+      {
+        "role": "transfer",
+        "families": [
+          "F01",
+          "F06",
+          "F07",
+          "F11"
+        ],
+        "base_lengths": [
+          65536
+        ],
+        "replicates": [
+          5000,
+          5001
+        ]
+      }
+    ],
+    "paired_offsets": [
+      0,
+      3
+    ],
+    "target_strings": 176,
+    "control_strings": 32,
+    "total_strings": 208,
+    "paired_units": 104,
+    "worker_jobs": 416,
+    "configs": {
+      "B0": {
+        "root_trial_cap": 512,
+        "cached_leaf_cap": 2048,
+        "length_charge_multiplier": 256
+      },
+      "B8": {
+        "root_trial_cap": 4096,
+        "cached_leaf_cap": 16384,
+        "length_charge_multiplier": 2048
+      }
+    },
+    "unchanged_boundary_settings": "all other fields equal frozen BoundaryConfig()",
+    "timing_scope": "boundary-only; never end-to-end hid_full"
+  },
+  "D3": {
+    "population": "D2 targets only",
+    "strings": 176,
+    "worker_jobs": 176,
+    "max_supplied_cuts": 5,
+    "max_subsets_per_string": 32,
+    "max_distinct_leaf_intervals_per_string": 21,
+    "config": "B0",
+    "subset_order": "cardinality, then ascending cut tuple",
+    "reachable_edge": "add one supplied cut; parent length >=64; positive child lengths; max eight segments",
+    "strict_edge": "reachable edge plus complete child archive bytes < parent archive bytes",
+    "truth_role": "evaluation-only supplied-cut diagnostic"
+  },
+  "D4": {
+    "populations": [
+      {
+        "role": "confirmation",
+        "families": [
+          "F01",
+          "F02",
+          "F03",
+          "F05"
+        ],
+        "base_lengths": [
+          256,
+          1024,
+          4096
+        ],
+        "replicates": [
+          3000,
+          3001,
+          3002,
+          3003,
+          3004,
+          3005,
+          3006,
+          3007,
+          3008,
+          3009,
+          3010,
+          3011,
+          3012,
+          3013,
+          3014,
+          3015,
+          3016,
+          3017,
+          3018,
+          3019
+        ]
+      },
+      {
+        "role": "transfer",
+        "families": [
+          "F01",
+          "F02",
+          "F03",
+          "F05"
+        ],
+        "base_lengths": [
+          16384,
+          65536,
+          131072
+        ],
+        "replicates": [
+          5000,
+          5001,
+          5002,
+          5003
+        ]
+      }
+    ],
+    "strings": 576,
+    "paired_units": 288,
+    "cells": 24,
+    "worker_jobs": 576,
+    "conversion_records": 1152,
+    "methods": [
+      "period",
+      "pair_grammar"
+    ],
+    "max_rules": 4096,
+    "max_depth": 64,
+    "identity": "H-C=(H-T)+(T-C); costs are complete archive bits"
+  },
+  "resources": {
+    "worker_wall_seconds": 30,
+    "worker_rss_bytes": 1073741824,
+    "max_workers": 2,
+    "allowances_s": {
+      "fixtures_development": 1800,
+      "diagnostic_jobs": 10800,
+      "report_verification": 1800
+    },
+    "total_wall_seconds": 14400,
+    "new_ledger_only": true
+  },
+  "new_reserved_generation": false,
+  "new_bootstrap_or_significance_tests": false,
+  "decision_choices": [
+    "SEARCH_FOCUSED",
+    "REPRESENTATION_FOCUSED",
+    "BOTH_SEPARATELY",
+    "NO_CLEAR_DIRECTION",
+    "INCOMPLETE",
+    "INVALID"
+  ],
+  "required_output": "HANDOFF.md, REPORT.md, DECISION.md, NEXT_PROTOCOL_DRAFT.md or no-direction statement; artifact-only executed notebook 18"
+}

@@ -26,9 +26,20 @@ cached leaves, total shortest-period length charge <= 256 n; each leaf is charge
 trial before its serialization. Leaf standalone serializations are counted
 separately. Every full-input trial is checked against the rule/depth limits and
 decoded by the independent decoder; a disagreement is fatal.
+
+HID-search-v3a (protocols/hierarchy_search_v3a/SEARCH.md) adds an explicit
+``BoundaryPolicy`` to the same search: ``refinement_seed_count`` k refines the k best
+coarse trials with distinct resulting partitions, level-major then seed-rank-major,
+each with its own local pool (its parent's coarse trials plus its own refinements);
+caches and charges are shared, the global winner is chosen over every trial, and the
+commit stays strict. k = 1 is the search-v2 behaviour byte for byte (same telemetry,
+same ``BoundaryConfig`` serialization). An optional ``TraceObserver`` records one event
+per trial request in call order; it only appends, adds no charged operation and is
+never read by the search.
 """
 from __future__ import annotations
 
+import hashlib
 import math
 from dataclasses import asdict, dataclass
 
@@ -59,6 +70,56 @@ class BoundaryConfig:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class BoundaryPolicy:
+    """How many ranked coarse trials are refined per round (SEARCH.md section 3)."""
+
+    refinement_seed_count: int = 1
+    schedule: str = "level_major_then_fixed_coarse_seed_rank"
+    seed_selection: str = "distinct_resulting_partitions_ranked_by_length_parent_start_cut_bytes"
+    seed_pool: str = "all_coarse_trials_of_seed_parent_plus_own_refinement_trials"
+
+    def __post_init__(self):
+        if self.refinement_seed_count < 1:
+            raise ValueError("refinement_seed_count must be >= 1")
+
+    def as_dict(self) -> dict:
+        return asdict(self)
+
+
+K1 = BoundaryPolicy()
+TRACE_SCHEMA = "hid-boundary-trace-v1"
+TRACE_MAX_EVENTS = 8192
+_CHARGES = ("root_trials", "leaf_cache", "leaf_length_charge")
+
+
+class TraceOverflow(RuntimeError):
+    """More trial events than the defensive bound: a trace failure, never truncation."""
+
+
+class TraceObserver:
+    """Direct observational trace of one boundary-search invocation (append only)."""
+
+    def __init__(self, max_events: int = TRACE_MAX_EVENTS) -> None:
+        self.max_events = max_events
+        self.events: list[dict] = []
+        self.summary: list[dict] = []
+
+    def event(self, ev: dict) -> None:
+        if len(self.events) >= self.max_events:
+            raise TraceOverflow(f"more than {self.max_events} boundary trial events")
+        ev["position"] = len(self.events)
+        self.events.append(ev)
+
+    def mark(self, item: dict) -> None:
+        self.summary.append(item)
+
+    def as_dict(self) -> dict:
+        return {"schema": TRACE_SCHEMA, "max_events": self.max_events,
+                "event_count": len(self.events), "events": self.events,
+                "summary": self.summary}
+
+
 class DecodeMismatch(RuntimeError):
     """A full-input candidate decodes to a different string: fatal, never a fallback."""
 
@@ -69,8 +130,10 @@ class _Cap(Exception):
 
 
 class BoundarySearch:
-    def __init__(self, x: str, cfg: BoundaryConfig = BoundaryConfig()) -> None:
+    def __init__(self, x: str, cfg: BoundaryConfig = BoundaryConfig(),
+                 policy: BoundaryPolicy = K1, observer: TraceObserver | None = None) -> None:
         self.x, self.n, self.cfg = x, len(x), cfg
+        self.policy, self.observer = policy, observer
         self.f = NodeFactory()
         self.leaves: dict[tuple[int, int], tuple] = {}
         self.parts: dict[tuple[int, ...], bytes | None] = {}
@@ -149,16 +212,49 @@ class BoundarySearch:
         cand = {a + 1, b - 1} | {a + (j * (b - a)) // k for j in range(1, k)}
         return sorted(c for c in cand if a < c < b)
 
+    def _charges(self) -> dict:
+        return {k: self.counts[k] for k in _CHARGES}
+
+    def _request(self, cuts: tuple[int, ...], info: dict) -> bytes | None:
+        """``evaluate`` with one observational trace event (when an observer is set)."""
+        obs = self.observer
+        if obs is None:
+            return self.evaluate(cuts)
+        ev = dict(info, partition=list(cuts), pre=self._charges(), cache_hit=cuts in self.parts)
+        try:
+            arc = self.evaluate(cuts)
+        except _Cap as cap:
+            ev.update(post=self._charges(), outcome="cap_blocked", cap=cap.reason)
+            obs.event(ev)
+            raise
+        if arc is None:
+            ev["outcome"] = "cached_graph_rejection" if ev["cache_hit"] else "new_graph_rejection"
+        else:
+            ev["outcome"] = "cached_admissible" if ev["cache_hit"] else "new_admissible"
+            ev["archive_bytes"] = len(arc)
+            ev["archive_sha256"] = hashlib.sha256(arc).hexdigest()
+        ev["post"] = self._charges()
+        obs.event(ev)
+        return arc
+
+    def _mark(self, kind: str, cuts, archive: bytes | None, **extra) -> None:
+        if self.observer is not None:
+            self.observer.mark(dict(extra, kind=kind, cuts=list(cuts),
+                                    archive_bytes=None if archive is None else len(archive),
+                                    archive_sha256=None if archive is None
+                                    else hashlib.sha256(archive).hexdigest()))
+
     def run(self, offer=None) -> dict:
         """Run B; ``offer(archive)`` is called on every commit and on the final output."""
-        cfg = self.cfg
+        cfg, k = self.cfg, self.policy.refinement_seed_count
         cuts: tuple[int, ...] = ()
         stop, unresolved = None, None
         current = None
         try:
-            current = self.evaluate(cuts)
+            current = self._request(cuts, {"round": 0, "phase": "initial"})
             if current is None:
                 raise RuntimeError("the initial single-leaf partition violates graph limits")
+            self._mark("initial", cuts, current)
             while True:
                 if len(cuts) + 1 >= cfg.max_segments:
                     stop = "max_segments"
@@ -175,15 +271,22 @@ class BoundarySearch:
                 trials: list[tuple] = []      # (len, parent start, cut, bytes, new cuts)
                 per_parent: dict[int, list[tuple]] = {}
 
-                def trial(a, b, c, stage):
+                def trial(a, b, c, stage, seed=None):
                     new = tuple(sorted(cuts + (c,)))
-                    arc = self.evaluate(new)
+                    info = {"round": rnd["round"], "phase": stage, "current": list(cuts),
+                            "parent": [a, b], "cut": c}
+                    if seed is not None:
+                        info.update(seed_rank=seed["rank"], level=seed["levels"] + 1)
+                    arc = self._request(new, info)
                     self.counts[f"{stage}_trials"] += 1
                     if arc is None:
                         return
                     t = (len(arc), a, c, arc, new)
                     trials.append(t)
-                    per_parent.setdefault(a, []).append(t)
+                    if seed is None:
+                        per_parent.setdefault(a, []).append(t)
+                    else:
+                        seed["pool"].append(t)
 
                 unresolved = {"round": rnd["round"], "phase": "coarse"}
                 for a, b in parents:
@@ -193,31 +296,67 @@ class BoundarySearch:
                     stop = "no_admissible_trial"
                     unresolved = None
                     break
-                best = min(trials, key=lambda t: t[:4])
-                a, c = best[1], best[2]
-                b = next(bb for aa, bb in parents if aa == a)
-                rnd.update(coarse_parent=[a, b], coarse_cut=c, coarse_bytes=best[0])
-                L = b - a
-                r = math.ceil(L / cfg.coarse_grid_denominator)
-                lo, hi = max(a + 1, c - r), min(b - 1, c + r)
-                levels, step = 0, None
-                unresolved = {"round": rnd["round"], "phase": "refinement", "parent": [a, b],
-                              "bracket": [lo, hi], "cut": c, "levels_done": 0}
-                for _ in range(cfg.max_refinement_levels):
-                    step = max(1, math.ceil((hi - lo) / cfg.refinement_grid_denominator))
-                    pos = {lo, hi, c} | {c + j * step for j in range(-cfg.refinement_offset,
-                                                                     cfg.refinement_offset + 1)}
-                    for q in sorted(p for p in pos if lo <= p <= hi):
-                        trial(a, b, q, "refine")
-                    pb = min(per_parent[a], key=lambda t: (t[0], t[2], t[3]))
-                    c = pb[2]
-                    levels += 1
-                    unresolved.update(bracket=[lo, hi], cut=c, levels_done=levels, step=step)
-                    if step == 1:
+                seeds, taken = [], set()
+                for t in sorted(trials, key=lambda t: t[:4]):
+                    if len(seeds) == k:
                         break
-                    lo, hi = max(a + 1, c - step), min(b - 1, c + step)
-                rnd.update(refined_cut=c, last_bracket=[lo, hi], last_step=step,
-                           levels=levels, resolved_to_one_bit=step == 1)
+                    if t[4] in taken:
+                        continue
+                    taken.add(t[4])
+                    a, c = t[1], t[2]
+                    b = next(bb for aa, bb in parents if aa == a)
+                    r = math.ceil((b - a) / cfg.coarse_grid_denominator)
+                    lo, hi = max(a + 1, c - r), min(b - 1, c + r)
+                    state = {"round": rnd["round"], "phase": "refinement", "parent": [a, b],
+                             "bracket": [lo, hi], "cut": c, "levels_done": 0}
+                    if k > 1:
+                        state["seed_rank"] = len(seeds)
+                    seeds.append({"rank": len(seeds), "a": a, "b": b, "c": c, "lo": lo,
+                                  "hi": hi, "levels": 0, "step": None, "active": True,
+                                  "coarse_cut": c, "coarse_bytes": t[0],
+                                  "pool": list(per_parent[a]), "unresolved": state})
+                top = seeds[0]
+                rnd.update(coarse_parent=[top["a"], top["b"]], coarse_cut=top["c"],
+                           coarse_bytes=top["coarse_bytes"])
+                for _ in range(cfg.max_refinement_levels):
+                    for sd in seeds:
+                        if not sd["active"]:
+                            continue
+                        a, b, c, lo, hi = sd["a"], sd["b"], sd["c"], sd["lo"], sd["hi"]
+                        unresolved = sd["unresolved"]
+                        if k > 1:
+                            unresolved.update(current_level=sd["levels"] + 1,
+                                              current_bracket=[lo, hi])
+                        step = max(1, math.ceil((hi - lo) / cfg.refinement_grid_denominator))
+                        pos = {lo, hi, c} | {c + j * step for j in range(-cfg.refinement_offset,
+                                                                         cfg.refinement_offset + 1)}
+                        for q in sorted(p for p in pos if lo <= p <= hi):
+                            trial(a, b, q, "refine", sd)
+                        pb = min(sd["pool"], key=lambda t: (t[0], t[2], t[3]))
+                        sd["c"] = c = pb[2]
+                        sd["levels"] += 1
+                        sd["step"] = step
+                        unresolved.update(bracket=[lo, hi], cut=c, levels_done=sd["levels"],
+                                          step=step)
+                        if step == 1:
+                            sd["active"] = False
+                            continue
+                        sd["lo"], sd["hi"] = max(a + 1, c - step), min(b - 1, c + step)
+                    if not any(sd["active"] for sd in seeds):
+                        break
+                rnd.update(refined_cut=top["c"], last_bracket=[top["lo"], top["hi"]],
+                           last_step=top["step"], levels=top["levels"],
+                           resolved_to_one_bit=top["step"] == 1)
+                if k > 1:
+                    rnd["seeds"] = [{"rank": sd["rank"], "parent": [sd["a"], sd["b"]],
+                                     "coarse_cut": sd["coarse_cut"],
+                                     "coarse_bytes": sd["coarse_bytes"], "refined_cut": sd["c"],
+                                     "last_bracket": [sd["lo"], sd["hi"]],
+                                     "last_step": sd["step"], "levels": sd["levels"],
+                                     "resolved_to_one_bit": sd["step"] == 1,
+                                     "local_best_bytes": min(t[0] for t in sd["pool"])}
+                                    for sd in seeds]
+                    rnd["seed_count"] = len(seeds)
                 unresolved = None
                 win = min(trials, key=lambda t: t[:4])
                 rnd.update(best_parent_start=win[1], best_cut=win[2], best_bytes=win[0],
@@ -226,6 +365,7 @@ class BoundarySearch:
                     cuts, current = win[4], win[3]
                     self.counts["commits"] += 1
                     rnd["committed"] = True
+                    self._mark("commit", cuts, current, round=rnd["round"])
                     if offer is not None:
                         offer(current)
                 else:
@@ -235,9 +375,13 @@ class BoundarySearch:
         except _Cap as cap:
             stop = cap.reason
         output, output_cuts = current, cuts
+        source = "current"
         if stop and stop.endswith("_cap") and self.best_seen is not None and \
                 (current is None or self.best_seen[0] < len(current)):
             output, output_cuts = self.best_seen[2], self.best_seen[3]
+            source = "best_seen"
+        self._mark("final", output_cuts, output, stop_reason=stop, source=source,
+                   unresolved=unresolved if stop and stop.endswith("_cap") else None)
         if output is not None and offer is not None:
             offer(output)
         return {"archive": output, "cuts": list(output_cuts), "committed_cuts": list(cuts),

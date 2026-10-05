@@ -1,0 +1,7448 @@
+{
+  "protocol": "PROTOCOL_screen_identification.md S3b, H2",
+  "script": "index-deconvolution/experiments/screen_s3b_multi_step.py",
+  "tool_versions": {
+    "python": "3.13.12",
+    "dd": "0.6.0",
+    "z3-solver": "5.1.0.0",
+    "pyboolnet": "3.0.16",
+    "clingo": "5.8.2",
+    "BoolNet": "2.1.9",
+    "R": "R version 4.6.1 (2026-06-24)",
+    "gringo": "gringo version 5.8.2",
+    "clasp": "clasp version 3.4.1"
+  },
+  "settings": {
+    "limit_s": 60.0,
+    "reps": 3,
+    "reach_steps": 3
+  },
+  "arms": {
+    "ours_attr": "num_attractors, EXHAUSTIVE over 2^n states",
+    "ours_fixed": "none exists",
+    "ours_reach": "none exists",
+    "index_based_arm_for_any_S3b_class": "none exists"
+  },
+  "summary": {
+    "fixed": {
+      "pyboolnet": {
+        "answered": "55/55",
+        "timeouts": 0,
+        "max_s_by_n": {
+          "4": 0.007547041001089383,
+          "6": 0.01012408300084644,
+          "7": 0.008295749999888358,
+          "9": 0.008894832999430946,
+          "10": 0.009062207998795202,
+          "11": 0.00800083300055121,
+          "13": 0.011171415999342571,
+          "14": 0.010159084000406438,
+          "15": 0.009686792000138666,
+          "18": 0.009022999998705927,
+          "19": 0.07194170799994026,
+          "20": 0.011359541000274476,
+          "24": 0.3843564159997186,
+          "26": 0.011671166999803972,
+          "28": 0.01101270800063503,
+          "30": 0.01262575000146171,
+          "33": 0.009313374999692314,
+          "42": 0.010001499998907093,
+          "50": 0.012731999999232357,
+          "60": 0.02117216599981475,
+          "77": 0.013005666998651577,
+          "87": 0.029625041999679524,
+          "100": 0.01668812499883643,
+          "200": 0.025039582998942933
+        },
+        "all_under_1s_at_n200": true,
+        "questions_at_n200": 5
+      },
+      "boolnet": {
+        "answered": "55/55",
+        "timeouts": 0,
+        "max_s_by_n": {
+          "4": 0.0,
+          "6": 0.0,
+          "7": 0.0,
+          "9": 0.0,
+          "10": 0.001,
+          "11": 0.0,
+          "13": 0.001,
+          "14": 0.001,
+          "15": 0.001,
+          "18": 0.0,
+          "19": 0.561,
+          "20": 0.001,
+          "24": 7.353,
+          "26": 0.001,
+          "28": 0.001,
+          "30": 0.001,
+          "33": 0.001,
+          "42": 0.000999999999999973,
+          "50": 0.001,
+          "60": 0.00900000000000001,
+          "77": 0.001,
+          "87": 0.014,
+          "100": 0.001,
+          "200": 0.003
+        },
+        "all_under_1s_at_n200": true,
+        "questions_at_n200": 5
+      }
+    },
+    "attr": {
+      "ours": {
+        "answered": "27/55",
+        "timeouts": 1,
+        "max_s_by_n": {
+          "4": 5.2791001508012414e-05,
+          "6": 0.00026545800028543454,
+          "7": 0.0005904589997953735,
+          "9": 0.0032416659996670205,
+          "10": 0.007379791000857949,
+          "11": 0.015860249999605003,
+          "13": 0.09482791699883819,
+          "14": 0.2003878329996951,
+          "15": 0.3689557090001472,
+          "18": 4.1554146250000485,
+          "19": 9.96692533299938,
+          "20": 19.09206499999891,
+          "24": null,
+          "26": null,
+          "28": null,
+          "30": null,
+          "33": null,
+          "42": null,
+          "50": null,
+          "60": null,
+          "77": null,
+          "87": null,
+          "100": null,
+          "200": null
+        },
+        "all_under_1s_at_n200": false,
+        "questions_at_n200": 5
+      },
+      "pyboolnet": {
+        "answered": "38/55",
+        "timeouts": 17,
+        "max_s_by_n": {
+          "4": 0.12368420900020283,
+          "6": 0.09630708300028346,
+          "7": 0.1724067079994711,
+          "9": 0.4171956250011135,
+          "10": 0.7177655420000519,
+          "11": 0.1501652919996559,
+          "13": 0.38050058400040143,
+          "14": 1.2175843340010033,
+          "15": 0.44343387499975506,
+          "18": 0.4700848329994187,
+          "19": null,
+          "20": 0.6362614999998186,
+          "24": null,
+          "26": 0.9306340839993936,
+          "28": 2.0594566250001662,
+          "30": 1.5755281659985485,
+          "33": 1.0967686669991963,
+          "42": 0.6138950000004115,
+          "50": 21.082939292000447,
+          "60": null,
+          "77": null,
+          "87": null,
+          "100": null,
+          "200": null
+        },
+        "all_under_1s_at_n200": false,
+        "questions_at_n200": 5
+      },
+      "boolnet": {
+        "answered": "44/55",
+        "timeouts": 11,
+        "max_s_by_n": {
+          "4": 0.0,
+          "6": 0.0,
+          "7": 0.001,
+          "9": 0.001,
+          "10": 0.001,
+          "11": 0.0,
+          "13": 0.02,
+          "14": 0.01,
+          "15": 0.00700000000000001,
+          "18": 0.002,
+          "19": 1.391,
+          "20": 0.039,
+          "24": 7.49,
+          "26": 0.034,
+          "28": 0.036,
+          "30": 0.028,
+          "33": 0.076,
+          "42": 0.00399999999999998,
+          "50": 2.517,
+          "60": 0.656,
+          "77": 0.064,
+          "87": null,
+          "100": null,
+          "200": 11.174
+        },
+        "all_under_1s_at_n200": false,
+        "questions_at_n200": 5
+      }
+    },
+    "reach": {
+      "pyboolnet": {
+        "answered": "110/110",
+        "timeouts": 0,
+        "max_s_by_n": {
+          "4": 0.01773391699862259,
+          "6": 0.020512582999799633,
+          "7": 0.01725299999998242,
+          "9": 0.01969295799972315,
+          "10": 0.01914379199843097,
+          "11": 0.01767104099963035,
+          "13": 0.02453833400068106,
+          "14": 0.020570082999256556,
+          "15": 0.025214916000550147,
+          "18": 0.0218426659994293,
+          "19": 0.04260400000021036,
+          "20": 0.042289625000194064,
+          "24": 0.03483162500015169,
+          "26": 0.05414520900012576,
+          "28": 0.0503282500012574,
+          "30": 0.05719416700048896,
+          "33": 0.02833329199893342,
+          "42": 0.019682916999954614,
+          "50": 0.14214329199967324,
+          "60": 0.2115986669996346,
+          "77": 0.15359741599968402,
+          "87": 0.24448887499966077,
+          "100": 0.5093469580006058,
+          "200": 1.8128539999997884
+        },
+        "all_under_1s_at_n200": false,
+        "questions_at_n200": 10
+      },
+      "z3_bmc": {
+        "answered": "110/110",
+        "timeouts": 0,
+        "max_s_by_n": {
+          "4": 0.003045166999072535,
+          "6": 0.0035655829997267574,
+          "7": 0.0032949579999694834,
+          "9": 0.004333500000939239,
+          "10": 0.005616000000372878,
+          "11": 0.003618458000346436,
+          "13": 0.0131344170004013,
+          "14": 0.009163499998976476,
+          "15": 0.0065055410013883375,
+          "18": 0.006172042001708178,
+          "19": 0.013592458000857732,
+          "20": 0.008881499999915832,
+          "24": 0.006330500000331085,
+          "26": 0.011428750000050059,
+          "28": 0.007070125000609551,
+          "30": 0.010279042000547634,
+          "33": 0.007575792000352521,
+          "42": 0.008393583000724902,
+          "50": 0.016407541999797104,
+          "60": 0.02620783299971663,
+          "77": 0.01734533400122018,
+          "87": 0.0683123329999944,
+          "100": 0.029743667000730056,
+          "200": 0.05287999999927706
+        },
+        "all_under_1s_at_n200": true,
+        "questions_at_n200": 10
+      }
+    }
+  },
+  "checks": {
+    "fixed_counts_agree": "55/55",
+    "attr_counts_agree": "35/55",
+    "T+_reachable_pyboolnet": "55/55",
+    "reach_pyboolnet_equals_z3": "110/110",
+    "verified_false": []
+  },
+  "h2_s3b": {
+    "fixed": {
+      "competitor_solves_class": true
+    },
+    "attr": {
+      "competitor_solves_class": false
+    },
+    "reach": {
+      "competitor_solves_class": false
+    }
+  },
+  "rows": [
+    {
+      "id": "synthetic/n010_s0",
+      "kind": "synthetic",
+      "n": 10,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011454874998889863,
+            0.008830291999402107,
+            0.009062207998795202
+          ],
+          "median_s": 0.009062207998795202,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.00702833300056227,
+            0.006966667000597226,
+            0.0070294590004778
+          ],
+          "median_s": 0.00702833300056227,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.42326408400003857,
+            0.3984080829995946,
+            0.3828532080005971
+          ],
+          "median_s": 0.3984080829995946,
+          "count": 2,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.02136420899842051,
+              0.018579999999928987,
+              0.01673287499943399
+            ],
+            "median_s": 0.018579999999928987,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004606917000273825,
+              0.004501125000388129,
+              0.004481083000428043
+            ],
+            "median_s": 0.004501125000388129,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017039791999195586,
+              0.016957709000053,
+              0.0170618749998539
+            ],
+            "median_s": 0.017039791999195586,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004693416998634348,
+              0.0046991250001156,
+              0.00494020900077885
+            ],
+            "median_s": 0.0046991250001156,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n010_s1",
+      "kind": "synthetic",
+      "n": 10,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008005875000890228,
+            0.007712708000326529,
+            0.008923458999561262
+          ],
+          "median_s": 0.008005875000890228,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.002,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.0064697920006437926,
+            0.006620166999709909,
+            0.006648374999713269
+          ],
+          "median_s": 0.006620166999709909,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.21535879199836927,
+            0.21516512499874807,
+            0.21485712499998044
+          ],
+          "median_s": 0.21516512499874807,
+          "count": 2,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.002
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v006": 0,
+            "v007": 1,
+            "v008": 1,
+            "v009": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.016818542000692105,
+              0.01857341699906101,
+              0.017415624999557622
+            ],
+            "median_s": 0.017415624999557622,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0041342080003232695,
+              0.00408962499932386,
+              0.004055416000483092
+            ],
+            "median_s": 0.00408962499932386,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v006": 1,
+            "v007": 0,
+            "v008": 0,
+            "v009": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01719562500147731,
+              0.01667920799991407,
+              0.01727112499975192
+            ],
+            "median_s": 0.01719562500147731,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004208166999887908,
+              0.0041452499990555225,
+              0.004159375001108856
+            ],
+            "median_s": 0.004159375001108856,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n010_s2",
+      "kind": "synthetic",
+      "n": 10,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008278958001028514,
+            0.008270374999483465,
+            0.008028792000914109
+          ],
+          "median_s": 0.008270374999483465,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.0072581660006107995,
+            0.007291625001016655,
+            0.007321000000956701
+          ],
+          "median_s": 0.007291625001016655,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.18770279199998186,
+            0.19427087499934714,
+            0.19938066599934245
+          ],
+          "median_s": 0.19427087499934714,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 1,
+          "boolnet": 2
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v007": 0,
+            "v008": 1,
+            "v009": 1,
+            "v000": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.019516291000400088,
+              0.018997334000232513,
+              0.018568499999673804
+            ],
+            "median_s": 0.018997334000232513,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.005616000000372878,
+              0.005480416999489535,
+              0.005635584000629024
+            ],
+            "median_s": 0.005616000000372878,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v007": 1,
+            "v008": 0,
+            "v009": 0,
+            "v000": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.018901084000390256,
+              0.018627249999553896,
+              0.018997875000422937
+            ],
+            "median_s": 0.018901084000390256,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.005602667000857764,
+              0.00563187500119966,
+              0.005611667000266607
+            ],
+            "median_s": 0.005611667000266607,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n010_s3",
+      "kind": "synthetic",
+      "n": 10,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008352124999873922,
+            0.008069875000728643,
+            0.007953124999403371
+          ],
+          "median_s": 0.008069875000728643,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.006959791000554105,
+            0.007051708000290091,
+            0.007024374999673455
+          ],
+          "median_s": 0.007024374999673455,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.2225790419997793,
+            0.19264687500071886,
+            0.17848454100021627
+          ],
+          "median_s": 0.19264687500071886,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 1,
+          "boolnet": 2
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v008": 1,
+            "v009": 1,
+            "v000": 1,
+            "v001": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01770658300119976,
+              0.01914379199843097,
+              0.019344541999089415
+            ],
+            "median_s": 0.01914379199843097,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004300332999264356,
+              0.0043448750002426095,
+              0.00424816600025224
+            ],
+            "median_s": 0.004300332999264356,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v008": 0,
+            "v009": 0,
+            "v000": 0,
+            "v001": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01806275000126334,
+              0.018707999999605818,
+              0.019331333998707123
+            ],
+            "median_s": 0.018707999999605818,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0044819159993494395,
+              0.00461399999949208,
+              0.0046224590005294885
+            ],
+            "median_s": 0.00461399999949208,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n010_s4",
+      "kind": "synthetic",
+      "n": 10,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008313624999573221,
+            0.00865370799874654,
+            0.008504749999701744
+          ],
+          "median_s": 0.008504749999701744,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.006576166000741068,
+            0.006436292000216781,
+            0.006459583000832936
+          ],
+          "median_s": 0.006459583000832936,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.08981545799906598,
+            0.0881485830013844,
+            0.08876950000012584
+          ],
+          "median_s": 0.08876950000012584,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 1,
+          "boolnet": 2
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v009": 1,
+            "v000": 1,
+            "v001": 1,
+            "v002": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01746462499977497,
+              0.016424375000497093,
+              0.016665082999679726
+            ],
+            "median_s": 0.016665082999679726,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003980749999755062,
+              0.003864541999064386,
+              0.0038669999994453974
+            ],
+            "median_s": 0.0038669999994453974,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v009": 0,
+            "v000": 0,
+            "v001": 0,
+            "v002": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017259666999962064,
+              0.01679287499973725,
+              0.01695612499861454
+            ],
+            "median_s": 0.01695612499861454,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004009500000393018,
+              0.003877458999340888,
+              0.003919875000065076
+            ],
+            "median_s": 0.003919875000065076,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n015_s0",
+      "kind": "synthetic",
+      "n": 15,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008456374998786487,
+            0.010305875000995002,
+            0.009686792000138666
+          ],
+          "median_s": 0.009686792000138666,
+          "count": 3,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.001,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 3,
+          "boolnet": 3
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.36912608300008287,
+            0.365737165999235,
+            0.3632111669994629
+          ],
+          "median_s": 0.365737165999235,
+          "count": 16,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.31237466700076766,
+            0.3127621250005177,
+            0.3118068339990714
+          ],
+          "median_s": 0.31237466700076766,
+          "count": 5,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.006,
+            0.00700000000000001,
+            0.00700000000000001
+          ],
+          "median_s": 0.00700000000000001,
+          "count": 16,
+          "verified": true
+        },
+        "counts": {
+          "ours": 16,
+          "pyboolnet": 5,
+          "boolnet": 16
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 0,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.018257665999044548,
+              0.018086416999722132,
+              0.01831049999964307
+            ],
+            "median_s": 0.018257665999044548,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.005742167000789777,
+              0.005344416998923407,
+              0.005388333000155399
+            ],
+            "median_s": 0.005388333000155399,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 1,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01809645899993484,
+              0.018066208000163897,
+              0.018359833000431536
+            ],
+            "median_s": 0.01809645899993484,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.005442417001177091,
+              0.0053904169999441365,
+              0.0053571250009554205
+            ],
+            "median_s": 0.0053904169999441365,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n015_s1",
+      "kind": "synthetic",
+      "n": 15,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008232833999500144,
+            0.008164333999957307,
+            0.007920542000647401
+          ],
+          "median_s": 0.008164333999957307,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.3454364999997779,
+            0.360506125000029,
+            0.37125720900075976
+          ],
+          "median_s": 0.360506125000029,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.07883412500086706,
+            0.07728279200091492,
+            0.07649079099974188
+          ],
+          "median_s": 0.07728279200091492,
+          "count": 2,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v006": 1,
+            "v007": 0,
+            "v008": 1,
+            "v009": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01766279100047541,
+              0.01705766700069944,
+              0.017264500000237604
+            ],
+            "median_s": 0.017264500000237604,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004330915999162244,
+              0.00442783400103508,
+              0.004360208000434795
+            ],
+            "median_s": 0.004360208000434795,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v006": 0,
+            "v007": 1,
+            "v008": 0,
+            "v009": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017495542000688147,
+              0.016666040999552933,
+              0.01714966699910292
+            ],
+            "median_s": 0.01714966699910292,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.00434504199984076,
+              0.004176124999503372,
+              0.004169457999523729
+            ],
+            "median_s": 0.004176124999503372,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n015_s2",
+      "kind": "synthetic",
+      "n": 15,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008412708000832936,
+            0.008253584001067793,
+            0.008193916000891477
+          ],
+          "median_s": 0.008253584001067793,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.36547066700040887,
+            0.36144883400083927,
+            0.3625282499997411
+          ],
+          "median_s": 0.3625282499997411,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.05910175000099116,
+            0.06071216599957552,
+            0.06003649999911431
+          ],
+          "median_s": 0.06003649999911431,
+          "count": 1,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 1,
+          "boolnet": 2
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v007": 1,
+            "v008": 0,
+            "v009": 1,
+            "v010": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017308708000200568,
+              0.017358541999783483,
+              0.02042562499991618
+            ],
+            "median_s": 0.017358541999783483,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004439334001290263,
+              0.004574374999720021,
+              0.0046458340002573095
+            ],
+            "median_s": 0.004574374999720021,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v007": 0,
+            "v008": 1,
+            "v009": 0,
+            "v010": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.02060212499964109,
+              0.017847582999820588,
+              0.018079790999763645
+            ],
+            "median_s": 0.018079790999763645,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004612250000718632,
+              0.004482583000935847,
+              0.004422250000061467
+            ],
+            "median_s": 0.004482583000935847,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n015_s3",
+      "kind": "synthetic",
+      "n": 15,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008780707999903825,
+            0.008917332999772043,
+            0.008451208001133637
+          ],
+          "median_s": 0.008780707999903825,
+          "count": 4,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.0,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 4,
+          "boolnet": 4
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.34994937499868684,
+            0.35101400000166905,
+            0.35830854199957685
+          ],
+          "median_s": 0.35101400000166905,
+          "count": 10,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.30665679199955775,
+            0.30204274999960035,
+            0.304214249999859
+          ],
+          "median_s": 0.304214249999859,
+          "count": 6,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.002,
+            0.002
+          ],
+          "median_s": 0.002,
+          "count": 10,
+          "verified": true
+        },
+        "counts": {
+          "ours": 10,
+          "pyboolnet": 6,
+          "boolnet": 10
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v008": 0,
+            "v009": 1,
+            "v010": 1,
+            "v011": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.025976999999329564,
+              0.025214916000550147,
+              0.025201541999194887
+            ],
+            "median_s": 0.025214916000550147,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.006485249999968801,
+              0.006409208001059596,
+              0.006349166998916189
+            ],
+            "median_s": 0.006409208001059596,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v008": 1,
+            "v009": 0,
+            "v010": 0,
+            "v011": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.018541375000495464,
+              0.019632208999610157,
+              0.01964695900096558
+            ],
+            "median_s": 0.019632208999610157,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0065055410013883375,
+              0.006743459000063012,
+              0.006441166999138659
+            ],
+            "median_s": 0.0065055410013883375,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n015_s4",
+      "kind": "synthetic",
+      "n": 15,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008717374999832828,
+            0.008406541999647743,
+            0.008328292000442161
+          ],
+          "median_s": 0.008406541999647743,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.3692284999997355,
+            0.3689557090001472,
+            0.3606419999996433
+          ],
+          "median_s": 0.3689557090001472,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.4522839170003863,
+            0.43994833400029165,
+            0.44343387499975506
+          ],
+          "median_s": 0.44343387499975506,
+          "count": 2,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.002,
+            0.002,
+            0.001
+          ],
+          "median_s": 0.002,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v009": 1,
+            "v010": 0,
+            "v011": 1,
+            "v012": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01688770900000236,
+              0.01716179200047918,
+              0.017302084001130424
+            ],
+            "median_s": 0.01716179200047918,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.005519874999663443,
+              0.005519041998923058,
+              0.005552833999900031
+            ],
+            "median_s": 0.005519874999663443,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v009": 0,
+            "v010": 1,
+            "v011": 0,
+            "v012": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01741129199945135,
+              0.016947833999438444,
+              0.017529707998619415
+            ],
+            "median_s": 0.01741129199945135,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.005858624999746098,
+              0.005662458001097548,
+              0.0055018330003804294
+            ],
+            "median_s": 0.005662458001097548,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n020_s0",
+      "kind": "synthetic",
+      "n": 20,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.009403374999237712,
+            0.009248292000847869,
+            0.00938624999980675
+          ],
+          "median_s": 0.00938624999980675,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            17.893280333000803,
+            17.586972666998918,
+            17.77698962499926
+          ],
+          "median_s": 17.77698962499926,
+          "count": 3,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.6403747080003086,
+            0.6362614999998186,
+            0.5368644999998651
+          ],
+          "median_s": 0.6362614999998186,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.039,
+            0.039,
+            0.037
+          ],
+          "median_s": 0.039,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "ours": 3,
+          "pyboolnet": 1,
+          "boolnet": 3
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 1,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.022385249998478685,
+              0.022326583999529248,
+              0.02198741699976381
+            ],
+            "median_s": 0.022326583999529248,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.008559334000892704,
+              0.008881499999915832,
+              0.008952416999818524
+            ],
+            "median_s": 0.008881499999915832,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 0,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.020166541000435245,
+              0.020551166000586818,
+              0.02017633400100749
+            ],
+            "median_s": 0.02017633400100749,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.008859584000674658,
+              0.008756499999435619,
+              0.008757290999710676
+            ],
+            "median_s": 0.008757290999710676,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n020_s1",
+      "kind": "synthetic",
+      "n": 20,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.00966020800115075,
+            0.009357000000818516,
+            0.009750541999892448
+          ],
+          "median_s": 0.00966020800115075,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            18.01824045899957,
+            18.36211908400037,
+            18.553198874998998
+          ],
+          "median_s": 18.36211908400037,
+          "count": 1,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.3974484999998822,
+            0.37070104200029164,
+            0.3723620000000665
+          ],
+          "median_s": 0.3723620000000665,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.014,
+            0.012,
+            0.012
+          ],
+          "median_s": 0.012,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "ours": 1,
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v006": 0,
+            "v007": 1,
+            "v008": 0,
+            "v009": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.042289625000194064,
+              0.04163858299943968,
+              0.043493208000654704
+            ],
+            "median_s": 0.042289625000194064,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.00868645800073864,
+              0.008764125001107459,
+              0.0088584160002938
+            ],
+            "median_s": 0.008764125001107459,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v006": 1,
+            "v007": 0,
+            "v008": 1,
+            "v009": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.04352741699949547,
+              0.04169079200073611,
+              0.04177229200104193
+            ],
+            "median_s": 0.04177229200104193,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.00862129199958872,
+              0.00857016699956148,
+              0.008509750001394423
+            ],
+            "median_s": 0.00857016699956148,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n020_s2",
+      "kind": "synthetic",
+      "n": 20,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.009405167000295478,
+            0.010288166000464116,
+            0.009120624999923166
+          ],
+          "median_s": 0.009405167000295478,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            19.09206499999891,
+            19.239258708001216,
+            19.052077457999985
+          ],
+          "median_s": 19.09206499999891,
+          "count": 1,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.12444225000035658,
+            0.1343923749991518,
+            0.132086084000548
+          ],
+          "median_s": 0.132086084000548,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.002,
+            0.002
+          ],
+          "median_s": 0.002,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "ours": 1,
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v007": 1,
+            "v008": 0,
+            "v009": 1,
+            "v010": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.037158540999371326,
+              0.033926874999451684,
+              0.03483337500074413
+            ],
+            "median_s": 0.03483337500074413,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.007554499999969266,
+              0.007845666999855894,
+              0.007429291999869747
+            ],
+            "median_s": 0.007554499999969266,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v007": 0,
+            "v008": 1,
+            "v009": 0,
+            "v010": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.03413883400025952,
+              0.03384458300024562,
+              0.0360406250001688
+            ],
+            "median_s": 0.03413883400025952,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.007656040999791003,
+              0.007603042000482674,
+              0.0078022079997026594
+            ],
+            "median_s": 0.007656040999791003,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n020_s3",
+      "kind": "synthetic",
+      "n": 20,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011359541000274476,
+            0.011607000000367407,
+            0.011259291999522247
+          ],
+          "median_s": 0.011359541000274476,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            18.718698208000205,
+            18.820259915999486,
+            18.686774583000442
+          ],
+          "median_s": 18.718698208000205,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.1769966249994468,
+            0.21006758300063666,
+            0.1887255420006113
+          ],
+          "median_s": 0.1887255420006113,
+          "count": 2,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.002,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v008": 0,
+            "v009": 1,
+            "v010": 1,
+            "v011": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.019060750000789994,
+              0.0197933750005177,
+              0.019613209000453935
+            ],
+            "median_s": 0.019613209000453935,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.009198000001561013,
+              0.008796333000645973,
+              0.00850308299959579
+            ],
+            "median_s": 0.008796333000645973,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v008": 1,
+            "v009": 0,
+            "v010": 0,
+            "v011": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.019574250000005122,
+              0.02309537499968428,
+              0.021623791000820347
+            ],
+            "median_s": 0.021623791000820347,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.008855500000208849,
+              0.009041125000294414,
+              0.008771500000875676
+            ],
+            "median_s": 0.008855500000208849,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n020_s4",
+      "kind": "synthetic",
+      "n": 20,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.009367124999698717,
+            0.009841291999691748,
+            0.009383582999362261
+          ],
+          "median_s": 0.009383582999362261,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            18.25241625000126,
+            18.451608125000348,
+            18.220049334000578
+          ],
+          "median_s": 18.25241625000126,
+          "count": 1,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.21093287499934377,
+            0.2012780829991243,
+            0.18993137500001467
+          ],
+          "median_s": 0.2012780829991243,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.002,
+            0.002,
+            0.002
+          ],
+          "median_s": 0.002,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "ours": 1,
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v009": 1,
+            "v010": 1,
+            "v011": 1,
+            "v012": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.031390416999784065,
+              0.03171345900045708,
+              0.028764667000359623
+            ],
+            "median_s": 0.031390416999784065,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.007488584000384435,
+              0.007564209001429845,
+              0.007375084000159404
+            ],
+            "median_s": 0.007488584000384435,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v009": 0,
+            "v010": 0,
+            "v011": 0,
+            "v012": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.02908091700010118,
+              0.028340500000922475,
+              0.028723624998747255
+            ],
+            "median_s": 0.028723624998747255,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.00752558299973316,
+              0.007499166998968576,
+              0.007545083999502822
+            ],
+            "median_s": 0.00752558299973316,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n030_s0",
+      "kind": "synthetic",
+      "n": 30,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.01122633300110465,
+            0.010957750000670785,
+            0.0107973750000383
+          ],
+          "median_s": 0.010957750000670785,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.4709514170008333,
+            0.4670685000000958,
+            0.49858995800059347
+          ],
+          "median_s": 0.4709514170008333,
+          "count": 1,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.019,
+            0.017,
+            0.019
+          ],
+          "median_s": 0.019,
+          "count": 8,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 8
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.0463225000003149,
+              0.046739583000089624,
+              0.04628245799904107
+            ],
+            "median_s": 0.0463225000003149,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.010123957999894628,
+              0.010279042000547634,
+              0.010444916000778903
+            ],
+            "median_s": 0.010279042000547634,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.047610458999770344,
+              0.04607583299912221,
+              0.047206416000335594
+            ],
+            "median_s": 0.047206416000335594,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.010073625000586617,
+              0.010125166998477653,
+              0.010018582999691716
+            ],
+            "median_s": 0.010073625000586617,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n030_s1",
+      "kind": "synthetic",
+      "n": 30,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.010786957998789148,
+            0.010714207999626524,
+            0.010679999999410938
+          ],
+          "median_s": 0.010714207999626524,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.642208125000252,
+            0.5877280000004248,
+            0.661308167000243
+          ],
+          "median_s": 0.642208125000252,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.025,
+            0.028,
+            0.029
+          ],
+          "median_s": 0.028,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v006": 1,
+            "v007": 1,
+            "v008": 0,
+            "v009": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.03517433299930417,
+              0.03818933399998059,
+              0.03833779200067511
+            ],
+            "median_s": 0.03818933399998059,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.009947957998519996,
+              0.010022874999776832,
+              0.009865124999123509
+            ],
+            "median_s": 0.009947957998519996,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v006": 0,
+            "v007": 0,
+            "v008": 1,
+            "v009": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.04407225000068138,
+              0.0413031249991036,
+              0.03571945799922105
+            ],
+            "median_s": 0.0413031249991036,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.009990499998821178,
+              0.0100143340005161,
+              0.009776667000551242
+            ],
+            "median_s": 0.009990499998821178,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n030_s2",
+      "kind": "synthetic",
+      "n": 30,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.010086499998578802,
+            0.011476208999738446,
+            0.010464416000104393
+          ],
+          "median_s": 0.010464416000104393,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.34963729199989757,
+            0.3329224579993024,
+            0.33019333300035214
+          ],
+          "median_s": 0.3329224579993024,
+          "count": 2,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.002,
+            0.002,
+            0.003
+          ],
+          "median_s": 0.002,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v007": 1,
+            "v008": 1,
+            "v009": 1,
+            "v010": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.03381312500096101,
+              0.0337752499999624,
+              0.03445287499926053
+            ],
+            "median_s": 0.03381312500096101,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.008975499998996384,
+              0.008945959001721349,
+              0.00885454099989147
+            ],
+            "median_s": 0.008945959001721349,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v007": 0,
+            "v008": 0,
+            "v009": 0,
+            "v010": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.03257833300085622,
+              0.034433124999850406,
+              0.03242945800047892
+            ],
+            "median_s": 0.03257833300085622,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.008812249998300103,
+              0.008906333001505118,
+              0.008846375001667184
+            ],
+            "median_s": 0.008846375001667184,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n030_s3",
+      "kind": "synthetic",
+      "n": 30,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011274457998297294,
+            0.01391883300129848,
+            0.01262575000146171
+          ],
+          "median_s": 0.01262575000146171,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.0,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            1.5742183330003172,
+            1.5776053750014398,
+            1.5755281659985485
+          ],
+          "median_s": 1.5755281659985485,
+          "count": 2,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.00800000000000001,
+            0.00900000000000001,
+            0.00900000000000001
+          ],
+          "median_s": 0.00900000000000001,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 4
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v008": 0,
+            "v009": 1,
+            "v010": 0,
+            "v011": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.05719416700048896,
+              0.05707500000062282,
+              0.06093729100030032
+            ],
+            "median_s": 0.05719416700048896,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.010238333001325373,
+              0.00996054200004437,
+              0.010207708000962157
+            ],
+            "median_s": 0.010207708000962157,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v008": 1,
+            "v009": 0,
+            "v010": 1,
+            "v011": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.04671970799972769,
+              0.044535875000292435,
+              0.043236542000158806
+            ],
+            "median_s": 0.044535875000292435,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.01009666699974332,
+              0.01008449999972072,
+              0.010144333999051014
+            ],
+            "median_s": 0.01009666699974332,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n030_s4",
+      "kind": "synthetic",
+      "n": 30,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.010756540999864228,
+            0.011032083000827697,
+            0.01094224999906146
+          ],
+          "median_s": 0.01094224999906146,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.19026329100051953,
+            0.19004454199966858,
+            0.18862850000004983
+          ],
+          "median_s": 0.19004454199966858,
+          "count": 2,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.012,
+            0.014,
+            0.014
+          ],
+          "median_s": 0.014,
+          "count": 5,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 5
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v009": 1,
+            "v010": 0,
+            "v011": 1,
+            "v012": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.0236858750013198,
+              0.024493499999152846,
+              0.021786792000057176
+            ],
+            "median_s": 0.0236858750013198,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.009723707999000908,
+              0.008917084000131581,
+              0.009168874999886611
+            ],
+            "median_s": 0.009168874999886611,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v009": 0,
+            "v010": 1,
+            "v011": 0,
+            "v012": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.02294212500055437,
+              0.02409208300014143,
+              0.02315900000030524
+            ],
+            "median_s": 0.02315900000030524,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.00921570900027291,
+              0.009281708000344224,
+              0.009439249999559252
+            ],
+            "median_s": 0.009281708000344224,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n050_s0",
+      "kind": "synthetic",
+      "n": 50,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.012731999999232357,
+            0.012903790999189368,
+            0.011085833999459282
+          ],
+          "median_s": 0.012731999999232357,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.418754665999586,
+            0.427474500000244,
+            0.41590412500045204
+          ],
+          "median_s": 0.418754665999586,
+          "count": 1,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.16,
+            0.189,
+            0.188
+          ],
+          "median_s": 0.188,
+          "count": 7,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 7
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 1,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.14061608399970282,
+              0.14214329199967324,
+              0.14277395799945225
+            ],
+            "median_s": 0.14214329199967324,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.012250707999555743,
+              0.012090083000657614,
+              0.012193624999781605
+            ],
+            "median_s": 0.012193624999781605,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 0,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.10207037500003935,
+              0.10096729199904075,
+              0.10065208299965889
+            ],
+            "median_s": 0.10096729199904075,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.011954458001127932,
+              0.012018208999506896,
+              0.011864250000144239
+            ],
+            "median_s": 0.011954458001127932,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n050_s1",
+      "kind": "synthetic",
+      "n": 50,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011275541000941303,
+            0.011289707999821985,
+            0.011365374999513733
+          ],
+          "median_s": 0.011289707999821985,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            20.29917949999981,
+            21.72897070900035,
+            21.082939292000447
+          ],
+          "median_s": 21.082939292000447,
+          "count": 2,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            2.517,
+            1.865,
+            2.782
+          ],
+          "median_s": 2.517,
+          "count": 6,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 6
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v006": 1,
+            "v007": 0,
+            "v008": 0,
+            "v009": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.106723916998817,
+              0.10756462499921327,
+              0.10953654199875018
+            ],
+            "median_s": 0.10756462499921327,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.013919875000283355,
+              0.013812791999953333,
+              0.013861707999240025
+            ],
+            "median_s": 0.013861707999240025,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v006": 0,
+            "v007": 1,
+            "v008": 1,
+            "v009": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.10937091699997836,
+              0.10804641699905915,
+              0.1069681250010035
+            ],
+            "median_s": 0.10804641699905915,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.013887749999412335,
+              0.013859665999916615,
+              0.013624416998936795
+            ],
+            "median_s": 0.013859665999916615,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n050_s2",
+      "kind": "synthetic",
+      "n": 50,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.012127083000450511,
+            0.012013083000056213,
+            0.01203262499984703
+          ],
+          "median_s": 0.01203262499984703,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v007": 1,
+            "v008": 1,
+            "v009": 0,
+            "v010": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.13405979100025434,
+              0.13165404200117337,
+              0.13123604099928343
+            ],
+            "median_s": 0.13165404200117337,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.016278832999887527,
+              0.016381125000407337,
+              0.01585187499949825
+            ],
+            "median_s": 0.016278832999887527,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v007": 0,
+            "v008": 0,
+            "v009": 1,
+            "v010": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.1365693329989881,
+              0.1366991250015417,
+              0.13711983299981512
+            ],
+            "median_s": 0.1366991250015417,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.01660620800066681,
+              0.01574304199857579,
+              0.016407541999797104
+            ],
+            "median_s": 0.016407541999797104,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n050_s3",
+      "kind": "synthetic",
+      "n": 50,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.010427708000861458,
+            0.011133207999591832,
+            0.011155333000715473
+          ],
+          "median_s": 0.011133207999591832,
+          "count": 3,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 3,
+          "boolnet": 3
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.6609629169997788,
+            0.6615050000000338,
+            0.6575867909996305
+          ],
+          "median_s": 0.6609629169997788,
+          "count": 3,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.905,
+            1.111,
+            0.836
+          ],
+          "median_s": 0.905,
+          "count": 20,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 3,
+          "boolnet": 20
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v008": 1,
+            "v009": 1,
+            "v010": 0,
+            "v011": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.11315837499932968,
+              0.1125413749996369,
+              0.11223962499934714
+            ],
+            "median_s": 0.1125413749996369,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.012838749998991261,
+              0.012747000000672415,
+              0.012772665999364108
+            ],
+            "median_s": 0.012772665999364108,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v008": 0,
+            "v009": 0,
+            "v010": 1,
+            "v011": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.08220320800137415,
+              0.08184095800061186,
+              0.08122137499958626
+            ],
+            "median_s": 0.08184095800061186,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.012894165998659446,
+              0.012929583001096034,
+              0.013131207999322214
+            ],
+            "median_s": 0.012929583001096034,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n050_s4",
+      "kind": "synthetic",
+      "n": 50,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.013480999999956111,
+            0.012027457998556201,
+            0.012018249999528052
+          ],
+          "median_s": 0.012027457998556201,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.062,
+            0.056,
+            0.065
+          ],
+          "median_s": 0.062,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "boolnet": 3
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v009": 0,
+            "v010": 1,
+            "v011": 1,
+            "v012": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.11958666700047615,
+              0.11861462500019115,
+              0.1165429579996271
+            ],
+            "median_s": 0.11861462500019115,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.01570374999937485,
+              0.015553208999335766,
+              0.015610166999977082
+            ],
+            "median_s": 0.015610166999977082,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v009": 1,
+            "v010": 0,
+            "v011": 0,
+            "v012": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.07988850000037928,
+              0.08272233299976506,
+              0.08234804099993198
+            ],
+            "median_s": 0.08234804099993198,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.015840833000765997,
+              0.015898582998488564,
+              0.01620470799934992
+            ],
+            "median_s": 0.015898582998488564,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n100_s0",
+      "kind": "synthetic",
+      "n": 100,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.018507541999497334,
+            0.01658270799998718,
+            0.01668812499883643
+          ],
+          "median_s": 0.01668812499883643,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.5225531670002965,
+              0.5093469580006058,
+              0.5071160419993248
+            ],
+            "median_s": 0.5093469580006058,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.028895541001475067,
+              0.028768332998879487,
+              0.028679500001089764
+            ],
+            "median_s": 0.028768332998879487,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.30960412499916856,
+              0.3090767499998037,
+              0.30775558299865224
+            ],
+            "median_s": 0.3090767499998037,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.028617415999178775,
+              0.02885279200017976,
+              0.02886308300003293
+            ],
+            "median_s": 0.02885279200017976,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n100_s1",
+      "kind": "synthetic",
+      "n": 100,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.015314166999814915,
+            0.01467150000098627,
+            0.014907958000549115
+          ],
+          "median_s": 0.014907958000549115,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v006": 1,
+            "v007": 0,
+            "v008": 0,
+            "v009": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.27612041600150405,
+              0.2783037499993952,
+              0.28009354200003145
+            ],
+            "median_s": 0.2783037499993952,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.025057167000340996,
+              0.025318833000710583,
+              0.025539624999510124
+            ],
+            "median_s": 0.025318833000710583,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v006": 0,
+            "v007": 1,
+            "v008": 1,
+            "v009": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.272172082999532,
+              0.26590666599986434,
+              0.26373312500072643
+            ],
+            "median_s": 0.26590666599986434,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.024879958999008522,
+              0.024974666999696638,
+              0.02506549999998242
+            ],
+            "median_s": 0.024974666999696638,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n100_s2",
+      "kind": "synthetic",
+      "n": 100,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.016838999999890802,
+            0.016011790999982622,
+            0.015951416999087087
+          ],
+          "median_s": 0.016011790999982622,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v007": 1,
+            "v008": 1,
+            "v009": 0,
+            "v010": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.4804319579998264,
+              0.47169420800128137,
+              0.4781425839992153
+            ],
+            "median_s": 0.4781425839992153,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.02948291699976835,
+              0.02999620899936417,
+              0.02928845799942792
+            ],
+            "median_s": 0.02948291699976835,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v007": 0,
+            "v008": 0,
+            "v009": 1,
+            "v010": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.32705033400088723,
+              0.32631716700052493,
+              0.325458459001311
+            ],
+            "median_s": 0.32631716700052493,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.02936733299975458,
+              0.02999525000086578,
+              0.029743667000730056
+            ],
+            "median_s": 0.029743667000730056,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n100_s3",
+      "kind": "synthetic",
+      "n": 100,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.018062957999063656,
+            0.015497166999921319,
+            0.0160379169992666
+          ],
+          "median_s": 0.0160379169992666,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v008": 1,
+            "v009": 1,
+            "v010": 0,
+            "v011": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.3849619160009752,
+              0.38982949999990524,
+              0.38542020800014143
+            ],
+            "median_s": 0.38542020800014143,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.02716987500025425,
+              0.027218749999519787,
+              0.027289249999739695
+            ],
+            "median_s": 0.027218749999519787,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v008": 0,
+            "v009": 0,
+            "v010": 1,
+            "v011": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.27731149999999616,
+              0.27633758400043007,
+              0.2710736250010086
+            ],
+            "median_s": 0.27633758400043007,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.027179042001080234,
+              0.026921459000732284,
+              0.027300415998979588
+            ],
+            "median_s": 0.027179042001080234,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n100_s4",
+      "kind": "synthetic",
+      "n": 100,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.017316207999101607,
+            0.01559991700014507,
+            0.0153716250006255
+          ],
+          "median_s": 0.01559991700014507,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v009": 0,
+            "v010": 1,
+            "v011": 1,
+            "v012": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.3296295830004965,
+              0.3290229169997474,
+              0.3247892090003006
+            ],
+            "median_s": 0.3290229169997474,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.027652374999888707,
+              0.027486332999615115,
+              0.027421332999438164
+            ],
+            "median_s": 0.027486332999615115,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v009": 1,
+            "v010": 0,
+            "v011": 0,
+            "v012": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.33498566699927323,
+              0.33423570900049526,
+              0.3338782920000085
+            ],
+            "median_s": 0.33423570900049526,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.027744832999815117,
+              0.02753804200074228,
+              0.02759899999909976
+            ],
+            "median_s": 0.02759899999909976,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n200_s0",
+      "kind": "synthetic",
+      "n": 200,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.023552541999379173,
+            0.02564133299893001,
+            0.025039582998942933
+          ],
+          "median_s": 0.025039582998942933,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.002,
+            0.002,
+            0.002
+          ],
+          "median_s": 0.002,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.4761451249996753,
+              1.5004421249996085,
+              1.4911899589988025
+            ],
+            "median_s": 1.4911899589988025,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.05154745899926638,
+              0.05156383299981826,
+              0.05237850000048638
+            ],
+            "median_s": 0.05156383299981826,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.137149166999734,
+              1.14060100000097,
+              1.143010666999544
+            ],
+            "median_s": 1.14060100000097,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0517065839994757,
+              0.05166066699894145,
+              0.05175095800041163
+            ],
+            "median_s": 0.0517065839994757,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n200_s1",
+      "kind": "synthetic",
+      "n": 200,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.022785000001022127,
+            0.022600041000259807,
+            0.022481166999568813
+          ],
+          "median_s": 0.022600041000259807,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.003,
+            0.00299999999999995,
+            0.003
+          ],
+          "median_s": 0.003,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v006": 0,
+            "v007": 1,
+            "v008": 1,
+            "v009": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.3602307080000173,
+              1.3890276249985618,
+              1.4065200410004763
+            ],
+            "median_s": 1.3890276249985618,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0465217910004867,
+              0.04619749999983469,
+              0.04653975000110222
+            ],
+            "median_s": 0.0465217910004867,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v006": 1,
+            "v007": 0,
+            "v008": 0,
+            "v009": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.3626009999989037,
+              1.355989125000633,
+              1.3553318750000471
+            ],
+            "median_s": 1.355989125000633,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0462353750008333,
+              0.04649241699917184,
+              0.04632624999976542
+            ],
+            "median_s": 0.04632624999976542,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n200_s2",
+      "kind": "synthetic",
+      "n": 200,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.024122541000906494,
+            0.02430929099864443,
+            0.024103249999825493
+          ],
+          "median_s": 0.024122541000906494,
+          "count": 3,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.003,
+            0.002,
+            0.003
+          ],
+          "median_s": 0.003,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 3,
+          "boolnet": 3
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            11.987,
+            11.119,
+            11.174
+          ],
+          "median_s": 11.174,
+          "count": 201,
+          "verified": true
+        },
+        "counts": {
+          "boolnet": 201
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v007": 0,
+            "v008": 1,
+            "v009": 1,
+            "v010": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.5562318749998667,
+              1.5613415830011945,
+              1.5860471249998227
+            ],
+            "median_s": 1.5613415830011945,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.052670041000965284,
+              0.05287999999927706,
+              0.05305633399984799
+            ],
+            "median_s": 0.05287999999927706,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v007": 1,
+            "v008": 0,
+            "v009": 0,
+            "v010": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.2420788340004947,
+              1.2484683330003463,
+              1.2438401250001334
+            ],
+            "median_s": 1.2438401250001334,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.05298212499837973,
+              0.052793083001233754,
+              0.05249270800049999
+            ],
+            "median_s": 0.052793083001233754,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n200_s3",
+      "kind": "synthetic",
+      "n": 200,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.023991750000277534,
+            0.02375554100035515,
+            0.02368337500047346
+          ],
+          "median_s": 0.02375554100035515,
+          "count": 3,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.00299999999999995,
+            0.003,
+            0.003
+          ],
+          "median_s": 0.003,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 3,
+          "boolnet": 3
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v008": 1,
+            "v009": 1,
+            "v010": 1,
+            "v011": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.8128539999997884,
+              1.809597916999337,
+              1.8342441249988042
+            ],
+            "median_s": 1.8128539999997884,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.05211349999990489,
+              0.05218375000004016,
+              0.051982584000143106
+            ],
+            "median_s": 0.05211349999990489,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v008": 0,
+            "v009": 0,
+            "v010": 0,
+            "v011": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.3904631250006787,
+              1.402733499999158,
+              1.3838906669989228
+            ],
+            "median_s": 1.3904631250006787,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.05140604199914378,
+              0.0511139579994051,
+              0.05172070799926587
+            ],
+            "median_s": 0.05140604199914378,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "synthetic/n200_s4",
+      "kind": "synthetic",
+      "n": 200,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.023209167000459274,
+            0.02311458400072297,
+            0.022935167000468937
+          ],
+          "median_s": 0.02311458400072297,
+          "count": 0,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.00299999999999995,
+            0.003,
+            0.003
+          ],
+          "median_s": 0.003,
+          "count": 0,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 0,
+          "boolnet": 0
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v009": 1,
+            "v010": 0,
+            "v011": 1,
+            "v012": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.1494992919997458,
+              1.147489167000458,
+              1.1341847500007134
+            ],
+            "median_s": 1.147489167000458,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.050801125000361935,
+              0.04997650000041176,
+              0.05000754200045776
+            ],
+            "median_s": 0.05000754200045776,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v009": 0,
+            "v010": 1,
+            "v011": 0,
+            "v012": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              1.1369512910005142,
+              1.1407300419996318,
+              1.1414559579989145
+            ],
+            "median_s": 1.1407300419996318,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.049622833999819704,
+              0.049390625001251465,
+              0.04960433400083275
+            ],
+            "median_s": 0.04960433400083275,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/lambda_phage",
+      "kind": "bio",
+      "n": 4,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0076808750000054715,
+            0.007547041001089383,
+            0.007227333000628278
+          ],
+          "median_s": 0.007547041001089383,
+          "count": 3,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 3,
+          "boolnet": 3
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            5.2791001508012414e-05,
+            4.683299994212575e-05,
+            5.3791000027558766e-05
+          ],
+          "median_s": 5.2791001508012414e-05,
+          "count": 4,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.12542008300079033,
+            0.12368420900020283,
+            0.1233641250000801
+          ],
+          "median_s": 0.12368420900020283,
+          "count": 3,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.0,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "ours": 4,
+          "pyboolnet": 3,
+          "boolnet": 4
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v001": 1,
+            "v002": 0,
+            "v003": 0,
+            "v000": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.018792832999679376,
+              0.017682957999568316,
+              0.016787709000709583
+            ],
+            "median_s": 0.017682957999568316,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003164040999763529,
+              0.00295883299986599,
+              0.0029168750006647315
+            ],
+            "median_s": 0.00295883299986599,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v001": 0,
+            "v002": 1,
+            "v003": 1,
+            "v000": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01773391699862259,
+              0.01692966699920362,
+              0.021962875000099302
+            ],
+            "median_s": 0.01773391699862259,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0029909580007370096,
+              0.003170500000123866,
+              0.003045166999072535
+            ],
+            "median_s": 0.003045166999072535,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2012-zebrafish-mir9-neurogenesis_zebra_miR9_22jul2011",
+      "kind": "bio",
+      "n": 6,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.01012408300084644,
+            0.015945332999763195,
+            0.008135542000673013
+          ],
+          "median_s": 0.01012408300084644,
+          "count": 3,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.0,
+          "count": 3,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 3,
+          "boolnet": 3
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.00026545800028543454,
+            0.0002669589994184207,
+            0.0002640000002429588
+          ],
+          "median_s": 0.00026545800028543454,
+          "count": 5,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.09453133299939509,
+            0.09630708300028346,
+            0.10883595800078183
+          ],
+          "median_s": 0.09630708300028346,
+          "count": 3,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 5,
+          "verified": true
+        },
+        "counts": {
+          "ours": 5,
+          "pyboolnet": 3,
+          "boolnet": 5
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v000": 0,
+            "v001": 0,
+            "v002": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01904866699987906,
+              0.01871637499971257,
+              0.016961332999926526
+            ],
+            "median_s": 0.01871637499971257,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0035655829997267574,
+              0.0035113339999952586,
+              0.0035694580001290888
+            ],
+            "median_s": 0.0035655829997267574,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v000": 1,
+            "v001": 1,
+            "v002": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.021374207999542705,
+              0.020512582999799633,
+              0.01777975000004517
+            ],
+            "median_s": 0.020512582999799633,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0035251660010544583,
+              0.0035037079996982357,
+              0.003512416999001289
+            ],
+            "median_s": 0.003512416999001289,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/lac_operon",
+      "kind": "bio",
+      "n": 7,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008295749999888358,
+            0.008481333999952767,
+            0.00802379199922143
+          ],
+          "median_s": 0.008295749999888358,
+          "count": 4,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 4,
+          "boolnet": 4
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.0005806660010421183,
+            0.0005904999998165295,
+            0.0005904589997953735
+          ],
+          "median_s": 0.0005904589997953735,
+          "count": 4,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.19277941600012127,
+            0.1724067079994711,
+            0.16335233399877325
+          ],
+          "median_s": 0.1724067079994711,
+          "count": 4,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.001,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "ours": 4,
+          "pyboolnet": 4,
+          "boolnet": 4
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v000": 0,
+            "v001": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.019506083001033403,
+              0.01718099999925471,
+              0.01725299999998242
+            ],
+            "median_s": 0.01725299999998242,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003514750000249478,
+              0.0032880409999052063,
+              0.0032949579999694834
+            ],
+            "median_s": 0.0032949579999694834,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v000": 1,
+            "v001": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017047875000571366,
+              0.016612666000582976,
+              0.016575792000367073
+            ],
+            "median_s": 0.016612666000582976,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003299209000033443,
+              0.003270499999416643,
+              0.003258916000049794
+            ],
+            "median_s": 0.003270499999416643,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/MODEL1504170000",
+      "kind": "bio",
+      "n": 9,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008122125000227243,
+            0.007777750000968808,
+            0.009529333001410123
+          ],
+          "median_s": 0.008122125000227243,
+          "count": 7,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 7,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 7,
+          "boolnet": 7
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.0032416659996670205,
+            0.0033480000001873123,
+            0.003228834000765346
+          ],
+          "median_s": 0.0032416659996670205,
+          "count": 7,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.3944428329996299,
+            0.43667174999973213,
+            0.4171956250011135
+          ],
+          "median_s": 0.4171956250011135,
+          "count": 7,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 7,
+          "verified": true
+        },
+        "counts": {
+          "ours": 7,
+          "pyboolnet": 7,
+          "boolnet": 7
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01969295799972315,
+              0.020087290999072138,
+              0.017713375000312226
+            ],
+            "median_s": 0.01969295799972315,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004331042000558227,
+              0.004333500000939239,
+              0.004426333000083105
+            ],
+            "median_s": 0.004333500000939239,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017346332999295555,
+              0.017880207999041886,
+              0.01742500000000291
+            ],
+            "median_s": 0.01742500000000291,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0041451249999227,
+              0.004077083000083803,
+              0.004083166999407695
+            ],
+            "median_s": 0.004083166999407695,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/biomodels_MODEL1712240003",
+      "kind": "bio",
+      "n": 9,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.007620207999934792,
+            0.009043541000210098,
+            0.008894832999430946
+          ],
+          "median_s": 0.008894832999430946,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.0,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.0024973330000648275,
+            0.0024326669990841765,
+            0.0024990000001707813
+          ],
+          "median_s": 0.0024973330000648275,
+          "count": 1,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.03270887500002573,
+            0.03190874999927473,
+            0.039025959000355215
+          ],
+          "median_s": 0.03270887500002573,
+          "count": 1,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.000999999999999973,
+            0.001,
+            0.000999999999999973
+          ],
+          "median_s": 0.000999999999999973,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "ours": 1,
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.016961875000561122,
+              0.0168744170005084,
+              0.01878512499934004
+            ],
+            "median_s": 0.016961875000561122,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003807875000347849,
+              0.0038223330011533108,
+              0.003780749999350519
+            ],
+            "median_s": 0.003807875000347849,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.020975375000489294,
+              0.019165708001310122,
+              0.017057125000064843
+            ],
+            "median_s": 0.019165708001310122,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003723541998624569,
+              0.003815457999735372,
+              0.0036188750000292202
+            ],
+            "median_s": 0.003723541998624569,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/MODEL1504170002",
+      "kind": "bio",
+      "n": 10,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.008332082999913837,
+            0.008067791999565088,
+            0.008148249999067048
+          ],
+          "median_s": 0.008148249999067048,
+          "count": 10,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 10,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 10,
+          "boolnet": 10
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.007302459000129602,
+            0.007379791000857949,
+            0.007604917000207934
+          ],
+          "median_s": 0.007379791000857949,
+          "count": 10,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.7177655420000519,
+            0.7741960839994135,
+            0.703626541999256
+          ],
+          "median_s": 0.7177655420000519,
+          "count": 10,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 10,
+          "verified": true
+        },
+        "counts": {
+          "ours": 10,
+          "pyboolnet": 10,
+          "boolnet": 10
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017749999999068677,
+              0.017529541999465437,
+              0.0173914999995759
+            ],
+            "median_s": 0.017529541999465437,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004312458000640618,
+              0.004342500000348082,
+              0.00431383300019661
+            ],
+            "median_s": 0.00431383300019661,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017358000000967877,
+              0.0169856249995064,
+              0.020834791001107078
+            ],
+            "median_s": 0.017358000000967877,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.004547624999759137,
+              0.00411891600015224,
+              0.004573250000248663
+            ],
+            "median_s": 0.004547624999759137,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/egfr_signaling",
+      "kind": "bio",
+      "n": 10,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.009672250000221538,
+            0.008113625000987668,
+            0.008508208999046474
+          ],
+          "median_s": 0.008508208999046474,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.006985541000176454,
+            0.0071831660006864695,
+            0.006892500001413282
+          ],
+          "median_s": 0.006985541000176454,
+          "count": 2,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.09036250000099244,
+            0.09889399999883608,
+            0.10847124999963853
+          ],
+          "median_s": 0.09889399999883608,
+          "count": 2,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2,
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.017651457999818376,
+              0.01711079099914059,
+              0.020585874999596854
+            ],
+            "median_s": 0.017651457999818376,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003404208999199909,
+              0.003358707999723265,
+              0.0033147919984912733
+            ],
+            "median_s": 0.003358707999723265,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.020697207999546663,
+              0.018022291998931905,
+              0.018893124999522115
+            ],
+            "median_s": 0.018893124999522115,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0034646670010261005,
+              0.0033825000009528594,
+              0.0033985000009124633
+            ],
+            "median_s": 0.0033985000009124633,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2013-drosophila-toll_Toll_Pathway_12Jun2013",
+      "kind": "bio",
+      "n": 11,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.00800083300055121,
+            0.007883083000706392,
+            0.008031291999941459
+          ],
+          "median_s": 0.00800083300055121,
+          "count": 4,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 4,
+          "boolnet": 4
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.015572667000014917,
+            0.015860249999605003,
+            0.016051208000135375
+          ],
+          "median_s": 0.015860249999605003,
+          "count": 4,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.15762904100120068,
+            0.148875582999608,
+            0.1501652919996559
+          ],
+          "median_s": 0.1501652919996559,
+          "count": 4,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.0,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "ours": 4,
+          "pyboolnet": 4,
+          "boolnet": 4
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01848358400093275,
+              0.01765408400024171,
+              0.017376915999193443
+            ],
+            "median_s": 0.01765408400024171,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.003600207999625127,
+              0.003486083000098006,
+              0.003530500000124448
+            ],
+            "median_s": 0.003530500000124448,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01767104099963035,
+              0.01771516599910683,
+              0.017492124999989755
+            ],
+            "median_s": 0.01767104099963035,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0036653340011980617,
+              0.003592332999687642,
+              0.003618458000346436
+            ],
+            "median_s": 0.003618458000346436,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2016-mammal-cell-cycle_Traynard_Boolean_MamCC_Apr2016",
+      "kind": "bio",
+      "n": 13,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011171415999342571,
+            0.01131304200134764,
+            0.010327791998861358
+          ],
+          "median_s": 0.011171415999342571,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.09570729099868913,
+            0.09482791699883819,
+            0.093117833001088
+          ],
+          "median_s": 0.09482791699883819,
+          "count": 5,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.4349274169999262,
+            0.38050058400040143,
+            0.36135245799960103
+          ],
+          "median_s": 0.38050058400040143,
+          "count": 2,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.027,
+            0.02,
+            0.02
+          ],
+          "median_s": 0.02,
+          "count": 5,
+          "verified": true
+        },
+        "counts": {
+          "ours": 5,
+          "pyboolnet": 2,
+          "boolnet": 5
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.0207680839994282,
+              0.02453833400068106,
+              0.0264270839998062
+            ],
+            "median_s": 0.02453833400068106,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.0131344170004013,
+              0.013000208000448765,
+              0.018999792000613525
+            ],
+            "median_s": 0.0131344170004013,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.023444458000085433,
+              0.023287709000214818,
+              0.021665624999513966
+            ],
+            "median_s": 0.023287709000214818,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.01246750000063912,
+              0.012698541000645491,
+              0.013031707998379716
+            ],
+            "median_s": 0.012698541000645491,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2011-drosophila-cell-cycle_drosophilaCellCycleVariants",
+      "kind": "bio",
+      "n": 14,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.010304584000550676,
+            0.010159084000406438,
+            0.009741292000398971
+          ],
+          "median_s": 0.010159084000406438,
+          "count": 24,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 24,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 24,
+          "boolnet": 24
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            0.2003878329996951,
+            0.20418699999936507,
+            0.1992887079995853
+          ],
+          "median_s": 0.2003878329996951,
+          "count": 27,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            1.3215075000007346,
+            1.2016375830007746,
+            1.2175843340010033
+          ],
+          "median_s": 1.2175843340010033,
+          "count": 26,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011,
+            0.01,
+            0.01
+          ],
+          "median_s": 0.01,
+          "count": 27,
+          "verified": true
+        },
+        "counts": {
+          "ours": 27,
+          "pyboolnet": 26,
+          "boolnet": 27
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01916858299955493,
+              0.019717041001058533,
+              0.01961416599988297
+            ],
+            "median_s": 0.01961416599988297,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.009163499998976476,
+              0.00905833300021186,
+              0.009220583000569604
+            ],
+            "median_s": 0.009163499998976476,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.02164124999944761,
+              0.020176374999209656,
+              0.020570082999256556
+            ],
+            "median_s": 0.020570082999256556,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.00898037499973725,
+              0.008882833000825485,
+              0.008930292000513873
+            ],
+            "median_s": 0.008930292000513873,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2009-budding-yeast-cell-cycle_buddingYeastIrons2009",
+      "kind": "bio",
+      "n": 18,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.009464458000365994,
+            0.008982792000097106,
+            0.009022999998705927
+          ],
+          "median_s": 0.009022999998705927,
+          "count": 6,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.001,
+            0.0
+          ],
+          "median_s": 0.0,
+          "count": 6,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 6,
+          "boolnet": 6
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            4.130223374999332,
+            4.1554146250000485,
+            4.174131249999846
+          ],
+          "median_s": 4.1554146250000485,
+          "count": 6,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.4700848329994187,
+            0.4534016249999695,
+            0.5265411250002217
+          ],
+          "median_s": 0.4700848329994187,
+          "count": 6,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.002,
+            0.002,
+            0.00199999999999997
+          ],
+          "median_s": 0.002,
+          "count": 6,
+          "verified": true
+        },
+        "counts": {
+          "ours": 6,
+          "pyboolnet": 6,
+          "boolnet": 6
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.0218426659994293,
+              0.022267000000283588,
+              0.019586625001466018
+            ],
+            "median_s": 0.0218426659994293,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.006060084000637289,
+              0.006083624999519088,
+              0.005972167000436457
+            ],
+            "median_s": 0.006060084000637289,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.02047912499983795,
+              0.020458583001527586,
+              0.019110167000690126
+            ],
+            "median_s": 0.020458583001527586,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.006172042001708178,
+              0.006155875000331434,
+              0.006269584000619943
+            ],
+            "median_s": 0.006172042001708178,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/MODEL1606020000",
+      "kind": "bio",
+      "n": 19,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.07271412499903818,
+            0.07194170799994026,
+            0.07069475000025705
+          ],
+          "median_s": 0.07194170799994026,
+          "count": 2356,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.567,
+            0.558,
+            0.561
+          ],
+          "median_s": 0.561,
+          "count": 2356,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2356,
+          "boolnet": 2356
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "ok",
+          "times_s": [
+            9.970519165999576,
+            9.854739040998538,
+            9.96692533299938
+          ],
+          "median_s": 9.96692533299938,
+          "count": 2832,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            1.391,
+            1.27,
+            1.472
+          ],
+          "median_s": 1.391,
+          "count": 2832,
+          "verified": true
+        },
+        "counts": {
+          "ours": 2832,
+          "boolnet": 2832
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.04258708399902389,
+              0.04260400000021036,
+              0.04590891699990607
+            ],
+            "median_s": 0.04260400000021036,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.01359391699952539,
+              0.013461917000313406,
+              0.013592458000857732
+            ],
+            "median_s": 0.013592458000857732,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.03015525000046182,
+              0.029537750000599772,
+              0.03397683399998641
+            ],
+            "median_s": 0.03015525000046182,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.01339808400007314,
+              0.013341542000489426,
+              0.013235708000138402
+            ],
+            "median_s": 0.013341542000489426,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2013-drosophila-hh_Hh__Pathway_11Jun2013",
+      "kind": "bio",
+      "n": 24,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.3843564159997186,
+            0.3806151669996325,
+            0.3882664169996133
+          ],
+          "median_s": 0.3843564159997186,
+          "count": 8192,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            7.353,
+            7.394,
+            7.312
+          ],
+          "median_s": 7.353,
+          "count": 8192,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 8192,
+          "boolnet": 8192
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "timeout",
+          "times_s": null,
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            7.486,
+            7.49,
+            7.554
+          ],
+          "median_s": 7.49,
+          "count": 8192,
+          "verified": true
+        },
+        "counts": {
+          "boolnet": 8192
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.0354579159993591,
+              0.0328840840011253,
+              0.03265320900027291
+            ],
+            "median_s": 0.0328840840011253,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.006301708001046791,
+              0.006230791001144098,
+              0.006251958999200724
+            ],
+            "median_s": 0.006251958999200724,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.03282637499978591,
+              0.03637974999946891,
+              0.03483162500015169
+            ],
+            "median_s": 0.03483162500015169,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.00632200000109151,
+              0.006330500000331085,
+              0.0065780839995568385
+            ],
+            "median_s": 0.006330500000331085,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2016-mammal-hspc-msc-communication_GINsim_HSPC_MSC",
+      "kind": "bio",
+      "n": 26,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011671166999803972,
+            0.011227041999518406,
+            0.011761292000301182
+          ],
+          "median_s": 0.011671166999803972,
+          "count": 2,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 2,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 2,
+          "boolnet": 2
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            1.0118968749993655,
+            0.9306340839993936,
+            0.8877534160001233
+          ],
+          "median_s": 0.9306340839993936,
+          "count": 4,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.034,
+            0.031,
+            0.034
+          ],
+          "median_s": 0.034,
+          "count": 6,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 4,
+          "boolnet": 6
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.0526185409999016,
+              0.05414520900012576,
+              0.05633266599943454
+            ],
+            "median_s": 0.05414520900012576,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.011404749999201158,
+              0.011428624999098247,
+              0.011535292000189656
+            ],
+            "median_s": 0.011428624999098247,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.03754654099975596,
+              0.036325749999377877,
+              0.03683724999973492
+            ],
+            "median_s": 0.03683724999973492,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.011463000000730972,
+              0.011428750000050059,
+              0.01134841599923675
+            ],
+            "median_s": 0.011428750000050059,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2010-mammal-cell-fate_Calzone__Cell_Fate",
+      "kind": "bio",
+      "n": 28,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.011124249998829328,
+            0.010945500000161701,
+            0.01101270800063503
+          ],
+          "median_s": 0.01101270800063503,
+          "count": 27,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.000999999999999973
+          ],
+          "median_s": 0.001,
+          "count": 27,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 27,
+          "boolnet": 27
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            2.0764902499995515,
+            2.0594566250001662,
+            2.0497052909995546
+          ],
+          "median_s": 2.0594566250001662,
+          "count": 27,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.038,
+            0.035,
+            0.036
+          ],
+          "median_s": 0.036,
+          "count": 97,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 27,
+          "boolnet": 97
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.050273332999495324,
+              0.050242916999195586,
+              0.05026820799866982
+            ],
+            "median_s": 0.05026820799866982,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.007013291000475874,
+              0.006944124999790802,
+              0.006965625001612352
+            ],
+            "median_s": 0.006965625001612352,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.0503282500012574,
+              0.0499586250007269,
+              0.05076754099900427
+            ],
+            "median_s": 0.0503282500012574,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.007297541998923407,
+              0.007070125000609551,
+              0.007033750000118744
+            ],
+            "median_s": 0.007070125000609551,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2010-mammal-cell-fate_CellFate_multiscale",
+      "kind": "bio",
+      "n": 33,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.009469957998589962,
+            0.009313374999692314,
+            0.009258500000214553
+          ],
+          "median_s": 0.009313374999692314,
+          "count": 23,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 23,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 23,
+          "boolnet": 23
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            1.0798143339998205,
+            1.0967686669991963,
+            1.105890749999162
+          ],
+          "median_s": 1.0967686669991963,
+          "count": 23,
+          "is_complete": "no",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.076,
+            0.061,
+            0.076
+          ],
+          "median_s": 0.076,
+          "count": 71,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 23,
+          "boolnet": 71
+        },
+        "counts_agree": false
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.024398125000516302,
+              0.02833329199893342,
+              0.02859845800048788
+            ],
+            "median_s": 0.02833329199893342,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.007485624999389984,
+              0.007440666999173118,
+              0.007460209000782925
+            ],
+            "median_s": 0.007460209000782925,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.022804416999861132,
+              0.023384833000818617,
+              0.021590791999187786
+            ],
+            "median_s": 0.022804416999861132,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.007575792000352521,
+              0.007683458999963477,
+              0.007486917000278481
+            ],
+            "median_s": 0.007575792000352521,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2018-mammal-tcr-tlr5_RodriguezJorge_TLR5_Signalling_BooleanModel_17Jul2018",
+      "kind": "bio",
+      "n": 42,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.009964000000763917,
+            0.010610625000481377,
+            0.010001499998907093
+          ],
+          "median_s": 0.010001499998907093,
+          "count": 4,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0,
+            0.000999999999999973,
+            0.001
+          ],
+          "median_s": 0.000999999999999973,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 4,
+          "boolnet": 4
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.6138950000004115,
+            0.6328147499989427,
+            0.5860154160000093
+          ],
+          "median_s": 0.6138950000004115,
+          "count": 4,
+          "is_complete": "yes",
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.00399999999999998,
+            0.00399999999999998,
+            0.005
+          ],
+          "median_s": 0.00399999999999998,
+          "count": 4,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 4,
+          "boolnet": 4
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.019826333000310115,
+              0.019552499999917927,
+              0.019682916999954614
+            ],
+            "median_s": 0.019682916999954614,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.008348542000021553,
+              0.008307292000608868,
+              0.008390917000724585
+            ],
+            "median_s": 0.008348542000021553,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.01985324999986915,
+              0.019648375000542728,
+              0.019665582998641185
+            ],
+            "median_s": 0.019665582998641185,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.008393583000724902,
+              0.008339250000062748,
+              0.008406791999732377
+            ],
+            "median_s": 0.008393583000724902,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2008-mammal-survival-tlgl-leukemia_T_LGL",
+      "kind": "bio",
+      "n": 60,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.0212793340015196,
+            0.02117216599981475,
+            0.021060667000710964
+          ],
+          "median_s": 0.02117216599981475,
+          "count": 172,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.01,
+            0.00900000000000001,
+            0.00900000000000001
+          ],
+          "median_s": 0.00900000000000001,
+          "count": 172,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 172,
+          "boolnet": 172
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.64,
+            0.656,
+            0.682
+          ],
+          "median_s": 0.656,
+          "count": 528,
+          "verified": true
+        },
+        "counts": {
+          "boolnet": 528
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.20709433299998636,
+              0.20861491700088663,
+              0.2104122919990914
+            ],
+            "median_s": 0.20861491700088663,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.02572008300012385,
+              0.025706624999656924,
+              0.02651829199930944
+            ],
+            "median_s": 0.02572008300012385,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.2115986669996346,
+              0.21048104100009368,
+              0.21237404199928278
+            ],
+            "median_s": 0.2115986669996346,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.02620783299971663,
+              0.026233124999635038,
+              0.026005790999988676
+            ],
+            "median_s": 0.02620783299971663,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2015-mammal-cell-fate-gastric-cancer_Flobak_FullModel_S2_Dataset",
+      "kind": "bio",
+      "n": 77,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.01377104200037138,
+            0.013005666998651577,
+            0.01244924999991781
+          ],
+          "median_s": 0.013005666998651577,
+          "count": 1,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.001,
+            0.001,
+            0.001
+          ],
+          "median_s": 0.001,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 1,
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.067,
+            0.064,
+            0.062
+          ],
+          "median_s": 0.064,
+          "count": 1,
+          "verified": true
+        },
+        "counts": {
+          "boolnet": 1
+        },
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 1,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.1553612499992596,
+              0.15237737499955983,
+              0.1524758750001638
+            ],
+            "median_s": 0.1524758750001638,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.017425125000954722,
+              0.01733845799935807,
+              0.017226250000021537
+            ],
+            "median_s": 0.01733845799935807,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 0,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.15290237500084913,
+              0.15370929099844943,
+              0.15359741599968402
+            ],
+            "median_s": 0.15359741599968402,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.01734533400122018,
+              0.01726487499945506,
+              0.01762145800057624
+            ],
+            "median_s": 0.01734533400122018,
+            "reachable": true
+          }
+        }
+      }
+    },
+    {
+      "id": "bio/ginsim_2019-mammal-cell-cycle-control_CellCycleControl_Sizek_PCB_2019",
+      "kind": "bio",
+      "n": 87,
+      "fixed": {
+        "ours": "none exists",
+        "pyboolnet": {
+          "status": "ok",
+          "times_s": [
+            0.029810875001203385,
+            0.029625041999679524,
+            0.02852458300003491
+          ],
+          "median_s": 0.029625041999679524,
+          "count": 16,
+          "verified": true
+        },
+        "boolnet": {
+          "status": "ok",
+          "times_s": [
+            0.014,
+            0.015,
+            0.014
+          ],
+          "median_s": 0.014,
+          "count": 16,
+          "verified": true
+        },
+        "counts": {
+          "pyboolnet": 16,
+          "boolnet": 16
+        },
+        "counts_agree": true
+      },
+      "attr": {
+        "ours": {
+          "status": "not run: exhaustive over 2^n states, n > 24",
+          "label": "exhaustive (2^n states)"
+        },
+        "pyboolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "boolnet": {
+          "status": "timeout",
+          "times_s": null
+        },
+        "counts": {},
+        "counts_agree": true
+      },
+      "reach": {
+        "T+": {
+          "target": {
+            "v005": 1,
+            "v006": 1,
+            "v007": 1,
+            "v008": 0
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.2390366660001746,
+              0.24448887499966077,
+              0.24575241599995934
+            ],
+            "median_s": 0.24448887499966077,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.06610416699913912,
+              0.06989874999999302,
+              0.0683123329999944
+            ],
+            "median_s": 0.0683123329999944,
+            "reachable": true
+          }
+        },
+        "T-": {
+          "target": {
+            "v005": 0,
+            "v006": 0,
+            "v007": 0,
+            "v008": 1
+          },
+          "ours": "none exists",
+          "pyboolnet": {
+            "status": "ok",
+            "times_s": [
+              0.22587037499943108,
+              0.22843525000098452,
+              0.22974516600152128
+            ],
+            "median_s": 0.22843525000098452,
+            "reachable": true
+          },
+          "boolnet": "not offered",
+          "z3_bmc": {
+            "status": "ok",
+            "times_s": [
+              0.06655233300079999,
+              0.06864674999997078,
+              0.06680724999932863
+            ],
+            "median_s": 0.06680724999932863,
+            "reachable": true
+          }
+        }
+      }
+    }
+  ]
+}

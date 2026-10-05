@@ -1,0 +1,73 @@
+--- a/index-deconvolution/results/causal_abstraction_validation/abstraction-validation-v1-r1/test_study.py
++++ b/index-deconvolution/results/causal_abstraction_validation/abstraction-validation-v1-r1/test_study.py
+@@ -221,3 +221,70 @@
+     co = S.coordinates(c, 8)
+     assert co[0][:2] == (0, 0) and co[3][:2] == (1, 1) and co[3][2] == 0 and co[4][2] == 1
+     assert S.beta_fine({"op": "flip", "j": 2, "c": None}, co) != S.beta_fine({"op": "flip", "j": 3, "c": None}, co)
++
++
++# ---- review closure R1: evidence availability and failure precedence (declared fixtures F1-F7)
++_OK = {0: 0, 1: 1}
++_SZ = {0: 1, 1: 1}
++
++
++def _member(r, ci=0, mi=0):
++    return r["classes"][ci]["members"][mi]
++
++
++def test_r1_missing_singleton_is_incomplete_not_no_holdout():
++    r = S.evaluate_classes([[0]], {}, set(), _SZ, 4)
++    assert r["label"] == "COARSE-INCOMPLETE"
++    assert r["classes"][0]["rep_state"] == "MISSING"
++    assert r["availability"] == {"missing_records": 1, "missing_comparisons": 0}
++    assert r["counts"]["MISSING"] == 0 and r["pairs_intended"] == 0
++
++
++def test_r1_missing_rep_failed_member_is_struct_fail():
++    r = S.evaluate_classes([[0, 1]], {1: None}, {1}, _SZ, 4)
++    assert r["label"] == "COARSE-STRUCT-FAIL"
++    m = _member(r)
++    assert m["outcome"] == "MEMBER-NOEXIST" and m["own_e3"] == F
++    assert m["macro_disagreements"] is None and m["micro_mismatches"] is None
++    assert r["counts"]["MEMBER-NOEXIST"] == 1 and r["counts"]["MISSING"] == 1
++    assert r["availability"] == {"missing_records": 1, "missing_comparisons": 1}
++    assert r["pairs_inspected"] == 0 and r["pairs_evaluable"] == 0
++
++
++def test_r1_missing_rep_passing_member_is_incomplete_no_substitution():
++    r = S.evaluate_classes([[0, 1]], {1: dict(_OK)}, {1}, _SZ, 4)
++    assert r["label"] == "COARSE-INCOMPLETE"
++    m = _member(r)
++    assert m["outcome"] == "MISSING" and m["own_e3"] == P
++    assert m["reason"] == "representative record absent"
++    assert m["macro_disagreements"] is None and m["witness_macro"] is None
++    assert r["availability"] == {"missing_records": 1, "missing_comparisons": 1}
++
++
++def test_r1_rep_nomap_member_missing_is_struct_fail():
++    r = S.evaluate_classes([[0, 1]], {0: None}, {0}, _SZ, 4)
++    assert r["label"] == "COARSE-STRUCT-FAIL"
++    assert r["classes"][0]["rep_state"] == "REP-NOEXIST"
++    assert _member(r)["outcome"] == "MISSING" and _member(r)["own_e3"] is None
++    assert r["availability"] == {"missing_records": 1, "missing_comparisons": 1}
++
++
++def test_r1_rep_nomap_member_failed_is_struct_fail():
++    r = S.evaluate_classes([[0, 1]], {0: None, 1: None}, {0, 1}, _SZ, 4)
++    assert r["label"] == "COARSE-STRUCT-FAIL"
++    m = _member(r)
++    assert m["outcome"] == "NOT-EVALUABLE" and m["own_e3"] == F
++    assert r["availability"] == {"missing_records": 0, "missing_comparisons": 0}
++
++
++def test_r1_disagreement_plus_missing_keeps_disagree():
++    r = S.evaluate_classes([[0, 1], [2, 3]], {0: dict(_OK), 1: {0: 1, 1: 1}}, {0, 1}, _SZ, 4)
++    assert r["label"] == "COARSE-DISAGREE"
++    assert r["counts"]["DISAGREE"] == 1 and r["counts"]["MISSING"] == 1
++    assert r["availability"] == {"missing_records": 2, "missing_comparisons": 1}
++
++
++def test_r1_struct_fail_plus_missing_singleton_keeps_struct_fail():
++    r = S.evaluate_classes([[0, 1], [2]], {0: None, 1: dict(_OK)}, {0, 1}, _SZ, 4)
++    assert r["label"] == "COARSE-STRUCT-FAIL"
++    assert r["availability"] == {"missing_records": 1, "missing_comparisons": 0}

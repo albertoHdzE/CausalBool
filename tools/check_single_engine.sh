@@ -208,6 +208,26 @@ else
   STATUS=1
 fi
 
+# bdm_anatomy_v1 (notebook 19) — the BDM arrangement term and the certified ECA
+# code. Owner: src/description_lengths.py (block_code_parts, certified_eca_code).
+# Keyed on body fragments: the multinomial in lgamma form, and D_schema rounded
+# up to a prefix-code length. index-deconvolution/bitacora/ is exempt: its
+# 43_probes/ are the exploratory scripts that preceded the owner, kept unedited
+# as the provenance of bitacora 43's numbers.
+ba_files=$(grep -rlE 'lgamma\(m ?\+ ?1\) ?- ?sum\((math\.)?lgamma|ceil\(schema_normal_form_length' \
+             --include='*.py' . 2>/dev/null \
+           | sed 's|^\./||' \
+           | grep -vE '^(archive|venv|audit|index-deconvolution/bitacora|.*/\.venv|.*/venv)/' \
+           | sort -u)
+if [[ "$ba_files" == "src/description_lengths.py" ]]; then
+  echo "SINGLE-ENGINE: ok    BDM block code and certified ECA code defined only in src/description_lengths.py"
+else
+  echo "SINGLE-ENGINE: FAIL  BDM block-code / certified-code sites:"
+  printf '  %s\n' ${(f)ba_files}
+  echo "  -> call description_lengths.block_code_parts / certified_eca_code"
+  STATUS=1
+fi
+
 if [[ "$STATUS" -eq 0 ]]; then
   echo "SINGLE-ENGINE: clean"
 else

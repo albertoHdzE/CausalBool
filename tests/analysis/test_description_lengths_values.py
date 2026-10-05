@@ -350,3 +350,163 @@ def test_variant_c_delegates_to_the_causalnet_measure():
     and3 = dl.model_dnf_bits([0, 0, 0, 0, 0, 0, 0, 1], 3)
     # XOR needs four product terms in DNF; AND needs one.
     assert xor3 > and3
+
+
+# ── bdm_1d / ctm_1d: the 1-D partition is chosen explicitly ─────────────────
+
+def test_ctm_is_invariant_under_reversal_and_complement():
+    # The D(5) machine space is closed under both symmetries, so the table is.
+    s = "10111111"
+    comp = "".join("1" if c == "0" else "0" for c in s)
+    assert dl.ctm_1d(s) == pytest.approx(dl.ctm_1d(s[::-1]))
+    assert dl.ctm_1d(s) == pytest.approx(dl.ctm_1d(comp))
+
+
+def test_aligned_bdm_is_the_sum_of_ctm_plus_log2_multiplicity():
+    # Derived from the BDM definition, not copied from pybdm's output.
+    blocks = ["01111111", "10111111", "01111111"]
+    expected = dl.ctm_1d(blocks[0]) + 1.0 + dl.ctm_1d(blocks[1])
+    assert dl.bdm_1d("".join(blocks), block=8) == pytest.approx(expected)
+
+
+def test_bdm_1d_refuses_a_remainder_unless_asked():
+    with pytest.raises(ValueError, match="tiled"):
+        dl.bdm_1d("1" * 20, block=12)
+    assert dl.bdm_1d("1" * 20, block=12, remainder="drop") == pytest.approx(
+        dl.ctm_1d("1" * 12))
+
+
+def test_ctm_1d_refuses_beyond_the_table():
+    with pytest.raises(ValueError, match="1..12"):
+        dl.ctm_1d("1" * 13)
+
+
+# ── HID-v1 / H0: the 1-D interface validates before converting ──────────────
+
+import numpy as _np
+
+
+@pytest.mark.parametrize("bad", [
+    [0.0, 1.0, 1.0], _np.array([0.0, 1.0]), [0, 0.5, 1], _np.array([0.5, 1.0]),
+    [0, 2, 1], "01a1", "0 1", [[0, 1], [1, 0]], _np.zeros((2, 2), dtype=int),
+    [[0, 1], [1]], [], "", _np.array([], dtype=int), 1, 0, True, _np.int64(1),
+    b"0101", [None, 1],
+])
+def test_bits_refuses_float_nonbinary_ragged_empty_and_scalar(bad):
+    with pytest.raises(ValueError):
+        dl.ctm_1d(bad)
+
+
+def test_float_one_half_is_never_cast_to_zero():
+    # The historical dtype=int cast scored [0, 0.5, 1] as "001"; it must now refuse.
+    with pytest.raises(ValueError, match="int or bool"):
+        dl.bdm_1d([0, 0.5, 1, 1], block=4)
+
+
+def test_int_bool_and_string_inputs_agree():
+    s = "0110100110010110"
+    as_int = [int(c) for c in s]
+    as_bool = [c == "1" for c in s]
+    want = dl.bdm_1d(s, block=8)
+    assert dl.bdm_1d(as_int, block=8) == want
+    assert dl.bdm_1d(as_bool, block=8) == want
+    assert dl.bdm_1d(_np.array(as_int, dtype=_np.int8), block=8) == want
+    assert dl.bdm_1d(_np.array(as_bool), block=8) == want
+
+
+@pytest.mark.parametrize("kw", [
+    {"block": 0}, {"block": 13}, {"block": True}, {"block": 8.0},
+    {"block": 8, "shift": 0}, {"block": 8, "shift": 9}, {"block": 8, "shift": True},
+    {"block": 8, "shift": 2.0}, {"block": 8, "remainder": "pad"},
+    {"block": 8, "remainder": None},
+])
+def test_bdm_1d_parameter_validation(kw):
+    with pytest.raises(ValueError):
+        dl.bdm_1d("01" * 12, **kw)
+
+
+def test_short_input_is_refused_for_raise_and_drop_not_scored_as_zero():
+    for policy in ("raise", "drop"):
+        with pytest.raises(ValueError, match="shorter than block"):
+            dl.bdm_1d("0101", block=8, remainder=policy)
+
+
+def test_recursive_short_input_scores_the_shorter_block():
+    assert dl.bdm_1d("01101", block=8, remainder="recursive") == pytest.approx(
+        dl.ctm_1d("01101"))
+
+
+def test_recursive_covers_every_bit_and_equals_the_parts_by_definition():
+    s = "1011" * 6 + "110"          # 27 bits: 12 + 12 + 3
+    d = dl.bdm_1d_partition(s, block=12, remainder="recursive")
+    assert d["covered_bits"] == 27 and d["dropped_bits"] == 0
+    assert d["parts"] == [(0, 12), (12, 12), (24, 3)]
+    # Two identical 12-blocks: CTM once + log2(2); the 3-bit remainder separately.
+    expected = dl.ctm_1d(s[:12]) + 1.0 + dl.ctm_1d("110")
+    assert d["score"] == pytest.approx(expected)
+
+
+def test_recursive_is_refused_with_a_sliding_shift():
+    with pytest.raises(ValueError, match="shift=None"):
+        dl.bdm_1d("01" * 12, block=8, shift=1, remainder="recursive")
+
+
+def test_sliding_raise_requires_exact_tiling_and_drop_reports_coverage():
+    s = "011010011001"                       # 12 bits
+    with pytest.raises(ValueError, match="tiled"):
+        dl.bdm_1d(s, block=4, shift=3)       # starts 0,3,6 cover 10 bits
+    d = dl.bdm_1d_partition(s, block=4, shift=3, remainder="drop")
+    assert d["covered_bits"] == 10 and d["dropped_bits"] == 2
+    assert [p[0] for p in d["parts"]] == [0, 3, 6]
+    full = dl.bdm_1d_partition(s, block=4, shift=1)
+    assert full["covered_bits"] == 12 and len(full["parts"]) == 9
+
+
+def test_historical_scores_from_bitacoras_32_and_33_are_unchanged():
+    shifted = ["1" * i + "0" + "1" * (7 - i) for i in range(8)]
+    a64 = "".join(shifted)
+    a72 = "1" * 8 + a64
+    # Recorded before H0 by the unhardened owner (bitacora 32 Finding 3, bitacora 33 3.2).
+    assert dl.bdm_1d(a64, block=8) == pytest.approx(159.785, abs=5e-4)
+    assert dl.bdm_1d(a72, block=3) == pytest.approx(17.842, abs=5e-4)
+    assert dl.bdm_1d(a72, block=9) == pytest.approx(24.615, abs=5e-4)
+    assert dl.bdm_1d(a72, block=8) == pytest.approx(178.31, abs=5e-3)
+
+
+def test_encoded_bit_length_is_eight_times_the_byte_count():
+    assert dl.encoded_bit_length(b"") == 0
+    assert dl.encoded_bit_length(b"ISD1\x00\x00\x00") == 56
+    for bad in ("ISD1", bytearray(b"ab"), memoryview(b"ab"), [1, 2], None):
+        with pytest.raises(TypeError):
+            dl.encoded_bit_length(bad)
+
+
+# ── bdm_1d_trace: the walk, block by block, sums to the owner's score ───────
+
+@pytest.mark.parametrize("s,kw", [
+    ("11101111", {"block": 8}),
+    ("11101111", {"block": 4, "shift": 1}),
+    ("011111111" * 8, {"block": 9}),
+    ("01111111" * 8, {"block": 8, "shift": 4}),
+    ("0110100110", {"block": 4, "remainder": "recursive"}),
+])
+def test_bdm_1d_trace_reconstructs_the_owner_score(s, kw):
+    t = dl.bdm_1d_trace(s, **kw)
+    assert t["rows"], "a trace with no rows proves nothing"
+    assert t["rows"][-1]["running"] == pytest.approx(dl.bdm_1d(s, **kw), abs=1e-9)
+    assert [(r["start"], r["length"]) for r in t["rows"]] == t["parts"]
+    for r in t["rows"]:
+        assert r["block"] == s[r["start"]:r["start"] + r["length"]]
+
+
+def test_bdm_1d_trace_word_equal_to_string_is_one_lookup():
+    t = dl.bdm_1d_trace("11101111", block=8, shift=1)
+    assert len(t["rows"]) == 1 and t["rows"][0]["ctm"] == pytest.approx(dl.ctm_1d("11101111"))
+
+
+def test_bdm_1d_trace_repeats_cost_log_increments():
+    rows = dl.bdm_1d_trace("011111111" * 8, block=9)["rows"]
+    assert [r["occurrence"] for r in rows] == list(range(1, 9))
+    for r in rows[1:]:
+        k = r["occurrence"]
+        assert r["added"] == pytest.approx(math.log2(k) - math.log2(k - 1))

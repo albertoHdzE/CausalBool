@@ -125,6 +125,43 @@ Parity gate: `python tools/test_description_length_parity.py` → exit 0 require
 It re-computes every fixture value through the wrapper and asserts the V5 stamps
 and the header delta.
 
+### §1c Archive bits (HID-v1, 2026-10-02) — a measured quantity, not a variant
+
+`index-deconvolution/hierarchy` (protocol `PROTOCOL_hierarchical_index_generalization.md`)
+measures **archive bits**: `8 × len(archive)` of a complete, independently decodable
+byte archive in the HID-v1 format, headers and padding included. The public measurement
+is `src/description_lengths.encoded_bit_length(payload: bytes) -> int`, which validates
+`bytes` strictly and does not import the hierarchy package.
+
+Archive bits are **not** variants A–E, not `D_schema`, not CTM/BDM and not an entropy
+statistic. The HID-v1 statistical comparison codecs (Bernoulli and first-order context
+enumerative codes) are decodable baselines labelled as such; they are never inserted into
+any description-length variant nor into the HID model-selection objective. Variants A–E
+are unchanged.
+
+The 1-D BDM wrapper (`ctm_1d`, `bdm_1d`, `bdm_1d_partition`) validates its input before
+conversion (refusing floats, non-binary, ragged, empty and scalar data), requires integral
+`block`/`shift`, and adds `remainder="recursive"` (pybdm `PartitionRecursive`,
+`min_length=1`) for full aligned coverage; previously valid scores are unchanged (0.0
+maximum difference over 20,458 comparisons, recorded in
+`index-deconvolution/results/hierarchy_v1/development/provenance/h0_owner_parity.txt`).
+
+### §1d Block code parts and the certified ECA code (bdm_anatomy_v1, 2026-10-04)
+
+Two further quantities, owned by `src/description_lengths.py`, guarded by
+`tools/check_single_engine.sh` and tested by round trip in
+`tests/analysis/test_bdm_anatomy_owner.py`. Neither is a variant A–E.
+
+- `block_code_parts` splits BDM into its **dictionary** (Σ CTM over distinct blocks) and
+  **counts** (Σ log2 multiplicity) — their sum is `bdm_1d` to 1e-9 — and adds the
+  **arrangement** term log2(m!/∏n!) that BDM omits. `decodable_bits` is the length of an
+  actual prefix code (⌈CTM⌉ per word, Kraft 0.671 over all 8,190 words of length 1–12;
+  Elias-γ counts; multiset rank) for lossless aligned partitions; `None` otherwise.
+- `certified_eca_code` is ⌈D_schema⌉(rule) + γ(width) + literal seed + γ(steps): a code
+  from which the diagram is reconstructed exactly (Kraft over the 256 rules 0.617).
+  `imp_causalnet_paper.measure.two_part_code` prices the seed with `bdm_1d(seed)`, which
+  is not a code length; it is a **different quantity** and keeps its own name.
+
 ## §3 The one wrapper
 
 `src/description_lengths.py` is the supported Python entry point:

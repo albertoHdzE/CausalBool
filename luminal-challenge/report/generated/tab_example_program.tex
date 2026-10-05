@@ -1,0 +1,11 @@
+0 & \texttt{a0 = load a[0]} & \emph{one word from buffer \texttt{a} (latency 3)} \\
+1 & \texttt{b0 = load b[0]} & \emph{one word from buffer \texttt{b} (latency 3)} \\
+2 & \texttt{c0 = load c[0]} & \emph{one word from buffer \texttt{c} (latency 3)} \\
+3 & \texttt{d0 = load d[0]} & \emph{one word from buffer \texttt{d} (latency 3)} \\
+4 & \texttt{left\_product = a0 * b0} & \emph{(latency 2)} \\
+5 & \texttt{right\_product = c0 * d0} & \emph{(latency 2)} \\
+6 & \texttt{cross = a0 + c0} & \emph{shared by both chains (latency 1)} \\
+7 & \texttt{left = left\_product + cross} & \emph{(latency 1)} \\
+8 & \texttt{right = right\_product \^{} cross} & \emph{(latency 1)} \\
+9 & \texttt{out[0] = left} & \emph{one store slot per cycle} \\
+10 & \texttt{out[1] = right} & \emph{one store slot per cycle} \\

@@ -1,0 +1,37 @@
+{
+  "regression_legacy_input_and_archive_hash_matches": 1632,
+  "pilot_resume_replay": {
+    "interrupted_after_cases": 8,
+    "replayed_cases": 12,
+    "deterministic_fields": [
+      "status",
+      "archive_sha256",
+      "archive_bits",
+      "decode_ok",
+      "selected_codec_id",
+      "selected_method",
+      "rule_count",
+      "dag_depth",
+      "candidate_count",
+      "deterministic_work",
+      "best_source",
+      "trace",
+      "search_counters (timing removed)"
+    ],
+    "differences": [],
+    "identical": true
+  },
+  "notebook_code_cells": 15,
+  "notebook_errors": 0,
+  "notebook_unexecuted": 0,
+  "notebook_live_inference_cells": [
+    {
+      "code_cell_1based": 5,
+      "source": "import random\nrng = random.Random(63)\nword = \"\".join(rng.choice(\"01\") for _ in range(63))\nn = 4096\nclean = (word * (n // 63 + 1))[:n]\nflips = sorted(rng.sample(range(n), n // 32))\nx = \"\".join((\"1\" if c == \"0\" else \"0\") if i in set(flips) else c for i, c in enumerate(clean))\nprint(f\"input: n = {n} bits, period 63 word with {len(flips)} flipped positions\")\nfor name in ARM_ORDER:\n    r = infer_v2(x, ARMS[name])\n    assert decode_archive(r.archive) == x\n    print(f\"{name:<20} {r.archive_bits:>6} bits  selected stage {r.selected_stage:<4}\"\n          f\" detail {r.telemetry.get('selected_detail')}\")"
+    },
+    {
+      "code_cell_1based": 6,
+      "source": "r = infer_v2(x, ARMS[\"hid_global\"])\nled = archive_ledger(r.archive)\nprint(\"exact cost buckets (bits):\", field_buckets(r.archive))\nfor i, rule in enumerate(led[\"model\"].rules):\n    print(i, type(rule).__name__, {k: (v if not isinstance(v, (tuple, str)) or len(v) < 12 else f\"<{len(v)} items>\")\n                                   for k, v in rule.__dict__.items()})"
+    }
+  ]
+}

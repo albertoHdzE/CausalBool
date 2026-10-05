@@ -1,0 +1,943 @@
+--- a/index-deconvolution/experiments/search_diagnosis/analysis.py
++++ b/index-deconvolution/experiments/search_diagnosis/analysis.py
+@@ -161,13 +161,32 @@
+ # Job records
+ # ---------------------------------------------------------------------------
+ 
+-def load_records(section: str, ids, kinds) -> dict:
++def load_records(section: str, ids, kinds, run_dir=None) -> dict:
+     out = {}
+     for cid in ids:
+         for k in kinds:
+-            p = record_path(K.RUN_DIR, section, cid, k)
++            p = record_path(run_dir or K.RUN_DIR, section, cid, k)
+             out[(cid, k)] = json.loads(p.read_text()) if p.exists() else None
+     return out
++
++
++def evidence_status(r: dict | None, input_sha256: str | None = None) -> str:
++    """Record status for reporting. ``ok``; an explicit UNAVAILABLE status (``missing``,
++    ``not_run``, ``timeout``, ``rss_limit``, ``error``); or an INVALID status
++    (``invalid_decode`` for a wrong decode, ``invalid_source`` for an input hash that
++    differs from the saved case). Protocol §9: invalid evidence is never unavailable."""
++    if r is None:
++        return "missing"
++    if input_sha256 is not None and r.get("input_sha256") != input_sha256:
++        return "invalid_source"
++    st = r.get("status", "missing")
++    if st == "error" and str(r.get("exception") or "").startswith("wrong_decode"):
++        return "invalid_decode"
++    return st
++
++
++def is_invalid(status: str) -> bool:
++    return status.startswith("invalid_")
+ 
+ 
+ def resource_summary(recs: dict) -> dict:
+@@ -193,10 +212,10 @@
+         n = full["n_bits"]
+         row = {"n": n, "H": full["archive_bits"], "saved_B_bits": B.get("archive_bits"),
+                "selected_stage": (full["search_counters"] or {}).get("selected_stage"),
+-               "B0_status": (r0 or {}).get("status", "missing"),
+-               "B8_status": (r8 or {}).get("status", "missing")}
++               "B0_status": evidence_status(r0, full["input_sha256"]),
++               "B8_status": evidence_status(r8, full["input_sha256"])}
+         for name, r in (("B0", r0), ("B8", r8)):
+-            if r and r["status"] == "ok":
++            if row[f"{name}_status"] == "ok":
+                 row[f"{name}_bits"] = r["info"]["archive_bits"]
+                 row[f"{name}_stop"] = r["info"]["stop_reason"]
+                 row[f"{name}_cap_hit"] = r["info"]["cap_hit"]
+@@ -204,7 +223,7 @@
+                 row[f"{name}_root_trials"] = r["info"]["counts"]["root_trials"]
+                 row[f"{name}_wall_s"] = r["worker_wall_ns"] / 1e9
+                 row[f"{name}_rss"] = r["peak_rss_bytes"]
+-        if r0 and r0["status"] == "ok":
++        if row["B0_status"] == "ok":
+             from .kernels import DETERMINISTIC_B
+             mism = [k for k in DETERMINISTIC_B
+                     if json.loads(json.dumps(r0["info"][k])) != B.get(k)]
+@@ -327,10 +346,11 @@
+     for cid in ids:
+         r = recs[(cid, "D3")]
+         ref = refs[cid]
+-        row = {"status": (r or {}).get("status", "missing"), "n": ref["n_bits"],
++        sha_in = K.saved_rows(cid)["hid_full"]["input_sha256"]
++        row = {"status": evidence_status(r, sha_in), "n": ref["n_bits"],
+                "supplied_cuts": ref["cuts"], "H": d2[cid]["H"],
+                "B0": d2[cid].get("B0_bits"), "B8": d2[cid].get("B8_bits")}
+-        if r and r["status"] == "ok":
++        if row["status"] == "ok":
+             info = r["info"]
+             cost = {tuple(s["subset"]): s.get("archive_bits") for s in info["subsets"]}
+             g = d3_graph(info["cuts"], ref["n_bits"], cost)
+@@ -361,8 +381,8 @@
+             C = rows[m]["archive_bits"]
+             row = {"case_id": cid, "method": m, "n": n, "H": H, "C": C, "portfolio": P,
+                    "portfolio_method": rows["baseline_best"]["selected_method"],
+-                   "job_status": (r or {}).get("status", "missing")}
+-            if r and r["status"] == "ok":
++                   "job_status": evidence_status(r, rows["hid_full"]["input_sha256"])}
++            if row["job_status"] == "ok":
+                 info = r["info"][m]
+                 row["status"] = info["status"]
+                 row["rule_count"], row["dag_depth"] = info["rule_count"], info["dag_depth"]
+@@ -372,6 +392,9 @@
+                                H_minus_T=H - T, T_minus_C=T - C, H_minus_C=H - C,
+                                identity_exact=(H - C) == (H - T) + (T - C),
+                                T_minus_portfolio=T - P,
++                               # equal length is not an equal proposal: compare the bytes
++                               T_bytes_equal_H=r["archives"][m]["sha256"] ==
++                               rows["hid_full"]["archive_sha256"],
+                                translated_buckets=info["translated_buckets"],
+                                baseline_buckets=info["baseline_buckets"])
+                     if m == "period":
+@@ -424,37 +447,106 @@
+     return {"n": k, "min": xs[0], "median": med, "max": xs[-1]}
+ 
+ 
++def _evidence(d2: dict, d3: dict, d4: dict, s2: dict, s4: dict, ids2) -> dict:
++    """Availability and validity of every intended record, before any success-only number.
++    Unavailable records stay in their denominators; invalid evidence is listed by reason."""
++    st2 = Counter(d2[c][f"{k}_status"] for c in ids2 for k in ("B0", "B8"))
++    st3 = Counter(r["status"] for r in d3.values())
++    jobs4: dict[str, str] = {}                # one job per intended case; two conversion rows each
++    for r in d4.values():
++        assert jobs4.setdefault(r["case_id"], r["job_status"]) == r["job_status"], r["case_id"]
++    st4 = Counter(jobs4.values())
++    conv = Counter(r["status"] for r in d4.values())
++    invalid_records = {
++        "D2": sorted(f"{c}.{k}:{d2[c][f'{k}_status']}" for c in ids2 for k in ("B0", "B8")
++                     if is_invalid(d2[c][f"{k}_status"])),
++        "D3": sorted(f"{c}:{r['status']}" for c, r in d3.items() if is_invalid(r["status"])),
++        "D4": sorted({f"{r['case_id']}:{r['job_status']}" for r in d4.values()
++                      if is_invalid(r["job_status"])})}
++    invalid = {
++        "records": invalid_records,
++        "B0_deterministic_mismatch": sorted(s2["targets"]["B0_mismatch_cases"] +
++                                            s2["controls"]["B0_mismatch_cases"]),
++        "reference_not_reproduced": sorted(c for c, r in d3.items()
++                                           if r["status"] == "ok" and not r["reference_reproduced"]),
++        "identity_failures": {m: s4[m]["identity_failures"] for m in s4},
++        # explicit False only: absent when B0 is unavailable or the final archive came from
++        # another stage, and an absent comparison is not a failed one
++        "B0_selected_bytes_mismatch": sorted(c for c in ids2
++                                             if d2[c].get("B0_bytes_equal_saved_final") is False)}
++    invalid["any"] = bool(any(invalid_records.values()) or invalid["B0_deterministic_mismatch"]
++                          or invalid["B0_selected_bytes_mismatch"]
++                          or invalid["reference_not_reproduced"]
++                          or any(invalid["identity_failures"].values()))
++    unavailable = {s: {k: v for k, v in sorted(c.items()) if k != "ok" and not is_invalid(k)}
++                   for s, c in (("D2", st2), ("D3", st3), ("D4_jobs", st4))}
++    unavailable["D4_conversions"] = {k: v for k, v in sorted(conv.items())
++                                     if k != "ok" and not is_invalid(k)}
++    return {"intended": {"D2_jobs": 2 * len(ids2), "D3_jobs": len(d3),
++                         "D4_jobs": len(jobs4),
++                         "D4_conversion_records": len(d4)},
++            "status": {"D2": dict(sorted(st2.items())), "D3": dict(sorted(st3.items())),
++                       "D4_jobs": dict(sorted(st4.items())),
++                       "D4_conversions": dict(sorted(conv.items()))},
++            "unavailable": unavailable, "invalid": invalid,
++            "complete": not any(unavailable.values()) and not any(invalid_records.values())}
++
++
+ def decision_quantities(d1: dict, d2: dict, s2: dict, d3: dict, d4: dict, s4: dict,
+-                        res: dict, targets, controls, ids4, near_bits: int = 8) -> dict:
++                        res: dict, targets, controls, ids4, near_bits: int = 8,
++                        b0_cuts: dict | None = None) -> dict:
++    """Flags and decision quantities over AVAILABLE records only, each with the intended
++    and available denominators. Never dereferences a field an unavailable record lacks;
++    never turns an unavailable value into zero. ``b0_cuts``: case -> cut tuple of the
++    archive B0 RETURNED (default: read from the saved B0 records of this run)."""
+     cell = lambda c: K.parse_case_id(c)["cell"]                     # noqa: E731
+     P = {c: d1[c]["bits"]["baseline_best"] for c in d1}
++    ids2 = sorted(targets + controls)
++    flags = {"evidence": _evidence(d2, d3, d4, s2, s4, ids2)}
++    ok2 = lambda c, k: d2[c][f"{k}_status"] == "ok"                # noqa: E731
+     # D2
+-    wit = [{"case_id": c, "H": d2[c]["H"], "B0": d2[c]["B0_bits"], "B8": d2[c]["B8_bits"],
+-            "n": d2[c]["n"], "portfolio": P[c], "B0_stop": d2[c]["B0_stop"],
++    wit = [{"case_id": c, "H": d2[c]["H"], "B0": d2[c].get("B0_bits"), "B8": d2[c]["B8_bits"],
++            "n": d2[c]["n"], "portfolio": P[c], "B0_stop": d2[c].get("B0_stop"),
+             "B8_stop": d2[c]["B8_stop"]} for c in s2["targets"]["witnesses"]]
+     b0cap = sorted(c for c in targets + controls if d2[c].get("B0_cap_hit"))
+-    flags = {"budget_opportunity_observed": {
++    comparable = [c for c in controls if ok2(c, "B0") and ok2(c, "B8")]
++    flags["budget_opportunity_observed"] = {
+         "value": bool(wit), "witnesses": wit,
++        "scope": "the specific B0 -> B8 cap increase on these strings; not a statement "
++                 "about resource limits under other searches",
+         "denominator": {"target_strings": len(targets), "completed_B8_targets":
+-                        sum(1 for c in targets if "B8_bits" in d2[c])},
++                        sum(1 for c in targets if ok2(c, "B8")),
++                        "completed_B0_and_B8_targets":
++                        sum(1 for c in targets if ok2(c, "B0") and ok2(c, "B8"))},
+         "prevalence_by_cell": s2["targets"]["B8_shorter_than_H"],
+         "control_behaviour": {"B8_shorter_than_H": s2["controls"]["B8_shorter_than_H"],
+-                              "B8_differs_from_B0": sum(1 for c in controls
+-                                                        if d2[c]["B8_bits"] != d2[c]["B0_bits"])},
++                              "B8_differs_from_B0": sum(1 for c in comparable
++                                                        if d2[c]["B8_bits"] != d2[c]["B0_bits"]),
++                              "comparable_controls": len(comparable),
++                              "control_strings": len(controls)},
+         "B0_cap_hit_strings": b0cap,
+         "effect_equal_cell_mean_opportunity_per_input_bit":
+             s2["targets"]["equal_cell_mean_opportunity"],
+-        "resources": res["D2"]}}
++        "partial_cells": sorted(k for k, v in s2["targets"]["opportunity"].items()
++                                if v["mean"] is None),
++        "resources": res["D2"]}
+     # D3
+     by: dict[str, Counter] = defaultdict(Counter)
+     kinds = Counter()
+     gaps = defaultdict(list)
+     located = Counter()
++    near_key = f"supplied_cut_with_returned_B0_cut_within_{near_bits}_bits"
++    far_key = f"supplied_cut_without_returned_B0_cut_within_{near_bits}_bits"
+     for c, r in d3.items():
+         k = by[cell(c)]
+-        al, el, st = (r["cheapest_all"]["bits"], r["cheapest_eligible"]["bits"],
+-                      r["cheapest_strict"]["bits"])
+         k["strings"] += 1
++        mins = [r.get(x) for x in ("cheapest_all", "cheapest_eligible", "cheapest_strict")]
++        if r["status"] != "ok" or None in mins:
++            k[r["status"] if is_invalid(r["status"]) else
++              "unavailable_" + (r["status"] if r["status"] != "ok" else "no_priced_minimum")] += 1
++            continue
++        k["available"] += 1
++        al, el, st = (m["bits"] for m in mins)
+         k["reference_reproduced"] += r["reference_reproduced"]
+         k["restricted_path_barrier"] += r["restricted_path_barrier"]
+         k["eligibility_obstruction"] += r["eligibility_obstruction"]
+@@ -464,16 +556,28 @@
+         k["cheapest_strict_lt_portfolio"] += st < P[c]
+         k["H_gt_portfolio"] += r["H"] > P[c]
+         k["H_gt_portfolio_and_cheapest_all_lt_H"] += r["H"] > P[c] and al < r["H"]
+-        k["cheapest_strict_lt_B0"] += st < r["B0"]
++        if r["B0"] is None:
++            k["B0_unavailable"] += 1
++        else:
++            k["cheapest_strict_lt_B0"] += st < r["B0"]
+         if r["restricted_path_barrier"]:
+             kinds[r["barrier"]["kind"]] += 1
+         gaps[cell(c)].append((r["H"] - al) / r["n"])
+         if st < r["H"]:
+-            b0cuts = json.loads(record_path(K.RUN_DIR, "D2", c, "B0").read_text())["info"]["cuts"]
+-            for s in r["cheapest_strict"]["subset"]:
+-                near = any(abs(s - x) <= near_bits for x in b0cuts)
+-                located["supplied_cut_with_B0_cut_within_%d_bits" % near_bits] += near
+-                located["supplied_cut_without"] += not near
++            if b0_cuts is None:
++                p = record_path(K.RUN_DIR, "D2", c, "B0")
++                cuts = json.loads(p.read_text())["info"]["cuts"] if ok2(c, "B0") else None
++            else:
++                cuts = b0_cuts.get(c)
++            subset = r["cheapest_strict"]["subset"]
++            if cuts is None:
++                located["supplied_cuts_returned_B0_cuts_unavailable"] += len(subset)
++                continue
++            located["strings"] += 1
++            for s in subset:
++                near = any(abs(s - x) <= near_bits for x in cuts)
++                located[near_key] += near
++                located[far_key] += not near
+     flags["restricted_path_barrier_observed"] = {
+         "value": sum(v["restricted_path_barrier"] for v in by.values()) > 0,
+         "space": "D3 supplied-cut subsets only (truth-assisted, B0 leaf heuristic)",
+@@ -482,8 +586,15 @@
+         "by_cell": {k: dict(v) for k, v in sorted(by.items())},
+         "effect_H_minus_cheapest_all_per_input_bit_by_cell":
+             {k: _quantiles(v) for k, v in sorted(gaps.items())},
+-        "descriptive_B0_cut_location": dict(located),
+-        "denominator": {"strings": len(d3), "subsets": sum(r["subsets"] for r in d3.values())},
++        "descriptive_returned_B0_cut_proximity": dict(
++            located, scope="post hoc, descriptive. Each supplied cut of the cheapest strictly "
++            "reachable subset, in strings where that subset is shorter than H, against the cut "
++            "tuple of the archive B0 RETURNED (job record info.cuts). Returned cuts are not the "
++            "cuts B proposed or evaluated: a cut may have been proposed and rejected, so this "
++            "measures proximity to returned cuts, not proposal coverage."),
++        "denominator": {"strings": len(d3),
++                        "available_strings": sum(v["available"] for v in by.values()),
++                        "subsets": sum(r["subsets"] for r in d3.values() if "subsets" in r)},
+         "resources": res["D3"]}
+     # D4
+     loss: dict[str, Counter] = defaultdict(Counter)
+@@ -498,14 +609,22 @@
+         k[f"portfolio_winner_{r['method']}"] += 1
+         if r["H"] > r["portfolio"]:
+             k["hid_loses"] += 1
+-            k["hid_loses_and_H_eq_T"] += r["H"] == r["T"]
++            k["hid_loses_translation_unavailable"] += "T" not in r
++            if "T" not in r:
++                continue
++            eq = r["H"] == r["T"]
++            k["hid_loses_and_H_eq_T"] += eq
++            k["hid_loses_and_H_eq_T_identical_bytes"] += eq and r["T_bytes_equal_H"]
++            k["hid_loses_and_H_eq_T_different_bytes"] += eq and not r["T_bytes_equal_H"]
+             k["hid_loses_and_H_lt_T"] += r["H"] < r["T"]
+             pen_loss[cell(r["case_id"])].append(r["T_minus_C"] / r["n"])
++    unavail4 = {m: len(ids4) - s4[m]["admissible"] for m in s4}
+     missed = {m: s4[m]["missed_witnesses"] for m in s4}
+     flags["missed_baseline_structure_observed"] = {
+         "value": any(missed.values()), "witnesses": missed,
+         "denominator": {"conversion_records": len(d4),
+-                        "admissible": {m: s4[m]["admissible"] for m in s4}},
++                        "admissible": {m: s4[m]["admissible"] for m in s4},
++                        "unavailable": unavail4},
+         "prevalence_by_cell": {m: s4[m]["T_shorter_than_H"] for m in s4},
+         "effect_H_minus_T_per_input_bit_by_cell": {m: {k: v["mean"] for k, v in
+                                                        s4[m]["H_minus_T"].items()} for m in s4},
+@@ -516,7 +635,8 @@
+                          "proposal under the stated factory/pruning rules",
+         "penalty_records": {m: s4[m]["penalty_cases"] for m in s4},
+         "denominator": {"conversion_records": len(d4),
+-                        "admissible": {m: s4[m]["admissible"] for m in s4}},
++                        "admissible": {m: s4[m]["admissible"] for m in s4},
++                        "unavailable": unavail4},
+         "prevalence_by_cell": {m: s4[m]["T_longer_than_C"] for m in s4},
+         "effect_T_minus_C_per_input_bit_by_cell": {m: {k: v["mean"] for k, v in
+                                                        s4[m]["T_minus_C"].items()} for m in s4},
+@@ -527,6 +647,9 @@
+         "by_cell": {k: dict(v) for k, v in sorted(loss.items())},
+         "T_minus_C_per_input_bit_among_losses": {k: _quantiles(v)
+                                                  for k, v in sorted(pen_loss.items())},
+-        "reading": "H == T: the automatic search reached a description of exactly the "
+-                   "translated length, so the whole loss to that baseline equals T - C"}
++        "reading": "H == T compares LENGTHS. Where it holds, H - C = T - C exactly, so the "
++                   "loss to that baseline equals this translation's penalty; it does not mean "
++                   "the search reached the same proposal (byte identity is counted separately) "
++                   "and it is not a bound over HID descriptions. A translation that is "
++                   "unavailable is counted as such, never as H == T or as a zero penalty."}
+     return flags
+--- a/index-deconvolution/experiments/search_diagnosis/cli.py
++++ b/index-deconvolution/experiments/search_diagnosis/cli.py
+@@ -186,41 +186,33 @@
+ def cmd_analyse(a) -> int:
+     _identity("execution")
+     out = K.RUN_DIR / "analysis"
++    b = report_build(K.RUN_DIR)
++    for name in ("d2_rows", "d2_summary", "d3_rows", "d4_rows", "d4_summary", "resources",
++                 "flags", "key_numbers"):
++        K.write_json(out / f"{name}.json", b[name])
++    K.write_json(K.RUN_DIR / "DECISION.json", b["decision"])
++    print({k: v["value"] for k, v in b["flags"].items() if "value" in v})
++    print("recommendation:", b["decision"]["recommendation"])
++    print(json.dumps({s: r["status"] for s, r in b["resources"].items()}))
++    return 0
++
++
++def report_build(run_dir) -> dict:
++    """Load every intended job record of ``run_dir`` (absent -> None) and the D1 tables,
++    then run the one reporting pipeline ``report.build``. Reads only."""
++    from .report import build
+     d2ids = K.section_ids("D2")
+-    ids2 = sorted(d2ids["targets"] + d2ids["controls"])
+-    rec2 = A.load_records("D2", ids2, ("B0", "B8"))
+-    d2 = A.d2_rows(rec2, ids2)
+-    s2 = A.d2_summary(d2, d2ids["targets"], d2ids["controls"])
+-    rec3 = A.load_records("D3", d2ids["targets"], ("D3",))
+-    d3 = A.d3_rows(rec3, d2ids["targets"], d2, K.references())
+-    ids4 = K.section_ids("D4")["targets"]
+-    rec4 = A.load_records("D4", ids4, ("D4",))
+-    d4 = A.d4_rows(rec4, ids4)
+-    s4 = A.d4_summary(d4, ids4)
+-    K.write_json(out / "d2_rows.json", d2)
+-    K.write_json(out / "d2_summary.json", s2)
+-    K.write_json(out / "d3_rows.json", d3)
+-    K.write_json(out / "d4_rows.json", d4)
+-    K.write_json(out / "d4_summary.json", s4)
+-    res = {"D2": A.resource_summary(rec2), "D3": A.resource_summary(rec3),
+-           "D4": A.resource_summary(rec4)}
+-    K.write_json(out / "resources.json", res)
+-    d1 = json.loads((K.RUN_DIR / "d1" / "d1_cases.json").read_text())
+-    flags = A.decision_quantities(d1, d2, s2, d3, d4, s4, res, d2ids["targets"],
+-                                  d2ids["controls"], ids4)
+-    K.write_json(out / "flags.json", flags)
+-    print({k: v["value"] for k, v in flags.items() if "value" in v})
+-    from .report import decision
+-    dec, numbers = decision(flags, json.loads((K.RUN_DIR / "d1" / "d1_tables.json").read_text()),
+-                            s2, s4, res, len(json.loads(
+-                                (K.RUN_DIR / "d1" / "d1_checks.json").read_text())["problems"]))
+-    K.write_json(K.RUN_DIR / "DECISION.json", dec)
+-    K.write_json(out / "key_numbers.json", numbers)
+-    print("recommendation:", dec["recommendation"])
+-    print(json.dumps({"D2": A.resource_summary(rec2)["status"],
+-                      "D3": A.resource_summary(rec3)["status"],
+-                      "D4": A.resource_summary(rec4)["status"]}))
+-    return 0
++    ids = {"targets": d2ids["targets"], "controls": d2ids["controls"],
++           "d4": K.section_ids("D4")["targets"]}
++    d1 = run_dir / "d1"
++    return build(A.load_records("D2", sorted(ids["targets"] + ids["controls"]), ("B0", "B8"),
++                                run_dir),
++                 A.load_records("D3", ids["targets"], ("D3",), run_dir),
++                 A.load_records("D4", ids["d4"], ("D4",), run_dir),
++                 json.loads((d1 / "d1_cases.json").read_text()),
++                 json.loads((d1 / "d1_tables.json").read_text()),
++                 len(json.loads((d1 / "d1_checks.json").read_text())["problems"]),
++                 K.references(), ids)
+ 
+ 
+ def cmd_preserve_after(a) -> int:
+--- a/index-deconvolution/experiments/search_diagnosis/report.py
++++ b/index-deconvolution/experiments/search_diagnosis/report.py
+@@ -3,22 +3,32 @@
+ Every value is read from the saved flags, tables and summaries; nothing is recomputed
+ from archives here. The recommendation rule is post-hoc reasoning over the fixed
+ cells, stated in ``RULE`` so the reader can check it against the printed counts.
++
++``build`` is the one reporting pipeline: job records -> rows -> summaries -> flags ->
++decision. The evidence gate is applied before the rule: INVALID when any evidence is
++invalid, else INCOMPLETE when any intended record is unavailable (missing, not run,
++timeout, RSS breach, worker error, graph-limited translation); the partial quantities
++are still reported with intended and available denominators.
+ """
+ from __future__ import annotations
+ 
+ from collections import Counter
+ 
++from . import analysis as A
++
+ RULE = (
+-    "Evidence gates first: every intended job present and ok, zero B0 deterministic "
+-    "mismatches, every supplied reference reproduced, exact H-C identity on every "
+-    "admissible record, D1 without problems; otherwise INVALID (mismatch) or INCOMPLETE "
+-    "(missing). Then: a SEARCH signal exists when, in cells where hid_full loses to the "
+-    "portfolio, a same-language supplied-cut partition (D3) is shorter than the saved full "
+-    "archive in a majority of those strings while B8 (D2) changes at most a small minority; "
+-    "a REPRESENTATION signal exists when, among D4 strings whose portfolio winner was the "
+-    "translated method and HID loses, the translation equals the saved full archive (H == T) "
+-    "in a majority, so the loss equals the translation penalty. Both signals in disjoint "
+-    "family groups -> BOTH_SEPARATELY; one -> its focused scope; neither -> NO_CLEAR_DIRECTION.")
++    "Evidence gates first: INVALID when any evidence is invalid (wrong decode, source/input "
++    "hash mismatch, B0 deterministic mismatch, supplied reference not reproduced, H-C "
++    "identity failure, D1 problem); otherwise INCOMPLETE when any intended job or conversion "
++    "record is unavailable (missing, not_run, timeout, rss_limit, error, graph-limited). "
++    "Then: a SEARCH signal exists when, in cells where hid_full loses to the portfolio, a "
++    "same-language supplied-cut partition (D3) is shorter than the saved full archive in a "
++    "majority of those strings while B8 (D2) changes at most a small minority; a "
++    "REPRESENTATION signal exists when, among D4 strings whose portfolio winner was the "
++    "translated method and HID loses, the translation has the same LENGTH as the saved full "
++    "archive (H == T) in a majority, so that H - C = T - C there (equal length, not an equal "
++    "proposal; byte identity is reported separately). Both signals in disjoint family groups "
++    "-> BOTH_SEPARATELY; one -> its focused scope; neither -> NO_CLEAR_DIRECTION.")
+ 
+ 
+ def _sum_cells(by_cell: dict, key: str) -> int:
+@@ -27,6 +37,7 @@
+ 
+ def decision(flags: dict, d1t: dict, s2: dict, s4: dict, res: dict,
+              d1_problems: int) -> tuple[dict, dict]:
++    ev = flags["evidence"]
+     fb, fbar = flags["budget_opportunity_observed"], flags["restricted_path_barrier_observed"]
+     fm, fp = flags["missed_baseline_structure_observed"], flags["proposal_representation_penalty_observed"]
+     dec4 = flags["d4_loss_decomposition_where_portfolio_winner_was_translated"]["by_cell"]
+@@ -34,44 +45,50 @@
+     for v in dec4.values():
+         tot4.update(v)
+     by3 = fbar["by_cell"]
+-    all_ok = all(r["status"] == {"ok": r["jobs"]} for r in res.values())
+     gates = {
+-        "all_jobs_ok": all_ok,
++        "all_jobs_ok": all(r["status"] == {"ok": r["jobs"]} for r in res.values()),
++        "all_records_available": ev["complete"],
+         "jobs": {k: r["jobs"] for k, r in res.items()},
+-        "B0_deterministic_mismatches": len(s2["targets"]["B0_mismatch_cases"]) +
+-        len(s2["controls"]["B0_mismatch_cases"]),
++        "unavailable": ev["unavailable"],
++        "invalid_records": ev["invalid"]["records"],
++        "B0_deterministic_mismatches": len(ev["invalid"]["B0_deterministic_mismatch"]),
++        "B0_selected_bytes_mismatches": ev["invalid"]["B0_selected_bytes_mismatch"],
+         "references_reproduced": f"{_sum_cells(by3, 'reference_reproduced')}/{_sum_cells(by3, 'strings')}",
++        "references_not_reproduced": ev["invalid"]["reference_not_reproduced"],
+         "identity_failures": sum(len(v) for v in fp["identity_failures"].values()),
+         "d1_problems": d1_problems,
+     }
+-    valid = (gates["B0_deterministic_mismatches"] == 0 and gates["identity_failures"] == 0
+-             and d1_problems == 0
+-             and _sum_cells(by3, "reference_reproduced") == _sum_cells(by3, "strings"))
++    valid = not ev["invalid"]["any"] and d1_problems == 0
++    complete = ev["complete"]
+     loss3 = _sum_cells(by3, "H_gt_portfolio")
+     loss3_better = _sum_cells(by3, "H_gt_portfolio_and_cheapest_all_lt_H")
+     b8_changed = len(fb["witnesses"])
+-    search = loss3 > 0 and 2 * loss3_better > loss3 and 2 * b8_changed < fb["denominator"]["target_strings"]
+-    rep = tot4["hid_loses"] > 0 and 2 * tot4["hid_loses_and_H_eq_T"] > tot4["hid_loses"]
+-    if not all_ok:
++    search = rep = None                       # not evaluated on invalid or partial evidence
++    if not valid:
++        rec = "INVALID"
++    elif not complete:
+         rec = "INCOMPLETE"
+-    elif not valid:
+-        rec = "INVALID"
+-    elif search and rep:
+-        rec = "BOTH_SEPARATELY"
+-    elif search:
+-        rec = "SEARCH_FOCUSED"
+-    elif rep:
+-        rec = "REPRESENTATION_FOCUSED"
+     else:
+-        rec = "NO_CLEAR_DIRECTION"
++        search = loss3 > 0 and 2 * loss3_better > loss3 and \
++            2 * b8_changed < fb["denominator"]["target_strings"]
++        rep = tot4["hid_loses"] > 0 and 2 * tot4["hid_loses_and_H_eq_T"] > tot4["hid_loses"]
++        rec = ("BOTH_SEPARATELY" if search and rep else "SEARCH_FOCUSED" if search
++               else "REPRESENTATION_FOCUSED" if rep else "NO_CLEAR_DIRECTION")
++    cb = fb["control_behaviour"]
+     numbers = {
+         "d1_accepted_primary_estimate": d1t["accepted_primary_reproduction"]["estimate"],
+         "d2_target_strings": fb["denominator"]["target_strings"],
++        "d2_completed_B8_targets": fb["denominator"]["completed_B8_targets"],
+         "d2_B8_witnesses": fb["witnesses"],
+         "d2_B0_cap_hit_strings": fb["B0_cap_hit_strings"],
+-        "d2_controls_B8_differs": fb["control_behaviour"]["B8_differs_from_B0"],
++        "d2_controls_B8_differs": cb["B8_differs_from_B0"],
++        "d2_controls_comparable": cb["comparable_controls"],
++        "d2_control_strings": cb["control_strings"],
+         "d2_equal_cell_mean_opportunity": fb["effect_equal_cell_mean_opportunity_per_input_bit"],
+-        "d3_strings": fbar["denominator"]["strings"], "d3_subsets": fbar["denominator"]["subsets"],
++        "d2_partial_cells": fb["partial_cells"],
++        "d3_strings": fbar["denominator"]["strings"],
++        "d3_available_strings": fbar["denominator"]["available_strings"],
++        "d3_subsets": fbar["denominator"]["subsets"],
+         "d3_barrier_strings": _sum_cells(by3, "restricted_path_barrier"),
+         "d3_barrier_kinds": fbar["barrier_kinds"],
+         "d3_eligibility_obstructions": fbar["eligibility_obstructions"],
+@@ -80,30 +97,70 @@
+         "d3_cheapest_all_lt_portfolio": _sum_cells(by3, "cheapest_all_lt_portfolio"),
+         "d3_cheapest_strict_lt_portfolio": _sum_cells(by3, "cheapest_strict_lt_portfolio"),
+         "d3_H_gt_portfolio": loss3, "d3_H_gt_portfolio_and_cheapest_all_lt_H": loss3_better,
+-        "d3_B0_cut_location": fbar["descriptive_B0_cut_location"],
++        "d3_returned_B0_cut_proximity": {k: v for k, v in
++                                         fbar["descriptive_returned_B0_cut_proximity"].items()
++                                         if k != "scope"},
+         "d4_records": fp["denominator"]["conversion_records"],
+         "d4_admissible": fp["denominator"]["admissible"],
++        "d4_unavailable": fp["denominator"]["unavailable"],
+         "d4_T_lt_H": {m: len(v) for m, v in fm["witnesses"].items()},
+         "d4_T_gt_C": fp["penalty_records"],
+         "d4_abs_T_minus_C_bits": fp["absolute_T_minus_C_bits"],
+         "d4_translated_winner_strings": tot4["portfolio_winner_period"] + tot4["portfolio_winner_pair_grammar"],
+         "d4_hid_loses": tot4["hid_loses"], "d4_hid_loses_H_eq_T": tot4["hid_loses_and_H_eq_T"],
++        "d4_hid_loses_H_eq_T_identical_bytes": tot4["hid_loses_and_H_eq_T_identical_bytes"],
++        "d4_hid_loses_H_eq_T_different_bytes": tot4["hid_loses_and_H_eq_T_different_bytes"],
+         "d4_hid_loses_H_lt_T": tot4["hid_loses_and_H_lt_T"],
++        "d4_hid_loses_translation_unavailable": tot4["hid_loses_translation_unavailable"],
+     }
+-    basis = [
+-        f"D2: B8 changed the boundary output on {b8_changed} of {fb['denominator']['target_strings']} "
+-        f"targets and 0 of 32 controls; B0 hit a cap on {len(fb['B0_cap_hit_strings'])} strings.",
+-        f"D3 (truth-assisted): in {loss3} boundary-family strings where hid_full loses to the "
+-        f"portfolio, a supplied-cut partition is shorter than the saved full archive in "
+-        f"{loss3_better}; restricted path barriers in {numbers['d3_barrier_strings']} strings "
++    basis = [] if valid and complete else [
++        f"Evidence gate: {rec}. Unavailable {ev['unavailable']}; invalid {ev['invalid']['records']}, "
++        f"B0 mismatches {gates['B0_deterministic_mismatches']}, references not reproduced "
++        f"{len(gates['references_not_reproduced'])}, identity failures {gates['identity_failures']}, "
++        f"D1 problems {d1_problems}. The rule is not evaluated; the lines below are partial."]
++    basis += [
++        f"D2: the B0 -> B8 cap increase changed the boundary output on {b8_changed} of "
++        f"{fb['denominator']['completed_B8_targets']} completed targets "
++        f"({fb['denominator']['target_strings']} intended) and on {cb['B8_differs_from_B0']} of "
++        f"{cb['comparable_controls']} comparable controls ({cb['control_strings']} intended); "
++        f"B0 hit a cap on {len(fb['B0_cap_hit_strings'])} strings.",
++        f"D3 (truth-assisted, {numbers['d3_available_strings']} of {numbers['d3_strings']} strings "
++        f"available): in {loss3} boundary-family strings where hid_full loses to the portfolio, "
++        f"a supplied-cut partition is shorter than the saved full archive in {loss3_better}; "
++        f"restricted path barriers in {numbers['d3_barrier_strings']} strings "
+         f"({fbar['barrier_kinds']}), eligibility obstructions {fbar['eligibility_obstructions']}.",
+         f"D4: {tot4['hid_loses']} strings where HID loses and the portfolio winner was the "
+-        f"translated method; H == T in {tot4['hid_loses_and_H_eq_T']}, H < T in "
+-        f"{tot4['hid_loses_and_H_lt_T']}; no admissible translation shorter than H "
+-        f"({numbers['d4_T_lt_H']}), every translation longer than its baseline ({fp['penalty_records']}).",
++        f"translated method; equal length H == T in {tot4['hid_loses_and_H_eq_T']} "
++        f"(byte-identical {tot4['hid_loses_and_H_eq_T_identical_bytes']}, different bytes "
++        f"{tot4['hid_loses_and_H_eq_T_different_bytes']}), H < T in "
++        f"{tot4['hid_loses_and_H_lt_T']}, translation unavailable "
++        f"{tot4['hid_loses_translation_unavailable']}; no admissible translation shorter than H "
++        f"({numbers['d4_T_lt_H']}), translations longer than their baseline "
++        f"{fp['penalty_records']} of admissible {fp['denominator']['admissible']}.",
+     ]
+     dec = {"recommendation": rec, "rule": RULE, "gates": gates, "valid": valid,
+-           "search_signal": search, "representation_signal": rep, "basis": basis,
+-           "flags": {k: v["value"] for k, v in flags.items() if "value" in v},
++           "complete": complete, "search_signal": search, "representation_signal": rep,
++           "basis": basis, "flags": {k: v["value"] for k, v in flags.items() if "value" in v},
+            "label": "post-hoc diagnostic recommendation; not a superiority claim"}
+     return dec, numbers
++
++
++def build(rec2: dict, rec3: dict, rec4: dict, d1_cases: dict, d1_tables: dict,
++          d1_problems: int, refs: dict, ids: dict) -> dict:
++    """job records -> rows -> summaries -> flags -> decision, for any availability.
++    ``ids``: {'targets', 'controls', 'd4'}; record dicts map (case, kind) -> record or None."""
++    targets, controls, ids4 = ids["targets"], ids["controls"], ids["d4"]
++    ids2 = sorted(targets + controls)
++    d2 = A.d2_rows(rec2, ids2)
++    s2 = A.d2_summary(d2, targets, controls)
++    d3 = A.d3_rows(rec3, targets, d2, refs)
++    d4 = A.d4_rows(rec4, ids4)
++    s4 = A.d4_summary(d4, ids4)
++    res = {"D2": A.resource_summary(rec2), "D3": A.resource_summary(rec3),
++           "D4": A.resource_summary(rec4)}
++    b0_cuts = {c: rec2[(c, "B0")]["info"]["cuts"] for c in ids2 if d2[c]["B0_status"] == "ok"}
++    flags = A.decision_quantities(d1_cases, d2, s2, d3, d4, s4, res, targets, controls, ids4,
++                                  b0_cuts=b0_cuts)
++    dec, numbers = decision(flags, d1_tables, s2, s4, res, d1_problems)
++    return {"d2_rows": d2, "d2_summary": s2, "d3_rows": d3, "d4_rows": d4, "d4_summary": s4,
++            "resources": res, "flags": flags, "decision": dec, "key_numbers": numbers}
+diff --git a/index-deconvolution/experiments/search_diagnosis/tests/test_reporting_pipeline.py b/index-deconvolution/experiments/search_diagnosis/tests/test_reporting_pipeline.py
+new file mode 100644
+--- /dev/null
++++ b/index-deconvolution/experiments/search_diagnosis/tests/test_reporting_pipeline.py
+@@ -0,0 +1,348 @@
++"""The whole reporting pipeline (rows -> summaries -> flags -> decision) on copies of the
++retained a1 job records, complete and with records made unavailable or invalid IN MEMORY.
++
++Nothing on disk is written or altered: the retained records are read once and every
++scenario mutates a deep copy. Unavailable evidence (missing, timeout, worker error,
++graph-limited translation) must give INCOMPLETE with intended/available denominators,
++never a KeyError or a zero gain; invalid evidence (wrong decode, source mismatch, B0
++mismatch, reference not reproduced, D1 problem) must give INVALID, even when records
++are also missing.
++"""
++from __future__ import annotations
++
++import copy
++import json
++
++import pytest
++
++from search_diagnosis import analysis as A
++from search_diagnosis import common as K
++from search_diagnosis.report import build
++
++pytestmark = pytest.mark.skipif(not (K.RUN_DIR / "jobs").is_dir(),
++                                reason="retained search-diagnosis-v1-r1 records not present")
++
++
++@pytest.fixture(scope="module")
++def saved():
++    d2ids = K.section_ids("D2")
++    ids = {"targets": d2ids["targets"], "controls": d2ids["controls"],
++           "d4": K.section_ids("D4")["targets"]}
++    d1 = K.RUN_DIR / "d1"
++    return {"rec2": A.load_records("D2", sorted(ids["targets"] + ids["controls"]), ("B0", "B8")),
++            "rec3": A.load_records("D3", ids["targets"], ("D3",)),
++            "rec4": A.load_records("D4", ids["d4"], ("D4",)),
++            "d1": json.loads((d1 / "d1_cases.json").read_text()),
++            "d1t": json.loads((d1 / "d1_tables.json").read_text()),
++            "refs": K.references(), "ids": ids,
++            "a1_numbers": json.loads((K.RUN_DIR / "analysis/key_numbers.json").read_text()),
++            "a1_flags": json.loads((K.RUN_DIR / "analysis/flags.json").read_text())}
++
++
++def run(saved, mutate=None, d1_problems=0):
++    rec = {k: copy.deepcopy(saved[k]) for k in ("rec2", "rec3", "rec4")}
++    if mutate:
++        mutate(rec, saved)
++    return build(rec["rec2"], rec["rec3"], rec["rec4"], saved["d1"], saved["d1t"],
++                 d1_problems, saved["refs"], saved["ids"])
++
++
++def first_losing_translated_winner(saved, identical_bytes=True):
++    """A D4 string whose portfolio winner is a translated method, HID loses and H == T."""
++    for cid in saved["ids"]["d4"]:
++        rows = K.saved_rows(cid)
++        m = rows["baseline_best"]["selected_method"]
++        r = saved["rec4"][(cid, "D4")]
++        if m in ("period", "pair_grammar") and \
++                rows["hid_full"]["archive_bits"] > rows["baseline_best"]["archive_bits"] and \
++                r["info"][m]["translated_bits"] == rows["hid_full"]["archive_bits"] and \
++                (r["archives"][m]["sha256"] == rows["hid_full"]["archive_sha256"]) == identical_bytes:
++            return cid, m
++    raise AssertionError("no such string")
++
++
++# --------------------------------------------------------------------------- complete
++
++
++def test_complete_run_keeps_every_a1_number(saved):
++    b = run(saved)
++    dec, kn, old = b["decision"], b["key_numbers"], saved["a1_numbers"]
++    assert dec["recommendation"] == "BOTH_SEPARATELY" and dec["valid"] and dec["complete"]
++    renamed = {"d3_B0_cut_location"}
++    for k, v in old.items():
++        if k not in renamed:
++            assert kn[k] == v, k
++    prox = kn["d3_returned_B0_cut_proximity"]
++    assert (prox["supplied_cut_with_returned_B0_cut_within_8_bits"],
++            prox["supplied_cut_without_returned_B0_cut_within_8_bits"], prox["strings"]) == \
++        (old["d3_B0_cut_location"]["supplied_cut_with_B0_cut_within_8_bits"],
++         old["d3_B0_cut_location"]["supplied_cut_without"], 68)
++    # R1: equal length is not equal bytes -- 282 = 261 identical + 21 different
++    assert (kn["d4_hid_loses_H_eq_T"], kn["d4_hid_loses_H_eq_T_identical_bytes"],
++            kn["d4_hid_loses_H_eq_T_different_bytes"]) == (282, 261, 21)
++    assert kn["d4_hid_loses_translation_unavailable"] == 0
++    assert b["flags"]["evidence"]["complete"] and not b["flags"]["evidence"]["invalid"]["any"]
++
++
++def test_complete_run_flag_tables_match_a1(saved):
++    f, old = run(saved)["flags"], saved["a1_flags"]
++    for k in ("budget_opportunity_observed", "missed_baseline_structure_observed",
++              "proposal_representation_penalty_observed"):
++        assert f[k]["value"] == old[k]["value"]
++    for c, v in old["restricted_path_barrier_observed"]["by_cell"].items():
++        new = dict(f["restricted_path_barrier_observed"]["by_cell"][c])
++        assert new.pop("available") == v["strings"] and new == v, c
++    dec = f["d4_loss_decomposition_where_portfolio_winner_was_translated"]
++    for c, v in old["d4_loss_decomposition_where_portfolio_winner_was_translated"]["by_cell"].items():
++        assert {k: dec["by_cell"][c][k] for k in v} == v, c
++
++
++# --------------------------------------------------------------------------- unavailable
++
++
++def test_missing_d2_control_b8_is_incomplete_not_keyerror(saved):
++    cid = saved["ids"]["controls"][0]
++
++    def m(rec, s):
++        rec["rec2"][(cid, "B8")] = None
++    b = run(saved, m)
++    f = b["flags"]["budget_opportunity_observed"]["control_behaviour"]
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
++    assert b["decision"]["search_signal"] is None and b["decision"]["representation_signal"] is None
++    assert (f["comparable_controls"], f["control_strings"], f["B8_differs_from_B0"]) == (31, 32, 0)
++    assert b["flags"]["evidence"]["unavailable"]["D2"] == {"missing": 1}
++
++
++def test_d2_target_timeout_keeps_cell_partial_never_zero(saved):
++    cid = "stress-S02-4096-4001-ragged"            # the one B8 witness
++
++    def m(rec, s):
++        r = rec["rec2"][(cid, "B8")]
++        r.update(status="timeout", info=None, archives={}, exception="worker exceeded 30.0 s")
++    b = run(saved, m)
++    row = b["d2_rows"][cid]
++    assert row["B8_status"] == "timeout" and "opportunity_per_input_bit" not in row
++    cellv = b["d2_summary"]["targets"]["opportunity"]["stress|S02|4096"]
++    assert cellv["mean"] is None and cellv["complete_units"] == 7 and cellv["units"] == 8
++    assert b["d2_summary"]["targets"]["equal_cell_mean_opportunity"] is None
++    kn = b["key_numbers"]
++    assert kn["d2_completed_B8_targets"] == 175 and kn["d2_B8_witnesses"] == []
++    assert kn["d2_partial_cells"] == ["stress|S02|4096"]
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
++
++
++@pytest.mark.parametrize("status", ["timeout", "error", "rss_limit", "not_run"])
++def test_d3_unavailable_record_is_partial(saved, status):
++    cid = saved["ids"]["targets"][0]
++
++    def m(rec, s):
++        rec["rec3"][(cid, "D3")].update(status=status, info=None, archives={},
++                                         exception=None if status == "not_run" else status)
++    b = run(saved, m)
++    f = b["flags"]["restricted_path_barrier_observed"]
++    cell = K.parse_case_id(cid)["cell"]
++    assert f["denominator"]["strings"] == 176 and f["denominator"]["available_strings"] == 175
++    assert f["by_cell"][cell][f"unavailable_{status}"] == 1
++    assert f["by_cell"][cell]["strings"] == f["by_cell"][cell]["available"] + 1
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
++    assert b["key_numbers"]["d3_available_strings"] == 175
++
++
++def test_d3_missing_record_is_partial(saved):
++    cid = saved["ids"]["targets"][-1]
++
++    def m(rec, s):
++        rec["rec3"][(cid, "D3")] = None
++    b = run(saved, m)
++    assert b["flags"]["evidence"]["unavailable"]["D3"] == {"missing": 1}
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
++
++
++def test_d4_graph_limit_of_portfolio_winner_is_unavailable_not_H_eq_T(saved):
++    cid, meth = first_losing_translated_winner(saved)
++
++    def m(rec, s):
++        info = rec["rec4"][(cid, "D4")]["info"][meth]
++        for k in ("translated_bits", "raw_clipped_bits", "translated_buckets"):
++            info.pop(k, None)
++        info["status"] = "unavailable_graph_limit"
++    b = run(saved, m)
++    kn = b["key_numbers"]
++    assert kn["d4_hid_loses"] == 367 and kn["d4_hid_loses_translation_unavailable"] == 1
++    assert kn["d4_hid_loses_H_eq_T"] == 281 and kn["d4_hid_loses_H_eq_T_identical_bytes"] == 260
++    assert kn["d4_admissible"][meth] == 575 and kn["d4_unavailable"][meth] == 1
++    assert b["flags"]["evidence"]["unavailable"]["D4_conversions"] == {"unavailable_graph_limit": 1}
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
++
++
++def test_d4_missing_job_removes_both_conversions(saved):
++    cid = saved["ids"]["d4"][0]
++
++    def m(rec, s):
++        rec["rec4"][(cid, "D4")] = None
++    b = run(saved, m)
++    assert b["key_numbers"]["d4_unavailable"] == {"period": 1, "pair_grammar": 1}
++    assert b["flags"]["evidence"]["unavailable"]["D4_conversions"] == {"missing": 2}
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
++
++
++# --------------------------------------------------------------------------- invalid
++
++
++def test_b0_deterministic_mismatch_is_invalid(saved):
++    cid = saved["ids"]["targets"][0]
++
++    def m(rec, s):
++        rec["rec2"][(cid, "B0")]["info"]["archive_bits"] += 8
++    b = run(saved, m)
++    assert b["decision"]["recommendation"] == "INVALID"
++    assert b["decision"]["gates"]["B0_deterministic_mismatches"] == 1
++
++
++def test_reference_not_reproduced_is_invalid(saved):
++    cid = saved["ids"]["targets"][0]
++
++    def m(rec, s):
++        full = sorted(s["refs"][cid]["cuts"])
++        sub = next(x for x in rec["rec3"][(cid, "D3")]["info"]["subsets"] if x["subset"] == full)
++        sub["archive_sha256"] = "0" * 64
++    b = run(saved, m)
++    assert b["decision"]["recommendation"] == "INVALID"
++    assert b["decision"]["gates"]["references_not_reproduced"] == [cid]
++
++
++def test_wrong_decode_is_invalid_not_unavailable(saved):
++    cid = saved["ids"]["d4"][0]
++
++    def m(rec, s):
++        rec["rec4"][(cid, "D4")].update(status="error", exception="wrong_decode:period")
++    b = run(saved, m)
++    ev = b["flags"]["evidence"]
++    assert ev["invalid"]["records"]["D4"] == [f"{cid}:invalid_decode"]
++    assert ev["unavailable"]["D4_jobs"] == {}
++    assert b["decision"]["recommendation"] == "INVALID"
++
++
++def test_source_mismatch_is_invalid(saved):
++    cid = saved["ids"]["controls"][0]
++
++    def m(rec, s):
++        rec["rec2"][(cid, "B8")]["input_sha256"] = "f" * 64
++    b = run(saved, m)
++    assert b["flags"]["evidence"]["invalid"]["records"]["D2"] == [f"{cid}.B8:invalid_source"]
++    assert b["decision"]["recommendation"] == "INVALID"
++
++
++def test_invalid_takes_precedence_over_missing(saved):
++    t = saved["ids"]["targets"]
++
++    def m(rec, s):
++        rec["rec3"][(t[0], "D3")] = None
++        rec["rec2"][(t[1], "B0")]["info"]["archive_bits"] += 8
++    b = run(saved, m)
++    assert b["decision"]["recommendation"] == "INVALID"
++    assert b["flags"]["evidence"]["unavailable"]["D3"] == {"missing": 1}
++
++
++def test_d1_problem_is_invalid(saved):
++    assert run(saved, d1_problems=1)["decision"]["recommendation"] == "INVALID"
++
++
++# ------------------------------------------------- R3a: D4 jobs counted once per case
++
++
++def _counts_sum_to_intended(ev):
++    it, st = ev["intended"], ev["status"]
++    assert sum(st["D4_jobs"].values()) == it["D4_jobs"]
++    assert sum(st["D4_conversions"].values()) == it["D4_conversion_records"] == 2 * it["D4_jobs"]
++
++
++def test_d4_complete_counts_jobs_once_and_conversions_per_method(saved):
++    ev = run(saved)["flags"]["evidence"]
++    assert ev["intended"]["D4_jobs"] == 576 and ev["status"]["D4_jobs"] == {"ok": 576}
++    assert ev["status"]["D4_conversions"] == {"ok": 1152}
++    _counts_sum_to_intended(ev)
++
++
++def test_d4_missing_job_is_one_job_and_two_conversions(saved):
++    cid = saved["ids"]["d4"][0]
++
++    def m(rec, s):
++        rec["rec4"][(cid, "D4")] = None
++    b = run(saved, m)
++    ev = b["flags"]["evidence"]
++    assert ev["status"]["D4_jobs"] == {"missing": 1, "ok": 575}
++    assert ev["status"]["D4_conversions"] == {"missing": 2, "ok": 1150}
++    assert ev["unavailable"]["D4_jobs"] == {"missing": 1}
++    assert ev["unavailable"]["D4_conversions"] == {"missing": 2}
++    _counts_sum_to_intended(ev)
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
++
++
++def test_d4_invalid_job_counted_once_in_its_denominator(saved):
++    cid = saved["ids"]["d4"][0]
++
++    def m(rec, s):
++        rec["rec4"][(cid, "D4")].update(status="error", exception="wrong_decode:period")
++    ev = run(saved, m)["flags"]["evidence"]
++    assert ev["status"]["D4_jobs"] == {"invalid_decode": 1, "ok": 575}
++    assert ev["intended"]["D4_jobs"] == 576
++    _counts_sum_to_intended(ev)
++
++
++# --------------------------------------- R3b: failed selected-B archive-byte comparison
++
++B_CASE = "confirmation-F12-1024-3000-base"     # the case of the review's in-memory probe
++
++
++def _break_b0_bytes(rec, cid=B_CASE):
++    rec["rec2"][(cid, "B0")]["archives"]["output"]["sha256"] = "0" * 64
++
++
++def test_selected_b_bytes_pass_on_retained_records(saved):
++    b = run(saved)
++    rows = b["d2_rows"]
++    assert rows[B_CASE]["B0_bytes_equal_saved_final"] is True
++    assert b["flags"]["evidence"]["invalid"]["B0_selected_bytes_mismatch"] == []
++    assert b["decision"]["gates"]["B0_selected_bytes_mismatches"] == []
++
++
++def test_false_selected_b_byte_comparison_is_invalid(saved):
++    b = run(saved, lambda rec, s: _break_b0_bytes(rec))
++    dec = b["decision"]
++    assert b["d2_rows"][B_CASE]["B0_bytes_equal_saved_final"] is False
++    assert b["d2_rows"][B_CASE]["B0_deterministic_mismatch"] == []   # bytes alone differ
++    assert dec["recommendation"] == "INVALID" and not dec["valid"]
++    assert dec["gates"]["B0_selected_bytes_mismatches"] == [B_CASE]
++    assert dec["search_signal"] is None and dec["representation_signal"] is None
++
++
++def test_false_byte_comparison_plus_missing_evidence_is_invalid(saved):
++    t = saved["ids"]["targets"]
++    other = next(c for c in t if c != B_CASE)
++
++    def m(rec, s):
++        _break_b0_bytes(rec)
++        rec["rec3"][(other, "D3")] = None
++        rec["rec4"][(saved["ids"]["d4"][0], "D4")] = None
++    b = run(saved, m)
++    dec, ev = b["decision"], b["flags"]["evidence"]
++    assert dec["recommendation"] == "INVALID" and not dec["complete"]
++    assert dec["gates"]["B0_selected_bytes_mismatches"] == [B_CASE]
++    assert ev["unavailable"]["D3"] == {"missing": 1} and ev["unavailable"]["D4_jobs"] == {"missing": 1}
++    assert dec["search_signal"] is None and dec["representation_signal"] is None
++
++
++def test_absent_byte_comparison_is_not_a_failure(saved):
++    b = run(saved)
++    rows = b["d2_rows"]
++    other_stage = [c for c, r in rows.items() if r["B0_status"] == "ok" and r["selected_stage"] != "B"]
++    assert other_stage, "no retained case whose final archive came from another stage"
++    assert all("B0_bytes_equal_saved_final" not in rows[c] for c in other_stage)
++
++    def m(rec, s):                             # B0 unavailable on a B-selected case
++        rec["rec2"][(B_CASE, "B0")] = None
++    b = run(saved, m)
++    assert "B0_bytes_equal_saved_final" not in b["d2_rows"][B_CASE]
++    assert b["decision"]["gates"]["B0_selected_bytes_mismatches"] == []
++    assert b["decision"]["recommendation"] == "INCOMPLETE"
