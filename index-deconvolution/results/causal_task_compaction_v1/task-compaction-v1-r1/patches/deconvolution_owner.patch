@@ -1,0 +1,130 @@
+--- a/index-deconvolution/src/deconvolution.py
++++ b/index-deconvolution/src/deconvolution.py
+@@ -782,3 +782,127 @@
+     if len(alpha) != len(image) or not alpha:
+         raise ValueError("alpha and image must be non-empty and of equal length")
+     return [x for x, (a, b) in enumerate(zip(alpha, image)) if macro_map(a) != b]
++
++
++# ---------------------------------------------------------------------------
++# Task-preserving state compaction (task-compaction-v1-r1)
++#
++# The coarsest grouping of ALL micro states that preserves a named observable
++# ``outputs`` now and after every finite word of the supplied actions, by the
++# classical layer-wise partition refinement (Knuutila 2001, Proposition 4) with
++# the previous label kept in each signature.  Every state is an admissible
++# initial state: nothing is pruned by reachability.  Action identifiers are
++# positional; two equal tables stay two actions.  The proof of exactness and
++# minimality is in results/causal_task_compaction_v1/task-compaction-v1-r1/THEORY.md.
++# ---------------------------------------------------------------------------
++
++def _is_index(v) -> bool:
++    return type(v) is int
++
++
++def _task_contract(outputs, transitions) -> int:
++    """Validate the full-domain task contract before any evaluation; return N."""
++    if not isinstance(outputs, (list, tuple)) or not outputs:
++        raise ValueError("outputs must be a non-empty list or tuple")
++    if not all(_is_index(v) and v >= 0 for v in outputs):
++        raise ValueError("outputs must be non-negative built-in integers (not bool)")
++    N = len(outputs)
++    if not isinstance(transitions, (list, tuple)) or not transitions:
++        raise ValueError("transitions must be a non-empty list or tuple of tables")
++    for q, t in enumerate(transitions):
++        if not isinstance(t, (list, tuple)) or len(t) != N:
++            raise ValueError(f"action {q}: table must be a list or tuple of length {N}")
++        if not all(_is_index(v) and 0 <= v < N for v in t):
++            raise ValueError(f"action {q}: entries must be built-in integers in 0..{N - 1} (not bool)")
++    return N
++
++
++def minimal_task_partition(outputs, transitions) -> dict:
++    """Coarsest output-preserving congruence of every action table, with its certificate.
++
++    ``stages`` holds P0 = canonical_partition(outputs) and every refinement
++    P[d+1](x) = canonical(P[d](x), P[d](T_q x) for q in order), ending with the first
++    repeated vector, so ``stages[-1] == stages[-2]`` and ``strict_rounds`` =
++    len(stages) - 2.  P[d](x) == P[d](y) iff every word of at most d actions gives
++    equal outputs from x and y.  ``alpha`` is the stable vector; ``decoder[k]`` the
++    output of block k; ``macro[q][k]`` the block reached from block k by action q;
++    ``coarsening[d][k]`` the P[d] block containing P[d+1] block k.  The decoder and
++    every macro table are checked on every state before returning.
++    """
++    N = _task_contract(outputs, transitions)
++    p = canonical_partition(outputs)
++    stages = [p]
++    while True:
++        sig = [(p[x],) + tuple(p[t[x]] for t in transitions) for x in range(N)]
++        nxt = canonical_partition(sig)
++        stages.append(nxt)
++        if nxt == p:
++            break
++        p = nxt
++    alpha = p
++    K = max(alpha) + 1
++    representatives = [alpha.index(k) for k in range(K)]
++    dec, bad = induced_map(alpha, list(outputs))
++    if bad is not None or commutation_failures(alpha, list(outputs), dec.__getitem__):
++        raise RuntimeError(f"stable partition does not decode the outputs: {bad}")
++    macro = []
++    for q, t in enumerate(transitions):
++        image = [alpha[t[x]] for x in range(N)]
++        G, bad = induced_map(alpha, image)
++        if bad is not None or commutation_failures(alpha, image, G.__getitem__):
++            raise RuntimeError(f"stable partition is not closed under action {q}: {bad}")
++        macro.append([G[k] for k in range(K)])
++    coarsening = []
++    for d in range(len(stages) - 1):
++        up, _ = induced_map(stages[d + 1], stages[d])
++        coarsening.append([up[k] for k in range(max(stages[d + 1]) + 1)])
++    return {"alpha": alpha, "stages": stages, "strict_rounds": len(stages) - 2, "K": K,
++            "representatives": representatives, "decoder": [dec[k] for k in range(K)],
++            "macro": macro, "coarsening": coarsening}
++
++
++def task_word_path(transitions, x, word) -> list[int]:
++    """States visited from x by an action word applied in written order (first letter first)."""
++    if not isinstance(transitions, (list, tuple)) or not transitions:
++        raise ValueError("transitions must be a non-empty list or tuple of tables")
++    N = len(transitions[0])
++    if not _is_index(x) or not 0 <= x < N:
++        raise ValueError(f"state {x!r} outside 0..{N - 1}")
++    path = [x]
++    for q in word:
++        if not _is_index(q) or not 0 <= q < len(transitions):
++            raise ValueError(f"action {q!r} outside 0..{len(transitions) - 1}")
++        path.append(transitions[q][path[-1]])
++    return path
++
++
++def distinguishing_task_word(outputs, transitions, stages, x, y) -> list[int] | None:
++    """Shortest action word whose final outputs differ from x and y (ties: least index word).
++
++    Returns None iff x and y share a block of the stable vector ``stages[-1]``, and
++    [] when their current outputs already differ.  Uses the supplied certificate
++    from minimal_task_partition; its correctness is audited separately, but its
++    shape and its consistency along the chosen path are checked here.
++    """
++    N = _task_contract(outputs, transitions)
++    if (not isinstance(stages, (list, tuple)) or len(stages) < 2
++            or any(not isinstance(s, (list, tuple)) or len(s) != N for s in stages)
++            or list(stages[-1]) != list(stages[-2])):
++        raise ValueError("stages must be >= 2 vectors of length N ending in a repeated vector")
++    for s in (x, y):
++        if not _is_index(s) or not 0 <= s < N:
++            raise ValueError(f"state {s!r} outside 0..{N - 1}")
++    if stages[-1][x] == stages[-1][y]:
++        return None
++    d = next(i for i, s in enumerate(stages) if s[x] != s[y])
++    word = []
++    while d > 0:
++        prev = stages[d - 1]
++        q = next((q for q, t in enumerate(transitions) if prev[t[x]] != prev[t[y]]), None)
++        if q is None:
++            raise ValueError("certificate inconsistent: no action separates a separated pair")
++        word.append(q)
++        x, y, d = transitions[q][x], transitions[q][y], d - 1
++    if outputs[x] == outputs[y]:
++        raise ValueError("certificate inconsistent: depth-0 separation without an output difference")
++    return word

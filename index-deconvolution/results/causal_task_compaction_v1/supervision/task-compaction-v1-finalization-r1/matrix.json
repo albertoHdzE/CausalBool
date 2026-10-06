@@ -1,0 +1,2161 @@
+{
+ "as_required": 52,
+ "by_group": {
+  "F": [
+   23,
+   23
+  ],
+  "H": [
+   6,
+   6
+  ],
+  "P": [
+   23,
+   23
+  ]
+ },
+ "cases": [
+  {
+   "aggregates_evaluated": true,
+   "as_required": true,
+   "bypass_integrity": false,
+   "cells_performed": 24,
+   "change": "none",
+   "exit_code": 0,
+   "expected_status": "VALID_COMPLETE",
+   "group": "P",
+   "id": "M01_original",
+   "invalid": [],
+   "missing": [],
+   "n_invalid": 0,
+   "n_missing": 0,
+   "protocol_item": 1,
+   "required_invalid_found": {},
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "VALID_COMPLETE",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "summary.cells = []",
+   "exit_code": 1,
+   "expected_status": "INCOMPLETE",
+   "group": "P",
+   "id": "M02a_summary_empty",
+   "invalid": [],
+   "missing": [
+    {
+     "missing": "row for cell 0",
+     "where": "summary"
+    },
+    {
+     "missing": "row for cell 1",
+     "where": "summary"
+    },
+    {
+     "missing": "row for cell 2",
+     "where": "summary"
+    },
+    {
+     "missing": "row for cell 3",
+     "where": "summary"
+    },
+    {
+     "missing": "row for cell 4",
+     "where": "summary"
+    },
+    {
+     "missing": "row for cell 5",
+     "where": "summary"
+    }
+   ],
+   "n_invalid": 0,
+   "n_missing": 24,
+   "protocol_item": 2,
+   "required_invalid_found": {},
+   "required_missing_found": {
+    "row for cell": true
+   },
+   "skipped": [],
+   "status": "INCOMPLETE",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "summary row for cell 7 removed",
+   "exit_code": 1,
+   "expected_status": "INCOMPLETE",
+   "group": "P",
+   "id": "M02b_summary_row_omitted",
+   "invalid": [],
+   "missing": [
+    {
+     "missing": "row for cell 7",
+     "where": "summary"
+    }
+   ],
+   "n_invalid": 0,
+   "n_missing": 1,
+   "protocol_item": 2,
+   "required_invalid_found": {},
+   "required_missing_found": {
+    "row for cell 7": true
+   },
+   "skipped": [],
+   "status": "INCOMPLETE",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "row for cell 2 duplicated",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M03a_summary_duplicate",
+   "invalid": [
+    {
+     "check": "duplicate or undeclared cell 2",
+     "field": "cells[24].cell.cell_id",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 3,
+   "required_invalid_found": {
+    "summary|cells[24].cell.cell_id|duplicate or undeclared cell 2": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "extra row with undeclared cell_id 99",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M03b_summary_undeclared",
+   "invalid": [
+    {
+     "check": "duplicate or undeclared cell 99",
+     "field": "cells[24].cell.cell_id",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 3,
+   "required_invalid_found": {
+    "undeclared cell 99": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "summary row cell 5: K_star + 1",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M04_summary_value",
+   "invalid": [
+    {
+     "check": "value 257 != expected 256",
+     "field": "cells[5].K_star",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 4,
+   "required_invalid_found": {
+    "summary|cells[5].K_star|": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 18,
+   "change": "tables/M1.json removed",
+   "exit_code": 1,
+   "expected_status": "INCOMPLETE",
+   "group": "P",
+   "id": "M05_table_M1_removed",
+   "invalid": [],
+   "missing": [
+    {
+     "missing": "sealed artifact tables/M1.json",
+     "where": "seal"
+    },
+    {
+     "missing": "M1.json",
+     "where": "M1"
+    }
+   ],
+   "n_invalid": 0,
+   "n_missing": 2,
+   "protocol_item": 5,
+   "required_invalid_found": {},
+   "required_missing_found": {
+    "M1.json": true
+   },
+   "skipped": [
+    {
+     "reason": "table missing",
+     "skipped": "transition-table checks and every cell of this model",
+     "where": "M1"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_00"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_01"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_02"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_03"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_04"
+    }
+   ],
+   "status": "INCOMPLETE",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "candidates/cell_00.jsonl replaced by one malformed line",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M06a_candidates_malformed",
+   "invalid": [
+    {
+     "check": "malformed JSONL cell_00.jsonl line 1: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "135 declared records absent or unusable",
+     "where": "candidates"
+    }
+   ],
+   "n_invalid": 1,
+   "n_missing": 1,
+   "protocol_item": 6,
+   "required_invalid_found": {
+    "cell_00.jsonl line 1": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "candidates/cell_01.jsonl line 5 truncated; other lines intact",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M06b_candidates_one_bad_line",
+   "invalid": [
+    {
+     "check": "malformed JSONL cell_01.jsonl line 5: Expecting value: line 1 column 958 (char 957)",
+     "where": "cell_01"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "1 declared records absent or unusable",
+     "where": "candidates"
+    }
+   ],
+   "n_invalid": 1,
+   "n_missing": 1,
+   "protocol_item": 6,
+   "required_invalid_found": {
+    "cell_01.jsonl line 5": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 18,
+   "change": "tables/M2.json truncated mid-array",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M06c_table_malformed",
+   "invalid": [
+    {
+     "check": "malformed JSON in M2.json: Expecting value: line 1 column 27 (char 26)",
+     "where": "M2"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 6,
+   "required_invalid_found": {
+    "malformed JSON in M2.json": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "table invalid",
+     "skipped": "transition-table checks and every cell of this model",
+     "where": "M2"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_06"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_07"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_08"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_09"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_10"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": {
+    "decoder": "cell 4 decoder[0] flipped",
+    "removed": "cells/cell_03.json"
+   },
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M07_missing_cell_and_wrong_decoder",
+   "invalid": [
+    {
+     "check": "decoder value check: H(alpha(x)) != h(x)",
+     "where": "cell_04"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "sealed artifact cells/cell_03.json",
+     "where": "seal"
+    },
+    {
+     "missing": "cell artifact",
+     "where": "cell_03"
+    }
+   ],
+   "n_invalid": 1,
+   "n_missing": 2,
+   "protocol_item": 7,
+   "required_invalid_found": {
+    "decoder value check": true
+   },
+   "required_missing_found": {
+    "cell artifact": true
+   },
+   "skipped": [
+    {
+     "reason": "cell artifact missing",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_03"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_03"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 3",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "summary row 6 lost cell.cell_id",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M08a_summary_id_missing",
+   "invalid": [
+    {
+     "check": "missing or non-integer",
+     "field": "cells[6].cell.cell_id",
+     "where": "summary"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "row for cell 6",
+     "where": "summary"
+    }
+   ],
+   "n_invalid": 1,
+   "n_missing": 1,
+   "protocol_item": 8,
+   "required_invalid_found": {
+    "summary|cells[6].cell.cell_id|missing or non-integer": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell_02.jsonl line 1 lost record_id",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M08b_record_id_missing",
+   "invalid": [
+    {
+     "check": "missing required field",
+     "field": "record[0].record_id",
+     "where": "cell_02"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "1 declared records absent or unusable",
+     "where": "candidates"
+    }
+   ],
+   "n_invalid": 1,
+   "n_missing": 1,
+   "protocol_item": 8,
+   "required_invalid_found": {
+    "cell_02|record[0].record_id|missing required field": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": "cell 9 alpha[3] = '3' (string)",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M08c_alpha_type",
+   "invalid": [
+    {
+     "check": "schema: alpha vector",
+     "where": "cell_09"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 8,
+   "required_invalid_found": {
+    "schema: alpha vector": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "cell artifact invalid",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_09"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_09"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 9",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": "cell 10 stages[1] shortened by one",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M08d_stage_length",
+   "invalid": [
+    {
+     "check": "schema: stage vectors",
+     "where": "cell_10"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 8,
+   "required_invalid_found": {
+    "schema: stage vectors": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "cell artifact invalid",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_10"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_11"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 10",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": "cell 11 alpha[0] = N (state index out of range)",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M08e_state_index",
+   "invalid": [
+    {
+     "check": "schema: alpha vector",
+     "where": "cell_11"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 8,
+   "required_invalid_found": {
+    "schema: alpha vector": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "cell artifact invalid",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_11"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_11"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 11",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": "cell 12 bool where an integer is required",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M08f_bool_index",
+   "invalid": [
+    {
+     "check": "schema: witness record",
+     "where": "cell_12"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 8,
+   "required_invalid_found": {
+    "schema:": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "cell artifact invalid",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_12"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_13"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 12",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": false,
+   "cells_performed": 24,
+   "change": "sealed candidates/cell_07.jsonl removed",
+   "exit_code": 1,
+   "expected_status": "INCOMPLETE",
+   "group": "P",
+   "id": "M09a_sealed_missing_normal",
+   "invalid": [],
+   "missing": [
+    {
+     "missing": "sealed artifact candidates/cell_07.jsonl",
+     "where": "seal"
+    },
+    {
+     "missing": "cell_07.jsonl",
+     "where": "cell_07"
+    },
+    {
+     "missing": "135 declared records absent or unusable",
+     "where": "candidates"
+    }
+   ],
+   "n_invalid": 0,
+   "n_missing": 3,
+   "protocol_item": 9,
+   "required_invalid_found": {},
+   "required_missing_found": {
+    "sealed artifact candidates/cell_07.jsonl": true
+   },
+   "skipped": [],
+   "status": "INCOMPLETE",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": false,
+   "cells_performed": 24,
+   "change": "summary.json re-serialised: same content, different bytes",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M09b_sealed_modified_normal",
+   "invalid": [
+    {
+     "check": "sealed artifact summary.json: present bytes differ from the seal",
+     "where": "seal"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 9,
+   "required_invalid_found": {
+    "sealed artifact summary.json": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": {
+    "field": "decoder[0]",
+    "file": "cells/cell_01.json",
+    "new": 1,
+    "old": 0
+   },
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M10a_COR1_decoder_value",
+   "invalid": [
+    {
+     "check": "decoder value check: H(alpha(x)) != h(x)",
+     "where": "cell_01"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 10,
+   "required_invalid_found": {
+    "decoder value check": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": {
+    "field": "macro[41][0]",
+    "file": "cells/cell_01.json",
+    "new": 1,
+    "old": 0
+   },
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M10b_COR2_macro_entry",
+   "invalid": [
+    {
+     "check": "macro-transition check: G_41(alpha(x)) != alpha(T_41(x))",
+     "where": "cell_01"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 10,
+   "required_invalid_found": {
+    "macro-transition check": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": {
+    "field": "certificate replaced by stable identity partition",
+    "file": "fixtures/FX1_identity.json",
+    "new": {
+     "alpha": [
+      0,
+      1,
+      2,
+      3
+     ]
+    },
+    "old": {
+     "K": 2,
+     "alpha": [
+      0,
+      0,
+      1,
+      1
+     ],
+     "coarsening": [
+      [
+       0,
+       1
+      ]
+     ],
+     "decoder": [
+      0,
+      1
+     ],
+     "macro": [
+      [
+       0,
+       1
+      ]
+     ],
+     "representatives": [
+      0,
+      2
+     ],
+     "stages": [
+      [
+       0,
+       0,
+       1,
+       1
+      ],
+      [
+       0,
+       0,
+       1,
+       1
+      ]
+     ],
+     "strict_rounds": 0
+    }
+   },
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "fx1_validity_minimality": [
+    true,
+    false
+   ],
+   "group": "P",
+   "id": "M10c_COR3_identity_certificate",
+   "invalid": [
+    {
+     "check": "stage-induction check: P1 is not the equivalence induced by P0",
+     "where": "FX1"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "protocol_item": 10,
+   "required_invalid_found": {
+    "stage-induction check": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": {
+    "corrupted": "cells/cell_05.json",
+    "field": "summary.K_star",
+    "new": 257,
+    "old": 256,
+    "removed": "cells/cell_03.json"
+   },
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "P",
+   "id": "M10d_COR4_remove_and_corrupt",
+   "invalid": [
+    {
+     "check": "value 257 != expected 256",
+     "field": "cell.summary.K_star",
+     "where": "cell_05"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "sealed artifact cells/cell_03.json",
+     "where": "seal"
+    },
+    {
+     "missing": "cell artifact",
+     "where": "cell_03"
+    }
+   ],
+   "n_invalid": 1,
+   "n_missing": 2,
+   "protocol_item": 10,
+   "required_invalid_found": {
+    "cell_05|cell.summary.K_star|value": true
+   },
+   "required_missing_found": {
+    "cell artifact": true
+   },
+   "skipped": [
+    {
+     "reason": "cell artifact missing",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_03"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_03"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 3",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 0 decodable=1, K_candidate=256.0",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F01_codex_candidate_bool",
+   "invalid": [
+    {
+     "check": "int in [1, N] required",
+     "field": "record[0].K_candidate",
+     "where": "cell_00"
+    },
+    {
+     "check": "bool required",
+     "field": "record[0].decodable",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 2,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[0].K_candidate|int in [1, N]": true,
+    "cell_00|record[0].decodable|bool required": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 0 cell_id=999, candidate.g='invented'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F02_codex_candidate_metadata",
+   "invalid": [
+    {
+     "check": "value 999 != declared cell 0",
+     "field": "record[0].cell_id",
+     "where": "cell_00"
+    },
+    {
+     "check": "value 'invented' != expected 'val'",
+     "field": "candidate[0].candidate.g",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 2,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|candidate[0].candidate.g|value 'invented'": true,
+    "cell_00|record[0].cell_id|value 999": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "identity.task_sufficient true->1 in cell 0 artifact and summary row 0",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F03_codex_summary_both_bool",
+   "invalid": [
+    {
+     "check": "type int != expected bool",
+     "field": "cell.summary.baselines.identity.task_sufficient",
+     "where": "cell_00"
+    },
+    {
+     "check": "type int != expected bool",
+     "field": "cells[0].baselines.identity.task_sufficient",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 2,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|cell.summary.baselines.identity.task_sufficient|type int != expected bool": true,
+    "summary|cells[0].baselines.identity.task_sufficient|type int != expected bool": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 0 K_ratio.den 1 -> 1.0",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F04_record_ratio_float",
+   "invalid": [
+    {
+     "check": "{num:int>0, den:int>0} iff task_sufficient, else null",
+     "field": "record[0].K_ratio",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[0].K_ratio|": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "row 0 K_star_over_N.num -> 1.0",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F05_summary_ratio_float",
+   "invalid": [
+    {
+     "check": "type float != expected int",
+     "field": "cells[0].K_star_over_N.num",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "summary|cells[0].K_star_over_N.num|type float != expected int": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 1 is_control -> null",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F06_null_not_allowed",
+   "invalid": [
+    {
+     "check": "bool required",
+     "field": "record[1].is_control",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[1].is_control|bool required": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 1 (insufficient) K_ratio -> 1/1",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F07_value_where_null_required",
+   "invalid": [
+    {
+     "check": "{num:int>0, den:int>0} iff task_sufficient, else null",
+     "field": "record[1].K_ratio",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[1].K_ratio|{num:int>0, den:int>0} iff task_sufficient, else null": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "M1 candidate_alphas[3].candidate.g -> 'x'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F08_alpha_declaration_metadata",
+   "invalid": [
+    {
+     "check": "value 'x' != expected 'or'",
+     "field": "candidates[3].candidate.g",
+     "where": "M1/candidate_alphas"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "candidate declarations",
+     "where": "cell_00"
+    },
+    {
+     "missing": "candidate declarations",
+     "where": "cell_01"
+    },
+    {
+     "missing": "candidate declarations",
+     "where": "cell_02"
+    },
+    {
+     "missing": "candidate declarations",
+     "where": "cell_03"
+    },
+    {
+     "missing": "candidate declarations",
+     "where": "cell_04"
+    },
+    {
+     "missing": "candidate declarations",
+     "where": "cell_05"
+    }
+   ],
+   "n_invalid": 1,
+   "n_missing": 6,
+   "required_invalid_found": {
+    "M1/candidate_alphas|candidates[3].candidate.g|value 'x'": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "candidate alphas invalid",
+     "skipped": "candidate decisions of this model",
+     "where": "M1"
+    },
+    {
+     "reason": "candidate declarations unavailable",
+     "skipped": "candidate decisions and summary",
+     "where": "cell_00"
+    },
+    {
+     "reason": "candidate declarations unavailable",
+     "skipped": "candidate decisions and summary",
+     "where": "cell_01"
+    },
+    {
+     "reason": "candidate declarations unavailable",
+     "skipped": "candidate decisions and summary",
+     "where": "cell_02"
+    },
+    {
+     "reason": "candidate declarations unavailable",
+     "skipped": "candidate decisions and summary",
+     "where": "cell_03"
+    },
+    {
+     "reason": "candidate declarations unavailable",
+     "skipped": "candidate decisions and summary",
+     "where": "cell_04"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 0 lost 'closed'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F09a_record_field_missing",
+   "invalid": [
+    {
+     "check": "missing required field",
+     "field": "record[0].closed",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[0].closed|missing required field": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": "cell 2 lost 'coarsening'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F09b_cell_field_missing",
+   "invalid": [
+    {
+     "check": "missing required field",
+     "field": "cell.coarsening",
+     "where": "cell_02"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_02|cell.coarsening|missing required field": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "cell artifact invalid",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_02"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_03"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 2",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "FX1 lost 'K'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F09c_fixture_K_missing",
+   "invalid": [
+    {
+     "check": "missing required field",
+     "field": "fixture.K",
+     "where": "FX1"
+    },
+    {
+     "check": "type NoneType != expected int",
+     "field": "fixture.K",
+     "where": "FX1"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 2,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "FX1|fixture.K|missing required field": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 1 closure_witnesses['0'] -> [0]",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F10a_closure_witness_shape",
+   "invalid": [
+    {
+     "check": "map action-index string -> state pair required",
+     "field": "record[1].closure_witnesses",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[1].closure_witnesses|": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 1 failing_actions -> [0.0]",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F10b_failing_actions_float",
+   "invalid": [
+    {
+     "check": "increasing action indices required",
+     "field": "record[1].failing_actions",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[1].failing_actions|": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 1 decode_conflict -> '0,3'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F10c_conflict_pair_string",
+   "invalid": [
+    {
+     "check": "null iff decodable, else a state pair",
+     "field": "record[1].decode_conflict",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[1].decode_conflict|": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 summary.K0+1; row 0 K0+1 (the two saved copies still agree)",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F11_paired_summary_value",
+   "invalid": [
+    {
+     "check": "value 3 != expected 2",
+     "field": "cell.summary.K0",
+     "where": "cell_00"
+    },
+    {
+     "check": "value 3 != expected 2",
+     "field": "cells[0].K0",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 2,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|cell.summary.K0|value": true,
+    "summary|cells[0].K0|value": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 0 decodable=1, K_candidate=256.0; candidates/cell_05.jsonl removed",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F12_invalid_with_missing",
+   "invalid": [
+    {
+     "check": "int in [1, N] required",
+     "field": "record[0].K_candidate",
+     "where": "cell_00"
+    },
+    {
+     "check": "bool required",
+     "field": "record[0].decodable",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [
+    {
+     "missing": "sealed artifact candidates/cell_05.jsonl",
+     "where": "seal"
+    },
+    {
+     "missing": "cell_05.jsonl",
+     "where": "cell_05"
+    },
+    {
+     "missing": "135 declared records absent or unusable",
+     "where": "candidates"
+    }
+   ],
+   "n_invalid": 2,
+   "n_missing": 3,
+   "required_invalid_found": {
+    "cell_00|record[0].decodable|bool required": true
+   },
+   "required_missing_found": {
+    "candidates|135 declared records": true,
+    "cell_05|cell_05.jsonl": true
+   },
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "summary n_cells -> 24.0",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F13_top_level_float",
+   "invalid": [
+    {
+     "check": "type float != expected int",
+     "field": "n_cells",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "summary|n_cells|type float != expected int": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": "cell 0 model -> 'M2'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F14_cell_scalar_value",
+   "invalid": [
+    {
+     "check": "value 'M2' != expected 'M1'",
+     "field": "cell.model",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|cell.model|value 'M2'": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "cell artifact invalid",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_00"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_01"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 0",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 23,
+   "change": "cell 0 witness 0 word_names[0] -> 'tick'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F15_witness_name",
+   "invalid": [
+    {
+     "check": "value 'tick' != expected 'id'",
+     "field": "witnesses[0].word_names[0]",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|witnesses[0].word_names[0]|value 'tick'": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "cell artifact invalid",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_00"
+    },
+    {
+     "reason": "a cell of the pair is unavailable",
+     "skipped": "INTERVENTION-refines-AUTO",
+     "where": "cell_01"
+    },
+    {
+     "reason": "its independent expectation is unavailable",
+     "skipped": "row for cell 0",
+     "where": "summary"
+    },
+    {
+     "reason": "not every pair was available",
+     "skipped": "top-level intervention_refines_auto",
+     "where": "summary"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 18,
+   "change": "M1 actions[1].c 0 -> false",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F16_action_decl_bool",
+   "invalid": [
+    {
+     "check": "type bool != expected int",
+     "field": "actions[1].c",
+     "where": "M1"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "M1|actions[1].c|type bool != expected int": true
+   },
+   "required_missing_found": {},
+   "skipped": [
+    {
+     "reason": "table invalid",
+     "skipped": "transition-table checks and every cell of this model",
+     "where": "M1"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_00"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_01"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_02"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_03"
+    },
+    {
+     "reason": "model tables unavailable",
+     "skipped": "certificate, witness, candidate and summary checks",
+     "where": "cell_04"
+    }
+   ],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "cell 0 rec 0 gains 'bonus'",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F17_undeclared_record_field",
+   "invalid": [
+    {
+     "check": "undeclared field",
+     "field": "record[0].bonus",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[0].bonus|undeclared field": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": true,
+   "cells_performed": 24,
+   "change": "row 3 strict_rounds int -> True",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F18_bool_summary_count",
+   "invalid": [
+    {
+     "check": "type bool != expected int",
+     "field": "cells[3].strict_rounds",
+     "where": "summary"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "summary|cells[3].strict_rounds|type bool != expected int": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "bypass_integrity": false,
+   "cells_performed": 24,
+   "change": "cell 0 rec 0 decodable=1, K_candidate=256.0",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "group": "F",
+   "id": "F19_codex_candidate_bool_normal_mode",
+   "invalid": [
+    {
+     "check": "sealed artifact candidates/cell_00.jsonl: present bytes differ from the seal",
+     "where": "seal"
+    },
+    {
+     "check": "int in [1, N] required",
+     "field": "record[0].K_candidate",
+     "where": "cell_00"
+    },
+    {
+     "check": "bool required",
+     "field": "record[0].decodable",
+     "where": "cell_00"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 3,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "cell_00|record[0].decodable|bool required": true,
+    "seal||sealed artifact candidates/cell_00.jsonl: present bytes differ": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "cells_performed": 24,
+   "change": "default (current repository) inputs root",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "freeze_roots": {
+    "inputs": {
+     "absent": [],
+     "declared": 21,
+     "extra": [],
+     "mismatch": [
+      "GOVERNANCE/CORE.md",
+      "index-deconvolution/src/deconvolution.py"
+     ],
+     "root": "current_repository"
+    },
+    "isolated": {
+     "absent": [],
+     "declared": 20,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run/isolated"
+    },
+    "run_files": {
+     "absent": [],
+     "declared": 18,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run"
+    }
+   },
+   "group": "H",
+   "id": "H01_default_current_root",
+   "invalid": [
+    {
+     "check": "identity mismatch inputs/GOVERNANCE/CORE.md under current_repository",
+     "where": "freeze"
+    },
+    {
+     "check": "identity mismatch inputs/index-deconvolution/src/deconvolution.py under current_repository",
+     "where": "freeze"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 2,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "freeze||identity mismatch inputs/GOVERNANCE/CORE.md under current_repository": true,
+    "freeze||identity mismatch inputs/index-deconvolution/src/deconvolution.py under current_repository": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": true,
+   "as_required": true,
+   "cells_performed": 24,
+   "change": "pristine copy of finalization/historical_inputs",
+   "exit_code": 0,
+   "expected_status": "VALID_COMPLETE",
+   "freeze_roots": {
+    "inputs": {
+     "absent": [],
+     "declared": 21,
+     "extra": [],
+     "mismatch": [],
+     "root": "explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H02_explicit_historical_root/historical_inputs"
+    },
+    "isolated": {
+     "absent": [],
+     "declared": 20,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run/isolated"
+    },
+    "run_files": {
+     "absent": [],
+     "declared": 18,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run"
+    }
+   },
+   "group": "H",
+   "id": "H02_explicit_historical_root",
+   "invalid": [],
+   "missing": [],
+   "n_invalid": 0,
+   "n_missing": 0,
+   "required_invalid_found": {},
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "VALID_COMPLETE",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "cells_performed": 24,
+   "change": "snapshot GOVERNANCE/CORE.md + 1 byte",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "freeze_roots": {
+    "inputs": {
+     "absent": [],
+     "declared": 21,
+     "extra": [],
+     "mismatch": [
+      "GOVERNANCE/CORE.md"
+     ],
+     "root": "explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H03_snapshot_corrupted/historical_inputs"
+    },
+    "isolated": {
+     "absent": [],
+     "declared": 20,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run/isolated"
+    },
+    "run_files": {
+     "absent": [],
+     "declared": 18,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run"
+    }
+   },
+   "group": "H",
+   "id": "H03_snapshot_corrupted",
+   "invalid": [
+    {
+     "check": "identity mismatch inputs/GOVERNANCE/CORE.md under explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H03_snapshot_corrupted/historical_inputs",
+     "where": "freeze"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "freeze||identity mismatch inputs/GOVERNANCE/CORE.md": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "cells_performed": 24,
+   "change": "snapshot gains index-deconvolution/src/extra.py",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "freeze_roots": {
+    "inputs": {
+     "absent": [],
+     "declared": 21,
+     "extra": [
+      "index-deconvolution/src/extra.py"
+     ],
+     "mismatch": [],
+     "root": "explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H04_snapshot_extra_file/historical_inputs"
+    },
+    "isolated": {
+     "absent": [],
+     "declared": 20,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run/isolated"
+    },
+    "run_files": {
+     "absent": [],
+     "declared": 18,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run"
+    }
+   },
+   "group": "H",
+   "id": "H04_snapshot_extra_file",
+   "invalid": [
+    {
+     "check": "undeclared file in explicit inputs root: index-deconvolution/src/extra.py",
+     "where": "freeze"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "freeze||undeclared file in explicit inputs root: index-deconvolution/src/extra.py": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "cells_performed": 24,
+   "change": "snapshot loses index-deconvolution/src/deconvolution.py",
+   "exit_code": 1,
+   "expected_status": "INCOMPLETE",
+   "freeze_roots": {
+    "inputs": {
+     "absent": [
+      "index-deconvolution/src/deconvolution.py"
+     ],
+     "declared": 21,
+     "extra": [],
+     "mismatch": [],
+     "root": "explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H05_snapshot_missing_file/historical_inputs"
+    },
+    "isolated": {
+     "absent": [],
+     "declared": 20,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run/isolated"
+    },
+    "run_files": {
+     "absent": [],
+     "declared": 18,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run"
+    }
+   },
+   "group": "H",
+   "id": "H05_snapshot_missing_file",
+   "invalid": [],
+   "missing": [
+    {
+     "missing": "inputs/index-deconvolution/src/deconvolution.py under explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H05_snapshot_missing_file/historical_inputs",
+     "where": "freeze"
+    }
+   ],
+   "n_invalid": 0,
+   "n_missing": 1,
+   "required_invalid_found": {},
+   "required_missing_found": {
+    "inputs/index-deconvolution/src/deconvolution.py": true
+   },
+   "skipped": [],
+   "status": "INCOMPLETE",
+   "traceback": false
+  },
+  {
+   "aggregates_evaluated": false,
+   "as_required": true,
+   "cells_performed": 24,
+   "change": "snapshot deconvolution.py replaced by the reviewed (to-be-adopted) owner",
+   "exit_code": 1,
+   "expected_status": "INVALID",
+   "freeze_roots": {
+    "inputs": {
+     "absent": [],
+     "declared": 21,
+     "extra": [],
+     "mismatch": [
+      "index-deconvolution/src/deconvolution.py"
+     ],
+     "root": "explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H06_snapshot_substituted_owner/historical_inputs"
+    },
+    "isolated": {
+     "absent": [],
+     "declared": 20,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run/isolated"
+    },
+    "run_files": {
+     "absent": [],
+     "declared": 18,
+     "extra": [],
+     "mismatch": [],
+     "root": "original_run"
+    }
+   },
+   "group": "H",
+   "id": "H06_snapshot_substituted_owner",
+   "invalid": [
+    {
+     "check": "identity mismatch inputs/index-deconvolution/src/deconvolution.py under explicit_root:../../../../../tmp/task_compaction_final_matrix_scratch_20261006/H06_snapshot_substituted_owner/historical_inputs",
+     "where": "freeze"
+    }
+   ],
+   "missing": [],
+   "n_invalid": 1,
+   "n_missing": 0,
+   "required_invalid_found": {
+    "freeze||identity mismatch inputs/index-deconvolution/src/deconvolution.py": true
+   },
+   "required_missing_found": {},
+   "skipped": [],
+   "status": "INVALID",
+   "traceback": false
+  }
+ ],
+ "n": 52,
+ "post_adoption": true
+}

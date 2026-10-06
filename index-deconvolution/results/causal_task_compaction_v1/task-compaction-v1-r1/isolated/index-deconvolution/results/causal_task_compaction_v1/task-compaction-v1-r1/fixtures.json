@@ -1,0 +1,728 @@
+{
+  "schema": "task-compaction-fixtures-v1",
+  "declared_before_first_execution": true,
+  "conventions": {
+    "state_order": "written table index; every state is an admissible initial state",
+    "vectors": "first-appearance canonical labels",
+    "words": "lists of positional action indices, applied in written order (first element first)",
+    "witness_ties": "lexicographically least action-index word among shortest words"
+  },
+  "fixtures": [
+    {
+      "id": "FX1_identity",
+      "outputs": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "transitions": [
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "expect": {
+        "stages": [
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            1
+          ]
+        ],
+        "alpha": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "K": 2,
+        "strict_rounds": 0,
+        "decoder": [
+          0,
+          1
+        ],
+        "macro": [
+          [
+            0,
+            1
+          ]
+        ],
+        "representatives": [
+          0,
+          2
+        ],
+        "identity_grouping_valid": true,
+        "identity_grouping_minimal": false
+      }
+    },
+    {
+      "id": "FX2_one_step",
+      "outputs": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "transitions": [
+        [
+          0,
+          2,
+          2,
+          3
+        ]
+      ],
+      "expect": {
+        "stages": [
+          [
+            0,
+            0,
+            1,
+            1
+          ],
+          [
+            0,
+            1,
+            2,
+            2
+          ],
+          [
+            0,
+            1,
+            2,
+            2
+          ]
+        ],
+        "K": 3,
+        "strict_rounds": 1,
+        "witness_pairs": [
+          {
+            "x": 0,
+            "y": 1,
+            "first_separation_depth": 1,
+            "word": [
+              0
+            ]
+          }
+        ],
+        "empty_word_distinguishes_0_1": false
+      }
+    },
+    {
+      "id": "FX3_two_step",
+      "outputs": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "transitions": [
+        [
+          1,
+          2,
+          2,
+          0
+        ]
+      ],
+      "expect": {
+        "stages": [
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            2,
+            0
+          ],
+          [
+            0,
+            1,
+            2,
+            3
+          ],
+          [
+            0,
+            1,
+            2,
+            3
+          ]
+        ],
+        "K": 4,
+        "strict_rounds": 2,
+        "witness_pairs": [
+          {
+            "x": 0,
+            "y": 3,
+            "first_separation_depth": 2,
+            "word": [
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "FX4_added_action",
+      "outputs": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "regimes": {
+        "a_only": {
+          "transitions": [
+            [
+              0,
+              1,
+              2,
+              3
+            ]
+          ],
+          "alpha": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "K": 2
+        },
+        "a_and_b": {
+          "transitions": [
+            [
+              0,
+              1,
+              2,
+              3
+            ],
+            [
+              0,
+              2,
+              2,
+              3
+            ]
+          ],
+          "alpha": [
+            0,
+            1,
+            2,
+            2
+          ],
+          "K": 3
+        }
+      }
+    },
+    {
+      "id": "FX5_action_order",
+      "outputs": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "transitions": [
+        [
+          1,
+          1,
+          2,
+          3
+        ],
+        [
+          0,
+          2,
+          2,
+          3
+        ]
+      ],
+      "replays": [
+        {
+          "x": 0,
+          "word": [
+            0,
+            1
+          ],
+          "path": [
+            0,
+            1,
+            2
+          ],
+          "final_output": 1
+        },
+        {
+          "x": 0,
+          "word": [
+            1,
+            0
+          ],
+          "path": [
+            0,
+            0,
+            1
+          ],
+          "final_output": 0
+        }
+      ]
+    },
+    {
+      "id": "FX6_constant_task",
+      "outputs": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transitions": [
+        [
+          0,
+          2,
+          2,
+          3
+        ]
+      ],
+      "expect": {
+        "stages": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "K": 1,
+        "strict_rounds": 0
+      }
+    },
+    {
+      "id": "FX6_identity_task",
+      "outputs": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "transitions": [
+        [
+          0,
+          2,
+          2,
+          3
+        ]
+      ],
+      "expect": {
+        "stages": [
+          [
+            0,
+            1,
+            2,
+            3
+          ],
+          [
+            0,
+            1,
+            2,
+            3
+          ]
+        ],
+        "K": 4,
+        "strict_rounds": 0
+      }
+    },
+    {
+      "id": "FX7_counter3_bit0_auto",
+      "construction": "T(x) = x+1 mod 8; h = x & 1",
+      "expect": {
+        "K": 2,
+        "alpha": [
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "FX7_counter3_bit2_auto",
+      "construction": "T(x) = x+1 mod 8; h = (x >> 2) & 1",
+      "expect": {
+        "K": 8,
+        "reason": "the output sequence 00001111 along the 8-cycle has 8 distinct cyclic shifts"
+      }
+    },
+    {
+      "id": "FX7_counter3_bit0_intervention",
+      "construction": "hand-built tables for the PROTOCOL \u00a72 order on the 3-bit counter F(x)=x+1 mod 8: id=F; reset(j,c)=F(x with bit j:=c); flip(j)=F(x xor 2^j); knockout(j,c)=F(x) with bit j:=c; tick=F(F(x)); 5n+2=17 actions",
+      "expect": {
+        "n_actions": 17,
+        "K": 2,
+        "alpha": [
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "FX8_rule150_ring4_auto",
+      "construction": "x_i' = x_{i-1} xor x_i xor x_{i+1}, indices mod 4; h = popcount(x) mod 2",
+      "expect": {
+        "K": 2,
+        "parity_conserved_all_states": true
+      }
+    },
+    {
+      "id": "FX8_rule150_ring4_reset0",
+      "construction": "actions [id, reset bit0 to 0 before the step]; h = popcount mod 2",
+      "expect": {
+        "K_greater_than": 2,
+        "pair": {
+          "x": 0,
+          "y": 3,
+          "word": [
+            1
+          ],
+          "outputs_after": [
+            0,
+            1
+          ]
+        },
+        "note": "final K under all interventions NOT declared"
+      }
+    },
+    {
+      "id": "FX9_relabel_outputs",
+      "outputs": [
+        7,
+        7,
+        2,
+        2
+      ],
+      "transitions": [
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "expect": {
+        "alpha": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "decoder": [
+          7,
+          2
+        ],
+        "K": 2
+      }
+    },
+    {
+      "id": "FX10_malformed",
+      "reject_with_ValueError": [
+        {
+          "case": "empty outputs",
+          "outputs": [],
+          "transitions": [
+            []
+          ]
+        },
+        {
+          "case": "empty Q",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": []
+        },
+        {
+          "case": "empty table",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": [
+            []
+          ]
+        },
+        {
+          "case": "unequal table length",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": [
+            [
+              0,
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "case": "negative entry",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": [
+            [
+              0,
+              -1
+            ]
+          ]
+        },
+        {
+          "case": "out-of-domain entry",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": [
+            [
+              0,
+              2
+            ]
+          ]
+        },
+        {
+          "case": "noninteger entry",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": [
+            [
+              0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "case": "bool entry",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": [
+            [
+              0,
+              true
+            ]
+          ]
+        },
+        {
+          "case": "bool output",
+          "outputs": [
+            false,
+            true
+          ],
+          "transitions": [
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "case": "negative output",
+          "outputs": [
+            0,
+            -1
+          ],
+          "transitions": [
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "case": "string output",
+          "outputs": [
+            0,
+            "1"
+          ],
+          "transitions": [
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "case": "generator outputs",
+          "outputs": "GENERATOR",
+          "transitions": [
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "case": "generator table",
+          "outputs": [
+            0,
+            1
+          ],
+          "transitions": "GENERATOR_TABLE"
+        }
+      ],
+      "accept": [
+        {
+          "case": "nonbinary integer labels",
+          "outputs": [
+            0,
+            5,
+            9
+          ],
+          "transitions": [
+            [
+              1,
+              2,
+              0
+            ]
+          ],
+          "K": 3
+        }
+      ],
+      "evidence_label_cases": {
+        "invalid_only": "INVALID",
+        "missing_only": "INCOMPLETE",
+        "invalid_and_missing": "INVALID",
+        "legitimate_negative_candidate": "VALID_COMPLETE"
+      }
+    },
+    {
+      "id": "SUP1_refines_but_not_closed",
+      "supplemental": true,
+      "outputs": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transitions": [
+        [
+          1,
+          0,
+          3,
+          2
+        ]
+      ],
+      "candidate": [
+        0,
+        1,
+        1,
+        2
+      ],
+      "expect": {
+        "alpha_star": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "K": 1,
+        "candidate_refines_alpha_star": true,
+        "candidate_closed": false,
+        "closure_witness": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "SUP2_pipeline_dry_run",
+      "supplemental": true,
+      "declared_before_first_run": true,
+      "construction": "produce.py --dryrun: models FXA (3-bit counter F(x)=x+1 mod 8) and FXB (4-cell rule-150 ring), PROTOCOL \u00a72 action order built from F by formula (hand_actions), tasks T0/T1/TP, regimes AUTO/INTERVENTION, candidates study.candidates(n) for n=3,4; 12 cells. Exercises orchestration, serialization and the audit before the freeze without touching M1-M4.",
+      "expect": {
+        "FXA_T0_AUTO_K": 2,
+        "FXA_T0_INTERVENTION_K": 2,
+        "FXA_T1_AUTO_K": 8,
+        "FXB_TP_AUTO_K": 2,
+        "FXB_TP_INTERVENTION_K_greater_than": 2,
+        "audit_status": "VALID_COMPLETE",
+        "intervention_refines_auto": true
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "id": "MUT1_one_group_init",
+      "change": "P0 = all states in one group instead of canonical_partition(outputs)"
+    },
+    {
+      "id": "MUT2_stop_after_first_update",
+      "change": "return after one refinement even if unstable"
+    },
+    {
+      "id": "MUT3_first_action_only",
+      "change": "signature uses only transitions[0]"
+    },
+    {
+      "id": "MUT4_drop_state",
+      "change": "refinement signature omits the last domain state"
+    },
+    {
+      "id": "MUT5_reverse_replay",
+      "change": "task_word_path applies the word in reverse order"
+    },
+    {
+      "id": "MUT6_identity_as_minimal",
+      "change": "report the stable identity partition as alpha"
+    }
+  ],
+  "audit_corruptions": [
+    {
+      "id": "COR1_decoder_value",
+      "expect": "INVALID via decoder check"
+    },
+    {
+      "id": "COR2_macro_entry",
+      "expect": "INVALID via macro-transition check"
+    },
+    {
+      "id": "COR3_identity_certificate_fx1",
+      "expect": "validity checks pass; INVALID via stage-induction (minimality) check"
+    },
+    {
+      "id": "COR4_remove_and_corrupt",
+      "expect": "INVALID outranks missing; both recorded"
+    }
+  ]
+}

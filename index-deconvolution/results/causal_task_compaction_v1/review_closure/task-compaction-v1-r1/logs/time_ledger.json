@@ -1,0 +1,45 @@
+{
+ "historical_erratum_task_compaction_v1_r1": {
+  "note": "Appended here; the original logs/time_ledger.json is NOT rewritten (sha256 b04012fd... verified unchanged).",
+  "recorded_executor_seconds": 1685,
+  "conservative_supplement_final_handoff_manifest": 300,
+  "historical_charge_seconds": 1985,
+  "historical_handoff_category_after_supplement": "518/900",
+  "source": "Codex REVIEW.md, Integration and accounting conditions"
+ },
+ "closure_run": "task-compaction-v1-r1-closure",
+ "method": "wall-clock milestones in logs/wallclock.jsonl (time includes reading, thinking, failed attempts and writes); category boundaries at milestones, each charge rounded UP to the next 30 s; a final-write allowance is added for HANDOFF/manifest writes after the last milestone",
+ "start_epoch": 1791232003,
+ "categories": {
+  "preflight": {
+   "cap": 300,
+   "charged": 120,
+   "span": "start -> R2 edit (hash checks, manifest 397/397, freeze 59/59, before-snapshot)"
+  },
+  "corrections_fixtures": {
+   "cap": 1200,
+   "charged": 480,
+   "span": "R2 owner+tests+mutant; audit_r2 and probe matrix incl. failed attempts 1-2"
+  },
+  "tests_audit_preservation": {
+   "cap": 900,
+   "charged": 240,
+   "span": "saved-data audit, comparison, run-local tests, owner check (attempt 4), patches, guards; final preservation counted under handoff allowance"
+  },
+  "literature_roadmap": {
+   "cap": 900,
+   "charged": 300,
+   "span": "four sources read; LITERATURE_MAP, V1 plan, DECISION, OWNERSHIP_ADDENDUM, REGENERATE verification"
+  },
+  "handoff_manifests": {
+   "cap": 300,
+   "charged": 300,
+   "span": "CHANGELOG, ledger, preservation-after, manifests, HANDOFF; conservative fixed allowance (exact self-accounting of the final writes is impossible)"
+  }
+ },
+ "total_charged": 1440,
+ "executor_cap": 3600,
+ "codex_review_reserve": 600,
+ "category_transfers": 0,
+ "wall_clock_at_ledger_write_s": 1079
+}

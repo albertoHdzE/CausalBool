@@ -1,0 +1,103 @@
+{
+ "method": "wall-clock epochs in logs/wallclock.jsonl (date +%s at stage boundaries, including model thinking time); each interval is charged to the category of the stage that opens it. Reporting and reproduction interleaved: report.py and the patches fall in the reporting interval (reporting_start -> reproduction_start); the fresh-directory reproduction AND the writing of REPORT.md, DECISION.md and CLAIMS.md fall in the interval opened by reproduction_start and are therefore charged to reproduction_preservation_handoff. Writing HANDOFF.md and the output manifest after this ledger (estimated under 300 s) is not included. All categories and the total remain far below their caps; no category transfer occurred.",
+ "caps_seconds": {
+  "preflight_literature_proof": 900,
+  "implementation_fixtures_tests_mutations": 1800,
+  "production": 900,
+  "independent_audit_corruptions": 1200,
+  "reporting": 900,
+  "reproduction_preservation_handoff": 900
+ },
+ "used_seconds": {
+  "preflight_literature_proof": 395,
+  "implementation_fixtures_tests_mutations": 938,
+  "production": 9,
+  "independent_audit_corruptions": 64,
+  "reporting": 61,
+  "reproduction_preservation_handoff": 218
+ },
+ "executor_total_seconds": 1685,
+ "executor_cap_seconds": 6600,
+ "codex_reserve_seconds": 600,
+ "within_all_caps": true,
+ "intervals": [
+  {
+   "from": "start",
+   "to": "preservation_before",
+   "category": "preflight_literature_proof",
+   "seconds": 50
+  },
+  {
+   "from": "preservation_before",
+   "to": "preflight_literature_proof_done",
+   "category": "preflight_literature_proof",
+   "seconds": 216
+  },
+  {
+   "from": "preflight_literature_proof_done",
+   "to": "implementation_start",
+   "category": "preflight_literature_proof",
+   "seconds": 129
+  },
+  {
+   "from": "implementation_start",
+   "to": "freeze_written",
+   "category": "implementation_fixtures_tests_mutations",
+   "seconds": 931
+  },
+  {
+   "from": "freeze_written",
+   "to": "production_start",
+   "category": "implementation_fixtures_tests_mutations",
+   "seconds": 7
+  },
+  {
+   "from": "production_start",
+   "to": "production_end",
+   "category": "production",
+   "seconds": 2
+  },
+  {
+   "from": "production_end",
+   "to": "audit_start",
+   "category": "production",
+   "seconds": 7
+  },
+  {
+   "from": "audit_start",
+   "to": "audit_end",
+   "category": "independent_audit_corruptions",
+   "seconds": 17
+  },
+  {
+   "from": "audit_end",
+   "to": "reporting_start",
+   "category": "independent_audit_corruptions",
+   "seconds": 47
+  },
+  {
+   "from": "reporting_start",
+   "to": "reproduction_start",
+   "category": "reporting",
+   "seconds": 61
+  },
+  {
+   "from": "reproduction_start",
+   "to": "reporting_end",
+   "category": "reproduction_preservation_handoff",
+   "seconds": 117
+  },
+  {
+   "from": "reporting_end",
+   "to": "handoff_start",
+   "category": "reporting",
+   "seconds": 0
+  },
+  {
+   "from": "handoff_start",
+   "to": "handoff_ledger",
+   "category": "reproduction_preservation_handoff",
+   "seconds": 101
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "run_id": "gap-ranking-v1-r1",
+ "question": "Does the declared recurrence-gap ordering place FULL causal state groupings earlier than canonical order and the exact random-order expectation?",
+ "models": ["M1", "M2", "M3", "M4"],
+ "taus": [1, 2, 4, 8, 16],
+ "widths_origins": "w in (2,3,4), o in range(w): 9 partitions",
+ "start_states": "0, 1, 2^(n-1), 2^n-1, sum 2^i even i, sum 2^i odd i",
+ "steps": 64,
+ "token": "(x >> a) & ((1 << l) - 1), LSB-first",
+ "eligible": ">= 3 occurrences per (trajectory, block, value)",
+ "regular": "all consecutive gaps equal",
+ "score": "R = regular / eligible pooled by counting over trajectories; eligible == 0 is UNAVAILABLE",
+ "population": "all raw candidates except 9 F1 val, identity, constant; N=124 (n=8), 130 (n=10); duplicates kept",
+ "inheritance": "F1/F3/F4 inherit first-level (w,o) score; F2 UNAVAILABLE; nesting itself not scored",
+ "rank": "available score descending by exact rational comparison, ties ascending candidate id; UNAVAILABLE last in id order",
+ "label": "results_d.jsonl status == FULL, unchanged (11 constant-dynamics rows included)",
+ "endpoint": "r_G, r_C; (N+1)/(m+1); delta_random=(N+1)/(m+1)-r_G; delta_canonical=r_C-r_G; EARLIER/TIE/LATER exact; m=0 NO_FULL_REFERENCE",
+ "no_inference": "no significance test, no across-cell inference, no single verdict, no wall-time claim",
+ "expected_counts": {"trajectories": 24, "states_per_trajectory": 65, "scores": 180, "ranked_lists": 20, "rank_positions": 2510, "reference_rows": 2730, "frames_per_tau": {"1": 65, "2": 33, "4": 17, "8": 9, "16": 5}},
+ "route": ["index-deconvolution/src", "index-deconvolution/results/causal_abstraction_validation/abstraction-validation-v1-r1-source-r2", "index-deconvolution/results/causal_grouping_gap_v1/gap-ranking-v1-r1/dependency/isolated/src"],
+ "trusted_inputs": {"results_d.jsonl": "7119aa72f6483e955aa1033cbde7d0ef144f34ea8a614a03ba66830354ad0e12", "nonf3_full_maps.json": "3dc79653b540512de1e374e0a95d73b9abc8b02b80b5e7390d450ad73ea6959d"}
+}
